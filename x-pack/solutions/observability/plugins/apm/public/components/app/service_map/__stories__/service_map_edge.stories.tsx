@@ -18,11 +18,11 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { EuiText, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceNode } from '../service_node';
-import { DependencyNode } from '../dependency_node';
+import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { ServiceMapEdge } from '../service_map_edge';
-import { applyDagreLayout } from '../layout';
+import { applyDagreLayout } from '../../../shared/service_map/layout';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,

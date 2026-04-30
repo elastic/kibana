@@ -399,3 +399,160 @@ describe('convertFindQueryParams', () => {
     });
   });
 });
+
+describe('constructSearchQuery with extendedFieldFilters', () => {
+  it('returns undefined when no search, caseIds, or extendedFieldFilters', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+    });
+    expect(result).toBeUndefined();
+  });
+
+  it('produces filter clauses for extendedFieldFilters only', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              filter: [
+                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('combines free text search with extended field filters', () => {
+    const result = constructSearchQuery({
+      search: 'some text',
+      searchFields: [`${CASE_SAVED_OBJECT}.title`],
+      caseIds: [],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result?.bool?.filter).toBeDefined();
+    const filter = result!.bool!.filter as Array<Record<string, unknown>>;
+    expect(filter).toHaveLength(2);
+    expect(filter[0]).toHaveProperty('bool.should');
+    expect(filter[1]).toHaveProperty('bool.filter');
+  });
+
+  it('handles multiple extended field filters with AND semantics', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+        [
+          {
+            storageKey: 'region_as_keyword',
+            value: 'emea',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              filter: [
+                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { term: { ef_region_as_keyword: { value: 'emea' } } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+});

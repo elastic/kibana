@@ -18,6 +18,7 @@ import type { CaseAttributes, ExternalService, CaseConnector } from '../../../co
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
   CASE_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -2315,7 +2316,8 @@ describe('CasesService', () => {
       'time_to_resolve',
       'time_to_investigate',
       'template',
-      CASE_EXTENDED_FIELDS
+      CASE_EXTENDED_FIELDS,
+      CASE_EXTENDED_FIELDS_LABELS
     );
 
     describe('getCaseIdsByAlertId', () => {

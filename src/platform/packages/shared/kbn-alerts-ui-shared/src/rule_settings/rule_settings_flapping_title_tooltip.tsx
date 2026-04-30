@@ -84,6 +84,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
         repositionOnScroll
         isOpen={isOpen}
         anchorPosition={anchorPosition}
+        aria-label={alertFlappingTitleInfo}
         panelStyle={{
           width: 500,
         }}

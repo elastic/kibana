@@ -55,6 +55,7 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
+  'agentContextLayer:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
@@ -79,6 +80,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
+  'securitySolution:enableAlertsAndAttacksAlignment': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;

@@ -21,7 +21,7 @@ type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimePar
 export const getAnswerAgentPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, answerActions, processedConversation, resultTransformer } = params;
+  const { actions, cycleLimit, answerActions, processedConversation, resultTransformer } = params;
 
   // Generate messages from the conversation's rounds, with optional compaction summary
   // sourced from processedConversation.compactionSummary (set during compaction phase).
@@ -34,7 +34,7 @@ export const getAnswerAgentPrompt = async (
   return [
     ['system', getAnswerSystemMessage(params)],
     ...previousRoundsAsMessages,
-    ...formatResearcherActionHistory({ actions }),
+    ...formatResearcherActionHistory({ actions, cycleLimit }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };
@@ -51,14 +51,14 @@ export const getAnswerSystemMessage = ({
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
-Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
+Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** purpose is to generate a natural language response to the user.
 
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.
 - Synthesize an accurate response that directly answers the user's question.
 - Do not hedge. If the information is complete, provide a confident and final answer.
 - If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
-- You do not have access to any tools. You MUST NOT, under any circumstances, attempt to call or generate syntax for any tool.
+- You **MUST NOT** under any circumstances, attempt to call or generate syntax for any tool.
 
 ## GUIDELINES
 - Do not mention the research process or that you are an AI or assistant.
@@ -109,6 +109,7 @@ export const getStructuredAnswerPrompt = async (
     answerActions,
     capabilities,
     processedConversation,
+    cycleLimit,
     resultTransformer,
   } = params;
   const { attachmentTypes, versionedAttachmentPresentation } = processedConversation;
@@ -170,7 +171,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
     ...previousRoundsAsMessages,
-    ...formatResearcherActionHistory({ actions }),
+    ...formatResearcherActionHistory({ actions, cycleLimit }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };

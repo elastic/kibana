@@ -57,11 +57,11 @@ const alertRule: RuleApiResponse = {
   no_data: { behavior: 'no_data', timeframe: '15m' },
 };
 
-const renderConditions = (rule: RuleApiResponse) =>
+const renderConditions = (rule: RuleApiResponse, variant?: 'full' | 'summary') =>
   render(
     <I18nProvider>
       <RuleProvider rule={rule}>
-        <RuleConditions />
+        <RuleConditions variant={variant} />
       </RuleProvider>
     </I18nProvider>
   );
@@ -162,6 +162,32 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(
       'After 4 recoveries or 20m'
     );
+  });
+
+  describe('variant="summary"', () => {
+    it('hides recovery, alert delay, recovery delay, and no-data-config fields', () => {
+      renderConditions(alertRule, 'summary');
+      expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryDelay')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertingV2RuleDetailsNoDataConfig')).not.toBeInTheDocument();
+      // Recovery row has no test subj on the row itself; assert by its title text absence.
+      expect(screen.queryByText('Recovery')).not.toBeInTheDocument();
+    });
+
+    it('still renders the base query and retained summary fields', () => {
+      renderConditions(alertRule, 'summary');
+      expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
+        'FROM metrics-* | STATS avg(cpu) BY host.name'
+      );
+      expect(screen.getByTestId('alertingV2RuleDetailsDataSource')).toHaveTextContent('metrics-*');
+      expect(screen.getByTestId('alertingV2RuleDetailsGroupBy')).toHaveTextContent(
+        'host.name, service.name'
+      );
+      expect(screen.getByTestId('alertingV2RuleDetailsTimeField')).toHaveTextContent('@timestamp');
+      expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
+      expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
+      expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alerting');
+    });
   });
 
   it('renders fallback values for missing optional fields', () => {

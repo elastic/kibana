@@ -67,6 +67,7 @@
                 "lineNumber": 24,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApiClientConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -90,6 +91,7 @@
                 "lineNumber": 24,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -506,6 +508,7 @@
                 "lineNumber": 215,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivateLocation",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -632,6 +635,7 @@
                 "lineNumber": 243,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivateLocation",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -758,6 +762,7 @@
                 "lineNumber": 271,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivateLocation",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -884,6 +889,7 @@
                 "lineNumber": 300,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivateLocation",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1309,6 +1315,7 @@
                 "lineNumber": 444,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1391,6 +1398,7 @@
             "lineNumber": 55,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "ForgeConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1414,6 +1422,7 @@
             "lineNumber": 55,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1500,6 +1509,7 @@
             "lineNumber": 171,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "ForgeConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1523,6 +1533,7 @@
             "lineNumber": 171,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }

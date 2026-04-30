@@ -12,7 +12,10 @@ import expect from '@kbn/expect';
 import rawExpect from 'expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import type { SupertestWithRoleScopeType } from '../../services';
 
@@ -37,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
       });
 
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await testPrivateLocations.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
@@ -45,7 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await supertestEditorWithApiKey.destroy();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     it('adds a test fleet policy', async () => {

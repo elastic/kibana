@@ -29,6 +29,7 @@ export interface ChromeHelpMenuLink {
   title: string;
   href?: string;
   onClick?: () => void;
+  iconType?: string;
   dataTestSubj?: string;
 }
 

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiAvatar, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { EuiAvatarProps } from '@elastic/eui';
+import type { EuiAvatarProps, EuiPanelProps } from '@elastic/eui';
 import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
@@ -30,12 +30,15 @@ const getIconSize = ({ size }: { size: 's' | 'm' | 'l' | 'xl' | undefined }) => 
 };
 
 interface BaseAgentAvatarProps {
+  /** Size that will be used if the avatar is rendered as an icon. By default uses 1 size larger than `size` prop. */
+  iconSize?: EuiAvatarProps['size'];
   size: EuiAvatarProps['size'];
   shape?: 'circle' | 'square';
 }
 
 interface AgentAvatarWithAgentProps extends BaseAgentAvatarProps {
   agent: AgentDefinition;
+  iconPaddingSize?: EuiPanelProps['paddingSize'];
   name?: never;
   symbol?: never;
   color?: 'subdued' | AgentDefinition['avatar_color'];
@@ -52,7 +55,7 @@ interface AgentAvatarCustomProps extends BaseAgentAvatarProps {
 type AgentAvatarProps = AgentAvatarWithAgentProps | AgentAvatarCustomProps;
 
 export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
-  const { size, shape = 'circle' } = props;
+  const { iconSize: iconSizeProp, size, shape = 'circle' } = props;
 
   const {
     name,
@@ -61,6 +64,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     readonly,
     icon,
     agentId,
+    iconPaddingSize,
   } = 'agent' in props && props.agent
     ? {
         name: props.agent.name,
@@ -70,6 +74,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
         agentId: props.agent.id,
+        iconPaddingSize: props.iconPaddingSize ?? 'xs',
       }
     : {
         agentId: props.agentId,
@@ -94,13 +99,13 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
 
   if (shouldUseIcon) {
     const iconType = icon ?? 'logoElastic';
-    const iconSize = getIconSize({ size });
+    const iconSize = iconSizeProp || getIconSize({ size });
     const panelStyles = css`
       ${hasBackground ? `background-color: ${color};` : ''}
       ${borderAndShapeStyles}
     `;
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
+      <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize={iconPaddingSize}>
         <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );

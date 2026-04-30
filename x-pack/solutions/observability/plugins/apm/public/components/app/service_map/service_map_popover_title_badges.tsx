@@ -71,6 +71,7 @@ export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
               sloStatus={nodeData.sloStatus}
               sloCount={nodeData.sloCount}
               serviceName={serviceName}
+              compactLabelOnNarrowScreens
               {...(onSloBadgeClick
                 ? {
                     onClick: (e) => {

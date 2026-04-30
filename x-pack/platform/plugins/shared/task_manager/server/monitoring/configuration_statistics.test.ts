@@ -70,6 +70,7 @@ describe('Configuration Statistics Aggregator', () => {
       },
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
+      grant_uiam_api_keys: false,
     };
 
     return new Promise<void>(async (resolve, reject) => {
