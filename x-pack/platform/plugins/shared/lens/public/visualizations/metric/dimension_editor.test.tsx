@@ -1013,12 +1013,21 @@ describe('dimension editor', () => {
         />
       );
 
-      const supportingVisOptions = {
-        none: screen.queryByTitle(/none/i),
-        // in eui when bar or line become disabled they change from input to button so we have to do this weird check
-        bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
-        trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
-      };
+      const supportingVisButtonGroup = screen.queryByTestId(
+        'lnsMetric_supporting_visualization_buttons'
+      );
+      const supportingVisOptions = supportingVisButtonGroup
+        ? {
+            none: within(supportingVisButtonGroup).queryByTitle(/none/i),
+            // in eui when bar or line become disabled they change from input to button so we have to do this weird check
+            bar:
+              within(supportingVisButtonGroup).queryByTitle(/bar/i) ||
+              within(supportingVisButtonGroup).queryByRole('button', { name: /bar/i }),
+            trendline:
+              within(supportingVisButtonGroup).queryByTitle(/line/i) ||
+              within(supportingVisButtonGroup).queryByRole('button', { name: /line/i }),
+          }
+        : { none: null, bar: null, trendline: null };
 
       const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
@@ -1067,12 +1076,23 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
+      const progressDirectionButtonGroup = screen.queryByTestId(
+        'lnsMetric_progress_direction_buttons'
+      );
+      const progressOptions = progressDirectionButtonGroup
+        ? {
+            vertical:
+              within(progressDirectionButtonGroup).queryByTitle(/vertical/i) ||
+              within(progressDirectionButtonGroup).queryByRole('button', { name: /vertical/i }),
+            horizontal:
+              within(progressDirectionButtonGroup).queryByTitle(/horizontal/i) ||
+              within(progressDirectionButtonGroup).queryByRole('button', { name: /horizontal/i }),
+          }
+        : { vertical: null, horizontal: null };
+
       return {
-        progressDirectionShowing: screen.queryByTestId('lnsMetric_progress_direction_buttons'),
-        progressOptions: {
-          vertical: screen.queryByTitle(/vertical/i),
-          horizontal: screen.queryByTitle(/horizontal/i),
-        },
+        progressDirectionShowing: progressDirectionButtonGroup,
+        progressOptions,
         supportingVisOptions,
         clickOnSupportingVis,
         applyColorToBtnGroup,

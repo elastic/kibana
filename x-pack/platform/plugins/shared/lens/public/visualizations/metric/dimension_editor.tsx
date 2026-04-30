@@ -708,7 +708,11 @@ function useScrollIntoView() {
   const anchorRef = useRef<HTMLDivElement>(null);
   const scrollIntoView = useCallback(() => {
     requestAnimationFrame(() => {
-      anchorRef.current?.scrollIntoView({
+      const el = anchorRef.current;
+      if (!el || typeof el.scrollIntoView !== 'function') {
+        return;
+      }
+      el.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'nearest',
