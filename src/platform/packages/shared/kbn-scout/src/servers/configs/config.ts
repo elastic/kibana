@@ -13,7 +13,12 @@ import { cloneDeepWith, get, has, toPath } from 'lodash';
 import Path from 'path';
 import * as Url from 'url';
 import { schema } from './schema';
-import { formatCurrentDate, getProjectType } from './utils/common';
+import {
+  formatCurrentDate,
+  getProjectType,
+  getOrganizationId,
+  getProductTier,
+} from './utils/common';
 import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 
 const $values = Symbol('values');
@@ -105,12 +110,16 @@ export class Config {
   }
 
   public getScoutTestConfig(): ScoutTestConfig {
+    const isServerless = this.get('serverless');
+    const serverArgs: string[] = this.get('kbnTestServer.serverArgs');
+    const projectType = isServerless ? getProjectType(serverArgs) : undefined;
+
     return {
-      serverless: this.get('serverless'),
+      serverless: isServerless,
       http2: this.get('http2'),
-      projectType: this.get('serverless')
-        ? getProjectType(this.get('kbnTestServer.serverArgs'))
-        : undefined,
+      projectType,
+      productTier: isServerless ? getProductTier(serverArgs, projectType) : undefined,
+      organizationId: isServerless ? getOrganizationId(serverArgs) : undefined,
       isCloud: false,
       license: this.get('esTestCluster.license'),
       cloudUsersFilePath: Path.resolve(REPO_ROOT, '.ftr', 'role_users.json'),

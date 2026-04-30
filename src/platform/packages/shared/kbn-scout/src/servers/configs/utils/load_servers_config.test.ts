@@ -58,6 +58,7 @@ const mockScoutTestConfig: ScoutTestConfig = {
   serverless: true,
   http2: false,
   projectType: 'oblt',
+  productTier: 'complete',
   isCloud: true,
   license: 'trial',
   cloudUsersFilePath: '/path/to/users',
