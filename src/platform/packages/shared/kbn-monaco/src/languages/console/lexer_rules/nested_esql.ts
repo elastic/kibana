@@ -46,7 +46,7 @@ export const buildEsqlStartRule = (tripleQuotes: boolean, esqlRoot: string = 'es
  * This function creates a group of rules needed for esql highlighting in console.
  * It reuses the tokenizer rules from esql_lexer_rules (a flat, self-contained set
  * compatible with the Console tokenizer context), but keywords and functions are
- * sourced from @elastic/monaco-esql/lib/definitions so they stay in sync automatically.
+ * sourced from @kbn/esql-language so they stay in sync automatically.
  */
 export const buildEsqlRules = (
   esqlRoot: string = 'esql_root'

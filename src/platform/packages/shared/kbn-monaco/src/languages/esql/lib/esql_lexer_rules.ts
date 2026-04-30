@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  headerCommands,
-  sourceCommands,
-  processingCommands,
-  options,
-  functions,
-} from '@elastic/monaco-esql/lib/definitions';
+import { EsqlCommandNames } from '@kbn/esql-language/src/commands/definitions/generated/commands/commands';
+import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import type { monaco } from '../../../monaco_imports';
 
 const brackets = [
@@ -21,16 +16,13 @@ const brackets = [
   { open: '(', close: ')', token: 'delimiter.parenthesis' },
 ];
 
-const toKeyword = (cmd: string) => cmd.toLowerCase().split(' ')[0];
+// These clause keywords are not exported as a list from @kbn/esql-language. They are kept here
+// to ensure single-quoted and triple-quoted ES|QL strings in Console share the same highlighting.
+const CLAUSE_KEYWORDS = ['by', 'on', 'with', 'metadata'];
 
-export const keywords = [
-  ...headerCommands,
-  ...sourceCommands,
-  ...processingCommands,
-  ...options,
-].map(toKeyword);
+export const keywords = [...Object.values(EsqlCommandNames), ...CLAUSE_KEYWORDS];
 
-export const builtinFunctions = functions;
+export const builtinFunctions = esqlFunctionNames;
 
 // These ESQL lexer rules are only used for highlighting nested ESQL in Console requests
 export const lexerRules = {
