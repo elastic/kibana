@@ -21,4 +21,5 @@ export const updateBodySchema = schema.object({
   r_rule: schema.maybe(rRuleRequestSchemaV1),
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope_episode_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
 });

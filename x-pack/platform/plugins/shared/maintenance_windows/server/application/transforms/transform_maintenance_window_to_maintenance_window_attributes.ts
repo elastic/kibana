@@ -47,11 +47,24 @@ export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
         ? { scope: maintenanceWindow.scope }
         : {
             scope: {
-              alerting: {
-                filters: maintenanceWindow.scope.alerting?.filters ?? [],
-                kql: maintenanceWindow.scope.alerting?.kql ?? '',
-                dsl: maintenanceWindow.scope.alerting?.dsl ?? '',
-              },
+              ...(maintenanceWindow.scope.alerting !== undefined
+                ? {
+                    alerting: {
+                      filters: maintenanceWindow.scope.alerting?.filters ?? [],
+                      kql: maintenanceWindow.scope.alerting?.kql ?? '',
+                      dsl: maintenanceWindow.scope.alerting?.dsl ?? '',
+                    },
+                  }
+                : {}),
+              ...(maintenanceWindow.scope.episodes !== undefined
+                ? {
+                    episodes: {
+                      filters: maintenanceWindow.scope.episodes?.filters ?? [],
+                      kql: maintenanceWindow.scope.episodes?.kql ?? '',
+                      dsl: maintenanceWindow.scope.episodes?.dsl ?? '',
+                    },
+                  }
+                : {}),
             },
           }
       : {}),

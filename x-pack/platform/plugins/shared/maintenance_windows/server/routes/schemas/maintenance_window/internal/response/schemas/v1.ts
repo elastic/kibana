@@ -39,4 +39,5 @@ export const maintenanceWindowResponseSchema = schema.object({
   ]),
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope_episode_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
 });

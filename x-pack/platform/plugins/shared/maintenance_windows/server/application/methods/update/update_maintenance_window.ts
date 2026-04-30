@@ -58,6 +58,7 @@ async function updateWithOCC(
   }
 
   let scopedQueryWithGeneratedValue = scope?.alerting;
+  let scopeEpisodesWithGeneratedValue = scope?.episodes;
   const indexPattern = getAlertsDataViewBase();
   try {
     if (scope?.alerting) {
@@ -71,6 +72,21 @@ async function updateWithOCC(
       );
       scopedQueryWithGeneratedValue = {
         ...scope.alerting,
+        dsl,
+      };
+    }
+
+    if (scope?.episodes) {
+      const dsl = JSON.stringify(
+        buildEsQuery(
+          indexPattern,
+          [{ query: scope.episodes.kql, language: 'kuery' }],
+          scope.episodes.filters as Filter[],
+          esQueryConfig
+        )
+      );
+      scopeEpisodesWithGeneratedValue = {
+        ...scope.episodes,
         dsl,
       };
     }
@@ -113,6 +129,19 @@ async function updateWithOCC(
       events = mergeEvents({ oldEvents: maintenanceWindow.events, newEvents: events });
     }
 
+    const mergedScope =
+      scopedQueryWithGeneratedValue !== undefined || scopeEpisodesWithGeneratedValue !== undefined
+        ? {
+            ...(maintenanceWindow.scope ?? {}),
+            ...(scopedQueryWithGeneratedValue !== undefined
+              ? { alerting: scopedQueryWithGeneratedValue }
+              : {}),
+            ...(scopeEpisodesWithGeneratedValue !== undefined
+              ? { episodes: scopeEpisodesWithGeneratedValue }
+              : {}),
+          }
+        : undefined;
+
     const updateMaintenanceWindowAttributes =
       transformMaintenanceWindowToMaintenanceWindowAttributes({
         ...maintenanceWindow,
@@ -129,9 +158,7 @@ async function updateWithOCC(
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
         ...(schedule ? { schedule } : {}),
-        ...(scopedQueryWithGeneratedValue !== undefined
-          ? { scope: { alerting: scopedQueryWithGeneratedValue } }
-          : {}),
+        ...(mergedScope !== undefined ? { scope: mergedScope } : {}),
       });
 
     // We are deleting and then creating rather than updating because SO.update

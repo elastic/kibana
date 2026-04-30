@@ -28,7 +28,8 @@
       "management",
       "kibanaUtils",
       "share",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "maintenanceWindows"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],

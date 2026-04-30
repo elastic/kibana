@@ -16,4 +16,5 @@ export const createBodySchema = schema.object({
   r_rule: rRuleRequestSchemaV1,
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope_episode_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
 });

@@ -20,6 +20,7 @@ export interface UpdateParams {
   rRule: MaintenanceWindowUI['rRule'];
   categoryIds?: MaintenanceWindowUI['categoryIds'];
   scopedQuery?: MaintenanceWindowUI['scopedQuery'];
+  scopeEpisodeQuery?: MaintenanceWindowUI['scopeEpisodeQuery'];
 }
 
 const transformUpdateBodySchema = (
@@ -36,6 +37,9 @@ const transformUpdateBodySchema = (
         }
       : {}),
     ...(updateParams.scopedQuery !== undefined ? { scoped_query: updateParams.scopedQuery } : {}),
+    ...(updateParams.scopeEpisodeQuery !== undefined
+      ? { scope_episode_query: updateParams.scopeEpisodeQuery }
+      : {}),
   };
 };
 

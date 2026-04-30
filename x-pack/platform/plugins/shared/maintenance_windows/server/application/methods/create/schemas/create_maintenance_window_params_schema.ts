@@ -22,7 +22,8 @@ export const createMaintenanceWindowParamsSchema = schema.object({
     schedule: schema.object({ custom: scheduleRequestSchema }),
     scope: schema.maybe(
       schema.object({
-        alerting: schema.nullable(alertsFilterQuerySchema),
+        alerting: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
+        episodes: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
       })
     ),
   }),

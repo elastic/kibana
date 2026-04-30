@@ -6,7 +6,11 @@
  */
 
 import { maintenanceWindowModelVersions } from './model_versions';
-import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
+import {
+  rawMaintenanceWindowSchemaV1,
+  rawMaintenanceWindowSchemaV2,
+  rawMaintenanceWindowSchemaV3,
+} from './schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 
 jest.mock('./schema');
@@ -352,6 +356,18 @@ describe('maintenanceWindowModelVersions', () => {
           ...mockDocument,
         });
       });
+    });
+  });
+
+  describe('version 5', () => {
+    const modelVersion5 = maintenanceWindowModelVersions[5] as SavedObjectsFullModelVersion;
+
+    it('should have empty changes (schema-only addition)', () => {
+      expect(modelVersion5.changes).toEqual([]);
+    });
+
+    it('should use rawMaintenanceWindowSchemaV3 as the create schema', () => {
+      expect(modelVersion5.schemas?.create).toBe(rawMaintenanceWindowSchemaV3);
     });
   });
 });

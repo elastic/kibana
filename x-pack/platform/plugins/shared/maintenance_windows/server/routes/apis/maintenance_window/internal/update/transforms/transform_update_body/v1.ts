@@ -19,6 +19,7 @@ export const transformUpdateBody = (
     r_rule: rRule,
     category_ids: categoryIds,
     scoped_query: scopedQuery,
+    scope_episode_query: scopeEpisodeQuery,
   } = updateBody;
 
   const schedule =
@@ -29,6 +30,14 @@ export const transformUpdateBody = (
         })
       : undefined;
 
+  const scope =
+    scopedQuery !== undefined || scopeEpisodeQuery !== undefined
+      ? {
+          ...(scopedQuery !== undefined ? { alerting: scopedQuery } : {}),
+          ...(scopeEpisodeQuery !== undefined ? { episodes: scopeEpisodeQuery } : {}),
+        }
+      : undefined;
+
   return {
     ...(title !== undefined ? { title } : {}),
     ...(enabled !== undefined ? { enabled } : {}),
@@ -37,6 +46,6 @@ export const transformUpdateBody = (
     ...(categoryIds !== undefined ? { categoryIds } : {}),
     ...(scopedQuery !== undefined ? { scopedQuery } : {}),
     ...(schedule !== undefined ? { schedule: { custom: schedule } } : {}),
-    ...(scopedQuery !== undefined ? { scope: { alerting: scopedQuery } } : {}),
+    ...(scope !== undefined ? { scope } : {}),
   };
 };

@@ -23,6 +23,7 @@ export interface FormProps {
   recurring: boolean;
   recurringSchedule?: RecurringSchedule;
   scopedQuery?: ScopedQueryAttributes | null;
+  scopeEpisodeQuery?: ScopedQueryAttributes | null;
 }
 
 export const schema: FormSchema<FormProps> = {
@@ -36,6 +37,12 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   scopedQuery: {
+    defaultValue: {
+      kql: '',
+      filters: [],
+    },
+  },
+  scopeEpisodeQuery: {
     defaultValue: {
       kql: '',
       filters: [],

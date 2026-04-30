@@ -38,6 +38,7 @@ export interface MaintenanceWindowAttributes {
   scopedQuery?: AlertsFilterQueryAttributes | null;
   schedule: { custom: Schedule };
   scope?: {
-    alerting: AlertsFilterQueryAttributes | null;
+    alerting?: AlertsFilterQueryAttributes | null;
+    episodes?: AlertsFilterQueryAttributes | null;
   };
 }

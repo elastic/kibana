@@ -16,6 +16,14 @@ export const transformCreateBody = (
     rRule: createBody.r_rule,
     duration: createBody.duration,
   });
+  const scope =
+    createBody.scoped_query || createBody.scope_episode_query
+      ? {
+          ...(createBody.scoped_query ? { alerting: createBody.scoped_query } : {}),
+          ...(createBody.scope_episode_query ? { episodes: createBody.scope_episode_query } : {}),
+        }
+      : undefined;
+
   return {
     title: createBody.title,
     duration: createBody.duration,
@@ -23,6 +31,6 @@ export const transformCreateBody = (
     categoryIds: createBody.category_ids,
     scopedQuery: createBody.scoped_query,
     schedule: { custom: schedule },
-    ...(createBody.scoped_query ? { scope: { alerting: createBody.scoped_query } } : {}),
+    ...(scope ? { scope } : {}),
   };
 };

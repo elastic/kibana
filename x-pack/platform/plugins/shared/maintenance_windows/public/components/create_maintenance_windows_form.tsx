@@ -16,7 +16,9 @@ import {
   UseMultiFields,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -26,8 +28,10 @@ import {
   EuiFormLabel,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextColor,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
@@ -95,6 +99,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   );
   const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
 
+  const [isEpisodeQueryEnabled, setIsEpisodeQueryEnabled] = useState(
+    !!initialValue?.scopeEpisodeQuery
+  );
+  const [episodeQuery, setEpisodeQuery] = useState<string>(
+    initialValue?.scopeEpisodeQuery?.kql || ''
+  );
+  const [episodeFilters, setEpisodeFilters] = useState<Filter[]>(
+    (initialValue?.scopeEpisodeQuery?.filters as Filter[]) || []
+  );
+
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
   const onCreateOrUpdateError = useCallback((error: IHttpFetchError<KibanaServerError>) => {
@@ -148,6 +162,20 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     };
   }, [isScopedQueryEnabled, query, filters]);
 
+  const scopeEpisodeQueryPayload = useMemo(() => {
+    if (!isEpisodeQueryEnabled) {
+      return null;
+    }
+    if (!episodeQuery && !episodeFilters.length) {
+      return null;
+    }
+
+    return {
+      kql: episodeQuery,
+      filters: transformQueryFilters(episodeFilters),
+    };
+  }, [isEpisodeQueryEnabled, episodeQuery, episodeFilters]);
+
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
@@ -170,6 +198,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           recurringSchedule: formData.recurringSchedule,
         }),
         scopedQuery: scopedQueryPayload ?? null,
+        scopeEpisodeQuery: scopeEpisodeQueryPayload ?? null,
         ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
       };
 
@@ -195,6 +224,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       scopedQueryErrors.length,
       isScopedQueryEnabled,
       scopedQueryPayload,
+      scopeEpisodeQueryPayload,
       defaultTimezone,
       isEditMode,
       showMultipleSolutionsWarning,
@@ -238,6 +268,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       }
     },
     [setIsScopedQueryEnabled, scopedQueryErrors, setScopedQueryErrors]
+  );
+
+  const onEpisodeQueryToggle = useCallback(
+    (event: EuiSwitchEvent) => {
+      setIsEpisodeQueryEnabled(event.target.checked);
+    },
+    [setIsEpisodeQueryEnabled]
   );
 
   const onQueryChange = useCallback(
@@ -450,6 +487,58 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                   onQueryChange={onQueryChange}
                   onFiltersChange={setFilters}
                 />
+              )}
+            </UseField>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>{i18n.CREATE_FORM_EPISODE_DATA_FILTER_TITLE}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.TECHNICAL_PREVIEW_LABEL}
+                  iconType="flask"
+                  tooltipContent={i18n.CREATE_FORM_EPISODE_DATA_FILTER_TECHNICAL_PREVIEW_TOOLTIP}
+                  size="s"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiText size="s">
+              <p>
+                <EuiTextColor color="subdued">
+                  {i18n.CREATE_FORM_EPISODE_DATA_FILTER_DESCRIPTION}
+                </EuiTextColor>
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <UseField path="scopeEpisodeQuery">
+              {() => (
+                <>
+                  <EuiSwitch
+                    data-test-subj="maintenanceWindowEpisodeDataFilterSwitch"
+                    label={i18n.CREATE_FORM_EPISODE_DATA_FILTER_TOGGLE_LABEL}
+                    checked={isEpisodeQueryEnabled}
+                    onChange={onEpisodeQueryToggle}
+                  />
+                  {isEpisodeQueryEnabled && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <MaintenanceWindowScopedQuery
+                        ruleTypeIds={ruleTypeIds}
+                        query={episodeQuery}
+                        filters={episodeFilters}
+                        isLoading={isLoadingRuleTypes}
+                        isEnabled={isEpisodeQueryEnabled}
+                        onQueryChange={setEpisodeQuery}
+                        onFiltersChange={setEpisodeFilters}
+                      />
+                    </>
+                  )}
+                </>
               )}
             </UseField>
           </EuiFlexItem>

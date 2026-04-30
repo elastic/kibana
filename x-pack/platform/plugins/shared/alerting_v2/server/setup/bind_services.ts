@@ -8,6 +8,7 @@
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
@@ -26,6 +27,11 @@ import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
+import {
+  MaintenanceWindowSavedObjectsClientToken,
+  MaintenanceWindowServiceInternalToken,
+} from '../lib/services/maintenance_window_service/tokens';
 import { ActionPolicySavedObjectService } from '../lib/services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
   ActionPolicySavedObjectsClientToken,
@@ -137,6 +143,21 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
       return new RulesSavedObjectService(internalClient, spaces);
+    })
+    .inSingletonScope();
+
+  bind(MaintenanceWindowSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      return savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+    })
+    .inSingletonScope();
+
+  bind(MaintenanceWindowServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const client = get(MaintenanceWindowSavedObjectsClientToken);
+      const logger = get(LoggerServiceToken);
+      return new MaintenanceWindowService(client, logger);
     })
     .inSingletonScope();
 

@@ -40,6 +40,7 @@ export async function createMaintenanceWindow(
   }
 
   let scopedQueryWithGeneratedValue = scope?.alerting;
+  let scopeEpisodesWithGeneratedValue = scope?.episodes;
   const indexPattern = getAlertsDataViewBase();
 
   try {
@@ -55,6 +56,22 @@ export async function createMaintenanceWindow(
 
       scopedQueryWithGeneratedValue = {
         ...scope.alerting,
+        dsl,
+      };
+    }
+
+    if (scope?.episodes) {
+      const dsl = JSON.stringify(
+        buildEsQuery(
+          indexPattern,
+          [{ query: scope.episodes.kql, language: 'kuery' }],
+          scope.episodes.filters as Filter[],
+          esQueryConfig
+        )
+      );
+
+      scopeEpisodesWithGeneratedValue = {
+        ...scope.episodes,
         dsl,
       };
     }
@@ -78,6 +95,14 @@ export async function createMaintenanceWindow(
     schedule: schedule.custom,
     expirationDate,
   });
+  const scopeForAttributes =
+    scopedQueryWithGeneratedValue || scopeEpisodesWithGeneratedValue
+      ? {
+          ...(scopedQueryWithGeneratedValue ? { alerting: scopedQueryWithGeneratedValue } : {}),
+          ...(scopeEpisodesWithGeneratedValue ? { episodes: scopeEpisodesWithGeneratedValue } : {}),
+        }
+      : undefined;
+
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
     enabled,
@@ -88,9 +113,7 @@ export async function createMaintenanceWindow(
     duration,
     events,
     schedule,
-    ...(scopedQueryWithGeneratedValue
-      ? { scope: { alerting: scopedQueryWithGeneratedValue } }
-      : {}),
+    ...(scopeForAttributes ? { scope: scopeForAttributes } : {}),
     ...modificationMetadata,
   });
 

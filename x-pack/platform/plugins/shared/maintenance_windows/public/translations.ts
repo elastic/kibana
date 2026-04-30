@@ -470,3 +470,40 @@ export const UPCOMING_EVENTS_POPOVER_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Upcoming events',
   }
 );
+
+export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const CREATE_FORM_EPISODE_DATA_FILTER_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.episodeDataFilterTitle',
+  {
+    defaultMessage: 'Episode data filter',
+  }
+);
+
+export const CREATE_FORM_EPISODE_DATA_FILTER_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.createForm.episodeDataFilterDescription',
+  {
+    defaultMessage:
+      'Suppress alerting v2 episodes whose data matches this query while the maintenance window is active.',
+  }
+);
+
+export const CREATE_FORM_EPISODE_DATA_FILTER_TOGGLE_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.createForm.episodeDataFilterToggleLabel',
+  {
+    defaultMessage: 'Filter episodes by data',
+  }
+);
+
+export const CREATE_FORM_EPISODE_DATA_FILTER_TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.maintenanceWindows.createForm.episodeDataFilterTechnicalPreviewTooltip',
+  {
+    defaultMessage:
+      'This feature is in technical preview and may change or be removed in future releases.',
+  }
+);
