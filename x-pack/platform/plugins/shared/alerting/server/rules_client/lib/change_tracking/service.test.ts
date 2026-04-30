@@ -137,13 +137,11 @@ describe('ChangeTrackingService', () => {
     };
 
     describe('log', () => {
-      it('throws when called before initialize()', async () => {
+      it('throws when called before initialize()', () => {
         service.register('stack');
-        await expect(
-          service
-            .asScoped(httpServerMock.createKibanaRequest())
-            .log(change, { action: 'rule_update', spaceId: 'default' })
-        ).rejects.toThrow(/before initialize/);
+        expect(() => service.asScoped(httpServerMock.createKibanaRequest())).toThrow(
+          /before initialize/
+        );
       });
 
       it('forwards a single change to logBulk', async () => {
@@ -219,13 +217,11 @@ describe('ChangeTrackingService', () => {
     });
 
     describe('logBulk', () => {
-      it('throws when called before initialize()', async () => {
+      it('throws when called before initialize()', () => {
         service.register('stack');
-        await expect(
-          service
-            .asScoped(httpServerMock.createKibanaRequest())
-            .logBulk([change], { action: 'rule_update', spaceId: 'default' })
-        ).rejects.toThrow(/before initialize/);
+        expect(() => service.asScoped(httpServerMock.createKibanaRequest())).toThrow(
+          /before initialize/
+        );
       });
 
       it('forwards multiple changes to logBulk', async () => {
@@ -433,6 +429,7 @@ describe('ChangeTrackingService', () => {
       it('delegates to the underlying client getHistory with rule saved object type', async () => {
         service.register('stack');
         const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        initializeService({ username: 'alice' });
         const opts = { size: 10 };
 
         await service
@@ -449,6 +446,7 @@ describe('ChangeTrackingService', () => {
       });
 
       it('throws when the module has no client and adds a warning to the logs', async () => {
+        initializeService({ username: 'alice' });
         await expect(
           service
             .asScoped(httpServerMock.createKibanaRequest())

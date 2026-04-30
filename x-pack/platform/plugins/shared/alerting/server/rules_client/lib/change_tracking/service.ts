@@ -74,29 +74,29 @@ export class ChangeTrackingService implements IChangeTrackingService {
   }
 
   asScoped(request: KibanaRequest): IScopedChangeTrackingService {
-    const authService = this.authService;
+    if (!this.authService) {
+      throw new Error(
+        'ChangeTrackingService.asScoped called before initialize(); authentication service is not available.'
+      );
+    }
 
-    const resolveOpts = async (
-      opts: ScopedLogChangeHistoryOptions
-    ): Promise<LogChangeHistoryOptions> => {
-      if (!authService) {
-        throw new Error(
-          'ChangeTrackingService.asScoped called before initialize(); authentication service is not available.'
-        );
-      }
-
-      const user = authService.getCurrentUser(request);
-
-      return {
-        ...opts,
-        username: user?.username ?? '',
-        userProfileId: user?.profile_uid,
-      };
+    const user = this.authService.getCurrentUser(request);
+    const userInfo: Pick<LogChangeHistoryOptions, 'username' | 'userProfileId'> = {
+      username: user?.username ?? '',
+      userProfileId: user?.profile_uid,
     };
 
     return {
-      log: async (change, opts) => this.log(change, await resolveOpts(opts)),
-      logBulk: async (changes, opts) => this.logBulk(changes, await resolveOpts(opts)),
+      log: async (change, opts) =>
+        this.log(change, {
+          ...opts,
+          ...userInfo,
+        }),
+      logBulk: async (changes, opts) =>
+        this.logBulk(changes, {
+          ...opts,
+          ...userInfo,
+        }),
       getHistory: this.getHistory.bind(this),
     };
   }
