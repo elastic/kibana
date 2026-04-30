@@ -17,7 +17,7 @@ import { allowedExperimentalValues } from '../../../common/experimental_features
 import { useKibana } from '../../common/lib/kibana';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
-import { OsqueryActionResult } from './osquery_result_wrapper';
+import { OsqueryActionResult } from './osquery_result';
 import {
   defaultLiveQueryDetails,
   DETAILS_ID,
@@ -44,7 +44,6 @@ const defaultPermissions = {
 const defaultProps = {
   actionId: 'test-action-id',
   startDate: DETAILS_TIMESTAMP,
-  queryId: '',
   ecsData: {
     _id: 'test',
     _index: 'test',
@@ -66,7 +65,7 @@ const renderWithContext = (Element: React.ReactElement) =>
     </EuiProvider>
   );
 
-describe('Osquery Results', () => {
+describe('Osquery result', () => {
   beforeAll(() => {
     mockKibana();
     jest
