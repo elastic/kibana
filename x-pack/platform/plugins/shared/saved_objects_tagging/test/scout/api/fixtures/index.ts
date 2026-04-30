@@ -5,9 +5,60 @@
  * 2.0.
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
+import type { RequestAuthFixture, RoleApiCredentials } from '@kbn/scout';
+import { apiTest as base } from '@kbn/scout';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
+export interface SavedObjectsTaggingRequestAuthFixture extends RequestAuthFixture {
+  getTagsEditorApiKey: () => Promise<RoleApiCredentials>;
+  getTagsViewerApiKey: () => Promise<RoleApiCredentials>;
+}
+
+export const apiTest = base.extend<{
+  requestAuth: SavedObjectsTaggingRequestAuthFixture;
+}>({
+  requestAuth: async ({ requestAuth }, use) => {
+    const getTagsEditorApiKey = () =>
+      requestAuth.getApiKeyForCustomRole({
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: {
+              savedObjectsTagging: ['all'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+    const getTagsViewerApiKey = () =>
+      requestAuth.getApiKeyForCustomRole({
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: {
+              savedObjectsTagging: ['read'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+    const extended: SavedObjectsTaggingRequestAuthFixture = {
+      ...requestAuth,
+      getTagsEditorApiKey,
+      getTagsViewerApiKey,
+    };
+
+    await use(extended);
+  },
+});
 
 export * as testData from './constants';

@@ -14,7 +14,7 @@ apiTest.describe('tags - list', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    viewerCredentials = await requestAuth.getApiKeyForViewer();
+    viewerCredentials = await requestAuth.getTagsViewerApiKey();
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.tagsFunctionalBase);
   });
 
