@@ -14,33 +14,37 @@ paths:
         - name: page
           in: query
           required: false
+          description: 'The page number to return.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         - name: pageSize
           in: query
           required: false
+          description: 'The number of results to return per page.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
         - name: sort
           in: query
           required: false
+          description: 'The field to sort results by.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         - name: sortOrder
           in: query
           required: false
+          description: 'The sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './find_saved_query.schema.yaml#/components/schemas/FindSavedQueryResponse'
     post:
       summary: Create a saved query
-      description: Create and run a saved query.
+      description: Create and save a query for later use.
       operationId: OsqueryCreateSavedQuery
       x-codegen-enabled: true
       x-labels: [ serverless, ess ]
@@ -52,7 +56,7 @@ paths:
               $ref: './create_saved_query.schema.yaml#/components/schemas/CreateSavedQueryRequestBody'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -68,11 +72,12 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The saved query ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -87,11 +92,12 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The saved query ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -109,6 +115,7 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The saved query ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       requestBody:
@@ -119,7 +126,7 @@ paths:
               $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -132,19 +139,40 @@ paths:
         If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
       operationId: OsqueryCopySavedQuery
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: id
           in: path
           required: true
+          description: 'The ID of the saved query to copy.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './copy_saved_query.schema.yaml#/components/schemas/CopySavedQueryResponse'
+              examples:
+                copySavedQueryExample:
+                  summary: Example response for copying a saved query
+                  value:
+                    data:
+                      saved_object_id: '42ba1280-2172-11ee-8523-5765fca79a3c'
+                      id: 'my_saved_query_copy'
+                      query: 'select * from uptime;'
+                      description: 'Saved query description'
+                      platform: 'linux,darwin'
+                      interval: '60'
+                      timeout: 120
+                      snapshot: true
+                      removed: false
+                      ecs_mapping:
+                        host.uptime:
+                          field: 'total_seconds'
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: 'elastic'
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: 'elastic'

@@ -27,18 +27,44 @@ Feedback, along with other session data, is sent using the server-side EBT `feed
 
 ## Defining application specific questions
 
-To define application-specific questions, add them to the `@kbn/feedback-registry` package.
+To define application-specific questions, add them to the `@kbn/feedback-registry` package. Each application's questions live in a separate file under `questions/`, and the registry lazily loads only the relevant set at runtime.
 
-1. Go to: `x-pack/platform/packages/private/feedback-registry/src/registry.ts`
-2. Define up to two questions.
+1. Create a new file for your application's questions at `x-pack/platform/packages/private/feedback-registry/src/questions/<your_app>.ts`. Define up to two questions:
 
 ```ts
-/**
- * The id of the application associated with this feedback entry, e.g. 'dashboard', 'discover'
- * or in case of deep links, the deep link id e.g. 'ml:dataVisualizer'.
- */
-type FeedbackRegistryEntryId = string;
+import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 
+export const questions: FeedbackRegistryEntry[] = [
+  {
+    id: 'my_app_experience',
+    order: 1,
+    placeholder: {
+      i18nId: 'xpack.feedbackRegistry.myAppExperiencePlaceholder',
+      defaultMessage: 'Describe your experience',
+    },
+    ariaLabel: {
+      i18nId: 'xpack.feedbackRegistry.myAppExperienceAriaLabel',
+      defaultMessage: 'Describe your experience',
+    },
+    question: 'Describe your experience',
+  },
+];
+```
+
+2. Register a lazy loader for your app in `x-pack/platform/packages/private/feedback-registry/src/registry.ts` by adding an entry to the `feedbackRegistry` map:
+
+```ts
+const feedbackRegistry: FeedbackRegistry = new Map([
+  [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
+  ['myApp', () => import('./questions/my_app').then((m) => m.questions)],
+]);
+```
+
+This ensures that only your app's questions are loaded when the feedback form is opened, keeping the feedback plugin's bundle size constant regardless of how many apps register questions.
+
+The `FeedbackRegistryEntry` interface is defined as follows:
+
+```ts
 /**
  * Definition of a feedback question entry in the feedback registry.
  */
@@ -77,8 +103,6 @@ interface FeedbackRegistryEntry {
     defaultMessage: string;
   };
 }
-
-type FeedbackRegistry = Map<FeedbackRegistryEntryId, FeedbackRegistryEntry[]>;
 ```
 
 3. If you're unsure of your application ID:

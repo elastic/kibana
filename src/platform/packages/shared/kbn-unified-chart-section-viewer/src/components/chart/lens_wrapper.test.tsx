@@ -9,10 +9,12 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 
 // Mock the EmbeddableComponent
 const mockEmbeddableComponent = jest.fn((props) => (
@@ -25,6 +27,10 @@ const mockEmbeddableComponent = jest.fn((props) => (
 jest.mock('./hooks/use_lens_extra_actions', () => ({
   useLensExtraActions: jest.fn(() => []),
 }));
+
+const useLensExtraActionsMock = useLensExtraActions as jest.MockedFunction<
+  typeof useLensExtraActions
+>;
 
 describe('LensWrapper', () => {
   const mockLensProps = {
@@ -185,7 +191,7 @@ describe('LensWrapper', () => {
       );
     });
 
-    it('wraps EmbeddableComponent in PresentationPanelQuickActionContext', () => {
+    it('wraps EmbeddableComponent in EmbeddableRendererContext', () => {
       const { getByTestId } = render(
         <EuiThemeProvider>
           <LensWrapper {...defaultProps} titleHighlight="test" />
@@ -194,6 +200,73 @@ describe('LensWrapper', () => {
 
       // The component should be wrapped in the context provider
       expect(getByTestId('embeddable-component')).toBeInTheDocument();
+    });
+  });
+
+  describe('handleExploreInDiscoverTab', () => {
+    function captureExploreHandler(): { handler: (() => void) | undefined } {
+      const captured: { handler: (() => void) | undefined } = { handler: undefined };
+      useLensExtraActionsMock.mockImplementation((actions) => {
+        captured.handler = actions.exploreInDiscoverTab?.onClick;
+        return [];
+      });
+      return captured;
+    }
+
+    it('resolves esqlVariables from lensProps before calling onExploreInDiscoverTab', () => {
+      const captured = captureExploreHandler();
+      const onExploreInDiscoverTab = jest.fn();
+
+      render(
+        <EuiThemeProvider>
+          <LensWrapper
+            {...defaultProps}
+            lensProps={{
+              ...mockLensProps,
+              esqlVariables: [{ key: 'event_type', value: 'Bad', type: ESQLVariableType.VALUES }],
+              attributes: {
+                ...mockLensProps.attributes,
+                state: {
+                  ...mockLensProps.attributes.state,
+                  query: { esql: 'FROM traces-apm* | WHERE ?event_type == "Bad"' },
+                },
+              },
+            }}
+            onExploreInDiscoverTab={onExploreInDiscoverTab}
+          />
+        </EuiThemeProvider>
+      );
+
+      act(() => {
+        captured.handler?.();
+      });
+
+      expect(onExploreInDiscoverTab).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { esql: 'FROM traces-apm* | WHERE "Bad" == "Bad"' },
+        })
+      );
+    });
+
+    it('passes non-esql queries through unchanged', () => {
+      const captured = captureExploreHandler();
+      const onExploreInDiscoverTab = jest.fn();
+
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} onExploreInDiscoverTab={onExploreInDiscoverTab} />
+        </EuiThemeProvider>
+      );
+
+      act(() => {
+        captured.handler?.();
+      });
+
+      expect(onExploreInDiscoverTab).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: mockLensProps.attributes.state.query,
+        })
+      );
     });
   });
 });

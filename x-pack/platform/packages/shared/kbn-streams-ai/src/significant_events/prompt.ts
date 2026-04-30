@@ -34,6 +34,7 @@ export function createGenerateSignificantEventsPrompt({
       description: z.string(),
       available_feature_types: z.string(),
       computed_feature_instructions: z.string(),
+      existing_queries: z.string(),
     }),
   })
     .version({
@@ -109,11 +110,22 @@ export function createGenerateSignificantEventsPrompt({
                       minimum: 0,
                       maximum: 100,
                     },
+                    type: {
+                      type: 'string',
+                      enum: ['match', 'stats'],
+                      description:
+                        'Hint for query type. "match" for WHERE-only filters, "stats" for aggregation queries. The system derives the authoritative type from ES|QL content.',
+                    },
                     evidence: {
                       type: 'array',
                       items: {
                         type: 'string',
                       },
+                    },
+                    replaces: {
+                      type: 'string',
+                      description:
+                        'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query from `existing_queries`.',
                     },
                   },
                   required: ['esql', 'title', 'description', 'category', 'severity_score'],

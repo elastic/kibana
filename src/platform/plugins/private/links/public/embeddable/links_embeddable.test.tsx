@@ -90,7 +90,7 @@ jest.mock('../content_management', () => {
 
 jest.mock('../content_management/load_from_library', () => {
   return {
-    loadFromLibrary: jest.fn((savedObjectId) => {
+    loadFromLibrary: jest.fn((refId) => {
       return Promise.resolve({
         title: 'links 001',
         description: 'some links',
@@ -128,7 +128,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       hide_title: false,
       hide_border: false,
-      savedObjectId: '123',
+      ref_id: '123',
     };
 
     test('component renders', async () => {
@@ -148,7 +148,7 @@ describe('getLinksEmbeddableFactory', () => {
         description: 'just a few links',
         hide_title: false,
         hide_border: false,
-        savedObjectId: '123',
+        ref_id: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
       expect(api.defaultTitle$?.value).toBe('links 001');
@@ -219,7 +219,7 @@ describe('getLinksEmbeddableFactory', () => {
         description: 'just a few links',
         hide_title: true,
         hide_border: true,
-        savedObjectId: '333',
+        ref_id: '333',
       });
     });
   });

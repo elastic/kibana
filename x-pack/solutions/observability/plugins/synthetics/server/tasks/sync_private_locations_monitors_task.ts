@@ -141,10 +141,12 @@ export class SyncPrivateLocationMonitorsTask {
         return { state: taskState, schedule: { interval } };
       }
       if (performCleanupSync) {
-        this.debugLog(`Syncing private location monitors because cleanup performed a change`);
+        this.debugLog(
+          `Syncing private location monitors because cleanup performed a change, ` +
+            `locations count: ${allPrivateLocations.length}`
+        );
 
         if (allPrivateLocations.length > 1) {
-          // if there are multiple locations, we run a task per location to optimize it
           for (const location of allPrivateLocations) {
             await runTaskPerPrivateLocation({
               server: this.serverSetup,
@@ -158,6 +160,7 @@ export class SyncPrivateLocationMonitorsTask {
             encryptedSavedObjects,
           });
         }
+        this.debugLog(`Completed post-cleanup sync`);
         return defaultState;
       }
 

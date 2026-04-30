@@ -85,6 +85,10 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
   /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
 }
@@ -125,6 +129,13 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
   /**
+   * Optional preferred width for the canvas flyout when opened in full-screen context.
+   * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
+   * Defaults to `'50vw'` when not specified.
+   * Has no effect in sidebar context.
+   */
+  canvasWidth?: string;
+  /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
    *
@@ -143,14 +154,6 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
-  /**
-   * Optional lifecycle hook called when an attachment is first rendered in the conversation.
-   * Called once per attachment (not per version). Use for setting up subscriptions or
-   * other side effects that should persist across version renders.
-   *
-   * @returns Optional cleanup function called when the attachment is removed from the conversation.
-   */
-  onAttachmentMount?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
 }
 
 /**

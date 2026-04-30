@@ -84,6 +84,7 @@ export const casesMutationsKeys = {
   exportTemplate: ['export-template'] as const,
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
+  changeAppliedTemplate: ['change-applied-template'] as const,
 };
 
 export const inferenceKeys = {
@@ -116,6 +117,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
   customFields: {},
+  extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,
   to: DEFAULT_TO_DATE,
 };

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { onSaveDiscoverSession } from './on_save_discover_session';
+export { DiscoverSessionSaveModalContainer } from './save_discover_session_modal_container';

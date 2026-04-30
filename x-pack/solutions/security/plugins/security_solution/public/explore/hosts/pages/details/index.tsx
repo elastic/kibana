@@ -225,7 +225,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const hostStoreIdentityFields = useMemo(() => {
     if (entityId) {
@@ -284,8 +284,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     endDate: to,
     startDate: from,
     hostName: detailName,
+    entityId: entityStoreV2Enabled ? entityFromStoreResult.entityRecord?.entity?.id : undefined,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
+    skip: selectedPatterns.length === 0,
   });
 
   const hostDetailsForOverview = entityStoreV2Enabled ? observedHost.details : hostOverview;
@@ -505,7 +506,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               {!noEntityInStore && (
                 <>
                   <AnomalyTableProvider
-                    criteriaFields={hostToCriteria(hostDetailsForOverview, euidApi?.euid)}
+                    criteriaFields={hostToCriteria({
+                      hostItem: hostDetailsForOverview,
+                      euid: euidApi?.euid,
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
+                    })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
                       euid: euidApi?.euid,
                       entityType: 'host',

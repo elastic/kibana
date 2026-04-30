@@ -24,6 +24,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_ACTION_POLICY_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_ACTION_POLICY_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/action_policies\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.ALERTING_V2_ALERT_API_PATH",
         "type": "string",
         "tags": [],
@@ -41,16 +58,16 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
-        "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "id": "def-common.ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH",
         "type": "string",
         "tags": [],
-        "label": "ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "label": "ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/alerting/v2/notification_policies/suggestions/values\""
+          "\"/api/alerting/v2/internal/user_profiles/_suggest\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,16 +75,16 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
-        "id": "def-common.ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
+        "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
         "type": "string",
         "tags": [],
-        "label": "ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
+        "label": "ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/alerting/v2/notification_policies\""
+          "\"/internal/action_policies/suggestions/values\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -85,6 +102,23 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
         "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/rule_doctor/insights\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -205,7 +239,9 @@
             "type": "number",
             "tags": [],
             "label": "[RUNBOOK_ARTIFACT_TYPE]",
-            "description": [],
+            "description": [
+              "\nType-specific artifact value length limits.\n\nTo raise or add a limit for a new artifact type, add an entry here.\nThe framework schema resolves: `ARTIFACT_VALUE_LIMITS[type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT`.\nNo framework code changes are needed — only this map."
+            ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
             "lineNumber": 22,
             "columnNumber": 3,

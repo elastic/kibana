@@ -218,6 +218,52 @@ describe('<ComponentTemplateDetails />', () => {
     });
   });
 
+  describe('WHEN actions is an empty array', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        COMPONENT_TEMPLATE
+      );
+
+      renderComponentTemplateDetails({
+        componentTemplateName: COMPONENT_TEMPLATE.name,
+        onClose: () => {},
+        actions: [],
+      });
+
+      await screen.findByTestId('title');
+    });
+
+    test('SHOULD not render the manage control while keeping the close footer', () => {
+      expect(screen.getByTestId('footer')).toBeInTheDocument();
+      expect(screen.getByTestId('closeDetailsButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('manageComponentTemplateButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('WHEN summary call-to-action is disabled', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
+        COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS
+      );
+
+      renderComponentTemplateDetails({
+        componentTemplateName: COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
+        onClose: () => {},
+        showSummaryCallToAction: false,
+      });
+
+      await screen.findByTestId('title');
+    });
+
+    test('SHOULD omit index-template links from the not-in-use summary callout', () => {
+      const callout = screen.getByTestId('notInUseCallout');
+      expect(within(callout).queryByRole('link', { name: 'Create' })).not.toBeInTheDocument();
+      expect(within(callout).queryByRole('link', { name: 'update' })).not.toBeInTheDocument();
+    });
+  });
+
   describe('Error handling for @custom templates', () => {
     const error = {
       statusCode: 404,

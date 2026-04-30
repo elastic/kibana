@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/observability_ai_assistant
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/i18n-react'
   - '@kbn/logging'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/core-analytics-browser'
@@ -66,14 +65,13 @@ dependsOn:
   - '@kbn/product-doc-base-plugin'
   - '@kbn/spaces-utils'
   - '@kbn/usage-collection-plugin'
-  - '@kbn/ai-agent-confirmation-modal'
-  - '@kbn/ai-assistant-management-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/zod'
   - '@kbn/search-inference-endpoints'
   - '@kbn/inference-connectors'
   - '@kbn/react-query'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/evals-plugin'
 tags:
   - plugin
   - prod

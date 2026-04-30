@@ -54,6 +54,25 @@ export const telemetryEventsSchemas: Partial<
         type: 'boolean',
         _meta: { description: 'Whether the creation was successful', optional: false },
       },
+      connectorId: {
+        type: 'keyword',
+        _meta: { description: 'Inference connector ID used for AI generation', optional: false },
+      },
+      modelName: {
+        type: 'keyword',
+        _meta: {
+          description: 'Model name from connector config (undefined when config is not exposed)',
+          optional: true,
+        },
+      },
+      connectorType: {
+        type: 'keyword',
+        _meta: { description: 'Inference connector type (e.g. .bedrock, .gen-ai)', optional: true },
+      },
+      connectorName: {
+        type: 'keyword',
+        _meta: { description: 'Inference connector display name', optional: true },
+      },
       errorMessage: {
         type: 'keyword',
         _meta: { description: 'Error message if creation failed', optional: true },

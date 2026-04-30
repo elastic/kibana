@@ -60,7 +60,7 @@ export default function (providerContext: FtrProviderContext) {
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         overwrite: true,
         attributes: {
-          policy_id: 'fleet-server-policy',
+          policy_ids: ['fleet-server-policy'],
           name: 'Fleet Server',
           package: {
             name: 'fleet_server',

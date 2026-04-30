@@ -20,6 +20,7 @@ import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
+  buildLogPageProbeSourceClause,
   buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
@@ -66,6 +67,8 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
   recoveryId?: string;
   pagination?: PaginationParams;
+  logsPageCursorStart?: PaginationParams;
+  logsPageCursorEnd?: PaginationParams;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -73,10 +76,10 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
+  logsPageCursorStart?: PaginationParams;
 }): string {
   return (
-    buildExtractionSourceClause(params) +
+    buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
   );
@@ -91,6 +94,8 @@ export function buildLogsExtractionEsqlQuery({
   latestIndex,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
 
@@ -98,7 +103,14 @@ export function buildLogsExtractionEsqlQuery({
 
   // FROM and WHERE
   parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
   );
 
   // Special evaluations for entity id

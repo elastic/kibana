@@ -46,13 +46,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.search_entities`,
 
   // Streams
-  `${internalNamespaces.streams}.list_streams`,
-  `${internalNamespaces.streams}.get_stream`,
-  `${internalNamespaces.streams}.get_schema`,
-  `${internalNamespaces.streams}.get_data_quality`,
-  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  `${internalNamespaces.streams}.inspect_streams`,
+  `${internalNamespaces.streams}.diagnose_stream`,
   `${internalNamespaces.streams}.query_documents`,
-  `${internalNamespaces.streams}.get_failed_documents`,
+  `${internalNamespaces.streams}.design_pipeline`,
+  `${internalNamespaces.streams}.update_stream`,
+  `${internalNamespaces.streams}.create_partition`,
+  `${internalNamespaces.streams}.delete_stream`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -77,7 +77,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
-  `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
 ] as const;
@@ -105,9 +104,14 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Dashboard
   'dashboard-management',
 
+  // Platform – Discover
+  'discover-data-analysis',
+
   // Platform – Streams
-  'streams-exploration',
+  'streams-management',
   'significant-events-memory',
+  'knowledge-indicators-management',
+  'ki-identification-management',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -123,6 +127,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // O11Y
   'observability.rca',
   'observability.investigation',
+  'observability.service-map',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

@@ -16,15 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const esql = getService('esql');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const esql = getService('esql');
 
-  const { dashboard, dashboardControls, discover, common, timePicker } = getPageObjects([
+  const { dashboard, dashboardControls, discover, timePicker } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'discover',
-    'common',
     'timePicker',
   ]);
 
@@ -34,23 +33,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         enableESQL: true,
       });
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
 
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls'
       );
       await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover/session_with_control'
       );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });
 
-    describe('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
+    after(async () => {
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    describe('when adding an ES|QL panel with controls in Dashboard and exploring it in Discover', () => {
       it('should retain the controls and their state', async () => {
-        // Navigate to a dasbhoard with an ESQL control
+        // Navigate to a dashboard with an ES|QL control
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('ES|QL controls fixture dashboard');
         await dashboard.waitForRenderComplete();
@@ -76,33 +80,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('when unlinking a ES|QL panel with controls and explorting it in discover', () => {
+    const addUnlinkedSavedSearch = async () => {
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('ESQL control unlink test');
+      await dashboard.waitForRenderComplete();
+
+      await dashboardPanelActions.unlinkFromLibrary('ESQL control unlink test');
+      await dashboard.waitForRenderComplete();
+    };
+
+    describe('when viewing an unlinked by-value ES|QL panel in Discover', () => {
       it('should retain the controls and their state', async () => {
-        // Go to discover
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
-
-        // Create a search with controls
-        await timePicker.setDefaultAbsoluteRange();
-        await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
-        await discover.waitUntilTabIsLoaded();
-
-        // Save session
-        await discover.saveSearch('ESQL control unlink test');
-
-        // Go to dashboards
-        await dashboard.navigateToApp();
-        await dashboard.clickNewDashboard();
-
-        // Add the saved search
-        await dashboardAddPanel.addSavedSearch('ESQL control unlink test');
-
-        // Unlink the saved search
-        await dashboardPanelActions.clickPanelActionByTitle(
-          'embeddablePanelAction-unlinkFromLibrary',
-          'ESQL control unlink test'
-        );
+        await addUnlinkedSavedSearch();
 
         // Save dashboard and go to view mode
         await dashboard.saveDashboard('ESQL control unlink test dashboard');
@@ -117,6 +108,173 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Verify that we are in discover and the control exists
         await discover.expectOnDiscover();
         expect(await dashboardControls.getControlsCount()).to.be(1);
+      });
+    });
+
+    describe('when editing an unlinked by-value ES|QL panel in Discover', () => {
+      it('should persist updated control selections after saving', async () => {
+        await addUnlinkedSavedSearch();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const initialDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(initialDashboardControlId)
+        ).to.be('AE');
+
+        await dashboardPanelActions.editPanelByTitle('ESQL control unlink test');
+        await discover.expectOnDiscover();
+        await discover.waitUntilTabIsLoaded();
+
+        const discoverControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'AE'
+        );
+
+        await dashboardControls.optionsListOpenPopover(discoverControlId, true);
+        await dashboardControls.optionsListPopoverSelectOption('CN');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(discoverControlId);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'CN'
+        );
+
+        await discover.clickSaveSearchButton();
+        await dashboard.waitForRenderComplete();
+
+        expect(await dashboardPanelActions.getPanelWrapper('ESQL control unlink test')).to.be.ok();
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const updatedDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(updatedDashboardControlId)
+        ).to.be('CN');
+      });
+
+      it('should discard control selection changes after cancelling', async () => {
+        await addUnlinkedSavedSearch();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const initialDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(initialDashboardControlId)
+        ).to.be('AE');
+
+        await dashboardPanelActions.editPanelByTitle('ESQL control unlink test');
+        await discover.expectOnDiscover();
+        await discover.waitUntilTabIsLoaded();
+
+        const discoverControlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.optionsListOpenPopover(discoverControlId, true);
+        await dashboardControls.optionsListPopoverSelectOption('CN');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(discoverControlId);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'CN'
+        );
+
+        await discover.clickCancelButton();
+        await dashboard.waitForRenderComplete();
+
+        expect(await dashboardPanelActions.getPanelWrapper('ESQL control unlink test')).to.be.ok();
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const unchangedDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(unchangedDashboardControlId)
+        ).to.be('AE');
+      });
+    });
+
+    describe('when saving a Discover table with ES|QL controls to a dashboard', () => {
+      it('should create a dashboard with the Discover table and the selected control state', async () => {
+        await discover.navigateToApp();
+        await discover.loadSavedSearch('ESQL control unlink test');
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const discoverControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'AE'
+        );
+
+        await dashboardControls.optionsListOpenPopover(discoverControlId, true);
+        await dashboardControls.optionsListPopoverSelectOption('CN');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(discoverControlId);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'CN'
+        );
+
+        await discover.clickSaveDiscoverTableToDashboard('ESQL control by-value table');
+
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+
+        expect(
+          await dashboardPanelActions.getPanelWrapper('ESQL control by-value table')
+        ).to.be.ok();
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const dashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(await dashboardControls.optionsListGetSelectionsString(dashboardControlId)).to.be(
+          'CN'
+        );
+      });
+    });
+
+    describe('when saving a new by-value Discover session panel back to a dashboard with matching controls', () => {
+      it('should update the existing dashboard control instead of creating a duplicate', async () => {
+        await addUnlinkedSavedSearch();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const initialDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(initialDashboardControlId)
+        ).to.be('AE');
+
+        await dashboardAddPanel.clickAddDiscoverPanel();
+        await discover.expectOnDiscover();
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        await esql.openEsqlControlFlyout('FROM logstash-* | WHERE geo.dest == ');
+        await testSubjects.setValue('esqlVariableName', '?geo_dest');
+        await testSubjects.setValue('esqlControlLabel', 'Updated destination');
+        await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+        await testSubjects.click('saveEsqlControlsFlyoutButton');
+
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const discoverControlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.optionsListOpenPopover(discoverControlId, true);
+        await dashboardControls.optionsListPopoverSelectOption('CN');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(discoverControlId);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'CN'
+        );
+
+        await discover.clickSaveSearchButton();
+        await dashboard.waitForRenderComplete();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const updatedDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(updatedDashboardControlId).to.be(initialDashboardControlId);
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(updatedDashboardControlId)
+        ).to.be('CN');
       });
     });
   });

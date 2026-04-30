@@ -103,14 +103,14 @@ You must create a **General** app in the Zoom Marketplace (not a User-managed ap
 5. On the **App Credentials** tab, copy the **Client ID** and **Client Secret**.
 6. Set the **OAuth Redirect URL** to your Kibana OAuth callback URL (for example, `https://<your-kibana-host>/api/actions/connector/_oauth_callback`).
 7. On the **Scopes** tab, add the following granular scopes:
-  - `user:read:user` — verify connection
-  - `meeting:read:meeting` — get meeting details
-  - `meeting:read:list_meetings` — list meetings
-  - `meeting:read:past_meeting` — get past meeting details
-  - `meeting:read:list_past_participants` — list past meeting participants
-  - `meeting:read:list_registrants` — list meeting registrants
-  - `cloud_recording:read:list_recording_files` — get meeting recordings
-  - `cloud_recording:read:list_user_recordings` — list user recordings
+   - `user:read:user` — verify connection
+   - `meeting:read:meeting` — get meeting details
+   - `meeting:read:list_meetings` — list meetings
+   - `meeting:read:past_meeting` — get past meeting details
+   - `meeting:read:list_past_participants` — list past meeting participants
+   - `meeting:read:list_registrants` — list meeting registrants
+   - `cloud_recording:read:list_recording_files` — get meeting recordings
+   - `cloud_recording:read:list_user_recordings` — list user recordings
 8. On the **Activation** tab, select **Activate your app**.
 9. In {{kib}}, create a Zoom connector and select **OAuth Authorization Code** as the authentication method. Enter the **Client ID** and **Client Secret**, then authorize with your Zoom account.
 

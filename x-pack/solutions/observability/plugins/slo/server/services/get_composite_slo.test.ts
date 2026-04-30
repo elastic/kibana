@@ -7,6 +7,7 @@
 
 import { createSLO, createAPMTransactionErrorRateIndicator } from './fixtures/slo';
 import { createCompositeSlo } from './fixtures/composite_slo';
+import { Duration, DurationUnit } from '../domain/models';
 import { GetCompositeSLO } from './get_composite_slo';
 import {
   createSummaryClientMock,
@@ -390,8 +391,10 @@ describe('GetCompositeSLO', () => {
       {
         slo: sloA,
         instanceId: 'my-instance',
-        timeWindowOverride: composite.timeWindow,
-        budgetingMethodOverride: composite.budgetingMethod,
+        timeWindowOverride: {
+          duration: new Duration(30, DurationUnit.Day),
+          type: 'rolling',
+        },
       },
     ]);
     expect(result.members[0].instanceId).toBe('my-instance');

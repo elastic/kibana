@@ -37,7 +37,15 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [
-              "/** Creates a mock for {@link InternalUserActivityServiceSetup}. */"
+              "/** Creates a mock for ",
+              {
+                "pluginId": "@kbn/core-user-activity-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreUserActivityServerMocksPluginApi",
+                "section": "def-server.InternalUserActivityServiceSetup",
+                "text": "InternalUserActivityServiceSetup"
+              },
+              ". */"
             ],
             "signature": [
               "() => jest.Mocked<",
@@ -59,7 +67,15 @@
             "tags": [],
             "label": "createInternalStartContract",
             "description": [
-              "/** Creates a mock for {@link InternalUserActivityServiceStart}. */"
+              "/** Creates a mock for ",
+              {
+                "pluginId": "@kbn/core-user-activity-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreUserActivityServerMocksPluginApi",
+                "section": "def-server.InternalUserActivityServiceStart",
+                "text": "InternalUserActivityServiceStart"
+              },
+              ". */"
             ],
             "signature": [
               "() => jest.Mocked<",
@@ -81,7 +97,15 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [
-              "/** Creates a mock for {@link UserActivityServiceSetup}. */"
+              "/** Creates a mock for ",
+              {
+                "pluginId": "@kbn/core-user-activity-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreUserActivityServerMocksPluginApi",
+                "section": "def-server.UserActivityServiceSetup",
+                "text": "UserActivityServiceSetup"
+              },
+              ". */"
             ],
             "signature": [
               "() => jest.Mocked<",
@@ -103,7 +127,15 @@
             "tags": [],
             "label": "createStartContract",
             "description": [
-              "/** Creates a mock for {@link UserActivityServiceStart}. */"
+              "/** Creates a mock for ",
+              {
+                "pluginId": "@kbn/core-user-activity-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreUserActivityServerMocksPluginApi",
+                "section": "def-server.UserActivityServiceStart",
+                "text": "UserActivityServiceStart"
+              },
+              ". */"
             ],
             "signature": [
               "() => jest.Mocked<",

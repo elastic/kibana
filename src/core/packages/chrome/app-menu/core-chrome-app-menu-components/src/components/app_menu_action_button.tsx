@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent } from 'react';
+import React, { useRef, type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -18,7 +17,7 @@ import {
   APP_MENU_NOTIFICATION_INDICATOR_LEFT,
   APP_MENU_NOTIFICATION_INDICATOR_TOP,
 } from '../constants';
-import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
 
@@ -59,7 +58,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const showTooltip = Boolean(content || title);
 
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
-  const colorProp = 'color' in props ? props.color : undefined;
 
   const {
     items: splitButtonItems,
@@ -68,22 +66,32 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   } = splitButtonProps || ({} as AppMenuSplitButtonProps);
 
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
+  const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
-    run?.({ triggerElement: event.currentTarget });
+    const triggerElement = event.currentTarget;
+    run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
   const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(splitButtonProps?.isSecondaryButtonDisabled)) return;
 
     if (hasSplitItems) {
+      anchorDomElementRef.current = event.currentTarget;
       onPopoverToggle();
       return;
     }
 
-    splitButtonRun?.({ triggerElement: event.currentTarget });
+    const triggerElement = event.currentTarget;
+    splitButtonRun?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
   const routerLinkProps =
@@ -119,7 +127,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const buttonCss = css`
     background-color: ${isPopoverOpen
       ? getIsSelectedColor({
-          color: colorProp as EuiButtonColor,
+          color: 'text',
           euiTheme,
           isFilled: false,
         })
@@ -153,7 +161,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         iconSide="left"
         isSelected={isPopoverOpen}
         css={buttonCss}
-        color={colorProp}
+        color="text"
       >
         {itemText}
       </EuiButton>
@@ -181,6 +189,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         tooltipContent={content}
         tooltipTitle={title}
         anchorElement={button}
+        anchorDomElement={anchorDomElementRef.current ?? undefined}
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}

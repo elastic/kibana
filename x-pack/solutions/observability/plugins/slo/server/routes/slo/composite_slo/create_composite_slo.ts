@@ -55,7 +55,7 @@ export const createCompositeSLORoute = createSloServerRoute({
 
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username ?? 'unknown';
-    const now = new Date();
+    const now = new Date().toISOString();
 
     const compositeSlo = {
       ...params.body,

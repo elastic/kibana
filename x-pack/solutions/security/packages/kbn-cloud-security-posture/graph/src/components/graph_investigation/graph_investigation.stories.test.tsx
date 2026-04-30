@@ -591,6 +591,7 @@ describe('GraphInvestigation Component', () => {
                   controlledBy: 'graph-investigation',
                   disabled: false,
                   field: 'event.id',
+                  index: '1235',
                   key: 'event.id',
                   negate: false,
                   params: {
@@ -689,6 +690,7 @@ describe('GraphInvestigation Component', () => {
                   controlledBy: 'graph-investigation',
                   disabled: false,
                   field: 'event.id',
+                  index: '1235',
                   key: 'event.id',
                   negate: false,
                   params: {

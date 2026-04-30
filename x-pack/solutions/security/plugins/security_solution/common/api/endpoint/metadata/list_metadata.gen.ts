@@ -14,10 +14,10 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const EndpointMetadataResponse = lazySchema(() => z.object({}));
 export type EndpointMetadataResponse = z.infer<typeof EndpointMetadataResponse>;
-export const EndpointMetadataResponse = z.object({});
 
+export const MetadataListResponse = lazySchema(() => z.object({}));
 export type MetadataListResponse = z.infer<typeof MetadataListResponse>;
-export const MetadataListResponse = z.object({});

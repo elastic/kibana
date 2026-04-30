@@ -1,5 +1,5 @@
 {
-  "sha1": "05325aa03637b259d89d009b98f8d10f11106fd5",
+  "sha1": "24149ff44e6e0fdf002d698eb7cffebdd4d4ba44",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,8 +13,92 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 25,
+        "line": 26,
         "column": 1
+      }
+    },
+    {
+      "id": "4799fe461e33a92-c74e20529e96d27",
+      "title": "Alert details - Explore in APM Stateful - View in APM link from alert details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "4799fe461e33a92-31a86326526525f",
+      "title": "Alert details - Explore in APM Serverless - View in APM link from alert details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-345cf8b9ba5e4fc",
+      "title": "Alert details - Chart layout Stateful - Latency threshold renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-064ee06ae3efb3a",
+      "title": "Alert details - Chart layout Serverless - Latency threshold renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-06f72cdbe1613f9",
+      "title": "Alert details - Chart layout Stateful - Failed transaction rate renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-03c7c4e61ee8c9e",
+      "title": "Alert details - Chart layout Serverless - Failed transaction rate renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 90,
+        "column": 7
       }
     },
     {
@@ -29,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 144,
+        "line": 95,
         "column": 7
       }
     },
@@ -43,7 +127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 187,
+        "line": 138,
         "column": 7
       }
     },
@@ -57,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 193,
+        "line": 144,
         "column": 7
       }
     },
@@ -505,7 +589,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 66,
+        "line": 73,
         "column": 9
       }
     },
@@ -521,7 +605,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 90,
+        "line": 95,
         "column": 9
       }
     },
@@ -649,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 68,
+        "line": 66,
         "column": 9
       }
     },
@@ -810,6 +894,22 @@
       }
     },
     {
+      "id": "6ab0e55ecb54392-b5d9e6a756e8940",
+      "title": "Service map embeddable adds Service map panel with service name, environment and KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
       "id": "431bbf1927933f1-820ffa8139e87c1",
       "title": "Service map renders page with selected date range",
       "expectedStatus": "passed",
@@ -854,6 +954,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
         "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-306551b6afaacbe",
+      "title": "Service map options panel: find in page, filter placeholders, and Ctrl+K focus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 57,
         "column": 9
       }
     },
@@ -1141,7 +1257,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 96,
+        "line": 99,
         "column": 9
       }
     },
@@ -1157,7 +1273,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 119,
+        "line": 122,
         "column": 9
       }
     },
@@ -1173,7 +1289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 156,
+        "line": 169,
         "column": 9
       }
     },
@@ -1806,7 +1922,7 @@
     {
       "id": "b1d9732f2022f52-1d041dd11a76a98",
       "title": "Custom links template validation Create custom link with template URL and filters",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1815,14 +1931,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 33,
+        "line": 36,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-244e245a602c0a7",
       "title": "Custom links template validation Verify template variables are populated correctly in custom link URLs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1831,14 +1947,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-8c63ceeb998a13d",
       "title": "Custom links template validation Delete custom link with template URL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1847,14 +1963,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 92,
+        "line": 95,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-ac6bad5f389c557",
       "title": "Custom links template validation Open transaction and validate the default url when creating a custom link",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1863,14 +1979,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 112,
+        "line": 115,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-5f08fd317b97702",
       "title": "Custom links template validation Delete custom link created from transaction details",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1879,7 +1995,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 186,
+        "line": 189,
         "column": 9
       }
     },

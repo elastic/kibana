@@ -31,6 +31,7 @@ import {
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import { i18n } from '@kbn/i18n';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuleFormParamsErrors } from '../common/types';
@@ -337,6 +338,10 @@ export const RuleActionsConnectorsBody = ({
     return (
       <EuiFilterGroup style={{ width: '100%' }}>
         <EuiPopover
+          aria-label={i18n.translate(
+            'responseOpsRuleForm.ruleForm.connectorTypeFilterPopoverAriaLabel',
+            { defaultMessage: 'Filter by connector type' }
+          )}
           button={button}
           closePopover={closeFilterPopover}
           isOpen={isConenctorFilterPopoverOpen}

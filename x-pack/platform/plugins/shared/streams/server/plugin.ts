@@ -54,6 +54,8 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
+import type { FeatureClient } from './lib/streams/feature/feature_client';
+import type { QueryClient } from './lib/streams/assets/query/query_client';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -73,7 +75,6 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
-import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -147,14 +148,12 @@ export class StreamsPlugin
       this.logger.get('inference-features')
     );
 
-    const inferenceResolver = createInferenceResolver(this.logger);
-
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, inferenceResolver, this.logger);
+    const featureService = new FeatureService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, inferenceResolver, this.logger);
+    const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
@@ -178,35 +177,46 @@ export class StreamsPlugin
         this.logger
       );
 
-      const tuningConfig = await getSigEventsTuningConfig(globalUiSettingsClient, this.logger);
+      const [attachmentClient, insightClient, contentClient, tuningConfig] = await Promise.all([
+        attachmentService.getClient({
+          soClient,
+          rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+        }),
+        insightService.getInternalClient(),
+        contentService.getClient(),
+        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
+      ]);
 
-      const [attachmentClient, featureClient, insightClient, contentClient, queryClient] =
-        await Promise.all([
-          attachmentService.getClient({
-            soClient,
-            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
-          }),
-          featureService.getClient(tuningConfig),
-          insightService.getInternalClient(),
-          contentService.getClient(),
-          queryService.getClient({
+      let featureClientPromise: Promise<FeatureClient> | undefined;
+      const getFeatureClient = (): Promise<FeatureClient> => {
+        featureClientPromise ??= featureService.getClient(tuningConfig);
+        return featureClientPromise;
+      };
+
+      let queryClientPromise: Promise<QueryClient> | undefined;
+      const getQueryClient = (): Promise<QueryClient> => {
+        queryClientPromise ??= (async () => {
+          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+            request,
+            DEFAULT_SPACE_ID
+          );
+          return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
-            rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-              request,
-              DEFAULT_SPACE_ID
-            ),
+            rulesClient,
             config: tuningConfig,
-          }),
-        ]);
+          });
+        })();
+        return queryClientPromise;
+      };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
-        queryClient,
-        featureClient,
+        getQueryClient,
+        getFeatureClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -223,11 +233,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
-        featureClient,
+        getFeatureClient,
         insightClient,
         inferenceClient,
         contentClient,
-        queryClient,
+        getQueryClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
@@ -239,12 +249,15 @@ export class StreamsPlugin
       };
     };
 
+    const telemetryClient = this.ebtTelemetryService.getClient();
+
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
         getScopedClients,
         server: this.server,
         logger: this.logger,
+        telemetry: telemetryClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -272,8 +285,6 @@ export class StreamsPlugin
         plugins.workflowsManagement.management
       );
     }
-
-    const telemetryClient = this.ebtTelemetryService.getClient();
 
     taskService.registerTasks({
       getScopedClients,
@@ -416,11 +427,7 @@ export class StreamsPlugin
             const attachmentClient = await attachmentService.getClient({ soClient, rulesClient });
 
             // featureClient and queryClient are not needed for enableStreams()
-            // and bulkUpsert() during preconfiguration. Avoid creating them here
-            // because their initialization probes ELSER inference endpoints via
-            // the inference API, which triggers lazy model deployment in
-            // Elasticsearch — an unwanted side effect during startup that can
-            // interfere with ML tests and waste cluster resources.
+            // and bulkUpsert() during preconfiguration, so we don't create them here.
             const streamsClient = await streamsService.getClient({
               attachmentClient,
               esClient,
