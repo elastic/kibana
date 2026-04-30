@@ -6,26 +6,27 @@
  */
 
 import Path from 'path';
+import fs from 'fs';
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { packagePolicyService } from '../services/package_policy';
 import { ensureCustomDatasetTemplatesForIntegrationPolicies } from '../services/setup/ensure_fleet_global_es_assets';
-import { waitForFleetSetup, useDockerRegistry } from './helpers';
 
-// These tests require a running Elasticsearch + Kibana with the Fleet plugin and
-// a Docker-based package registry serving a test integration package that exposes
-// a `data_stream.dataset` variable.
-//
-// Run with:
-//   node scripts/jest_integration x-pack/platform/plugins/shared/fleet/server/integration_tests/package_policy_custom_dataset.test.ts
+import { waitForFleetSetup, useDockerRegistry, getSupertestWithAdminUser } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs_custom_dataset.log');
 
-const TEST_PACKAGE_NAME = 'log'; // bundled "Custom Logs" package exposes data_stream.dataset var
-const TEST_PACKAGE_VERSION = '2.3.0'; // adjust to bundled version
-const DEFAULT_DATASET = 'log.log'; // default dataset for the log package
+const TEST_PACKAGE_ZIP = Path.resolve(
+  __dirname,
+  '../../cypress/packages/logs_integration-1.0.0.zip'
+);
+const TEST_PACKAGE_NAME = 'logs_integration';
+const TEST_PACKAGE_VERSION = '1.0.0';
+// Default dataset for the logs_integration package data stream (path: log → dataset: logs_integration.log)
+const DEFAULT_DATASET = 'logs_integration.log';
 const CUSTOM_DATASET = 'my_custom_log';
 const AGENT_POLICY_ID = 'test-agent-policy-custom-dataset';
 
@@ -33,9 +34,11 @@ describe('Integration package policy with custom dataset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 
-  const registryUrl = useDockerRegistry();
+  // Docker registry is still needed for Fleet's own packages (fleet_server, system, etc.)
+  // that are auto-installed during setup.
+  useDockerRegistry();
 
-  const startServers = async (extraConfig?: Record<string, unknown>) => {
+  const startServers = async () => {
     const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: { es: { license: 'trial' }, kbn: {} },
@@ -46,10 +49,7 @@ describe('Integration package policy with custom dataset', () => {
     const root = createRootWithCorePlugins(
       {
         xpack: {
-          fleet: {
-            registryUrl: await registryUrl,
-            ...extraConfig,
-          },
+          fleet: {},
         },
         logging: {
           appenders: {
@@ -87,6 +87,30 @@ describe('Integration package policy with custom dataset', () => {
 
   const getSoClient = () => kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
   const getEsClient = () => kbnServer.coreStart.elasticsearch.client.asInternalUser;
+
+  const installTestPackage = async () => {
+    const zipBuffer = fs.readFileSync(TEST_PACKAGE_ZIP);
+    const response = await getSupertestWithAdminUser(
+      kbnServer.root,
+      'post',
+      '/api/fleet/epm/packages'
+    )
+      .set('Content-Type', 'application/zip')
+      .set('kbn-xsrf', 'true')
+      .send(zipBuffer)
+      .expect(200);
+    return response.body;
+  };
+
+  const uninstallTestPackage = async () => {
+    await getSupertestWithAdminUser(
+      kbnServer.root,
+      'delete',
+      `/api/fleet/epm/packages/${TEST_PACKAGE_NAME}/${TEST_PACKAGE_VERSION}`
+    )
+      .set('kbn-xsrf', 'true')
+      .send();
+  };
 
   const createAgentPolicy = async () => {
     const soClient = getSoClient();
@@ -126,7 +150,11 @@ describe('Integration package policy with custom dataset', () => {
             ],
           },
         ],
-        package: { name: TEST_PACKAGE_NAME, title: 'Custom Logs', version: TEST_PACKAGE_VERSION },
+        package: {
+          name: TEST_PACKAGE_NAME,
+          title: 'Logs Integration Package',
+          version: TEST_PACKAGE_VERSION,
+        },
       },
       { skipEnsureInstalled: false }
     );
@@ -149,10 +177,12 @@ describe('Integration package policy with custom dataset', () => {
 
   beforeAll(async () => {
     await startServers();
+    await installTestPackage();
     await createAgentPolicy();
   }, 5 * 60 * 1000);
 
   afterAll(async () => {
+    await uninstallTestPackage();
     await stopServers();
   });
 
@@ -216,7 +246,7 @@ describe('Integration package policy with custom dataset', () => {
           ],
           package: {
             name: TEST_PACKAGE_NAME,
-            title: 'Custom Logs',
+            title: 'Logs Integration Package',
             version: TEST_PACKAGE_VERSION,
           },
         },
@@ -224,14 +254,11 @@ describe('Integration package policy with custom dataset', () => {
       );
       policyId = policy.id;
 
-      // The package-level template for the default dataset should be installed by the
-      // package install step, not by our new code. No separate custom template.
-      const customTemplate = await getIndexTemplate(`logs-${DEFAULT_DATASET}`);
-      // This may or may not exist depending on the package, but it should NOT have been
-      // installed by our integration custom-dataset code (verify meta if present).
-      if (customTemplate) {
-        // If a template exists for the default dataset it was installed by package install, not our path.
-        // We just confirm no duplicate was created by verifying there is at most one template.
+      // A template may exist for the default dataset (installed by the package install step),
+      // but it should NOT have been created by our custom-dataset code. If a template exists,
+      // verify there is only one (no duplicate created by our path).
+      const defaultTemplate = await getIndexTemplate(`logs-${DEFAULT_DATASET}`);
+      if (defaultTemplate) {
         const result = await getEsClient().indices.getIndexTemplate({
           name: `logs-${DEFAULT_DATASET}`,
         });
@@ -321,7 +348,7 @@ describe('Integration package policy with custom dataset', () => {
       await ensureCustomDatasetTemplatesForIntegrationPolicies({
         soClient: getSoClient(),
         esClient: getEsClient(),
-        logger: kbnServer.coreStart.logging.get('test.migration'),
+        logger: loggerMock.create(),
       });
 
       // Template should be re-installed
@@ -334,18 +361,17 @@ describe('Integration package policy with custom dataset', () => {
         ensureCustomDatasetTemplatesForIntegrationPolicies({
           soClient: getSoClient(),
           esClient: getEsClient(),
-          logger: kbnServer.coreStart.logging.get('test.migration'),
+          logger: loggerMock.create(),
         })
       ).resolves.not.toThrow();
     });
   });
 
   describe('Scenario 7 — Package upgrade reinstalls custom-dataset templates', () => {
-    // This scenario is a structural test: verify that upgrading the package policy
-    // triggers reinstallation of custom-dataset templates. Full package version cycling
-    // is dependent on the registry serving two versions, so we verify the upgrade
-    // code path is wired correctly by checking the template exists after a forced upgrade
-    // (force=true re-installs even if no version change in test environments).
+    // Verifies that upgrading the package policy triggers reinstallation of custom-dataset
+    // templates. Full version cycling requires the registry to serve two versions; instead
+    // we verify the upgrade code path by deleting the template first and running a forced
+    // upgrade (force=true re-installs even without a version change in test environments).
     it('template exists after policy is upgraded', async () => {
       const upgradeDataset = 'my_upgrade_nginx';
       const policy = await createCustomDatasetPolicy(upgradeDataset);
