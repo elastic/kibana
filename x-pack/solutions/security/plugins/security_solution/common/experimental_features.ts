@@ -101,7 +101,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  gapReasonDetectionEnabled: false,
+  gapReasonDetectionEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -178,6 +178,10 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
+  /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: false,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
