@@ -18,32 +18,36 @@ resources:
 imports:
   - .github/agents/code-reviewer.md
 engine:
-  id: codex
-  model: gpt-5.3-codex
-  args:
-    - -c
-    - model=llm-gateway/gpt-5.3-codex
-    - -c
-    - model_context_window=1050000
-    # Disable plugins and apps to remove context bloat
-    - -c
-    - features.plugins=false
-    - -c
-    - features.apps=false
-    # Codex disables settings for unrecognized model names like the llm-gateway/ prefix.
-    # Force reasoning on
-    - -c
-    - model_supports_reasoning_summaries=true
-    # Reasoning effort: minimal | low | medium | high.
-    - -c
-    - model_reasoning_effort=medium
-    # Reasoning summary verbosity: auto | concise | detailed | none.
-    - -c
-    - model_reasoning_summary=auto
+  id: claude
+  model: llm-gateway/gpt-5.4
+  max-turns: 120
+  # args:
+  #   - -c
+  #   - model=llm-gateway/gpt-5.3-codex
+  #   - -c
+  #   - model_context_window=1050000
+  #   # Disable plugins and apps to remove context bloat
+  #   - -c
+  #   - features.plugins=false
+  #   - -c
+  #   - features.apps=false
+  #   # Codex disables settings for unrecognized model names like the llm-gateway/ prefix.
+  #   # Force reasoning on
+  #   - -c
+  #   - model_supports_reasoning_summaries=true
+  #   # Reasoning effort: minimal | low | medium | high.
+  #   - -c
+  #   - model_reasoning_effort=medium
+  #   # Reasoning summary verbosity: auto | concise | detailed | none.
+  #   - -c
+  #   - model_reasoning_summary=auto
   env:
-    CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
+    # CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    # OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    # OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
+    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
+    ENABLE_PROMPT_CACHING_1H: "1"
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
