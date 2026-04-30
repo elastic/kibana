@@ -22,7 +22,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
+import {
+  canCurrentUserEditAgent,
+  isAgentOwner,
+  type AgentDefinition,
+} from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -36,6 +40,8 @@ import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_ma
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from './agent_visibility_badge';
+import { AccessFlyout } from '../access/access_flyout';
+import { accessSummaryManageButton } from '../access/access_i18n';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -71,10 +77,22 @@ export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
-  const { manageAgents, isAdmin } = useUiPrivileges();
+  const { manageAgents, manageAgentAcls, isAdmin } = useUiPrivileges();
   const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
+  const [aclAgent, setAclAgent] = React.useState<AgentDefinition | null>(null);
+
+  const canManageAgentAccess = React.useCallback(
+    (agent: AgentDefinition) => {
+      if (agent.readonly) return false;
+      if (isCurrentUserLoading) return false;
+      if (isAdmin) return true;
+      if (manageAgentAcls) return true;
+      return isAgentOwner({ owner: agent.created_by, currentUser });
+    },
+    [currentUser, isAdmin, isCurrentUserLoading, manageAgentAcls]
+  );
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
@@ -190,6 +208,16 @@ export const AgentsList: React.FC = () => {
           available: () => manageAgents,
         },
         {
+          type: 'icon',
+          icon: 'lockOpen',
+          name: accessSummaryManageButton,
+          description: accessSummaryManageButton,
+          'data-test-subj': (agent) => `agentBuilderAgentsListManageAccess-${agent.id}`,
+          showOnHover: true,
+          onClick: (agent) => setAclAgent(agent),
+          available: canManageAgentAccess,
+        },
+        {
           // Have to use a custom action to display the danger color
           // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
           render: (agent) => {
@@ -223,6 +251,7 @@ export const AgentsList: React.FC = () => {
     isAdmin,
     isCurrentUserLoading,
     manageAgents,
+    canManageAgentAccess,
   ]);
 
   const errorMessage = useMemo(
@@ -246,45 +275,48 @@ export const AgentsList: React.FC = () => {
   }, [agents]);
 
   return (
-    <EuiInMemoryTable
-      data-test-subj="agentBuilderAgentsListTable"
-      rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
-      items={agents}
-      itemId={(agent) => agent.id}
-      columns={columns}
-      sorting={true}
-      search={{
-        box: { incremental: true },
-        filters: [
-          {
-            type: 'field_value_selection',
-            name: 'Labels',
-            multiSelect: 'and',
-            options: labelOptions,
-            field: 'labels',
-            operator: 'exact',
-            autoSortOptions: false,
-          },
-        ],
-      }}
-      pagination={{
-        pageIndex,
-        pageSize,
-        pageSizeOptions: [10, 25, 50, 100],
-        showPerPageOptions: true,
-      }}
-      onTableChange={({ page }: CriteriaWithPagination<AgentDefinition>) => {
-        if (page) {
-          setPageIndex(page.index);
-          if (page.size !== pageSize) {
-            setPageSize(page.size);
-            setPageIndex(0);
+    <>
+      <EuiInMemoryTable
+        data-test-subj="agentBuilderAgentsListTable"
+        rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
+        items={agents}
+        itemId={(agent) => agent.id}
+        columns={columns}
+        sorting={true}
+        search={{
+          box: { incremental: true },
+          filters: [
+            {
+              type: 'field_value_selection',
+              name: 'Labels',
+              multiSelect: 'and',
+              options: labelOptions,
+              field: 'labels',
+              operator: 'exact',
+              autoSortOptions: false,
+            },
+          ],
+        }}
+        pagination={{
+          pageIndex,
+          pageSize,
+          pageSizeOptions: [10, 25, 50, 100],
+          showPerPageOptions: true,
+        }}
+        onTableChange={({ page }: CriteriaWithPagination<AgentDefinition>) => {
+          if (page) {
+            setPageIndex(page.index);
+            if (page.size !== pageSize) {
+              setPageSize(page.size);
+              setPageIndex(0);
+            }
           }
-        }
-      }}
-      loading={isLoading}
-      error={errorMessage}
-      responsiveBreakpoint={false}
-    />
+        }}
+        loading={isLoading}
+        error={errorMessage}
+        responsiveBreakpoint={false}
+      />
+      {aclAgent && <AccessFlyout agent={aclAgent} onClose={() => setAclAgent(null)} />}
+    </>
   );
 };

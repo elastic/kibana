@@ -8,14 +8,19 @@
 import {
   isAgentOwner,
   canChangeAgentVisibility,
+  canDeleteAgent,
+  canManageAgentAcl,
+  getEffectiveAgentRole,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
   canCurrentUserEditAgent,
 } from './access_control';
 import type { AgentConfiguration, AgentDefinition } from './definition';
 import { agentBuilderDefaultAgentId, AgentType } from './definition';
 import { AgentVisibility } from './visibility';
-import type { UserIdAndName } from '../base/users';
+import { AgentAclRole, type AgentAcl } from './acl';
+import type { CurrentUser, UserIdAndName } from '../base/users';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'owner-user' };
 const currentUser: UserIdAndName = { id: 'owner-id', username: 'owner-user' };
@@ -365,5 +370,289 @@ describe('canCurrentUserEditAgent', () => {
         isAdmin: true,
       })
     ).toBe(true);
+  });
+});
+
+describe('ACL-aware authorization', () => {
+  const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
+  const bob: CurrentUser = { id: 'bob-id', username: 'bob', roles: ['analyst'] };
+  const carol: CurrentUser = { id: 'carol-id', username: 'carol', roles: ['viewer_role'] };
+  const noOne: CurrentUser = { id: 'no-id', username: 'no-one', roles: [] };
+
+  const aclWith = (...entries: AgentAcl['entries']): AgentAcl => ({ entries, version: 0 });
+
+  describe('getEffectiveAgentRole', () => {
+    test('returns "admin" when isAdmin', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          currentUser: bob,
+          isAdmin: true,
+        })
+      ).toBe('admin');
+    });
+
+    test('returns "owner" for the agent owner', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          currentUser: { id: 'owner-id', username: 'alice' },
+          isAdmin: false,
+        })
+      ).toBe('owner');
+    });
+
+    test('returns undefined for a private agent with no ACL match', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBeUndefined();
+    });
+
+    test('matches a user-type ACL entry by username', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.User }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.User);
+    });
+
+    test('does not match a user-type ACL entry against the user roles list', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          // type=user but the value is "analyst" — must not cross-match against bob.roles=['analyst'].
+          acl: aclWith({ type: 'user', name: 'analyst', role: AgentAclRole.Manager }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBeUndefined();
+    });
+
+    test('matches a role-type ACL entry against currentUser.roles', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith({ type: 'role', name: 'analyst', role: AgentAclRole.Editor }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.Editor);
+    });
+
+    test('picks the highest role across multiple matching entries', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith(
+            { type: 'user', name: 'bob', role: AgentAclRole.Viewer },
+            { type: 'role', name: 'analyst', role: AgentAclRole.Manager }
+          ),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.Manager);
+    });
+
+    test('Public visibility grants Editor baseline to non-owners', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Public,
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.Editor);
+    });
+
+    test('Shared visibility grants User baseline to non-owners', () => {
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Shared,
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.User);
+    });
+
+    test('ACL upgrades over visibility baseline', () => {
+      // Public alone gives Editor; ACL Manager wins.
+      expect(
+        getEffectiveAgentRole({
+          visibility: AgentVisibility.Public,
+          owner,
+          acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.Manager);
+    });
+
+    test('legacy agent (no visibility, no ACL) treats as Public Editor', () => {
+      expect(
+        getEffectiveAgentRole({
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(AgentAclRole.Editor);
+    });
+  });
+
+  describe('hierarchy checks', () => {
+    const privateAgent = {
+      visibility: AgentVisibility.Private,
+      owner,
+      isAdmin: false,
+    };
+
+    test('Viewer can read but not use, write, delete, or manage ACL', () => {
+      const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Viewer });
+      const args = { ...privateAgent, acl, currentUser: bob };
+      expect(hasAgentReadAccess(args)).toBe(true);
+      expect(hasAgentUseAccess(args)).toBe(false);
+      expect(hasAgentWriteAccess(args)).toBe(false);
+      expect(canDeleteAgent(args)).toBe(false);
+      expect(canManageAgentAcl(args)).toBe(false);
+    });
+
+    test('User can use but not write, delete, or manage ACL', () => {
+      const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.User });
+      const args = { ...privateAgent, acl, currentUser: bob };
+      expect(hasAgentReadAccess(args)).toBe(true);
+      expect(hasAgentUseAccess(args)).toBe(true);
+      expect(hasAgentWriteAccess(args)).toBe(false);
+      expect(canDeleteAgent(args)).toBe(false);
+      expect(canManageAgentAcl(args)).toBe(false);
+    });
+
+    test('Editor can write but not delete or manage ACL', () => {
+      const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Editor });
+      const args = { ...privateAgent, acl, currentUser: bob };
+      expect(hasAgentWriteAccess(args)).toBe(true);
+      expect(canDeleteAgent(args)).toBe(false);
+      expect(canManageAgentAcl(args)).toBe(false);
+    });
+
+    test('Manager can delete and manage ACL', () => {
+      const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager });
+      const args = { ...privateAgent, acl, currentUser: bob };
+      expect(canDeleteAgent(args)).toBe(true);
+      expect(canManageAgentAcl(args)).toBe(true);
+    });
+
+    test('Public visibility does NOT silently grant Manager to all users', () => {
+      // ACL Manager is granted to bob; carol gets only the Public baseline (Editor).
+      const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager });
+      expect(
+        canDeleteAgent({
+          visibility: AgentVisibility.Public,
+          owner,
+          acl,
+          currentUser: carol,
+          isAdmin: false,
+        })
+      ).toBe(false);
+    });
+
+    test('owner is implicitly Manager regardless of ACL', () => {
+      const args = {
+        visibility: AgentVisibility.Private,
+        owner,
+        currentUser: { id: 'owner-id', username: 'alice' } as CurrentUser,
+        isAdmin: false,
+      };
+      expect(canDeleteAgent(args)).toBe(true);
+      expect(canManageAgentAcl(args)).toBe(true);
+    });
+
+    test('user with no access has no privileges at all', () => {
+      const args = { ...privateAgent, currentUser: noOne };
+      expect(hasAgentReadAccess(args)).toBe(false);
+      expect(hasAgentUseAccess(args)).toBe(false);
+      expect(hasAgentWriteAccess(args)).toBe(false);
+      expect(canDeleteAgent(args)).toBe(false);
+      expect(canManageAgentAcl(args)).toBe(false);
+    });
+  });
+
+  describe('canManageAgentAcl', () => {
+    test('grants when manageAcls privilege is held', () => {
+      expect(
+        canManageAgentAcl({
+          visibility: AgentVisibility.Private,
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+          manageAcls: true,
+        })
+      ).toBe(true);
+    });
+
+    test('denies when manageAcls is false and no ownership/admin/Manager role', () => {
+      expect(
+        canManageAgentAcl({
+          visibility: AgentVisibility.Private,
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+          manageAcls: false,
+        })
+      ).toBe(false);
+    });
+
+    test('grants for ACL Manager grant', () => {
+      expect(
+        canManageAgentAcl({
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(true);
+    });
+  });
+
+  describe('canChangeAgentVisibility', () => {
+    test('blocks default agent even for Manager via ACL', () => {
+      expect(
+        canChangeAgentVisibility({
+          agentId: agentBuilderDefaultAgentId,
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(false);
+    });
+
+    test('allows Manager via ACL on a non-default agent', () => {
+      expect(
+        canChangeAgentVisibility({
+          agentId: 'custom-agent',
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(true);
+    });
   });
 });

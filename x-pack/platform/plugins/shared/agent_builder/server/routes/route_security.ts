@@ -42,3 +42,18 @@ export const TOOLS_WRITE_SECURITY: RouteSecurity = {
 export const SKILLS_WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.manageSkills] },
 };
+
+/**
+ * Security configuration object for editing an agent's access control list.
+ *
+ * Either the agent's owner (already granted `manageAgents` to create/edit their own agents)
+ * OR a holder of the `manageAgentAcls` sub-feature privilege may call the endpoint. The route
+ * handler enforces the ownership/manageAcls split per individual agent.
+ */
+export const AGENTS_MANAGE_ACL_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [
+      { anyRequired: [apiPrivileges.manageAgents, apiPrivileges.manageAgentAcls] },
+    ],
+  },
+};

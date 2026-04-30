@@ -95,6 +95,19 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 savedObject: { all: [], read: [] },
                 ui: [uiPrivileges.manageSkills],
               },
+              {
+                id: subFeaturePrivilegeIds.manageAgentAcls,
+                name: i18n.translate(
+                  'xpack.agentBuilder.featureRegistry.subFeatures.manageAgentAcls.privilege',
+                  { defaultMessage: 'Manage access for any agent' }
+                ),
+                // Granted explicitly only — agent owners can already edit their own agents'
+                // ACLs without this privilege.
+                includeIn: 'none',
+                api: [apiPrivileges.manageAgentAcls],
+                savedObject: { all: [], read: [] },
+                ui: [uiPrivileges.manageAgentAcls],
+              },
             ],
           },
         ],

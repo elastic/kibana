@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-import type { UserIdAndName } from '../base/users';
+import type { CurrentUser, UserIdAndName } from '../base/users';
 import type { AgentDefinition } from './definition';
 import { agentBuilderDefaultAgentId } from './definition';
 import { AgentVisibility } from './visibility';
+import type { AgentAcl } from './acl';
+import { AgentAclRole, aclRoleMeets, maxAclRole } from './acl';
+
+/** Resolved authorization role on an individual agent. */
+export type EffectiveAgentRole = AgentAclRole | 'owner' | 'admin';
+
+export interface AgentAuthzArgs {
+  visibility?: AgentVisibility;
+  owner?: UserIdAndName;
+  acl?: AgentAcl;
+  currentUser?: CurrentUser | null;
+  isAdmin: boolean;
+}
 
 export const isAgentOwner = ({
   owner,
@@ -29,58 +42,127 @@ export const isAgentOwner = ({
   return false;
 };
 
-export const canChangeAgentVisibility = ({
-  agentId,
-  owner,
-  currentUser,
-  isAdmin,
-}: {
-  agentId?: string;
-  owner?: UserIdAndName;
-  currentUser?: UserIdAndName | null;
-  isAdmin: boolean;
-}): boolean =>
-  // The default agent is a very special cookie, and we can't change its visibility
-  agentId === agentBuilderDefaultAgentId ? false : isAdmin || isAgentOwner({ owner, currentUser });
+const visibilityRole = (visibility?: AgentVisibility): AgentAclRole | undefined => {
+  const effective = visibility ?? AgentVisibility.Public;
+  switch (effective) {
+    case AgentVisibility.Public:
+      // Public preserves the previous behavior: anyone can read AND write.
+      return AgentAclRole.Editor;
+    case AgentVisibility.Shared:
+      // Shared: anyone can read and run; only owner+admin can write (matches legacy).
+      return AgentAclRole.User;
+    case AgentVisibility.Private:
+      return undefined;
+  }
+};
 
-/** Legacy agents without a visibility field are treated as Public. */
-export const hasAgentReadAccess = ({
+const aclRoleForUser = (
+  acl: AgentAcl | undefined,
+  currentUser?: CurrentUser | null
+): AgentAclRole | undefined => {
+  if (!acl || !currentUser) {
+    return undefined;
+  }
+  const userRoles = currentUser.roles ?? [];
+  let best: AgentAclRole | undefined;
+  for (const entry of acl.entries) {
+    if (entry.type === 'user') {
+      if (currentUser.username && entry.name === currentUser.username) {
+        best = maxAclRole(best, entry.role);
+      }
+    } else if (entry.type === 'role') {
+      if (userRoles.includes(entry.name)) {
+        best = maxAclRole(best, entry.role);
+      }
+    }
+  }
+  return best;
+};
+
+/**
+ * Resolves the effective role of `currentUser` on the agent described by `args`.
+ * Returns `'admin'`, `'owner'`, an `AgentAclRole`, or `undefined` when the user has no access.
+ *
+ * Resolution order (highest wins):
+ *   1. isAdmin → 'admin'
+ *   2. ownership → 'owner' (implicit Manager)
+ *   3. ACL grant (max of user grant and any role grants)
+ *   4. visibility baseline (Public→Editor, Shared→User, Private→nothing)
+ */
+export const getEffectiveAgentRole = ({
   visibility,
   owner,
+  acl,
   currentUser,
   isAdmin,
-}: {
-  visibility?: AgentVisibility;
-  owner?: UserIdAndName;
-  currentUser?: UserIdAndName | null;
-  isAdmin: boolean;
-}): boolean => {
-  const effectiveVisibility = visibility ?? AgentVisibility.Public;
-  return (
-    isAdmin ||
-    isAgentOwner({ owner, currentUser }) ||
-    effectiveVisibility !== AgentVisibility.Private
-  );
+}: AgentAuthzArgs): EffectiveAgentRole | undefined => {
+  if (isAdmin) {
+    return 'admin';
+  }
+  if (isAgentOwner({ owner, currentUser })) {
+    return 'owner';
+  }
+  const aclRole = aclRoleForUser(acl, currentUser);
+  const baseline = visibilityRole(visibility);
+  return maxAclRole(aclRole, baseline);
+};
+
+const meetsThreshold = (
+  effective: EffectiveAgentRole | undefined,
+  threshold: AgentAclRole
+): boolean => {
+  if (effective === undefined) {
+    return false;
+  }
+  if (effective === 'admin' || effective === 'owner') {
+    return true;
+  }
+  return aclRoleMeets(effective, threshold);
+};
+
+export const canChangeAgentVisibility = (args: AgentAuthzArgs & { agentId?: string }): boolean => {
+  // The default agent is a very special cookie, and we can't change its visibility
+  if (args.agentId === agentBuilderDefaultAgentId) {
+    return false;
+  }
+  const role = getEffectiveAgentRole(args);
+  // Only owner / admin / Manager (via ACL) can change visibility.
+  return role === 'admin' || role === 'owner' || role === AgentAclRole.Manager;
 };
 
 /** Legacy agents without a visibility field are treated as Public. */
-export const hasAgentWriteAccess = ({
-  visibility,
-  owner,
-  currentUser,
-  isAdmin,
-}: {
-  visibility?: AgentVisibility;
-  owner?: UserIdAndName;
-  currentUser?: UserIdAndName | null;
-  isAdmin: boolean;
-}): boolean => {
-  const effectiveVisibility = visibility ?? AgentVisibility.Public;
-  return (
-    isAdmin ||
-    isAgentOwner({ owner, currentUser }) ||
-    effectiveVisibility === AgentVisibility.Public
-  );
+export const hasAgentReadAccess = (args: AgentAuthzArgs): boolean =>
+  meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.Viewer);
+
+/** Whether the current user may run/converse with the agent. */
+export const hasAgentUseAccess = (args: AgentAuthzArgs): boolean =>
+  meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.User);
+
+/** Legacy agents without a visibility field are treated as Public. */
+export const hasAgentWriteAccess = (args: AgentAuthzArgs): boolean =>
+  meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.Editor);
+
+/** Whether the current user may delete the agent. */
+export const canDeleteAgent = (args: AgentAuthzArgs): boolean =>
+  meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.Manager);
+
+/**
+ * Whether the current user may view/edit the agent's ACL.
+ *
+ * Authorized when any of:
+ *   - cluster admin (`isAdmin`)
+ *   - owner of the agent
+ *   - holder of the `manageAgentAcls` sub-feature privilege (`manageAcls: true`)
+ *   - effective Manager role via ACL grant
+ */
+export const canManageAgentAcl = (
+  args: AgentAuthzArgs & { manageAcls?: boolean }
+): boolean => {
+  if (args.isAdmin) return true;
+  if (isAgentOwner({ owner: args.owner, currentUser: args.currentUser })) return true;
+  if (args.manageAcls) return true;
+  const role = getEffectiveAgentRole(args);
+  return role === AgentAclRole.Manager;
 };
 
 /**
@@ -95,7 +177,7 @@ export const canCurrentUserEditAgent = ({
 }: {
   agent: AgentDefinition;
   manageAgents: boolean;
-  currentUser?: UserIdAndName | null;
+  currentUser?: CurrentUser | null;
   isAdmin: boolean;
   /** When true deny edit to avoid flashing incorrect actions. */
   isCurrentUserLoading?: boolean;
@@ -111,6 +193,7 @@ export const canCurrentUserEditAgent = ({
   return hasAgentWriteAccess({
     visibility: agent.visibility,
     owner: agent.created_by,
+    acl: agent.acl,
     currentUser,
     isAdmin,
   });

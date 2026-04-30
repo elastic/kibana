@@ -105,7 +105,7 @@ describe('hasWriteAccess', () => {
 });
 
 describe('buildVisibilityReadFilter', () => {
-  it('includes owner username clause and must_not private visibility', () => {
+  it('includes owner clauses, the not-private visibility clause, and a nested user-ACL clause', () => {
     const filter = buildVisibilityReadFilter({ user: ownerUser });
     expect(filter).toEqual({
       bool: {
@@ -113,19 +113,71 @@ describe('buildVisibilityReadFilter', () => {
           { bool: { must_not: { term: { visibility: AgentVisibility.Private } } } },
           { term: { created_by_name: 'owner' } },
           { term: { created_by_id: 'user-1' } },
+          {
+            nested: {
+              path: 'acl.entries',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'acl.entries.type': 'user' } },
+                    { term: { 'acl.entries.name': 'owner' } },
+                  ],
+                },
+              },
+            },
+          },
         ],
         minimum_should_match: 1,
       },
     });
   });
 
-  it('omits created_by_id clause when user.id is undefined', () => {
+  it('omits created_by_id clause when user.id is undefined but still adds user-ACL nested clause', () => {
     const filter = buildVisibilityReadFilter({ user: ownerByUsernameOnly });
-    expect(filter.bool.should).toHaveLength(2);
-    expect(filter.bool.should).toEqual([
-      { bool: { must_not: { term: { visibility: AgentVisibility.Private } } } },
-      { term: { created_by_name: 'owner' } },
-    ]);
+    expect(filter.bool.should).toHaveLength(3);
+    expect(filter.bool.should[0]).toEqual({
+      bool: { must_not: { term: { visibility: AgentVisibility.Private } } },
+    });
+    expect(filter.bool.should[1]).toEqual({ term: { created_by_name: 'owner' } });
+    expect(filter.bool.should[2]).toEqual({
+      nested: {
+        path: 'acl.entries',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'acl.entries.type': 'user' } },
+              { term: { 'acl.entries.name': 'owner' } },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('adds a role-ACL nested clause when the user has roles', () => {
+    const filter = buildVisibilityReadFilter({
+      user: { ...ownerUser, roles: ['analyst', 'viewer_role'] },
+    });
+    const last = filter.bool.should[filter.bool.should.length - 1] as Record<string, any>;
+    expect(last).toEqual({
+      nested: {
+        path: 'acl.entries',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'acl.entries.type': 'role' } },
+              { terms: { 'acl.entries.name': ['analyst', 'viewer_role'] } },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('omits the role-ACL nested clause when the user has no roles', () => {
+    const filter = buildVisibilityReadFilter({ user: { ...ownerUser, roles: [] } });
+    // Same shape as the first test above (4 clauses, no roles clause).
+    expect(filter.bool.should).toHaveLength(4);
   });
 });
 

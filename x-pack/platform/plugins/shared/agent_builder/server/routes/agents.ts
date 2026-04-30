@@ -7,19 +7,26 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
-import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
+import {
+  AGENT_BUILDER_READ_SECURITY,
+  AGENTS_MANAGE_ACL_SECURITY,
+  AGENTS_WRITE_SECURITY,
+} from './route_security';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
   UpdateAgentResponse,
   DeleteAgentResponse,
+  GetAgentAclResponse,
   ListAgentResponse,
+  UpdateAgentAclResponse,
 } from '../../common/http_api/agents';
 import { asError } from '../utils/as_error';
+import { isAclConflictError } from '../services/agents/persisted/client/utils/acl';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -476,6 +483,116 @@ export function registerAgentRoutes({
             agentId: request.params.id,
             error: asError(error),
           });
+          throw error;
+        }
+      })
+    );
+
+  // Get agent ACL
+  router.versioned
+    .get({
+      path: `${publicApiPath}/agents/{id}/acl`,
+      security: AGENT_BUILDER_READ_SECURITY,
+      access: 'public',
+      summary: "Get an agent's access control list",
+      description:
+        "Get the ACL for a specific agent. Callers without permission to manage the ACL receive `canManage: false` and an empty `entries` list — the principal list itself is sensitive.",
+      options: {
+        tags: ['agent', 'oas-tag:agent builder'],
+        availability: { since: '9.5.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent.' },
+              }),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getRegistry({ request });
+        const result = await service.getAcl(request.params.id);
+
+        const body: GetAgentAclResponse = {
+          canManage: result.canManage,
+          acl: result.canManage
+            ? result.acl
+            : { entries: [], version: result.acl.version },
+        };
+        return response.ok<GetAgentAclResponse>({ body });
+      })
+    );
+
+  // Update agent ACL
+  router.versioned
+    .put({
+      path: `${publicApiPath}/agents/{id}/acl`,
+      security: AGENTS_MANAGE_ACL_SECURITY,
+      access: 'public',
+      summary: "Update an agent's access control list",
+      description:
+        "Replace the per-agent access control list. Either the agent's owner or a holder of the `manageAgentAcls` privilege may call this endpoint. The body must include the current `version`; stale updates return 409.",
+      options: {
+        tags: ['agent', 'oas-tag:agent builder'],
+        availability: { since: '9.5.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent.' },
+              }),
+            }),
+            body: schema.object({
+              version: schema.number({
+                meta: { description: 'Current ACL version. Stale values are rejected with 409.' },
+              }),
+              entries: schema.arrayOf(
+                schema.object({
+                  type: schema.oneOf([schema.literal('user'), schema.literal('role')]),
+                  name: schema.string({ minLength: 1, maxLength: 1024 }),
+                  role: schema.oneOf([
+                    schema.literal(AgentAclRole.Viewer),
+                    schema.literal(AgentAclRole.User),
+                    schema.literal(AgentAclRole.Editor),
+                    schema.literal(AgentAclRole.Manager),
+                  ]),
+                }),
+                { maxSize: 100 }
+              ),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents, auditLogService } = getInternalServices();
+        const service = await agents.getRegistry({ request });
+
+        try {
+          const updatedAcl = await service.updateAcl(request.params.id, request.body);
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+          });
+          return response.ok<UpdateAgentAclResponse>({ body: updatedAcl });
+        } catch (error) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          if (isAclConflictError(error)) {
+            return response.conflict({ body: { message: error.message } });
+          }
           throw error;
         }
       })

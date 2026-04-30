@@ -133,7 +133,7 @@ export const runAgent = async ({
 
   const { agentsService, request } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId);
+  const agent = await agentRegistry.getForRun(agentId);
 
   const agentResult = await withAgentSpan({ agent }, async () => {
     const agentHandler = createAgentHandler({ agent });

@@ -7,9 +7,13 @@
 
 import {
   AgentVisibility,
+  type CurrentUser,
   type UserIdAndName,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
+  canDeleteAgent,
+  canManageAgentAcl,
   canChangeAgentVisibility,
 } from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
@@ -26,12 +30,30 @@ export const hasReadAccess = ({
   isAdmin,
 }: {
   source: AgentProperties;
-  user: UserIdAndName;
+  user: CurrentUser;
   isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
     visibility: source.visibility,
     owner: sourceToOwner(source),
+    acl: source.acl,
+    currentUser: user,
+    isAdmin,
+  });
+
+export const hasUseAccess = ({
+  source,
+  user,
+  isAdmin,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+  isAdmin: boolean;
+}): boolean =>
+  hasAgentUseAccess({
+    visibility: source.visibility,
+    owner: sourceToOwner(source),
+    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
@@ -42,17 +64,65 @@ export const hasWriteAccess = ({
   isAdmin,
 }: {
   source: AgentProperties;
-  user: UserIdAndName;
+  user: CurrentUser;
   isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
     visibility: source.visibility,
     owner: sourceToOwner(source),
+    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
 
-export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => {
+export const hasDeleteAccess = ({
+  source,
+  user,
+  isAdmin,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+  isAdmin: boolean;
+}): boolean =>
+  canDeleteAgent({
+    visibility: source.visibility,
+    owner: sourceToOwner(source),
+    acl: source.acl,
+    currentUser: user,
+    isAdmin,
+  });
+
+export const hasManageAclAccess = ({
+  source,
+  user,
+  isAdmin,
+  manageAcls,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+  isAdmin: boolean;
+  manageAcls: boolean;
+}): boolean =>
+  canManageAgentAcl({
+    visibility: source.visibility,
+    owner: sourceToOwner(source),
+    acl: source.acl,
+    currentUser: user,
+    isAdmin,
+    manageAcls,
+  });
+
+/**
+ * Builds an Elasticsearch DSL filter that limits the visible agents for a non-admin user
+ * to those they may at least see/list.
+ *
+ * A non-admin user can list an agent when any of the following holds:
+ *   - the agent's visibility is not Private (Public + Shared cover the world by default), OR
+ *   - the user is the agent's creator (matched on profile id and/or username), OR
+ *   - the agent's ACL has a `type=user` entry naming the current user, OR
+ *   - the agent's ACL has a `type=role` entry whose name appears in the current user's roles.
+ */
+export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
   const shouldClauses: Array<Record<string, unknown>> = [
     {
       bool: {
@@ -68,6 +138,37 @@ export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => 
     shouldClauses.push({ term: { created_by_id: user.id } });
   }
 
+  shouldClauses.push({
+    nested: {
+      path: 'acl.entries',
+      query: {
+        bool: {
+          filter: [
+            { term: { 'acl.entries.type': 'user' } },
+            { term: { 'acl.entries.name': user.username } },
+          ],
+        },
+      },
+    },
+  });
+
+  const userRoles = user.roles ?? [];
+  if (userRoles.length > 0) {
+    shouldClauses.push({
+      nested: {
+        path: 'acl.entries',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'acl.entries.type': 'role' } },
+              { terms: { 'acl.entries.name': userRoles } },
+            ],
+          },
+        },
+      },
+    });
+  }
+
   return {
     bool: {
       should: shouldClauses,
@@ -75,6 +176,12 @@ export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => 
     },
   };
 };
+
+/**
+ * Backwards-compatible alias. Prefer {@link buildReadAccessFilter} for new code.
+ * @deprecated
+ */
+export const buildVisibilityReadFilter = buildReadAccessFilter;
 
 export const validateVisibilityUpdateAccess = ({
   source,
@@ -84,7 +191,7 @@ export const validateVisibilityUpdateAccess = ({
 }: {
   source: AgentProperties;
   update: AgentUpdateRequest;
-  user: UserIdAndName;
+  user: CurrentUser;
   isAdmin: boolean;
 }): boolean => {
   const isVisibilityChange =
@@ -95,7 +202,9 @@ export const validateVisibilityUpdateAccess = ({
     !isVisibilityChange ||
     canChangeAgentVisibility({
       agentId: source.id,
+      visibility: source.visibility,
       owner: sourceToOwner(source),
+      acl: source.acl,
       currentUser: user,
       isAdmin,
     })

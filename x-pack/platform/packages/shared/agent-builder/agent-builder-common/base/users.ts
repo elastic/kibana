@@ -11,3 +11,12 @@ export interface UserIdAndName {
   /** username */
   username: string;
 }
+
+/**
+ * Identity used in authorization decisions. Adds the user's Kibana role names so ACL
+ * role grants (`type: 'role'`) can be matched against the current request.
+ */
+export interface CurrentUser extends UserIdAndName {
+  /** Kibana role names assigned to this user. */
+  roles?: string[];
+}

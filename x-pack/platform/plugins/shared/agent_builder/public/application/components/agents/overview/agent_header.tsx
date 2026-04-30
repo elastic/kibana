@@ -25,6 +25,7 @@ import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from '../list/agent_visibility_badge';
 import { AgentDescription } from './agent_description';
+import { accessSummaryManageButton } from '../access/access_i18n';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -33,6 +34,8 @@ export interface AgentHeaderProps {
   docsUrl?: string;
   canEditAgent: boolean;
   onEditDetails: () => void;
+  canManageAccess?: boolean;
+  onManageAccess?: () => void;
 }
 
 export const AgentHeader: React.FC<AgentHeaderProps> = ({
@@ -40,6 +43,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   docsUrl,
   canEditAgent,
   onEditDetails,
+  canManageAccess,
+  onManageAccess,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -124,6 +129,16 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 data-test-subj="agentOverviewEditDetailsButton"
               >
                 {overviewLabels.editDetailsButton}
+              </EuiButtonEmpty>
+            )}
+            {canManageAccess && onManageAccess && (
+              <EuiButtonEmpty
+                iconType="lockOpen"
+                size="s"
+                onClick={onManageAccess}
+                data-test-subj="agentOverviewManageAccessButton"
+              >
+                {accessSummaryManageButton}
               </EuiButtonEmpty>
             )}
           </EuiFlexGroup>

@@ -6,8 +6,13 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AgentType,
+  AgentVisibility,
+  EMPTY_AGENT_ACL,
+} from '@kbn/agent-builder-common';
+import type { AgentAcl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
@@ -36,6 +41,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     visibility: document._source.visibility ?? AgentVisibility.Public,
+    acl: normalizeAcl(document._source.acl),
     created_by:
       document._source.created_by_id || document._source.created_by_name
         ? {
@@ -79,6 +85,7 @@ export const createRequestToEs = ({
     visibility: profile.visibility ?? AgentVisibility.Public,
     created_by_id: user.id,
     created_by_name: user.username,
+    acl: { ...EMPTY_AGENT_ACL },
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
@@ -120,4 +127,28 @@ export const updateRequestToEs = ({
   };
 
   return updated;
+};
+
+const normalizeAcl = (acl: AgentAcl | undefined): AgentAcl => {
+  if (!acl) return { ...EMPTY_AGENT_ACL };
+  return {
+    entries: acl.entries ?? [],
+    version: acl.version ?? 0,
+  };
+};
+
+export const aclUpdateToEs = ({
+  currentProps,
+  acl,
+  updateDate,
+}: {
+  currentProps: AgentProperties;
+  acl: AgentAcl;
+  updateDate: Date;
+}): AgentProperties => {
+  return {
+    ...currentProps,
+    acl,
+    updated_at: updateDate.toISOString(),
+  };
 };

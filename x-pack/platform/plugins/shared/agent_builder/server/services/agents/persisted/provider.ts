@@ -88,6 +88,18 @@ const createPersistedProvider = async ({
         throw e;
       }
     },
+    getForRun: async (agentId: string) => {
+      try {
+        const definition = await client.getWithAccess(agentId, 'use');
+        return toInternalDefinition({ definition });
+      } catch (e) {
+        if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
+          const definition = await ensureDefaultAgent(client);
+          return toInternalDefinition({ definition });
+        }
+        throw e;
+      }
+    },
     list: async (opts) => {
       const definitions = await client.list(opts);
       const hasDefault = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
@@ -110,6 +122,13 @@ const createPersistedProvider = async ({
     },
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
+    },
+    getAcl: async (agentId: string) => {
+      const result = await client.getAcl(agentId);
+      return { canManage: result.canManage, acl: result.acl };
+    },
+    updateAcl: async (agentId, update) => {
+      return client.updateAcl(agentId, update);
     },
   };
 };

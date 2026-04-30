@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { CurrentUser } from '@kbn/agent-builder-common';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
 
@@ -32,17 +32,24 @@ export const getUserFromRequest = async ({
   request: KibanaRequest;
   security: SecurityServiceStart;
   esClient: ElasticsearchClient;
-}): Promise<UserIdAndName> => {
+}): Promise<CurrentUser> => {
   if (!request.isFakeRequest) {
     const authUser = security.authc.getCurrentUser(request);
     if (authUser) {
-      return { id: authUser.profile_uid!, username: authUser.username };
+      return {
+        id: authUser.profile_uid!,
+        username: authUser.username,
+        roles: [...(authUser.roles ?? [])],
+      };
     }
   }
 
   // Fallback for fake requests (e.g. Task Manager execution): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
-  return { username: authResponse.username };
+  return {
+    username: authResponse.username,
+    roles: [...(authResponse.roles ?? [])],
+  };
 };
 
 const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege
@@ -84,20 +91,60 @@ export const getAgentApiAccessFromRequest = async ({
 }: {
   esClient: ElasticsearchClient;
   space: string;
-}): Promise<{ canReadAgents: boolean; canManageAgents: boolean }> => {
+}): Promise<{
+  canReadAgents: boolean;
+  canManageAgents: boolean;
+  canManageAgentAcls: boolean;
+}> => {
   const resource = `space:${space}`;
   const response = await esClient.security.hasPrivileges({
     application: [
       {
         application: KIBANA_APPLICATION,
         resources: [resource],
-        privileges: [apiPrivileges.readAgentBuilder, apiPrivileges.manageAgents],
+        privileges: [
+          apiPrivileges.readAgentBuilder,
+          apiPrivileges.manageAgents,
+          apiPrivileges.manageAgentAcls,
+        ],
       },
     ],
   });
   const applicationPrivileges = response.application?.[KIBANA_APPLICATION]?.[resource];
   const canReadAgents = applicationPrivileges?.[apiPrivileges.readAgentBuilder] ?? false;
   const canManageAgents = applicationPrivileges?.[apiPrivileges.manageAgents] ?? false;
+  const canManageAgentAcls = applicationPrivileges?.[apiPrivileges.manageAgentAcls] ?? false;
 
-  return { canReadAgents, canManageAgents };
+  return { canReadAgents, canManageAgents, canManageAgentAcls };
+};
+
+/**
+ * Returns `true` when the request holds the `manageAgentAcls` sub-feature privilege in `space`.
+ * This privilege gates editing the ACL of agents the user does not own.
+ */
+export const hasManageAgentAclsFromRequest = async ({
+  esClient,
+  space,
+}: {
+  esClient: ElasticsearchClient;
+  space: string;
+}): Promise<boolean> => {
+  const resource = `space:${space}`;
+  try {
+    const response = await esClient.security.hasPrivileges({
+      application: [
+        {
+          application: KIBANA_APPLICATION,
+          resources: [resource],
+          privileges: [apiPrivileges.manageAgentAcls],
+        },
+      ],
+    });
+    return (
+      response.application?.[KIBANA_APPLICATION]?.[resource]?.[apiPrivileges.manageAgentAcls] ??
+      false
+    );
+  } catch {
+    return false;
+  }
 };

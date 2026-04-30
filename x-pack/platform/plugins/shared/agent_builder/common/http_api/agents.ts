@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import type { AgentAcl, AgentAclEntry, AgentDefinition } from '@kbn/agent-builder-common';
 
 export type GetAgentResponse = AgentDefinition;
 
@@ -20,3 +20,22 @@ export type CreateAgentResponse = AgentDefinition;
 export interface DeleteAgentResponse {
   success: boolean;
 }
+
+/**
+ * Response shape for `GET /api/agent_builder/agents/{id}/acl`.
+ *
+ * `canManage` indicates whether the requesting user can edit the ACL via PUT.
+ * `acl` is always present and reflects the current persisted entries.
+ */
+export interface GetAgentAclResponse {
+  canManage: boolean;
+  acl: AgentAcl;
+}
+
+/** Body for `PUT /api/agent_builder/agents/{id}/acl`. */
+export interface UpdateAgentAclRequestBody {
+  version: number;
+  entries: AgentAclEntry[];
+}
+
+export type UpdateAgentAclResponse = AgentAcl;
