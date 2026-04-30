@@ -286,9 +286,8 @@ export class AgentBuilderPlugin
   }
 
   /**
-   * Remove orphaned `agent_builder:sml_crawler` tasks that were migrated
-   * to `agent_context_layer:sml_crawler`. Safe to call on every start —
-   * removeIfExists is a no-op when the task doesn't exist.
+   * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
+   * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
    */
   private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
     const logger = this.logger.get('sml-migration');
@@ -298,13 +297,11 @@ export class AgentBuilderPlugin
       'agent_builder:sml_crawler:dashboard',
       'agent_builder:sml_crawler:workflow',
     ];
-    await Promise.allSettled(
-      legacyTaskIds.map((taskId) =>
-        taskManager.removeIfExists(taskId).catch((error) => {
-          logger.warn(`Failed to remove legacy task '${taskId}': ${(error as Error).message}`);
-        })
-      )
-    );
+    try {
+      await taskManager.bulkRemove(legacyTaskIds);
+    } catch (error) {
+      logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
+    }
   }
 
   stop() {}
