@@ -11,6 +11,7 @@ import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import { useFetchEpisodeDataFields } from '../hooks/use_fetch_episode_data_fields';
 import { useKibana } from '../utils/kibana_react';
 
 interface EpisodeMatcherInputProps {
@@ -52,6 +53,7 @@ export const EpisodeMatcherInput = ({
       kql: { QueryStringInput },
     },
   } = useKibana();
+  const { data: dataFieldNames } = useFetchEpisodeDataFields();
 
   const syntheticDataView = useMemo(() => {
     const baseFields = MATCHER_CONTEXT_FIELDS.map((f) => ({
@@ -62,14 +64,22 @@ export const EpisodeMatcherInput = ({
       aggregatable: true,
     }));
 
+    const dataFields = (dataFieldNames ?? []).map((name) => ({
+      name,
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+    }));
+
     return [
       {
         title: '',
         fieldFormatMap: {},
-        fields: baseFields,
+        fields: [...baseFields, ...dataFields],
       },
     ] as unknown as DataView[];
-  }, []);
+  }, [dataFieldNames]);
 
   const query: Query = useMemo(() => ({ query: value, language: 'kuery' }), [value]);
 
