@@ -27,7 +27,9 @@ paths:
                 value:
                   page: 1
                   per_page: 50
-                  filter: 'alert.attributes.enabled:true'
+                  filter:
+                    term: 'alert.attributes.enabled:true'
+                    mode: KQL
                   sort_field: 'name'
                   sort_order: 'asc'
                   search:
@@ -47,9 +49,8 @@ paths:
                   items:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
                 filter:
-                  type: string
-                  description: |
-                    KQL filter string.
+                  description: Structured KQL filter applied to detection rules (alert saved objects).
+                  $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
                 aggregations:
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
                 search:

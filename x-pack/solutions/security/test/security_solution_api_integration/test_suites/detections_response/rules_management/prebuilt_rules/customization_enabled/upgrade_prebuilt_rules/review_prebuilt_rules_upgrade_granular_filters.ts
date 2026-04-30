@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: 'alert.attributes.tags: "tag-b"',
+          filter: { term: 'alert.attributes.tags: "tag-b"', mode: 'KQL' },
         });
 
         expect(response.total).toBe(1);
@@ -105,7 +105,10 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: '(alert.attributes.tags: "tag-a") AND (alert.attributes.tags: "tag-b")',
+          filter: {
+            term: '(alert.attributes.tags: "tag-a") AND (alert.attributes.tags: "tag-b")',
+            mode: 'KQL',
+          },
         });
 
         expect(response.total).toBe(1);
@@ -116,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: 'alert.attributes.tags: "tag-does-not-exist"',
+          filter: { term: 'alert.attributes.tags: "tag-does-not-exist"', mode: 'KQL' },
         });
 
         expect(response.total).toBe(0);
@@ -126,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('returns 400 for invalid KQL filter', async () => {
         const response = (await reviewPrebuiltRulesToUpgrade(
           supertest,
-          { filter: 'alert.attributes.name: (' },
+          { filter: { term: 'alert.attributes.name: (', mode: 'KQL' } },
           400
         )) as unknown as { status_code: number; message: string[] };
         expect(response.status_code).toBe(400);
@@ -150,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: 'alert.attributes.tags: "tag-a"',
+          filter: { term: 'alert.attributes.tags: "tag-a"', mode: 'KQL' },
           search: { term: 'malware', mode: 'legacy' },
         });
 
@@ -196,7 +199,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: 'alert.attributes.tags: "tag-a"',
+          filter: { term: 'alert.attributes.tags: "tag-a"', mode: 'KQL' },
           aggregations: { counts: ['tags'] },
         });
 
@@ -280,7 +283,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: 'alert.attributes.params.ruleId: "rule-a"',
+          filter: { term: 'alert.attributes.params.ruleId: "rule-a"', mode: 'KQL' },
         });
 
         expect(response.total).toBe(1);
@@ -291,8 +294,10 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter:
-            '(alert.attributes.params.ruleId: ("rule-a" OR "rule-b")) AND (alert.attributes.tags: "tag-b")',
+          filter: {
+            term: '(alert.attributes.params.ruleId: ("rule-a" OR "rule-b")) AND (alert.attributes.tags: "tag-b")',
+            mode: 'KQL',
+          },
         });
 
         expect(response.total).toBe(1);
@@ -303,7 +308,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await setUpThreeUpgradeableRules();
 
         const response = await reviewPrebuiltRulesToUpgrade(supertest, {
-          filter: 'alert.attributes.params.ruleId: "does-not-exist"',
+          filter: { term: 'alert.attributes.params.ruleId: "does-not-exist"', mode: 'KQL' },
         });
 
         expect(response.total).toBe(0);

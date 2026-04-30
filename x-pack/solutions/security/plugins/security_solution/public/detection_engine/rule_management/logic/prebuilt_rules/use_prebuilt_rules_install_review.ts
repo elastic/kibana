@@ -10,7 +10,10 @@ import type {
   ReviewRuleInstallationResponseBody,
   ReviewRuleInstallationField,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
-import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
+import type {
+  GranularRulesFilter,
+  GranularRulesSearch,
+} from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
@@ -73,7 +76,7 @@ const buildTagsClause = (tags: string[]): string => {
 };
 
 /**
- * Converts the UI filter options into a KQL string using the field paths that
+ * Converts the UI filter options into a structured KQL filter using the field paths that
  * exist on the prebuilt-rule asset saved-object documents (`security-rule.*`).
  * Preserves the UI semantics:
  *   - `name`: substring match for single terms, exact phrase match for
@@ -82,7 +85,7 @@ const buildTagsClause = (tags: string[]): string => {
  */
 export const buildInstallReviewKqlFilter = (
   filterOptions: AddPrebuiltRulesTableFilterOptions | undefined
-): string | undefined => {
+): GranularRulesFilter | undefined => {
   if (!filterOptions) {
     return undefined;
   }
@@ -100,5 +103,5 @@ export const buildInstallReviewKqlFilter = (
     return undefined;
   }
 
-  return parts.map((part) => `(${part})`).join(' AND ');
+  return { term: parts.map((part) => `(${part})`).join(' AND '), mode: 'KQL' };
 };

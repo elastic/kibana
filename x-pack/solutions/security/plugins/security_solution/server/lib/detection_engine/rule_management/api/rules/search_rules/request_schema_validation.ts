@@ -8,6 +8,7 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import type { FindRulesRequestQueryInput } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/request_schema_validation';
+import type { GranularRulesFilter } from '../../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import type { SearchRulesRequestBodyInput } from '../../../../../../../common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
 
 export const MAX_SEARCH_RULES_SEARCH_TERM_LENGTH = 1000;
@@ -30,6 +31,17 @@ export const validateSearchRulesKqlFilter = (filter: string | undefined): string
   }
 };
 
+export const validateSearchRulesFilter = (filter: GranularRulesFilter | undefined): string[] => {
+  if (filter == null) {
+    return [];
+  }
+  const mode = filter.mode ?? 'KQL';
+  if (mode !== 'KQL') {
+    return [`unsupported filter.mode "${mode}"`];
+  }
+  return validateSearchRulesKqlFilter(filter.term);
+};
+
 export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {
   const searchAfter = body.search_after;
   if (searchAfter == null || searchAfter.length === 0) {
@@ -42,7 +54,7 @@ export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInpu
 };
 
 export const validateAggregationsCountsUnique = (
-  aggregations: SearchRulesRequestBodyInput['aggregations']
+  aggregations: { counts?: readonly string[] } | undefined
 ): string[] => {
   const counts = aggregations?.counts;
   if (counts == null || counts.length === 0) {
@@ -61,7 +73,7 @@ export const validateSearchRulesRequestBody = (body: SearchRulesRequestBodyInput
     errors.push(`search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`);
   }
 
-  errors.push(...validateSearchRulesKqlFilter(body.filter));
+  errors.push(...validateSearchRulesFilter(body.filter));
   errors.push(...validateSearchAfterRequiresSort(body));
   errors.push(...validateAggregationsCountsUnique(body.aggregations));
 

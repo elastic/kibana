@@ -25,7 +25,7 @@ describe('validateReviewRuleUpgradeRequestBody', () => {
     expect(
       validateReviewRuleUpgradeRequestBody({
         ...defaultInput,
-        filter: 'alert.attributes.tags: "tag-a"',
+        filter: { term: 'alert.attributes.tags: "tag-a"', mode: 'KQL' },
       })
     ).toEqual([]);
   });
@@ -33,7 +33,7 @@ describe('validateReviewRuleUpgradeRequestBody', () => {
   it('rejects a syntactically invalid KQL filter', () => {
     const errors = validateReviewRuleUpgradeRequestBody({
       ...defaultInput,
-      filter: 'alert.attributes.name: (',
+      filter: { term: 'alert.attributes.name: (' },
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
   });
@@ -43,9 +43,17 @@ describe('validateReviewRuleUpgradeRequestBody', () => {
     expect(
       validateReviewRuleUpgradeRequestBody({
         ...defaultInput,
-        filter: `${filler}x`,
+        filter: { term: `${filler}x` },
       })
     ).toEqual([`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`]);
+  });
+
+  it('rejects unsupported filter.mode', () => {
+    const errors = validateReviewRuleUpgradeRequestBody({
+      ...defaultInput,
+      filter: JSON.parse('{"term":"x","mode":"esql"}'),
+    });
+    expect(errors).toContain('unsupported filter.mode "esql"');
   });
 
   it('accepts sort as a non-empty array of criteria', () => {

@@ -18,9 +18,10 @@ describe('buildUpgradeReviewKqlFilter', () => {
   });
 
   it('builds a tags-only clause wrapped in parentheses (alert field path)', () => {
-    expect(buildUpgradeReviewKqlFilter({ tags: ['tag-a', 'tag-b'] })).toBe(
-      '(alert.attributes.tags:("tag-a" AND "tag-b"))'
-    );
+    expect(buildUpgradeReviewKqlFilter({ tags: ['tag-a', 'tag-b'] })).toEqual({
+      term: '(alert.attributes.tags:("tag-a" AND "tag-b"))',
+      mode: 'KQL',
+    });
   });
 
   it('builds a customized-only clause for CUSTOMIZED status', () => {
@@ -28,7 +29,10 @@ describe('buildUpgradeReviewKqlFilter', () => {
       buildUpgradeReviewKqlFilter({
         customizationStatus: RuleCustomizationStatus.CUSTOMIZED,
       })
-    ).toBe('(alert.attributes.params.ruleSource.isCustomized: true)');
+    ).toEqual({
+      term: '(alert.attributes.params.ruleSource.isCustomized: true)',
+      mode: 'KQL',
+    });
   });
 
   it('builds a not-customized clause for NOT_CUSTOMIZED status', () => {
@@ -36,7 +40,10 @@ describe('buildUpgradeReviewKqlFilter', () => {
       buildUpgradeReviewKqlFilter({
         customizationStatus: RuleCustomizationStatus.NOT_CUSTOMIZED,
       })
-    ).toBe('(NOT alert.attributes.params.ruleSource.isCustomized: true)');
+    ).toEqual({
+      term: '(NOT alert.attributes.params.ruleSource.isCustomized: true)',
+      mode: 'KQL',
+    });
   });
 
   it('ANDs tags with customization status when both are present', () => {
@@ -45,21 +52,24 @@ describe('buildUpgradeReviewKqlFilter', () => {
         tags: ['tag-a'],
         customizationStatus: RuleCustomizationStatus.CUSTOMIZED,
       })
-    ).toBe(
-      '(alert.attributes.tags:("tag-a") AND alert.attributes.params.ruleSource.isCustomized: true)'
-    );
+    ).toEqual({
+      term: '(alert.attributes.tags:("tag-a") AND alert.attributes.params.ruleSource.isCustomized: true)',
+      mode: 'KQL',
+    });
   });
 
   it('folds a single ruleIds entry into the KQL via `alert.attributes.params.ruleId`', () => {
-    expect(buildUpgradeReviewKqlFilter({ ruleIds: ['rule-a'] })).toBe(
-      '(alert.attributes.params.ruleId:("rule-a"))'
-    );
+    expect(buildUpgradeReviewKqlFilter({ ruleIds: ['rule-a'] })).toEqual({
+      term: '(alert.attributes.params.ruleId:("rule-a"))',
+      mode: 'KQL',
+    });
   });
 
   it('ORs multiple ruleIds together under a single `alert.attributes.params.ruleId` clause', () => {
-    expect(buildUpgradeReviewKqlFilter({ ruleIds: ['rule-a', 'rule-b'] })).toBe(
-      '(alert.attributes.params.ruleId:("rule-a" OR "rule-b"))'
-    );
+    expect(buildUpgradeReviewKqlFilter({ ruleIds: ['rule-a', 'rule-b'] })).toEqual({
+      term: '(alert.attributes.params.ruleId:("rule-a" OR "rule-b"))',
+      mode: 'KQL',
+    });
   });
 
   it('ANDs ruleIds with the structured filter clauses', () => {
@@ -69,9 +79,10 @@ describe('buildUpgradeReviewKqlFilter', () => {
         customizationStatus: RuleCustomizationStatus.CUSTOMIZED,
         ruleIds: ['rule-a'],
       })
-    ).toBe(
-      '(alert.attributes.tags:("tag-a") AND alert.attributes.params.ruleSource.isCustomized: true) AND (alert.attributes.params.ruleId:("rule-a"))'
-    );
+    ).toEqual({
+      term: '(alert.attributes.tags:("tag-a") AND alert.attributes.params.ruleSource.isCustomized: true) AND (alert.attributes.params.ruleId:("rule-a"))',
+      mode: 'KQL',
+    });
   });
 
   it('returns undefined when only an empty ruleIds array is provided', () => {

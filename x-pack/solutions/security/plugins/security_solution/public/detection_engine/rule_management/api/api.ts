@@ -252,7 +252,7 @@ export const fetchRules = async ({
  */
 export const fetchSearchRules = async ({
   fields,
-  filter = '',
+  filter,
   search,
   sort_field = 'enabled',
   sort_order = 'desc',
@@ -274,7 +274,7 @@ export const fetchSearchRules = async ({
     sort_field,
     sort_order,
     fields,
-    ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
+    ...(filter != null && filter.term.trim() !== '' ? { filter } : {}),
     search,
     aggregations,
     search_after,

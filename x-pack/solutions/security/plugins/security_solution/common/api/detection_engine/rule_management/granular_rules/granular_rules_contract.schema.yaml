@@ -27,6 +27,28 @@ components:
         mode:
           $ref: '#/components/schemas/GranularRulesSearchMode'
 
+    GranularRulesFilterMode:
+      type: string
+      description: |
+        How `GranularRulesFilter.term` is interpreted. Only KQL against alerting saved objects is supported today.
+      enum:
+        - KQL
+      default: KQL
+
+    GranularRulesFilter:
+      type: object
+      additionalProperties: false
+      required:
+        - term
+      description: |
+        Structured KQL filter applied to alert saved objects (`term` is the KQL string).
+        Only `mode` value `KQL` (or omitted) is supported; other modes are rejected by request validation.
+      properties:
+        term:
+          type: string
+        mode:
+          $ref: '#/components/schemas/GranularRulesFilterMode'
+
     GranularRulesFacetCategory:
       type: string
       enum:

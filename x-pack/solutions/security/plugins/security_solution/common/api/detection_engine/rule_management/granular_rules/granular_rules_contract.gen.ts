@@ -37,6 +37,28 @@ export const GranularRulesSearch = lazySchema(() =>
 );
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
 
+/**
+  * How `GranularRulesFilter.term` is interpreted. Only KQL against alerting saved objects is supported today.
+
+  */
+export const GranularRulesFilterMode = lazySchema(() => z.literal('KQL').default('KQL'));
+export type GranularRulesFilterMode = z.infer<typeof GranularRulesFilterMode>;
+
+/**
+  * Structured KQL filter applied to alert saved objects (`term` is the KQL string).
+Only `mode` value `KQL` (or omitted) is supported; other modes are rejected by request validation.
+
+  */
+export const GranularRulesFilter = lazySchema(() =>
+  z
+    .object({
+      term: z.string(),
+      mode: GranularRulesFilterMode.optional(),
+    })
+    .strict()
+);
+export type GranularRulesFilter = z.infer<typeof GranularRulesFilter>;
+
 export const GranularRulesFacetCategory = lazySchema(() =>
   z.enum(['tags', 'enabled', 'updatedBy', 'createdBy', 'lastRunOutcome', 'isCustomized'])
 );

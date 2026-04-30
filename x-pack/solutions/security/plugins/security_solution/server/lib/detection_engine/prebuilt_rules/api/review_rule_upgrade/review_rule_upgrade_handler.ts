@@ -16,6 +16,7 @@ import type {
 import type { ReviewRuleInstallationField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type {
   FindRulesSortField,
+  GranularRulesFilter,
   GranularRulesSearch,
   SearchRulesAggregations,
 } from '../../../../../../common/api/detection_engine/rule_management';
@@ -166,7 +167,7 @@ interface CalculateUpgradeableRulesDiffArgs {
   perPage: number;
   sortField: FindRulesSortField | undefined;
   sortOrder: SortOrder | undefined;
-  filter: string | undefined;
+  filter: GranularRulesFilter | undefined;
   search: GranularRulesSearch | undefined;
   aggregations: SearchRulesAggregations | undefined;
 }
@@ -187,7 +188,7 @@ async function calculateUpgradeableRulesDiff({
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
   const latestVersionsMap = new Map(allLatestVersions.map((version) => [version.rule_id, version]));
 
-  const combinedKql = buildGranularRulesKql({ filter, search });
+  const combinedKql = buildGranularRulesKql({ filter: filter?.term, search });
 
   // Push the user-supplied KQL down into the installed-rules SO fetch so single-rule lookups
   // (e.g. filtering by `rule_id`) don't pull every prebuilt rule and then narrow afterwards.

@@ -6,6 +6,7 @@
  */
 
 import type { RuleCustomizationStatus } from '../../../../../common/api/detection_engine';
+import type { GranularRulesFilter } from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { convertRulesFilterToKQL } from '../../../../../common/detection_engine/rule_management/rule_filtering';
 import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 
@@ -25,7 +26,7 @@ export interface UpgradeReviewKqlFilterOptions {
  */
 export const buildUpgradeReviewKqlFilter = (
   options: UpgradeReviewKqlFilterOptions | undefined
-): string | undefined => {
+): GranularRulesFilter | undefined => {
   if (!options) {
     return undefined;
   }
@@ -50,5 +51,6 @@ export const buildUpgradeReviewKqlFilter = (
     return undefined;
   }
 
-  return parts.map((part) => `(${part})`).join(' AND ');
+  const term = parts.map((part) => `(${part})`).join(' AND ');
+  return { term, mode: 'KQL' };
 };

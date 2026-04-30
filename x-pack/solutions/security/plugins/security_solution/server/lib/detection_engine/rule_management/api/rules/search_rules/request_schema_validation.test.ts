@@ -96,9 +96,17 @@ describe('validateSearchRulesRequestBody', () => {
   it('rejects invalid filter KQL', () => {
     const errors = validateSearchRulesRequestBody({
       ...defaultInput,
-      filter: 'not kql :',
+      filter: { term: 'not kql :', mode: 'KQL' },
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
+  });
+
+  it('rejects unsupported filter.mode', () => {
+    const errors = validateSearchRulesRequestBody({
+      ...defaultInput,
+      filter: JSON.parse('{"term":"x","mode":"esql"}'),
+    });
+    expect(errors).toContain('unsupported filter.mode "esql"');
   });
 
   it('rejects search_after without sort_field and sort_order', () => {

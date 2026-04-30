@@ -32,9 +32,8 @@ paths:
                   default: 20
                   description: Rules per page.
                 filter:
-                  type: string
-                  description: |
-                    KQL filter string applied to the installed rules (alert saved objects) in the upgradeable set.
+                  description: Structured filter applied to the installed rules (alert saved objects) in the upgradeable set.
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
                 search:
                   description: Free-text search combined with the KQL `filter`.
                   $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'

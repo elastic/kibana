@@ -29,19 +29,21 @@ describe('buildPrebuiltRuleInstallationKql', () => {
     expect(
       buildPrebuiltRuleInstallationKql({ filter: undefined, search: undefined })
     ).toBeUndefined();
-    expect(buildPrebuiltRuleInstallationKql({ filter: '  ', search: undefined })).toBeUndefined();
+    expect(
+      buildPrebuiltRuleInstallationKql({ filter: { term: '  ' }, search: undefined })
+    ).toBeUndefined();
     expect(
       buildPrebuiltRuleInstallationKql({ filter: undefined, search: { term: '' } })
     ).toBeUndefined();
     expect(
-      buildPrebuiltRuleInstallationKql({ filter: '  ', search: { term: '  ' } })
+      buildPrebuiltRuleInstallationKql({ filter: { term: '  ' }, search: { term: '  ' } })
     ).toBeUndefined();
   });
 
   it('returns only filter when search is absent', () => {
     expect(
       buildPrebuiltRuleInstallationKql({
-        filter: 'security-rule.tags: "Elastic"',
+        filter: { term: 'security-rule.tags: "Elastic"' },
         search: undefined,
       })
     ).toBe('(security-rule.tags: "Elastic")');
@@ -49,7 +51,7 @@ describe('buildPrebuiltRuleInstallationKql', () => {
 
   it('ANDs filter with legacy search term', () => {
     const kql = buildPrebuiltRuleInstallationKql({
-      filter: 'security-rule.tags: "Elastic"',
+      filter: { term: 'security-rule.tags: "Elastic"' },
       search: { term: 'sql', mode: 'legacy' },
     });
     expect(kql).toBe(

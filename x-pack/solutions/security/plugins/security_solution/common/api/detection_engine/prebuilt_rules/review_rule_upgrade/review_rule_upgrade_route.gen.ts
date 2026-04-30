@@ -17,6 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
+  GranularRulesFilter,
   GranularRulesSearch,
   SearchRulesAggregations,
   FacetCounts,
@@ -190,10 +191,9 @@ export const ReviewRuleUpgradeRequestBody = lazySchema(() =>
        */
       per_page: z.number().int().min(0).max(500).optional().default(20),
       /**
-      * KQL filter string applied to the installed rules (alert saved objects) in the upgradeable set.
-
-      */
-      filter: z.string().optional(),
+       * Structured filter applied to the installed rules (alert saved objects) in the upgradeable set.
+       */
+      filter: GranularRulesFilter.optional(),
       /**
        * Free-text search combined with the KQL `filter`.
        */

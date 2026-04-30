@@ -93,7 +93,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
           const rulesClient = await ctx.alerting.getRulesClient();
 
           const combinedKql = buildGranularRulesKql({
-            filter,
+            filter: filter?.term,
             search,
           });
 

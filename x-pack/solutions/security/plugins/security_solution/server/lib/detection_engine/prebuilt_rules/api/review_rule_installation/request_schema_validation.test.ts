@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PrebuiltRuleAssetsFacetCategory } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { validateReviewRuleInstallationRequestBody } from './request_schema_validation';
 import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
@@ -26,7 +27,7 @@ describe('validateReviewRuleInstallationRequestBody', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
-        filter: 'security-rule.tags: "tag-a"',
+        filter: { term: 'security-rule.tags: "tag-a"', mode: 'KQL' },
       })
     ).toEqual([]);
   });
@@ -35,7 +36,7 @@ describe('validateReviewRuleInstallationRequestBody', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
-        filter: 'security-rule.attributes.tags: "tag-a"',
+        filter: { term: 'security-rule.attributes.tags: "tag-a"', mode: 'KQL' },
       })
     ).toEqual([]);
   });
@@ -43,7 +44,7 @@ describe('validateReviewRuleInstallationRequestBody', () => {
   it('rejects a syntactically invalid KQL filter', () => {
     const errors = validateReviewRuleInstallationRequestBody({
       ...defaultInput,
-      filter: 'security-rule.name: (',
+      filter: { term: 'security-rule.name: (', mode: 'KQL' },
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
   });
@@ -53,7 +54,7 @@ describe('validateReviewRuleInstallationRequestBody', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
-        filter: `${filler}x`,
+        filter: { term: `${filler}x`, mode: 'KQL' },
       })
     ).toEqual([`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`]);
   });

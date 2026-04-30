@@ -18,6 +18,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   SearchRulesField,
+  GranularRulesFilter,
   SearchRulesAggregations,
   GranularRulesSearch,
   FacetCounts,
@@ -59,10 +60,9 @@ export const SearchRulesRequestBody = lazySchema(() =>
        */
       fields: z.array(SearchRulesField).optional(),
       /**
-      * KQL filter string.
-
-      */
-      filter: z.string().optional(),
+       * Structured KQL filter applied to detection rules (alert saved objects).
+       */
+      filter: GranularRulesFilter.optional(),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),

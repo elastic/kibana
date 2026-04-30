@@ -25,6 +25,7 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  GranularRulesFilter,
   SearchRulesAggregations,
   SearchRulesField,
   SearchRulesResponse,
@@ -123,7 +124,7 @@ export interface FetchRulesResponse {
 export interface FetchSearchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   fields?: SearchRulesField[];
-  filter?: string;
+  filter?: GranularRulesFilter;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;
   sort_order?: z.infer<typeof SortOrder>;

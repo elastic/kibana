@@ -9,7 +9,7 @@ import type { ReviewRuleUpgradeRequestBodyInput } from '../../../../../../common
 import {
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
   validateAggregationsCountsUnique,
-  validateSearchRulesKqlFilter,
+  validateSearchRulesFilter,
 } from '../../../rule_management/api/rules/search_rules/request_schema_validation';
 
 export const validateReviewRuleUpgradeRequestBody = (
@@ -21,7 +21,7 @@ export const validateReviewRuleUpgradeRequestBody = (
     errors.push(`search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`);
   }
 
-  errors.push(...validateSearchRulesKqlFilter(body.filter));
+  errors.push(...validateSearchRulesFilter(body.filter));
   errors.push(...validateAggregationsCountsUnique(body.aggregations));
 
   const searchMode = body.search?.mode;
