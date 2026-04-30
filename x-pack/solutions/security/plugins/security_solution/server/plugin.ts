@@ -173,6 +173,8 @@ import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
+const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
+
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
   private readonly config: ConfigType;
@@ -423,8 +425,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (plugins.searchInferenceEndpoints) {
+      // Registered independently here and in `elastic_assistant`. Registration is
+      // idempotent on featureId, so whichever plugin sets up first creates the
+      // parent and the other call is a no-op.
       plugins.searchInferenceEndpoints.features.register({
-        featureId: 'security_search_inference_parent',
+        featureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureName: 'Security',
         featureDescription: 'Parent feature for Security',
         taskType: 'chat_completion',
@@ -435,7 +440,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
 
       plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'entity_ai_highlight_summary',
         featureName: 'Entity AI Highlight Summary',
         featureDescription: 'Entity AI Highlight Summary inference endpoint configuration',
@@ -445,7 +450,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       if (!experimentalFeatures.siemMigrationsDisabled) {
         plugins.searchInferenceEndpoints.features.register({
-          parentFeatureId: 'security_search_inference_parent',
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
           featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
           featureName: 'Automatic migration',
           featureDescription: 'Automatic migration inference endpoint configuration',
@@ -455,7 +460,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       }
 
       plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'defend_insights',
         featureName: 'Automatic Troubleshooting',
         featureDescription: 'Automatic Troubleshooting inference endpoint configuration',
@@ -464,7 +469,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
 
       plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'attack_discovery',
         featureName: 'Attack Discovery',
         featureDescription: 'Attack Discovery inference endpoint configuration',
@@ -474,7 +479,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       if (experimentalFeatures.leadGenerationEnabled) {
         plugins.searchInferenceEndpoints.features.register({
-          parentFeatureId: 'security_search_inference_parent',
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
           featureId: 'lead_generation',
           featureName: 'Threat Hunting Lead Generation',
           featureDescription: 'Lead generation inference endpoint configuration',
