@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/server';
 import type { EntityMaintainerTelemetryEventType } from '../tasks/entity_maintainers/types';
 
 // ------------------------------------
@@ -51,6 +50,23 @@ interface EntityStoreHealthEnginePayload {
 interface EntityStoreHealthReportPayload {
   namespace: string;
   engines: EntityStoreHealthEnginePayload[];
+}
+
+/**
+ * Per-run summary of the Knowledge Indicators (KI) extraction loop emitted
+ * from the generic-type extract task. Used to surface stream-derived
+ * entity extraction health across a deployment without requiring an
+ * operator to inspect task state SOs.
+ */
+interface KnowledgeIndicatorsLoopEventPayload {
+  namespace: string;
+  groupsTotal: number;
+  groupsProcessed: number;
+  groupsSucceeded: number;
+  groupsFailed: number;
+  groupsSkippedNoIndexPatterns: number;
+  groupsSkippedMissingSubtype: number;
+  groupsTruncated: number;
 }
 
 interface EntityMaintainerEvent {
@@ -239,6 +255,59 @@ export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   },
 } as const satisfies EventTypeOpts<EntityStoreHealthReportPayload>;
 
+export const ENTITY_STORE_KI_LOOP_EVENT = {
+  eventType: 'entity_store_ki_loop',
+  schema: {
+    namespace: {
+      type: 'keyword',
+      _meta: { description: 'Namespace where the KI extraction loop ran (e.g. "default")' },
+    },
+    groupsTotal: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of (stream, subtype) groups discovered in entity Knowledge Indicators above the configured min confidence',
+      },
+    },
+    groupsProcessed: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of groups that completed an extraction attempt (succeeded or failed); excludes skipped groups',
+      },
+    },
+    groupsSucceeded: {
+      type: 'long',
+      _meta: { description: 'Number of groups that successfully extracted entities' },
+    },
+    groupsFailed: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of groups whose extraction step threw and was isolated; their prior cursor was preserved',
+      },
+    },
+    groupsSkippedNoIndexPatterns: {
+      type: 'long',
+      _meta: {
+        description:
+          'Groups skipped because the source stream resolved to zero index patterns (likely deleted)',
+      },
+    },
+    groupsSkippedMissingSubtype: {
+      type: 'long',
+      _meta: { description: 'Features dropped because they lacked a subtype' },
+    },
+    groupsTruncated: {
+      type: 'long',
+      _meta: {
+        description:
+          'Groups that exceeded the aggregationGroupCap and were not processed this run (sorted-deterministic truncation)',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<KnowledgeIndicatorsLoopEventPayload>;
+
 // ------------------------------------
 // Registration
 // ------------------------------------
@@ -250,6 +319,7 @@ const events = [
   ENTITY_STORE_USAGE_EVENT,
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_MAINTAINER_EVENT,
+  ENTITY_STORE_KI_LOOP_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -266,6 +336,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_USAGE_EVENT.eventType]: StoreUsageEventPayload;
   [ENTITY_STORE_HEALTH_REPORT_EVENT.eventType]: EntityStoreHealthReportPayload;
   [ENTITY_MAINTAINER_EVENT.eventType]: EntityMaintainerEvent;
+  [ENTITY_STORE_KI_LOOP_EVENT.eventType]: KnowledgeIndicatorsLoopEventPayload;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;

@@ -30,6 +30,7 @@ import {
   runKnowledgeIndicatorsExtraction,
   type KnowledgeIndicatorsLoopMetrics,
 } from './knowledge_indicators_loop';
+import { ENTITY_STORE_KI_LOOP_EVENT, createReportEvent } from '../telemetry/events';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -121,6 +122,14 @@ async function runTask({
             `skipped=${kiMetrics.groupsSkippedNoIndexPatterns} ` +
             `truncated=${kiMetrics.groupsTruncated}`
         );
+        // Telemetry is emitted ONLY on completed loops, not on the
+        // pre-loop catch path. A pre-loop crash means we have no metrics
+        // to report; the local warn log is the only signal.
+        const telemetryReporter = createReportEvent(core.analytics);
+        telemetryReporter.reportEvent(ENTITY_STORE_KI_LOOP_EVENT, {
+          namespace,
+          ...kiMetrics,
+        });
       } catch (kiError) {
         const message = kiError instanceof Error ? kiError.message : String(kiError);
         logger.warn(
