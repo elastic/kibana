@@ -22,6 +22,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 
@@ -40,6 +41,7 @@ export interface AlertingServerSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
 }
 

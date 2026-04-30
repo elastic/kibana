@@ -46,7 +46,10 @@ describe('datatable cell renderer', () => {
     rows,
   });
 
-  const defaultFormatter = { convert: (x: unknown) => `formatted ${x}` } as FieldFormat;
+  const defaultFormatter = {
+    convert: (x: unknown) => `formatted ${x}`,
+    reactConvert: (x: unknown) => `formatted ${x}`,
+  } as FieldFormat;
   const defaultFormatters = { a: defaultFormatter } as Record<string, FieldFormat>;
 
   const defaultAlignments = new Map<string, 'left' | 'right' | 'center'>([['a', 'right']]);
@@ -203,8 +206,14 @@ describe('datatable cell renderer', () => {
           sortingDirection: 'none',
         },
         formatters: {
-          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-          b: { convert: (x) => `formatted ${x}` } as FieldFormat,
+          a: {
+            convert: (x) => `formatted ${x}`,
+            reactConvert: (x) => `formatted ${x}`,
+          } as FieldFormat,
+          b: {
+            convert: (x) => `formatted ${x}`,
+            reactConvert: (x) => `formatted ${x}`,
+          } as FieldFormat,
         },
       });
 
@@ -330,15 +339,14 @@ describe('datatable cell renderer', () => {
           columnConfig,
           formatters: {
             a: {
-              convert: (x: unknown, contentType?: string) => {
+              convert: () => '(null)',
+              reactConvert: (x: unknown) => {
                 if (x == null) {
-                  return contentType === 'html'
-                    ? '<span class="ffString__emptyValue">(null)</span>'
-                    : '(null)';
+                  return <span className="ffString__emptyValue">(null)</span>;
                 }
                 return `formatted ${x}`;
               },
-            } as FieldFormat,
+            } as unknown as FieldFormat,
           },
         });
 
@@ -423,7 +431,7 @@ describe('datatable cell renderer', () => {
       expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
     });
 
-    it('should fall back to html placeholder when text formatting is empty in badge mode', () => {
+    it('should fall back to React placeholder when text formatting is empty in badge mode', () => {
       const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
 
@@ -431,15 +439,19 @@ describe('datatable cell renderer', () => {
         columnConfig,
         formatters: {
           a: {
-            convert: (x: unknown, contentType?: string) => {
+            convert: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return contentType === 'text'
-                  ? ''
-                  : '<span class="ffString__emptyValue">(null)</span>';
+                return '';
               }
               return `formatted ${x}`;
             },
-          } as FieldFormat,
+            reactConvert: (x: unknown) => {
+              if (typeof x === 'number' && Number.isNaN(x)) {
+                return <span className="ffString__emptyValue">(null)</span>;
+              }
+              return `formatted ${x}`;
+            },
+          } as unknown as FieldFormat,
         },
       });
 

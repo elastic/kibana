@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ExportMenu, ManagedFlyout, type ManagedFlyoutProps } from './export_integrations';
+export {
+  ExportMenu,
+  ManagedExportFlyout,
+  type ManagedExportFlyoutProps,
+} from './export_integrations';

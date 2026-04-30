@@ -63,10 +63,7 @@ export class RuleDoctorInsightsClient {
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [
-            { term: { insight_id: insightId } },
-            { term: { space_id: spaceId } },
-          ],
+          filter: [{ term: { insight_id: insightId } }, { term: { space_id: spaceId } }],
         },
       },
       size: 1,
@@ -90,10 +87,7 @@ export class RuleDoctorInsightsClient {
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [
-            { term: { insight_id: insightId } },
-            { term: { space_id: spaceId } },
-          ],
+          filter: [{ term: { insight_id: insightId } }, { term: { space_id: spaceId } }],
         },
       },
       size: 1,
@@ -121,7 +115,12 @@ export class RuleDoctorInsightsClient {
     }
 
     const operations = insights.flatMap((insight) => [
-      { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: `${insight.space_id}:${insight.insight_id}` } },
+      {
+        index: {
+          _index: RULE_DOCTOR_INSIGHTS_INDEX,
+          _id: `${insight.space_id}:${insight.insight_id}`,
+        },
+      },
       insight,
     ]);
 
@@ -200,9 +199,7 @@ export class RuleDoctorInsightsClient {
     };
   }
 
-  private buildFilterQuery(
-    params: ListInsightsParams
-  ): QueryDslQueryContainer {
+  private buildFilterQuery(params: ListInsightsParams): QueryDslQueryContainer {
     const filters: QueryDslQueryContainer[] = [{ term: { space_id: params.spaceId } }];
 
     if (params.status) {
