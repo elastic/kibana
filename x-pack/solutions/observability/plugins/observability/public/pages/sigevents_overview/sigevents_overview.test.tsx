@@ -173,7 +173,7 @@ describe('SigeventsOverviewPage', () => {
       expect(MockEmbeddableConversation).toHaveBeenLastCalledWith(
         expect.objectContaining({
           initialMessage: expect.stringContaining('remediate'),
-          autoSendInitialMessage: false,
+          autoSendInitialMessage: true,
         }),
         expect.anything()
       );

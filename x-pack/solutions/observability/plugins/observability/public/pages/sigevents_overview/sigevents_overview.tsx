@@ -259,7 +259,7 @@ export function SigeventsOverviewPage() {
                 />
               ) : eventData ? (
                 <SigeventsOverview
-                  state={eventData.state}
+                  state="critical"
                   blastRadiusScore={eventData.blastRadiusScore}
                   mainEventTitle={eventData.mainEventTitle}
                   mainEventDescription={eventData.description}

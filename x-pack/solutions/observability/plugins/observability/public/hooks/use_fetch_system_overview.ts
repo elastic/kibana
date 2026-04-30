@@ -178,6 +178,7 @@ export function useFetchSystemOverview(): {
 
       for (const ev of acknowledgedEvents) {
         switch (ev.impact) {
+          case 'critical':
           case 'high':
             highCount++;
             break;
