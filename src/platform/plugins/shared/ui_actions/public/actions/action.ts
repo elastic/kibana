@@ -8,6 +8,7 @@
  */
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { Trigger } from '../types';
 
@@ -68,7 +69,7 @@ export interface Action<Context extends object = object, ActionExtension extends
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionExecutionContext<Context>): string | undefined;
+  getIconType(context: ActionExecutionContext<Context>): IconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.

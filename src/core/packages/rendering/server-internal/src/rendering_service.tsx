@@ -195,6 +195,7 @@ export class RenderingService {
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
+      userSettingLocale,
     ] = await Promise.all([
       // All sites
       withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
@@ -205,10 +206,13 @@ export class RenderingService {
             uiSettings.globalClient?.getUserProvided(true),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
+            // locale
+            userSettings?.getUserSettingLocale(request),
           ] as [
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined
+            Promise<DarkModeValue> | undefined,
+            Promise<string> | undefined
           ])
         : []),
     ]);
@@ -270,13 +274,20 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const locale = i18nLib.getLocale();
+    const configLocale = i18nLib.getLocale();
+    const translationHashes = i18n.getTranslationHashes();
+    const availableLocales = i18n.getAvailableLocales();
+    // Resolve the effective locale server-side using the priority chain:
+    // 1. User profile setting
+    // 2. kibana.yml i18n.defaultLocale (configLocale)
+    const effectiveLocale =
+      userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
     let translationsUrl: string;
     if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+      translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
     } else {
-      const translationHash = i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+      const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
@@ -288,7 +299,7 @@ export class RenderingService {
       hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      locale,
+      locale: effectiveLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
@@ -318,6 +329,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
         },
         theme: {
           darkMode,
