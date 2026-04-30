@@ -7,13 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-/**
- * Validates that an SSL certificate field value does not contain whitespace
- * when it is a file path. PEM content (starting with `-----BEGIN`) is exempt
- * because it naturally contains spaces and newlines.
- *
- * Returns an i18n error string when invalid, undefined when valid.
- */
+// PEM content (-----BEGIN ...) is exempt — it naturally contains whitespace
 export function validateSslCertPath(value: string): string | undefined {
   if (!value || value.trimStart().startsWith('-----BEGIN')) return undefined;
   if (/\s/.test(value)) {

@@ -35,7 +35,10 @@ export function useInput(
       const newValue = e.target.value;
       setValue(newValue);
       if (errors && validate) {
-        setErrors(validate(newValue));
+        const newErrors = validate(newValue);
+        if (newErrors?.[0] !== errors[0]) {
+          setErrors(newErrors);
+        }
       }
     },
     [errors, validate]
@@ -99,7 +102,10 @@ export function useSecretInput(
       const newValue = e.target.value;
       setValue(newValue);
       if (errors && validate) {
-        setErrors(validate(newValue));
+        const newErrors = validate(newValue);
+        if (newErrors?.[0] !== errors[0]) {
+          setErrors(newErrors);
+        }
       }
     },
     [errors, validate]
