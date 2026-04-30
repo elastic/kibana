@@ -51,6 +51,7 @@
             "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceServiceSettings",
             "trackAdoption": false,
             "isRequired": true
           }

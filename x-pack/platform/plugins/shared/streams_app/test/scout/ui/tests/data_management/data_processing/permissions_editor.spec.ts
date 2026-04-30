@@ -14,13 +14,10 @@ test.describe(
   'Streams data processing permissions - editor role (no simulate, no manage)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
-    });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-      // Setup as admin first to create processors
-      await browserAuth.loginAsAdmin();
+      // Set up state as admin once — not per test
       await apiServices.streams.updateStreamProcessors('logs-generic-default', {
         steps: [
           {
@@ -33,15 +30,30 @@ test.describe(
             to: 'test_field',
             value: 'test_value',
           },
+          {
+            condition: {
+              field: 'test_field',
+              contains: 'logs',
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'message',
+                  patterns: ['%{WORD:attributes.method}'],
+                },
+              ],
+            },
+          },
         ],
       });
+    });
 
-      // Now login as editor for the actual test
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAs('editor');
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     });
 
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await logsSynthtraceEsClient.clean();
     });
 
@@ -59,7 +71,7 @@ test.describe(
       pageObjects,
     }) => {
       // Verify processors are visible
-      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
+      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(3);
 
       // Verify edit button is disabled (requires simulate)
       const editButton = await pageObjects.streams.getProcessorEditButton(0);
@@ -70,7 +82,7 @@ test.describe(
       pageObjects,
     }) => {
       // Verify processors are visible
-      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
+      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(3);
 
       // Verify duplicate button is disabled (requires manage)
       const duplicateButton = await pageObjects.streams.getProcessorDuplicateButton(0);
@@ -82,7 +94,7 @@ test.describe(
       pageObjects,
     }) => {
       // Verify processors are visible
-      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
+      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(3);
 
       // Try to access the context menu
       const processors = await pageObjects.streams.getProcessorsListItems();
@@ -100,6 +112,44 @@ test.describe(
       // Save changes button should not be visible (requires manage)
       const saveButton = page.getByRole('button', { name: 'Save changes' });
       await expect(saveButton).toBeHidden();
+    });
+
+    test('should NOT allow editor to edit existing conditions (requires simulate privilege)', async ({
+      pageObjects,
+    }) => {
+      // Verify condition is visible
+      expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+
+      // Verify edit button is disabled (requires simulate)
+      const editButton = await pageObjects.streams.getConditionEditButton(0);
+      await expect(editButton).toBeDisabled();
+    });
+
+    test('should NOT allow editor to delete conditions (requires manage privilege)', async ({
+      page,
+      pageObjects,
+    }) => {
+      // Verify condition is visible
+      expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+
+      // Click the condition's own context menu button (not nested processor buttons)
+      const contextMenuButton = await pageObjects.streams.getConditionContextMenuButton(0);
+      await contextMenuButton.click();
+
+      // Verify delete option is disabled (requires manage)
+      const deleteButton = page.getByTestId('stepContextMenuDeleteItem');
+      await expect(deleteButton).toBeDisabled();
+    });
+
+    test('should NOT allow editor to add nested steps to conditions (requires simulate privilege)', async ({
+      pageObjects,
+    }) => {
+      // Verify condition is visible
+      expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+
+      // Verify the "Create nested step" button is disabled (requires simulate)
+      const addNestedStepButton = await pageObjects.streams.getConditionAddStepMenuButton(0);
+      await expect(addNestedStepButton).toBeDisabled();
     });
   }
 );

@@ -62,8 +62,10 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const missingRules = !hasDefaultRules && !canSave;
 
   useEffect(() => {
-    dispatch(getDynamicSettingsAction.get());
-  }, [dispatch]);
+    if (!settings) {
+      dispatch(getDynamicSettingsAction.get());
+    }
+  }, [dispatch, settings]);
 
   return (
     <>

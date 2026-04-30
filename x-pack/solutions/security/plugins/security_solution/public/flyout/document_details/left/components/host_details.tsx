@@ -220,7 +220,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     });
   }, [openPreviewPanel, hostName, entityId, scopeId, telemetry]);
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const hostIdentityFieldsForStore = useMemo(
@@ -491,7 +491,11 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnomalyTableProvider
-        criteriaFields={hostToCriteria(hostDetails)}
+        criteriaFields={hostToCriteria({
+          hostItem: hostDetails,
+          euid: euidApi?.euid,
+          entityRecord: entityStoreV2Enabled ? hostEntityFromStoreResult?.entityRecord : undefined,
+        })}
         startDate={from}
         endDate={to}
         skip={isInitializing}
