@@ -49,9 +49,9 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ apiServices, esClient, kbnClient, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ apiServices, esClient, kbnClient, logsSynthtraceEsClient, log }) => {
       try {
-        await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
+        await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
         await apiServices.streams.deleteStream(CLASSIC_STREAM_NAME);
       } catch {
         // Streams may not exist

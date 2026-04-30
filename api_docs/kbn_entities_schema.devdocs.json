@@ -87,6 +87,7 @@
             "lineNumber": 52,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "AliasPatternOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -124,6 +125,7 @@
             "lineNumber": 44,
             "columnNumber": 71,
             "deprecated": false,
+            "docsReferencedTypeName": "IndexPatternOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -161,6 +163,7 @@
             "lineNumber": 35,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "IndexPatternOptions",
             "trackAdoption": false,
             "isRequired": true
           }
