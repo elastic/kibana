@@ -36,7 +36,7 @@ disabled:
   # Detection Rules Management OOM Testing
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/oom_testing/configs/ess_basic_license.config.ts
 
-defaultQueue: 'n2-4-spot'
+defaultQueue: 'n4-4-spot'
 enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/ess.config.ts
@@ -119,7 +119,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts:
-      queue: n2-4-spot
+      queue: n4-4-spot
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/endpoint_exceptions_moved_ff.ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/ess.config.ts
