@@ -31,7 +31,7 @@ export interface CompleteLangModuleType extends LangModuleType {
 interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData> {
   validate: (
     model: monaco.editor.ITextModel,
-    code?: string,
+    code: string,
     callbacks?: Deps,
     options?: { invalidateColumnsCache?: boolean }
   ) => Promise<{ errors: MarkerDataType[]; warnings: MarkerDataType[] }>;
