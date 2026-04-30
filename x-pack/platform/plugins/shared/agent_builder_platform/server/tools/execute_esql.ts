@@ -45,8 +45,8 @@ const executeEsqlToolSchema = z.object({
     .optional()
     .describe(
       '(Optional) When set, the full result is stored in the filestore and only the first N rows are returned in context. ' +
-        'Use this when fetching large datasets that you intend to post-filter with the jq_filter tool. ' +
-        'The response will include a filestore_path you can pass to jq_filter.'
+        'Use this when fetching larger datasets that you intend to post-filter with the jq_filter tool. ' +
+        'Recommended value: 20. The response will include a filestore_path you can pass to jq_filter.'
     ),
 });
 
@@ -74,6 +74,7 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
 Setting \`preview_rows\` stores the full result in the filestore and keeps your context clean —
 you then call \`${platformCoreTools.jqFilter}\` to extract exactly what you need.
 Loading hundreds of raw rows directly into context wastes space and makes it harder to reason about the data.
+**Use \`preview_rows: 20\` as your default** when you are not sure how many rows you need.
 
 Use a plain \`limit\` (without \`preview_rows\`) only when:
 - You genuinely need every row in context to answer the question (rare), **or**
