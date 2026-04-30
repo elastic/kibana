@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type {
-  CoreAuthenticationService,
-  ElasticsearchClient,
-  KibanaRequest,
-} from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
 import type {
   ObjectChange,
   GetHistoryResult,
-  LogChangeHistoryOptions,
   ChangeHistoryDocument,
   GetChangeHistoryOptions,
+  ScopedLogChangeHistoryOptions,
 } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
 
@@ -40,16 +35,7 @@ export interface GetRuleHistoryResult extends GetHistoryResult {
   items: RuleChangeHistoryDocument[];
 }
 
-export interface ChangeTrackingServiceInitializeParams {
-  elasticsearchClient: ElasticsearchClient;
-  authService: CoreAuthenticationService;
-}
-
 export interface IChangeTrackingService {
-  asScoped(request: KibanaRequest): IScopedChangeTrackingService;
-}
-
-export interface IScopedChangeTrackingService {
   log(change: RuleChange, opts: ScopedLogChangeHistoryOptions): Promise<void>;
   logBulk(changes: RuleChange[], opts: ScopedLogChangeHistoryOptions): Promise<void>;
   getHistory(
@@ -59,13 +45,3 @@ export interface IScopedChangeTrackingService {
     opts: GetChangeHistoryOptions
   ): Promise<GetHistoryResult>;
 }
-
-/**
- * Per-call options for a request-scoped change tracking client. The wrapper
- * resolves `username`, `userProfileId` from the bound request,
- * so callers must not provide them.
- */
-export type ScopedLogChangeHistoryOptions = Omit<
-  LogChangeHistoryOptions,
-  'username' | 'userProfileId'
->;

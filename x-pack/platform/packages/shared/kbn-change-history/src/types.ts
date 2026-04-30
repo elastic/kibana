@@ -10,6 +10,12 @@ import type {
   Refresh,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  CoreAuthenticationService,
+  ElasticsearchClient,
+  KibanaRequest,
+} from '@kbn/core/server';
+
 /**
  * Represents a single document in the change history.
  */
@@ -119,6 +125,51 @@ export interface LogChangeHistoryOptions {
   refresh?: Refresh;
 }
 
+/**
+ * Fields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)
+ */
+export interface ChangeHistoryFieldsToHash {
+  [Key: string]: boolean | ChangeHistoryFieldsToHash;
+}
+
+export interface ChangeHistoryClientInitializeParams {
+  elasticsearchClient: ElasticsearchClient;
+  authService: CoreAuthenticationService;
+}
+
+export interface IChangeHistoryClient {
+  isInitialized(): boolean;
+  initialize({
+    elasticsearchClient,
+    authService,
+  }: ChangeHistoryClientInitializeParams): Promise<void>;
+  asScoped(request: KibanaRequest): IScopedChangeHistoryClient;
+  log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
+  logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
+  getHistory(
+    spaceId: string,
+    objectType: string,
+    objectId: string,
+    opts?: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult>;
+}
+
+export interface IScopedChangeHistoryClient {
+  log(change: ObjectChange, opts: ScopedLogChangeHistoryOptions): Promise<void>;
+  logBulk(changes: ObjectChange[], opts: ScopedLogChangeHistoryOptions): Promise<void>;
+  getHistory(
+    spaceId: string,
+    objectType: string,
+    objectId: string,
+    opts?: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult>;
+}
+
+export type ScopedLogChangeHistoryOptions = Omit<
+  LogChangeHistoryOptions,
+  'username' | 'userProfileId'
+>;
+
 export interface GetChangeHistoryOptions {
   additionalFilters?: QueryDslQueryContainer[];
   sort?: SortCombinations[];
@@ -132,11 +183,4 @@ export interface GetChangeHistoryOptions {
 export interface GetHistoryResult {
   total: number;
   items: ChangeHistoryDocument[];
-}
-
-/**
- * Fields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)
- */
-export interface ChangeHistoryFieldsToHash {
-  [Key: string]: boolean | ChangeHistoryFieldsToHash;
 }

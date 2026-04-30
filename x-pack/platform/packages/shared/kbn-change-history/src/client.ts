@@ -11,7 +11,7 @@ import type {
   SearchTotalHits,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CoreAuthenticationService, KibanaRequest } from '@kbn/core/server';
 import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
@@ -29,6 +29,9 @@ import type {
   LogChangeHistoryOptions,
   GetChangeHistoryOptions,
   ObjectChange,
+  IChangeHistoryClient,
+  ChangeHistoryClientInitializeParams,
+  IScopedChangeHistoryClient,
 } from './types';
 import { sha256, hashFields } from './utils';
 
@@ -39,25 +42,13 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
   ChangeHistoryDocument
 >;
 
-export interface IChangeHistoryClient {
-  isInitialized(): boolean;
-  initialize(elasticsearchClient: ElasticsearchClient): Promise<void>;
-  log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
-  logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
-  getHistory(
-    spaceId: string,
-    objectType: string,
-    objectId: string,
-    opts?: GetChangeHistoryOptions
-  ): Promise<GetHistoryResult>;
-}
-
 export class ChangeHistoryClient implements IChangeHistoryClient {
   private module: string;
   private dataset: string;
   private kibanaVersion: string;
   private logger: Logger;
   private client?: ChangeHistoryDataStreamClient;
+  private authService?: CoreAuthenticationService;
 
   constructor({
     module,
@@ -100,12 +91,15 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @returns A promise that resolves when the change tracking service is initialized.
    * @throws An error if the data stream is not initialized properly.
    */
-  async initialize(elasticsearchClient: ElasticsearchClient) {
+  async initialize({ elasticsearchClient, authService }: ChangeHistoryClientInitializeParams) {
     if (!FLAGS.FEATURE_ENABLED) {
       const error = new Error(`Change history is disabled. Skipping initialization.`);
       this.logger.error(error);
       throw error;
     }
+
+    this.authService = authService;
+
     // Step 1: Create data stream definition
     // TODO: What about ILM policy (defaults to none = keep forever)
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
@@ -135,6 +129,34 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(err);
       throw err;
     }
+  }
+
+  asScoped(request: KibanaRequest): IScopedChangeHistoryClient {
+    if (!this.authService) {
+      throw new Error(
+        'ChangeHistoryClient.asScoped called before initialize(); authentication service is not available.'
+      );
+    }
+
+    const user = this.authService.getCurrentUser(request);
+    const userInfo: Pick<LogChangeHistoryOptions, 'username' | 'userProfileId'> = {
+      username: user?.username ?? '',
+      userProfileId: user?.profile_uid,
+    };
+
+    return {
+      log: async (change, opts) =>
+        this.log(change, {
+          ...opts,
+          ...userInfo,
+        }),
+      logBulk: async (changes, opts) =>
+        this.logBulk(changes, {
+          ...opts,
+          ...userInfo,
+        }),
+      getHistory: this.getHistory.bind(this),
+    };
   }
 
   /**
