@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export {
-  createAttachmentTypeRegistry,
-  type AttachmentTypeRegistry,
-} from './attachment_type_registry';
 export { type AttachmentService, createAttachmentService } from './attachment_service';
-export type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
+export type { AttachmentServiceStart } from './types';
+export type { ResolverTypeLookup } from './validate_attachment';

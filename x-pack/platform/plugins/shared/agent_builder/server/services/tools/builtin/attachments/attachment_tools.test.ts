@@ -6,9 +6,8 @@
  */
 
 import { ToolResultType, attachmentTools } from '@kbn/agent-builder-common';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -22,7 +21,7 @@ describe('attachment tools', () => {
     ({
       id: type,
       validate: (input: unknown) => ({ valid: true, data: input }),
-      format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+      format: () => ({ type: 'text', value: '' }),
       isReadonly: false,
     } as any);
 
@@ -35,10 +34,8 @@ describe('attachment tools', () => {
       id: 'text',
       validate: (input: unknown) => ({ valid: true, data: input }),
       format: (attachment: { data: unknown }) => ({
-        getRepresentation: () => ({
-          type: 'text',
-          value: `formatted:${String(attachment.data)}`,
-        }),
+        type: 'text',
+        value: `formatted:${String(attachment.data)}`,
       }),
       isReadonly: false,
     }),
@@ -73,7 +70,7 @@ describe('attachment tools', () => {
         getTypeDefinition: () => ({
           id: 'text',
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
           isReadonly: true,
         }),
       } as any;
@@ -118,7 +115,7 @@ describe('attachment tools', () => {
             ? {
                 id: 'text',
                 validate: (input: unknown) => ({ valid: true, data: input }),
-                format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+                format: () => ({ type: 'text', value: '' }),
                 isReadonly: false,
               }
             : undefined,
@@ -200,15 +197,13 @@ describe('attachment tools', () => {
           ({
             id: AttachmentType.visualization,
             validate: (input: unknown) => ({ valid: true, data: input }),
-            format: (formattedAttachment: Attachment) => ({
-              getRepresentation: () => ({
-                type: 'text',
-                value: JSON.stringify(formattedAttachment.data),
-              }),
+            format: (item: { id: string; type: string; data: unknown }) => ({
+              type: 'text',
+              value: JSON.stringify(item.data),
             }),
             resolve: async () => resolvedData,
             isReadonly: false,
-          } as unknown as AttachmentTypeDefinition),
+          } as unknown as ResolverTypeDefinition),
       } as any;
       const resolveAttachmentManager = createAttachmentStateManager([], {
         getTypeDefinition: customAttachmentsService.getTypeDefinition,
@@ -322,7 +317,7 @@ describe('attachment tools', () => {
         getTypeDefinition: () => ({
           id: 'text',
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
           isReadonly: true,
         }),
       } as any;

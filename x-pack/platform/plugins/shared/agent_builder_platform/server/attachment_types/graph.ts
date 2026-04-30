@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { GraphAttachmentData, GraphEdge } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
 
-export const createGraphAttachmentType = (): AttachmentTypeDefinition<
+export const createGraphAttachmentType = (): ResolverTypeDefinition<
   typeof GRAPH_ATTACHMENT_TYPE,
   GraphAttachmentData
 > => {
@@ -24,14 +24,10 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
 
       return { valid: false, error: parseResult.error.message };
     },
-    format: (attachment: GraphAttachment) => {
-      return {
-        getRepresentation: () => ({
-          type: 'text' as const,
-          value: formatGraphAttachment(attachment.data),
-        }),
-      };
-    },
+    format: (item) => ({
+      type: 'text' as const,
+      value: formatGraphAttachment(item.data),
+    }),
     getAgentDescription: () => {
       return 'A graph attachment contains a graph visualization configuration. Use it when you need to represent or discuss entity relationships, dependencies, and graph connectivity in a structured way. Rendering it inline displays the graph as a dynamic, interactive component in the conversation UI.';
     },

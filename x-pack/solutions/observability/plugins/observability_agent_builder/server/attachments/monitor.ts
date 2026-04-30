@@ -6,11 +6,11 @@
  */
 
 import dedent from 'dedent';
-import { z } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
@@ -31,7 +31,7 @@ export function createMonitorAttachmentType({
 }: {
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): AttachmentTypeDefinition<
+}): ResolverTypeDefinition<
   typeof OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
   MonitorAttachmentData
 > {
@@ -44,68 +44,40 @@ export function createMonitorAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { configId, monitorName, monitorType } = attachment.data;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability Synthetics Monitor: ${item.data.monitorName} (${item.data.monitorType}). Use the ${GET_MONITOR_DETAILS_TOOL_ID} tool to fetch full monitor details.`,
+    }),
+    getBoundedTools: (item) => {
+      const { configId, monitorName, monitorType } = item.data;
+      return [
+        {
+          id: GET_MONITOR_DETAILS_TOOL_ID,
+          description: `Fetch the full details for synthetics monitor "${monitorName}" (${monitorType}).`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const monitorDetails = await dataRegistry.getData('syntheticsMonitorDetails', {
+              request: abContext.request,
+              configId,
+            });
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability Synthetics Monitor: ${monitorName} (${monitorType}). Use the ${GET_MONITOR_DETAILS_TOOL_ID} tool to fetch full monitor details.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_MONITOR_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the full details for synthetics monitor "${monitorName}" (${monitorType}).`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const monitorDetails = await dataRegistry.getData('syntheticsMonitorDetails', {
-                  request: context.request,
-                  configId,
-                });
+            if (!monitorDetails) {
+              throw new Error(`Monitor details not found for ${monitorName} (${configId})`);
+            }
 
-                if (!monitorDetails) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Monitor details not found for ${monitorName} (${configId})`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: monitorDetails,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(`Failed to fetch monitor details for attachment: ${error?.message}`);
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch monitor details: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: monitorDetails as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

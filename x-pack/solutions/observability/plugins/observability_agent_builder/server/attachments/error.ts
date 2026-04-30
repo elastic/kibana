@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { Logger } from '@kbn/core/server';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
@@ -33,7 +33,7 @@ export function createErrorAttachmentType({
 }: {
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {
+}): ResolverTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {
   return {
     id: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
     validate: (input) => {
@@ -43,72 +43,44 @@ export function createErrorAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { errorId, serviceName = '', environment = '', start = '', end = '' } = attachment.data;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability APM Error ID: ${item.data.errorId}. Use the ${GET_ERROR_DETAILS_TOOL_ID} tool to fetch full error information.`,
+    }),
+    getBoundedTools: (item) => {
+      const { errorId, serviceName = '', environment = '', start = '', end = '' } = item.data;
+      return [
+        {
+          id: GET_ERROR_DETAILS_TOOL_ID,
+          description: `Fetch the full error information for error ${errorId}.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const errorDetails = await dataRegistry.getData('apmErrorDetails', {
+              request: abContext.request,
+              errorId,
+              serviceName,
+              start,
+              end,
+              serviceEnvironment: environment ?? '',
+            });
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability APM Error ID: ${errorId}. Use the ${GET_ERROR_DETAILS_TOOL_ID} tool to fetch full error information.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_ERROR_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the full error information for error ${errorId}.`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const errorDetails = await dataRegistry.getData('apmErrorDetails', {
-                  request: context.request,
-                  errorId,
-                  serviceName,
-                  start,
-                  end,
-                  serviceEnvironment: environment ?? '',
-                });
+            if (!errorDetails) {
+              throw new Error(`Error details not found for ${errorId}`);
+            }
 
-                if (!errorDetails) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Error details not found for ${errorId}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: errorDetails as Record<string, unknown>,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(`Failed to fetch error details for attachment: ${error?.message}`);
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch error details: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: errorDetails as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

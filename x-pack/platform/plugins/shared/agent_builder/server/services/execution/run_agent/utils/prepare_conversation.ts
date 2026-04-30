@@ -29,10 +29,13 @@ import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
+import { attachmentToResolverBoundedToolSnapshot } from '../../../attachments/resolver_bounded_tool_snapshot';
+
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
+import { attachmentScopedBoundedToolId } from './attachment_bounded_tool_id';
 
 export interface ProcessedAttachmentType {
   type: string;
@@ -264,7 +267,7 @@ export const prepareConversation = async ({
         if (!isReadonly) {
           return undefined;
         }
-        const formatted = await definition.format(
+        const representation = await definition.format(
           {
             id: attachment.id,
             type: attachment.type,
@@ -272,10 +275,6 @@ export const prepareConversation = async ({
           },
           formatContext
         );
-        if (!formatted?.getRepresentation) {
-          return undefined;
-        }
-        const representation = await formatted.getRepresentation();
         return representation?.type === 'text' ? representation.value : undefined;
       } catch {
         return undefined;
@@ -348,16 +347,24 @@ const prepareAttachment = async ({
   const attachment = inputToFinal(input);
 
   try {
-    const formatted = await definition.format(attachment, formatContext);
-    const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
-    if (!formatted.getRepresentation) {
-      return {
-        attachment,
-        representation: { type: 'text', value: JSON.stringify(attachment.data) },
-        tools,
-      };
-    }
-    const representation = await formatted.getRepresentation();
+    const representation = await definition.format(
+      {
+        id: attachment.id,
+        type: attachment.type,
+        data: attachment.data,
+      },
+      formatContext
+    );
+    const boundedTools = definition.getBoundedTools
+      ? await definition.getBoundedTools(
+          attachmentToResolverBoundedToolSnapshot(attachment),
+          formatContext
+        )
+      : [];
+    const tools = boundedTools.map((t) => ({
+      ...t,
+      id: attachmentScopedBoundedToolId(attachment.id, t.id),
+    }));
 
     return {
       attachment,

@@ -6,10 +6,11 @@
  */
 
 import dedent from 'dedent';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
-import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
@@ -30,7 +31,7 @@ export function createHostAttachmentType({
 }: {
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID, HostAttachmentData> {
+}): ResolverTypeDefinition<typeof OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID, HostAttachmentData> {
   return {
     id: OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
     validate: (input) => {
@@ -40,88 +41,49 @@ export function createHostAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { hostName, start, end } = attachment.data;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability Host Name: ${item.data.hostName}. Use the ${GET_HOST_DETAILS_TOOL_ID} tool to fetch full host details.`,
+    }),
+    getBoundedTools: (item) => {
+      const { hostName, start, end } = item.data;
+      return [
+        {
+          id: GET_HOST_DETAILS_TOOL_ID,
+          description: `Fetch the full host details for host ${hostName}.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const hostDetails = await dataRegistry.getData('infraHosts', {
+              request: abContext.request,
+              from: start,
+              to: end,
+              limit: 1,
+              query: {
+                bool: {
+                  filter: [{ term: { 'host.name': hostName } }],
+                },
+              },
+            });
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability Host Name: ${hostName}. Use the ${GET_HOST_DETAILS_TOOL_ID} tool to fetch full host details.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_HOST_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the full host details for host ${hostName}.`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const hostDetails = await dataRegistry.getData('infraHosts', {
-                  request: context.request,
-                  from: start,
-                  to: end,
-                  limit: 1,
-                  query: {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'host.name': hostName,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                });
+            const host = hostDetails?.nodes?.[0];
 
-                const host = hostDetails?.nodes?.[0];
+            if (!host) {
+              throw new Error(`Host details not found for ${hostName}`);
+            }
 
-                if (!host) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Host details not found for ${hostName}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: {
-                        hostName,
-                        start,
-                        end,
-                        host,
-                      },
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(`Failed to fetch host details for attachment: ${error?.message}`);
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch host details: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: { hostName, start, end, host } as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

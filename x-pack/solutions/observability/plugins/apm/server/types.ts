@@ -58,6 +58,10 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server/types';
 import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
+import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginStart,
 } from '@kbn/observability-agent-builder-plugin/server';
@@ -89,6 +93,7 @@ export interface APMPluginSetupDependencies {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
@@ -120,6 +125,7 @@ export interface APMPluginStartDependencies {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   actions?: ActionsPlugin['start'];
   alerting?: AlertingServerStart;
   cloud?: undefined;

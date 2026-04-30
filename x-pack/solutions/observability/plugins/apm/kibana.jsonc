@@ -64,6 +64,7 @@
       "observabilityAgentBuilder",
       "share",
       "agentBuilder",
+      "agentContextLayer",
       "slo",
       "cps",
     ],

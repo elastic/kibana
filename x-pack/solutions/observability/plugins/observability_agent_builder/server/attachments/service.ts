@@ -6,10 +6,11 @@
  */
 
 import dedent from 'dedent';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
-import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
@@ -31,7 +32,7 @@ export function createServiceAttachmentType({
 }: {
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): AttachmentTypeDefinition<
+}): ResolverTypeDefinition<
   typeof OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   ServiceAttachmentData
 > {
@@ -44,71 +45,43 @@ export function createServiceAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { serviceName, environment, start, end } = attachment.data;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability Service Name: ${item.data.serviceName}. Use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`,
+    }),
+    getBoundedTools: (item) => {
+      const { serviceName, environment, start, end } = item.data;
+      return [
+        {
+          id: GET_SERVICE_DETAILS_TOOL_ID,
+          description: `Fetch the full service details for service ${serviceName}.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const serviceDetails = await dataRegistry.getData('apmServiceSummary', {
+              request: abContext.request,
+              serviceName,
+              serviceEnvironment: environment,
+              start,
+              end,
+            });
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability Service Name: ${serviceName}. Use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_SERVICE_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the full service details for service ${serviceName}.`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const serviceDetails = await dataRegistry.getData('apmServiceSummary', {
-                  request: context.request,
-                  serviceName,
-                  serviceEnvironment: environment,
-                  start,
-                  end,
-                });
+            if (!serviceDetails) {
+              throw new Error(`Service details not found for ${serviceName}`);
+            }
 
-                if (!serviceDetails) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Service details not found for ${serviceName}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: serviceDetails,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(`Failed to fetch service details for attachment: ${error?.message}`);
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch service details: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: serviceDetails as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

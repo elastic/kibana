@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -28,7 +27,7 @@ type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;
 };
-export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
+export const createRuleAttachmentType = (): ResolverTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.rule,
     validate: (input) => {
@@ -39,19 +38,15 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment: Attachment<string, unknown>) => {
+    format: (item) => {
       // Extract data to allow proper type narrowing
-      const data = attachment.data;
+      const data = item.data;
       // Necessary because we cannot currently use the AttachmentType type as agent is not
       // registered with enum AttachmentType in agentBuilder attachment_types.ts
       if (!isRuleAttachmentData(data)) {
-        throw new Error(`Invalid rule attachment data for attachment ${attachment.id}`);
+        throw new Error(`Invalid rule attachment data for attachment ${item.id}`);
       }
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: formatRuleData(data) };
-        },
-      };
+      return { type: 'text', value: formatRuleData(data) };
     },
     getTools: () => [
       platformCoreTools.generateEsql,

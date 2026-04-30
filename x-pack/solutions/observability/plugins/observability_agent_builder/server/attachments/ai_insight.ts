@@ -7,8 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
@@ -26,7 +25,7 @@ const isValidAiInsightAttachmentData = (data: unknown): data is AiInsightAttachm
   return aiInsightAttachmentDataSchema.safeParse(data).success;
 };
 
-export const createAiInsightAttachmentType = (): AttachmentTypeDefinition => {
+export const createAiInsightAttachmentType = (): ResolverTypeDefinition => {
   return {
     id: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
     validate: (input) => {
@@ -38,24 +37,16 @@ export const createAiInsightAttachmentType = (): AttachmentTypeDefinition => {
 
       return { valid: true, data: parsed.data };
     },
-    format: (attachment: Attachment<string, unknown>) => {
-      return {
-        getRepresentation: () => {
-          // Agent Builder does not apply the attachment schema at `format` time
-          // so we re-validate it before using it.
-          if (!isValidAiInsightAttachmentData(attachment.data)) {
-            throw new Error(`Invalid AI insight attachment data for attachment ${attachment.id}`);
-          }
+    format: (item) => {
+      // Re-validate before using attachment data.
+      if (!isValidAiInsightAttachmentData(item.data)) {
+        throw new Error(`Invalid AI insight attachment data for attachment ${item.id}`);
+      }
 
-          const { summary, context } = attachment.data;
-          const value = [`AI summary:\n${summary}`, `Context data:\n${context}`].join('\n\n');
+      const { summary, context } = item.data;
+      const value = [`AI summary:\n${summary}`, `Context data:\n${context}`].join('\n\n');
 
-          return {
-            type: 'text',
-            value,
-          };
-        },
-      };
+      return { type: 'text', value };
     },
     getAgentDescription: () => {
       return dedent(`

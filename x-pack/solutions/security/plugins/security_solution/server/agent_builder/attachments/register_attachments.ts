@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
 
 /**
- * Registers all security agent builder attachments with the agentBuilder plugin
+ * Registers all security agent builder attachments with the agentContextLayer plugin
  */
-export const registerAttachments = async (agentBuilder: AgentBuilderPluginSetup) => {
-  agentBuilder.attachments.registerType(createAlertAttachmentType());
-  agentBuilder.attachments.registerType(createEntityAttachmentType());
-  agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
-  agentBuilder.attachments.registerType(createRuleAttachmentType());
+export const registerAttachments = async (agentContextLayer: AgentContextLayerPluginSetup) => {
+  agentContextLayer.registerResolverType(createAlertAttachmentType());
+  agentContextLayer.registerResolverType(createEntityAttachmentType());
+  agentContextLayer.registerResolverType(createEntityAnalyticsDashboardAttachmentType());
+  agentContextLayer.registerResolverType(createRuleAttachmentType());
 };

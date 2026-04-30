@@ -20,7 +20,7 @@ import {
   createAttachmentStateManager,
   type AttachmentStateManager,
 } from './attachment_state_manager';
-import type { AttachmentTypeDefinition } from './type_definition';
+import type { ResolverTypeDefinition } from '../resolver_definition';
 
 describe('AttachmentStateManager', () => {
   let manager: AttachmentStateManager;
@@ -30,13 +30,13 @@ describe('AttachmentStateManager', () => {
   let isStaleResult: boolean = false;
   let resolvedStalePayload: Record<string, unknown> | undefined = { fresh: true };
 
-  const getTypeDefinition = (type: string): AttachmentTypeDefinition | undefined => {
+  const getTypeDefinition = (type: string): ResolverTypeDefinition | undefined => {
     switch (type) {
       case 'staleable':
         return {
           id: 'staleable',
           validate: (input: unknown) => ({ valid: true, data: input as any }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
           resolve: async (_origin: string) => resolvedStalePayload,
           isStale: async () => isStaleResult,
         } as any;
@@ -44,7 +44,7 @@ describe('AttachmentStateManager', () => {
         return {
           id: 'staleable_no_resolve',
           validate: (input: unknown) => ({ valid: true, data: input as any }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
           isStale: async () => true,
           // no resolve
         } as any;
@@ -61,7 +61,7 @@ describe('AttachmentStateManager', () => {
             }
             return { valid: false, error: 'Expected { content: string }' };
           },
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         } as any;
       case 'screen_context':
         return {
@@ -81,7 +81,7 @@ describe('AttachmentStateManager', () => {
             }
             return { valid: true, data: input as any };
           },
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         } as any;
       case 'esql':
         return {
@@ -96,7 +96,7 @@ describe('AttachmentStateManager', () => {
             }
             return { valid: false, error: 'Expected { query: string }' };
           },
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         } as any;
       case 'by_ref':
         return {
@@ -111,7 +111,7 @@ describe('AttachmentStateManager', () => {
             }
             return { valid: false, error: 'Expected { ref: string }' };
           },
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
           resolve: async () => resolvedByRefPayload,
         } as any;
       default:
@@ -899,7 +899,7 @@ describe('AttachmentStateManager', () => {
             return {
               id: 'staleable',
               validate: (input: unknown) => ({ valid: true, data: input as any }),
-              format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+              format: () => ({ type: 'text', value: '' }),
               resolve: async () => resolvedStalePayload,
               isStale: async (attachment: any) => attachment.id === 'att-stale',
             } as any;
@@ -929,7 +929,7 @@ describe('AttachmentStateManager', () => {
             return {
               id: 'staleable',
               validate: (input: unknown) => ({ valid: true, data: input as any }),
-              format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+              format: () => ({ type: 'text', value: '' }),
               resolve: async () => ({ ok: true }),
               isStale: async (attachment: any) => {
                 if (attachment.id === 'att-bad') {

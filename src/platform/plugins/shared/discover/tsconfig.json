@@ -133,6 +133,8 @@
     "@kbn/synthtrace-client",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
+    "@kbn/agent-context-layer-common",
+    "@kbn/agent-context-layer-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
     "@kbn/alerting-v2-plugin",

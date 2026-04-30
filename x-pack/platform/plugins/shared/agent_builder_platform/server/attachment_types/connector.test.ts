@@ -11,7 +11,6 @@ import {
   AttachmentType,
   type ConnectorAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
-import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
@@ -81,16 +80,11 @@ describe('connector attachment type', () => {
   });
 
   describe('format', () => {
-    describe('getRepresentation', () => {
-      it('returns text with connector name and description when no spec is found', () => {
+    it('returns text with connector name and description when no spec is found', () => {
         getConnectorSpecMock.mockReturnValue(undefined);
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const representation = formatted.getRepresentation!();
+        const representation = connectorType.format(attachment, formatContext);
 
         expect(representation).toEqual({
           type: 'text',
@@ -111,11 +105,7 @@ describe('connector attachment type', () => {
         });
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const representation = formatted.getRepresentation!() as { value: string };
+        const representation = connectorType.format(attachment, formatContext) as { value: string };
 
         expect(representation.value).toContain('Generic GitHub connector');
       });
@@ -124,11 +114,7 @@ describe('connector attachment type', () => {
         getConnectorSpecMock.mockReturnValue(undefined);
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const representation = formatted.getRepresentation!() as { value: string };
+        const representation = connectorType.format(attachment, formatContext) as { value: string };
 
         expect(representation.value).toContain('Description: .github');
       });
@@ -172,11 +158,7 @@ describe('connector attachment type', () => {
           ...validData,
           connector_type: '.slack2',
         });
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const representation = formatted.getRepresentation!() as { value: string };
+        const representation = connectorType.format(attachment, formatContext) as { value: string };
 
         expect(representation.value).toContain('execute_connector_sub_action');
         expect(representation.value).toContain('searchMessages: Search Slack messages');
@@ -211,60 +193,16 @@ describe('connector attachment type', () => {
           ...validData,
           connector_type: '.slack2',
         });
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const representation = formatted.getRepresentation!() as { value: string };
+        const representation = connectorType.format(attachment, formatContext) as { value: string };
 
         expect(representation.value).toContain(
           'Always resolve channel ID before sending a message.'
         );
       });
-    });
 
     describe('getBoundedTools', () => {
-      it('always returns empty array', () => {
-        getConnectorSpecMock.mockReturnValue(undefined);
-
-        const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const boundedTools = formatted.getBoundedTools!();
-
-        expect(boundedTools).toEqual([]);
-      });
-
-      it('returns empty array when spec has sub-actions', () => {
-        const inputSchema = z.object({});
-        getConnectorSpecMock.mockReturnValue({
-          metadata: {
-            id: '.slack2',
-            displayName: 'Slack',
-            description: 'Slack connector',
-            minimumLicense: 'enterprise',
-            supportedFeatureIds: [],
-          },
-          actions: {
-            searchMessages: {
-              isTool: true,
-              description: 'Search messages',
-              input: inputSchema,
-              handler: jest.fn(),
-            },
-          },
-        });
-
-        const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
-          attachment,
-          formatContext
-        ) as AgentFormattedAttachment;
-        const boundedTools = formatted.getBoundedTools!();
-
-        expect(boundedTools).toEqual([]);
+      it('is not defined on the connector type', () => {
+        expect(connectorType.getBoundedTools).toBeUndefined();
       });
     });
   });

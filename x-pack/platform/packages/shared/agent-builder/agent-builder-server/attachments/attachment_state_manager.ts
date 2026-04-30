@@ -29,7 +29,9 @@ import {
   isAttachmentActive,
   isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
+import type { ResolverStaleCheckItem } from '@kbn/agent-context-layer-common';
+import type { AttachmentResolveContext } from './type_definition';
+import type { ResolverTypeDefinition } from '../resolver_definition';
 
 /**
  * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
@@ -150,7 +152,7 @@ export interface CreateAttachmentStateManagerOptions {
    * Function to fetch the type definition from the attachment type registry.
    * Used to validate attachment data before storing it into conversation state.
    */
-  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
+  getTypeDefinition: (type: string) => ResolverTypeDefinition | undefined;
 }
 
 /**
@@ -587,7 +589,21 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     const definition = this.options.getTypeDefinition(type);
-    const originIsOutdated = await definition?.isStale?.(attachment, resolveContext);
+    const latestForStale = getLatestVersion(attachment);
+    if (!latestForStale) {
+      return { id, is_stale: false };
+    }
+
+    const originIsOutdated = await definition?.isStale?.(
+      {
+        id: attachment.id,
+        type: attachment.type,
+        origin: attachment.origin,
+        data: latestForStale.data,
+        origin_snapshot_at: attachment.origin_snapshot_at,
+      } satisfies ResolverStaleCheckItem,
+      resolveContext
+    );
 
     if (!originIsOutdated) {
       return { id, is_stale: false };

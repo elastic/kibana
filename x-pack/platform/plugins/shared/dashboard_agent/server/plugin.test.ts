@@ -11,7 +11,7 @@ import { dashboardManagementSkill } from './skills/dashboard_management_skill';
 
 describe('DashboardAgentPlugin', () => {
   it('registers the dashboard attachment type, skill, and SML type', () => {
-    const registerAttachmentType = jest.fn();
+    const registerResolverType = jest.fn();
     const registerSkill = jest.fn();
     const registerSmlType = jest.fn();
 
@@ -21,14 +21,19 @@ describe('DashboardAgentPlugin', () => {
       {} as never,
       {
         agentBuilder: {
-          attachments: { registerType: registerAttachmentType },
           skills: { register: registerSkill },
-          sml: { registerType: registerSmlType },
+        },
+        agentContextLayer: {
+          registerResolverType,
+          registerType: registerSmlType,
         },
       } as never
     );
 
-    expect(registerAttachmentType).toHaveBeenCalledTimes(1);
+    expect(registerResolverType).toHaveBeenCalledTimes(1);
+    expect(registerResolverType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'dashboard' })
+    );
     expect(registerSkill).toHaveBeenCalledWith(dashboardManagementSkill);
     expect(registerSmlType).toHaveBeenCalledTimes(1);
     expect(registerSmlType).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard' }));

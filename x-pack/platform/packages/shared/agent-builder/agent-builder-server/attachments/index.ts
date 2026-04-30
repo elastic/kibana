@@ -6,7 +6,6 @@
  */
 
 export type {
-  AttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
   AttachmentValidationResult,
@@ -14,6 +13,7 @@ export type {
   AttachmentFormatContext,
   AttachmentResolveContext,
 } from './type_definition';
+export type { ResolverTypeDefinition } from '../resolver_definition';
 export type {
   AttachmentBoundedTool,
   BuiltinAttachmentBoundedTool,

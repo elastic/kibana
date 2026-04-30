@@ -25,8 +25,10 @@ import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
+import { attachmentToResolverBoundedToolSnapshot } from '../../../attachments/resolver_bounded_tool_snapshot';
 import { getStoreTools } from '../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
+import { attachmentScopedBoundedToolId } from './attachment_bounded_tool_id';
 
 export interface SelectToolsResult {
   staticTools: ExecutableToolWithOrigin[];
@@ -234,14 +236,24 @@ const getVersionedAttachmentBoundTools = async ({
       ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
     };
 
+    if (!definition.getBoundedTools) {
+      continue;
+    }
+
     try {
-      const formatted = await definition.format(input, formatContext);
-      const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+      const boundedTools = await definition.getBoundedTools(
+        attachmentToResolverBoundedToolSnapshot(input),
+        formatContext
+      );
       for (const tool of boundedTools) {
-        tools.push(attachmentsService.convertAttachmentTool(tool));
+        const converted = attachmentsService.convertAttachmentTool(tool);
+        tools.push({
+          ...converted,
+          id: attachmentScopedBoundedToolId(attachment.id, converted.id),
+        });
       }
     } catch {
-      // Ignore formatting errors; bounded tools are optional.
+      // Ignore errors; bounded tools are optional.
     }
   }
 

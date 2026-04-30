@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
 import type {
-  AttachmentFormatContext,
-  AttachmentResolveContext,
-} from '@kbn/agent-builder-server/attachments';
+  ResolverFormatContext,
+  ResolverResolveContext,
+} from '@kbn/agent-context-layer-common';
 import { z } from '@kbn/zod/v4';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   workflowTools,
 } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
 
 const clientDiagnosticSchema = z.object({
   severity: z.enum(['error', 'warning']),
@@ -39,7 +39,9 @@ type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
 
 const workflowYamlOriginSchema = z.string().describe('The workflow ID to resolve');
 
-const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
+export const createWorkflowYamlAttachmentType = (
+  api: WorkflowsManagementApi
+): ResolverTypeDefinition<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlData> => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
   isReadonly: true,
   validate: (input: unknown) => {
@@ -58,72 +60,86 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   },
   resolve: async (
     origin: string,
-    context: AttachmentResolveContext
+    context: ResolverResolveContext
   ): Promise<WorkflowYamlData | undefined> => {
     const workflow = await api.getWorkflow(origin, context.spaceId);
     if (!workflow) return undefined;
     return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
   },
-  format: (attachment: { data: WorkflowYamlData }, context: AttachmentFormatContext) => {
-    const { data } = attachment;
+  format: async (
+    item: { id: string; type: string; data: unknown },
+    context: ResolverFormatContext
+  ) => {
+    const parsed = workflowYamlDataSchema.safeParse(item.data);
+    if (!parsed.success) {
+      return {
+        type: 'text' as const,
+        value: `Invalid workflow YAML attachment: ${parsed.error.message}`,
+      };
+    }
+    const data = parsed.data;
+    let validationSection = '';
+    try {
+      const result = await api.validateWorkflow(data.yaml, context.spaceId, context.request);
+      if (result.valid) {
+        validationSection = '\n\nValidation: valid';
+      } else {
+        const errors = result.diagnostics.filter(
+          (d: { severity: string }) => d.severity === 'error'
+        );
+        const warnings = result.diagnostics.filter(
+          (d: { severity: string }) => d.severity === 'warning'
+        );
+        const errorLines = errors
+          .map(
+            (d: { source: string; message: string; path?: Array<string | number> }) =>
+              `- [${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`
+          )
+          .join('\n');
+        validationSection = `\n\nValidation errors (${errors.length}):\n${errorLines}`;
+        if (warnings.length > 0) {
+          const warningLines = warnings
+            .map(
+              (d: { source: string; message: string; path?: Array<string | number> }) =>
+                `- [${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`
+            )
+            .join('\n');
+          validationSection += `\n\nValidation warnings (${warnings.length}):\n${warningLines}`;
+        }
+      }
+    } catch {
+      // Validation service unavailable; LLM can use validate_workflow tool.
+    }
+
+    if (data.clientDiagnostics && data.clientDiagnostics.length > 0) {
+      const clientErrors = data.clientDiagnostics.filter(
+        (d: { severity: string }) => d.severity === 'error'
+      );
+      const clientWarnings = data.clientDiagnostics.filter(
+        (d: { severity: string }) => d.severity === 'warning'
+      );
+      if (clientErrors.length > 0) {
+        const lines = clientErrors
+          .map((d: { source: string; message: string }) => `- [${d.source}] ${d.message}`)
+          .join('\n');
+        validationSection += `\n\nClient-side validation errors (${clientErrors.length}):\n${lines}`;
+      }
+      if (clientWarnings.length > 0) {
+        const lines = clientWarnings
+          .map((d: { source: string; message: string }) => `- [${d.source}] ${d.message}`)
+          .join('\n');
+        validationSection += `\n\nClient-side validation warnings (${clientWarnings.length}):\n${lines}`;
+      }
+    }
+
     return {
-      getRepresentation: async (): Promise<{ type: 'text'; value: string }> => {
-        let validationSection = '';
-        try {
-          const result = await api.validateWorkflow(data.yaml, context.spaceId, context.request);
-          if (result.valid) {
-            validationSection = '\n\nValidation: valid';
-          } else {
-            const errors = result.diagnostics.filter(
-              (d: { severity: string }) => d.severity === 'error'
-            );
-            const warnings = result.diagnostics.filter(
-              (d: { severity: string }) => d.severity === 'warning'
-            );
-            const errorLines = errors
-              .map(
-                (d: { source: string; message: string; path?: Array<string | number> }) =>
-                  `- [${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`
-              )
-              .join('\n');
-            validationSection = `\n\nValidation errors (${errors.length}):\n${errorLines}`;
-            if (warnings.length > 0) {
-              const warningLines = warnings
-                .map(
-                  (d: { source: string; message: string; path?: Array<string | number> }) =>
-                    `- [${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`
-                )
-                .join('\n');
-              validationSection += `\n\nValidation warnings (${warnings.length}):\n${warningLines}`;
-            }
-          }
-        } catch {
-          // Validation service unavailable; LLM can use validate_workflow tool.
-        }
-
-        if (data.clientDiagnostics && data.clientDiagnostics.length > 0) {
-          const clientErrors = data.clientDiagnostics.filter((d) => d.severity === 'error');
-          const clientWarnings = data.clientDiagnostics.filter((d) => d.severity === 'warning');
-          if (clientErrors.length > 0) {
-            const lines = clientErrors.map((d) => `- [${d.source}] ${d.message}`).join('\n');
-            validationSection += `\n\nClient-side validation errors (${clientErrors.length}):\n${lines}`;
-          }
-          if (clientWarnings.length > 0) {
-            const lines = clientWarnings.map((d) => `- [${d.source}] ${d.message}`).join('\n');
-            validationSection += `\n\nClient-side validation warnings (${clientWarnings.length}):\n${lines}`;
-          }
-        }
-
-        return {
-          type: 'text' as const,
-          value:
-            `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
-            `${validationSection}\n\n` +
-            `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.setYaml}) to modify this workflow.\n` +
-            `When inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\n` +
-            `Each edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
-        };
-      },
+      type: 'text' as const,
+      value:
+        `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
+        `${validationSection}\n\n` +
+        `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.setYaml}) to modify this workflow.\n` +
+        `When inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\n` +
+        `Each edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
     };
   },
   getTools: () => Object.values(workflowTools),
@@ -177,14 +193,3 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `- Connector-based steps require a \`connector-id\` field\n` +
     `- When fixing an error, scan the entire YAML for other occurrences of the same mistake and fix them all`,
 });
-
-export function registerWorkflowYamlAttachment(
-  agentBuilder: AgentBuilderPluginSetupContract,
-  api: WorkflowsManagementApi
-): void {
-  agentBuilder.attachments.registerType(
-    createWorkflowYamlAttachmentType(api) as Parameters<
-      typeof agentBuilder.attachments.registerType
-    >[0]
-  );
-}

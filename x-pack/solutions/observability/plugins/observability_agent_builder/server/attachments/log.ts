@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { Logger } from '@kbn/core/server';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
 import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id';
@@ -31,7 +31,7 @@ export function createLogAttachmentType({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID, LogAttachmentData> {
+}): ResolverTypeDefinition<typeof OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID, LogAttachmentData> {
   return {
     id: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
     validate: (input) => {
@@ -41,72 +41,44 @@ export function createLogAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { index, id } = attachment.data;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability Log ID: ${item.data.index}:${item.data.id}. Use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch full log document.`,
+    }),
+    getBoundedTools: (item) => {
+      const { index, id } = item.data;
+      return [
+        {
+          id: GET_LOG_DOCUMENT_TOOL_ID,
+          description: `Fetch the log document for ${index}:${id}.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const [coreStart] = await core.getStartServices();
+            const esClient = coreStart.elasticsearch.client.asScoped(abContext.request);
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability Log ID: ${index}:${id}. Use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch full log document.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_LOG_DOCUMENT_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the log document for ${index}:${id}.`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const [coreStart] = await core.getStartServices();
-                const esClient = coreStart.elasticsearch.client.asScoped(context.request);
+            const logEntry = await getLogDocumentById({
+              esClient: esClient.asCurrentUser,
+              index,
+              id,
+            });
 
-                const logEntry = await getLogDocumentById({
-                  esClient: esClient.asCurrentUser,
-                  index,
-                  id,
-                });
+            if (!logEntry) {
+              throw new Error(`Log document not found for ${index}:${id}`);
+            }
 
-                if (!logEntry) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Log document not found for ${index}:${id}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: logEntry,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(`Failed to fetch log document for attachment: ${error?.message}`);
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch log document: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: logEntry as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

@@ -85,6 +85,7 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
+      "agentContextLayer",
       "llmTasks",
       "workflowsExtensions",
       "cps",

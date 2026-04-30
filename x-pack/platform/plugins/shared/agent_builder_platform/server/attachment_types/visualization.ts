@@ -11,9 +11,9 @@ import {
   visualizationAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type {
-  AttachmentResolveContext,
-  AttachmentTypeDefinition,
-} from '@kbn/agent-builder-server/attachments';
+  ResolverResolveContext,
+  ResolverTypeDefinition,
+} from '@kbn/agent-context-layer-plugin/server';
 import {
   LensConfigBuilder,
   type LensApiConfig,
@@ -31,7 +31,7 @@ import {
  * After creation, all attachments behave identically — the agent doesn't know
  * whether something was originally by-reference.
  */
-export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
+export const createVisualizationAttachmentType = (): ResolverTypeDefinition<
   AttachmentType.visualization,
   VisualizationAttachmentData
 > => {
@@ -48,7 +48,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
 
     resolve: async (
       origin: string,
-      context: AttachmentResolveContext
+      context: ResolverResolveContext
     ): Promise<VisualizationAttachmentData | undefined> => {
       if (!context.savedObjectsClient) return undefined;
 
@@ -78,16 +78,14 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
       }
     },
 
-    format: (attachment) => ({
-      getRepresentation: () => ({
-        type: 'text',
-        value: [
-          'Visualization attachment',
-          `Query: ${attachment.data.query}`,
-          `Chart type: ${attachment.data.chart_type}`,
-          `ES|QL: ${attachment.data.esql}`,
-        ].join('\n'),
-      }),
+    format: (item) => ({
+      type: 'text',
+      value: [
+        'Visualization attachment',
+        `Query: ${item.data.query}`,
+        `Chart type: ${item.data.chart_type}`,
+        `ES|QL: ${item.data.esql}`,
+      ].join('\n'),
     }),
 
     isReadonly: false,

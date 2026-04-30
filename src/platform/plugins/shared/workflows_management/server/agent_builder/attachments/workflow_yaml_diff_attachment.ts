@@ -8,9 +8,10 @@
  */
 
 import { diffLines } from 'diff';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
+import type { ResolverFormatContext } from '@kbn/agent-context-layer-common';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
-import type { AgentBuilderPluginSetupContract } from '../../types';
 
 const workflowYamlDiffStatusSchema = z.enum(['pending', 'accepted', 'declined']);
 
@@ -42,7 +43,10 @@ const buildUnifiedDiff = (beforeYaml: string, afterYaml: string): string => {
   return result.join('\n');
 };
 
-const workflowYamlDiffAttachmentType = {
+export const workflowYamlDiffAttachmentType: ResolverTypeDefinition<
+  typeof WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+  WorkflowYamlDiffData
+> = {
   id: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
   validate: (input: unknown) => {
     const parseResult = workflowYamlDiffDataSchema.safeParse(input);
@@ -51,15 +55,21 @@ const workflowYamlDiffAttachmentType = {
     }
     return { valid: false as const, error: parseResult.error.message };
   },
-  format: (attachment: { data: WorkflowYamlDiffData }) => {
-    const { data } = attachment;
+  format: (item: { id: string; type: string; data: unknown }, _context: ResolverFormatContext) => {
+    const parsed = workflowYamlDiffDataSchema.safeParse(item.data);
+    if (!parsed.success) {
+      return {
+        type: 'text' as const,
+        value: `Invalid workflow YAML diff attachment: ${parsed.error.message}`,
+      };
+    }
+    const data = parsed.data;
     const statusLabel = data.status.toUpperCase();
     const diff = buildUnifiedDiff(data.beforeYaml, data.afterYaml);
 
     return {
-      getRepresentation: () => ({
-        type: 'text' as const,
-        value: `Workflow YAML proposed diff
+      type: 'text' as const,
+      value: `Workflow YAML proposed diff
 Proposal ID: ${data.proposalId}
 Status: ${statusLabel}
 
@@ -68,7 +78,6 @@ ${diff}
 \`\`\`
 
 If the proposal is pending, user can accept or decline it from the workflow YAML diff attachment UI.`,
-      }),
     };
   },
   getAgentDescription: () =>
@@ -79,11 +88,3 @@ If the proposal is pending, user can accept or decline it from the workflow YAML
     `so the user sees the colored diff hunks and accept/decline buttons.\n` +
     `Do NOT paste the raw diff text — the rendered attachment provides the interactive UI.`,
 };
-
-export function registerWorkflowYamlDiffAttachment(
-  agentBuilder: AgentBuilderPluginSetupContract
-): void {
-  agentBuilder.attachments.registerType(
-    workflowYamlDiffAttachmentType as Parameters<typeof agentBuilder.attachments.registerType>[0]
-  );
-}

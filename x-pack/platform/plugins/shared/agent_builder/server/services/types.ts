@@ -23,13 +23,13 @@ import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-se
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
-import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
-import type { SmlService, SmlServiceSetup } from './sml';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
@@ -40,12 +40,10 @@ import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
-  attachments: AttachmentServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
-  sml: SmlServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -63,7 +61,6 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
-  sml: SmlService;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
 }
@@ -94,4 +91,5 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  agentContextLayer: AgentContextLayerPluginStart;
 }

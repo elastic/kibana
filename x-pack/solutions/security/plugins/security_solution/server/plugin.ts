@@ -270,9 +270,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
-    registerAttachments(agentBuilder).catch((error) => {
-      this.logger.error(`Error registering security attachments: ${error}`);
-    });
+    if (plugins.agentContextLayer) {
+      registerAttachments(plugins.agentContextLayer).catch((error) => {
+        this.logger.error(`Error registering security attachments: ${error}`);
+      });
+    }
     registerSkills({
       agentBuilder,
       experimentalFeatures,

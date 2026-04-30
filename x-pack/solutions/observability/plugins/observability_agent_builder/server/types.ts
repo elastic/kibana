@@ -11,6 +11,10 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server/types';
 import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
+import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
@@ -43,6 +47,7 @@ export type ObservabilityAgentBuilderPluginStart = Record<string, never>;
 
 export interface ObservabilityAgentBuilderPluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
@@ -54,6 +59,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  agentContextLayer: AgentContextLayerPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
   metricsDataAccess: MetricsDataPluginStart;

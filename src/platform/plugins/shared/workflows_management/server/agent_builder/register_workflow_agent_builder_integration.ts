@@ -8,10 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
-import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
-import { createWorkflowSmlType } from './sml_types/workflow';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
@@ -45,12 +42,7 @@ export function registerWorkflowAgentBuilderIntegration({
 
   registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
-  registerWorkflowYamlAttachment(agentBuilder, api);
-  registerWorkflowYamlDiffAttachment(agentBuilder);
-
   agentBuilder.skills.register(workflowAuthoringSkill);
-
-  agentBuilder.sml.registerType(createWorkflowSmlType(api));
 
   logger.debug('Workflow Agent Builder integration components registered');
 }

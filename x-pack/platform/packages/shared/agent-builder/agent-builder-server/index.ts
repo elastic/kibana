@@ -6,6 +6,7 @@
  */
 
 export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
+export type { ResolverTypeDefinition } from './resolver_definition';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
