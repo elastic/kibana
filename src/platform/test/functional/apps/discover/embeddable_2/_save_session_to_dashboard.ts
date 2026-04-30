@@ -271,7 +271,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
+          '13 documents',
+          '13 documents',
+        ]);
       });
     });
   });
