@@ -17,6 +17,7 @@ import {
   SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 export type DiscoverSessionSaveDashboardModalSaveProps = OnSaveProps & {
   addToLibrary?: boolean;
@@ -27,6 +28,7 @@ export type DiscoverSessionSaveDashboardModalSaveProps = OnSaveProps & {
 
 export interface DiscoverSessionSaveDashboardModalProps {
   description?: string;
+  hasLibraryItemWithTitle: SavedSearchPublicPluginStart['hasLibraryItemWithTitle'];
   hideDashboardOptions?: boolean;
   initialTags?: string[];
   initialTimeRestore?: boolean;
@@ -42,6 +44,7 @@ export interface DiscoverSessionSaveDashboardModalProps {
 
 export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardModalProps> = ({
   description,
+  hasLibraryItemWithTitle,
   hideDashboardOptions,
   initialTags = [],
   initialTimeRestore,
@@ -125,6 +128,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
 
   return (
     <SavedObjectSaveModalDashboard
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       canSaveByReference={true}
       customModalTitle={customModalTitle}
       documentInfo={{ description, id: sessionId, title }}

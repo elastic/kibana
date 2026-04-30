@@ -34,8 +34,6 @@ export interface SaveDiscoverSessionThunkParams {
   newCopyOnSave: boolean;
   newDescription: string;
   newTags: string[];
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
 }
 
 export const saveDiscoverSession = createInternalStateAsyncThunk(
@@ -47,8 +45,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newTimeRestore,
       newDescription,
       newTags,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
     }: SaveDiscoverSessionThunkParams,
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
@@ -205,9 +201,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {
-      onTitleDuplicate,
       copyOnSave: newCopyOnSave,
-      isTitleDuplicateConfirmed,
     };
 
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);

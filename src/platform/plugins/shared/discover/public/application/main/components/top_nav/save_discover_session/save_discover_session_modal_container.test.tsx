@@ -58,13 +58,11 @@ const defaultPersistedDiscoverSession = createDiscoverSessionMock({
 const getOnSaveProps = (
   props?: Partial<Parameters<DiscoverSessionSaveDashboardModalProps['onSave']>[0]>
 ): Parameters<DiscoverSessionSaveDashboardModalProps['onSave']>[0] => ({
-  isTitleDuplicateConfirmed: false,
   newCopyOnSave: false,
   newDescription: 'description',
   newTags: [],
   newTimeRestore: false,
   newTitle: 'title',
-  onTitleDuplicate: jest.fn(),
   ...props,
 });
 
