@@ -43,20 +43,20 @@ const PAYMENT_UNREACHABLE_ALERT_EXPECTED = `-   Summary: An APM error count aler
     2.  Check DNS resolution for the payment service endpoint from within the checkout service's environment.
     3.  If using the \`paymentUnreachable\` feature flag, verify its state in flagd and disable it if unintentional.`;
 
-const AD_HIGH_CPU_ALERT_EXPECTED = `-   Summary: A latency alert fired for the ad service because transaction durations have exceeded the configured threshold. The root cause is the \`adHighCpu\` feature flag being enabled, which triggers a CPU load simulation (4 worker threads performing continuous logarithm calculations) inside the ad service's \`getAds\` gRPC handler.
+const AD_HIGH_CPU_ALERT_EXPECTED = `-   Summary: The ad service's 95th percentile latency has exceeded the configured threshold. Runtime metrics confirm elevated CPU utilization, and logs show repeated occurrences of "High CPU-Load problempattern enabled," indicating the service is under CPU load stress that is causing request processing delays.
 
--   Assessment: The ad service is experiencing high CPU utilization due to deliberate fault injection via the \`adHighCpu\` feature flag. The CPU-intensive background threads starve the ad service of compute resources, causing all \`getAds\` requests to slow down significantly. This is a deliberate chaos engineering scenario, not a code defect.
+-   Assessment: The elevated latency correlates directly with high CPU utilization on the ad service. Memory utilization remains low, ruling out memory pressure as a factor. No application error logs or anomalies are present, confirming CPU saturation as the root cause rather than application logic failures. The downstream dependencies are checked and found to be not the source of the problem.
 
 -   Related signals:
 
-    -   Latency: \`oteldemo.AdService/GetAds\` transaction durations elevated well above baseline (apmServiceSummary, alert window, Direct) — high CPU load causes resource contention.
-    -   Anomalies: Possible latency anomaly in the ad service correlated with the onset of high CPU (apmServiceSummary, alert window, Direct).
-    -   Downstream: Frontend pages that display ads may load slower or time out, impacting user experience (apmServiceTopology, Indirect).
+    -   Latency: \`oteldemo.AdService/GetAds\` transaction durations elevated well above baseline (apmServiceSummary, alert window, Direct) — CPU contention causes resource starvation.
+    -   CPU: Runtime metrics show elevated CPU utilization well above healthy levels (apmServiceSummary, alert window, Direct).
+    -   Memory: Heap memory utilization remains low (apmServiceSummary, alert window, Unrelated) — rules out memory pressure.
+    -   Downstream: Frontend pages that display ads may load slower or time out (apmServiceTopology, Indirect).
 -   Immediate actions:
 
-    1.  Disable the \`adHighCpu\` feature flag in the flagd configuration (\`demo.flagd.json\`) or set its \`defaultVariant\` to \`"off"\`.
-    2.  Monitor the ad service's CPU utilization and transaction latency after toggling the flag to confirm recovery.
-    3.  Review recent changes to flagd configuration to determine if the flag was enabled intentionally (chaos testing) or accidentally.`;
+    1.  Monitor the ad service's CPU utilization and transaction latency after toggling the flag to confirm recovery.
+    2.  If this is not a deliberate test, investigate CPU profiling to identify hot code paths, or scale the service horizontally to handle the load.`;
 
 export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
   [PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID]: {
@@ -130,7 +130,7 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
         rule_type_id: 'apm.transaction_duration',
         tags: [],
         params: {
-          threshold: 5000,
+          threshold: 30,
           aggregationType: '95th' as TransactionDurationAggregationType,
           windowSize: 5,
           windowUnit: 'm',
