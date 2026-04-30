@@ -82,5 +82,4 @@ describe('sanitize_entity_record_for_upsert', () => {
       ).entity?.relationships
     ).toEqual({ communicates_with: ['host:a'] });
   });
-
 });
