@@ -294,7 +294,13 @@ describe('WorkflowExecutionQueryService', () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
 
       await service.searchStepExecutions(
-        { workflowId: 'wf-1', includeInput: true, includeOutput: true, start: 'now-1w', end: 'now' },
+        {
+          workflowId: 'wf-1',
+          includeInput: true,
+          includeOutput: true,
+          start: 'now-1w',
+          end: 'now',
+        },
         'default'
       );
 
