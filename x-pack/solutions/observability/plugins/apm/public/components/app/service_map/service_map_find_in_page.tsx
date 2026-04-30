@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import { NODE_WIDTH, NODE_HEIGHT, CENTER_ANIMATION_DURATION_MS } from './constants';
-import { useServiceMapSearchContext } from './service_map_search_context';
+import { useServiceMapSearchContext } from '../../shared/service_map/service_map_search_context';
 
 export const SERVICE_MAP_FIND_INPUT_ID = 'serviceMapFindInPageInput';
 

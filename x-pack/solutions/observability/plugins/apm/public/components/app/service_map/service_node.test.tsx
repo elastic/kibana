@@ -10,7 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
-import { useServiceMapSearchHighlight } from './service_map_search_context';
+import { useServiceMapSearchHighlight } from '../../shared/service_map/service_map_search_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
@@ -49,8 +49,8 @@ jest.mock('./use_service_map_alerts_tab_href', () => ({
   useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('./service_map_search_context', () => ({
-  ...jest.requireActual('./service_map_search_context'),
+jest.mock('../../shared/service_map/service_map_search_context', () => ({
+  ...jest.requireActual('../../shared/service_map/service_map_search_context'),
   useServiceMapSearchHighlight: jest.fn(() => ({
     isSearchMatch: false,
     isActiveSearchMatch: false,

@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { GroupedResourcesNode } from '../../../shared/service_map/grouped_resources_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { GroupedNodeData } from '../../../../../common/service_map';
-import { ServiceMapSearchProvider } from '../service_map_search_context';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
 import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {

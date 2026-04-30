@@ -14,7 +14,7 @@ import { ServiceNode } from '../service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { ServiceMapSearchProvider } from '../service_map_search_context';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
 import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {

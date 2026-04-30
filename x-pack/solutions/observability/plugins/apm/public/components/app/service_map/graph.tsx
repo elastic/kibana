@@ -54,7 +54,7 @@ import {
 import { applyServiceMapRelayoutForFilteredView } from './relayout_service_map_for_filters';
 import { computeServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
-import { ServiceMapSearchProvider } from './service_map_search_context';
+import { ServiceMapSearchProvider } from '../../shared/service_map/service_map_search_context';
 import { ServiceMapOptionsPanel, type ServiceMapOrientation } from './service_map_options_panel';
 import type { Environment } from '../../../../common/environment_rt';
 import {
