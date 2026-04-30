@@ -6,10 +6,10 @@
  */
 
 import type {
-  AttachmentTypeDefinition,
-  AttachmentResolveContext,
-} from '@kbn/agent-builder-server/attachments';
-import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+  ResolverTypeDefinition,
+  ResolverResolveContext,
+  ResolverStaleCheckItem,
+} from '@kbn/agent-context-layer-plugin/server';
 import deepEqual from 'fast-deep-equal';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -40,13 +40,13 @@ const normalizeDashboardAttachmentData = (
 export const createDashboardAttachmentType = ({
   logger,
   getDashboardClient,
-}: CreateDashboardAttachmentTypeOptions): AttachmentTypeDefinition<
+}: CreateDashboardAttachmentTypeOptions): ResolverTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
 > => {
   const fetchDashboard = async (
     origin: string,
-    context: AttachmentResolveContext
+    context: ResolverResolveContext
   ): Promise<Awaited<ReturnType<DashboardPluginStart['client']['read']>> | undefined> => {
     if (!context.savedObjectsClient) {
       throw new Error('Saved objects client is required to read dashboard attachments');
@@ -69,7 +69,7 @@ export const createDashboardAttachmentType = ({
     },
     resolve: async (
       origin: string,
-      context: AttachmentResolveContext
+      context: ResolverResolveContext
     ): Promise<DashboardAttachmentData | undefined> => {
       try {
         const dashboard = await fetchDashboard(origin, context);
@@ -84,52 +84,38 @@ export const createDashboardAttachmentType = ({
       }
     },
     isStale: async (
-      attachment: VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData>,
-      context: AttachmentResolveContext
+      item: ResolverStaleCheckItem<DashboardAttachmentData>,
+      context: ResolverResolveContext
     ): Promise<boolean> => {
-      if (!attachment.origin || !attachment.origin_snapshot_at) {
+      if (!item.origin || !item.origin_snapshot_at) {
         return false;
       }
       try {
-        const dashboard = await fetchDashboard(attachment.origin, context);
+        const dashboard = await fetchDashboard(item.origin, context);
         const dashboardUpdatedAt = dashboard?.meta.updated_at;
         if (!dashboard || !dashboardUpdatedAt) {
           return false;
         }
 
-        if (Date.parse(dashboardUpdatedAt) > Date.parse(attachment.origin_snapshot_at)) {
-          const latestVersion = getLatestVersion(attachment);
-          if (!latestVersion) {
-            logger.warn(
-              `Attachment "${attachment.id}" has no version matching current_version ${attachment.current_version}`
-            );
-            return false;
-          }
+        if (Date.parse(dashboardUpdatedAt) > Date.parse(item.origin_snapshot_at)) {
           const resolvedDashboardData = normalizeDashboardAttachmentData(
             dashboardStateToAttachmentData(dashboard.data)
           );
           // Compare canonicalized attachment data so Lens panel shape differences do not cause false staleness.
-          return !deepEqual(
-            resolvedDashboardData,
-            normalizeDashboardAttachmentData(latestVersion.data)
-          );
+          return !deepEqual(resolvedDashboardData, normalizeDashboardAttachmentData(item.data));
         }
         return false;
       } catch (error) {
         logger.warn(
-          `Failed to check staleness for dashboard attachment "${attachment.origin}": ${error}`
+          `Failed to check staleness for dashboard attachment "${item.origin}": ${error}`
         );
         return false;
       }
     },
-    format: (attachment) => {
+    format: (item) => {
       return {
-        getRepresentation: () => {
-          return {
-            type: 'text',
-            value: formatDashboardAttachment(attachment.id, attachment.data),
-          };
-        },
+        type: 'text',
+        value: formatDashboardAttachment(item.id, item.data),
       };
     },
     getAgentDescription: () =>

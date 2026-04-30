@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import dedent from 'dedent';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../common/constants';
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
@@ -29,7 +29,7 @@ export function createAlertAttachmentType({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID, AlertAttachmentData> {
+}): ResolverTypeDefinition<typeof OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID, AlertAttachmentData> {
   return {
     id: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
     validate: (input) => {
@@ -39,73 +39,42 @@ export function createAlertAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const alertId = attachment.data.alertId;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability Alert ID: ${item.data.alertId}. Use the ${GET_ALERT_DETAILS_TOOL_ID} tool to fetch full alert information.`,
+    }),
+    getBoundedTools: (item) => {
+      const { alertId } = item.data;
+      return [
+        {
+          id: GET_ALERT_DETAILS_TOOL_ID,
+          description: `Fetch full details for alert ${alertId} including rule info, status, reason, and related entities.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const [, startDeps] = await core.getStartServices();
+            const alertsClient = await startDeps.ruleRegistry.getRacClientWithRequest(
+              abContext.request
+            );
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability Alert ID: ${alertId}. Use the ${GET_ALERT_DETAILS_TOOL_ID} tool to fetch full alert information.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_ALERT_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch full details for alert ${alertId} including rule info, status, reason, and related entities.`,
-            schema: z.object({}),
-            handler: async (_, context) => {
-              try {
-                const [, startDeps] = await core.getStartServices();
-                const alertsClient = await startDeps.ruleRegistry.getRacClientWithRequest(
-                  context.request
-                );
+            const alertDoc = await alertsClient.get({ id: alertId });
 
-                const alertDoc = await alertsClient.get({ id: alertId });
+            if (!alertDoc) {
+              throw new Error(`Alert document not found for ${alertId}`);
+            }
 
-                if (!alertDoc) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Alert document not found for ${alertId}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: alertDoc as Record<string, unknown>,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(
-                  `Failed to fetch alert ${alertId}: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`
-                );
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch alert: ${
-                          error instanceof Error ? error.message : String(error)
-                        }`,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: alertDoc as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

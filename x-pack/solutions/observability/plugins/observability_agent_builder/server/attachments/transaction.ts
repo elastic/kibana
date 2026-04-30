@@ -6,10 +6,11 @@
  */
 
 import dedent from 'dedent';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
-import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
@@ -34,7 +35,7 @@ export function createTransactionAttachmentType({
 }: {
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): AttachmentTypeDefinition<
+}): ResolverTypeDefinition<
   typeof OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
   TransactionAttachmentData
 > {
@@ -47,76 +48,49 @@ export function createTransactionAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { serviceName, transactionName, transactionType, transactionId, traceId, start, end } =
-        attachment.data;
-
+    format: (item) => {
+      const { serviceName, transactionName, transactionType } = item.data;
       return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability APM Transaction: ${transactionName} (${transactionType}) in service ${serviceName}. Use the ${GET_TRANSACTION_DETAILS_TOOL_ID} tool to fetch full transaction details.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_TRANSACTION_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the full transaction details for transaction "${transactionName}" (${transactionType}) in service ${serviceName}.`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const transactionDetails = await dataRegistry.getData('apmTransactionDetails', {
-                  request: context.request,
-                  serviceName,
-                  transactionName,
-                  transactionId,
-                  traceId,
-                  start,
-                  end,
-                });
-
-                if (!transactionDetails?.transaction) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `Transaction details not found for ${transactionName}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: transactionDetails,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(
-                  `Failed to fetch transaction details for attachment: ${error?.message}`
-                );
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch transaction details: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
-          },
-        ],
+        type: 'text',
+        value: `Observability APM Transaction: ${transactionName} (${transactionType}) in service ${serviceName}. Use the ${GET_TRANSACTION_DETAILS_TOOL_ID} tool to fetch full transaction details.`,
       };
+    },
+    getBoundedTools: (item) => {
+      const { serviceName, transactionName, transactionType, transactionId, traceId, start, end } =
+        item.data;
+      return [
+        {
+          id: GET_TRANSACTION_DETAILS_TOOL_ID,
+          description: `Fetch the full transaction details for transaction "${transactionName}" (${transactionType}) in service ${serviceName}.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const transactionDetails = await dataRegistry.getData('apmTransactionDetails', {
+              request: abContext.request,
+              serviceName,
+              transactionName,
+              transactionId,
+              traceId,
+              start,
+              end,
+            });
+
+            if (!transactionDetails?.transaction) {
+              throw new Error(`Transaction details not found for ${transactionName}`);
+            }
+
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: transactionDetails as Record<string, unknown>,
+                },
+              ],
+            };
+          },
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

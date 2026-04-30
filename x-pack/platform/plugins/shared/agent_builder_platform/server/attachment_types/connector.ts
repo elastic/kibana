@@ -10,7 +10,7 @@ import {
   AttachmentType,
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { getConnectorSpec } from '@kbn/connector-specs';
 
@@ -22,7 +22,7 @@ import { getConnectorSpec } from '@kbn/connector-specs';
  * sub-actions (with `isTool: true`) are listed directly from the spec so the
  * agent knows how to call them via `execute_connector_sub_action`.
  */
-export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
+export const createConnectorAttachmentType = (): ResolverTypeDefinition<
   AttachmentType.connector,
   ConnectorAttachmentData
 > => {
@@ -39,55 +39,49 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
       return { valid: false, error: parseResult.error.message };
     },
 
-    format: (attachment) => {
+    format: (item) => {
       const {
         connector_id: connectorId,
         connector_name: connectorName,
         connector_type: connectorType,
-      } = attachment.data;
+      } = item.data;
 
       const spec = getConnectorSpec(connectorType);
       const subActionEntries = spec
         ? Object.entries(spec.actions).filter(([, action]) => action.isTool)
         : [];
 
-      return {
-        getRepresentation: () => {
-          const description = spec?.metadata.description ?? connectorType;
+      const description = spec?.metadata.description ?? connectorType;
 
-          const parts: string[] = [
-            `Connector: ${connectorName} (${connectorType})`,
-            `Description: ${description}`,
-            `Connector ID: ${connectorId}`,
-          ];
+      const parts: string[] = [
+        `Connector: ${connectorName} (${connectorType})`,
+        `Description: ${description}`,
+        `Connector ID: ${connectorId}`,
+      ];
 
-          if (subActionEntries.length > 0) {
-            parts.push('');
-            parts.push(
-              'Available sub-actions (use the execute_connector_sub_action tool with ' +
-                `connectorId="${connectorId}"):`
-            );
-            for (const [actionName, action] of subActionEntries) {
-              const actionDesc = action.description ?? actionName;
-              const paramsSummary = action.input
-                ? formatSchemaForLlm(action.input)
-                : 'No parameters';
-              parts.push(`  - ${actionName}: ${actionDesc}`);
-              parts.push(`    Parameters: ${paramsSummary}`);
-            }
+      if (subActionEntries.length > 0) {
+        parts.push('');
+        parts.push(
+          'Available sub-actions (use the execute_connector_sub_action tool with ' +
+            `connectorId="${connectorId}"):`
+        );
+        for (const [actionName, action] of subActionEntries) {
+          const actionDesc = action.description ?? actionName;
+          const paramsSummary = action.input
+            ? formatSchemaForLlm(action.input)
+            : 'No parameters';
+          parts.push(`  - ${actionName}: ${actionDesc}`);
+          parts.push(`    Parameters: ${paramsSummary}`);
+        }
 
-            // Include skill content after the sub-action listing
-            if (spec?.skill) {
-              parts.push('');
-              parts.push(spec.skill);
-            }
-          }
+        // Include skill content after the sub-action listing
+        if (spec?.skill) {
+          parts.push('');
+          parts.push(spec.skill);
+        }
+      }
 
-          return { type: 'text', value: parts.join('\n') };
-        },
-
-        getBoundedTools: () => [],
-      };
+      return { type: 'text', value: parts.join('\n') };
     },
 
     getTools: () => [],

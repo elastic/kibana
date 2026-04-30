@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -35,7 +35,7 @@ const smlSearchSchema = z.object({
  * Searches the Semantic Metadata Layer for items matching a query.
  */
 export const createSmlSearchTool = ({
-  getSmlService,
+  getAgentContextLayer,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlSearchSchema> => ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
@@ -44,13 +44,15 @@ export const createSmlSearchTool = ({
     'Provide a natural-language query string; titles and types are matched using Elasticsearch text analysis (bool_prefix on search_as_you_type fields). ' +
     'Pass "*" to return all available assets. ' +
     'Each result includes a title, content snippet, attachment_id, attachment_type, and chunk_id. ' +
-    'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
+    'To inspect a result without attaching, pass its chunk_id to sml_read; to add it as a conversation attachment, use sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      const enabled = await uiSettings.get<boolean>(
+        AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+      );
       return enabled
         ? { status: 'available' }
         : {
@@ -60,12 +62,12 @@ export const createSmlSearchTool = ({
     },
   },
   handler: async ({ query, size }, context) => {
-    const smlService = getSmlService();
+    const agentContextLayer = getAgentContextLayer();
     const { spaceId, esClient, request } = context;
 
     let searchResult;
     try {
-      searchResult = await smlService.search({
+      searchResult = await agentContextLayer.search({
         query,
         size,
         spaceId,

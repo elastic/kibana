@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import {
   SERVICE_MAP_ATTACHMENT_TYPE,
   serviceMapAttachmentDataSchema,
   type ServiceMapAttachmentData,
 } from '../../../common/agent_builder/attachments';
 
-export const createServiceMapAttachmentType = (): AttachmentTypeDefinition<
+export const createServiceMapAttachmentType = (): ResolverTypeDefinition<
   typeof SERVICE_MAP_ATTACHMENT_TYPE,
   ServiceMapAttachmentData
 > => {
@@ -28,14 +28,10 @@ export const createServiceMapAttachmentType = (): AttachmentTypeDefinition<
       }
       return { valid: true, data: parseResult.data };
     },
-    format: (attachment) => {
-      return {
-        getRepresentation: () => ({
-          type: 'text' as const,
-          value: JSON.stringify(attachment.data),
-        }),
-      };
-    },
+    format: (item) => ({
+      type: 'text' as const,
+      value: JSON.stringify(item.data),
+    }),
     getAgentDescription: () =>
       'A service map attachment showing the topology of services and their dependencies with RED metrics (latency, throughput, error rate) on each connection. Rendered as an interactive graph with service nodes (circles) and dependency nodes (diamonds).',
     getTools: () => [],

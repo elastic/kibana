@@ -12,4 +12,4 @@ export {
   attachmentToolIds,
   type AttachmentToolsOptions,
 } from './attachments';
-export { createSmlTools, smlToolIds, type SmlToolsOptions } from './sml';
+export { createSmlTools, smlToolIds, type SmlToolsOptions, type SmlReadResolverService } from './sml';

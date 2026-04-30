@@ -5,14 +5,27 @@
  * 2.0.
  */
 
-import type { SmlService } from '../../../sml';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
+import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
+
+/**
+ * Narrow resolver registry for {@link createSmlReadTool} — `format` / `getBoundedTools`
+ * without coupling to attachment persistence or the full tool handler context.
+ */
+export interface SmlReadResolverService {
+  getResolverType(typeId: string): ResolverTypeDefinition | undefined;
+}
 
 /**
  * Options for creating SML tools.
- * Uses a getter for lazy resolution — the SML service start contract
+ * Uses getters for lazy resolution — the agent context layer start contract
  * is not available until after plugin start.
  */
 export interface SmlToolsOptions {
-  /** Lazy getter for the SML service (resolved at handler invocation time). */
-  getSmlService: () => SmlService;
+  getAgentContextLayer: () => AgentContextLayerPluginStart;
+  /**
+   * Resolver types backing SML attachment payloads (same registry as conversation attachments).
+   * Injected so only `sml_read` depends on it; other SML tools ignore this field.
+   */
+  getSmlReadResolverService: () => SmlReadResolverService;
 }

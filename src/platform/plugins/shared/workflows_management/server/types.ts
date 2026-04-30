@@ -14,7 +14,6 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 import type {
@@ -42,7 +41,6 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { ZodObject } from '@kbn/zod/v4';
-import type { SmlTypeDefinition } from './agent_builder/sml_types/types';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
@@ -65,15 +63,9 @@ export interface AgentBuilderPluginSetupContract {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- any is used by the original type
     register: <RunInput extends ZodObject<any>>(tool: StaticToolRegistration<RunInput>) => void;
   };
-  attachments: {
-    registerType: (definition: AttachmentTypeDefinition) => void;
-  };
   hooks: HooksServiceSetup;
   skills: {
     register: (definition: SkillDefinition) => void;
-  };
-  sml: {
-    registerType: (definition: SmlTypeDefinition) => void;
   };
 }
 

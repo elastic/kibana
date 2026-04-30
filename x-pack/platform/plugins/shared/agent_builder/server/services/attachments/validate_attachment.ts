@@ -6,12 +6,15 @@
  */
 
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentResolveContext,
-  AttachmentTypeDefinition,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { AttachmentTypeRegistry } from './attachment_type_registry';
+
+/** Read resolver definitions from the Agent Context Layer registry (see plan 022). */
+export interface ResolverTypeLookup {
+  has(typeId: string): boolean;
+  get(typeId: string): ResolverTypeDefinition | undefined;
+}
 
 export type ValidateAttachmentResult<Type extends string, Data> =
   | { valid: true; attachment: Attachment<Type, Data> }
@@ -19,18 +22,18 @@ export type ValidateAttachmentResult<Type extends string, Data> =
 
 export const validateAttachment = async <Type extends string, Data>({
   attachment,
-  registry,
+  resolverLookup,
   resolveContext,
 }: {
   attachment: AttachmentInput<Type, Data>;
-  registry: AttachmentTypeRegistry;
+  resolverLookup: ResolverTypeLookup;
   resolveContext: AttachmentResolveContext;
 }): Promise<ValidateAttachmentResult<Type, Data>> => {
-  if (!registry.has(attachment.type)) {
+  if (!resolverLookup.has(attachment.type)) {
     return { valid: false, error: `Unknown attachment type: ${attachment.type}` };
   }
 
-  const typeDefinition = registry.get(attachment.type)!;
+  const typeDefinition = resolverLookup.get(attachment.type)!;
 
   try {
     const resolvedData = await resolveAttachment({ attachment, resolveContext, typeDefinition });
@@ -62,7 +65,7 @@ const resolveAttachment = async <Type extends string, Data>({
 }: {
   attachment: AttachmentInput<Type, Data>;
   resolveContext: AttachmentResolveContext;
-  typeDefinition: AttachmentTypeDefinition;
+  typeDefinition: ResolverTypeDefinition;
 }): Promise<Data> => {
   if (attachment.data !== undefined) {
     return attachment.data;
@@ -75,7 +78,17 @@ const resolveAttachment = async <Type extends string, Data>({
   if (!typeDefinition.resolve) {
     throw new Error(`Attachment type "${attachment.type}" does not support resolving from origin`);
   }
-  const resolved = await typeDefinition.resolve(attachment.origin, resolveContext);
+
+  let originForResolve = attachment.origin as string;
+  if (typeDefinition.validateOrigin) {
+    const originValidation = await typeDefinition.validateOrigin(attachment.origin);
+    if (!originValidation.valid) {
+      throw new Error(originValidation.error);
+    }
+    originForResolve = originValidation.data;
+  }
+
+  const resolved = await typeDefinition.resolve(originForResolve, resolveContext);
   if (resolved == null) {
     throw new Error(
       `Failed to resolve content from origin for attachment type "${attachment.type}"`

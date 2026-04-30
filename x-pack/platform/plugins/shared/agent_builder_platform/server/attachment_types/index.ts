@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
@@ -26,9 +26,9 @@ export const registerAttachmentTypes = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { agentBuilder } = setupDeps;
+  const { agentContextLayer } = setupDeps;
 
-  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
+  const attachmentTypes: ResolverTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
@@ -38,6 +38,6 @@ export const registerAttachmentTypes = ({
   ];
 
   attachmentTypes.forEach((attachmentType) => {
-    agentBuilder.attachments.registerType(attachmentType);
+    agentContextLayer.registerResolverType(attachmentType);
   });
 };

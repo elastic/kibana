@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
@@ -97,7 +97,7 @@ const riskEntityAttachmentDataSchema = z.union([
 /**
  * Creates the definition for the `entity` attachment type.
  */
-export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
+export const createEntityAttachmentType = (): ResolverTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.entity,
     validate: (input) => {
@@ -108,7 +108,7 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: () => ({}),
+    format: (item) => ({ type: 'text', value: JSON.stringify(item.data) }),
     getTools: () => [SECURITY_ENTITY_RISK_SCORE_TOOL_ID],
     getAgentDescription: () => {
       return `You have access to one or more risk entities that need to be evaluated. Each entity has an identifierType and identifier that you should use to query the risk score.

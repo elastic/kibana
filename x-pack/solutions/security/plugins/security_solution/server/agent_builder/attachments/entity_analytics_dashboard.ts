@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
@@ -102,7 +101,7 @@ const formatDashboardForAgent = (
   return lines.join('\n');
 };
 
-export const createEntityAnalyticsDashboardAttachmentType = (): AttachmentTypeDefinition => {
+export const createEntityAnalyticsDashboardAttachmentType = (): ResolverTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
     validate: (input) => {
@@ -113,18 +112,14 @@ export const createEntityAnalyticsDashboardAttachmentType = (): AttachmentTypeDe
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment: Attachment<string, unknown>) => {
-      const data = attachment.data;
+    format: (item) => {
+      const data = item.data;
       if (!isEntityAnalyticsDashboardAttachmentData(data)) {
         throw new Error(
-          `Invalid entity analytics dashboard attachment data for attachment ${attachment.id}`
+          `Invalid entity analytics dashboard attachment data for attachment ${item.id}`
         );
       }
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: formatDashboardForAgent(attachment.id, data) };
-        },
-      };
+      return { type: 'text', value: formatDashboardForAgent(item.id, data) };
     },
     getTools: () => [],
     getAgentDescription: () => {

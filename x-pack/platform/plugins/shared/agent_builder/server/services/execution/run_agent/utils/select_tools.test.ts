@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import { selectTools } from './select_tools';
+import { attachmentScopedBoundedToolId } from './attachment_bounded_tool_id';
 
 jest.mock('../../../tools/builtin/attachments', () => {
   // Keep mock dependencies local to the factory to satisfy Jest hoisting rules.
@@ -118,9 +119,7 @@ describe('selectTools', () => {
     };
     const convertedBoundedTool = createExecutableTool('attachment.inline');
     const attachmentDefinition = {
-      format: jest.fn().mockResolvedValue({
-        getBoundedTools: jest.fn().mockResolvedValue([boundedTool]),
-      }),
+      getBoundedTools: jest.fn().mockResolvedValue([boundedTool]),
     };
 
     const attachmentsService = {
@@ -159,8 +158,76 @@ describe('selectTools', () => {
     });
 
     // Attachment-scoped bounded tools are treated as inline because they are not registry entries.
-    expect(result.staticTools.find((tool) => tool.id === 'attachment.inline')?.origin).toBe(
-      ToolOrigin.inline
+    // Ids are prefixed with a short hash of the attachment id so duplicate resolver types do not collide
+    // after dedupe, and names stay within connector tool name length limits.
+    expect(
+      result.staticTools.find(
+        (tool) => tool.id === attachmentScopedBoundedToolId('a-1', 'attachment.inline')
+      )?.origin
+    ).toBe(ToolOrigin.inline);
+  });
+
+  it('prefixes bounded tool ids per attachment so same-type attachments do not dedupe', async () => {
+    const boundedTool = {
+      id: 'same_bounded',
+      type: ToolType.builtin,
+    };
+    const convertedBoundedTool = createExecutableTool('same_bounded');
+    const attachmentDefinition = {
+      getBoundedTools: jest.fn().mockResolvedValue([boundedTool]),
+    };
+
+    const attachmentsService = {
+      getTypeDefinition: jest.fn().mockReturnValue(attachmentDefinition),
+      convertAttachmentTool: jest.fn().mockReturnValue(convertedBoundedTool),
+    } as any;
+
+    const result = await selectTools({
+      conversation: {
+        attachmentTypes: [],
+        attachmentStateManager: {
+          getActive: jest.fn().mockReturnValue([
+            {
+              id: 'att-1',
+              type: 'text',
+              active: true,
+              current_version: 1,
+              versions: [{ version: 1, data: 'a', created_at: 'now', content_hash: 'h1' }],
+            },
+            {
+              id: 'att-2',
+              type: 'text',
+              active: true,
+              current_version: 1,
+              versions: [{ version: 1, data: 'b', created_at: 'now', content_hash: 'h2' }],
+            },
+          ]),
+        },
+      } as any,
+      previousDynamicToolIds: [],
+      filteredSkills: [],
+      skills: { convertSkillTool: jest.fn() } as any,
+      request: {} as any,
+      toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
+      agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
+      attachmentsService,
+      filestore: {} as any,
+      spaceId: 'default',
+      runner: {
+        runInternalTool: jest.fn(),
+      } as any,
+      experimentalFeatures: { filestore: false } as any,
+    });
+
+    const ids = result.staticTools
+      .filter((t) => t.origin === ToolOrigin.inline && t.id.includes('same_bounded'))
+      .map((t) => t.id)
+      .sort();
+    expect(ids).toEqual(
+      [
+        attachmentScopedBoundedToolId('att-1', 'same_bounded'),
+        attachmentScopedBoundedToolId('att-2', 'same_bounded'),
+      ].sort()
     );
   });
 });

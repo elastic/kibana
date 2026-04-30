@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttachmentBoundedTool, AttachmentTypeDefinition } from '../attachments';
+import type { AttachmentBoundedTool } from '../attachments';
+import type { ResolverTypeDefinition } from '../resolver_definition';
 import type { ExecutableTool } from './tool_provider';
 
 /**
@@ -15,7 +16,7 @@ export interface AttachmentsService {
   /**
    * Returns the full definition for an attachment type
    */
-  getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
+  getTypeDefinition(type: string): ResolverTypeDefinition | undefined;
   /**
    * Returns the IDs of all registered attachment types.
    */

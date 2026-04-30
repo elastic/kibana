@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
+import { createWorkflowYamlAttachmentType } from './workflow_yaml_attachment';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   workflowTools,
 } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
 
 interface RegisteredAttachmentType {
   id: string;
@@ -27,32 +26,24 @@ interface RegisteredAttachmentType {
     context: { spaceId: string }
   ) => Promise<{ yaml: string; workflowId: string; name: string } | undefined>;
   format: (
-    attachment: {
+    item: {
+      id: string;
+      type: string;
       data: {
         yaml: string;
         clientDiagnostics?: Array<{ severity: string; message: string; source: string }>;
       };
     },
     context: { spaceId: string; request: unknown }
-  ) => {
-    getRepresentation: () => Promise<{ type: 'text'; value: string }>;
-  };
+  ) => Promise<{ type: 'text'; value: string }>;
   getTools: () => string[];
   getAgentDescription: () => string;
 }
 
 const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
-  let registeredType: RegisteredAttachmentType | undefined;
-  const mockAgentBuilder = {
-    attachments: {
-      registerType: jest.fn((type: unknown) => {
-        registeredType = type as RegisteredAttachmentType;
-      }),
-    },
-  } as unknown as AgentBuilderPluginSetupContract;
-
-  registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi);
-  return registeredType!;
+  return createWorkflowYamlAttachmentType(
+    api as WorkflowsManagementApi
+  ) as RegisteredAttachmentType;
 };
 
 describe('workflow_yaml_attachment', () => {
@@ -115,15 +106,16 @@ describe('workflow_yaml_attachment', () => {
       const type = registerAndCapture({ validateWorkflow });
       const request = { headers: { authorization: 'Bearer token' } };
 
-      const { getRepresentation } = type.format(
+      const result = await type.format(
         {
+          id: 'wf-1',
+          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
           data: {
             yaml: 'version: "1"',
           },
         },
         { spaceId: 'default', request }
       );
-      const result = await getRepresentation();
 
       expect(validateWorkflow).toHaveBeenCalledWith('version: "1"', 'default', request);
       expect(result.value).toContain('Validation: valid');
@@ -139,8 +131,10 @@ describe('workflow_yaml_attachment', () => {
       });
       const type = registerAndCapture({ validateWorkflow });
 
-      const { getRepresentation } = type.format(
+      const result = await type.format(
         {
+          id: 'wf-2',
+          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
           data: {
             yaml: 'version: "1"',
             clientDiagnostics: [
@@ -150,7 +144,6 @@ describe('workflow_yaml_attachment', () => {
         },
         { spaceId: 'default', request: {} }
       );
-      const result = await getRepresentation();
 
       expect(validateWorkflow).toHaveBeenCalledWith('version: "1"', 'default', {});
       expect(result.type).toBe('text');
@@ -166,15 +159,16 @@ describe('workflow_yaml_attachment', () => {
       const validateWorkflow = jest.fn().mockRejectedValue(new Error('validation unavailable'));
       const type = registerAndCapture({ validateWorkflow });
 
-      const { getRepresentation } = type.format(
+      const result = await type.format(
         {
+          id: 'wf-3',
+          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
           data: {
             yaml: 'version: "1"',
           },
         },
         { spaceId: 'default', request: {} }
       );
-      const result = await getRepresentation();
 
       expect(result.type).toBe('text');
       expect(result.value).toContain('```yaml\nversion: "1"\n```');
