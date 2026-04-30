@@ -13,7 +13,9 @@ import {
   extractStatsGroupColumns,
   extractWhereExpression,
   getStatsQueryHints,
+  hasSameEsql,
   hasStatsCommand,
+  normalizeEsqlSafe,
 } from './esql_helpers';
 
 describe('extractWhereExpression', () => {
@@ -282,5 +284,119 @@ describe('extractBucketColumnName', () => {
 
   it('returns null on parse failure', () => {
     expect(extractBucketColumnName('INVALID {{{')).toBeNull();
+  });
+});
+
+describe('normalizeEsqlSafe', () => {
+  it('uppercases commands and collapses whitespace', () => {
+    expect(normalizeEsqlSafe('from  logs  |  where   x  >  1')).toBe('FROM logs | WHERE x > 1');
+  });
+
+  it('sorts commutative AND operands alphabetically', () => {
+    expect(normalizeEsqlSafe('FROM logs | WHERE b:"y" AND a:"x"')).toBe(
+      normalizeEsqlSafe('FROM logs | WHERE a:"x" AND b:"y"')
+    );
+  });
+
+  it('sorts commutative OR operands alphabetically', () => {
+    expect(normalizeEsqlSafe('FROM logs | WHERE c OR a OR b')).toBe(
+      normalizeEsqlSafe('FROM logs | WHERE a OR b OR c')
+    );
+  });
+
+  it('normalizes nested AND/OR chains', () => {
+    const a = 'FROM logs | WHERE (z OR a) AND (y OR b)';
+    const b = 'FROM logs | WHERE (b OR y) AND (a OR z)';
+    expect(normalizeEsqlSafe(a)).toBe(normalizeEsqlSafe(b));
+  });
+
+  it('does not reorder across different operators', () => {
+    const q1 = normalizeEsqlSafe('FROM logs | WHERE a AND (b OR c)');
+    const q2 = normalizeEsqlSafe('FROM logs | WHERE (b OR c) AND a');
+    expect(q1).toBe(q2);
+
+    const q3 = normalizeEsqlSafe('FROM logs | WHERE a OR (b AND c)');
+    const q4 = normalizeEsqlSafe('FROM logs | WHERE (b AND c) OR a');
+    expect(q3).toBe(q4);
+  });
+
+  it('returns deterministic output for garbage input that the parser accepts', () => {
+    const a = normalizeEsqlSafe('INVALID   ESQL  {{{');
+    const b = normalizeEsqlSafe('INVALID ESQL {{{');
+    expect(a).toBe(b);
+  });
+
+  it('handles real-world multi-term match queries', () => {
+    const a = 'FROM logs | WHERE body.text:"timeout" AND body.text:"connection"';
+    const b = 'FROM logs | WHERE body.text:"connection" AND body.text:"timeout"';
+    expect(normalizeEsqlSafe(a)).toBe(normalizeEsqlSafe(b));
+  });
+
+  it('handles entity-scoped queries with swapped conditions', () => {
+    const a =
+      'FROM logs | WHERE service.name == "api" AND body.text:"error" AND log.level == "ERROR"';
+    const b =
+      'FROM logs | WHERE log.level == "ERROR" AND body.text:"error" AND service.name == "api"';
+    expect(normalizeEsqlSafe(a)).toBe(normalizeEsqlSafe(b));
+  });
+
+  it('preserves all operands in right-nested AND trees', () => {
+    const rightNested = normalizeEsqlSafe('FROM logs | WHERE a:"x" AND (b:"y" AND c:"z")');
+    const leftAssoc = normalizeEsqlSafe('FROM logs | WHERE a:"x" AND b:"y" AND c:"z"');
+    expect(rightNested).toBe(leftAssoc);
+    expect(rightNested).toContain('c');
+  });
+
+  it('preserves all operands in right-nested OR trees', () => {
+    const rightNested = normalizeEsqlSafe('FROM logs | WHERE a OR (b OR c)');
+    const leftAssoc = normalizeEsqlSafe('FROM logs | WHERE a OR b OR c');
+    expect(rightNested).toBe(leftAssoc);
+    expect(rightNested).toContain('c');
+  });
+
+  it('handles mixed nesting: AND(AND(a, b), AND(c, d))', () => {
+    const mixed = normalizeEsqlSafe('FROM logs | WHERE (a:"w" AND b:"x") AND (c:"y" AND d:"z")');
+    const flat = normalizeEsqlSafe('FROM logs | WHERE a:"w" AND b:"x" AND c:"y" AND d:"z"');
+    expect(mixed).toBe(flat);
+  });
+
+  it('handles STATS queries without altering structure', () => {
+    const q =
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10';
+    const normalized = normalizeEsqlSafe(q);
+    expect(normalized).toContain('STATS');
+    expect(normalized).toContain('BUCKET');
+  });
+});
+
+describe('hasSameEsql', () => {
+  it('returns true for identical queries', () => {
+    expect(hasSameEsql('FROM logs | WHERE x > 1', 'FROM logs | WHERE x > 1')).toBe(true);
+  });
+
+  it('returns true for whitespace-different queries', () => {
+    expect(hasSameEsql('FROM  logs  |  WHERE  x > 1', 'FROM logs | WHERE x > 1')).toBe(true);
+  });
+
+  it('returns true for commutative AND reorderings', () => {
+    expect(
+      hasSameEsql('FROM logs | WHERE a:"x" AND b:"y"', 'FROM logs | WHERE b:"y" AND a:"x"')
+    ).toBe(true);
+  });
+
+  it('returns false for semantically different queries', () => {
+    expect(hasSameEsql('FROM logs | WHERE a:"x"', 'FROM logs | WHERE b:"y"')).toBe(false);
+  });
+
+  it('returns false when one has additional conditions', () => {
+    expect(hasSameEsql('FROM logs | WHERE a:"x"', 'FROM logs | WHERE a:"x" AND b:"y"')).toBe(false);
+  });
+
+  it('treats garbage inputs that the parser accepts consistently', () => {
+    expect(hasSameEsql('BAD  QUERY  {{{', 'BAD QUERY {{{')).toBe(true);
+  });
+
+  it('distinguishes valid but different queries', () => {
+    expect(hasSameEsql('FROM logs | WHERE a > 1', 'FROM logs | WHERE b > 2')).toBe(false);
   });
 });

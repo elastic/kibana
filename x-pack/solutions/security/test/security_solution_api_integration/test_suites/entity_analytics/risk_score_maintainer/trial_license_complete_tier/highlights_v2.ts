@@ -75,6 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
         waitForEntities: false,
+        maintainerAutoStart: true,
       });
 
       // Wait for the risk score data stream to be fully created before indexing into it.

@@ -26,8 +26,6 @@ export const CellValueHost: GetAlertsTableProp<'renderCellValue'> = (props) => {
     renderCellValue: CellValue = DefaultCellValue,
     isLoading,
     alerts,
-    oldAlertsData,
-    ecsAlertsData,
     cases,
     maintenanceWindows,
     showAlertStatusWithFlapping,
@@ -38,8 +36,6 @@ export const CellValueHost: GetAlertsTableProp<'renderCellValue'> = (props) => {
   } = props;
   const idx = rowIndex - pageSize * pageIndex;
   const alert = alerts[idx];
-  const legacyAlert = oldAlertsData[idx];
-  const ecsAlert = ecsAlertsData[idx];
   if (isSystemCell(columnId) && alert) {
     return (
       <SystemCell
@@ -57,7 +53,7 @@ export const CellValueHost: GetAlertsTableProp<'renderCellValue'> = (props) => {
   if (alert) {
     return (
       <ErrorBoundary fallback={ErrorCell}>
-        <CellValue {...props} alert={alert} legacyAlert={legacyAlert} ecsAlert={ecsAlert} />
+        <CellValue {...props} alert={alert} />
       </ErrorBoundary>
     );
   }

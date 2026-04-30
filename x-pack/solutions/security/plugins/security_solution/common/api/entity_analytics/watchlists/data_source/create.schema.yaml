@@ -48,6 +48,8 @@ paths:
                     $ref: "./common.schema.yaml#/components/schemas/Matcher"
                 filter:
                   $ref: "./common.schema.yaml#/components/schemas/Filter"
+                range:
+                  $ref: "./common.schema.yaml#/components/schemas/DateRange"
       responses:
         "200":
           description: Entity source created successfully

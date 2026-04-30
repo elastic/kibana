@@ -41,20 +41,6 @@ jest.mock('@xyflow/react', () => {
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-test-subj="serviceMapControls">{children}</div>
     ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
-    ),
     MiniMap: (props: Record<string, unknown>) => {
       mockMinimapProps = props;
       return (
@@ -92,7 +78,7 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
 }));
 

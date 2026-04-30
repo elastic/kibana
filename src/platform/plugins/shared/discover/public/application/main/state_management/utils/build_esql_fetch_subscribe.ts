@@ -116,8 +116,12 @@ export const buildEsqlFetchSubscribe = ({
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
-    if (next.result?.length) {
-      nextAllColumns = Object.keys(next.result[0].raw);
+    const responseColumns =
+      next.esqlQueryColumns?.map((c) => c.name) ??
+      (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
+
+    if (responseColumns !== undefined) {
+      nextAllColumns = responseColumns;
 
       if (
         hasTransformationalCommand(nextQuery.esql) ||
@@ -152,12 +156,13 @@ export const buildEsqlFetchSubscribe = ({
 
     const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-
     // If the index pattern hasn't changed, but the available columns have changed
     // due to transformational commands, mark the associated profile state fields to reset
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        // This reset comes from the current fetch, so keep the same resetId.
+        // Otherwise the snapshot taken at fetch start looks stale when cleanup runs.
+        injectCurrentTab(internalStateActions.setProfileStateFieldsToResetWithoutResetId)({
           fieldsToReset: ['columns'],
         })
       );

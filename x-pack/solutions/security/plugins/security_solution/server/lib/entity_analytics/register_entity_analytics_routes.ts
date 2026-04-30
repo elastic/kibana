@@ -27,9 +27,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
   }
   registerPrivilegeMonitoringRoutes(routeDeps);
 
-  if (routeDeps.config.experimentalFeatures.entityDetailsHighlightsEnabled) {
-    registerEntityDetailsRoutes(routeDeps);
-  }
+  registerEntityDetailsRoutes(routeDeps);
 
   if (routeDeps.config.experimentalFeatures.leadGenerationEnabled) {
     registerLeadGenerationRoutes(routeDeps);

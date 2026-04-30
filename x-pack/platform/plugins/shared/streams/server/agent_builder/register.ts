@@ -9,26 +9,29 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamsManagementSkill } from './skills/streams_management_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
   isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  agentBuilder.skills.register(streamsManagementSkill);
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry });
 
   const getMemoryService = () =>
     new MemoryServiceImpl({
@@ -38,7 +41,7 @@ export const registerStreamsAgentBuilder = async ({
 
   // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
   // This avoids exposing the skill to the agent when memory is not configured.
-  // Call ensureMemorySkillRegistered() after enabling observability:streamsEnableMemory.
+  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -59,5 +62,16 @@ export const registerStreamsAgentBuilder = async ({
     ensureMemorySkillRegistered();
   }
 
-  return { ensureMemorySkillRegistered };
+  return {
+    ensureMemorySkillRegistered,
+    /**
+     * Call this from a uiSettings change subscription (e.g. in plugin start)
+     * to auto-register the memory skill when the setting is toggled on.
+     */
+    onMemorySettingChanged: async () => {
+      if (await isMemoryEnabled()) {
+        ensureMemorySkillRegistered();
+      }
+    },
+  };
 };

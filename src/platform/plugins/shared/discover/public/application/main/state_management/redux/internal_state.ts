@@ -416,6 +416,17 @@ export const internalStateSlice = createSlice({
         }),
     },
 
+    setProfileStateFieldsToResetWithoutResetId: (
+      state,
+      action: TabAction<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.defaultProfileState = {
+          ...tab.defaultProfileState,
+          fieldsToReset: action.payload.fieldsToReset,
+        };
+      }),
+
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;

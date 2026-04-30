@@ -53,11 +53,21 @@ describe('updated at column builder', () => {
       expect(result).toMatchObject({ name: 'Modified' });
     });
 
-    it('applies custom width', () => {
-      const props: UpdatedAtColumnProps = { width: '150px' };
+    it('applies custom layout props', () => {
+      const props: UpdatedAtColumnProps = {
+        width: '12em',
+        minWidth: '12em',
+        maxWidth: '14em',
+        truncateText: false,
+      };
       const result = buildUpdatedAtColumn(props, defaultContext);
 
-      expect(result).toMatchObject({ width: '150px' });
+      expect(result).toMatchObject({
+        width: '12em',
+        minWidth: '12em',
+        maxWidth: '14em',
+        truncateText: false,
+      });
     });
 
     it('does not include width when not specified', () => {
