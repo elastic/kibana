@@ -72,7 +72,6 @@
     "src/platform/packages/shared/shared-ux/button_toolbar": "'button_toolbar' should be kebab-case",
     "src/platform/packages/shared/shared-ux/button/exit_full_screen": "'exit_full_screen' should be kebab-case",
     "src/platform/packages/shared/shared-ux/error_boundary": "'error_boundary' should be kebab-case",
-    "src/platform/packages/shared/shared-ux/feedback_snippet": "'feedback_snippet' should be kebab-case",
     "src/platform/packages/shared/shared-ux/label_formatter": "'label_formatter' should be kebab-case",
     "src/platform/packages/shared/shared-ux/page/solution_nav": "'solution_nav' should be kebab-case",
     "src/platform/packages/shared/shared-ux/prompt/not_found": "'not_found' should be kebab-case",
