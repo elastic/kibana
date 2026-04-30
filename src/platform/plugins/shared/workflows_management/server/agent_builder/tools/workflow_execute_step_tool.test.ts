@@ -9,12 +9,14 @@
 
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, type InternalConnectorContract } from '@kbn/workflows';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import {
   registerWorkflowExecuteStepTool,
+  SAFE_STEP_TYPES,
   WORKFLOW_EXECUTE_STEP_TOOL_ID,
 } from './workflow_execute_step_tool';
+import { getAllConnectorsInternal } from '../../../common/schema';
 
 const VALID_WORKFLOW_YAML = `version: '1'
 name: test-workflow
@@ -591,5 +593,35 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(stubbedYaml).toContain('name: __stub_fallback');
       expect(stubbedYaml).not.toContain('name: fallback_http');
     });
+  });
+});
+
+describe('SAFE_STEP_TYPES policy', () => {
+  it('keeps connector-backed safe steps aligned with audited connector contracts', () => {
+    const auditedSafeConnectorMethods: Record<string, readonly string[]> = {
+      'elasticsearch.search': ['GET', 'POST'],
+      'elasticsearch.esql.query': ['POST'],
+      'elasticsearch.indices.exists': ['HEAD'],
+      'kibana.getCase': ['GET'],
+      'kibana.streams.list': ['GET'],
+      'kibana.streams.get': ['GET'],
+      'kibana.streams.getSignificantEvents': ['GET'],
+    };
+
+    const internalConnectors = new Map(
+      getAllConnectorsInternal()
+        .filter((connector): connector is InternalConnectorContract => 'methods' in connector)
+        .map((connector) => [connector.type, connector])
+    );
+
+    const connectorBackedSafeSteps = Array.from(SAFE_STEP_TYPES)
+      .filter((stepType) => internalConnectors.has(stepType))
+      .sort();
+
+    expect(connectorBackedSafeSteps).toEqual(Object.keys(auditedSafeConnectorMethods).sort());
+
+    for (const [stepType, expectedMethods] of Object.entries(auditedSafeConnectorMethods)) {
+      expect(internalConnectors.get(stepType)?.methods).toEqual(expectedMethods);
+    }
   });
 });

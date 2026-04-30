@@ -26,7 +26,7 @@ import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
-const SAFE_STEP_TYPES = new Set([
+export const SAFE_STEP_TYPES = new Set([
   'console',
   'data.set',
   'data.map',
