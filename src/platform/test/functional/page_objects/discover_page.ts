@@ -248,7 +248,9 @@ export class DiscoverPageObject extends FtrService {
       timeout: this.defaultFindTimeout * 10,
     });
     // does not show "Cancel" button when searching, so we can use it to determine that searching has finished
-    await this.testSubjects.missingOrFail('queryCancelButton');
+    await this.testSubjects.missingOrFail('queryCancelButton', {
+      timeout: this.defaultFindTimeout * 10,
+    });
   }
 
   public async waitUntilTabIsLoaded() {
