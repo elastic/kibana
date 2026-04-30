@@ -71,7 +71,7 @@ builds directly — no page-size guessing needed:
 
 ```bash
 curl -sf -H "$BK_AUTH" \
-  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?pull_request_id=$PR&state=failed&per_page=1" \
+  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?pull_request_id=$PR&state[]=failed&state[]=failing&per_page=1" \
   | jq '.[0] | {number,state,branch,web_url,jobs:[.jobs[]|{id,name,state,exit_status}]}'
 ```
 
