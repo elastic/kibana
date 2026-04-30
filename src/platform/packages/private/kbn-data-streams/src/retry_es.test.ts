@@ -91,7 +91,7 @@ describe('retryEs', () => {
     );
   });
 
-  it('caps indefinite circuit breaker retry delays at 64 seconds', async () => {
+  it('caps indefinite 429 retry delays at 64 seconds', async () => {
     const logger = loggingSystemMock.createLogger();
     const error = createCircuitBreaking429();
     const operation = jest
@@ -121,18 +121,31 @@ describe('retryEs', () => {
     );
   });
 
-  it('keeps non-circuit-breaker 429 errors bounded to three retries', async () => {
+  it('retries 429 too many requests errors indefinitely', async () => {
+    const logger = loggingSystemMock.createLogger();
     const error = createTooManyRequestsError();
-    const operation = jest.fn().mockRejectedValue(error);
+    const operation = jest
+      .fn()
+      .mockRejectedValueOnce(error)
+      .mockRejectedValueOnce(error)
+      .mockRejectedValueOnce(error)
+      .mockRejectedValueOnce(error)
+      .mockResolvedValue('done');
 
-    const promise = retryEs(operation);
-    const assertion = expect(promise).rejects.toBe(error);
+    const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
-    await jest.advanceTimersByTimeAsync(1_000);
     await jest.advanceTimersByTimeAsync(2_000);
     await jest.advanceTimersByTimeAsync(4_000);
+    await jest.advanceTimersByTimeAsync(8_000);
+    await jest.advanceTimersByTimeAsync(16_000);
 
-    await assertion;
-    expect(operation).toHaveBeenCalledTimes(4);
+    await expect(promise).resolves.toBe('done');
+    expect(operation).toHaveBeenCalledTimes(5);
+    expect(logger.warn).toHaveBeenCalledTimes(4);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Elasticsearch call failed with retryable error too_many_requests_exception'
+      )
+    );
   });
 });

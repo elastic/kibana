@@ -34,21 +34,6 @@ function isRetryableEsClientError(e: Error): boolean {
   return false;
 }
 
-function isCircuitBreakerResponseError(e: Error): e is EsErrors.ResponseError {
-  if (!(e instanceof EsErrors.ResponseError) || e.statusCode !== 429) {
-    return false;
-  }
-
-  const error = e.body?.error;
-  if (error?.type === 'circuit_breaking_exception') {
-    return true;
-  }
-
-  return error?.root_cause?.some(({ type }: { type?: string }) => {
-    return type === 'circuit_breaking_exception';
-  });
-}
-
 function getExponentialDelayMs(attempt: number, { maxDelayMs }: { maxDelayMs: number }) {
   return Math.min(1000 * Math.pow(2, attempt), maxDelayMs);
 }
@@ -105,7 +90,7 @@ export async function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions =
 
       retryCount++;
 
-      if (isCircuitBreakerResponseError(error)) {
+      if (error instanceof EsErrors.ResponseError && error.statusCode === 429) {
         const retryDelay = getExponentialDelayMs(retryCount, {
           maxDelayMs: maxIndefiniteRetryDelayMs,
         });
