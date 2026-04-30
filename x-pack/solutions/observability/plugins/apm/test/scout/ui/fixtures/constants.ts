@@ -43,6 +43,7 @@ export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
+export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';
 export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';
 // Error constants - based on opbeans synthtrace data
 export const ERROR_MESSAGE = '[MockError] Foo';

@@ -38,7 +38,11 @@ export default function (providerContext: FtrProviderContext) {
   describe('@ess Entity Store History - Snapshots', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
-        const { body } = await supertest.get('/api/entity_store/status').expect(200);
+        const { body } = await supertest
+          .get('/internal/entity_store/status')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', '1')
+          .expect(200);
 
         const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
         expect(response.status).to.eql('not_installed');
@@ -332,8 +336,10 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     // Only enable 'host' engine - this test only validates host snapshots.
     // Enabling all engines concurrently causes task conflicts (server-side issue).
     const response = await supertest
-      .post('/api/entity_store/enable')
+      .post('/internal/entity_store/enable')
       .set('kbn-xsrf', 'xxxx')
+      .set('x-elastic-internal-origin', 'kibana')
+      .set('elastic-api-version', '1')
       .send({ entityTypes: ['host'] });
 
     if (response.statusCode !== 200) {
@@ -358,7 +364,9 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     try {
       await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
         const { body } = await supertest
-          .get('/api/entity_store/status')
+          .get('/internal/entity_store/status')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', '1')
           .query({ include_components: true })
           .expect(200);
 

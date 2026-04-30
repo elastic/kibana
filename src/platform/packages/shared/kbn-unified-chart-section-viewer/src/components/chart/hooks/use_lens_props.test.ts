@@ -11,8 +11,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -20,7 +19,7 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
-jest.mock('@kbn/lens-embeddable-utils/config_builder');
+jest.mock('@kbn/lens-embeddable-utils');
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
@@ -103,6 +102,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -110,6 +110,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -135,6 +136,7 @@ describe('useLensProps', () => {
 
     renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -142,6 +144,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -186,6 +189,7 @@ describe('useLensProps', () => {
     };
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -193,6 +197,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
     expect(result.current).toBeUndefined();
@@ -205,7 +210,14 @@ describe('useLensProps', () => {
       expect(result.current).toStrictEqual(
         expect.objectContaining({
           attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
-          executionContext: { description: 'metrics experience chart data' },
+          executionContext: {
+            description: 'metrics experience chart data',
+            meta: {
+              profile_id: 'testProfileId',
+              metric_id: 'testChartId',
+              metric_type: 'lnsXY',
+            },
+          },
           id: 'metricsExperienceLensComponent',
           noPadding: true,
           searchSessionId: fetchParams.searchSessionId,
@@ -220,6 +232,7 @@ describe('useLensProps', () => {
   it('handles chartRef as null gracefully', async () => {
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -227,6 +240,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef: undefined,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -247,6 +261,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -254,6 +269,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockEmptyChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -272,6 +288,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -280,6 +297,7 @@ describe('useLensProps', () => {
         chartRef,
         chartLayers: mockEmptyChartLayers,
         error: mockError,
+        profileId: 'testProfileId',
       })
     );
 

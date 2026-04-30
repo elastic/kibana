@@ -93,7 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity_ea';
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/263556
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,

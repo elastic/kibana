@@ -137,6 +137,7 @@ jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
       get: jest.fn(),
+      getByIds: jest.fn(),
       update: jest.fn(),
       list: jest.fn(),
     },
@@ -334,6 +335,7 @@ describe('When calling package policy', () => {
         ],
       });
       (agentPolicyService.get as jest.Mock).mockResolvedValue({ inputs: [] });
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
     });
 
     it('should use existing package policy props if not provided by request', async () => {
@@ -426,6 +428,32 @@ describe('When calling package policy', () => {
       );
     });
 
+    it('should throw if output_id changed on a managed agent policy', async () => {
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: true }]);
+      const request = getUpdateKibanaRequest({ output_id: 'new-output' } as any);
+
+      await expect(() => routeHandler(context, request, response)).rejects.toThrow(
+        /Cannot change the output of a package policy belonging to a managed agent policy/
+      );
+    });
+
+    it('should not throw if output_id unchanged on a managed agent policy', async () => {
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: true }]);
+      // existingPolicy has no output_id, so passing undefined should not trigger the check
+      const request = getUpdateKibanaRequest({ name: 'endpoint-2' } as any);
+
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should allow output_id change on a non-managed agent policy', async () => {
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
+      const request = getUpdateKibanaRequest({ output_id: 'new-output' } as any);
+
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
+    });
+
     it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
@@ -444,7 +472,7 @@ describe('When calling package policy', () => {
         expect.anything(),
         'agent-policy',
         { name: 'Agentless policy for new-name' },
-        { force: true }
+        { bumpRevision: false, force: true }
       );
     });
     it('should not rename the agentless agent policy if agentless is not enabled in cloud environment', async () => {

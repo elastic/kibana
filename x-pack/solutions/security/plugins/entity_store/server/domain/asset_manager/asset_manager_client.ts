@@ -50,12 +50,17 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
+import {
+  getEntitiesAlias,
+  ENTITY_LATEST,
+  getLatestEntitiesIndexName,
+} from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
+import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
@@ -74,6 +79,7 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  ccsLogExtractionStateClient: CcsLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
@@ -88,6 +94,7 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
+  private readonly ccsLogExtractionStateClient: CcsLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
@@ -101,6 +108,7 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
+    this.ccsLogExtractionStateClient = deps.ccsLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
@@ -228,6 +236,7 @@ export class AssetManagerClient {
 
       await Promise.all([
         this.engineDescriptorClient.delete(type),
+        this.ccsLogExtractionStateClient.delete(type),
         uninstallElasticsearchAssets({
           esClient: this.esClient,
           logger: this.logger.get(type),
@@ -439,7 +448,7 @@ export class AssetManagerClient {
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
-    const latestIndex = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
     const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
       this.esClient.indices.exists({ index: latestIndex }),

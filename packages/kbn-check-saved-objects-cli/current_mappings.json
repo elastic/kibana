@@ -1464,6 +1464,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -2843,6 +2847,9 @@
       "name": {
         "type": "keyword"
       },
+      "otel_disable_beatsauth": {
+        "type": "boolean"
+      },
       "otel_exporter_config_yaml": {
         "type": "text"
       },
@@ -3181,6 +3188,10 @@
     "properties": {}
   },
   "kql-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "lead-generation-config": {
     "dynamic": false,
     "properties": {}
   },
@@ -4993,6 +5004,16 @@
       },
       "name": {
         "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
       },
       "type": {
         "type": "keyword"

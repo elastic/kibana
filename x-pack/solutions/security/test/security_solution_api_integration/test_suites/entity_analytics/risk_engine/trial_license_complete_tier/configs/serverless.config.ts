@@ -14,6 +14,10 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'disable:entityAnalyticsEntityStoreV2',
+    ])}`,
+    '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
   ],
   testFiles: [require.resolve('..')],
   junit: {

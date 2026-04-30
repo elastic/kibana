@@ -14,31 +14,35 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { PromptItemArray } from './common_attributes.gen';
 
+export const FindSecurityAIPromptsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Connector id used for prompt lookup
+     */
+    connector_id: z.string().optional(),
+    /**
+     * The unique identifier for the prompt group
+     */
+    prompt_group_id: z.string(),
+    /**
+     * Comma-separated list of prompt IDs to retrieve
+     */
+    prompt_ids: ArrayFromString(z.string()),
+  })
+);
 export type FindSecurityAIPromptsRequestQuery = z.infer<typeof FindSecurityAIPromptsRequestQuery>;
-export const FindSecurityAIPromptsRequestQuery = z.object({
-  /**
-   * Connector id used for prompt lookup
-   */
-  connector_id: z.string().optional(),
-  /**
-   * The unique identifier for the prompt group
-   */
-  prompt_group_id: z.string(),
-  /**
-   * Comma-separated list of prompt IDs to retrieve
-   */
-  prompt_ids: ArrayFromString(z.string()),
-});
 export type FindSecurityAIPromptsRequestQueryInput = z.input<
   typeof FindSecurityAIPromptsRequestQuery
 >;
 
+export const FindSecurityAIPromptsResponse = lazySchema(() =>
+  z.object({
+    prompts: PromptItemArray,
+  })
+);
 export type FindSecurityAIPromptsResponse = z.infer<typeof FindSecurityAIPromptsResponse>;
-export const FindSecurityAIPromptsResponse = z.object({
-  prompts: PromptItemArray,
-});

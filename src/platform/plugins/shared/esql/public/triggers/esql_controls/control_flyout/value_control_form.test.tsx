@@ -66,7 +66,7 @@ describe('ValueControlForm', () => {
     data: dataMock,
   };
 
-  services.core.http.get = jest
+  services.core.http.post = jest
     .fn()
     .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
 

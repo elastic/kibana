@@ -52,27 +52,6 @@ export class GenAiSettingsPage {
   }
 
   /**
-   * Get the Agent confirmation modal container
-   */
-  getConfirmModal() {
-    return this.page.testSubj.locator('confirmModalTitleText');
-  }
-
-  /**
-   * Get the confirm button in the Agent confirmation modal
-   */
-  getConfirmModalConfirmButton() {
-    return this.page.testSubj.locator('confirmModalConfirmButton');
-  }
-
-  /**
-   * Get the cancel button in the Agent confirmation modal
-   */
-  getConfirmModalCancelButton() {
-    return this.page.testSubj.locator('confirmModalCancelButton');
-  }
-
-  /**
    * Get the save button in the bottom bar
    */
   getSaveButton() {

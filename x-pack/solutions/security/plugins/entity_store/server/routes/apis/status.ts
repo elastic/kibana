@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -44,7 +45,9 @@ interface EntityStoreStatusResponseBody {
 }
 
 const querySchema = z.object({
-  include_components: BooleanFromString.optional().default(false),
+  include_components: BooleanFromString.optional()
+    .default(false)
+    .describe('If true, returns a detailed status of each engine including all its components.'),
 });
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
@@ -53,7 +56,7 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
+  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
     logsExtractionConfig;
 
   return {
@@ -65,12 +68,13 @@ function toPublicEngine(
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
+    maxLogsPerPage,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
-    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
   };
 }
 
@@ -79,6 +83,12 @@ export function registerStatus(router: EntityStorePluginRouter) {
     .get({
       path: ENTITY_STORE_ROUTES.public.STATUS,
       access: 'public',
+      summary: 'Get Entity Store status',
+      description:
+        'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -91,6 +101,9 @@ export function registerStatus(router: EntityStorePluginRouter) {
           request: {
             query: buildRouteValidationWithZod(querySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_status.yaml'),
         },
       },
       wrapMiddlewares(

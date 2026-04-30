@@ -212,15 +212,15 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('shows ID must be unique error', () => {
-      cy.intercept('GET', '**/api/osquery/saved_queries**').as('savedQueriesLoaded');
       cy.contains('Queries').click();
-      cy.wait('@savedQueriesLoaded');
       cy.contains('Create query').click();
       cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
 
       cy.contains('ID must be unique').should('not.exist');
       inputQuery('test');
-      cy.contains('Save query').click();
+      // The "Save query" button is disabled while saved query IDs are loading.
+      // Wait for it to become enabled so the ID uniqueness validation has data.
+      cy.contains('Save query').should('not.be.disabled').click();
       cy.contains('ID must be unique').should('exist');
     });
   });

@@ -90,6 +90,9 @@ export function AdvancedSettings() {
                     min={1}
                     max={359}
                     step={1}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.settings.syncDelay.ariaLabel', {
+                      defaultMessage: 'Sync delay (in minutes)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}
@@ -130,6 +133,9 @@ export function AdvancedSettings() {
                     min={1}
                     max={59}
                     step={1}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.settings.frequency.ariaLabel', {
+                      defaultMessage: 'Frequency (in minutes)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}

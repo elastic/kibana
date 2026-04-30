@@ -23,48 +23,63 @@ import {
   waitForAnomaliesToBeLoaded,
 } from '../../../../tasks/entity_analytics';
 
-describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
-  });
-
-  describe('With anomalies data', () => {
+describe(
+  'Entity Analytics Dashboard',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsNewHomePageEnabled',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
     before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'network' });
-      login();
-      visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      cy.get(ANOMALIES_TABLE, { timeout: 30000 }).should('be.visible');
-      waitForAnomaliesToBeLoaded();
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     });
 
     after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'network' });
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
-    it('should enable a job and renders the table with pagination', () => {
-      // Enables the job and perform checks
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
-        .eq(5)
-        .within(() => {
-          enableJob();
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
-          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
-        });
+    describe('With anomalies data', () => {
+      before(() => {
+        cy.task('esArchiverLoad', { archiveName: 'network' });
+        login();
+        visitWithTimeRange(ENTITY_ANALYTICS_URL);
+        cy.get(ANOMALIES_TABLE, { timeout: 30000 }).should('be.visible');
+        waitForAnomaliesToBeLoaded();
+      });
 
-      // Checks pagination
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
+      after(() => {
+        cy.task('esArchiverUnload', { archiveName: 'network' });
+      });
 
-      // navigates to next page
-      navigateToNextPage();
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+      it('should enable a job and renders the table with pagination', () => {
+        // Enables the job and perform checks
+        cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
+          .eq(5)
+          .within(() => {
+            enableJob();
+            cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
+            cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
+          });
 
-      // updates rows per page to 25 items
-      setRowsPerPageTo(25);
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
+        // Checks pagination
+        cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
+
+        // navigates to next page
+        navigateToNextPage();
+        cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+
+        // updates rows per page to 25 items
+        setRowsPerPageTo(25);
+        cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
+      });
     });
-  });
-});
+  }
+);

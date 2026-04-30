@@ -578,7 +578,7 @@ export class SettingsPageObject extends FtrService {
         }
       );
 
-      await (await this.getSaveIndexPatternButton()).click();
+      await (await this.getSaveDataViewButtonActive()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -721,7 +721,7 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
-      await this.toasts.dismissIfExists();
+      await this.toasts.dismissAllWithChecks();
       await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {

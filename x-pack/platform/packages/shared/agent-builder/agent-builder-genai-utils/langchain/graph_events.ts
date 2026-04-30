@@ -128,7 +128,7 @@ export const createMessageEvent = (
     type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
-      message_content: typeof content === 'string' ? content : '',
+      message_content: typeof content === 'string' ? content : JSON.stringify(content),
       ...(typeof content === 'object' ? { structured_output: content } : {}),
     },
   };

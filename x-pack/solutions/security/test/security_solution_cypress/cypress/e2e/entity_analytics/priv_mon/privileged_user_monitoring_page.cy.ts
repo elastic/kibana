@@ -13,6 +13,16 @@ describe(
   'Privileged User Monitoring - Page',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+            'disable:entityAnalyticsNewHomePageEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     before(() => {

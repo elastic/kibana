@@ -476,6 +476,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-ccs-state": [],
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
@@ -857,6 +858,7 @@
     "is_preconfigured",
     "key",
     "name",
+    "otel_disable_beatsauth",
     "otel_exporter_config_yaml",
     "output_id",
     "partition",
@@ -959,6 +961,11 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
+  "lead-generation-config": [
+    "connectorId",
+    "lastError",
+    "lastExecutionUuid"
+  ],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
@@ -1507,6 +1514,9 @@
     "enabled",
     "managed",
     "name",
+    "range",
+    "range.end",
+    "range.start",
     "type"
   ],
   "workplace_search_telemetry": []

@@ -49,10 +49,16 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  describe('@ess Host transform logic', () => {
-    describe('Entity Store is not installed by default', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/232405
+  describe.skip('@ess Host transform logic', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/232405
+    describe.skip('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
-        const { body } = await supertest.get('/api/entity_store/status').expect(200);
+        const { body } = await supertest
+          .get('/internal/entity_store/status')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', '1')
+          .expect(200);
 
         const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
         expect(response.status).to.eql('not_installed');
@@ -118,7 +124,9 @@ export default function (providerContext: FtrProviderContext) {
           TIMEOUT_MS,
           async () => {
             const { body } = await supertest
-              .get('/api/entity_store/status')
+              .get('/internal/entity_store/status')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('elastic-api-version', '1')
               .query({ include_components: true })
               .expect(200);
 
@@ -151,7 +159,9 @@ export default function (providerContext: FtrProviderContext) {
 
         // Final verification
         const { body } = await supertest
-          .get('/api/entity_store/status')
+          .get('/internal/entity_store/status')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', '1')
           .query({ include_components: true })
           .expect(200);
 

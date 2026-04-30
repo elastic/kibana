@@ -32,8 +32,8 @@ export const upsertEntitiesBulk = (
 ) => {
   router.versioned
     .put({
-      access: 'public',
-      path: '/api/entity_store/entities/bulk',
+      access: 'internal',
+      path: '/internal/entity_store/entities/bulk',
       options: {
         availability: {
           stability: 'beta',
@@ -47,7 +47,7 @@ export const upsertEntitiesBulk = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(UpsertEntitiesBulkRequestQuery),

@@ -23,6 +23,10 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type {
+  AssignWatchlistEntitiesRequestParamsInput,
+  AssignWatchlistEntitiesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/entities/assign.gen';
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import type { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import type { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
@@ -82,6 +86,10 @@ import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution
 import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import type { SyncWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
 import type {
+  UnassignWatchlistEntitiesRequestParamsInput,
+  UnassignWatchlistEntitiesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/entities/unassign.gen';
+import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/update.gen';
@@ -108,11 +116,16 @@ import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
+   * Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
+   */
   applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+      .post(
+        getRouteUrlForSpace('/internal/entity_store/engines/apply_dataview_indices', kibanaSpace)
+      )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
@@ -121,6 +134,30 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+      * Assigns the provided entities to the specified watchlist using a "manual" source label.
+The entities must already exist in the entity store.
+
+If an entity is already on the watchlist, no new document is created — the "manual" label
+is added to its existing source labels instead.
+
+      */
+  assignWatchlistEntities(props: AssignWatchlistEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entities/assign',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
   },
   /**
       * Bulk upsert up to 1000 asset criticality records.
@@ -252,20 +289,20 @@ If a record already exists for the specified entity, that record is overwritten 
     return supertest
       .delete(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
   deleteEntityEngines(props: DeleteEntityEnginesProps, kibanaSpace: string = 'default') {
     return supertest
-      .delete(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .delete(getRouteUrlForSpace('/internal/entity_store/engines', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
@@ -310,12 +347,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .delete(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/entities/{entityType}', props.params),
+          replaceParams('/internal/entity_store/entities/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -380,6 +417,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
+   */
   entityStoreGetPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/entity_store/privileges', kibanaSpace))
@@ -422,16 +462,19 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Get the engine descriptor for a specific entity type, including its configuration and current status.
+   */
   getEntityEngine(props: GetEntityEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .get(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   getEntitySource(props: GetEntitySourceProps, kibanaSpace: string = 'default') {
@@ -446,11 +489,14 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
+   */
   getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/entity_store/status', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
@@ -503,24 +549,30 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Initialize a single entity engine for the specified entity type.
+   */
   initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}/init', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Initialize the entire Entity Store, creating engines for all or specified entity types.
+   */
   initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/entity_store/enable', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -573,17 +625,20 @@ Each row will match up to 10,000 entities.
    */
   listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/entity_store/entities/list', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Get a list of all installed entity engines and their current status.
+   */
   listEntityEngines(kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/entity_store/engines', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
@@ -713,28 +768,34 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Start a previously stopped entity engine, resuming transform processing for the given entity type.
+   */
   startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}/start', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Stop a running entity engine, pausing transform processing for the given entity type.
+   */
   stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}/stop', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   syncWatchlist(props: SyncWatchlistProps, kibanaSpace: string = 'default') {
@@ -760,6 +821,32 @@ Each row will match up to 10,000 entities.
       .post(getRouteUrlForSpace('/internal/risk_score/calculation/entity', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+      * Unassigns the provided entities from the specified watchlist.
+This only removes the "manual" assignment. If the entity is also
+assigned via other sources (for example, index or integration), it will
+remain on the watchlist.
+
+      */
+  unassignWatchlistEntities(
+    props: UnassignWatchlistEntitiesProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entities/unassign',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -859,9 +946,9 @@ The creation is asynchronous. The time for a document to be present in the  fina
       */
   upsertEntitiesBulk(props: UpsertEntitiesBulkProps, kibanaSpace: string = 'default') {
     return supertest
-      .put(getRouteUrlForSpace('/api/entity_store/entities/bulk', kibanaSpace))
+      .put(getRouteUrlForSpace('/internal/entity_store/entities/bulk', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object)
       .query(props.query);
@@ -877,12 +964,12 @@ If the specified entity already exists, it is updated with the provided values. 
     return supertest
       .put(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/entities/{entityType}', props.params),
+          replaceParams('/internal/entity_store/entities/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object)
       .query(props.query);
@@ -905,6 +992,10 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   };
 }
 
+export interface AssignWatchlistEntitiesProps {
+  params: AssignWatchlistEntitiesRequestParamsInput;
+  body: AssignWatchlistEntitiesRequestBodyInput;
+}
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
 }
@@ -1020,6 +1111,10 @@ export interface SyncWatchlistProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UnassignWatchlistEntitiesProps {
+  params: UnassignWatchlistEntitiesRequestParamsInput;
+  body: UnassignWatchlistEntitiesRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;

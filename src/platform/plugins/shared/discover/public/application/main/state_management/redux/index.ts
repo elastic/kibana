@@ -42,6 +42,7 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
     'syncProfileStateSnapshot'

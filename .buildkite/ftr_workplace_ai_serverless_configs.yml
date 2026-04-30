@@ -6,10 +6,11 @@ disabled:
   - x-pack/solutions/workplaceai/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.feature_flags.ts
 
-defaultQueue: 'n2-4-spot'
-enabled:
   - x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts
   - x-pack/platform/test/serverless/api_integration/configs/workplaceai/config.group1.ts
   - x-pack/solutions/workplaceai/test/serverless/functional/configs/config.ts
   - x-pack/platform/test/serverless/functional/configs/workplaceai/config.config_compat_mode.ts
   - x-pack/platform/test/serverless/functional/configs/workplaceai/config.group1.ts
+
+defaultQueue: 'n2-4-spot'
+enabled:

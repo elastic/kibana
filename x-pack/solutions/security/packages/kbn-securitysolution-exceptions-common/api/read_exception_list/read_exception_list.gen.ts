@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListId,
@@ -23,19 +23,21 @@ import {
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
+export const ReadExceptionListRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Exception list's identifier. Either `id` or `list_id` must be specified.
+     */
+    id: ExceptionListId.optional(),
+    /**
+     * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
+     */
+    list_id: ExceptionListHumanId.optional(),
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+  })
+);
 export type ReadExceptionListRequestQuery = z.infer<typeof ReadExceptionListRequestQuery>;
-export const ReadExceptionListRequestQuery = z.object({
-  /**
-   * Exception list's identifier. Either `id` or `list_id` must be specified.
-   */
-  id: ExceptionListId.optional(),
-  /**
-   * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
-   */
-  list_id: ExceptionListHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-});
 export type ReadExceptionListRequestQueryInput = z.input<typeof ReadExceptionListRequestQuery>;
 
+export const ReadExceptionListResponse = lazySchema(() => ExceptionList);
 export type ReadExceptionListResponse = z.infer<typeof ReadExceptionListResponse>;
-export const ReadExceptionListResponse = ExceptionList;

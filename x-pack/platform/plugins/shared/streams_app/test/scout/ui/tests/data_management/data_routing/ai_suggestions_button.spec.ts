@@ -49,7 +49,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: tags.statefu
     await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
       await route.fulfill({
         status: 200,
-        body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+        body: JSON.stringify({ connectors: [], soEntryFound: false }),
       });
     });
 
@@ -64,8 +64,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: tags.statefu
       await route.fulfill({
         status: 200,
         body: JSON.stringify({
-          connectors: [],
-          allConnectors: [
+          connectors: [
             {
               connectorId: 'test-connector-1',
               name: 'Test Connector 1',

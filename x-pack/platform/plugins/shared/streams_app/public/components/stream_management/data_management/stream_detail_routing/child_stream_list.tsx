@@ -346,11 +346,6 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   {suggestPartitionsText}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
-              {showAdditionalChargesCallout && (
-                <EuiFlexItem grow={false}>
-                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
-                </EuiFlexItem>
-              )}
             </>
           )}
           <EuiFlexItem grow={false}>
@@ -369,6 +364,11 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {showAdditionalChargesCallout && (
+          <EuiFlexItem grow={false}>
+            <AdditionalChargesCallout aiFeatures={aiFeatures} />
+          </EuiFlexItem>
+        )}
       </EuiFlexItem>
     );
   };
@@ -396,13 +396,13 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   ]);
 
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
-    <NoDataEmptyPrompt
-      createNewRule={createNewRule}
-      isLoading={!!aiFeatures?.loading}
-      isAiEnabled={!!aiFeatures?.enabled}
-    >
-      {aiFeatures?.enabled && (
-        <>
+    <>
+      <NoDataEmptyPrompt
+        createNewRule={createNewRule}
+        isLoading={!!aiFeatures?.loading}
+        isAiEnabled={!!aiFeatures?.enabled}
+      >
+        {aiFeatures?.enabled && (
           <GenerateSuggestionButton
             size="s"
             onClick={getSuggestionsForStream}
@@ -412,15 +412,15 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           >
             {suggestPartitionsText}
           </GenerateSuggestionButton>
-          {showAdditionalChargesCallout && (
-            <>
-              <EuiSpacer size="s" />
-              <AdditionalChargesCallout aiFeatures={aiFeatures} />
-            </>
-          )}
+        )}
+      </NoDataEmptyPrompt>
+      {showAdditionalChargesCallout && (
+        <>
+          <EuiSpacer size="s" />
+          <AdditionalChargesCallout aiFeatures={aiFeatures} />
         </>
       )}
-    </NoDataEmptyPrompt>
+    </>
   ) : (
     <>
       {showBulkAcceptModal && suggestions && (

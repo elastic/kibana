@@ -63,6 +63,13 @@ export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
       index: { document: Omit<TDocument, '_id'>; _id?: string };
     }
+  | {
+      /**
+       * ES bulk `create` action: fails with a 409 conflict if `_id` already exists.
+       * Use `index` instead if you want silent upsert (overwrite) behaviour.
+       */
+      create: { document: Omit<TDocument, '_id'>; _id?: string };
+    }
   | { delete: { _id: string } };
 
 export interface StorageClientBulkOptions {

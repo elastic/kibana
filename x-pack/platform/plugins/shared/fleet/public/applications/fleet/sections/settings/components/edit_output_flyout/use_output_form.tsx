@@ -85,6 +85,7 @@ export interface OutputFormInputsType {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
+  remoteElasticsearchUrlInput: ReturnType<typeof useComboInput>;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
   diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
@@ -144,6 +145,7 @@ export interface OutputFormInputsType {
   kafkaSslKeySecretInput: ReturnType<typeof useSecretInput>;
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   writeToStreams: ReturnType<typeof useSwitchInput>;
+  otelDisableBeatsauthInput: ReturnType<typeof useSwitchInput>;
 }
 
 function extractKafkaOutputSecrets(
@@ -247,6 +249,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled('otel_exporter_config_yaml')
   );
 
+  const otelDisableBeatsauthInput = useSwitchInput(
+    (output as NewElasticsearchOutput)?.otel_disable_beatsauth ?? false,
+    isDisabled('otel_disable_beatsauth')
+  );
+
   const defaultOutputInput = useSwitchInput(
     output?.is_default ?? false,
     isDisabled('is_default') || output?.is_default
@@ -264,15 +271,29 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
-  // Set the hosts to default for new ES output in serverless.
+  const isEditingRemoteEsOutput = output?.type === outputType.RemoteElasticsearch;
+  // When editing a remote ES output, the saved hosts belong to the remote ES input,
+  // not the regular ES input. Use the default output hosts instead.
   const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
+    isEditingRemoteEsOutput || (isServerless && !output?.hosts)
+      ? defaultOutput?.hosts || []
+      : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
     elasticsearchUrlDefaultValue,
     validateESHosts,
     elasticsearchUrlDisabled
+  );
+
+  // Remote ES has its own hosts input — separate from the regular ES hosts
+  const remoteEsUrlDefaultValue =
+    output?.type === outputType.RemoteElasticsearch ? output?.hosts || [] : [];
+  const remoteElasticsearchUrlInput = useComboInput(
+    'remoteEsHostsComboBox',
+    remoteEsUrlDefaultValue,
+    validateESHosts,
+    isDisabled('hosts')
   );
 
   const presetInput = useInput(
@@ -605,6 +626,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    remoteElasticsearchUrlInput,
     diskQueueEnabledInput,
     diskQueuePathInput,
     diskQueueEncryptionEnabled,
@@ -616,6 +638,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     presetInput,
     additionalYamlConfigInput,
     otelExporterConfigInput,
+    otelDisableBeatsauthInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
@@ -671,6 +694,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const remoteElasticsearchUrlsValid = remoteElasticsearchUrlInput.validate();
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
@@ -735,7 +759,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     }
     if (isRemoteElasticsearch) {
       return (
-        elasticsearchUrlsValid &&
+        remoteElasticsearchUrlsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
         ((serviceTokenInput.value && serviceTokenValid) ||
@@ -760,6 +784,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   }, [
     nameInput,
     elasticsearchUrlInput,
+    remoteElasticsearchUrlInput,
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
@@ -1017,7 +1042,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
-              hosts: elasticsearchUrlInput.value,
+              hosts: remoteElasticsearchUrlInput.value,
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
@@ -1050,6 +1075,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
@@ -1161,6 +1187,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
     elasticsearchUrlInput.value,
+    remoteElasticsearchUrlInput.value,
     presetInput.value,
     kibanaAPIKeyInput.value,
     syncIntegrationsInput.value,
@@ -1168,6 +1195,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     syncUninstalledIntegrationsInput.value,
     writeToStreams.value,
     otelExporterConfigInput.value,
+    otelDisableBeatsauthInput.value,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
