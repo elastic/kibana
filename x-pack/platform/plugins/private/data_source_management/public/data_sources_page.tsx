@@ -20,6 +20,7 @@ import {
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
+
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataSourceWithSecrets, DataSource } from '../common';
 import { HttpDataSourcesClient } from './http_data_sources_client';
@@ -68,14 +69,11 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   }, [dataClient]);
 
   const handleCreateDataSourceSave = useCallback(
-    async (values: {
-      name: string;
-      dataSource: Omit<DataSourceWithSecrets, 'id'>;
-    }): Promise<string | null> => {
+    async (dataSource: DataSourceWithSecrets): Promise<string | void> => {
       try {
-        await dataClient.add({ id: values.name, ...values.dataSource } as DataSourceWithSecrets);
+        await dataClient.add(dataSource);
         setItems(await dataClient.get());
-        return null;
+        setCreateFlyoutOpen(false);
       } catch (e) {
         return e instanceof Error ? e.message : 'Unknown error';
       }

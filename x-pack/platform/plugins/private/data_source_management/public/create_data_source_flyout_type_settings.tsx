@@ -17,18 +17,22 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import type { DataSourceType } from '../common/datasource_types';
+import type { Control } from 'react-hook-form';
+import type { DataSourceType, DataSourceWithSecrets } from '../common/datasource_types';
 import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
 import { patchFormSettings } from './create_data_source_flyout_form_state';
+import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutTypeSettings({
   dataSourceType,
   formSettings,
   onFormSettingsChange,
+  control,
 }: {
   dataSourceType: DataSourceType;
   formSettings: CreateDataSourceFlyoutFormSettings;
   onFormSettingsChange: (next: CreateDataSourceFlyoutFormSettings) => void;
+  control: Control<DataSourceWithSecrets, any>;
 }) {
   const patch = (
     type: DataSourceType,
@@ -38,81 +42,12 @@ export function CreateDataSourceFlyoutTypeSettings({
   };
 
   if (dataSourceType === 's3') {
-    const v = formSettings.s3;
     return (
-      <>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.s3.fields.region', {
-            defaultMessage: 'Region',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.region}
-            onChange={(e) => patch('s3', { region: e.target.value })}
-            data-test-subj="createDataSourceFlyoutS3Region"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.s3.fields.endpoint', {
-            defaultMessage: 'Endpoint',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.endpoint}
-            onChange={(e) => patch('s3', { endpoint: e.target.value })}
-            data-test-subj="createDataSourceFlyoutS3Endpoint"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.s3.fields.auth', {
-            defaultMessage: 'Auth',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.auth}
-            onChange={(e) => patch('s3', { auth: e.target.value })}
-            data-test-subj="createDataSourceFlyoutS3Auth"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.s3.fields.accessKey', {
-            defaultMessage: 'Access key',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.access_key}
-            onChange={(e) => patch('s3', { access_key: e.target.value })}
-            data-test-subj="createDataSourceFlyoutS3AccessKey"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.s3.fields.secretKey', {
-            defaultMessage: 'Secret key',
-          })}
-          fullWidth
-        >
-          <EuiFieldPassword
-            type="dual"
-            value={v.secret_key}
-            onChange={(e) => patch('s3', { secret_key: e.target.value })}
-            data-test-subj="createDataSourceFlyoutS3SecretKey"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-      </>
+      <CreateDataSourceFlyoutTypeSettingsS3
+        control={control}
+        values={formSettings.s3}
+        onPatch={(p) => patch('s3', p)}
+      />
     );
   }
 
@@ -541,6 +476,7 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   dataSourceType: DataSourceType;
   formSettings: CreateDataSourceFlyoutFormSettings;
   onFormSettingsChange: (next: CreateDataSourceFlyoutFormSettings) => void;
+  control: Control<DataSourceWithSecrets, any>;
 }) {
   return (
     <>

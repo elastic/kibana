@@ -75,8 +75,9 @@ export class HttpDataSourcesClient {
       );
     }
       */
+    console.log('dataSource', dataSource);
     await this.http.put(getDataSourceByIdApiPath(nameTrimmed), {
-      body: JSON.stringify(omit(dataSource, ['id'])),
+      body: JSON.stringify(omit(dataSource, ['name'])),
     });
   }
 

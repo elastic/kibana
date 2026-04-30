@@ -23,6 +23,8 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { useController, useForm } from 'react-hook-form';
+import { omit } from 'lodash';
 
 import type { DataSourceWithSecrets } from '../common';
 import { ALL_DATA_SOURCE_TYPES } from '../common';
@@ -39,25 +41,47 @@ export interface CreateDataSourceFlyoutProps {
   /**
    * Persist a new data source. Resolve `null` on success, or an error message to show in the flyout.
    */
-  onSave: (values: {
-    name: string;
-    dataSource: Omit<DataSourceWithSecrets, 'id'>;
-  }) => Promise<string | null>;
+  onSave: (data: DataSourceWithSecrets) => Promise<string | null>;
 }
 
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   onClose,
   onSave,
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [dataSourceType, setDataSourceType] = useState<DataSourceType>('s3');
+  const {
+    handleSubmit,
+    control,
+    // formState: { errors },
+  } = useForm<DataSourceWithSecrets>();
+
   const [formSettings, setFormSettings] = useState<CreateDataSourceFlyoutFormSettings>(
     emptyCreateDataSourceFormSettings
   );
   const [nameError, setNameError] = useState<string | undefined>();
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+
+  const { field: dataSourceTypeField } = useController({
+    defaultValue: 's3' as DataSourceType,
+    name: 'type',
+    control,
+  });
+
+  const { field: nameField } = useController({
+    defaultValue: '',
+    name: 'name',
+    control,
+    rules: {
+      // todo will need to make sure this is unique
+      // todo make sure this is displayed somewhere
+      required: createDataSourceFlyoutStrings.nameRequired(),
+    },
+  });
+  const { field: descriptionField } = useController({
+    defaultValue: '',
+    name: 'description',
+    control,
+  });
 
   const dataSourceTypeOptions = useMemo(
     () =>
@@ -68,6 +92,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     []
   );
 
+  /*
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
@@ -98,6 +123,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       setIsSaving(false);
     }
   }, [dataSourceType, description, formSettings, name, onClose, onSave]);
+  */
+
+  const handleSave = (data: DataSourceWithSecrets) => {
+    console.log('form data', data);
+    return onSave(data);
+  };
 
   return (
     <EuiFlyout
@@ -113,7 +144,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm component="form" id="createDataSourceForm" onSubmit={(e) => e.preventDefault()}>
+        <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(handleSave)}>
           {saveError ? (
             <>
               <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
@@ -125,11 +156,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSelect
               options={dataSourceTypeOptions}
-              value={dataSourceType}
-              onChange={(e) => setDataSourceType(e.target.value as DataSourceType)}
               data-test-subj="createDataSourceFlyoutType"
               fullWidth
               aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
+              value={dataSourceTypeField.value as DataSourceType}
+              onChange={(e) => dataSourceTypeField.onChange(e.target.value as DataSourceType)}
+              name={dataSourceTypeField.name}
+              inputRef={dataSourceTypeField.ref}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -139,27 +172,31 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             fullWidth
           >
             <EuiFieldText
-              name="dataSourceName"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              // todo
               isInvalid={Boolean(nameError)}
               data-test-subj="createDataSourceFlyoutName"
               autoFocus
               fullWidth
+              value={nameField.value}
+              onChange={(e) => nameField.onChange(e.target.value)}
+              name={nameField.name}
+              inputRef={nameField.ref}
             />
           </EuiFormRow>
           <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
             <EuiTextArea
-              name="dataSourceDescription"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth
               rows={4}
+              value={descriptionField.value}
+              onChange={(e) => descriptionField.onChange(e.target.value)}
+              name={descriptionField.name}
+              inputRef={descriptionField.ref}
             />
           </EuiFormRow>
           <CreateDataSourceFlyoutTypeSettingsBlock
-            dataSourceType={dataSourceType}
+            control={control}
+            dataSourceType={dataSourceTypeField.value as DataSourceType}
             formSettings={formSettings}
             onFormSettingsChange={setFormSettings}
           />
@@ -171,9 +208,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiButtonEmpty>
         <EuiButton
           fill
-          type="button"
+          type="submit"
           data-test-subj="createDataSourceFlyoutSubmit"
-          onClick={() => void handleSave()}
+          onClick={handleSubmit(handleSave)}
           isLoading={isSaving}
           disabled={isSaving}
         >
