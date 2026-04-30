@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,11 @@ import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
+// Stable, serializable identifier for a metric item that is robust enough to
+// survive grid reorders/pagination so the flyout can be restored across navigation.
+const getMetricUniqueKey = (metricItem: ParsedMetricItem) =>
+  `${metricItem.dataStream}::${metricItem.metricName}`;
+
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
@@ -38,6 +43,19 @@ export type MetricsGridProps = Pick<
   whereStatements?: string[];
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
+  /**
+   * Whether the owning Discover tab is the currently active one.
+   *
+   * Discover keeps inactive tabs' chart sections mounted to preserve internal
+   * state (e.g. Lens), so without this gate every tab with a persisted flyout
+   * would render its own `MetricInsightsFlyout` into `document.body` via
+   * `EuiPortal`, causing visual collisions and event-capture conflicts across
+   * tabs (e.g. opening a flyout in tab A would close the flyout in tab B,
+   * and duplicating a tab would lose the persisted flyout).
+   *
+   * Defaults to `true` for non-Discover consumers that don't manage tab state.
+   */
+  isTabSelected?: boolean;
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -57,18 +75,11 @@ export const MetricsGrid = ({
   searchTerm,
   getUserMessages,
   getDescription,
+  isTabSelected = true,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-
-  const [expandedMetric, setExpandedMetric] = useState<
-    | {
-        index: number;
-        metricItem: ParsedMetricItem;
-        esqlQuery: string;
-      }
-    | undefined
-  >();
+  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -81,26 +92,56 @@ export const MetricsGrid = ({
       gridRef,
     });
 
+  const flyoutData = useMemo(() => {
+    if (!flyoutState) {
+      return undefined;
+    }
+    const matchedItem = metricItems.find(
+      (item) => getMetricUniqueKey(item) === flyoutState.metricUniqueKey
+    );
+    if (!matchedItem) {
+      return undefined;
+    }
+    return { metricItem: matchedItem, esqlQuery: flyoutState.esqlQuery };
+  }, [flyoutState, metricItems]);
+
+  // Clear stale flyout state when the referenced metric is no longer present
+  // (e.g. after a search/filter change that removed it from the grid).
+  // Only run AFTER metric items have loaded at least once so the initial render
+  // of a duplicated tab (which mounts with empty items before the per-tab fetch
+  // completes) does not erase a freshly cloned flyoutState carried over via
+  // tab.uiState.metricsGrid.
+  useEffect(() => {
+    if (flyoutState && metricItems.length > 0 && !flyoutData) {
+      onFlyoutStateChange(undefined);
+    }
+  }, [flyoutState, metricItems.length, flyoutData, onFlyoutStateChange]);
+
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
       dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-      setExpandedMetric({ index, metricItem, esqlQuery });
+      onFlyoutStateChange({
+        gridPosition: index,
+        metricUniqueKey: getMetricUniqueKey(metricItem),
+        esqlQuery,
+        selectedTabId: 'overview',
+      });
     },
-    []
+    [onFlyoutStateChange]
   );
 
   const handleCloseFlyout = useCallback(() => {
-    if (!expandedMetric) {
+    if (!flyoutState) {
       return;
     }
 
-    const { rowIndex, colIndex } = getRowColFromIndex(expandedMetric.index);
-    setExpandedMetric(undefined);
+    const { rowIndex, colIndex } = getRowColFromIndex(flyoutState.gridPosition);
+    onFlyoutStateChange(undefined);
     // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
     requestAnimationFrame(() => {
       focusCell(rowIndex, colIndex);
     });
-  }, [expandedMetric, focusCell, getRowColFromIndex]);
+  }, [flyoutState, focusCell, getRowColFromIndex, onFlyoutStateChange]);
 
   if (metricItems.length === 0) {
     return <EmptyState />;
@@ -164,10 +205,10 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {expandedMetric && (
+      {flyoutData && isTabSelected && (
         <MetricInsightsFlyout
-          metricItem={expandedMetric.metricItem}
-          esqlQuery={expandedMetric.esqlQuery}
+          metricItem={flyoutData.metricItem}
+          esqlQuery={flyoutData.esqlQuery}
           onClose={handleCloseFlyout}
         />
       )}

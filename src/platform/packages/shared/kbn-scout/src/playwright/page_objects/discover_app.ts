@@ -21,6 +21,17 @@ export interface DiscoverGotoOptions {
   queryMode?: DiscoverQueryMode;
 }
 
+/**
+ * Test-subject prefixes used by the Unified Tabs component.
+ */
+const UNIFIED_TABS_TEST_SUBJ = {
+  selectTabBtnPrefix: 'unifiedTabs_selectTabBtn_',
+  tabMenuBtnPrefix: 'unifiedTabs_tabMenuBtn_',
+  newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
+  tabsBar: 'unifiedTabs_tabsBar',
+  duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
+} as const;
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -529,6 +540,75 @@ export class DiscoverApp {
     const tab = tabsBar.getByRole('tab', { name });
     await tab.click();
     await expect(tab).toHaveAttribute('aria-selected', 'true');
+  }
+
+  /**
+   * Locator for the currently selected Discover tab button in the unified
+   * tabs bar.
+   */
+  private get activeTabLocator(): Locator {
+    return this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBar)
+      .locator(
+        `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]`
+      );
+  }
+
+  /**
+   * Clicks the "New tab" button in the Discover tab bar and waits for the
+   * newly created tab to become the active one.
+   */
+  async createNewTab() {
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
+    // The newly created tab becomes active automatically; wait for the
+    // active-tab marker to appear before letting the caller proceed, so
+    // subsequent assertions are not racing the tab activation.
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Returns the `data-test-subj` of the currently selected Discover tab
+   * (e.g. `unifiedTabs_selectTabBtn_<id>`). Useful for capturing a tab id
+   * before navigating away so it can be restored later by test-subj.
+   */
+  async getActiveTabTestSubj(): Promise<string> {
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+    const testSubj = await this.activeTabLocator.getAttribute('data-test-subj');
+    if (!testSubj) {
+      throw new Error('Active Discover tab is missing a data-test-subj attribute');
+    }
+    return testSubj;
+  }
+
+  /**
+   * Switches to the Discover tab identified by the given full
+   * `unifiedTabs_selectTabBtn_<id>` test subject and waits for it to become
+   * the active tab.
+   */
+  async navigateToTabByTestSubj(testSubj: string) {
+    await this.page.testSubj.click(testSubj);
+    await this.page
+      .locator(`[data-test-subj="${testSubj}"][aria-selected="true"]`)
+      .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Duplicates the currently active Discover tab via its tab menu.
+   * The duplicated tab becomes the active one; this helper waits for the
+   * active-tab marker to move to a different test subject before returning.
+   */
+  async duplicateActiveTab() {
+    const originalTestSubj = await this.getActiveTabTestSubj();
+    const tabId = originalTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.duplicateMenuItem);
+
+    await this.page
+      .locator(
+        `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]:not([data-test-subj="${originalTestSubj}"])`
+      )
+      .waitFor({ state: 'visible' });
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {

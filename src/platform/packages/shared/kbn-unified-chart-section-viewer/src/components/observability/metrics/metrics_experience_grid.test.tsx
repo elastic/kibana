@@ -154,6 +154,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -268,6 +271,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -311,6 +317,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -349,6 +358,9 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutTabChange: jest.fn(),
         profileId: 'test-profile-id',
       });
 
@@ -386,6 +398,9 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutTabChange: jest.fn(),
         profileId: 'test-profile-id',
       });
 

@@ -10,6 +10,19 @@
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import type { Dimension } from './types';
 
+export type FlyoutTabId = 'overview' | 'esql-query';
+
+export interface FlyoutState {
+  // Position of the metric in the grid when the flyout was opened.
+  gridPosition: number;
+  // Stable identifier for the metric being shown.
+  metricUniqueKey: string;
+  // ES|QL query rendered for the metric in the flyout.
+  esqlQuery: string;
+  // Selected tab inside the flyout body.
+  selectedTabId?: FlyoutTabId;
+}
+
 export interface MetricsExperienceRestorableState {
   // Pagination page index
   currentPage: number;
@@ -22,6 +35,9 @@ export interface MetricsExperienceRestorableState {
 
   // Selected dimensions
   selectedDimensions: Dimension[];
+
+  // Open metric details flyout state, persisted across navigation.
+  flyoutState?: FlyoutState;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

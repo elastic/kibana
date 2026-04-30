@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ParsedMetricItem } from '../../types';
+import { useMetricsExperienceState } from '../observability/metrics/context/metrics_experience_state_provider';
 import { OverviewTab, EsqlQueryTab } from './tabs';
 
 const tabIds = {
@@ -48,17 +49,14 @@ interface MetricFlyoutBodyProps {
 }
 
 export const MetricFlyoutBody = ({ metricItem, esqlQuery, description }: MetricFlyoutBodyProps) => {
-  const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
-
-  const onSelectedTabChanged = (id: TabId) => {
-    setSelectedTabId(id);
-  };
+  const { flyoutState, onFlyoutTabChange } = useMetricsExperienceState();
+  const selectedTabId: TabId = flyoutState?.selectedTabId ?? tabIds.OVERVIEW;
 
   const renderTabs = () => {
     return tabs.map((tab, index) => (
       <EuiTab
         key={index}
-        onClick={() => onSelectedTabChanged(tab.id)}
+        onClick={() => onFlyoutTabChange(tab.id)}
         isSelected={tab.id === selectedTabId}
         data-test-subj={tab['data-test-subj']}
       >

@@ -121,6 +121,9 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -181,6 +184,9 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 

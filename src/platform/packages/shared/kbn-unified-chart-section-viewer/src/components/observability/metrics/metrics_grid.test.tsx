@@ -22,11 +22,21 @@ import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
 import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+import { withRestorableState } from '../../../restorable_state';
+import type { FlyoutState } from '../../../restorable_state';
 
 jest.mock('@kbn/discover-utils', () => ({
   DiscoverFlyouts: { metricInsights: 'metricInsights' },
   dismissAllFlyoutsExceptFor: jest.fn(),
 }));
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    useIsWithinMinBreakpoint: jest.fn(() => true),
+  };
+});
 
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -99,6 +109,29 @@ describe('MetricsGrid', () => {
       <MetricsExperienceStateProvider profileId="test-profile">
         <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />
       </MetricsExperienceStateProvider>
+    );
+  };
+
+  const MetricsGridWithRestorableState = withRestorableState(
+    (props: MetricsGridProps & { profileId: string }) => (
+      <MetricsExperienceStateProvider profileId={props.profileId}>
+        <MetricsGrid {...props} />
+      </MetricsExperienceStateProvider>
+    )
+  );
+
+  const renderMetricsGridWithInitialFlyoutState = (
+    initialFlyoutState: FlyoutState | undefined,
+    props: Partial<MetricsGridProps> = {}
+  ) => {
+    return render(
+      <MetricsGridWithRestorableState
+        {...defaultProps}
+        discoverFetch$={discoverFetch$}
+        profileId="test-profile"
+        initialState={{ flyoutState: initialFlyoutState }}
+        {...props}
+      />
     );
   };
 
@@ -509,6 +542,216 @@ describe('MetricsGrid', () => {
       // the second is the safety-net useEffect inside MetricInsightsFlyout.
       expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(2);
       expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+    });
+  });
+
+  describe('flyout state persistence', () => {
+    it('renders the metrics insights flyout when View details is triggered', () => {
+      const { queryByTestId } = renderMetricsGrid();
+
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+
+      const firstChartProps = (Chart as jest.Mock).mock.calls[0][0];
+
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
+    });
+
+    it('renders the flyout when initial restorable flyoutState references an existing metric', () => {
+      const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      });
+
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
+    });
+
+    it('does not render the flyout when initial restorable flyoutState references a missing metric', () => {
+      const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
+        gridPosition: 0,
+        metricUniqueKey: 'metrics-*::no.longer.here',
+        esqlQuery: 'FROM metrics-* | STATS AVG(no.longer.here) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      });
+
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+    });
+
+    it('preserves restored flyoutState during initial render when metric items are empty (duplicate-tab scenario)', () => {
+      const onInitialStateChange = jest.fn();
+      const initialFlyoutState: FlyoutState = {
+        gridPosition: 0,
+        metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      };
+
+      render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          metricItems={[]}
+          initialState={{ flyoutState: initialFlyoutState }}
+          onInitialStateChange={onInitialStateChange}
+        />
+      );
+
+      const clearedWithUndefined = onInitialStateChange.mock.calls.some(
+        ([state]) => state?.flyoutState === undefined
+      );
+      expect(clearedWithUndefined).toBe(false);
+    });
+
+    it('clears stale flyoutState when the referenced metric is no longer present', () => {
+      const onInitialStateChange = jest.fn();
+
+      render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{
+            flyoutState: {
+              gridPosition: 0,
+              metricUniqueKey: 'metrics-*::no.longer.here',
+              esqlQuery: 'FROM metrics-* | STATS AVG(no.longer.here) BY TBUCKET(100)',
+              selectedTabId: 'overview',
+            },
+          }}
+          onInitialStateChange={onInitialStateChange}
+        />
+      );
+
+      const lastCall = onInitialStateChange.mock.calls.at(-1)?.[0];
+      expect(lastCall?.flyoutState).toBeUndefined();
+    });
+
+    it('clears flyoutState when the flyout is closed', () => {
+      const onInitialStateChange = jest.fn();
+
+      const { getByTestId, queryByTestId } = render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{
+            flyoutState: {
+              gridPosition: 0,
+              metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+              esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
+              selectedTabId: 'overview',
+            },
+          }}
+          onInitialStateChange={onInitialStateChange}
+        />
+      );
+
+      expect(getByTestId('metricsExperienceFlyout')).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.keyDown(getByTestId('metricsExperienceFlyout'), {
+          key: 'Escape',
+          bubbles: true,
+          cancelable: true,
+        });
+      });
+
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+
+      const lastCall = onInitialStateChange.mock.calls.at(-1)?.[0];
+      expect(lastCall?.flyoutState).toBeUndefined();
+    });
+
+    it('does not render the flyout when isTabSelected is false even with restored flyoutState', () => {
+      const { queryByTestId } = renderMetricsGridWithInitialFlyoutState(
+        {
+          gridPosition: 1,
+          metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+          esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+          selectedTabId: 'overview',
+        },
+        { isTabSelected: false }
+      );
+
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+    });
+
+    it('renders the restored flyout once the owning tab becomes active', () => {
+      const initialFlyoutState: FlyoutState = {
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      };
+
+      const { queryByTestId, rerender } = render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{ flyoutState: initialFlyoutState }}
+          isTabSelected={false}
+        />
+      );
+
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+
+      rerender(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{ flyoutState: initialFlyoutState }}
+          isTabSelected={true}
+        />
+      );
+
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
+    });
+
+    it('returns focus to the originating grid cell after closing the flyout', () => {
+      jest
+        .spyOn(global, 'requestAnimationFrame')
+        .mockImplementation((cb: FrameRequestCallback): number => {
+          cb(0);
+          return 0;
+        });
+
+      const { getByTestId, getAllByRole } = render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{
+            flyoutState: {
+              gridPosition: 1,
+              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+              selectedTabId: 'overview',
+            },
+          }}
+        />
+      );
+
+      const gridCells = getAllByRole('gridcell');
+
+      act(() => {
+        fireEvent.keyDown(getByTestId('metricsExperienceFlyout'), {
+          key: 'Escape',
+          bubbles: true,
+          cancelable: true,
+        });
+      });
+
+      expect(document.activeElement).toBe(gridCells[1]);
+
+      (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
     });
   });
 });
