@@ -233,7 +233,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 
 **Machine Learning**:
 * Updates Security ML jobs to use entity analytics fields for host and user fields [#255339]({{kib-pull}}255339).
-* Adds sparkline charts for `CATEGORIZE` in Discover [#254269]({{kib-pull}}254269).
 * Adds a link to manage anomaly detection jobs in the Machine Learning left navigation [#260605]({{kib-pull}}260605).
 * Anomaly detection now automatically closes the job when stopping a datafeed [#259603]({{kib-pull}}259603).
 * Adds aria labels to anomaly detection job wizard combo boxes [#258509]({{kib-pull}}258509).
