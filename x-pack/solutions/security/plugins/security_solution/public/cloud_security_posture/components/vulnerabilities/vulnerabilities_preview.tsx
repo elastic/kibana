@@ -20,6 +20,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
@@ -67,10 +68,12 @@ const VulnerabilitiesCount = ({
 
 export const VulnerabilitiesPreview = ({
   identityFields,
+  entityRecord,
   isPreviewMode,
   openDetailsPanel,
 }: {
   identityFields: IdentityFields;
+  entityRecord?: EntityStoreRecord | null;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
@@ -81,8 +84,11 @@ export const VulnerabilitiesPreview = ({
   const euidApi = useEntityStoreEuidApi();
   const entityType = inferEntityTypeFromIdentityFields(identityFields);
   const cspPreviewOptions = useMemo(
-    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi),
-    [euidApi, entityType, identityFields]
+    () =>
+      buildEuidCspPreviewOptions(entityType, entityRecord, euidApi, {
+        legacyIdentityFields: identityFields,
+      }),
+    [entityType, entityRecord, euidApi, identityFields]
   );
   const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 
