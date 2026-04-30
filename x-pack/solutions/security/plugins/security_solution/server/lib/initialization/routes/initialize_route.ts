@@ -18,6 +18,12 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { runInitializationFlows } from '../flow_registry';
 
+/**
+ * The route itself has no route-level rate limit or throttle. Concurrency is
+ * handled at the flow level: when many clients call `/initialize` in parallel, 
+ * the per-flow dedup in `runSingleFlow` coalesces concurrent callers into
+ * a single underlying execution per flow (or per flow+space for space-aware flows).
+ */
 export const initializeRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
