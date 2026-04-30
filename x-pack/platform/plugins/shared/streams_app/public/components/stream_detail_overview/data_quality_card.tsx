@@ -49,7 +49,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const {
-    core: { application },
+    core: { application, uiSettings },
     dependencies: {
       start: {
         data,
@@ -78,11 +78,12 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         signal,
         start: ts.start,
         end: ts.end,
+        uiSettings,
       });
       const colIdx = response.columns.findIndex((c) => c.name === 'doc_count');
       return colIdx !== -1 ? (response.values[0]?.[colIdx] as number) ?? 0 : 0;
     },
-    [dataSourceForTimeRange, data.search.search],
+    [dataSourceForTimeRange, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
   );
 
@@ -98,11 +99,12 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         signal,
         start: ts.start,
         end: ts.end,
+        uiSettings,
       });
       const colIdx = response.columns.findIndex((c) => c.name === 'degraded_doc_count');
       return colIdx !== -1 ? (response.values[0]?.[colIdx] as number) ?? 0 : 0;
     },
-    [dataSourceForTimeRange, data.search.search],
+    [dataSourceForTimeRange, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
   );
 
@@ -135,11 +137,12 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         signal,
         start: ts.start,
         end: ts.end,
+        uiSettings,
       });
       const countCol = response.columns.findIndex((c) => c.name === 'ignored_fields_count');
       return countCol !== -1 ? (response.values[0]?.[countCol] as number) ?? 0 : 0;
     },
-    [dataSourceForTimeRange, data.search.search],
+    [dataSourceForTimeRange, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
   );
 

@@ -195,6 +195,7 @@ export function useStreamDocCountsFetch({
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
+        uiSettings,
       }).catch((error: unknown) => {
         // The ::failures backing index is created lazily (only when a document first fails).
         // An enabled failure store with no data yet returns "Unknown index" — treat it as empty.

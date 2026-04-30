@@ -331,7 +331,11 @@ export function MonitorDetailFlyout(props: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={isPush ? UNDOCK_LABEL : DOCK_LABEL} display="block">
+              <EuiToolTip
+                content={isPush ? UNDOCK_LABEL : DOCK_LABEL}
+                display="block"
+                disableScreenReaderOutput={true}
+              >
                 <EuiButtonIcon
                   data-test-subj="syntheticsFlyoutToggleMode"
                   iconType={isPush ? 'menuLeft' : 'menuRight'}

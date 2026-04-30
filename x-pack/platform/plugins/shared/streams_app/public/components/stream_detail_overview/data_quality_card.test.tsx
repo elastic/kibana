@@ -43,9 +43,7 @@ jest.mock('./top_failure_reasons', () => ({
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
-    core: {
-      application: { navigateToUrl: jest.fn() },
-    },
+    core: { application: { navigateToUrl: jest.fn() }, uiSettings: {} },
     dependencies: {
       start: {
         data: { search: { search: jest.fn() } },
