@@ -16,6 +16,7 @@ import type {
   SmlCrawlerStateDocument,
   SmlCrawler,
   SmlListItem,
+  SmlCrawlUserScope,
 } from './types';
 import type { SmlIndexer } from './sml_indexer';
 import {
@@ -46,11 +47,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
     esClient,
     savedObjectsClient,
     abortSignal,
+    userScope,
   }: {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     abortSignal?: AbortSignal;
+    userScope?: SmlCrawlUserScope;
   }): Promise<void> {
     const crawlerStateStorage = createSmlCrawlerStateStorage({
       logger: this.logger,
@@ -59,8 +62,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const stateClient = crawlerStateStorage.getClient();
 
     const context: SmlContext = {
-      esClient,
-      savedObjectsClient,
+      esClient: userScope?.elasticsearchClient ?? esClient,
+      savedObjectsClient: userScope?.savedObjectsClient ?? savedObjectsClient,
       logger: this.logger,
     };
 
@@ -143,6 +146,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
       esClient,
       savedObjectsClient,
       stateClient,
+      userScope,
     });
   }
 
@@ -294,11 +298,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
     esClient,
     savedObjectsClient,
     stateClient,
+    userScope,
   }: {
     attachmentType: string;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    userScope?: SmlCrawlUserScope;
   }): Promise<void> {
     const pageSize = 1000;
     const limit = pLimit(10);
@@ -370,7 +376,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
                 action,
                 spaces: doc.spaces,
                 esClient,
-                savedObjectsClient,
+                savedObjectsClient: userScope?.savedObjectsClient ?? savedObjectsClient,
+                getSmlDataElasticsearchClient: userScope?.elasticsearchClient,
                 logger: this.logger,
               });
 

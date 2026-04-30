@@ -26,6 +26,12 @@ export interface SmlChunk {
   title: string;
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
+  /**
+   * Optional ISO-8601 instant for this chunk's content (e.g. source last-modified time).
+   * When set, both `created_at` and `updated_at` on the indexed document use this value.
+   * When omitted, the indexing request time is used.
+   */
+  timestamp?: string;
 }
 
 /**
@@ -68,7 +74,7 @@ export interface SmlListItem {
 /**
  * Server-side type definition for SML (Semantic Metadata Layer).
  *
- * Registered via `agentBuilder.sml.registerType()` during plugin setup.
+ * Registered via `agentContextLayer.registerType()` during plugin setup.
  *
  * Solutions register these to make their content discoverable via the SML.
  */
@@ -161,14 +167,14 @@ export interface SmlCrawlerStateDocument {
 export type SmlIndexAction = 'create' | 'update' | 'delete';
 
 /**
- * Parameters for the event-driven indexing API.
+ * Optional credentials for user-scoped crawling.
+ * System Elasticsearch access (SML data index + crawler state) always uses the
+ * privileged `esClient` passed into {@link SmlCrawler.crawl}; this scope is used
+ * only for `list` / `getSmlData` hooks.
  */
-export interface SmlIndexAttachmentParams {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-  spaceId?: string;
+export interface SmlCrawlUserScope {
+  elasticsearchClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
@@ -182,6 +188,8 @@ export interface SmlCrawler {
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     abortSignal?: AbortSignal;
+    /** When set, `list` and `getSmlData` run with these clients; indexing stays on `esClient`. */
+    userScope?: SmlCrawlUserScope;
   }) => Promise<void>;
 }
 

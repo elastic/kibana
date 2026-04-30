@@ -17,8 +17,8 @@ export type {
   SmlDocument,
   SmlCrawlerStateDocument,
   SmlCrawler,
+  SmlCrawlUserScope,
   SmlIndexAction,
-  SmlIndexAttachmentParams,
 } from './types';
 export {
   createSmlService,
@@ -33,3 +33,5 @@ export {
   scheduleSmlCrawlerTasks,
   SML_CRAWLER_TASK_TYPE,
 } from './sml_task_definitions';
+export { resolveSmlAttachItems } from './execute_sml_attach_items';
+export { smlElasticsearchIndexMappings, smlIndexName } from './sml_storage';
