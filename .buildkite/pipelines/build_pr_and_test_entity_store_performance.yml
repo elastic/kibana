@@ -74,6 +74,7 @@ steps:
         env:
           ES_ZONE_COUNT: 2
           ES_HOT_TIER_MEMORY_SIZE: 8192
+          KIBANA_MEMORY_SIZE: 8192
         label: 'Build and Deploy to Cloud'
         agents:
           provider: gcp
