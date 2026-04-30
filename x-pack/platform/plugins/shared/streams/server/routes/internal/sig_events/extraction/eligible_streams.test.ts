@@ -5,36 +5,14 @@
  * 2.0.
  */
 
-import { TaskStatus, type Streams } from '@kbn/streams-schema';
-import type { PersistedTask } from '../../../../lib/tasks/types';
-import type { FeaturesIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/features_identification';
+import type { Streams } from '@kbn/streams-schema';
+import type { FeaturesRecencyResult } from '../../../../lib/sig_events/features/are_features_recent';
 import { classifyStreams, parseExcludePatterns } from './classify_streams';
 
 const STUB_STREAM_FIELDS = {
   description: '',
   updated_at: '2025-01-01T00:00:00Z',
 } as const;
-
-type TaskForTest = PersistedTask<FeaturesIdentificationTaskParams>;
-
-const makeTask = (
-  streamName: string,
-  overrides: Partial<Omit<TaskForTest, 'task'>> & {
-    task?: Partial<TaskForTest['task']>;
-  } = {}
-): TaskForTest => {
-  const { task: taskOverrides, ...rest } = overrides;
-  return {
-    id: `task-${streamName}`,
-    type: 'streams:features-identification',
-    space: 'default',
-    created_at: '2025-01-01T00:00:00Z',
-    status: TaskStatus.Completed,
-    last_completed_at: '2025-01-01T00:05:00Z',
-    ...rest,
-    task: { params: { streamName, start: 0, end: 1 }, ...taskOverrides },
-  } as TaskForTest;
-};
 
 const makeStream = (name: string, opts?: { query: boolean }): Streams.all.Definition =>
   opts?.query
@@ -81,9 +59,8 @@ describe('parseExcludePatterns', () => {
 describe('classifyStreams', () => {
   const defaultArgs = {
     allStreams: [] as ReturnType<typeof makeStream>[],
-    sortedTasks: [] as TaskForTest[],
+    recencyByStream: new Map<string, FeaturesRecencyResult>(),
     excludedStreamPatterns: '',
-    intervalHours: 12,
   };
 
   it('skips unsupported stream types and reports them', () => {
@@ -107,7 +84,7 @@ describe('classifyStreams', () => {
     expect(candidateNames(result)).toEqual(['logs']);
   });
 
-  it('treats streams without a task as never-processed candidates', () => {
+  it('treats streams without recency data as candidates', () => {
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('stream-a'), makeStream('stream-b')],
@@ -116,92 +93,50 @@ describe('classifyStreams', () => {
     expect(candidateNames(result)).toEqual(['stream-a', 'stream-b']);
   });
 
-  it('identifies already running (in-progress) tasks', () => {
-    const result = classifyStreams({
-      ...defaultArgs,
-      allStreams: [makeStream('running-stream')],
-      sortedTasks: [
-        makeTask('running-stream', {
-          status: TaskStatus.InProgress,
-          created_at: new Date().toISOString(),
-        }),
-      ],
-    });
+  it('marks streams with recent features as up-to-date', () => {
+    const recentLastSeen = new Date().toISOString();
+    const recencyByStream = new Map<string, FeaturesRecencyResult>([
+      ['fresh-stream', { isRecent: true, newestLastSeen: recentLastSeen }],
+    ]);
 
-    expect(result.alreadyRunning).toHaveLength(1);
-    expect(result.candidates).toEqual([]);
-  });
-
-  it('treats BeingCanceled tasks as already running', () => {
-    const result = classifyStreams({
-      ...defaultArgs,
-      allStreams: [makeStream('canceling-stream')],
-      sortedTasks: [
-        makeTask('canceling-stream', {
-          status: TaskStatus.BeingCanceled,
-          created_at: new Date().toISOString(),
-        }),
-      ],
-    });
-
-    expect(result.alreadyRunning).toHaveLength(1);
-    expect(result.candidates).toEqual([]);
-  });
-
-  it('marks recently completed tasks as up-to-date', () => {
-    const recentCompletion = new Date().toISOString();
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('fresh-stream')],
-      sortedTasks: [makeTask('fresh-stream', { last_completed_at: recentCompletion })],
+      recencyByStream,
     });
 
     expect(result.upToDate).toEqual([
-      { streamName: 'fresh-stream', lastCompletedAt: recentCompletion },
+      { streamName: 'fresh-stream', lastCompletedAt: recentLastSeen },
     ]);
     expect(result.candidates).toEqual([]);
   });
 
-  it('schedules streams whose last completion is past the extraction interval', () => {
-    const oldCompletion = '2024-01-01T00:00:00Z';
+  it('marks streams with stale features as candidates', () => {
+    const oldLastSeen = '2024-01-01T00:00:00Z';
+    const recencyByStream = new Map<string, FeaturesRecencyResult>([
+      ['old-stream', { isRecent: false, newestLastSeen: oldLastSeen }],
+    ]);
+
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('old-stream')],
-      sortedTasks: [makeTask('old-stream', { last_completed_at: oldCompletion })],
+      recencyByStream,
     });
 
-    expect(result.candidates).toEqual([
-      { streamName: 'old-stream', lastCompletedAt: oldCompletion },
+    expect(result.candidates).toEqual([{ streamName: 'old-stream', lastCompletedAt: oldLastSeen }]);
+  });
+
+  it('marks streams with no features as candidates with null lastCompletedAt', () => {
+    const recencyByStream = new Map<string, FeaturesRecencyResult>([
+      ['empty-stream', { isRecent: false }],
     ]);
-  });
 
-  it('uses failed task last_failed_at for interval calculation', () => {
-    const recentFailure = new Date().toISOString();
     const result = classifyStreams({
       ...defaultArgs,
-      allStreams: [makeStream('failed-stream')],
-      sortedTasks: [
-        makeTask('failed-stream', {
-          status: TaskStatus.Failed,
-          last_failed_at: recentFailure,
-          last_completed_at: undefined,
-          task: { params: { streamName: 'failed-stream', start: 0, end: 1 }, error: 'some error' },
-        }),
-      ],
+      allStreams: [makeStream('empty-stream')],
+      recencyByStream,
     });
 
-    expect(result.upToDate).toEqual([{ streamName: 'failed-stream', lastCompletedAt: null }]);
-    expect(result.candidates).toEqual([]);
-  });
-
-  it('places no-task streams before old-task streams in candidates', () => {
-    const oldCompletion = '2024-01-01T00:00:00Z';
-    const result = classifyStreams({
-      ...defaultArgs,
-      allStreams: [makeStream('old-stream'), makeStream('new-stream')],
-      sortedTasks: [makeTask('old-stream', { last_completed_at: oldCompletion })],
-    });
-
-    expect(candidateNames(result)).toEqual(['new-stream', 'old-stream']);
+    expect(result.candidates).toEqual([{ streamName: 'empty-stream', lastCompletedAt: null }]);
   });
 });

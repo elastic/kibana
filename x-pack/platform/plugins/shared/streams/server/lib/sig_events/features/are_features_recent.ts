@@ -43,3 +43,37 @@ export async function areFeaturesRecent({
 
   return { isRecent, newestLastSeen };
 }
+
+const RECENCY_BATCH_CONCURRENCY = 10;
+
+/**
+ * Checks feature recency for multiple streams with bounded concurrency
+ * to avoid overwhelming ES with unbounded parallel queries.
+ */
+export async function areFeaturesRecentBatch({
+  featureClient,
+  streamNames,
+  thresholdHours,
+}: {
+  featureClient: FeatureClient;
+  streamNames: string[];
+  thresholdHours: number;
+}): Promise<Map<string, FeaturesRecencyResult>> {
+  const result = new Map<string, FeaturesRecencyResult>();
+  const pending = [...streamNames];
+
+  while (pending.length > 0) {
+    const batch = pending.splice(0, RECENCY_BATCH_CONCURRENCY);
+    const results = await Promise.all(
+      batch.map(async (streamName) => {
+        const recency = await areFeaturesRecent({ featureClient, streamName, thresholdHours });
+        return [streamName, recency] as const;
+      })
+    );
+    for (const [streamName, recency] of results) {
+      result.set(streamName, recency);
+    }
+  }
+
+  return result;
+}

@@ -11,7 +11,10 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
+import {
+  Streams,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
@@ -19,24 +22,15 @@ import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
 } from '../../../../../common/constants';
-import {
-  type FeaturesIdentificationTaskParams,
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/features_identification';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
-import {
-  classifyStreams,
-  parseExcludePatterns,
-  type StreamCandidate,
-  type StreamClassificationResult,
-} from './classify_streams';
+import { classifyStreams, parseExcludePatterns, type StreamCandidate } from './classify_streams';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
+import { areFeaturesRecentBatch } from '../../../../lib/sig_events/features/are_features_recent';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 export interface EligibleStreamsResponse {
   candidates: StreamCandidate[];
-  alreadyRunning: StreamClassificationResult['alreadyRunning'];
   upToDate: StreamCandidate[];
   excluded: string[];
   unsupported: string[];
@@ -47,9 +41,10 @@ export interface EligibleStreamsResponse {
     excludePatterns: string[];
   };
   connectorId: string;
+  resolvedIntervalHours: number;
   timeRange: {
-    from: string;
-    to: string;
+    from: number;
+    to: number;
   };
 }
 
@@ -67,7 +62,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List streams eligible for KI extraction',
     description:
-      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and task state.',
+      'Classifies streams into eligible candidates, up-to-date, and excluded buckets based on extraction settings and feature recency.',
   },
   security: {
     authz: {
@@ -90,7 +85,7 @@ const eligibleStreamsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EligibleStreamsResponse> => {
-    const { streamsClient, taskClient, globalUiSettingsClient, uiSettingsClient, licensing } =
+    const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing, getFeatureClient } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -116,50 +111,50 @@ const eligibleStreamsRoute = createServerRoute({
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
+    const intervalHours =
+      query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
+    const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
-    const [connectorId, sortedTasks, allStreams] = await Promise.all([
+    const [connectorId, allStreams, featureClient] = await Promise.all([
       resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         featureName: 'knowledge indicator extraction',
         request,
       }),
-      taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
-        sort: [
-          {
-            last_completed_at: {
-              order: 'asc',
-              missing: '_first',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      }),
       streamsClient.listStreams(),
+      getFeatureClient(),
     ]);
 
-    const intervalHours =
-      query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
+    const supportedStreams = allStreams.filter(
+      (s) => Streams.WiredStream.Definition.is(s) || Streams.ClassicStream.Definition.is(s)
+    );
 
-    const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
-
-    const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
-      allStreams,
-      sortedTasks,
-      excludedStreamPatterns: resolvedExcludedPatterns,
-      intervalHours,
+    const recencyByStream = await areFeaturesRecentBatch({
+      featureClient,
+      streamNames: supportedStreams.map((s) => s.name),
+      thresholdHours: intervalHours,
     });
 
-    const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
-    const toSchedule = candidates.slice(0, availableSlots);
-    const skipped = candidates.slice(availableSlots);
+    const {
+      candidates: allCandidates,
+      upToDate,
+      excluded,
+      unsupported,
+    } = classifyStreams({
+      allStreams,
+      recencyByStream,
+      excludedStreamPatterns: resolvedExcludedPatterns,
+    });
+
+    const toSchedule = allCandidates.slice(0, maxStreams);
+    const skipped = allCandidates.slice(maxStreams);
 
     const now = Date.now();
     const start = now - lookbackHours * 3_600_000;
 
     return {
       candidates: toSchedule,
-      alreadyRunning,
       upToDate,
       excluded,
       unsupported,
@@ -169,10 +164,11 @@ const eligibleStreamsRoute = createServerRoute({
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
         excludePatterns: parseExcludePatterns(excludedStreamPatterns),
       },
+      resolvedIntervalHours: intervalHours,
       connectorId,
       timeRange: {
-        from: new Date(start).toISOString(),
-        to: new Date(now).toISOString(),
+        from: start,
+        to: now,
       },
     };
   },
