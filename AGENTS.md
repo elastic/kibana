@@ -1,18 +1,105 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Kibana
 
 ## Setup
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
+## Running Kibana
+- Start the development server: `node scripts/kibana --dev`
+- Requires a running Elasticsearch instance (see `dev_docs/tutorials/elasticsearch.mdx` for setup)
+- Scaffold a new plugin: `node scripts/generate_plugin.js --name <pluginName> [--ui] [--server]`
+
+## Repository Layout
+
+```
+src/
+  core/         Core runtime and fundamental services; packages in src/core/packages/
+  platform/     Platform packages and plugins (shared infrastructure)
+x-pack/
+  solutions/    Solution-domain plugins and packages
+    observability/
+    search/
+    security/
+    workplaceai/
+packages/       Standalone @kbn/* utility packages
+plugins/        Top-level plugin workspace (mostly examples/externally generated)
+```
+
+Modules are grouped by domain (`platform` vs solutions) with `visibility` rules (`shared` vs `private`) that limit cross-group access. The group and visibility are declared in each module's `kibana.jsonc`.
+
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
 - Packages are reusable units with explicit boundaries and a single public entry point (no subpath imports), usually with a focused purpose.
 - Plugins are a package type (`type: "plugin"`) that include a plugin class with setup/start/stop lifecycles, utilized by the core platform to enable applications.
+- **Stateful code must be exposed through plugin lifecycle contracts** (`setup`/`start` return values). Never statically export stateful code from a plugin.
 - Plugins that depend on other plugins rely on the contracts returned by those lifecycles, so circular dependencies must be avoided.
 - Module IDs (typically `@kbn/...`) live in `kibana.jsonc`; `package.json` names are derived where present.
 - Plugin IDs are additional camelCase IDs under `plugin.id` in `kibana.jsonc`, used by core platform and other plugins.
-- Modules are grouped by domain (platform vs solutions) with visibility rules (`shared` vs `private`) that limit cross-group access.
 - Utility scripts live in `scripts/` (e.g., `node scripts/generate.js`).
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
+
+## Plugin Structure
+
+Standard plugin layout (`public/`, `server/`, `common/` are optional based on `browser`/`server` flags):
+
+```
+my_plugin/
+  kibana.jsonc        # Module manifest
+  tsconfig.json
+  public/
+    index.ts          # Plugin export + static type exports only
+    plugin.ts         # Single class implementing Plugin interface
+    applications/     # UI apps; each exports a single renderApp(); loaded via dynamic import
+    services/         # Services provided to other plugins
+  server/
+    index.ts          # Plugin export + static type exports only
+    plugin.ts         # Single class implementing Plugin interface
+    routes/           # HTTP route handlers
+    saved_objects/    # One file per saved object type (snake_case name), plus index.ts
+    services/
+  common/             # Types/utilities shared across server and browser
+```
+
+### kibana.jsonc key fields
+
+```jsonc
+{
+  "type": "plugin",           // "plugin" | "shared-common" | "shared-browser" | "shared-server" | etc.
+  "id": "@kbn/my-plugin",     // Package ID — must start with @kbn/
+  "owner": "@elastic/my-team",
+  "group": "platform",        // "platform" | "observability" | "search" | "security" | "workplaceai"
+  "visibility": "shared",     // "shared" (any module may import) | "private" (group-only)
+  "plugin": {
+    "id": "myPlugin",         // camelCase plugin ID used by core and requiredPlugins lists
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}
+```
+
+## Core Package Naming Conventions (`src/core/packages/`)
+
+| Suffix | Role | Visibility |
+|---|---|---|
+| `-server` | Public server-side types/contracts only | `shared` |
+| `-server-internal` | Server-side implementation | `private` |
+| `-server-mocks` | Jest mocks for server contracts | `shared`, `devOnly` |
+| `-browser` | Public browser-side types/contracts only | `shared` |
+| `-browser-internal` | Browser-side implementation | `private` |
+| `-browser-mocks` | Jest mocks for browser contracts | `shared`, `devOnly` |
+| `common` | Types/utilities shared across server and browser | `shared` |
+
+`-internal` packages contain implementation and depend on public API packages, never the reverse.
+
+## HTTP API Conventions
+- **Public APIs**: path must start with `/api/` — document in `docs/api/`, include a release tag (experimental/beta/stable/deprecated)
+- **Internal APIs**: path must start with `/internal/{pluginId}/` — no stability guarantees; only used by the owning plugin
+- Plugins should never call another plugin's REST API directly; access it through the plugin's contract instead
 
 ## Testing
 Always run `node scripts/check_changes.ts` to validate your changes
@@ -76,8 +163,11 @@ Follow existing patterns in the target area first; below are common defaults.
 ### React / UI Conventions
 - Use functional components; type props explicitly.
 - Keep hooks at the top level; avoid conditional hooks.
-- Avoid inline styles unless consistent with the file’s conventions.
-- Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
+- Avoid inline styles unless consistent with the file's conventions.
+- Use **`@elastic/eui`** components with Emotion (`@emotion/react`) for styling — no Tailwind, MUI, Chakra, or other UI frameworks.
+- Never nest multiple `EuiProvider` instances; it wraps the app once at the root.
+- Use `useEuiTheme()` for theme tokens.
+- Use `camelCase` for `data-test-subj` attribute values (e.g., `data-test-subj="myButton"`).
 
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.

@@ -12,7 +12,7 @@ import type { EventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 
-const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
+export const MAC_EVENT_COLLECTION_OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
   {
     name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.dns', {
       defaultMessage: 'DNS',
@@ -56,7 +56,7 @@ export const MacEventCollectionCard = memo<MacEventCollectionCardProps>((props) 
       {...props}
       os={OperatingSystem.MAC}
       selection={props.policy.mac.events}
-      options={OPTIONS}
+      options={MAC_EVENT_COLLECTION_OPTIONS}
     />
   );
 });

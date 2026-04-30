@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
+import { expectIsViewOnly, exactMatchText, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -20,6 +20,7 @@ import {
   BehaviourProtectionCard,
   LOCKED_CARD_BEHAVIOR_TITLE,
 } from './protection_settings_card/behaviour_protection_card';
+import { BEHAVIOR_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 
 jest.mock('../../../../../../../common/hooks/use_license');
 
@@ -50,25 +51,20 @@ describe('Policy Behaviour Protection Card', () => {
   });
 
   it('should render the card with expected components', () => {
-    const { getByTestId, queryByTestId } = render();
-
-    expect(getByTestId(testSubj.enableDisableSwitch));
-    expect(getByTestId(testSubj.protectionPreventRadio));
-    expect(getByTestId(testSubj.notifyUserCheckbox));
-    expect(queryByTestId(testSubj.reputationServiceCheckbox)).not.toBeInTheDocument();
-  });
-
-  it('should show reputation service section for cloud user', () => {
-    startServices.cloud!.isCloudEnabled = true;
     const { getByTestId } = render();
 
-    expect(getByTestId(testSubj.reputationServiceCheckbox));
+    expect(getByTestId(testSubj.enableDisableSwitch));
+    expect(getByTestId(testSubj.windowsModeSelect));
+    expect(getByTestId(testSubj.windowsNotifyUserCheckbox));
+    expect(getByTestId(testSubj.reputationServiceCheckbox)).toBeInTheDocument();
   });
 
   it('should show supported OS values', () => {
     const { getByTestId } = render();
 
-    expect(getByTestId(testSubj.osValuesContainer)).toHaveTextContent('Windows, Mac, Linux');
+    expect(getByTestId(testSubj.osValuesContainer)).toHaveTextContent(
+      BEHAVIOR_POLICY_SECTION_DESCRIPTION
+    );
   });
 
   describe('and license is lower than Platinum', () => {
@@ -93,114 +89,96 @@ describe('Policy Behaviour Protection Card', () => {
   });
 
   describe('and displayed in View mode', () => {
-    const cardTextContent = (
-      args: {
-        enabled?: boolean;
-        reputationServices?: boolean;
-        notifyUser?: boolean;
-        prebuiltRules?: boolean;
-      } = {}
-    ) => {
-      const defaults = {
-        enabled: true,
-        reputationServices: false,
-        notifyUser: true,
-        prebuiltRules: false,
-      };
-      const config = { ...defaults, ...args };
-
-      const baseText = [
-        'Type',
-        'Malicious behavior',
-        'Operating system',
-        'Windows, Mac, Linux ',
-        'Malicious behavior protections',
-      ];
-
-      return (
-        config.enabled
-          ? [
-              ...baseText,
-              'Protection level',
-              'Prevent',
-              ...(config.reputationServices
-                ? ['Reputation serviceInfo', 'Reputation service']
-                : []),
-              'User notification',
-              'Agent version 7.15+',
-              ...(config.notifyUser
-                ? ['Notify user', 'Notification message', '—']
-                : ['Notify user']),
-            ]
-          : baseText
-      ).join('');
-    };
-
     beforeEach(() => {
       formProps.mode = 'view';
     });
 
-    it('should display correctly when overall card is enabled', () => {
-      const { getByTestId } = render();
+    const assertSettingCardHeader = () => {
+      const { getByTestId } = renderResult;
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Malicious behavior')
+      );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(BEHAVIOR_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Malicious behavior protections'
+      );
+      expect(card.textContent).not.toContain('TypeMalicious behavior');
+      expect(card.textContent).not.toContain('Operating system');
+    };
 
-      expectIsViewOnly(getByTestId(testSubj.card));
-      expect(getByTestId(testSubj.card)).toHaveTextContent(cardTextContent());
-      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
+    it('should display correctly when overall card is enabled', () => {
+      render();
+
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+      assertSettingCardHeader();
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('true');
+      expect(renderResult.getByTestId('test-behaviour-windowsNotifyUser-checkbox')).toBeChecked();
     });
 
     it('should display correctly when overall card is enabled for cloud user', () => {
       startServices.cloud!.isCloudEnabled = true;
 
-      const { getByTestId } = render();
+      render();
 
-      expectIsViewOnly(getByTestId(testSubj.card));
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        cardTextContent({ reputationServices: true })
-      );
-      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
-      expect(getByTestId(testSubj.reputationServiceCheckbox)).not.toHaveAttribute('checked');
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+      assertSettingCardHeader();
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('true');
+      expect(renderResult.getByTestId('test-behaviour-windowsNotifyUser-checkbox')).toBeChecked();
+      expect(
+        renderResult.getByTestId('test-behaviour-windowsReputationService-switch')
+      ).not.toBeChecked();
     });
 
     it('should display correctly when overall card is disabled', () => {
       set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
+      set(formProps.policy, 'mac.behavior_protection.mode', ProtectionModes.off);
+      set(formProps.policy, 'linux.behavior_protection.mode', ProtectionModes.off);
 
-      const { getByTestId } = render();
+      render();
 
-      expectIsViewOnly(getByTestId(testSubj.card));
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        cardTextContent({ enabled: false, prebuiltRules: true })
-      );
-      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+      assertSettingCardHeader();
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('false');
     });
 
     it('should display correctly when overall card is disabled for cloud user', () => {
       startServices.cloud!.isCloudEnabled = true;
       set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
+      set(formProps.policy, 'mac.behavior_protection.mode', ProtectionModes.off);
+      set(formProps.policy, 'linux.behavior_protection.mode', ProtectionModes.off);
 
-      const { getByTestId } = render();
+      render();
 
-      expectIsViewOnly(getByTestId(testSubj.card));
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        cardTextContent({
-          enabled: false,
-          reputationServices: true,
-          prebuiltRules: true,
-        })
-      );
-      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+      assertSettingCardHeader();
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('false');
     });
 
     it('should display user notification disabled', () => {
       set(formProps.policy, 'windows.popup.behavior_protection.enabled', false);
 
-      const { getByTestId } = render();
+      render();
 
-      expectIsViewOnly(getByTestId(testSubj.card));
-      expect(getByTestId(testSubj.card)).toHaveTextContent(cardTextContent({ notifyUser: false }));
-      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).not.toHaveAttribute('checked');
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+      assertSettingCardHeader();
+      expect(
+        renderResult.getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('true');
+      expect(
+        renderResult.getByTestId('test-behaviour-windowsNotifyUser-checkbox')
+      ).not.toBeChecked();
     });
   });
 });

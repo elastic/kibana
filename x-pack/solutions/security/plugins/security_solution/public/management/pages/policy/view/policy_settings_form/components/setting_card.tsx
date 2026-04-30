@@ -7,7 +7,6 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -26,15 +25,6 @@ import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { OS_TITLES } from '../../../../../common/translations';
 
-const TITLES = {
-  type: i18n.translate('xpack.securitySolution.endpoint.policyDetailType', {
-    defaultMessage: 'Type',
-  }),
-  os: i18n.translate('xpack.securitySolution.endpoint.policyDetailOS', {
-    defaultMessage: 'Operating system',
-  }),
-};
-
 export const SettingCardHeader = memo<{ children: React.ReactNode; 'data-test-subj'?: string }>(
   ({ children, 'data-test-subj': dataTestSubj }) => (
     <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
@@ -46,13 +36,17 @@ SettingCardHeader.displayName = 'SettingCardHeader';
 
 export type SettingCardProps = React.PropsWithChildren<{
   /**
-   * A subtitle for this component.
+   * Card section title (e.g. Malware, Event collection).
    **/
   type: string;
   /**
    * Types of supported operating systems.
    */
   supportedOss: OperatingSystem[];
+  /**
+   * Subdued summary under the title. When omitted, supported OS names are shown instead.
+   */
+  sectionDescription?: ReactNode;
   osRestriction?: ReactNode;
   dataTestSubj?: string;
   /** React Node to be put on the right corner of the card */
@@ -65,6 +59,7 @@ export const SettingCard: FC<SettingCardProps> = memo(
   ({
     type,
     supportedOss,
+    sectionDescription,
     osRestriction,
     dataTestSubj,
     rightCorner,
@@ -78,29 +73,29 @@ export const SettingCard: FC<SettingCardProps> = memo(
       <EuiPanel data-test-subj={getTestId()} hasBorder={true} hasShadow={false} paddingSize="none">
         <EuiFlexGroup
           direction="row"
-          gutterSize="none"
-          alignItems="center"
+          gutterSize="m"
+          alignItems="flexStart"
+          justifyContent="spaceBetween"
+          responsive={false}
           css={({ euiTheme }) => ({
             padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
           })}
         >
           <EuiFlexItem grow={1}>
-            <SettingCardHeader>{TITLES.type}</SettingCardHeader>
-            <EuiText size="s" data-test-subj={getTestId('type')}>
-              {type}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <SettingCardHeader>{TITLES.os}</SettingCardHeader>
+            <EuiTitle size="s" data-test-subj={getTestId('type')}>
+              <span>{type}</span>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
             <EuiFlexGroup
               direction="row"
               gutterSize="s"
               alignItems="center"
+              wrap
               data-test-subj={getTestId('osValueContainer')}
             >
               <EuiFlexItem grow={false}>
-                <EuiText size="s" data-test-subj={getTestId('osValues')}>
-                  {supportedOss.map((os) => OS_TITLES[os]).join(', ')}{' '}
+                <EuiText size="s" color="subdued" data-test-subj={getTestId('osValues')}>
+                  {sectionDescription ?? supportedOss.map((os) => OS_TITLES[os]).join(', ')}
                 </EuiText>
               </EuiFlexItem>
               {osRestriction && (
@@ -128,7 +123,7 @@ export const SettingCard: FC<SettingCardProps> = memo(
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiShowFor sizes={['m', 'l', 'xl', 'xxl']}>
-            <EuiFlexItem grow={3}>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false} data-test-subj={getTestId('rightCornerContainer')}>
                   {rightCorner}
@@ -137,7 +132,7 @@ export const SettingCard: FC<SettingCardProps> = memo(
             </EuiFlexItem>
           </EuiShowFor>
           <EuiShowFor sizes={rightCorner ? ['s', 'xs'] : []}>
-            <EuiFlexItem data-test-subj={getTestId('rightCornerContainer')}>
+            <EuiFlexItem grow={false} data-test-subj={getTestId('rightCornerContainer')}>
               {rightCorner}
             </EuiFlexItem>
           </EuiShowFor>

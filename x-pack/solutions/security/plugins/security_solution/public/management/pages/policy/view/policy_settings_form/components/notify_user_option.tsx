@@ -9,36 +9,34 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
-import type { EuiTextAreaProps, EuiCheckboxProps } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EuiCheckboxProps, EuiFieldTextProps } from '@elastic/eui';
 import {
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiCheckbox,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIconTip,
+  EuiSpacer,
   EuiText,
-  EuiTextArea,
+  useEuiTheme,
 } from '@elastic/eui';
 import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '../protection_notice_supported_endpoint_version';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
-import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
-import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
-import {
-  NOTIFY_USER_SECTION_TITLE,
-  NOTIFY_USER_CHECKBOX_LABEL,
-  NOTIFICATION_MESSAGE_LABEL,
-  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
-} from './shared_translations';
+import { NOTIFY_USER_CHECKBOX_LABEL } from './shared_translations';
 
 export interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
-  osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+  /** When provided, reads and writes only this OS's popup config. */
+  os: 'windows' | 'mac' | 'linux';
+  /** When false, the protection section master switch is off — keep controls visible but disabled. */
+  sectionFeatureEnabled?: boolean;
 }
 
 export const NotifyUserOption = React.memo(
@@ -47,206 +45,222 @@ export const NotifyUserOption = React.memo(
     onChange,
     mode,
     protection,
-    osList,
+    os,
+    sectionFeatureEnabled = true,
     'data-test-subj': dataTestSubj,
   }: NotifyUserOptionProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const CustomNotificationUpsellingComponent = useGetCustomNotificationUnavailableComponent();
+    const { euiTheme } = useEuiTheme();
 
     const isEditMode = mode === 'edit';
-    const selected = policy.windows[protection].mode;
-    const userNotificationSelected = policy.windows.popup[protection].enabled;
-    const userNotificationMessage = policy.windows.popup[protection].message;
+
+    const protectionMode = useMemo(() => {
+      if (os === 'mac') return policy.mac[protection as MacPolicyProtection].mode;
+      if (os === 'linux') return policy.linux[protection as LinuxPolicyProtection].mode;
+      return policy.windows[protection].mode;
+    }, [os, policy, protection]);
+
+    const userNotificationSelected = useMemo(() => {
+      if (os === 'mac')
+        return (
+          (policy.mac.popup as Record<string, { enabled: boolean }>)[protection]?.enabled ?? false
+        );
+      if (os === 'linux')
+        return (
+          (policy.linux.popup as Record<string, { enabled: boolean }>)[protection]?.enabled ?? false
+        );
+      return policy.windows.popup[protection].enabled;
+    }, [os, policy, protection]);
+
+    const userNotificationMessage = useMemo(() => {
+      if (os === 'mac')
+        return (policy.mac.popup as Record<string, { message: string }>)[protection]?.message ?? '';
+      if (os === 'linux')
+        return (
+          (policy.linux.popup as Record<string, { message: string }>)[protection]?.message ?? ''
+        );
+      return policy.windows.popup[protection].message;
+    }, [os, policy, protection]);
 
     const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
       (event) => {
         const newPayload = cloneDeep(policy);
 
-        for (const os of osList) {
-          if (os === 'windows') {
-            newPayload[os].popup[protection].enabled = event.target.checked;
-          } else if (os === 'mac') {
-            newPayload[os].popup[protection as MacPolicyProtection].enabled = event.target.checked;
-          } else if (os === 'linux') {
-            newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
-              event.target.checked;
-          }
+        if (os === 'windows') {
+          newPayload.windows.popup[protection].enabled = event.target.checked;
+        } else if (os === 'mac') {
+          (newPayload.mac.popup as Record<string, { enabled: boolean }>)[protection].enabled =
+            event.target.checked;
+        } else if (os === 'linux') {
+          (newPayload.linux.popup as Record<string, { enabled: boolean }>)[protection].enabled =
+            event.target.checked;
         }
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
-      [policy, onChange, osList, protection]
+      [policy, onChange, os, protection]
     );
 
-    const handleCustomUserNotification = useCallback<NonNullable<EuiTextAreaProps['onChange']>>(
+    const handleCustomUserNotification = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
       (event) => {
         const newPayload = cloneDeep(policy);
-        for (const os of osList) {
-          if (os === 'windows') {
-            newPayload[os].popup[protection].message = event.target.value;
-          } else if (os === 'mac') {
-            newPayload[os].popup[protection as MacPolicyProtection].message = event.target.value;
-          } else if (os === 'linux') {
-            newPayload[os].popup[protection as LinuxPolicyProtection].message = event.target.value;
-          }
+
+        if (os === 'windows') {
+          newPayload.windows.popup[protection].message = event.target.value;
+        } else if (os === 'mac') {
+          (newPayload.mac.popup as Record<string, { message: string }>)[protection].message =
+            event.target.value;
+        } else if (os === 'linux') {
+          (newPayload.linux.popup as Record<string, { message: string }>)[protection].message =
+            event.target.value;
         }
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
-      [policy, onChange, osList, protection]
+      [policy, onChange, os, protection]
     );
 
-    const tooltipProtectionText = useCallback((protectionType: PolicyProtection) => {
-      if (protectionType === 'memory_protection') {
-        return i18n.translate(
-          'xpack.securitySolution.endpoint.policyDetail.memoryProtectionTooltip',
-          {
-            defaultMessage: 'memory threat',
-          }
-        );
-      } else if (protectionType === 'behavior_protection') {
-        return i18n.translate(
-          'xpack.securitySolution.endpoint.policyDetail.behaviorProtectionTooltip',
-          {
-            defaultMessage: 'malicious behavior',
-          }
-        );
-      } else {
-        return protectionType;
-      }
-    }, []);
+    const version =
+      PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
+        protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
+      ];
 
-    const tooltipBracketText = useCallback(
-      (protectionType: PolicyProtection) => {
-        if (protectionType === 'memory_protection' || protection === 'behavior_protection') {
-          return i18n.translate('xpack.securitySolution.endpoint.policyDetail.rule', {
-            defaultMessage: 'rule',
-          });
-        } else {
-          return i18n.translate('xpack.securitySolution.endpoint.policyDetail.filename', {
-            defaultMessage: 'filename',
-          });
-        }
-      },
-      [protection]
-    );
+    const tooltipContent = useMemo(() => {
+      const protectionText =
+        protection === 'memory_protection'
+          ? i18n.translate('xpack.securitySolution.endpoint.policyDetail.memoryProtectionTooltip', {
+              defaultMessage: 'memory threat',
+            })
+          : protection === 'behavior_protection'
+          ? i18n.translate(
+              'xpack.securitySolution.endpoint.policyDetail.behaviorProtectionTooltip',
+              { defaultMessage: 'malicious behavior' }
+            )
+          : protection;
 
-    const customNotificationComponent = useMemo(() => {
-      if (!userNotificationSelected) {
-        return null;
-      }
-
-      if (CustomNotificationUpsellingComponent) {
-        return <CustomNotificationUpsellingComponent />;
-      }
-
-      if (!isEditMode) {
-        return (
-          <>
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <h4>{NOTIFICATION_MESSAGE_LABEL}</h4>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <>{userNotificationMessage || getEmptyValue()}</>
-          </>
-        );
-      }
+      const bracketText =
+        protection === 'memory_protection' || protection === 'behavior_protection'
+          ? i18n.translate('xpack.securitySolution.endpoint.policyDetail.rule', {
+              defaultMessage: 'rule',
+            })
+          : i18n.translate('xpack.securitySolution.endpoint.policyDetail.filename', {
+              defaultMessage: 'filename',
+            });
 
       return (
         <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" data-test-subj={getTestId('customMessageTitle')}>
-                <h4>{CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL}</h4>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                position="right"
-                data-test-subj={getTestId('tooltipInfo')}
-                anchorProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
-                content={
-                  <>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a"
-                      defaultMessage="Selecting the user notification option will display a notification to the host user when { protectionName } is prevented or detected."
-                      values={{
-                        protectionName: tooltipProtectionText(protection),
-                      }}
-                    />
-                    <EuiSpacer size="m" />
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
-                      defaultMessage="
-                      The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
-                      values={{
-                        bracketText: tooltipBracketText(protection),
-                      }}
-                    />
-                  </>
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiTextArea
-            placeholder={i18n.translate(
-              'xpack.securitySolution.endpoint.policyDetails.userNotification.placeholder',
-              {
-                defaultMessage: 'Input your custom notification message',
-              }
-            )}
-            value={userNotificationMessage}
-            onChange={handleCustomUserNotification}
-            fullWidth={true}
-            disabled={!isEditMode}
-            data-test-subj={getTestId('customMessage')}
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a"
+            defaultMessage="Selecting the user notification option will display a notification to the host user when { protectionName } is prevented or detected."
+            values={{ protectionName: protectionText }}
+          />
+          <br />
+          <br />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
+            defaultMessage="The user notification can be customized in the text field beside this option. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
+            values={{ bracketText }}
           />
         </>
       );
-    }, [
-      CustomNotificationUpsellingComponent,
-      getTestId,
-      handleCustomUserNotification,
-      isEditMode,
-      protection,
-      tooltipBracketText,
-      tooltipProtectionText,
-      userNotificationMessage,
-      userNotificationSelected,
-    ]);
+    }, [protection]);
 
-    if (!isPlatinumPlus) {
-      return null;
-    }
+    const containerCss = css`
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+      border-radius: ${euiTheme.border.radius.medium};
+      padding: ${euiTheme.size.s} ${euiTheme.size.m};
+      width: 100%;
+    `;
+
+    const checkboxLabelCss = css`
+      display: inline-flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      white-space: nowrap;
+    `;
+
+    const versionLabel = version
+      ? i18n.translate('xpack.securitySolution.endpoint.policyDetails.notifyUser.agentVersion', {
+          defaultMessage: '(agent version {version})',
+          values: { version },
+        })
+      : null;
+
+    const showCustomNotificationUpsell =
+      Boolean(CustomNotificationUpsellingComponent) &&
+      (!isPlatinumPlus || userNotificationSelected);
 
     return (
-      <div data-test-subj={getTestId()}>
-        <EuiSpacer size="m" />
-        <SettingCardHeader data-test-subj={getTestId('title')}>
-          {NOTIFY_USER_SECTION_TITLE}
-        </SettingCardHeader>
-
-        <SupportedVersionForProtectionNotice
-          protection={protection}
-          data-test-subj={getTestId('supportedVersion')}
-        />
-
-        <EuiSpacer size="s" />
-
-        <EuiCheckbox
-          data-test-subj={getTestId('checkbox')}
-          id={`${protection}UserNotificationCheckbox}`}
-          onChange={handleUserNotificationCheckbox}
-          checked={userNotificationSelected}
-          disabled={!isEditMode || selected === ProtectionModes.off}
-          label={NOTIFY_USER_CHECKBOX_LABEL}
-        />
-
-        {customNotificationComponent}
+      <div css={containerCss} data-test-subj={getTestId()}>
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              data-test-subj={getTestId('checkbox')}
+              id={`${protection}-${os}-userNotificationCheckbox`}
+              onChange={handleUserNotificationCheckbox}
+              checked={userNotificationSelected}
+              disabled={
+                !sectionFeatureEnabled ||
+                !isEditMode ||
+                protectionMode === ProtectionModes.off ||
+                !isPlatinumPlus
+              }
+              label={
+                <span css={checkboxLabelCss}>
+                  <span>{NOTIFY_USER_CHECKBOX_LABEL}</span>
+                  {versionLabel && (
+                    <EuiText size="xs" color="subdued" component="span">
+                      {versionLabel}
+                    </EuiText>
+                  )}
+                  <EuiIconTip
+                    type="question"
+                    position="right"
+                    data-test-subj={getTestId('tooltipInfo')}
+                    anchorProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
+                    content={tooltipContent}
+                  />
+                </span>
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {!isEditMode ? (
+              <EuiText size="s" data-test-subj={getTestId('customMessage')}>
+                {userNotificationMessage || getEmptyValue()}
+              </EuiText>
+            ) : (
+              <>
+                {showCustomNotificationUpsell && CustomNotificationUpsellingComponent ? (
+                  <>
+                    <CustomNotificationUpsellingComponent />
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
+                <EuiFieldText
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.endpoint.policyDetails.userNotification.placeholder',
+                    { defaultMessage: 'Customize message' }
+                  )}
+                  value={userNotificationMessage}
+                  onChange={handleCustomUserNotification}
+                  disabled={
+                    !sectionFeatureEnabled ||
+                    !userNotificationSelected ||
+                    !isPlatinumPlus ||
+                    protectionMode === ProtectionModes.off
+                  }
+                  fullWidth
+                  compressed
+                  data-test-subj={getTestId('customMessage')}
+                />
+              </>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     );
   }

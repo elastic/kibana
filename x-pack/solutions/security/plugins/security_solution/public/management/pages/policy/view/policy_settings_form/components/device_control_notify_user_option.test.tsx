@@ -16,11 +16,6 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
-import {
-  NOTIFY_USER_SECTION_TITLE,
-  NOTIFY_USER_CHECKBOX_LABEL,
-  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
-} from './shared_translations';
 import type { DeviceControlNotifyUserOptionProps } from './device_control_notify_user_option';
 import { DeviceControlNotifyUserOption } from './device_control_notify_user_option';
 
@@ -52,6 +47,7 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       policy,
       onChange: jest.fn(),
       mode: 'edit',
+      os: 'windows',
       'data-test-subj': 'test',
     };
 
@@ -64,21 +60,19 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
   it('should render with expected content', () => {
     const { getByTestId } = render();
 
-    expect(getByTestId('test')).toHaveTextContent(NOTIFY_USER_SECTION_TITLE);
+    expect(getByTestId('test')).toBeInTheDocument();
     expect(isChecked('test-checkbox')).toBe(true);
-    expect(renderResult.getByLabelText(NOTIFY_USER_CHECKBOX_LABEL));
-    expect(getByTestId('test-customMessageTitle')).toHaveTextContent(
-      exactMatchText(CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL)
-    );
+    expect(renderResult.getByRole('checkbox', { name: /notify user/i })).toBeInTheDocument();
     expect(getByTestId('test-customMessage')).toHaveValue('hello world');
   });
 
   it('should render with options un-checked', () => {
     formProps.policy.windows.popup.device_control!.enabled = false;
+    formProps.policy.mac.popup.device_control!.enabled = false;
     render();
 
     expect(isChecked('test-checkbox')).toBe(false);
-    expect(renderResult.queryByTestId('test-customMessage')).toBeNull();
+    expect(renderResult.getByTestId('test-customMessage')).toBeDisabled();
   });
 
   it('should render checkbox disabled if device control is OFF', () => {
@@ -190,7 +184,7 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
     it('should render with expected output when checked', () => {
       render();
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        'User notificationNotify userNotification messagehello world'
+        exactMatchText('Notify userInfohello world')
       );
     });
 
@@ -198,14 +192,16 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       formProps.policy.windows.popup.device_control!.message = '';
       render();
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        'User notificationNotify userNotification message—'
+        exactMatchText('Notify userInfo—')
       );
     });
 
     it('should render with expected output when un-checked', () => {
       formProps.policy.windows.popup.device_control!.enabled = false;
       render();
-      expect(renderResult.getByTestId('test')).toHaveTextContent('User notificationNotify user');
+      expect(renderResult.getByTestId('test')).toHaveTextContent(
+        exactMatchText('Notify userInfohello world')
+      );
     });
   });
 });

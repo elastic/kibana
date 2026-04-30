@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
@@ -34,6 +35,76 @@ export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCom
     policyConfigData: PolicyConfig;
     protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => PolicyConfig;
+  /**
+   * Fired when the section master switch turns off, after per-OS modes are saved and the draft
+   * policy is updated to `off`. Passes saved modes and the policy before toggle (e.g. for UI that
+   * still shows reputation / notify state while disabled).
+   */
+  onMasterSwitchTurnedOff?: (
+    savedModes: Partial<Record<keyof UIPolicyConfig, ProtectionModes>>,
+    policyBeforeToggle: PolicyConfig
+  ) => void;
+  /** Called when the user toggles the section master switch (before policy onChange). */
+  onSectionActiveChange?: (active: boolean) => void;
+}
+
+function applyToggleOffForOs(
+  os: Partial<keyof UIPolicyConfig>,
+  protection: PolicyProtection,
+  isPlatinumPlus: boolean,
+  policy: PolicyConfig,
+  newPayload: PolicyConfig,
+  savedModes: Partial<Record<keyof UIPolicyConfig, ProtectionModes>>
+): void {
+  if (os === 'windows') {
+    savedModes.windows = policy.windows[protection].mode;
+    newPayload.windows[protection].mode = ProtectionModes.off;
+    if (isPlatinumPlus) {
+      newPayload.windows.popup[protection].enabled = false;
+    }
+  } else if (os === 'mac') {
+    savedModes.mac = policy.mac[protection as MacPolicyProtection].mode;
+    newPayload.mac[protection as MacPolicyProtection].mode = ProtectionModes.off;
+    if (isPlatinumPlus) {
+      (newPayload.mac.popup as Record<string, { enabled: boolean }>)[protection].enabled = false;
+    }
+  } else if (os === 'linux') {
+    savedModes.linux = policy.linux[protection as LinuxPolicyProtection].mode;
+    newPayload.linux[protection as LinuxPolicyProtection].mode = ProtectionModes.off;
+    if (isPlatinumPlus) {
+      (newPayload.linux.popup as Record<string, { enabled: boolean }>)[protection].enabled = false;
+    }
+  }
+}
+
+function applyToggleOnForOs(
+  os: Partial<keyof UIPolicyConfig>,
+  protection: PolicyProtection,
+  isPlatinumPlus: boolean,
+  newPayload: PolicyConfig,
+  savedModes: Partial<Record<keyof UIPolicyConfig, ProtectionModes>>
+): void {
+  if (os === 'windows') {
+    const restored = savedModes.windows ?? ProtectionModes.off;
+    newPayload.windows[protection].mode = restored;
+    if (isPlatinumPlus) {
+      newPayload.windows.popup[protection].enabled = restored === ProtectionModes.prevent;
+    }
+  } else if (os === 'mac') {
+    const restored = savedModes.mac ?? ProtectionModes.off;
+    newPayload.mac[protection as MacPolicyProtection].mode = restored;
+    if (isPlatinumPlus) {
+      (newPayload.mac.popup as Record<string, { enabled: boolean }>)[protection].enabled =
+        restored === ProtectionModes.prevent;
+    }
+  } else if (os === 'linux') {
+    const restored = savedModes.linux ?? ProtectionModes.off;
+    newPayload.linux[protection as LinuxPolicyProtection].mode = restored;
+    if (isPlatinumPlus) {
+      (newPayload.linux.popup as Record<string, { enabled: boolean }>)[protection].enabled =
+        restored === ProtectionModes.prevent;
+    }
+  }
 }
 
 export const ProtectionSettingCardSwitch = React.memo(
@@ -42,6 +113,8 @@ export const ProtectionSettingCardSwitch = React.memo(
     protectionLabel,
     osList,
     additionalOnSwitchChange,
+    onMasterSwitchTurnedOff,
+    onSectionActiveChange,
     onChange,
     policy,
     mode,
@@ -52,60 +125,48 @@ export const ProtectionSettingCardSwitch = React.memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
 
+    const switchAriaLabel = useMemo(
+      () =>
+        protectionLabel?.trim() ||
+        i18n.translate('xpack.securitySolution.endpoint.policy.details.toggleProtectionAriaLabel', {
+          defaultMessage: 'Toggle protection for this policy section',
+        }),
+      [protectionLabel]
+    );
+
+    // Snapshot per-OS modes before toggling off so they can be restored on toggle-on.
+    const savedModesRef = useRef<Partial<Record<keyof UIPolicyConfig, ProtectionModes>>>({});
+
     const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (event) => {
+        onSectionActiveChange?.(event.target.checked);
         const newPayload = cloneDeep(policy);
 
         if (event.target.checked === false) {
+          const policyBeforeToggle = cloneDeep(policy);
           for (const os of osList) {
-            if (os === 'windows') {
-              newPayload[os][protection].mode = ProtectionModes.off;
-            } else if (os === 'mac') {
-              newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.off;
-            } else if (os === 'linux') {
-              newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.off;
-            }
-            if (isPlatinumPlus) {
-              if (os === 'windows') {
-                newPayload[os].popup[protection].enabled = event.target.checked;
-              } else if (os === 'mac') {
-                newPayload[os].popup[protection as MacPolicyProtection].enabled =
-                  event.target.checked;
-              } else if (os === 'linux') {
-                newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
-                  event.target.checked;
-              }
-              if (protection === 'behavior_protection') {
-                newPayload.windows.behavior_protection.reputation_service = false;
-                newPayload.mac.behavior_protection.reputation_service = false;
-                newPayload.linux.behavior_protection.reputation_service = false;
-              }
-            }
+            applyToggleOffForOs(
+              os,
+              protection,
+              isPlatinumPlus,
+              policy,
+              newPayload,
+              savedModesRef.current
+            );
           }
+          onMasterSwitchTurnedOff?.(cloneDeep(savedModesRef.current), policyBeforeToggle);
         } else {
           for (const os of osList) {
+            applyToggleOnForOs(os, protection, isPlatinumPlus, newPayload, savedModesRef.current);
+          }
+          for (const os of osList) {
             if (os === 'windows') {
-              newPayload[os][protection].mode = ProtectionModes.prevent;
+              savedModesRef.current.windows = newPayload.windows[protection].mode;
             } else if (os === 'mac') {
-              newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.prevent;
+              savedModesRef.current.mac = newPayload.mac[protection as MacPolicyProtection].mode;
             } else if (os === 'linux') {
-              newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
-            }
-            if (isPlatinumPlus) {
-              if (protection === 'behavior_protection') {
-                newPayload.windows.behavior_protection.reputation_service = true;
-                newPayload.mac.behavior_protection.reputation_service = true;
-                newPayload.linux.behavior_protection.reputation_service = true;
-              }
-              if (os === 'windows') {
-                newPayload[os].popup[protection].enabled = event.target.checked;
-              } else if (os === 'mac') {
-                newPayload[os].popup[protection as MacPolicyProtection].enabled =
-                  event.target.checked;
-              } else if (os === 'linux') {
-                newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
-                  event.target.checked;
-              }
+              savedModesRef.current.linux =
+                newPayload.linux[protection as LinuxPolicyProtection].mode;
             }
           }
         }
@@ -121,13 +182,22 @@ export const ProtectionSettingCardSwitch = React.memo(
             : newPayload,
         });
       },
-      [policy, onChange, additionalOnSwitchChange, osList, isPlatinumPlus, protection]
+      [
+        policy,
+        onChange,
+        additionalOnSwitchChange,
+        onMasterSwitchTurnedOff,
+        onSectionActiveChange,
+        osList,
+        isPlatinumPlus,
+        protection,
+      ]
     );
 
     return (
       <EuiSwitch
-        label={protectionLabel}
-        labelProps={{ 'data-test-subj': getTestId('label') }}
+        showLabel={false}
+        label={switchAriaLabel}
         checked={selected}
         disabled={!isEditMode}
         onChange={handleSwitchChange}

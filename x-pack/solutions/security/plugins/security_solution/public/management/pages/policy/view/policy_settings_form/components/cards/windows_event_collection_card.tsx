@@ -12,7 +12,9 @@ import type { EventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 
-const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
+export const WINDOWS_EVENT_COLLECTION_OPTIONS: ReadonlyArray<
+  EventFormOption<OperatingSystem.WINDOWS>
+> = [
   {
     name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
@@ -92,7 +94,7 @@ export const WindowsEventCollectionCard = memo<WindowsEventCollectionCardProps>(
       {...props}
       os={OperatingSystem.WINDOWS}
       selection={props.policy.windows.events}
-      options={OPTIONS}
+      options={WINDOWS_EVENT_COLLECTION_OPTIONS}
     />
   );
 });

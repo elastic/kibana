@@ -14,6 +14,7 @@ import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
 import { set } from '@kbn/safer-lodash-set';
 import type { MemoryProtectionCardProps } from './memory_protection_card';
 import { LOCKED_CARD_MEMORY_TITLE, MemoryProtectionCard } from './memory_protection_card';
+import { MEMORY_THREAT_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
@@ -47,15 +48,15 @@ describe('Policy Memory Protections Card', () => {
     const { getByTestId } = render();
 
     expect(getByTestId(testSubj.enableDisableSwitch));
-    expect(getByTestId(testSubj.protectionPreventRadio));
-    expect(getByTestId(testSubj.notifyUserCheckbox));
+    expect(getByTestId(testSubj.windowsModeSelect));
+    expect(getByTestId(testSubj.windowsNotifyUserCheckbox));
   });
 
   it('should show supported OS values', () => {
     render();
 
     expect(renderResult.getByTestId(testSubj.osValuesContainer)).toHaveTextContent(
-      'Windows, Mac, Linux'
+      MEMORY_THREAT_POLICY_SECTION_DESCRIPTION
     );
   });
 
@@ -90,41 +91,44 @@ describe('Policy Memory Protections Card', () => {
 
       expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Memory threat' +
-            'Operating system' +
-            'Windows, Mac, Linux ' +
-            'Memory threat protections' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.15+' +
-            'Notify user' +
-            'Notification message' +
-            '—'
-        )
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Memory threat')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(MEMORY_THREAT_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Memory threat protections'
+      );
+      expect(card.textContent).not.toContain('TypeMemory threat');
+      expect(card.textContent).not.toContain('Operating system');
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
+      expect(getByTestId('test-memory-windowsNotifyUser-checkbox')).toBeChecked();
     });
 
     it('should display correctly when overall card is disabled', () => {
       set(formProps.policy, 'windows.memory_protection.mode', ProtectionModes.off);
+      set(formProps.policy, 'mac.memory_protection.mode', ProtectionModes.off);
+      set(formProps.policy, 'linux.memory_protection.mode', ProtectionModes.off);
       const { getByTestId } = render();
 
       expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Memory threat' +
-            'Operating system' +
-            'Windows, Mac, Linux ' +
-            'Memory threat protections'
-        )
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Memory threat')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(MEMORY_THREAT_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Memory threat protections'
+      );
+      expect(card.textContent).not.toContain('TypeMemory threat');
+      expect(card.textContent).not.toContain('Operating system');
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
     });
 
@@ -135,22 +139,21 @@ describe('Policy Memory Protections Card', () => {
 
       expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Memory threat' +
-            'Operating system' +
-            'Windows, Mac, Linux ' +
-            'Memory threat protections' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.15+' +
-            'Notify user'
-        )
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Memory threat')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(MEMORY_THREAT_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Memory threat protections'
+      );
+      expect(card.textContent).not.toContain('TypeMemory threat');
+      expect(card.textContent).not.toContain('Operating system');
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).not.toHaveAttribute('checked');
+      expect(getByTestId('test-memory-windowsNotifyUser-checkbox')).not.toBeChecked();
     });
   });
 });

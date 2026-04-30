@@ -62,17 +62,26 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
         'true'
       );
 
-      // Default: Prevent + Notify user enabled
-      cy.getByTestSubj(malwareTestSubj.protectionPreventRadio).find('input').should('be.checked');
-      cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('be.checked');
+      // Default: Prevent + Notify user enabled (per-OS controls)
+      cy.getByTestSubj(malwareTestSubj.windowsModeSelect).should(
+        'contain.text',
+        'Detect & prevent'
+      );
+      cy.getByTestSubj(malwareTestSubj.windowsNotifyUserCheckbox).should('be.checked');
 
-      // Changing to Detect -> Notify user disabled
-      cy.getByTestSubj(malwareTestSubj.protectionDetectRadio).find('label').click();
-      cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('not.be.checked');
+      // Changing Windows to Detect -> Notify user disabled for Windows
+      cy.getByTestSubj(malwareTestSubj.windowsModeSelect).click();
+      cy.get('[role="option"]')
+        .contains(/^detect$/i)
+        .click();
+      cy.getByTestSubj(malwareTestSubj.windowsNotifyUserCheckbox).should('not.be.checked');
 
-      // Changing back to Prevent -> Notify user enabled
-      cy.getByTestSubj(malwareTestSubj.protectionPreventRadio).find('label').click();
-      cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('be.checked');
+      // Changing back to Detect & prevent -> Notify user enabled
+      cy.getByTestSubj(malwareTestSubj.windowsModeSelect).click();
+      cy.get('[role="option"]')
+        .contains(/detect & prevent/i)
+        .click();
+      cy.getByTestSubj(malwareTestSubj.windowsNotifyUserCheckbox).should('be.checked');
     });
 
     it('disabling protection should disable notification in yaml for every OS', () => {
@@ -116,7 +125,7 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.getByTestSubj(malwareTestSubj.osValuesContainer).should(
         'contain.text',
-        'Windows, Mac, Linux'
+        'Configure how Elastic Defend protects your endpoints.'
       );
 
       cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
@@ -147,19 +156,24 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
         'true'
       );
 
-      // Default: Prevent + Notify user enabled
-      cy.getByTestSubj(ransomwareTestSubj.protectionPreventRadio)
-        .find('input')
-        .should('be.checked');
-      cy.getByTestSubj(ransomwareTestSubj.notifyUserCheckbox).should('be.checked');
+      // Default: Prevent + Notify user enabled (per-OS controls)
+      cy.getByTestSubj(ransomwareTestSubj.windowsModeSelect).should(
+        'contain.text',
+        'Detect & prevent'
+      );
+      cy.getByTestSubj(ransomwareTestSubj.windowsNotifyUserCheckbox).should('be.checked');
 
-      // Changing to Detect -> Notify user disabled
-      cy.getByTestSubj(ransomwareTestSubj.protectionDetectRadio).find('label').click();
-      cy.getByTestSubj(ransomwareTestSubj.notifyUserCheckbox).should('not.be.checked');
+      cy.getByTestSubj(ransomwareTestSubj.windowsModeSelect).click();
+      cy.get('[role="option"]')
+        .contains(/^detect$/i)
+        .click();
+      cy.getByTestSubj(ransomwareTestSubj.windowsNotifyUserCheckbox).should('not.be.checked');
 
-      // Changing back to Prevent -> Notify user enabled
-      cy.getByTestSubj(ransomwareTestSubj.protectionPreventRadio).find('label').click();
-      cy.getByTestSubj(ransomwareTestSubj.notifyUserCheckbox).should('be.checked');
+      cy.getByTestSubj(ransomwareTestSubj.windowsModeSelect).click();
+      cy.get('[role="option"]')
+        .contains(/detect & prevent/i)
+        .click();
+      cy.getByTestSubj(ransomwareTestSubj.windowsNotifyUserCheckbox).should('be.checked');
     });
   });
 
