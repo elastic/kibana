@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/249716
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Prevent editing feature of significant event queries

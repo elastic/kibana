@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/242256
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Auto scroll to Suggestions / Regenerate panels

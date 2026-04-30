@@ -86,6 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Fixes `template_path` asset selection for some cases of integration packages
+  lifecycle: ga
+title: Fix asset for template path filter
+description: Fixes `template_path` asset selection for some cases of integration packages

@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/240954
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Show field data types in Processing table and step editor

@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Alert deletion feature is now GA.
+- Alerting and Reporting
+title: Make Alert deletion GA
+description: Alert deletion feature is now GA.

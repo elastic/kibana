@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- AI for observability
-title: Fixes the AI Assistant button tooltip by closing the tooltip (on mouse out) when the button is not being hovered.
+title: Update tooltip behaviour to close on mouse out
+description: Fixes the AI Assistant button tooltip by closing the tooltip (on mouse out) when the button is not being hovered.

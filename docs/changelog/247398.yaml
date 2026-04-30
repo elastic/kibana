@@ -88,6 +88,6 @@ issues:
 type: feature
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Adds capability for rolling back a recent upgrade of a Fleet-managed Elastic Agent upgrade using Fleet UI or API.
+  lifecycle: ga
+title: Implement agent upgrade rollback
+description: Adds capability for rolling back a recent upgrade of a Fleet-managed Elastic Agent upgrade using Fleet UI or API.

@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- AI for observability
 title: Add 10s request timeout to ES|QL query execution

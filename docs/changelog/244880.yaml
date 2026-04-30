@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243751
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Improve attachments feature with details flyout and better UX

@@ -85,8 +85,8 @@ prs:
 - https://github.com/elastic/kibana/pull/238555
 type: feature
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: '- Enable cases numerical id service'

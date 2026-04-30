@@ -88,6 +88,7 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Don't make redundant requests when breakdown or chart interval changes

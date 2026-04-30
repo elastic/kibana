@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243436
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Show AI log assistant with fallback message fields

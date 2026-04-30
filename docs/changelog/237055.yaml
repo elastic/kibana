@@ -86,7 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data management
+  lifecycle: ga
 title: Fix privileges for reindexing indices
 description: 'Fixes privilege requirements when reindexing indices via Upgrade Assistant. Previously, the "superuser" role was required. Now "cluster: manage" and "all" privileges for the relevant indices are sufficient.'

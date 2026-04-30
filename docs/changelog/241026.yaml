@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- AI for observability
-title: Fix overlapping components in the Observability AI Assistant flyout for small screen sizes.
+title: Fix overlapping components on the flyout for small screen sizes
+description: Fix overlapping components in the Observability AI Assistant flyout for small screen sizes.

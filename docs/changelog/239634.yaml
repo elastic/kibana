@@ -85,10 +85,6 @@ prs:
 - https://github.com/elastic/kibana/pull/239634
 type: feature
 products:
-- product: kibana
 - product: security
-areas:
-- Data ingestion and Fleet
-- Detection rules and alerts
 title: Extracts Rules/Alerts/Exceptions permission to new Rules feature privileges
 description: Rules feature privileges are added to ESS. Access to Rules may now be explicitly set on both ESS and Serverless for user roles.

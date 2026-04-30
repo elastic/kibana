@@ -86,6 +86,4 @@ prs:
 type: feature
 products:
 - product: security
-areas:
-- Entity analytics
 title: Enable the risk score reset feature

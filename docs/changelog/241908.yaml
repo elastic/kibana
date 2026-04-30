@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/241908
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Make 'sampling_rate' agent central config options available to …

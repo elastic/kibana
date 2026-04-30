@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/249108
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add maxQueue backpressure to anonymization regex worker pool

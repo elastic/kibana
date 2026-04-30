@@ -87,6 +87,6 @@ issues:
 - https://github.com/elastic/kibana/issues/247882
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
-title: Fixes the icon in the "Elastic documentation not available" callout in AI Assistant Settings.
+- product: observability
+title: Fix product documentation not available callout icon
+description: Fixes the icon in the "Elastic documentation not available" callout in AI Assistant Settings.

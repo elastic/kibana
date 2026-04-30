@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data management
+  lifecycle: ga
 title: Cloned managed ilm policies shouldn't be marked as managed

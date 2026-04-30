@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/242257
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Disable conflicting actions in partitioning tab

@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243347
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Fix filtering by multiline string fields

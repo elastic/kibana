@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: 'The webhook connector now allows the following HTTP request methods: POST(default), PUT, PATCH, GET, or DELETE.'
+- Alerting and Reporting
+title: Allow additional methods for the Webhook connector
+description: 'The webhook connector now allows the following HTTP request methods: POST(default), PUT, PATCH, GET, or DELETE.'

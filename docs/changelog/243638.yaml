@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/213347
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'Handle missing `error.id` '

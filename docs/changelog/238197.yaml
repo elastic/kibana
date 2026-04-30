@@ -86,6 +86,8 @@ prs:
 type: feature
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Added support for deleting export schedules
+- Alerting and Reporting
+title: Add support for deletion of export schedules
+description: Added support for deleting export schedules

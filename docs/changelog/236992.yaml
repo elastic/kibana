@@ -87,7 +87,5 @@ issues:
 - https://github.com/elastic/security-team/issues/14106
 type: enhancement
 products:
-- product: cloud-serverless
-areas:
-- Cloud security
+- product: security
 title: Add CSPM Cloud Connector Usage Statistics Collection

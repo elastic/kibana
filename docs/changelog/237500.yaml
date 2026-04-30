@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/237281
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Update useAnyOfApmParams to include mobile services

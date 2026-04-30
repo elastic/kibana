@@ -88,6 +88,5 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'File upload: Adds ability to cancel file upload'

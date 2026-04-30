@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/239876
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F30A Streams: Fix simulation of geo points"

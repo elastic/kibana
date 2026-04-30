@@ -86,6 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Kibana security
-title: Introduced a separate error for empty login attempt with `saml/oidc` providers.
+  lifecycle: ga
+title: Introduced error for empty login attempt
+description: Introduced a separate error for empty login attempt with `saml/oidc` providers.

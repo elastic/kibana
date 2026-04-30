@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: Adds unique accessible labels for Show top field values buttons

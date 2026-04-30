@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: observability
-areas:
-- Actionable Observability
 title: Updated Observability Serverless side nav

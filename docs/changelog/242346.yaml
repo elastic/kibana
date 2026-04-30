@@ -89,6 +89,7 @@ issues:
 type: feature
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Show partial results after search has been canceled

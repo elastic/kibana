@@ -88,6 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Kibana security
-title: Fixes a bug preventing IDP initiated login with multiple OIDC providers
+  lifecycle: ga
+title: Fix IDP Initiated Authentication for Multiple OIDC Providers
+description: Fixes a bug preventing IDP initiated login with multiple OIDC providers

@@ -86,6 +86,5 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Anomaly Detection: Adds feedback button to the Anomaly Explorer and Single Metric Viewer'

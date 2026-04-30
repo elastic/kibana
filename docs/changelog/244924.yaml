@@ -88,6 +88,4 @@ issues:
 type: feature
 products:
 - product: security
-areas:
-- Threat hunting
 title: Adds Support for QRadar Reference Sets as Lookups

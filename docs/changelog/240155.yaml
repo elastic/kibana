@@ -86,8 +86,7 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-- product: security
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Improve all cases table loading to prevent flashing

@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/246589
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: Fix the issue related to token count
 description: Fixes token count display showing "NaN" in Search Playground by preserving message annotations across the AI SDK v5 stream.

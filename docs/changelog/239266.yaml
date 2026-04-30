@@ -88,6 +88,7 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Supports multi values variables in MV_CONTAINS

@@ -87,8 +87,8 @@ issues:
 - https://github.com/elastic/kibana/issues/205689
 type: bug-fix
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Remove `autoFocus` to preserve proper focus when modal closed

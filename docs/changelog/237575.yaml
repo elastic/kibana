@@ -86,6 +86,8 @@ prs:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
-title: This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there
+title: Displays the solution recommended queries for queries which start with special characters
+description: This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there

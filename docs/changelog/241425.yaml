@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- AI for observability
 title: Improved error handling for tool response

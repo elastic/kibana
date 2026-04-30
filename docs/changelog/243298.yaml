@@ -88,6 +88,5 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- AI for observability
-title: Adds ELSER in EIS as a model option for the Observability and Search AI Assistant Knowledge Base
+title: Add ELSER in EIS model option to the Knowledge Base
+description: Adds ELSER in EIS as a model option for the Observability and Search AI Assistant Knowledge Base

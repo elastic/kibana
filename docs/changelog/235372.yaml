@@ -86,7 +86,6 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Dashboards and Visualizations
+  lifecycle: ga
 title: Display layers as tabs instead of vertically stacked panels
 description: The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines.

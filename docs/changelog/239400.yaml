@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/221525
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add missing aria-label to BetaBadge component

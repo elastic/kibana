@@ -87,7 +87,7 @@ issues:
 - https://github.com/elastic/kibana/issues/238802
 type: enhancement
 products:
-- product: kibana
+- product: observability
 areas:
 - Discover and ES|QL
 title: Toggle Icon type for add/remove field column

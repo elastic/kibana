@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/242134
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Show field data type in partitioning UI

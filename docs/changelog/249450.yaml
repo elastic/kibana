@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/249450
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Replace custom header with lens highlight implementation

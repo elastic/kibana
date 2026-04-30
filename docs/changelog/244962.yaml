@@ -88,6 +88,5 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Inference/AI Connector and Inference endpoint creation providers: adds icon for Groq'

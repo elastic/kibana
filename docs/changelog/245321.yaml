@@ -85,8 +85,8 @@ prs:
 - https://github.com/elastic/kibana/pull/245321
 type: enhancement
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Expand search in all cases page

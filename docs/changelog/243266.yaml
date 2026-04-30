@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- AI for observability
 title: Update system prompt title for generic deployments

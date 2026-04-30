@@ -88,6 +88,8 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
-title: Fixes a bug in Lens that incorrectly assigned unsaved (ad-hoc) dataview references.
+title: Fix internal reference handling
+description: Fixes a bug in Lens that incorrectly assigned unsaved (ad-hoc) dataview references.

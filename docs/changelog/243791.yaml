@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/243791
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Fixed a case of keyboard focus getting trapped in pages using document preview.
+- product: kibana
+  lifecycle: ga
+title: Fix Popover trapping keyboard focus in Document Viewer
+description: Fixed a case of keyboard focus getting trapped in pages using document preview.

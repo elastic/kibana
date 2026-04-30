@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- AI for security
 title: Correct esql query column names using selected index mappings

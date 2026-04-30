@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Global experience
 title: Revert change removing infra UI custom dashboards

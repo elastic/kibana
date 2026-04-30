@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/236919
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: add ingest pipeline processor template suggestions to manual ingest pipeline processor editor

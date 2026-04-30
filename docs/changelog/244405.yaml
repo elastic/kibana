@@ -88,6 +88,7 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
+- Alerting and Reporting
 title: wrong time zone applied when CSV report has local date comparison

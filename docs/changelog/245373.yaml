@@ -89,6 +89,5 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- Global experience
-title: Add a 'Find Alert Rule Templates' API and use it to power showing installed templates in the create rule modal.
+title: Expose alert rule templates in 'create rule' UI
+description: Add a 'Find Alert Rule Templates' API and use it to power showing installed templates in the create rule modal.

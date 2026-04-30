@@ -88,6 +88,4 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- AI for observability
 title: Add `isStream` param to chat/complete endpoint to support non-streaming responses

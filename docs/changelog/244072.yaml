@@ -87,7 +87,7 @@ issues:
 - https://github.com/elastic/search-team/issues/11838
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Fixes the API Creation Flyout sizing issue
+- product: kibana
+  lifecycle: ga
+title: Fix the flyout size issue
+description: Fixes the API Creation Flyout sizing issue

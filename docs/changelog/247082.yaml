@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/247082
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add abort support and silent mode for stream description generation

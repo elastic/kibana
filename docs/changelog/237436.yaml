@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: security
-areas:
-- Entity analytics
 title: Enable privileged user monitoring advanced setting by default

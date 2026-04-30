@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: security
-areas:
-- Investigations
 title: 'Timeline: ESQL query editor showing on fullScreen mode'

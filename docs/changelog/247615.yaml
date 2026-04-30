@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Data Visualizer: fixes display of map view for small screen sizes'

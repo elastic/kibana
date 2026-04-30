@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/streams-program/issues/497
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add Drop processor

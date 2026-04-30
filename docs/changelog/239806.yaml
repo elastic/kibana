@@ -86,6 +86,5 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: Adds new temperature parameter to AI Connector and OpenAI, Bedrock, Gemini connectors

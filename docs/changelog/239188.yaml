@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/239188
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Improve processing warnings

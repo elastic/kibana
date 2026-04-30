@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Threat hunting
 title: Sanitize lookup names for index creation

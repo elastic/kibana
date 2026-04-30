@@ -85,9 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/242365
 type: bug-fix
 products:
-- product: kibana
-- product: cloud-serverless
-areas:
-- Data ingestion and Fleet
-- Cloud security
+- product: security
 title: add encoding of cloudFormation url params

@@ -85,7 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/244532
 type: feature
 products:
-- product: kibana
-areas:
-- Machine learning
+- product: observability
 title: 'Agent Builder: Opt-in flow'

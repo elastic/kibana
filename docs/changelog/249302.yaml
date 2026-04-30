@@ -89,4 +89,7 @@ type: bug-fix
 products:
 - product: kibana
   lifecycle: ga
-title: Fixes filtering out null values from the Discover histogram legend in ES|QL mode.
+areas:
+- Discover and ES|QL
+title: fix filtering out null values
+description: Fixes filtering out null values from the Discover histogram legend in ES|QL mode.

@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/streams-program/issues/256
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'Processing: Suggest ingest pipeline'

@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: security
-areas:
-- Endpoint security
 title: Fix artifacts spaces migration (`v9.1`) to ensure all artifacts are processed

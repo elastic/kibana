@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/244017
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'kibana tool: Add auth header to request'

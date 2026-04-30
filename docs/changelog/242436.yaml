@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/242436
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: Default semantic text endpoint select input to ELSER in EIS
 description: .`elser-2-elastic` (ELSER in EIS) is now automatically selected as the default inference endpoint when adding semantic text fields. The `SelectInferenceId` component has been refactored for clarity and stability, resolving a console warning and improving popover and flyout state handling.

@@ -88,6 +88,7 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Should be able to complete all quickly opened tabs

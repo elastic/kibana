@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Adds support for searching rules by their actions' params via API
+- Alerting and Reporting
+title: Map rule actions params as flattened to allow search
+description: Adds support for searching rules by their actions' params via API

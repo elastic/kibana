@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/242310
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Replace processor

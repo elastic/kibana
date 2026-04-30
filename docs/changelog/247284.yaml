@@ -86,7 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
 title: Use unicode escaping to prevent Agent from interpreting JS template literals as policy variables

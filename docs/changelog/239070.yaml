@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/239070
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Generate significant events from Advanced tab and UI improvements

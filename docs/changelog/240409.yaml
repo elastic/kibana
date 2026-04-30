@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/240409
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Update the "Open in Discover" query in the related Logs section of the Overview tab

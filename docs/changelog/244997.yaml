@@ -86,6 +86,7 @@ prs:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
+- Alerting and Reporting
 title: Add consecutiveMatches to action context

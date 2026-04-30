@@ -86,6 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: '* Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered.'
+  lifecycle: ga
+title: Retry transient errors on agents search
+description: '* Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered.'

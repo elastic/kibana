@@ -85,9 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/248167
 type: bug-fix
 products:
-- product: kibana
 - product: observability
-areas:
-- Machine learning
-- Global experience
 title: Fixes broken Data Visualizer & AIOps navigation breadcrumbs / sidebar in solutions

@@ -86,6 +86,5 @@ prs:
 type: feature
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: Adds Security ML modules for GCP Audit and Azure Activity Logs

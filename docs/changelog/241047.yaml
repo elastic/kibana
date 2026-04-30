@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/239752
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Simplify metrics profile resolution by removing index pattern and time series validation

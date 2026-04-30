@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/238047
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Hide document match filter controls for users without manage privileges

@@ -87,7 +87,6 @@ issues:
 - https://github.com/elastic/kibana/issues/243688
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F30A [Streams] \U0001F41E Prevent retention page crash for certain ILM policies"
 description: Fixes a crash on UI Streams > retention page when a stream has defined an index lifecycle (ILM) policy that omits expected lifecycle phases or all of it phases starts at `0`.

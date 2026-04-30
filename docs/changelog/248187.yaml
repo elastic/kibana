@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: Fixes counter metric fields missing in Anomaly detection dropdown

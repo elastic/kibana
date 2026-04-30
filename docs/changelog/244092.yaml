@@ -88,6 +88,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243475
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add SLO attachments and migrate UI to attachments API

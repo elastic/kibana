@@ -90,6 +90,5 @@ issues:
 - https://github.com/elastic/kibana/issues/246824
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'unskip flaky test: retrieve_elastic_doc '

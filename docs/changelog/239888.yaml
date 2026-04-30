@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Global experience
+  lifecycle: ga
 title: 'Reduce re-renders on resize and items change '

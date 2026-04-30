@@ -85,6 +85,6 @@ prs:
 - https://github.com/elastic/kibana/pull/246129
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
-title: Taking bulk actions on Stream Features now requires the `manage` permission for the Kibana Streams feature.
+- product: observability
+title: "\U0001F30A [Feature identifiation] Tweak route permissions"
+description: Taking bulk actions on Stream Features now requires the `manage` permission for the Kibana Streams feature.

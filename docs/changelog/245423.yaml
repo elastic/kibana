@@ -86,6 +86,8 @@ prs:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Slack connector can be configured to send messages to any channel using channel names.
+- Alerting and Reporting
+title: 'Simplify channel configuration '
+description: Slack connector can be configured to send messages to any channel using channel names.

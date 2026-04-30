@@ -88,6 +88,6 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: '"Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes.'
+  lifecycle: ga
+title: Add "Show agentless resources" toggle
+description: '"Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes.'

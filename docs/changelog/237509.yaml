@@ -89,4 +89,5 @@ type: bug-fix
 products:
 - product: kibana
   lifecycle: ga
-title: Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings.
+title: Prevent index polling from overriding pipeline settings while editing
+description: Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings.

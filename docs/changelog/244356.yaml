@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/244356
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add classic streams geo point field type support

@@ -85,9 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/239144
 type: enhancement
 products:
-- product: kibana
 - product: observability
-areas:
-- Machine learning
-- AI for observability
 title: Removes `AI Assistants Settings` privilege

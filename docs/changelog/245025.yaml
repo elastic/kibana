@@ -88,7 +88,5 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
-title: Custom global ingest pipeline can be configured on SLO rollup data.
+title: Add a global custom ingest pipeline referenced by all SLO pipel…
+description: Custom global ingest pipeline can be configured on SLO rollup data.

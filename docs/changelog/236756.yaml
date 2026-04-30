@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: security
-areas:
-- Investigations
 title: Fix alerts page controls

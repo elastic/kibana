@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/242695
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F41E Fix Cell Actions populate undefined with empty cells"

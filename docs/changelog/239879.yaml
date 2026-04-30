@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
-title: Moves the Lens visualization toolbar from the workspace section to the config panel.
+title: Move toolbar from Lens editor workspace to config panel
+description: Moves the Lens visualization toolbar from the workspace section to the config panel.

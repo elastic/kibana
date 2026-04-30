@@ -88,6 +88,5 @@ issues:
 type: feature
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Add integration knowledge opt out UI setting and enable feature flag

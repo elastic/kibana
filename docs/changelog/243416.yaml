@@ -88,7 +88,6 @@ issues:
 type: deprecation
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Show callout for deprecated (in-use) ILM policies
 description: The `logs`, `metrics`, and `synthetics` ILM policies have been deprecated and replaced with `{name}@lifecycle`. If using a deprecated ILM policy with a component template, the user will see a callout in Fleet > Data Streams with instructions on how to migrate to the new lifecycle policy.

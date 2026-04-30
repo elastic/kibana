@@ -88,6 +88,4 @@ issues:
 type: enhancement
 products:
 - product: observability
-areas:
-- AI for observability
 title: aware of new .integration_knowledge* system index

@@ -88,7 +88,6 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Kibana security
+  lifecycle: ga
 title: Enforce object_src in our CSP
 description: Enforces the `object_src 'none'` directive in Kibana's Content Security Policy. Introduces a new `csp.object_src` configuration option to control its behavior.

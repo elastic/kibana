@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'File upload: Fixes file preview occasional corruption'

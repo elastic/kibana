@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/240475
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Fixes Agents & Playground icons in the solution side navigation to render correctly when using dark mode
+- product: kibana
+  lifecycle: ga
+title: fix v2 solution nav search icons
+description: Fixes Agents & Playground icons in the solution side navigation to render correctly when using dark mode

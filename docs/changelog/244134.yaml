@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Global experience
 title: Add managed field to dataViewSpecSchema

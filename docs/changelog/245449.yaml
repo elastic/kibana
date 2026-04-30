@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Investigations
 title: fix alert flyout threat intelligence section not showing multiple values

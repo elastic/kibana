@@ -89,7 +89,4 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- AI for observability
-- Global experience
 title: " [Obs Agent] Add observability tools for log and metric change point analysis"

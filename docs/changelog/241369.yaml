@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/streams-program/issues/583
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add timezone and locale parameters to Streamlang

@@ -89,8 +89,8 @@ issues:
 - https://github.com/elastic/kibana/issues/195024
 type: bug-fix
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Add manual focus to action buttons' actions

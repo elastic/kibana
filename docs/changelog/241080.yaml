@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/240020
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Hide non-trace services in Service Inventory

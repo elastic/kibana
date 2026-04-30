@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: security
-areas:
-- Endpoint security
 title: UI and API changes for process descendants in trusted apps

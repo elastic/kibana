@@ -87,7 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/236804
 type: bug-fix
 products:
-- product: kibana
-areas:
-- Machine learning
+- product: observability
 title: 'GenAI Settings: Reflect selected `AI Assistants Visibility` value from header selector on the Settings page'

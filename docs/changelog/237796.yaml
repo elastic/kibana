@@ -86,7 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Endpoint security
 title: TelemetryConfigWatcher auth fix
 description: Fixes the 'missing authentication credentials' issue in `TelemetryConfigWatcher` and `PolicyWatcher`, which should result in less warning log entries in the Security Solution plugin.

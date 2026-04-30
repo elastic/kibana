@@ -89,8 +89,5 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
 title: Fix duplicate test result hit on monitor status heatmap
 description: Fixes issue where synthetics test results show up duplicated on the monitor status heat map (for higher granularity columns)

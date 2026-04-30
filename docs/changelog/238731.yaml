@@ -88,6 +88,7 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
 title: fix Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar

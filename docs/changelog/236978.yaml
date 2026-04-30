@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/236978
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'feat: add metrics dashboard for non EDOT agents in the otel native ingestion path'

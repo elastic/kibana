@@ -85,9 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/238326
 type: bug-fix
 products:
-- product: kibana
 - product: observability
-areas:
-- Data ingestion and Fleet
-- Actionable Observability
 title: Use runWithCache for fleet bulk operations !!

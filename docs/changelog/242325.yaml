@@ -85,8 +85,8 @@ prs:
 - https://github.com/elastic/kibana/pull/242325
 type: bug-fix
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Fix auto extraction in event bulk actions

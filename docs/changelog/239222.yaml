@@ -88,6 +88,8 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
-title: Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula.
+title: Fix filtering on tables with formula columns
+description: Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula.

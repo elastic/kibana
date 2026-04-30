@@ -85,7 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/240992
 type: bug-fix
 products:
-- product: kibana
-areas:
-- Global experience
+- product: observability
 title: Align "Members" link across solutions

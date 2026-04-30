@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Detection rules and alerts
 title: Change alert suppression icon

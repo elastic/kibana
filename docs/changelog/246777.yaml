@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/246777
 type: enhancement
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Search Homepage design is updated.
+- product: kibana
+  lifecycle: ga
+title: Add Scout setup for Search Homepage
+description: Search Homepage design is updated.

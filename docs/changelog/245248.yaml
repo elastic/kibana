@@ -88,6 +88,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243746
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Improve attachment filters with multi-type selection, server-side filtering, and suggestions limit

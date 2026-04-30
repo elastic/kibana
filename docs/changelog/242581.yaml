@@ -91,6 +91,5 @@ issues:
 - https://github.com/elastic/kibana/issues/242254
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Child stream input validation

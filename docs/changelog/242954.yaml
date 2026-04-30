@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Kibana security
+  lifecycle: ga
 title: Fix infinite loading of roles on edit spaces screen

@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- AI for observability
-title: Fixes Knowledge base model label in AI Assistant Setttings
+title: Update Knowledge Base model label in AI Assistant settings
+description: Fixes Knowledge base model label in AI Assistant Setttings

@@ -85,7 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/242592
 type: enhancement
 products:
-- product: cloud-serverless
-areas:
-- Cloud security
+- product: security
 title: 'fix csp-agnostic regressions '

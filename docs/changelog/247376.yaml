@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Global experience
 title: Fix console state persisting across journey steps

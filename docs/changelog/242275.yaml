@@ -88,6 +88,8 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Fixes a bug that caused the alerts tables pagination to be stuck in the Rule pages
+- Alerting and Reporting
+title: Fix alerts table pagination resetting when lastReloadRequestTime is used
+description: Fixes a bug that caused the alerts tables pagination to be stuck in the Rule pages

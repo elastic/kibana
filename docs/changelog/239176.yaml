@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
-title: Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header.
+title: Move flyout toolbar from flyout body to header
+description: Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header.

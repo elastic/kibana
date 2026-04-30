@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/245506
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Disable geopoint mapping in the processing preview

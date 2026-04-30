@@ -86,7 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
 title: Edit default alerts flow breaks if default rules are not defined

@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/243656
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Remove mentions of template snippets (Mustache Templates) from descriptions.

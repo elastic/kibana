@@ -88,6 +88,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243476
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add Attachments API

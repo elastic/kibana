@@ -87,8 +87,8 @@ issues:
 - https://github.com/elastic/kibana/issues/237226
 type: bug-fix
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Add Jira's `otherFields` JSON editor to case creation flow

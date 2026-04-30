@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: fix docker image in Add agent k8s manifest

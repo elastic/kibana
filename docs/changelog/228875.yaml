@@ -88,6 +88,6 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Fleet agent list table now persists state of filters while navigating within a session.
+  lifecycle: ga
+title: Save agent list table state using session storage
+description: Fleet agent list table now persists state of filters while navigating within a session.

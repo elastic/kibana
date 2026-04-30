@@ -88,7 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Global experience
 title: Only update relevant monitors where maintenance windows exists
 description: Only update Synthetics package policies that use maintenance windows when maintenance windows are updated or deleted. Prevents extra Synthetics package policies from being updated when maintenance windows are updated or deleted, even if the monitor itself does not use maintenance windows.

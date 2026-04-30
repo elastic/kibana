@@ -86,6 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: '* Fixes on integration policy upgrade:'
+  lifecycle: ga
+title: Support var removals on integration upgrade
+description: '* Fixes on integration policy upgrade:'

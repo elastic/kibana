@@ -88,6 +88,4 @@ issues:
 type: enhancement
 products:
 - product: observability
-areas:
-- Actionable Observability
 title: Add unified rules list

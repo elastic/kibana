@@ -86,7 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Threat hunting
-- Investigations
 title: Fix rule link in timeline's flyout

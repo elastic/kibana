@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/246090
 type: enhancement
 products:
-- product: elasticsearch
-areas:
-- Search
-title: 'Enhances the copy behavior by providing clear visual confirmation:'
+- product: kibana
+  lifecycle: ga
+title: Change the copy_icon to check_icon when copied
+description: 'Enhances the copy behavior by providing clear visual confirmation:'

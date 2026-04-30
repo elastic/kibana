@@ -88,6 +88,5 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: auto migrate component template ilms in setup task

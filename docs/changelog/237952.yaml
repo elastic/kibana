@@ -86,7 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data management
+  lifecycle: ga
 title: Fix @custom component template creation
 description: Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data-streams and a popup would appear asking to rollover conflicting ones.

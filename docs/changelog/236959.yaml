@@ -88,6 +88,5 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Add missing settings to set up Elastic Agent > Fleet Server SSL support

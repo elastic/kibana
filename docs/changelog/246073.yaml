@@ -86,7 +86,6 @@ prs:
 type: feature
 products:
 - product: kibana
-areas:
-- Global experience
+  lifecycle: ga
 title: Set heap limit to min(60%, 4gb) for containers if unset
 description: Containers now set the default Node.js heap to 75% of available memory up to a maximum of 4096mb.  Previously this was set to 50%.

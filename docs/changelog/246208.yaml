@@ -90,6 +90,5 @@ issues:
 - https://github.com/elastic/observability-error-backlog/issues/385
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Small fixes for onboarding

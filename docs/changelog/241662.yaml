@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/241151
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Escape special characters when creating ESQL query for Lens charts

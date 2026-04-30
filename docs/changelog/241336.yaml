@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/233880
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: adding missing fields to transaction

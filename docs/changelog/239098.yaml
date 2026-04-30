@@ -86,6 +86,6 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Kibana security
-title: Enhanced the error message to include detailed information about why the role is considered malformed.
+  lifecycle: ga
+title: Added error reasons for role malformed message
+description: Enhanced the error message to include detailed information about why the role is considered malformed.

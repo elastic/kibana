@@ -86,6 +86,5 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Add `xpack.fleet.experimentalFeatures` config setting

@@ -85,8 +85,8 @@ prs:
 - https://github.com/elastic/kibana/pull/236863
 type: bug-fix
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: '- Connector api update'

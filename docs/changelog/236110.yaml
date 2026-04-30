@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: security
-areas:
-- Investigations
 title: support multiple values in IOC flyout table tab

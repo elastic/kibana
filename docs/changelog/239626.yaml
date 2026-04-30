@@ -86,7 +86,5 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Machine learning
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Adds new temperature parameter to AI Connector config schema

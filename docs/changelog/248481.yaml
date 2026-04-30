@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Investigations
-title: Fixes incorrect pagination count in Security Solution Notes tab that showed "1-0 of 0" when no notes exist.
+title: fix utility bar page count
+description: Fixes incorrect pagination count in Security Solution Notes tab that showed "1-0 of 0" when no notes exist.

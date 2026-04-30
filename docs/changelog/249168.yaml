@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data management
+  lifecycle: ga
 title: Fix bug when adding to an index template

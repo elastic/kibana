@@ -86,7 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Threat hunting
-- Investigations
 title: Fix timeline action shown in alerts table bulk actions without proper privilege

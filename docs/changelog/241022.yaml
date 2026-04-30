@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Detection rules and alerts
 title: Fix threshold rule logic with no group by fields defined

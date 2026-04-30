@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Inference/AI Connector and Inference endpoint creation:  ensures deleted text in form is not sent as empty string'

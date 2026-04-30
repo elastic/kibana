@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: use long expiration for upgrade agents

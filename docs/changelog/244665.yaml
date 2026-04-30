@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/244665
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: New "Similar errors" section with Occurrences chart

@@ -88,7 +88,4 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
 title: Add synthetics params read sub feature privilege

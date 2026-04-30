@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243974
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Validate space ownership when unlinking attachments

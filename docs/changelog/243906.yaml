@@ -88,7 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data management
+  lifecycle: ga
 title: Account for max headroom setting when showing low watermark warning
 description: Fixes case where upgrade assistant would incorrectly warn about node breaching low watermark despite max headroom setting.

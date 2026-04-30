@@ -85,8 +85,8 @@ prs:
 - https://github.com/elastic/kibana/pull/236524
 type: bug-fix
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Enable auto-extraction by default and add user actions for observable actions

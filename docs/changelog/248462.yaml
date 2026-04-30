@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/248462
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: 'Fix: Only run ML saved object check if saving semantic text mapping'
 description: Fixes an issue when running Elasticsearch with a Basic license, where users might encounter errors when updating index mappings, even when adding non-ML field types. This issue has been resolved so that mapping updates now work as expected, while advanced semantic text features continue to require the appropriate license.

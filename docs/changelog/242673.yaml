@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/242665
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Charts not filtering by host.name fix

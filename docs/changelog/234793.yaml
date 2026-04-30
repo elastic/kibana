@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: security
-areas:
-- Detection rules and alerts
 title: Adds `customized_fields` and `has_base_version` fields to `rule_source` object schema

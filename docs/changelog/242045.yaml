@@ -87,6 +87,5 @@ type: bug-fix
 products:
 - product: security
 areas:
-- Investigations
-- Alerting, connectors, and reporting
+- Alerting and Reporting
 title: Fix top n popover overlapping new case flyout

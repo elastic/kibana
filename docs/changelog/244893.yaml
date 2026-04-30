@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/streams-program/issues/621
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Empty state for Partitioning tab

@@ -88,7 +88,8 @@ issues:
 type: feature
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
+- Alerting and Reporting
 title: Add email cc, bcc, subject and message fields to scheduled reports email
 description: 'Adds new fields to the schedule export form email notification section:  cc and bcc recipients, subject and message with Mustache templating support'

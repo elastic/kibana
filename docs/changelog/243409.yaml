@@ -85,8 +85,8 @@ prs:
 - https://github.com/elastic/kibana/pull/243409
 type: enhancement
 products:
-- product: security
+- product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-- Investigations
+- Alerting and Reporting
 title: Add time range to all cases

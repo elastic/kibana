@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: Fixes index names causing incompatible cluster error when product docs are installed with for multiple Inference IDs

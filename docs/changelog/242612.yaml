@@ -86,7 +86,6 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Add fleet policy revisions cleanup task
 description: '* Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index'

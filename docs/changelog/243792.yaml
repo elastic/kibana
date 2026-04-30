@@ -88,7 +88,5 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- Actionable Observability
 title: Edit tags UI
 description: Users can now manually add workflow tags directly to alerts (see [this PR as well](https://github.com/elastic/kibana/pull/244251))

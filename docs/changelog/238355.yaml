@@ -88,6 +88,7 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
 title: Improve list error handling

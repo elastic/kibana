@@ -88,6 +88,7 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
 title: 'Use flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings'

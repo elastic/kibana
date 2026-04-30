@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/240450
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Fix invalid state for wired streams toggle

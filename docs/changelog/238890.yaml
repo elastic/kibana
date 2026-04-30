@@ -88,6 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Fixes `ignore_above` mapping for `flattened` fields
+  lifecycle: ga
+title: Add support for flattened fields with ignore_above in mappings
+description: Fixes `ignore_above` mapping for `flattened` fields

@@ -86,6 +86,7 @@ prs:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Suggest adding curly braces after the WITH keyword for Rerank and Completion

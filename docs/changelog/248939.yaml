@@ -85,6 +85,6 @@ prs:
 - https://github.com/elastic/kibana/pull/248939
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
-title: Fixes broken links from View In Context Modal to Discover which was not respecting the DateRange
+- product: observability
+title: Fix incorrect extraction of time range from wrong context
+description: Fixes broken links from View In Context Modal to Discover which was not respecting the DateRange

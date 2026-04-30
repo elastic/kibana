@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Single Metric Viewer: fixes partition field settings errors in the dashboard panel '

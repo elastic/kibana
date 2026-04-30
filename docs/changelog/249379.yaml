@@ -85,8 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/249379
 type: enhancement
 products:
-- product: kibana
-areas:
-- Machine learning
-- Data ingestion and Fleet
+- product: observability
 title: 'Preconfigured Connectors: adds new connectors'

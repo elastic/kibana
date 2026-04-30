@@ -89,8 +89,7 @@ issues:
 - https://github.com/elastic/kibana/issues/244716
 type: feature
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: Deprecate feature flag (part 1 of 2)
 description: Adds a new getting started page within the Elasticsearch solution which offers hands on feature tutorials. This page defaults as the initial destination for users creating a new Elasticsearch project.

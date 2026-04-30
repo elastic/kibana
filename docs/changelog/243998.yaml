@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/243998
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Add  custom processor description

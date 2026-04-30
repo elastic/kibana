@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/241048
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Make 'opamp_polling_interval' and 'sampling_rate' agent config vars available to EDOT Node.js

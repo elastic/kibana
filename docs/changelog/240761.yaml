@@ -88,6 +88,6 @@ issues:
 type: feature
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Support integrations rollback to previous versions
+  lifecycle: ga
+title: enable feature flag enablePackageRollback
+description: Support integrations rollback to previous versions

@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Global experience
 title: Fix related dashboards for ES Query and other stack rules supported in observability

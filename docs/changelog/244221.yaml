@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/streams-program/issues/454
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F30A Streams: Disallow invalid stuff"

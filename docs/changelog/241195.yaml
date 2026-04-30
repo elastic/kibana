@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/241159
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Update Metrics Experience routes to delegate authorization to Elasticsearch

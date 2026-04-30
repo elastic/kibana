@@ -85,9 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/240411
 type: bug-fix
 products:
-- product: kibana
 - product: observability
 areas:
-- Alerting, connectors, and reporting
-- Actionable Observability
+- Alerting and Reporting
 title: Copy alert states to payload

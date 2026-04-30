@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/245718
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: Update solution nav tour copy
 description: Fixes the grammatical issues in the Solution Nav tour and simplifies the content by replacing multiple links with one link

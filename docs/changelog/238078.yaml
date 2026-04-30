@@ -86,6 +86,5 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Global experience
+  lifecycle: ga
 title: Add deployment name to breadcrumbs in ECH

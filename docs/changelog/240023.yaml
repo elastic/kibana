@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/streams-program/issues/498
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Support convert processor for stream data processing

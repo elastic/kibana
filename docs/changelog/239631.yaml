@@ -86,6 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Fixes fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur
+  lifecycle: ga
+title: Fix enforcement of unique policy name of policies across spaces
+description: Fixes fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur

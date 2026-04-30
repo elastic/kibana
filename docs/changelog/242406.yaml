@@ -88,6 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Fix package icons loading
+  lifecycle: ga
+title: fix icon loading with default icon
+description: Fix package icons loading

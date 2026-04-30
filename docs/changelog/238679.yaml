@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: security
-areas:
-- Threat hunting
 title: Can not change migration when translating rules (#233640)

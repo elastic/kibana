@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
+- Alerting and Reporting
 - Discover and ES|QL
 title: Discover to dashboard with controls, saving the histogram

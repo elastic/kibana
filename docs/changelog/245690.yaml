@@ -89,5 +89,6 @@ type: feature
 products:
 - product: observability
 areas:
-- Actionable Observability
-title: Ability to bulk mute/unmute alerts
+- Alerting and Reporting
+title: '- Add mute and unmute bulk action UI to the Alerts table.'
+description: Ability to bulk mute/unmute alerts

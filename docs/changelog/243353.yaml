@@ -85,9 +85,6 @@ prs:
 - https://github.com/elastic/kibana/pull/243353
 type: enhancement
 products:
-- product: kibana
 - product: observability
-areas:
-- Kibana security
-- Global experience
-title: Added a warning when deleting API keys currently in use by alerting rules.
+title: 'Added warning when deleting alerting rule API keys '
+description: Added a warning when deleting API keys currently in use by alerting rules.

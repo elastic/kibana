@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/246680
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Fix Processing, field name autocomplete not working on new fields

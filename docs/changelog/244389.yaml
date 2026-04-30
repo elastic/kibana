@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/244051
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'Add span links badge to Unified trace waterfall #244051 Open'

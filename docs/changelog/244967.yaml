@@ -86,8 +86,7 @@ prs:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Global experience
-- Kibana security
 - Discover and ES|QL
 title: Intersect allowed and authorized types

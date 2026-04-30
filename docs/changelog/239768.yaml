@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/239768
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: 'Fix: Add styling to handle the text overflow'
 description: Fixed data preview metadata popup visual issues when ID is too long. Added a tooltip and copy button to improve user experience.

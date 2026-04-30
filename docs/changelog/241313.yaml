@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/241313
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F30A Streams: Speed up field simulation"

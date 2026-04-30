@@ -87,9 +87,8 @@ issues:
 - https://github.com/elastic/kibana/issues/238022
 type: enhancement
 products:
-- product: kibana
 - product: observability
 areas:
-- Alerting, connectors, and reporting
-- Actionable Observability
-title: Users can now view the SLO associated with a burn rate rule from the rule details page.
+- Alerting and Reporting
+title: add link to SLO from rule details page
+description: Users can now view the SLO associated with a burn rate rule from the rule details page.

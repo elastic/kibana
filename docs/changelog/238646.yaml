@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/238178
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Edit feature condition and add feature discover url

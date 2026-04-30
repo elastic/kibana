@@ -86,7 +86,6 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Kibana security
+  lifecycle: ga
 title: Add origin configuration to authc providers
 description: Adds the ability to specify the origin(s) where an authentication provider will appear to users in the Login Selector UI.

@@ -87,8 +87,6 @@ issues:
 - https://github.com/elastic/kibana/issues/241646
 type: enhancement
 products:
-- product: kibana
-areas:
-- Data management
+- product: observability
 title: Add classic stream creation flyout to Streams page
 description: Adds a new flyout to create classic streams directly from the Streams page. The UI includes validation to prevent duplicate stream names and detect index template priority conflicts and ensuring streams are created with the expected configuration.

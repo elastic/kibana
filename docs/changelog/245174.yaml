@@ -88,7 +88,6 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
+  lifecycle: ga
 title: Agent actions menu redesign
 description: Redesigned single and bulk agent actions menus in Fleet. Commonly used actions are organized at the top level of the menus, while other actions are now organized into nested menus by use-case.

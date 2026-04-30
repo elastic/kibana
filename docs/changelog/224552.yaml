@@ -89,5 +89,7 @@ type: feature
 products:
 - product: kibana
   lifecycle: ga
+areas:
+- Dashboards and Visualizations
 title: 'Feature branch '
 description: Kibana Dashboards now support ownership and "write_restricted" mode. Users can now keep dashboards publicly editable or in a write-restricted state until they are ready to publish, giving them more control over who can edit their dashboards, regardless of broader space permissions.

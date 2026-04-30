@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243209
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Error rate chart warning on first load

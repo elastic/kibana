@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Entity analytics
 title: Disable rule summary button when user lacks all rule privileges

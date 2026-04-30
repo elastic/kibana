@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/237812
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: 'fix: Add sync check for saved objects for trained models.'
 description: Index management mappings editor now syncs model deployment status correctly. This fixes a case where user couldn't save `semantic_text` fields during deployment without forcing.

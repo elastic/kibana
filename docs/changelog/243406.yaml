@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/243161
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Improve error messaging when expensive queries are disabled in Streams schema editor

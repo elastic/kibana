@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Scheduled exports is GA.
+- Alerting and Reporting
+title: Make scheduled exports GA
+description: Scheduled exports is GA.

@@ -86,6 +86,6 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Improves memory usage in Fleet setup by deferring package reinstalls to async tasks.
+  lifecycle: ga
+title: Optimize memory usage on Fleet setup
+description: Improves memory usage in Fleet setup by deferring package reinstalls to async tasks.

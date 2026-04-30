@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/239589
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: 'Pod datails: Fix cpu query by changing the gap policy to include zeros'

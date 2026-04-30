@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: security
-areas:
-- Detection rules and alerts
 title: Updates kibana MITRE data to `v18.1`

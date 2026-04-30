@@ -89,8 +89,5 @@ issues:
 type: feature
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
 title: 'feat(slo): Add index sorting on SLI and split per day'
 description: SLI rolled-up data for SLO is split daily instead of monthly by default. Override is possible through a global custom pipeline.

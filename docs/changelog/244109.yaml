@@ -88,6 +88,5 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Log Rate Analysis: Optimizes & Re-enables text field analysis in contextual insights'

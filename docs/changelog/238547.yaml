@@ -87,7 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/234835
 type: enhancement
 products:
-- product: cloud-serverless
-areas:
-- Cloud security
+- product: security
 title: CDR Data View versioning and migration logic

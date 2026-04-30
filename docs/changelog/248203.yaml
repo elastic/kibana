@@ -87,7 +87,8 @@ issues:
 - https://github.com/elastic/kibana/issues/248047
 type: bug-fix
 products:
-- product: kibana
+- product: observability
 areas:
 - Discover and ES|QL
-title: Prevent loss of UI state in signal-specific Discover fly-out tabs when refreshing a query
+title: Prevent document-level doc viewer tabs from re-mounting when refreshing
+description: Prevent loss of UI state in signal-specific Discover fly-out tabs when refreshing a query

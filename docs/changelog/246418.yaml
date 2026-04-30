@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: security
-areas:
-- Endpoint security
 title: Add server configuration setting for disabling the auto install of endpoint rule on policy create

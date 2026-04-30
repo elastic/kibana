@@ -86,6 +86,5 @@ prs:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Global experience
+  lifecycle: ga
 title: Make Elastic logo click open custom home page in solution view

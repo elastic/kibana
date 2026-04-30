@@ -88,7 +88,5 @@ issues:
 type: enhancement
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
-title: Alert workflow tags will be viewable on the overview tab of the alert details flyout
+title: Add workflow tags to alert details overview tab
+description: Alert workflow tags will be viewable on the overview tab of the alert details flyout

@@ -90,6 +90,5 @@ issues:
 - https://github.com/elastic/observability-error-backlog/issues/320
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Manual ingest pipeline script validation

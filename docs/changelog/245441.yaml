@@ -88,7 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
 title: Default Rule creation

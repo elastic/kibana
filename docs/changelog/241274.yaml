@@ -88,6 +88,5 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: 'Anomaly Detection: Adds an action to create an anomaly detection alerting rule'

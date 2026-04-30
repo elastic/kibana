@@ -85,10 +85,6 @@ prs:
 - https://github.com/elastic/kibana/pull/243574
 type: enhancement
 products:
-- product: kibana
 - product: security
 - product: observability
-areas:
-- Data ingestion and Fleet
-- AI for security
 title: Security attachments in Agent Builder

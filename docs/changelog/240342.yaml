@@ -86,6 +86,6 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: '* Allows fleet setup retries on start in all environments'
+  lifecycle: ga
+title: Allow fleet-setup retries for all environments
+description: '* Allows fleet setup retries on start in all environments'

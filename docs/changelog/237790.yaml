@@ -89,6 +89,6 @@ issues:
 type: feature
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Adds a functionality for removing root privilege from Fleet managed agents if applicable.
+  lifecycle: ga
+title: Agent privilege level change UI
+description: Adds a functionality for removing root privilege from Fleet managed agents if applicable.

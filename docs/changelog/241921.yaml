@@ -87,7 +87,7 @@ issues:
 - https://github.com/elastic/kibana/issues/237401
 type: enhancement
 products:
-- product: kibana
+- product: observability
 areas:
 - Discover and ES|QL
 title: Supports subqueries in our apps

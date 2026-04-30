@@ -88,6 +88,6 @@ issues:
 type: enhancement
 products:
 - product: kibana
-areas:
-- Kibana security
-title: API Keys management page now defaults to showing personal API Keys only
+  lifecycle: ga
+title: 'refactor(api keys): Display personal API keys as default view'
+description: API Keys management page now defaults to showing personal API Keys only

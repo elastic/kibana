@@ -87,6 +87,6 @@ issues:
 - https://github.com/elastic/kibana/issues/237454
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
-title: Provides a better message feedback into the collapsed Processors/Conditions for the user
+- product: observability
+title: Minor UI improvement when collapsing nested conditions
+description: Provides a better message feedback into the collapsed Processors/Conditions for the user

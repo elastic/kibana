@@ -86,7 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: security
-areas:
-- Detection rules and alerts
-- Investigations
 title: Fixes react-query id collision

@@ -88,6 +88,4 @@ issues:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
 title: Rule condition chart parser replaces metric names inside filter values (e.g., A in "Accounts")

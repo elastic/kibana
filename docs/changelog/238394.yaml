@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/238394
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Improve performance of clustering

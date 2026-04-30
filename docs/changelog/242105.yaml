@@ -87,7 +87,7 @@ issues:
 - https://github.com/elastic/kibana/issues/236543
 type: feature
 products:
-- product: kibana
+- product: observability
 areas:
 - Discover and ES|QL
 title: Enable by default

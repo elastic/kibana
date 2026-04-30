@@ -86,7 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
-- Global experience
-title: Fixed an issue where the SLOs page could potentially cause inconsistent browser back button behavior.
+title: "Welcome Page: use React Router's history.replace() for in-app navigation"
+description: Fixed an issue where the SLOs page could potentially cause inconsistent browser back button behavior.

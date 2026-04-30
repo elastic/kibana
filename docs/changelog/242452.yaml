@@ -87,7 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/242234
 type: bug-fix
 products:
-- product: kibana
-areas:
-- Data ingestion and Fleet
+- product: observability
 title: Fix squished Apple icon on Auto Detect flow cards

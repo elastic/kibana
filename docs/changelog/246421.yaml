@@ -86,6 +86,7 @@ prs:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Computed suggestions for expression

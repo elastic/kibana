@@ -86,6 +86,4 @@ prs:
 type: enhancement
 products:
 - product: security
-areas:
-- Endpoint security
 title: Show user readable output for MDE runscript response action

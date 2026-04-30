@@ -85,7 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/236906
 type: enhancement
 products:
-- product: cloud-serverless
-areas:
-- Cloud security
+- product: security
 title: replace node label and detail labels tooltips with popovers

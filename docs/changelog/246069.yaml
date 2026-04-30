@@ -88,7 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Kibana security
+  lifecycle: ga
 title: Fix case sensitivity of fields in role page
 description: Fixes an issue where fields were not case-sensitive in Kibana's user interface for creating and updating roles, though fields are case-sensitive in Elasticsearch.

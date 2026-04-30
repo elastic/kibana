@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/237612
 type: enhancement
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: Remove global empty state redirect
 description: Users will now land on the Elasticsearch home page by default instead of being redirected to the create index page. This ensures immediate access to tutorials and educational content, improving discoverability of Kibana features while removing the previous global empty state redirect.

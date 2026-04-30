@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/248657
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Fixed an issue with agents count not updating in homepage
+- product: kibana
+  lifecycle: ga
+title: Fix missing agents count
+description: Fixed an issue with agents count not updating in homepage

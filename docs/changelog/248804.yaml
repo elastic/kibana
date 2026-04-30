@@ -88,6 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Global experience
-title: Fixes an issue with share modal where all time ranges were being shared as absolute.
+  lifecycle: ga
+title: Fix share modal time range issues
+description: Fixes an issue with share modal where all time ranges were being shared as absolute.

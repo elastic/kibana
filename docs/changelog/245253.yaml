@@ -88,6 +88,8 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode
+- Alerting and Reporting
+title: Fix Security alerts table not switching view mode columns correctly
+description: Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode

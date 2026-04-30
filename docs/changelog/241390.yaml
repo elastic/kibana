@@ -85,7 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/241390
 type: bug-fix
 products:
-- product: cloud-serverless
-areas:
-- Cloud security
+- product: security
 title: 'Fix Agent-Based Failing to produce data '

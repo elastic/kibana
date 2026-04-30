@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/235392
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Fix dependencies / service map for `txn == exit-span` use cases

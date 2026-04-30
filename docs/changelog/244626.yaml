@@ -85,8 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/244626
 type: enhancement
 products:
-- product: elasticsearch
-areas:
-- Search
+- product: kibana
+  lifecycle: ga
 title: Add targeted EIS callouts and tours for ECH/Serverless users in Kibana
 description: Targeted EIS callouts and guided tours have been added to Kibana for ECH/Serverless users to improve discoverability of Elastic Inference Service endpoints. Users can dismiss callouts and tours, which will not reappear after dismissal.

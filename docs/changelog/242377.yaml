@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/242377
 type: feature
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F30A Dissect suggestions"

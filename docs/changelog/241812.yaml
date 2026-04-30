@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/239348
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Fix the "Values" dropdown visualizing incorrectly on smaller screens

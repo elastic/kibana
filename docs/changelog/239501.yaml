@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/239501
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Only return valid queries for sig events

@@ -89,6 +89,8 @@ issues:
 type: feature
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Added the possibility to search scheduled reports by title and creator.
+- Alerting and Reporting
+title: Add search functionality to scheduled reports list
+description: Added the possibility to search scheduled reports by title and creator.

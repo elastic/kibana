@@ -88,7 +88,5 @@ issues:
 - https://github.com/elastic/security-team/issues/11085
 type: enhancement
 products:
-- product: cloud-serverless
-areas:
-- Cloud security
+- product: security
 title: Create Cloud Connector usage collector in Asset Inventory

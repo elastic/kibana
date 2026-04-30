@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/238630
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Fix wrapping issues in Processing and Streams partitions AI suggestions

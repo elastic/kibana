@@ -88,10 +88,8 @@ issues:
 - https://github.com/elastic/kibana/issues/240376
 type: enhancement
 products:
-- product: kibana
 - product: observability
 areas:
-- Alerting, connectors, and reporting
-- Actionable Observability
-- Global experience
-title: Users can now view and filter by workflow tags manually added to alerts
+- Alerting and Reporting
+title: Show workflow tags on table and details page
+description: Users can now view and filter by workflow tags manually added to alerts

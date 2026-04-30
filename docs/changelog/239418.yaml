@@ -86,6 +86,4 @@ prs:
 type: bug-fix
 products:
 - product: observability
-areas:
-- Actionable Observability
 title: Fix layout of SLO management page combo box filter

@@ -88,6 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Data ingestion and Fleet
-title: Enable storing secrets in Fleet Server Host config if fleet-server is running at a minimum supported version.
+  lifecycle: ga
+title: add fleet-server version check for SSL secrets
+description: Enable storing secrets in Fleet Server Host config if fleet-server is running at a minimum supported version.

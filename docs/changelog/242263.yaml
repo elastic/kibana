@@ -86,6 +86,5 @@ prs:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Machine learning
+  lifecycle: ga
 title: Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs

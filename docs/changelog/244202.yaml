@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Allow users to enable scheduled reports
+- Alerting and Reporting
+title: Enable scheduled reports
+description: Allow users to enable scheduled reports

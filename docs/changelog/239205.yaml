@@ -85,6 +85,5 @@ prs:
 - https://github.com/elastic/kibana/pull/239205
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: removing unecessary _source from query as we use fields

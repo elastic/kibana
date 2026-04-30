@@ -88,6 +88,4 @@ issues:
 type: enhancement
 products:
 - product: security
-areas:
-- Entity analytics
 title: Prepare Monitoring Entity Source CRUD APIs for GA

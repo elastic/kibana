@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/248072
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Disabled 'API keys' button on Elasticsearch homepage when logged in user have insufficient permissions.
+- product: kibana
+  lifecycle: ga
+title: Disable API keys on insufficient permissions
+description: Disabled 'API keys' button on Elasticsearch homepage when logged in user have insufficient permissions.

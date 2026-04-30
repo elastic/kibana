@@ -88,6 +88,7 @@ issues:
 type: bug-fix
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Dashboards and Visualizations
 title: fix 'sync colors' and 'sync tooltips' must be ON by default

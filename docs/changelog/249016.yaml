@@ -88,6 +88,6 @@ issues:
 type: bug-fix
 products:
 - product: kibana
-areas:
-- Global experience
-title: Fix Stack Monitoring Recent Log Entries timestamps to respect Kibana's time zone setting (`dateFormat:tz`).
+  lifecycle: ga
+title: Fix Recent Log Entries timezone
+description: Fix Stack Monitoring Recent Log Entries timestamps to respect Kibana's time zone setting (`dateFormat:tz`).

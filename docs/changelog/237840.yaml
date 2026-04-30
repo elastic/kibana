@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/235208
 type: bug-fix
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: "\U0001F41E [Dataset Quality] Flyout rendering issue"

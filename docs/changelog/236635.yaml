@@ -87,6 +87,5 @@ issues:
 - https://github.com/elastic/kibana/issues/236002
 type: enhancement
 products:
-- product: kibana
-  lifecycle: ga
+- product: observability
 title: Replace current doc count chart by RED metrics

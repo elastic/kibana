@@ -87,4 +87,5 @@ type: enhancement
 products:
 - product: kibana
   lifecycle: ga
-title: Linux now supports populate_file_data advanced option which enables entropy and header_bytes fields in file events.
+title: Add populate_file_data advanced option for linux
+description: Linux now supports populate_file_data advanced option which enables entropy and header_bytes fields in file events.

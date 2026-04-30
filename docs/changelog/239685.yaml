@@ -88,6 +88,7 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
 - Discover and ES|QL
 title: Applies the breakdown first and then the date_histogram

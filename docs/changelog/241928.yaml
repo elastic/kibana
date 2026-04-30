@@ -88,6 +88,8 @@ issues:
 type: enhancement
 products:
 - product: kibana
+  lifecycle: ga
 areas:
-- Alerting, connectors, and reporting
-title: Allow users to edit schedule config.
+- Alerting and Reporting
+title: Allow users to edit scheduled exports
+description: Allow users to edit schedule config.

@@ -87,4 +87,6 @@ type: enhancement
 products:
 - product: kibana
   lifecycle: ga
+areas:
+- Dashboards and Visualizations
 title: Allows basic filtering in ES|QL charts

@@ -85,7 +85,7 @@ prs:
 - https://github.com/elastic/kibana/pull/243802
 type: bug-fix
 products:
-- product: elasticsearch
-areas:
-- Search
-title: Fixes a case on Index management page where screen reader text was different than visible one.
+- product: kibana
+  lifecycle: ga
+title: Update manage indices button alt text
+description: Fixes a case on Index management page where screen reader text was different than visible one.

@@ -87,4 +87,5 @@ type: feature
 products:
 - product: kibana
   lifecycle: ga
-title: Introduces a connector for web search via Brave Search
+title: Added a Brave Search connector
+description: Introduces a connector for web search via Brave Search
