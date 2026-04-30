@@ -13,7 +13,7 @@ import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { DashboardCreateResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { createDashboardSavedObject } from '../create_dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 export async function create(
   requestCtx: RequestHandlerContext,
@@ -29,13 +29,22 @@ export async function create(
     isDashboardAppRequest
   );
 
-  const savedObject = await createDashboardSavedObject({
-    savedObjectsClient: core.savedObjects.client,
-    typeRegistry: core.savedObjects.typeRegistry,
-    attributes: soAttributes,
-    references: soReferences,
-    accessMode: accessControl?.access_mode,
-  });
+  const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
+    DASHBOARD_SAVED_OBJECT_TYPE
+  );
+  const savedObject = await core.savedObjects.client.create(
+    DASHBOARD_SAVED_OBJECT_TYPE,
+    soAttributes,
+    {
+      references: soReferences,
+      ...(accessControl?.access_mode &&
+        supportsAccessControl && {
+          accessControl: {
+            accessMode: accessControl.access_mode,
+          },
+        }),
+    }
+  );
 
   return getDashboardCRUResponseBody(
     savedObject,

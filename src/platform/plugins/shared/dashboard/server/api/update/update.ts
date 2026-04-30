@@ -17,7 +17,6 @@ import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { createDashboardSavedObject } from '../create_dashboard_saved_object';
 
 export async function update(
   requestCtx: RequestHandlerContext,
@@ -65,14 +64,20 @@ export async function update(
 
   if (isCreateRequest) {
     try {
-      const savedObject = await createDashboardSavedObject({
-        savedObjectsClient: core.savedObjects.client,
-        typeRegistry: core.savedObjects.typeRegistry,
-        id,
-        attributes: soAttributes,
-        references: soReferences,
-        accessMode: accessControl?.access_mode,
-      });
+      const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
+        DASHBOARD_SAVED_OBJECT_TYPE,
+        soAttributes,
+        {
+          id,
+          references: soReferences,
+          ...(accessControl?.access_mode &&
+            supportsAccessControl && {
+              accessControl: {
+                accessMode: accessControl.access_mode,
+              },
+            }),
+        }
+      );
 
       return getDashboardCRUResponseBody(
         savedObject,
