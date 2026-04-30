@@ -15,6 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   describe.skip('Privileges', function () {
     describe('GET /api/upgrade_assistant/privileges', () => {
       it('User with with index privileges', async () => {

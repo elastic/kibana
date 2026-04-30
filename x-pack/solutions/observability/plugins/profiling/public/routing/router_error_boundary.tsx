@@ -15,16 +15,38 @@ import type { ProfilingPluginPublicStartDeps } from '../types';
 
 export function RouterErrorBoundary({ children }: { children?: React.ReactNode }) {
   const location = useLocation();
-  return <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>;
+  return <ErrorBoundary resetKey={location.pathname}>{children}</ErrorBoundary>;
 }
 
-class ErrorBoundary extends React.Component<{ children?: React.ReactNode }, { error?: Error }, {}> {
-  public state: { error?: Error } = {
-    error: undefined,
-  };
+interface ErrorBoundaryProps {
+  children?: React.ReactNode;
+  resetKey: string;
+}
 
-  static getDerivedStateFromError(error: Error) {
+interface ErrorBoundaryState {
+  error?: Error;
+  resetKey: string;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { error: undefined, resetKey: props.resetKey };
+  }
+
+  static getDerivedStateFromError(error: Error): Pick<ErrorBoundaryState, 'error'> {
     return { error };
+  }
+
+  static getDerivedStateFromProps(
+    nextProps: ErrorBoundaryProps,
+    prevState: ErrorBoundaryState
+  ): Partial<ErrorBoundaryState> | null {
+    if (nextProps.resetKey !== prevState.resetKey) {
+      // Pathname changed: clear any previous error so the new route renders normally.
+      return { error: undefined, resetKey: nextProps.resetKey };
+    }
+    return null;
   }
 
   render() {

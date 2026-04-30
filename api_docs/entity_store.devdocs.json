@@ -2382,7 +2382,7 @@
         "label": "EntityMaintainerResponseItem",
         "description": [],
         "signature": [
-          "{ id: string; taskStatus: any; interval: string; description: any; nextRunAt: any; minLicense: any; customState: any; runs: number; lastSuccessTimestamp: any; lastErrorTimestamp: any; }"
+          "{ id: string; taskStatus: any; interval: string; description: string | null; nextRunAt: string | null; minLicense: any; customState: Record<string, unknown> | null; runs: number; lastSuccessTimestamp: string | null; lastErrorTimestamp: string | null; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
         "lineNumber": 15,
@@ -2518,7 +2518,7 @@
         "label": "GetEntityMaintainersResponse",
         "description": [],
         "signature": [
-          "{ maintainers: { id: string; taskStatus: any; interval: string; description: any; nextRunAt: any; minLicense: any; customState: any; runs: number; lastSuccessTimestamp: any; lastErrorTimestamp: any; }[]; }"
+          "{ maintainers: { id: string; taskStatus: any; interval: string; description: string | null; nextRunAt: string | null; minLicense: any; customState: Record<string, unknown> | null; runs: number; lastSuccessTimestamp: string | null; lastErrorTimestamp: string | null; }[]; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
         "lineNumber": 29,

@@ -108,6 +108,9 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     isLoading,
     isFetching,
     error,
+    hasNoItems,
+    hasNoResults,
+    hasActiveQuery,
     refetch: queryRefetch,
     requery: queryRequery,
   } = useContentListItemsQuery(clientState);
@@ -130,12 +133,28 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
         isLoading,
         isFetching,
         error,
+        hasNoItems,
+        hasNoResults,
+        hasActiveQuery,
       },
       dispatch,
       refetch,
       refresh,
     }),
-    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch, refresh]
+    [
+      clientState,
+      items,
+      totalItems,
+      isLoading,
+      isFetching,
+      error,
+      hasNoItems,
+      hasNoResults,
+      hasActiveQuery,
+      dispatch,
+      refetch,
+      refresh,
+    ]
   );
 
   return (
