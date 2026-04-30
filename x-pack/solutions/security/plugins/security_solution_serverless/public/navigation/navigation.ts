@@ -31,10 +31,9 @@ export const registerSolutionNavigation = async (
   // Get initial chat experience for setting initial navigation tree
   const initialChatExperience = await firstValueFrom(chatExperience$);
 
-  const workflowsUiEnabled$ = services.settings.client.get$<boolean>(
-    WORKFLOWS_UI_SETTING_ID,
-    false
-  );
+  // Same as chat experience: no defaultOverride so unset values use the registered default
+  // (workflows:ui:enabled defaults to true in workflows_management).
+  const workflowsUiEnabled$ = services.settings.client.get$<boolean>(WORKFLOWS_UI_SETTING_ID);
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
   const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
