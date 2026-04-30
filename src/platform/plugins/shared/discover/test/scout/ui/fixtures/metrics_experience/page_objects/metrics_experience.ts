@@ -8,7 +8,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -91,13 +90,6 @@ export class MetricsExperiencePage {
 
   public getVisibleCardCount(): Promise<number> {
     return this.cards.count();
-  }
-
-  /**
-   * `toHaveCount` with a longer timeout than the default 10s (slow CI / late chart mount).
-   */
-  public async expectCardCount(expected: number, timeoutMs = 30_000): Promise<void> {
-    await expect(this.cards).toHaveCount(expected, { timeout: timeoutMs });
   }
 
   public async toggleFullscreen(): Promise<void> {
