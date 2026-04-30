@@ -209,16 +209,7 @@ describe('LensWrapper', () => {
     });
   });
 
-  describe('quick-action view list (prop-keyed)', () => {
-    /**
-     * The wrapper builds the `view` quick-action list dynamically based on which
-     * handler props the parent wired. We snoop on the value of
-     * `PresentationPanelQuickActionContext` from a child rendered inside the
-     * provider. This locks in the behavior that promotes View details / Copy to
-     * dashboard onto the visible quick-action row only when their handlers are
-     * present (so the traces grid, which never wires those handlers, stays
-     * unchanged).
-     */
+  describe('quick-action view list', () => {
     function renderAndCaptureViewList(props: Partial<LensWrapperProps>): string[] | undefined {
       let captured: string[] | undefined;
       function ContextSnoop() {
@@ -227,7 +218,6 @@ describe('LensWrapper', () => {
         return null;
       }
 
-      // Stub EmbeddableComponent to render our snoop child so it sits inside the provider.
       mockEmbeddableComponent.mockImplementationOnce(() => <ContextSnoop />);
 
       render(
@@ -239,30 +229,32 @@ describe('LensWrapper', () => {
       return captured;
     }
 
-    it('promotes View details and Copy to dashboard when both handlers are wired', () => {
-      const view = renderAndCaptureViewList({
-        onViewDetails: jest.fn(),
-        onCopyToDashboard: jest.fn(),
-      });
-
-      expect(view).toEqual([
-        ACTION_EXPLORE_IN_DISCOVER_TAB,
-        ACTION_VIEW_DETAILS,
-        ACTION_COPY_TO_DASHBOARD,
-        'openInspector',
-      ]);
-    });
-
-    it('preserves the traces-grid contract when neither metrics handler is wired', () => {
+    it('falls back to [Explore, openInspector] when quickActionIds is not provided', () => {
       const view = renderAndCaptureViewList({});
 
       expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector']);
     });
 
-    it('only promotes View details when onViewDetails is wired alone', () => {
-      const view = renderAndCaptureViewList({ onViewDetails: jest.fn() });
+    it('uses caller-provided quickActionIds verbatim', () => {
+      const ids = [
+        ACTION_EXPLORE_IN_DISCOVER_TAB,
+        ACTION_VIEW_DETAILS,
+        ACTION_COPY_TO_DASHBOARD,
+        'openInspector',
+      ];
 
-      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_VIEW_DETAILS, 'openInspector']);
+      const view = renderAndCaptureViewList({ quickActionIds: ids });
+
+      expect(view).toEqual(ids);
+    });
+
+    it('ignores onCopyToDashboard / onViewDetails handler presence when no quickActionIds is provided', () => {
+      const view = renderAndCaptureViewList({
+        onCopyToDashboard: jest.fn(),
+        onViewDetails: jest.fn(),
+      });
+
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector']);
     });
   });
 

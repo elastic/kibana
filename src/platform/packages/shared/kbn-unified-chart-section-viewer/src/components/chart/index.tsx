@@ -57,6 +57,7 @@ export const Chart = ({
   syncTooltips,
   yBounds,
   extraDisabledActions,
+  quickActionIds,
   isLoading = false,
   error,
   userMessages,
@@ -108,6 +109,7 @@ export const Chart = ({
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
             extraDisabledActions={extraDisabledActions}
+            quickActionIds={quickActionIds}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

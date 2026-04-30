@@ -22,7 +22,19 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import { createESQLQuery, firstNonNullable } from '../../../common/utils';
-import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_OPEN_IN_DISCOVER,
+  ACTION_VIEW_DETAILS,
+} from '../../../common/constants';
+
+const METRICS_QUICK_ACTION_IDS: ReadonlyArray<string> = [
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_VIEW_DETAILS,
+  ACTION_COPY_TO_DASHBOARD,
+  'openInspector',
+];
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
@@ -271,6 +283,7 @@ const ChartItem = React.memo(
           chartLayers={chartLayers}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+          quickActionIds={METRICS_QUICK_ACTION_IDS}
           userMessages={userMessages}
           profileId={profileId}
         />
