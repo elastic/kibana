@@ -27,7 +27,7 @@ const mockCapturedRun: CapturedRun = {
 
 let mockKibanaServerRef: TestKibanaUtils | null = null;
 
-    jest.mock('../queries/task_claiming', () => {
+jest.mock('../queries/task_claiming', () => {
   const actual = jest.requireActual('../queries/task_claiming');
   return {
     ...actual,
