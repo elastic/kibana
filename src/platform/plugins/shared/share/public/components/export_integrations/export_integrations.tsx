@@ -39,7 +39,7 @@ import {
   useShareTypeContext,
   useShareContext,
 } from '../context';
-import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import type { ExportShareConfig, ExportShareDerivativesConfig, ShareContext } from '../../types';
 import { DraftModeCallout } from '../common/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
@@ -59,7 +59,7 @@ interface LayoutOptionsProps {
   printLayoutChange: (evt: EuiSwitchEvent) => void;
 }
 
-export interface ManagedFlyoutProps {
+export interface ManagedExportFlyoutProps {
   exportIntegration: ExportShareConfig;
   intl: InjectedIntl;
   isDirty: boolean;
@@ -75,6 +75,7 @@ export interface ManagedFlyoutProps {
   sharingData: {
     [key: string]: unknown;
   };
+  shareableUrlLocatorParams?: ShareContext['shareableUrlLocatorParams'];
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -128,7 +129,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-export function ManagedFlyout({
+export function ManagedExportFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -140,7 +141,7 @@ export function ManagedFlyout({
   onSave,
   isSaving,
   sharingData,
-}: ManagedFlyoutProps) {
+}: ManagedExportFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
 
@@ -296,6 +297,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectTypeAlias,
     objectTypeMeta,
     sharingData,
+    shareableUrlLocatorParams,
   } = useShareTypeContext('integration', 'export');
   const { shareMenuItems: exportDerivatives } = useShareTypeContext(
     'integration',
@@ -314,6 +316,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     id: string;
     group: keyof typeof selectionOptions.current;
   }>();
+
   const selectedMenuItem = useMemo<ExportShareConfig | ExportShareDerivativesConfig | null>(() => {
     let result: ExportShareConfig | ExportShareDerivativesConfig | null = null;
 
@@ -464,7 +467,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             }}
           />
           {selectedMenuItemMeta!.group === 'export' ? (
-            <ManagedFlyout
+            <ManagedExportFlyout
               exportIntegration={selectedMenuItem as ExportShareConfig}
               shareObjectType={objectType}
               shareObjectTypeAlias={objectTypeAlias}
@@ -476,6 +479,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               onSave={onSave}
               isSaving={isSaving}
               sharingData={sharingData}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

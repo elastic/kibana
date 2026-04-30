@@ -111,9 +111,18 @@ export const useTopNavLinks = ({
     });
 
     services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-      state: byValueState,
+      state: {
+        byValueState,
+        controlGroupState: currentTab.attributes.controlGroupState,
+      },
     });
-  }, [getState, currentTab.id, runtimeStateManager, services]);
+  }, [
+    currentTab.id,
+    currentTab.attributes.controlGroupState,
+    getState,
+    runtimeStateManager,
+    services,
+  ]);
 
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({

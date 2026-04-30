@@ -93,7 +93,7 @@ export const GroupMenu = ({ groupOptions, orderByOptions, groupField }: Props) =
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} style={{ minWidth: 160 }} />
+      <EuiContextMenuPanel items={items} css={{ minWidth: 160 }} />
     </EuiPopover>
   );
 };

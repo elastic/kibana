@@ -69,7 +69,15 @@
         "tags": [],
         "label": "TrackApplicationViewProps",
         "description": [
-          "\nProps to provide to the {@link TrackApplicationView} component."
+          "\nProps to provide to the ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "public",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-public.TrackApplicationView",
+            "text": "TrackApplicationView"
+          },
+          " component."
         ],
         "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
         "lineNumber": 12,
@@ -199,6 +207,7 @@
               "lineNumber": 85,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "UiCounterMetricType",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -307,6 +316,7 @@
               "lineNumber": 96,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "UiCounterMetricType",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -1469,7 +1479,15 @@
             "tags": [],
             "label": "fetch",
             "description": [
-              "\nThe actual logic that reports the Usage collection.\nIt will be called on every collection request.\nWhatever is returned in this method will be passed through as-is under\nthe {@link ICollector.type} key.\n"
+              "\nThe actual logic that reports the Usage collection.\nIt will be called on every collection request.\nWhatever is returned in this method will be passed through as-is under\nthe ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.ICollector.type",
+                "text": "ICollector.type"
+              },
+              " key.\n"
             ],
             "signature": [
               "(this: ",
@@ -1517,6 +1535,7 @@
                 "lineNumber": 139,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "CollectorFetchContext",
                 "trackAdoption": false
               }
             ]
@@ -1614,6 +1633,7 @@
                 "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UsageCollectorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1667,6 +1687,7 @@
                 "lineNumber": 40,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Collector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1729,7 +1750,15 @@
         "tags": [],
         "label": "IUsageCounter",
         "description": [
-          "\nUsage Counter allows to keep track of any events that occur.\nBy calling {@link IUsageCounter.incrementCounter} devs can notify this\nAPI whenever the event happens."
+          "\nUsage Counter allows to keep track of any events that occur.\nBy calling ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.IUsageCounter.incrementCounter",
+            "text": "IUsageCounter.incrementCounter"
+          },
+          " devs can notify this\nAPI whenever the event happens."
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
         "lineNumber": 19,
@@ -1888,7 +1917,15 @@
         "tags": [],
         "label": "CollectorFetchMethod",
         "description": [
-          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is {@link CollectorFetchContext}."
+          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorFetchContext",
+            "text": "CollectorFetchContext"
+          },
+          "."
         ],
         "signature": [
           "(this: ",
@@ -1936,6 +1973,7 @@
             "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CollectorFetchContext",
             "trackAdoption": false
           }
         ],
@@ -1997,7 +2035,15 @@
         "tags": [],
         "label": "MakeSchemaFrom",
         "description": [
-          "\nThe `schema` property in {@link CollectorOptions} must match the output of\nthe `fetch` method. This type helps ensure that is correct"
+          "\nThe `schema` property in ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorOptions",
+            "text": "CollectorOptions"
+          },
+          " must match the output of\nthe `fetch` method. This type helps ensure that is correct"
         ],
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: \"array\"; items: ",
@@ -2039,7 +2085,15 @@
         "tags": [],
         "label": "UsageCollectorOptions",
         "description": [
-          "\nSame as {@link CollectorOptions} but with the `schema` property enforced"
+          "\nSame as ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorOptions",
+            "text": "CollectorOptions"
+          },
+          " but with the `schema` property enforced"
         ],
         "signature": [
           "{ type: string; isReady: () => boolean | Promise<boolean>; schema?: ",
