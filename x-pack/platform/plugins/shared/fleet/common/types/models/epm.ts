@@ -216,6 +216,7 @@ export interface DeploymentsModesDefault {
   is_default?: boolean;
 }
 
+// Ordering should be from least to most mature
 export enum AgentlessDeploymentReleaseStatus {
   Beta = 'beta',
   GA = 'ga',
