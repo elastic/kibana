@@ -32,7 +32,7 @@ import {
   EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW,
   EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE,
   EBT_ELEMENT_DOC_VIEWER_WATERFALL_SERVICE_BADGE,
-} from '../../../../../telemetry/constants';
+} from '../../ebt_constants';
 
 export interface FullScreenWaterfallProps {
   traceId: string;

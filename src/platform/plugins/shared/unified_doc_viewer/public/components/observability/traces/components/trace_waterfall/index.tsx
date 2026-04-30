@@ -29,7 +29,7 @@ import {
   EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_WATERFALL_AREA,
   EBT_DETAIL_SPAN_DOC,
   EBT_CLICK_ACTION_EXPAND_TRACE,
-} from '../../../../../telemetry/constants';
+} from '../../ebt_constants';
 
 interface Props {
   traceId: string;

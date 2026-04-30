@@ -15,7 +15,7 @@ import {
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { EBT_CLICK_ACTION_VIEW_TRANSACTION } from '../../../../telemetry/constants';
+import { EBT_CLICK_ACTION_VIEW_TRANSACTION } from '../ebt_constants';
 
 interface TransactionNameLinkProps {
   serviceName?: string;

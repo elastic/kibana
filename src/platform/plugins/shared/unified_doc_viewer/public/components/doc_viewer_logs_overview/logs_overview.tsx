@@ -41,7 +41,7 @@ import {
   TraceWaterfall,
   type TraceWaterfallRestorableState,
 } from '../observability/traces/components/trace_waterfall';
-import { EBT_DETAIL_LOG_DOC } from '../../telemetry/constants';
+import { EBT_DETAIL_LOG_DOC } from './ebt_constants';
 import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';

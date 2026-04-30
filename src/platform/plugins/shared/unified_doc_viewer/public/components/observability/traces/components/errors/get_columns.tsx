@@ -25,10 +25,7 @@ import {
 import { EBT_CLICK_ACTION_VIEW_ERROR } from '@kbn/ebt-click-actions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
-import {
-  EBT_ELEMENT_DOC_VIEWER_ERRORS,
-  EBT_DETAIL_SPAN_DOC,
-} from '../../../../../telemetry/constants';
+import { EBT_ELEMENT_DOC_VIEWER_ERRORS, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
 
 const errorEbt = {

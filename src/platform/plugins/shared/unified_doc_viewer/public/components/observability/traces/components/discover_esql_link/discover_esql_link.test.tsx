@@ -15,10 +15,7 @@ import { DiscoverEsqlLink } from '.';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
 import { EBT_CLICK_ACTION_VIEW_SPAN } from '@kbn/ebt-click-actions';
-import {
-  EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
-  EBT_DETAIL_SPAN_DOC,
-} from '../../../../../telemetry/constants';
+import { EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
 
 jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
   useDiscoverLinkAndEsqlQuery: jest.fn(),

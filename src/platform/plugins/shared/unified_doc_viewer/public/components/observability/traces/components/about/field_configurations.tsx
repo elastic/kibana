@@ -35,10 +35,7 @@ import { TransactionNameLink } from '../transaction_name_link';
 import { HighlightField } from '../highlight_field';
 import { DependencyNameLink } from '../dependency_name_link';
 import { fieldDescriptions, fieldLabels } from '../../../constants';
-import {
-  EBT_ELEMENT_DOC_VIEWER_ABOUT,
-  EBT_DETAIL_SPAN_DOC,
-} from '../../../../../telemetry/constants';
+import { EBT_ELEMENT_DOC_VIEWER_ABOUT, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
 
 const aboutEbt = { element: EBT_ELEMENT_DOC_VIEWER_ABOUT, detail: EBT_DETAIL_SPAN_DOC };
 

@@ -41,7 +41,7 @@ import {
   EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
   EBT_DETAIL_SPAN_DOC,
   EBT_CLICK_ACTION_FILTER_SPAN_LINKS,
-} from '../../../../../telemetry/constants';
+} from '../../ebt_constants';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',

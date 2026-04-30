@@ -22,7 +22,7 @@ import {
   EBT_CLICK_ACTION_VIEW_TRACE,
   EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
   EBT_DETAIL_SPAN_DOC,
-} from '../../../../../telemetry/constants';
+} from '../../ebt_constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import {

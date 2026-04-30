@@ -16,7 +16,7 @@ import {
 import {
   EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
   EBT_DETAIL_SPAN_DOC,
-} from '../../telemetry/constants';
+} from '../../components/observability/traces/ebt_constants';
 import { DocViewerExtensionActionsProvider } from '../use_doc_viewer_extension_actions';
 import { useOpenInDiscoverSectionAction } from '.';
 
