@@ -6,25 +6,25 @@
  */
 
 import type {
-  JSX,
   ComponentClass,
   ComponentProps,
   ComponentType,
   Dispatch,
   FC,
+  JSX,
   Key,
   MutableRefObject,
   ReactNode,
   RefAttributes,
 } from 'react';
 import type {
-  AlertConsumers,
   ALERT_CASE_IDS,
-  ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_STATUS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -39,11 +39,9 @@ import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
@@ -52,6 +50,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
@@ -163,18 +162,6 @@ type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   : T extends ComponentClass<infer Props>
   ? ComponentClass<Props & AP>
   : never;
-
-export interface AlertWithLegacyFormats {
-  alert: Alert;
-  /**
-   * @deprecated
-   */
-  legacyAlert: LegacyField[];
-  /**
-   * @deprecated
-   */
-  ecsAlert: any;
-}
 
 export interface AlertsTableOnLoadedProps {
   alerts: Alert[];
@@ -317,7 +304,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderCellValue?: MergeProps<
     EuiDataGridProps['renderCellValue'],
-    RenderContext<AC> & AlertWithLegacyFormats
+    RenderContext<AC> & { alert: Alert }
   >;
   /**
    * Cell popover render function
@@ -331,14 +318,20 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderActionsCell?: MergeProps<
     EuiDataGridControlColumn['rowCellRender'],
-    RenderContext<AC> &
-      AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
+    RenderContext<AC> & { alert: Alert; setIsActionLoading?: (isLoading: boolean) => void }
   >;
   /**
    * Get the alert formatter for a specific rule type.
    * Used to generate "View in App" links for individual alerts.
    */
   getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Navigation config for the alert details page.
+   * When provided, the "View alert details" row action and the flyout footer
+   * render as `href` links to the alert details page instead of opening
+   * the flyout.
+   */
+  alertDetailsNavigation?: AlertDetailsNavigation;
   /**
    * Additional toolbar controls render function
    */
@@ -470,14 +463,6 @@ export type RenderContext<AC extends AdditionalContext> = {
 
   isLoadingAlerts: boolean;
   alerts: Alert[];
-  /**
-   * @deprecated
-   */
-  oldAlertsData: LegacyField[][];
-  /**
-   * @deprecated
-   */
-  ecsAlertsData: any[];
   alertsCount: number;
   browserFields: BrowserFields;
 
@@ -512,6 +497,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'
     | 'getAlertFormatter'
+    | 'alertDetailsNavigation'
   >,
   | 'columns'
   | 'pageIndex'
@@ -553,6 +539,10 @@ export interface PublicAlertsDataGridProps
   minScore?: number;
   trackScores?: boolean;
   consumers?: string[];
+  /**
+   * Value to override the server side search
+   */
+  projectRouting?: ProjectRouting;
   /**
    * If true, shows a button in the table toolbar to inspect the search alerts request
    */
@@ -617,21 +607,30 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   alertsQuerySnapshot?: EsQuerySnapshot;
 }
 
+export interface AlertDetailsNavigation {
+  /** The Kibana app ID to navigate to (e.g. 'observability') */
+  appId: string;
+  /** Returns the in-app path for a given alert ID (e.g. `/alerts/${alertId}`) */
+  getPath: (alertId: string) => string;
+}
+
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
   RenderContext<AC> &
     EuiDataGridCellValueElementProps & {
       key?: Key;
       alert: Alert;
       onActionExecuted?: () => void;
-      isAlertDetailsEnabled?: boolean;
       /**
        * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
        */
       resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
       /**
-       * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+       * SPA navigation config for the alert details page.
+       * When provided, the "View alert details" row action and flyout footer
+       * render as `href` links to the alert details page instead of opening
+       * the flyout.
        */
-      resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+      alertDetailsNavigation?: AlertDetailsNavigation;
       /**
        * Get the alert formatter for a specific rule type.
        * Used to generate "View in App" links for individual alerts.
@@ -659,6 +658,7 @@ interface PanelConfig {
   id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
+  width?: number;
 }
 
 export interface RenderContentPanelProps {

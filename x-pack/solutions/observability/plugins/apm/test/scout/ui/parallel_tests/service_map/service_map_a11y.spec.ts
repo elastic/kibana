@@ -44,18 +44,16 @@ test.describe(
     }) => {
       await test.step('nodes have visible focus indicators when focused', async () => {
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.openFindInPageWithKeyboardShortcut();
+        await serviceMapPage.serviceMapFindInPageInput.fill(SERVICE_OPBEANS_JAVA);
+        await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(/[1-9]/);
         const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await node.focus();
-        const isFocused = await page.evaluate((name: string) => {
-          const focused = document.activeElement;
-          return (
-            focused?.getAttribute('aria-label')?.toLowerCase().includes(name.toLowerCase()) ?? false
-          );
-        }, SERVICE_OPBEANS_JAVA);
-        expect(isFocused).toBe(true);
+        await expect(node).toBeFocused();
       });
 
       await test.step('zoom controls are keyboard accessible', async () => {
+        await serviceMapPage.clickFitView();
         await expect(serviceMapPage.zoomInBtnControl).toBeVisible();
         await expect(serviceMapPage.zoomOutBtnControl).toBeVisible();
         await expect(serviceMapPage.fitViewBtn).toBeVisible();
@@ -86,10 +84,14 @@ test.describe(
         );
       });
 
-      await test.step('screen reader announcement region exists within service map', async () => {
+      await test.step('polite live regions exist for keyboard announcements and find-in-page', async () => {
         const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
-        const liveRegion = serviceMapContainer.locator('[aria-live="polite"]');
-        await expect(liveRegion).toHaveCount(1);
+        await expect(page.testSubj.locator('serviceMapControlsSearch')).toBeVisible();
+        const politeLiveRegions = serviceMapContainer.locator('[aria-live="polite"]');
+        await expect(politeLiveRegions).toHaveCount(2);
+        await expect(
+          serviceMapContainer.locator('[data-test-subj="serviceMapFindMatchSummary"]')
+        ).toHaveAttribute('aria-live', 'polite');
       });
     });
   }

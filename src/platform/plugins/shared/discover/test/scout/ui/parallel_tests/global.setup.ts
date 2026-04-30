@@ -8,20 +8,22 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
+import { getSynthtraceClient } from '@kbn/scout-synthtrace';
+import {
+  createMetricsTestIndexIfNeeded,
+  DIMENSIONS_WIPE_CONFIG,
+} from '../fixtures/metrics_experience';
+import {
+  TRACES,
+  richTrace,
+  traceCorrelatedLogs,
+  minimalTraceCorrelatedLogs,
+  deepTrace,
+} from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
-  async ({
-    esClient,
-    esArchiver,
-    apmSynthtraceEsClient,
-    logsSynthtraceEsClient,
-    apiServices,
-    config,
-    log,
-  }) => {
+  async ({ esClient, esArchiver, apiServices, config, log, kbnUrl }) => {
     // Logstash data for flyout stability tests
     log.debug(
       '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
@@ -40,33 +42,72 @@ globalSetupHook(
         : '[setup:metrics] metrics test index already exists, skipping'
     );
 
-    // Traces Experience setup
-    if (!config.isCloud) {
-      await apiServices.fleet.internal.setup();
-      log.debug('[setup:traces] Fleet infrastructure setup completed');
-      await apiServices.fleet.agent.setup();
-      log.debug('[setup:traces] Fleet agents setup completed');
+    // Companion index for stream-switch coverage
+    log.debug(
+      '[setup:metrics] creating companion metrics test index (only if it does not exist)...'
+    );
+    const createdOther = await createMetricsTestIndexIfNeeded(esClient, DIMENSIONS_WIPE_CONFIG);
+    log.debug(
+      createdOther
+        ? '[setup:metrics] companion metrics test index created successfully'
+        : '[setup:metrics] companion metrics test index already exists, skipping'
+    );
+
+    // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
+    const hasFleetSupport = !config.serverless || config.projectType === 'oblt';
+    if (hasFleetSupport) {
+      if (!config.isCloud) {
+        await apiServices.fleet.internal.setup();
+        log.debug('[setup:traces] Fleet infrastructure setup completed');
+        await apiServices.fleet.agent.setup();
+        log.debug('[setup:traces] Fleet agents setup completed');
+      }
+
+      const { apmEsClient } = await getSynthtraceClient('apmEsClient', {
+        esClient,
+        kbnUrl: kbnUrl.get(),
+        log,
+        config,
+      });
+
+      const { logsEsClient } = await getSynthtraceClient('logsEsClient', {
+        esClient,
+        log,
+        config,
+      });
+
+      const timeRange = {
+        from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
+        to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
+      };
+
+      const { apmData, correlationIds } = richTrace(timeRange);
+
+      await apmEsClient.index(apmData);
+      log.debug('[setup:traces] Rich APM trace data indexed');
+
+      await apmEsClient.index(deepTrace(timeRange));
+      log.debug('[setup:traces] Deep trace data indexed');
+
+      const logData = traceCorrelatedLogs({
+        ...timeRange,
+        traceId: correlationIds.richTraceId,
+        transactionId: correlationIds.transactionId,
+        dbSpanId: correlationIds.dbSpanId,
+        processOrderSpanId: correlationIds.processOrderSpanId,
+      });
+
+      await logsEsClient.index(logData);
+      log.debug('[setup:traces] Correlated log data indexed');
+
+      const minimalLogData = minimalTraceCorrelatedLogs({
+        ...timeRange,
+        traceId: correlationIds.minimalTraceId,
+        transactionId: correlationIds.minimalTransactionId,
+      });
+
+      await logsEsClient.index(minimalLogData);
+      log.debug('[setup:traces] Minimal trace log data indexed');
     }
-
-    const timeRange = {
-      from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
-      to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
-    };
-
-    const { apmData, correlationIds } = richTrace(timeRange);
-
-    await apmSynthtraceEsClient.index(apmData);
-    log.debug('[setup:traces] Rich APM trace data indexed');
-
-    const logData = traceCorrelatedLogs({
-      ...timeRange,
-      traceId: correlationIds.richTraceId,
-      transactionId: correlationIds.transactionId,
-      dbSpanId: correlationIds.dbSpanId,
-      processOrderSpanId: correlationIds.processOrderSpanId,
-    });
-
-    await logsSynthtraceEsClient.index(logData);
-    log.debug('[setup:traces] Correlated log data indexed');
   }
 );

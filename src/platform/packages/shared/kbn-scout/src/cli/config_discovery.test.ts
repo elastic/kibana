@@ -10,6 +10,7 @@
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { findPackageForPath } from '@kbn/repo-packages';
 import fs from 'fs';
 import {
   filterModulesByScoutCiConfig,
@@ -42,6 +43,10 @@ jest.mock('fs', () => {
     writeFileSync: jest.fn(),
   };
 });
+
+jest.mock('@kbn/repo-packages', () => ({
+  findPackageForPath: jest.fn(),
+}));
 
 jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
@@ -86,7 +91,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       type: 'plugin',
       configs: [
         {
-          path: 'pluginA/config1.playwright.config.ts',
+          path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
           hasTests: true,
           tags: [
             '@local-stateful-classic',
@@ -108,6 +113,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       enum: jest.fn(),
       arrayOfStrings: jest.fn(),
       boolean: jest.fn(),
+      string: jest.fn(),
     } as any;
 
     log = {
@@ -138,6 +144,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
     flagsReader.arrayOfStrings.mockReturnValue([]);
+    flagsReader.string.mockImplementation(() => '');
+
+    (findPackageForPath as jest.Mock).mockReset();
 
     (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
     (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([]);
@@ -152,11 +161,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/private/pluginA',
         configs: [
           {
-            path: 'pluginA/config1.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'pluginA/config1.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'abc123',
               tests: [
@@ -180,13 +189,16 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
           {
-            path: 'pluginA/parallel.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'pluginA/parallel.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
               exists: true,
               sha1: 'def456',
               tests: [
@@ -199,6 +211,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -210,11 +225,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/shared/pluginB',
         configs: [
           {
-            path: 'pluginB/config3.playwright.config.ts',
+            path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
             manifest: {
-              path: 'pluginB/config3.playwright.config.ts',
+              path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'ghi789',
               tests: [
@@ -227,6 +242,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -238,11 +256,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'src/platform/packages/shared/packageA',
         configs: [
           {
-            path: 'packageA/config4.playwright.config.ts',
+            path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
             manifest: {
-              path: 'packageA/config4.playwright.config.ts',
+              path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'jkl012',
               tests: [
@@ -258,6 +276,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   ],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -298,6 +319,97 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage).toBeDefined();
     expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only (pluginB filtered out)
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+  });
+
+  it('fails when --selective-testing is set without --affected-modules', () => {
+    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+    flagsReader.string.mockReturnValue('');
+
+    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+      '--selective-testing requires --affected-modules'
+    );
+  });
+
+  it('with --selective-testing and --affected-modules, limits discovery to affected modules only', () => {
+    flagsReader.enum.mockReturnValue('mki');
+    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+    flagsReader.string.mockImplementation((name: string) =>
+      name === 'affected-modules' ? '/mock/affected_modules.json' : ''
+    );
+
+    (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
+      if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
+      if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
+      if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };
+      return undefined;
+    });
+
+    (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
+      if (readPath === '/mock/affected_modules.json') {
+        return JSON.stringify(['@kbn/pluginA']);
+      }
+      if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
+        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+      }
+      if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
+        return 'mock yaml content';
+      }
+      return '';
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)');
+    expect(foundMessage![0]).toContain('0 package(s)');
+
+    expect(
+      infoCalls.some((call) =>
+        String(call[0]).includes('Selective testing: Scout discovery limited')
+      )
+    ).toBe(true);
+  });
+
+  it('with --affected-modules but without --selective-testing, still discovers all modules matching the target', () => {
+    flagsReader.enum.mockReturnValue('mki');
+    flagsReader.boolean.mockReturnValue(false);
+    flagsReader.string.mockImplementation((name: string) =>
+      name === 'affected-modules' ? '/mock/affected_modules_non_draft.json' : ''
+    );
+
+    (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
+      if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
+      if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
+      if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };
+      return undefined;
+    });
+
+    (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
+      if (readPath === '/mock/affected_modules_non_draft.json') {
+        return JSON.stringify(['@kbn/pluginA']);
+      }
+      if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
+        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+      }
+      if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
+        return 'mock yaml content';
+      }
+      return '';
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('2 plugin(s)');
+    expect(foundMessage![0]).toContain('1 package(s)');
   });
 
   it('filters configs based on target tags for "mki" target (@cloud-serverless-*)', () => {
@@ -360,7 +472,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // Verify only @local-* tags are kept
     const configLogCall = infoCalls.find((call) =>
-      call[0].includes('config1.playwright.config.ts')
+      call[0].includes('/pluginA/test/scout/ui/playwright.config.ts')
     );
     expect(configLogCall).toBeDefined();
     expect(configLogCall![0]).toContain('@local-stateful-classic');
@@ -381,11 +493,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
       root: 'x-pack/platform/plugins/private/pluginLocalServerless',
       configs: [
         {
-          path: 'pluginLocalServerless/config.playwright.config.ts',
+          path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
           category: 'ui',
           type: 'playwright',
           manifest: {
-            path: 'pluginLocalServerless/config.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
             exists: true,
             sha1: 'local789',
             tests: [
@@ -397,6 +509,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 tags: ['@local-serverless-search'],
               },
             ],
+          },
+          server: {
+            configSet: 'default',
           },
         },
       ],
@@ -420,7 +535,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // Verify only @local-stateful-* tags are kept
     const configLogCall = infoCalls.find((call) =>
-      call[0].includes('config1.playwright.config.ts')
+      call[0].includes('/pluginA/test/scout/ui/playwright.config.ts')
     );
     expect(configLogCall).toBeDefined();
     expect(configLogCall![0]).toContain('@local-stateful-classic');
@@ -446,11 +561,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/private/pluginCustom',
         configs: [
           {
-            path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
               exists: true,
               sha1: 'custom123',
               tests: [
@@ -463,13 +578,16 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'custom',
+            },
           },
           {
-            path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'normal456',
               tests: [
@@ -481,6 +599,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@local-stateful-classic'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -494,7 +615,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(configLogs.length).toBeGreaterThan(0);
     expect(configLogs.some((call) => call[0].includes('/test/scout_custom/'))).toBe(true);
     expect(
-      configLogs.some((call) => call[0].includes('/pluginCustom/config.playwright.config.ts'))
+      configLogs.some((call) =>
+        call[0].includes('/pluginCustom/test/scout/ui/playwright.config.ts')
+      )
     ).toBe(true);
   });
 
@@ -523,7 +646,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: excludedConfigPath,
+              path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/.meta/ui/parallel.json',
               exists: true,
               sha1: 'exclude123',
               tests: [
@@ -536,13 +659,16 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'cspm_agentless',
+            },
           },
           {
-            path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/config.playwright.config.ts',
+            path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/config.playwright.config.ts',
+              path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'include456',
               tests: [
@@ -555,6 +681,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -565,9 +694,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
     const infoCalls = log.info.mock.calls;
     const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
     expect(configLogs.some((call) => call[0].includes(excludedConfigPath))).toBe(false);
-    expect(
-      configLogs.some((call) => call[0].includes('/test/scout/ui/config.playwright.config.ts'))
-    ).toBe(true);
+    expect(configLogs.some((call) => call[0].includes('/test/scout/ui/playwright.config.ts'))).toBe(
+      true
+    );
 
     process.env.CI = originalCi;
   });
@@ -581,7 +710,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // Find the log call that shows config details
     const infoCalls = log.info.mock.calls;
     const configLogCall = infoCalls.find((call) =>
-      call[0].includes('config1.playwright.config.ts')
+      call[0].includes('/pluginA/test/scout/ui/playwright.config.ts')
     );
 
     expect(configLogCall).toBeDefined();
@@ -601,7 +730,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     const infoCalls = log.info.mock.calls;
     expect(infoCalls.length).toBeGreaterThan(0);
-    expect(infoCalls[0][0]).toContain('Found Playwright config files');
+    expect(infoCalls.some((call) => call[0].includes('Found Playwright config files'))).toBe(true);
 
     // Check that config logs include tags
     const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
@@ -625,11 +754,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/private/pluginNoMatch',
         configs: [
           {
-            path: 'pluginNoMatch/config.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'pluginNoMatch/config.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'mno345',
               tests: [
@@ -641,6 +770,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@cloud-serverless-workplaceai'], // Not in ESS_ONLY
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -672,7 +804,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(savedData)).toBe(true);
 
     expect(log.info).toHaveBeenCalledWith(
-      expect.stringContaining('Scout configs were filtered for CI. Saved')
+      expect.stringContaining('Scout configs saved for CI (full suite)')
     );
   });
 
@@ -707,11 +839,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/private/pluginNoTests',
         configs: [
           {
-            path: 'pluginNoTests/config.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'pluginNoTests/config.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'pqr678',
               tests: [
@@ -723,6 +855,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@local-stateful-classic'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -759,11 +894,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/private/pluginMixedTests',
         configs: [
           {
-            path: 'pluginMixedTests/config.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'pluginMixedTests/config.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'stu901',
               tests: [
@@ -811,6 +946,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -820,7 +958,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // Find the log call that shows config details
     const infoCalls = log.info.mock.calls;
-    const configLogCall = infoCalls.find((call) => call[0].includes('config.playwright.config.ts'));
+    const configLogCall = infoCalls.find((call) =>
+      call[0].includes('/pluginMixedTests/test/scout/ui/playwright.config.ts')
+    );
 
     expect(configLogCall).toBeDefined();
     // For target 'all', only tags in deploymentAgnostic are shown (filtered by filterModulesByTargetTags)
@@ -859,11 +999,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         root: 'x-pack/platform/plugins/private/pluginTestModes',
         configs: [
           {
-            path: 'pluginTestModes/config1.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
             manifest: {
-              path: 'pluginTestModes/config1.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'vwx234',
               tests: [
@@ -880,13 +1020,16 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
           {
-            path: 'pluginTestModes/config2.playwright.config.ts',
+            path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
             manifest: {
-              path: 'pluginTestModes/config2.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'yza567',
               tests: [
@@ -899,6 +1042,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -909,8 +1055,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // Verify that serverRunFlags are computed and included in the output
     // The function should compute serverRunFlags from tags automatically
     const infoCalls = log.info.mock.calls;
-    const config1Log = infoCalls.find((call) => call[0].includes('config1.playwright.config.ts'));
-    const config2Log = infoCalls.find((call) => call[0].includes('config2.playwright.config.ts'));
+    const config1Log = infoCalls.find((call) => call[0].includes('/ui/playwright.config.ts'));
+    const config2Log = infoCalls.find((call) => call[0].includes('/api/playwright.config.ts'));
 
     expect(config1Log).toBeDefined();
     expect(config2Log).toBeDefined();
@@ -931,11 +1077,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
           root: 'x-pack/platform/plugins/private/pluginSearch',
           configs: [
             {
-              path: 'pluginSearch/config1.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
               manifest: {
-                path: 'pluginSearch/config1.playwright.config.ts',
+                path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'bcd234',
                 tests: [
@@ -948,13 +1094,16 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   },
                 ],
               },
+              server: {
+                configSet: 'default',
+              },
             },
             {
-              path: 'pluginSearch/config2.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
               category: 'api',
               type: 'playwright',
               manifest: {
-                path: 'pluginSearch/config2.playwright.config.ts',
+                path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
                 exists: true,
                 sha1: 'cde345',
                 tests: [
@@ -967,6 +1116,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   },
                 ],
               },
+              server: {
+                configSet: 'default',
+              },
             },
           ],
         },
@@ -978,11 +1130,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
           root: 'x-pack/platform/plugins/private/pluginPlatform',
           configs: [
             {
-              path: 'pluginPlatform/config1.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
               manifest: {
-                path: 'pluginPlatform/config1.playwright.config.ts',
+                path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'def456',
                 tests: [
@@ -995,6 +1147,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   },
                 ],
               },
+              server: {
+                configSet: 'default',
+              },
             },
           ],
         },
@@ -1006,11 +1161,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
           root: 'x-pack/solutions/observability/plugins/pluginOblt',
           configs: [
             {
-              path: 'pluginOblt/config1.playwright.config.ts',
+              path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
               manifest: {
-                path: 'pluginOblt/config1.playwright.config.ts',
+                path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'efg567',
                 tests: [
@@ -1022,6 +1177,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                     tags: ['@cloud-serverless-observability_complete'],
                   },
                 ],
+              },
+              server: {
+                configSet: 'default',
               },
             },
           ],
@@ -1156,7 +1314,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       expect(statefulSearchGroup).toBeDefined();
       expect(statefulSearchGroup.testTarget.domain).toBe('search');
-      expect(statefulSearchGroup.configs).toContain('pluginSearch/config1.playwright.config.ts');
+      expect(statefulSearchGroup.configs).toContain(
+        'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts'
+      );
 
       // Find stateful group for 'platform'
       // For stateful (ECH), domain is based on group: 'platform' => 'classic'
@@ -1169,7 +1329,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(statefulPlatformGroup).toBeDefined();
       expect(statefulPlatformGroup.testTarget.domain).toBe('classic');
       expect(statefulPlatformGroup.configs).toContain(
-        'pluginPlatform/config1.playwright.config.ts'
+        'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts'
       );
 
       // Find serverless group for 'search'
@@ -1183,8 +1343,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       expect(serverlessSearchGroup).toBeDefined();
       expect(serverlessSearchGroup.testTarget.domain).toBe('search');
-      expect(serverlessSearchGroup.configs).toContain('pluginSearch/config1.playwright.config.ts');
-      expect(serverlessSearchGroup.configs).toContain('pluginSearch/config2.playwright.config.ts');
+      expect(serverlessSearchGroup.configs).toContain(
+        'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts'
+      );
+      expect(serverlessSearchGroup.configs).toContain(
+        'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts'
+      );
 
       // Find serverless group for 'observability'
       const serverlessObltScoutCmd =
@@ -1197,7 +1361,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       expect(serverlessObltGroup).toBeDefined();
       expect(serverlessObltGroup.testTarget.domain).toBe('observability_complete');
-      expect(serverlessObltGroup.configs).toContain('pluginOblt/config1.playwright.config.ts');
+      expect(serverlessObltGroup.configs).toContain(
+        'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts'
+      );
     });
 
     it('handles configs with multiple "serverRunFlags" correctly', () => {
@@ -1218,11 +1384,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
           root: 'x-pack/platform/plugins/private/pluginMultiMode',
           configs: [
             {
-              path: 'pluginMultiMode/config1.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
               manifest: {
-                path: 'pluginMultiMode/config1.playwright.config.ts',
+                path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'fgh678',
                 tests: [
@@ -1239,6 +1405,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   },
                 ],
               },
+              server: {
+                configSet: 'default',
+              },
             },
           ],
         },
@@ -1252,7 +1421,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
           visibility: 'private',
           configs: [
             {
-              path: 'pluginMultiMode/config1.playwright.config.ts',
+              path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
               hasTests: true,
               tags: [
                 '@local-stateful-classic',
@@ -1291,7 +1460,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       expect(statefulGroup).toBeDefined();
       expect(statefulGroup.testTarget.domain).toBe('classic');
-      expect(statefulGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
+      expect(statefulGroup.configs).toContain(
+        'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts'
+      );
 
       const serverlessEsGroup = savedData.find(
         (g: any) =>
@@ -1301,7 +1472,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       expect(serverlessEsGroup).toBeDefined();
       expect(serverlessEsGroup.testTarget.domain).toBe('search');
-      expect(serverlessEsGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
+      expect(serverlessEsGroup.configs).toContain(
+        'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts'
+      );
 
       const serverlessObltGroup = savedData.find(
         (g: any) =>
@@ -1311,7 +1484,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       expect(serverlessObltGroup).toBeDefined();
       expect(serverlessObltGroup.testTarget.domain).toBe('observability_complete');
-      expect(serverlessObltGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
+      expect(serverlessObltGroup.configs).toContain(
+        'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts'
+      );
     });
   });
 });

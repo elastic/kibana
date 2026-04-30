@@ -9,13 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { ExampleRequestHandlerContext } from '../request_context';
+import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
 import { EMIT_EVENT_ROUTE_PATH } from '../../common/constants';
 import { CUSTOM_TRIGGER_ID } from '../../common/triggers/custom_trigger';
 
 export { EMIT_EVENT_ROUTE_PATH };
 
-export function registerEmitEventRoute(router: IRouter<ExampleRequestHandlerContext>): void {
+export function registerEmitEventRoute(
+  router: IRouter<WorkflowsExtensionsRequestHandlerContext>
+): void {
   router.post(
     {
       path: EMIT_EVENT_ROUTE_PATH,
@@ -30,17 +32,28 @@ export function registerEmitEventRoute(router: IRouter<ExampleRequestHandlerCont
           message: schema.string(),
           source: schema.maybe(schema.string()),
           category: schema.maybe(schema.string()),
+          labels: schema.maybe(schema.arrayOf(schema.string())),
+          foo: schema.maybe(
+            schema.object({
+              bar: schema.object({
+                baz: schema.string(),
+              }),
+            })
+          ),
+          another: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const workflows = await context.workflows;
-        const client = workflows.getWorkflowsClient();
-        await client.emitEvent(CUSTOM_TRIGGER_ID, {
+        await workflows.emitEvent(CUSTOM_TRIGGER_ID, {
           message: request.body.message,
           ...(request.body.source !== undefined && { source: request.body.source }),
           ...(request.body.category !== undefined && { category: request.body.category }),
+          ...(request.body.labels !== undefined && { labels: request.body.labels }),
+          ...(request.body.foo !== undefined && { foo: request.body.foo }),
+          ...(request.body.another !== undefined && { another: request.body.another }),
         });
         return response.ok({
           body: { ok: true, triggerId: CUSTOM_TRIGGER_ID },

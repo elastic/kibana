@@ -9,20 +9,49 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
+import type {
+  GetIssueInput,
+  GetProjectInput,
+  GetProjectsInput,
+  SearchIssuesWithJqlInput,
+  SearchUsersInput,
+} from './types';
+import {
+  GetIssueInputSchema,
+  GetProjectInputSchema,
+  GetProjectsInputSchema,
+  SearchUsersInputSchema,
+  SearchIssuesWithJqlInputSchema,
+} from './types';
 import type { ActionContext, ConnectorSpec } from '../../../..';
 
-const buildBaseUrl = (ctx: ActionContext) =>
-  `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
+const buildBaseUrl = (ctx: ActionContext): string => {
+  if (ctx.secrets?.authType === 'oauth_authorization_code') {
+    const cloudId = String(ctx.config?.cloudId ?? '').trim();
+    if (cloudId === '') {
+      throw new Error(
+        'Jira Cloud ID is required in connector configuration when using OAuth authentication.'
+      );
+    }
+    return `https://api.atlassian.com/ex/jira/${cloudId}`;
+  }
+  const subdomain = String(ctx.config?.subdomain ?? '').trim();
+  if (subdomain === '') {
+    throw new Error('Jira Cloud subdomain is required');
+  }
+  return `https://${subdomain}.atlassian.net`;
+};
 
 export const JiraConnector: ConnectorSpec = {
   metadata: {
     id: '.jira-cloud',
     displayName: 'Jira Cloud',
     description: i18n.translate('core.kibanaConnectorSpecs.jira.metadata.description', {
-      defaultMessage: 'Connect to Jira to pull data from your project.',
+      defaultMessage: 'Search issues, browse projects, and look up users in Jira Cloud',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: [
@@ -40,6 +69,21 @@ export const JiraConnector: ConnectorSpec = {
               }),
             },
           },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://auth.atlassian.com/authorize',
+          tokenUrl: 'https://auth.atlassian.com/oauth/token',
+          scope: 'read:jira-work read:jira-user offline_access',
         },
       },
     ],
@@ -61,19 +105,35 @@ export const JiraConnector: ConnectorSpec = {
         placeholder: 'your-domain',
         helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.helpText', {
           defaultMessage:
-            'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.com)',
+            'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.net)',
+        }),
+      }),
+    cloudId: z
+      .string()
+      .optional()
+      .describe(
+        i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.description', {
+          defaultMessage: 'Atlassian cloud ID (OAuth)',
+        })
+      )
+      .meta({
+        widget: 'text',
+        label: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.label', {
+          defaultMessage: 'Cloud ID',
+        }),
+        helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
+          defaultMessage:
+            'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response.',
         }),
       }),
   }),
   actions: {
     searchIssuesWithJql: {
-      isTool: false,
-      input: z.object({
-        jql: z.string(),
-        maxResults: z.number().optional(),
-        nextPageToken: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
+      isTool: true,
+      description:
+        'Search or filter Jira issues using JQL (Jira Query Language). Use when you need to find issues by status, assignee, project, label, or any other criteria. Supports pagination via nextPageToken.',
+      input: SearchIssuesWithJqlInputSchema,
+      handler: async (ctx, input: SearchIssuesWithJqlInput) => {
         const typedInput = input as {
           jql: string;
           maxResults?: number;
@@ -85,11 +145,11 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     getIssue: {
-      isTool: false,
-      input: z.object({
-        issueId: z.string(),
-      }),
-      handler: async (ctx, input) => {
+      isTool: true,
+      description:
+        'Fetch full details of a single Jira issue by its ID or key. Use when you already have the issue key (e.g. PROJ-123) or issue ID and need the complete record including fields, comments, and metadata.',
+      input: GetIssueInputSchema,
+      handler: async (ctx, input: GetIssueInput) => {
         const typedInput = input as {
           issueId: string;
         };
@@ -99,13 +159,11 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     getProjects: {
-      isTool: false,
-      input: z.object({
-        maxResults: z.number().optional(),
-        startAt: z.number().optional(),
-        query: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
+      isTool: true,
+      description:
+        'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Supports pagination and optional text filtering.',
+      input: GetProjectsInputSchema,
+      handler: async (ctx, input: GetProjectsInput) => {
         const typedInput = input as {
           maxResults?: number;
           startAt?: number;
@@ -119,11 +177,11 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     getProject: {
-      isTool: false,
-      input: z.object({
-        projectId: z.string(),
-      }),
-      handler: async (ctx, input) => {
+      isTool: true,
+      description:
+        'Fetch full details of a single Jira project by its ID or key. Use when you already have the project key (e.g. PROJ) or numeric project ID and need the complete project record.',
+      input: GetProjectInputSchema,
+      handler: async (ctx, input: GetProjectInput) => {
         const typedInput = input as {
           projectId: string;
         };
@@ -135,16 +193,11 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     searchUsers: {
-      isTool: false,
-      input: z.object({
-        query: z.string().optional(),
-        username: z.string().optional(),
-        accountId: z.string().optional(),
-        startAt: z.number().optional(),
-        maxResults: z.number().optional(),
-        property: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
+      isTool: true,
+      description:
+        'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user contact details. At least one search parameter should be provided.',
+      input: SearchUsersInputSchema,
+      handler: async (ctx, input: SearchUsersInput) => {
         const typedInput = input as {
           query?: string;
           username?: string;
@@ -161,4 +214,10 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
   },
+  skill: [
+    'Typical patterns:',
+    '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',
+    '- Issue lookup: searchIssuesWithJql → getIssue (by key from results)',
+    '- User-filtered search: searchUsers (to get accountId) → searchIssuesWithJql with assignee = "accountId"',
+  ].join('\n'),
 };

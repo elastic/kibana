@@ -57,6 +57,10 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   columns: input.columns
     .map((col) => {
       if (col.id === columnId) {
+        // Skip formatting for non-number columns to avoid NaN values when rendering
+        if (col.meta?.type !== 'number') {
+          return col;
+        }
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
@@ -71,6 +75,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
                   suffix,
                   ...otherArgs,
                 }),
+                decimals,
               },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);
@@ -101,6 +106,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               suffix,
               ...otherArgs,
             }),
+            decimals,
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
           // property. Here the format is passed to this property to make it work properly

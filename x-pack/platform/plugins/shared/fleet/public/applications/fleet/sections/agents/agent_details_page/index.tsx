@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { useRouteMatch, useLocation } from 'react-router-dom';
+import { useRouteMatch, useLocation, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
@@ -31,7 +31,7 @@ import {
   useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-
+import { ExperimentalFeaturesService } from '../../../services';
 import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
@@ -40,6 +40,7 @@ import {
   AgentDetailsActionMenu,
   AgentDetailsContent,
   AgentDiagnosticsTab,
+  AgentCollectorConfig,
 } from './components';
 import { AgentSettings } from './components/agent_settings';
 
@@ -97,7 +98,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={getHref('agent_list')}
             flush="left"
             size="xs"
@@ -192,6 +193,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [agentPolicyData, agentData, getHref, isAgentPolicyLoading]
   );
 
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+
   const headerTabs = useMemo(() => {
     const tabs = [
       {
@@ -226,9 +229,24 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
         isSelected: tabId === 'settings',
       },
+      ...(enableOtelUI && agent?.type === 'OPAMP'
+        ? [
+            {
+              id: 'collector-config',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.collectorConfigTab', {
+                defaultMessage: 'Collector config',
+              }),
+              href: getHref('agent_details_collector_config', {
+                agentId,
+                tabId: 'collector-config',
+              }),
+              isSelected: tabId === 'collector-config',
+            },
+          ]
+        : []),
     ];
     return tabs;
-  }, [getHref, agentId, tabId]);
+  }, [getHref, agentId, tabId, enableOtelUI, agent]);
 
   return (
     <AgentRefreshContext.Provider
@@ -307,6 +325,8 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   outputs?: OutputsForAgentPolicy;
 }> = ({ agent, agentPolicy, outputs }) => {
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+  const { getPath } = useLink();
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -334,6 +354,17 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
+      {enableOtelUI && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_collector_config}
+          render={() => {
+            if (agent.type !== 'OPAMP') {
+              return <Redirect to={getPath('agent_details', { agentId: agent.id })} />;
+            }
+            return <AgentCollectorConfig agent={agent} />;
+          }}
+        />
+      )}
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-custom-branding-browser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-custom-branding-browser'
+  title: '@kbn/core-custom-branding-browser'
   description: Moon project for @kbn/core-custom-branding-browser
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/core/packages/custom-branding/browser
+  sourceRoot: src/core/packages/custom-branding/browser
 dependsOn:
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/core-custom-branding-common'

@@ -20,6 +20,7 @@ export enum AgentBuilderErrorCode {
   skillNotFound = 'skillNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
   hookExecutionError = 'hookExecutionError',
@@ -212,6 +213,35 @@ export const createConversationNotFoundError = ({
 };
 
 /**
+ * Error thrown when trying to retrieve a plugin not present in the current context.
+ */
+export type AgentBuilderPluginNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.pluginNotFound>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderPluginNotFoundError}
+ */
+export const isPluginNotFoundError = (err: unknown): err is AgentBuilderPluginNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.pluginNotFound;
+};
+
+export const createPluginNotFoundError = ({
+  pluginId,
+  customMessage,
+  meta = {},
+}: {
+  pluginId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderPluginNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.pluginNotFound,
+    customMessage ?? `Plugin ${pluginId} not found`,
+    { ...meta, pluginId, statusCode: 404 }
+  );
+};
+
+/**
  * Represents an internal error
  */
 export type AgentBuilderRequestAbortedError =
@@ -356,6 +386,7 @@ export const AgentBuilderErrorUtils = {
   isSkillNotFoundError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isPluginNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
   isAgentExecutionError,
@@ -365,6 +396,7 @@ export const AgentBuilderErrorUtils = {
   createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createPluginNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,
   createAgentExecutionError,

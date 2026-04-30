@@ -32,7 +32,6 @@ import type {
 import { v4 as uuidV4 } from 'uuid';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -53,6 +52,7 @@ import {
   getSomeActionsWithFrequencies,
   getCustomQueryRuleParams,
 } from '../../../utils';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -464,8 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message:
-              '[request body]: Invalid input: expected string, received array, Too big: expected array to have <=5 items',
+            message: '[request body]: threshold.field: Too big: expected array to have <=5 items',
             statusCode: 400,
           });
         });

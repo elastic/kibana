@@ -27,7 +27,7 @@ import {
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 
 const urlParamOverride = { timeline: { isOpen: false } };
 

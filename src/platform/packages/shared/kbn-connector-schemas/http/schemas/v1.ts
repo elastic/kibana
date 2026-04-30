@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod/v4';
+import {
+  SecretConfiguration,
+  SecretConfigurationSchemaValidation,
+} from '../../common/auth/schemas/v1';
 import { AuthConfiguration } from '../../common/auth';
 
 export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
@@ -26,15 +30,43 @@ export const ConfigSchema = z
     clientId: AuthConfiguration.clientId,
     scope: AuthConfiguration.scope,
     additionalFields: AuthConfiguration.additionalFields,
+    proxyUrl: z.string().url().nullable().default(null),
+    proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
+    hasProxyAuth: z.boolean().default(false),
   })
   .strict();
+
+export const SecretsSchema = z
+  .object({
+    ...SecretConfiguration,
+    proxyUsername: z.string().nullable().default(null),
+    proxyPassword: z.string().nullable().default(null),
+  })
+  .strict()
+  .superRefine((secrets, ctx) => {
+    const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
+    if (errorMessage) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: errorMessage,
+      });
+    }
+  });
+
+export const HttpMethodSchema = z.enum(HTTP_METHODS).default('GET');
+
+export const HttpRequestBodySchema = z.union([
+  z.string(),
+  z.array(z.unknown()),
+  z.record(z.string(), z.unknown()),
+]);
 
 export const ParamsSchema = z
   .object({
     url: z.string().url().optional(),
     path: z.string().optional(),
-    method: z.enum(HTTP_METHODS).default('GET'),
-    body: z.string().optional(),
+    method: HttpMethodSchema,
+    body: HttpRequestBodySchema.optional(),
     query: z.record(z.string(), z.string()).optional(),
     headers: z.record(z.string(), z.string()).optional(),
     fetcher: z
@@ -43,6 +75,7 @@ export const ParamsSchema = z
         follow_redirects: z.boolean().optional(),
         max_redirects: z.number().optional(),
         keep_alive: z.boolean().optional(),
+        max_content_length: z.number().positive().finite().optional(),
       })
       .optional(),
   })

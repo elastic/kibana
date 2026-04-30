@@ -15,7 +15,11 @@ import type {
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
-import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
+import {
+  CcsLogExtractionStateClient,
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+} from './domain/saved_objects';
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
@@ -40,7 +44,7 @@ export async function createRequestHandlerContext({
   analytics,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const [, startPlugins] = await coreSetup.getStartServices();
+  const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
@@ -68,7 +72,17 @@ export async function createRequestHandlerContext({
     esClient,
     namespace,
   });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const ccsLogExtractionStateClient = new CcsLogExtractionStateClient(
+    core.savedObjects.client,
+    namespace,
+    logger
+  );
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(
+    logger,
+    esClient,
+    namespace,
+    ccsLogExtractionStateClient
+  );
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
@@ -95,6 +109,7 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       engineDescriptorClient,
       globalStateClient,
+      ccsLogExtractionStateClient,
       namespace,
       isServerless,
       logsExtractionClient,
@@ -106,6 +121,9 @@ export async function createRequestHandlerContext({
       logger,
       taskManager: taskManagerStart,
       namespace,
+      analytics,
+      coreStart,
+      licensing: startPlugins.licensing,
     }),
     crudClient,
     resolutionClient: new ResolutionClient({

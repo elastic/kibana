@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-visualizer-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-visualizer-plugin'
+  title: '@kbn/data-visualizer-plugin'
   description: Moon project for @kbn/data-visualizer-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/data_visualizer
+  sourceRoot: x-pack/platform/plugins/private/data_visualizer
 dependsOn:
   - '@kbn/aiops-components'
   - '@kbn/charts-plugin'
@@ -91,6 +90,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/presentation-util'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
@@ -105,16 +105,6 @@ fileGroups:
     - server/**/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

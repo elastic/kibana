@@ -63,8 +63,9 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     datasetTypesPrivileges: DatasetTypesPrivileges;
   }> {
-    const { context, params } = resources;
+    const { context, params, getIsSecurityEnabled } = resources;
     const coreContext = await context.core;
+    const isSecurityEnabled = await getIsSecurityEnabled();
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -72,6 +73,7 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
     const { datasetsPrivilages } = await getDatasetTypesPrivileges({
       esClient,
       ...params.query,
+      isSecurityEnabled,
     });
 
     return {
@@ -83,8 +85,13 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
+    // Each branch declares both keys so strict excess-key validation accepts
+    // requests that carry `types` and `datasetQuery` together.
     query: t.intersection([
-      t.union([t.type({ types: typesRt }), t.type({ datasetQuery: t.string })]),
+      t.union([
+        t.intersection([t.type({ types: typesRt }), t.partial({ datasetQuery: t.string })]),
+        t.intersection([t.type({ datasetQuery: t.string }), t.partial({ types: typesRt })]),
+      ]),
       t.partial({ includeCreationDate: toBooleanRt }),
     ]),
   }),
@@ -102,18 +109,24 @@ const statsRoute = createDatasetQualityServerRoute({
     datasetUserPrivileges: DatasetUserPrivileges;
     dataStreamsStats: DataStreamStat[];
   }> {
-    const { context, params, getEsCapabilities } = resources;
+    const { context, params, getEsCapabilities, getIsSecurityEnabled } = resources;
     const coreContext = await context.core;
-    const isServerless = (await getEsCapabilities()).serverless;
+    const [isServerless, isSecurityEnabled] = await Promise.all([
+      getEsCapabilities().then((c) => c.serverless),
+      getIsSecurityEnabled(),
+    ]);
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-    const esClientAsSecondaryAuthUser = coreContext.elasticsearch.client.asSecondaryAuthUser;
+    const esClientAsSecondaryAuthUser = isSecurityEnabled
+      ? coreContext.elasticsearch.client.asSecondaryAuthUser
+      : esClient;
 
     const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
       ...params.query,
       uncategorisedOnly: false,
+      isSecurityEnabled,
     });
 
     const privilegedDataStreams = dataStreams.filter((dataStream) => {
@@ -219,12 +232,17 @@ const totalDocsRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     totalDocs: DataStreamDocsStat[];
   }> {
-    const { context, params } = resources;
+    const { context, params, getIsSecurityEnabled } = resources;
     const coreContext = await context.core;
+    const isSecurityEnabled = await getIsSecurityEnabled();
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
+    await datasetQualityPrivileges.throwIfCannotReadDataset(
+      esClient,
+      isSecurityEnabled,
+      params.query.type
+    );
 
     const { type, start, end } = params.query;
 
@@ -402,9 +420,10 @@ const dataStreamSettingsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<DataStreamSettings> {
-    const { context, params } = resources;
+    const { context, params, getIsSecurityEnabled } = resources;
     const { dataStream } = params.path;
     const coreContext = await context.core;
+    const isSecurityEnabled = await getIsSecurityEnabled();
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -412,6 +431,7 @@ const dataStreamSettingsRoute = createDatasetQualityServerRoute({
     const dataStreamSettings = await getDataStreamSettings({
       esClient,
       dataStream,
+      isSecurityEnabled,
     });
 
     return dataStreamSettings;
@@ -476,14 +496,17 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<DataStreamDetails> {
-    const { context, params, getEsCapabilities } = resources;
+    const { context, params, getEsCapabilities, getIsSecurityEnabled } = resources;
     const { dataStream } = params.path;
     const { start, end } = params.query;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client;
 
-    const isServerless = (await getEsCapabilities()).serverless;
+    const [isServerless, isSecurityEnabled] = await Promise.all([
+      getEsCapabilities().then((c) => c.serverless),
+      getIsSecurityEnabled(),
+    ]);
 
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
@@ -491,6 +514,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
       start,
       end,
       isServerless,
+      isSecurityEnabled,
     });
 
     // If dataStreamDetails is empty, return empty object, otherwise append defaultRetentionPeriod
@@ -568,14 +592,16 @@ const updateFieldLimitRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<UpdateFieldLimitResponse> {
-    const { context, params } = resources;
+    const { context, params, getIsSecurityEnabled } = resources;
     const coreContext = await context.core;
+    const isSecurityEnabled = await getIsSecurityEnabled();
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const updatedLimitResponse = await updateFieldLimit({
       esClient,
       newFieldLimit: params.body.newFieldLimit,
       dataStream: params.path.dataStream,
+      isSecurityEnabled,
     });
 
     return updatedLimitResponse;

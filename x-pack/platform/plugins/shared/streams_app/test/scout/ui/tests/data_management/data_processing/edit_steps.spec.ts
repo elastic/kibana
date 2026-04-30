@@ -21,7 +21,7 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.updateStreamProcessors('logs-generic-default', {
@@ -121,18 +121,6 @@ test.describe(
 
       // Verify processor still exists
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    });
-
-    test('should handle insufficient privileges gracefully', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
-      // Login as user with limited privileges
-      await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-
-      // Edit button should be disabled or show tooltip
-      await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeDisabled();
     });
   }
 );

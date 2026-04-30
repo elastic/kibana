@@ -615,7 +615,7 @@
           "[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/types.ts",
-        "lineNumber": 55,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -655,7 +655,7 @@
           "<TPrompt>, { [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>[\"response\"]; }>[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/types.ts",
-        "lineNumber": 38,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

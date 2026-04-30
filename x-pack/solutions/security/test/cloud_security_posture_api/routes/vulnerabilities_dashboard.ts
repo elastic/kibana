@@ -119,6 +119,7 @@ export default function (providerContext: FtrProviderContext) {
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_LATEST_INDEX);
   const scoresIndex = new EsIndexDataProvider(es, BENCHMARK_SCORES_INDEX);
 
+  // Failing: See https://github.com/elastic/kibana/issues/257006
   describe.skip('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
       await vulnerabilitiesIndex.deleteAll();

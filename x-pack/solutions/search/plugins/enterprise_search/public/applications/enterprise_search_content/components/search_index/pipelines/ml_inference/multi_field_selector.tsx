@@ -199,7 +199,7 @@ export const MultiFieldMapping: React.FC = () => {
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             disabled={selectedFields.length === 0}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onAddSelectedFields}
             style={{ width: '60px' }}
           >

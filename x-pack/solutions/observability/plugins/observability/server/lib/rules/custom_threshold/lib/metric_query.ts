@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EsQueryConfig, Filter } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter } from '@kbn/es-query';
 import type {
   CustomMetricExpressionParams,
   SearchConfigurationType,
@@ -54,6 +54,7 @@ export const createBoolQuery = (
   timeframe: { start: number; end: number },
   timeFieldName: string,
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   esQueryConfig: EsQueryConfig,
   additionalQueries: QueryDslQueryContainer[] = []
 ) => {
@@ -67,7 +68,7 @@ export const createBoolQuery = (
   };
   const filters = QueryDslQueryContainerToFilter([rangeQuery, ...additionalQueries]);
 
-  return getSearchConfigurationBoolQuery(searchConfiguration, filters, esQueryConfig);
+  return getSearchConfigurationBoolQuery(searchConfiguration, filters, dataView, esQueryConfig);
 };
 
 export const getElasticsearchMetricQuery = (
@@ -77,6 +78,7 @@ export const getElasticsearchMetricQuery = (
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   esQueryConfig: EsQueryConfig,
   runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
@@ -96,7 +98,8 @@ export const getElasticsearchMetricQuery = (
     metricParams.metrics,
     currentTimeFrame,
     timeFieldName,
-    metricParams.equation
+    metricParams.equation,
+    dataView
   );
 
   const bucketSelectorAggregations = createBucketSelector(
@@ -209,7 +212,13 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const query = createBoolQuery(timeframe, timeFieldName, searchConfiguration, esQueryConfig);
+  const query = createBoolQuery(
+    timeframe,
+    timeFieldName,
+    searchConfiguration,
+    dataView,
+    esQueryConfig
+  );
 
   return {
     track_total_hits: true,

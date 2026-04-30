@@ -6,14 +6,14 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ECS_MAPPINGS_COMPONENT_TEMPLATE } from '../constants';
 import {
   ENTITY_LATEST,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
-  ECS_MAPPINGS_COMPONENT_TEMPLATE,
-  getEntityIndexPattern,
-  getEntitiesAliasPattern,
-} from '../constants';
+  MAPPING_VERSION,
+  getLatestEntityIndexPattern,
+} from '../../../common/domain/entity_index';
 import { getComponentTemplateName } from './component_templates';
 import { getLatestIndexIngestPipelineId } from './latest_index_ingest_pipeline';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
@@ -41,20 +41,11 @@ export const getLatestEntityIndexTemplateConfig = (
   ignore_missing_component_templates: [
     ...ALL_ENTITY_TYPES.map((t) => getComponentTemplateName(t, namespace)),
   ],
-  index_patterns: [
-    getEntityIndexPattern({
-      schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-      dataset: ENTITY_LATEST,
-      namespace,
-    }),
-  ],
+  index_patterns: [getLatestEntityIndexPattern(namespace)],
   priority: 200,
   template: {
-    aliases: {
-      [getEntitiesAliasPattern({ dataset: ENTITY_LATEST })]: {},
-    },
     mappings: {
-      _meta: { n: '1.6.0' },
+      _meta: { mappingsVersion: MAPPING_VERSION },
       date_detection: false,
       dynamic_templates: [
         {

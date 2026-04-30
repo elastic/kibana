@@ -209,7 +209,6 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,
@@ -243,8 +242,22 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYVisualizationState,
 } from './visualizations/xy/types';
+export type {
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from './visualizations/xy/persistence';
+export {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+} from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
@@ -277,7 +290,6 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
-  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
@@ -339,7 +351,6 @@ export {
 export {
   LENS_HEATMAP_ID,
   LENS_HEATMAP_CHART_SHAPES,
-  LENS_HEATMAP_CHART_NAMES,
   LENS_HEATMAP_GROUP_ID,
   HEATMAP_NAME,
   HEATMAP_LEGEND_NAME,
@@ -382,8 +393,6 @@ export {
 export {
   YAxisModes,
   SeriesTypes,
-  visualizationSubtypes,
-  visualizationTypes,
   AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
@@ -401,3 +410,6 @@ export {
 } from './datasources/form_based/helpers';
 
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
+export { LENS_DATASOURCE_ID } from './embeddable/types';
+export type { LensDatasourceId } from './embeddable/types';
+export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';

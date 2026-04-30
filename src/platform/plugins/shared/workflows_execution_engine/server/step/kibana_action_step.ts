@@ -12,19 +12,19 @@
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
+import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import type { z } from '@kbn/zod/v4';
+import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { getKibanaUrl } from '../utils';
+import {
+  getOutboundEventChainHeaders,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '../trigger_events/event_context/event_chain_context';
+import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
-
-// Extend BaseStep for kibana-specific properties
-export interface KibanaActionStep extends BaseStep {
-  type: string; // e.g., 'kibana.createCase'
-  with?: Record<string, any>;
-}
 
 /**
  * Fetcher configuration options for customizing HTTP requests
@@ -35,27 +35,44 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
   [key: string]: any;
 };
 
-export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
+/**
+ * Describes a single field in a multipart/form-data upload.
+ * Used by the `form_data` param of `kibana.request` steps.
+ */
+interface FormDataFieldSpec {
+  /** The field value / file content (string). */
+  content: string;
+  /** Optional filename hint (e.g. "export.ndjson"). */
+  filename?: string;
+  /** MIME type of the field value (e.g. "application/ndjson"). */
+  content_type?: string;
+}
+
+export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
-    step: KibanaActionStep,
+    private node: KibanaGraphNode,
     stepExecutionRuntime: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
+    const step = {
+      name: node.stepId,
+      type: node.stepType,
+      stepId: node.stepId,
+      'max-step-size': node.configuration['max-step-size'],
+    };
     super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
   public getInput() {
-    // Render inputs from 'with' - support both direct step.with and step.configuration.with
-    const stepWith = this.step.with || (this.step as any).configuration?.with || {};
+    const stepWith = this.node.configuration?.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    // Support both direct step types (kibana.createCase) and atomic+configuration pattern
-    const stepType = this.step.type || (this.step as any).configuration?.type;
-    // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
-    const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+    const stepType = this.node.configuration.type;
+    // Use rendered inputs if provided, otherwise fall back to raw configuration.with
+    const stepWith = withInputs || this.node.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {
       use_server_info = false,
@@ -82,18 +99,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         },
       });
 
-      // Get Kibana base URL (respecting force flags) and authentication
+      // Get Kibana base URL (respecting force flags)
       const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
-      const authHeaders = this.getAuthHeaders();
 
       // Generic approach like Dev Console - just forward the request to Kibana
-      const result = await this.executeKibanaRequest(
-        kibanaUrl,
-        authHeaders,
-        stepType,
-        httpParams,
-        debug
-      );
+      const result = await this.executeKibanaRequest(kibanaUrl, stepType, httpParams, debug);
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'success' },
@@ -138,7 +148,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
   private getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       'kbn-xsrf': 'true',
     };
 
@@ -148,7 +157,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       // Use API key from fakeRequest if available
       headers.Authorization = fakeRequest.headers.authorization.toString();
     } else {
-      // error
       throw new Error('No authentication headers found');
     }
     return headers;
@@ -156,13 +164,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
   private async executeKibanaRequest(
     kibanaUrl: string,
-    authHeaders: Record<string, string>,
     stepType: string,
     params: any,
     debug: boolean = false
   ): Promise<any> {
-    // Get current space ID from workflow context
-    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+    const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
 
     // Extract and remove fetcher configuration from params (it's only for our internal use)
     const { fetcher: fetcherOptions, ...cleanParams } = params;
@@ -172,14 +178,42 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       method: string;
       path: string;
       body?: any;
+      formData?: Record<string, FormDataFieldSpec>;
       query?: any;
       headers?: Record<string, string>;
     };
 
+    if (cleanParams.body && cleanParams.form_data) {
+      throw new Error(
+        'Cannot set both body and form_data — they are mutually exclusive. ' +
+          'Use body for JSON requests, or form_data for multipart/form-data uploads.'
+      );
+    }
+
+    const authHeaders = this.getAuthHeaders();
+    const jsonContentType = { 'Content-Type': 'application/json' };
+
     if (cleanParams.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
-      requestConfig = { method, path, body, query, headers: { ...authHeaders, ...customHeaders } };
+      requestConfig = {
+        method,
+        path,
+        body,
+        query,
+        headers: { ...authHeaders, ...jsonContentType, ...customHeaders },
+      };
+    } else if (cleanParams.form_data) {
+      // form_data mode: POST multipart/form-data (e.g. saved objects import).
+      // Content-Type is intentionally omitted — fetch sets it automatically with the multipart boundary.
+      const { form_data, method = 'POST', path, query, headers: customHeaders } = cleanParams;
+      requestConfig = {
+        method,
+        path,
+        formData: form_data as Record<string, FormDataFieldSpec>,
+        query,
+        headers: { ...authHeaders, ...(customHeaders as Record<string, string> | undefined) },
+      };
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
       const {
@@ -194,7 +228,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         path,
         body,
         query,
-        headers: { ...authHeaders, ...connectorHeaders },
+        headers: { ...authHeaders, ...jsonContentType, ...connectorHeaders },
       };
     }
 
@@ -221,18 +255,57 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     return fullUrl;
   }
 
+  private buildFormData(formData: Record<string, FormDataFieldSpec>): FormData {
+    const fd = new FormData();
+    for (const [fieldName, spec] of Object.entries(formData)) {
+      if (spec.filename !== undefined) {
+        // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
+        const blob = new Blob([spec.content], {
+          type: spec.content_type ?? 'application/octet-stream',
+        });
+        fd.append(fieldName, blob, spec.filename);
+      } else if (spec.content_type !== undefined) {
+        // Typed blob without a filename (e.g. application/json fragment)
+        const blob = new Blob([spec.content], { type: spec.content_type });
+        fd.append(fieldName, blob);
+      } else {
+        // Plain text field — serialize as a string so Content-Disposition has no filename
+        fd.append(fieldName, spec.content);
+      }
+    }
+    return fd;
+  }
+
   private async makeHttpRequest(
     kibanaUrl: string,
     requestConfig: {
       method: string;
       path: string;
       body?: any;
+      formData?: Record<string, FormDataFieldSpec>;
       query?: any;
       headers?: Record<string, string>;
     },
     fetcherOptions?: FetcherOptions
   ): Promise<any> {
-    const { method, path, body, query, headers = {} } = requestConfig;
+    const { method, path, body, formData, query, headers = {} } = requestConfig;
+
+    // Two paths can lead to emitEvent: (1) In-process: a workflow step (e.g. kibana.createCase) runs in
+    // the same process and gets the fakeRequest from step context; getCasesClient(fakeRequest) and later
+    // emitEvent(fakeRequest) see the Symbol-set context — no headers needed. (2) Outbound HTTP: this
+    // step (kibana.request) sends a new HTTP request; the route handler receives a new request object
+    // with no Symbol. Inject these headers so the server can restore context (depth + sourceExecutionId)
+    // and enforce the event-chain depth cap when that handler calls emitEvent.
+    // X_ELASTIC_INTERNAL_ORIGIN_REQUEST sets isInternalApiRequest on the receiving KibanaRequest so
+    // getEventChainContext will parse the event-chain headers. Note: this header can be set by any
+    // HTTP caller, so it gates naive spoofing but is not a hard trust boundary.
+    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
+    const workflowRunId = this.stepExecutionRuntime.workflowExecution?.id;
+    const outboundHeaders = {
+      ...headers,
+      [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
+      ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+    };
 
     // Build full URL with query parameters
     let fullUrl = `${kibanaUrl}${path}`;
@@ -241,11 +314,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       fullUrl = `${fullUrl}?${queryString}`;
     }
 
+    // Build fetch body: multipart FormData or JSON
+    let fetchBody: RequestInit['body'];
+    if (formData) {
+      fetchBody = this.buildFormData(formData);
+    } else {
+      fetchBody = body != null ? JSON.stringify(body) : undefined;
+    }
+
     // Build fetch options
     const fetchOptions: RequestInit = {
       method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
+      headers: outboundHeaders,
+      body: fetchBody,
     };
 
     // Apply undici Agent with fetcher options
@@ -286,15 +367,69 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     const response = await fetch(fullUrl, fetchOptions);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      const errorBody = await this.readStreamWithLimit(response, {
+        maxBytes: 1024 * 1024,
+        onExceed: 'truncate',
+      });
+      throw new Error(`HTTP ${response.status}: ${errorBody}`);
     }
 
-    // APIs that return 204 No Content or 304 Not Modified have no body to parse.
-    // Return an empty object so the step succeeds with `output: {}`.
     if (response.status === 204 || response.status === 304) {
       return {};
     }
 
-    return response.json();
+    return this.readResponseBody(response);
+  }
+
+  /**
+   * Reads a fetch Response body as a stream with size enforcement.
+   * Binary content types are returned as a raw Buffer to preserve the original bytes.
+   * Text/JSON content types are decoded as UTF-8 and parsed normally.
+   *
+   * NOTE: Binary responses are returned as a Node.js Buffer. This works correctly within
+   * the same execution (e.g. download → base64_encode → use), but Buffers serialize to
+   * JSON as { type: "Buffer", data: [n, n, ...] } which is ~4x larger than the raw bytes.
+   * After ES persistence and reload the deserialized object is a plain object, not a Buffer,
+   * so Buffer.isBuffer() and the base64_encode filter would not handle it correctly.
+   * For now this is acceptable since binary data is typically consumed immediately.
+   */
+  private async readResponseBody(
+    response: Response
+  ): Promise<Buffer | Record<string, unknown> | string | null> {
+    if (!response.body) {
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type');
+    const maxSize = this.getMaxResponseBytes();
+    const { buffer, truncated } = await readResponseStream(response, maxSize);
+
+    if (truncated) {
+      throw new ResponseSizeLimitError(maxSize, this.step.name);
+    }
+    if (buffer.byteLength === 0) return null;
+
+    if (!isTextContentType(contentType)) {
+      return buffer;
+    }
+
+    const text = buffer.toString('utf-8');
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+
+  /**
+   * Reads a Response body stream as a UTF-8 string with truncation for error bodies.
+   */
+  private async readStreamWithLimit(
+    response: Response,
+    opts: { maxBytes: number; onExceed: 'truncate' }
+  ): Promise<string> {
+    const { buffer, truncated } = await readResponseStream(response, opts.maxBytes);
+    const text = buffer.toString('utf-8');
+    return truncated ? `${text}... [truncated]` : text;
   }
 }

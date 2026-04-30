@@ -32,7 +32,7 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
-        "lineNumber": 340,
+        "lineNumber": 350,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,9 +48,10 @@
               "InferenceServiceSettings"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
-            "lineNumber": 341,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceServiceSettings",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -122,7 +123,7 @@
               "\nModel name, e.g. elser"
             ],
             "signature": [
-              "\"elser\" | \"e5\" | \"rerank\""
+              "\"rerank\" | \"elser\" | \"e5\""
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
             "lineNumber": 173,
@@ -487,7 +488,7 @@
         "label": "ElasticCuratedModelName",
         "description": [],
         "signature": [
-          "\"elser\" | \"e5\" | \"rerank\""
+          "\"rerank\" | \"elser\" | \"e5\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "lineNumber": 170,
@@ -611,7 +612,7 @@
           "InferenceServiceSettings"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
-        "lineNumber": 338,
+        "lineNumber": 348,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -734,7 +735,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"text_expansion\" | \"ner\" | \"text_embedding\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
+          "\"text_expansion\" | \"text_embedding\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "lineNumber": 49,

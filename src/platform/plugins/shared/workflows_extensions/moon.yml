@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-extensions'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-extensions'
+  title: '@kbn/workflows-extensions'
   description: Moon project for @kbn/workflows-extensions
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/workflows_extensions
+  sourceRoot: src/platform/plugins/shared/workflows_extensions
 dependsOn:
   - '@kbn/core'
   - '@kbn/workflows'
@@ -33,6 +32,9 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/es-query'
   - '@kbn/std'
+  - '@kbn/logging-mocks'
+  - '@kbn/logging'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -47,16 +49,6 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

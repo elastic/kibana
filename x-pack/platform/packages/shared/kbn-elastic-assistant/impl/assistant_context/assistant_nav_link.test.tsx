@@ -8,20 +8,16 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AssistantNavLink } from './assistant_nav_link';
-import { of } from 'rxjs';
 import { useAssistantContext } from '.';
 
 const mockShowAssistantOverlay = jest.fn();
-const mockGetChromeStyle = jest.fn();
 
 const mockAssistantContext = {
-  chrome: {
-    getChromeStyle$: mockGetChromeStyle,
-  },
   showAssistantOverlay: mockShowAssistantOverlay,
   assistantAvailability: {
     hasAssistantPrivilege: true,
   },
+  isOverlayOpen: false,
 };
 
 jest.mock('.', () => {
@@ -34,34 +30,9 @@ jest.mock('.', () => {
 describe('AssistantNavLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetChromeStyle.mockReturnValue(of('classic'));
     (useAssistantContext as jest.Mock).mockReturnValue({
       ...mockAssistantContext,
     });
-  });
-
-  it('button has transparent background in project navigation', () => {
-    mockGetChromeStyle.mockReturnValue(of('project'));
-
-    const { queryByTestId } = render(
-      <>
-        <AssistantNavLink />
-      </>
-    );
-    expect(queryByTestId('assistantNavLink')).not.toHaveStyle(
-      'background-color: rgb(204, 228, 245)'
-    );
-  });
-
-  it('button has opaque background in classic navigation', () => {
-    mockGetChromeStyle.mockReturnValue(of('classic'));
-
-    const { queryByTestId } = render(
-      <>
-        <AssistantNavLink />
-      </>
-    );
-    expect(queryByTestId('assistantNavLink')).toHaveStyle('background-color: rgb(217, 232, 255)');
   });
 
   it('should render the header link text', () => {

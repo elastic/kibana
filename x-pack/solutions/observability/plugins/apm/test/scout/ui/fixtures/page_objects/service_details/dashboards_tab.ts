@@ -6,6 +6,8 @@
  */
 
 import type { KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -15,21 +17,42 @@ export class DashboardsTab extends ServiceDetailsTab {
   public readonly tab: Locator;
 
   public readonly addServiceDashboardButton: Locator;
+  public readonly dashboardComboBox: EuiComboBoxWrapper;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.addServiceDashboardButton = this.page.getByTestId('apmAddServiceDashboard');
+    this.dashboardComboBox = new EuiComboBoxWrapper(this.page, 'apmSelectServiceDashboard');
   }
 
   protected async waitForTabLoad(): Promise<void> {
+    await this.page
+      .getByTestId('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async waitForDashboardsToLoad(): Promise<void> {
+    await expect(this.page.getByRole('progressbar')).toBeHidden({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   public async linkDashboardByTitle(dashboardTitle: string) {
+    await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
-    await this.page.getByTestId('apmSelectServiceDashboard').getByTestId('comboBoxInput').click();
-    await this.page.getByText(dashboardTitle).click();
+    // The combo box is disabled while the dashboard list is loading asynchronously.
+    // Wait for it to become enabled before interacting.
+    const comboBoxInput = this.page
+      .getByTestId('apmSelectServiceDashboard')
+      .getByTestId('comboBoxSearchInput');
+    await expect(comboBoxInput).toBeEnabled({ timeout: EXTENDED_TIMEOUT });
+    await this.dashboardComboBox.selectSingleOption(dashboardTitle);
     await this.page.getByTestId('apmSelectDashboardButton').click();
+  }
+
+  public async unlinkDashboard() {
+    await this.page.getByTestId('apmContextMenuButton').click();
+    await this.page.getByTestId('apmUnLinkServiceDashboardMenu').click();
+    await this.page.getByTestId('confirmModalConfirmButton').click();
   }
 }

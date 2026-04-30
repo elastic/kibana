@@ -7,46 +7,302 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import reactElementToJSXString from 'react-element-to-jsx-string';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   useContentListItems,
   useContentListSort,
   useContentListPagination,
   useContentListConfig,
+  MANAGED_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_FILTER,
+  NO_CREATOR_USER_LABEL,
 } from '@kbn/content-list-provider';
-import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import type {
+  ContentListItem,
+  FindItemsParams,
+  FindItemsResult,
+  FilterFacetConfig,
+  UserProfileEntry,
+} from '@kbn/content-list-provider';
+import type { Tag } from '@kbn/content-management-tags';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
   MOCK_DASHBOARDS,
   createMockFindItems,
+  createMockFavoritesClient,
   extractTagIds,
   mockTagsService,
+  mockContentListUserProfilesServices,
+  MOCK_USER_PROFILES_MAP,
 } from '@kbn/content-list-mock-data';
 
-export { mockTagsService };
+export { mockTagsService, createMockFavoritesClient, mockContentListUserProfilesServices };
+
+// =============================================================================
+// Inspect Flyout (mock content editor)
+// =============================================================================
+
+/**
+ * Mock "View details" flyout for Storybook stories.
+ *
+ * Renders a lightweight EuiFlyout showing item metadata. Stands in for the
+ * real Kibana content editor flyout (`@kbn/content-management-content-editor`)
+ * which requires Kibana core services not available in Storybook.
+ */
+const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'contentListInspectFlyoutTitle' });
+
+  return (
+    <EuiFlyout aria-labelledby={titleId} onClose={onClose} size="s" ownFocus>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={titleId}>{item.title}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiDescriptionList
+          type="column"
+          compressed
+          listItems={[
+            { title: 'ID', description: item.id },
+            { title: 'Description', description: item.description || '—' },
+            { title: 'Type', description: item.type || '—' },
+            {
+              title: 'Updated',
+              description: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—',
+            },
+            { title: 'Tags', description: item.tags?.join(', ') || '—' },
+          ]}
+        />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
+
+/**
+ * Hook that manages the open/close state for a mock inspect flyout.
+ *
+ * Returns an `onInspect` callback suitable for `ContentListItemConfig.onInspect`
+ * and a `flyout` element to render in the component tree.
+ *
+ * @example
+ * ```tsx
+ * const { onInspect, flyout } = useInspectFlyout();
+ * // pass onInspect to item config, render {flyout} in JSX
+ * ```
+ */
+export const useInspectFlyout = (): {
+  onInspect: (item: ContentListItem) => void;
+  flyout: ReactNode;
+} => {
+  const [inspectedItem, setInspectedItem] = useState<ContentListItem | null>(null);
+  const onInspect = useCallback((item: ContentListItem) => setInspectedItem(item), []);
+  const flyout = inspectedItem ? (
+    <InspectFlyout item={inspectedItem} onClose={() => setInspectedItem(null)} />
+  ) : null;
+
+  return { onInspect, flyout };
+};
+
+// =============================================================================
+// Kibana-shaped Storybook chrome
+// =============================================================================
+
+export const DashboardListingStoryFrame = ({ children }: { children: ReactNode }) => (
+  <EuiPageTemplate panelled restrictWidth={false}>
+    <EuiPageTemplate.Header
+      data-test-subj="top-nav"
+      pageTitle="Dashboards"
+      tabs={[
+        {
+          label: 'Dashboards',
+          isSelected: true,
+          onClick: () => undefined,
+        },
+      ]}
+    />
+    <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
+  </EuiPageTemplate>
+);
+
+export const DashboardListingEmptyPromptMock = ({
+  inProgress = false,
+}: {
+  inProgress?: boolean;
+}) => {
+  const headingId = useGeneratedHtmlId({ prefix: 'dashboardListingHeading' });
+  return (
+    <EuiEmptyPrompt
+      iconType="dashboardApp"
+      title={
+        <h1 id={headingId} data-test-subj="emptyListPrompt">
+          {inProgress ? 'Dashboard in progress' : 'Create your first dashboard'}
+        </h1>
+      }
+      body={
+        <>
+          <p>
+            Analyze all of your Elastic data in one place by creating a dashboard and adding
+            visualizations.
+          </p>
+          {!inProgress && (
+            <p>
+              New to Kibana? <EuiLink href="#">Add some sample data</EuiLink> to take a test drive.
+            </p>
+          )}
+        </>
+      }
+      actions={
+        inProgress ? (
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" color="danger" data-test-subj="discardDashboardPromptButton">
+                Reset changes
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill iconType="pencil" color="primary" data-test-subj="newItemButton">
+                Continue editing
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiButton fill iconType="plusCircle" data-test-subj="newItemButton">
+            Create a dashboard
+          </EuiButton>
+        )
+      }
+    />
+  );
+};
+
+// =============================================================================
+// Generic listing headers
+// =============================================================================
+
+export const ListingPageHeaderMock = ({
+  title,
+  description,
+  actions,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
+}) => (
+  <>
+    <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="l">
+          <h1>{title}</h1>
+        </EuiTitle>
+        {description ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText color="subdued">
+              <p>{description}</p>
+            </EuiText>
+          </>
+        ) : null}
+      </EuiFlexItem>
+      {actions ? <EuiFlexItem grow={false}>{actions}</EuiFlexItem> : null}
+    </EuiFlexGroup>
+    <EuiSpacer size="l" />
+  </>
+);
 
 // =============================================================================
 // Mock Data
 // =============================================================================
 
+export type StoryMockItem = UserContentCommonSchema & {
+  attributes: {
+    title?: string;
+    description?: string;
+  };
+};
+
+export const toContentListItem = <T extends StoryMockItem>(
+  item: T,
+  extraFields?: (item: T) => Record<string, unknown>
+): ContentListItem => ({
+  id: item.id,
+  title: item.attributes.title ?? '',
+  description: item.attributes.description,
+  type: item.type,
+  updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+  createdAt: item.createdAt,
+  createdBy: item.createdBy,
+  updatedBy: item.updatedBy,
+  managed: item.managed,
+  tags: extractTagIds(item.references),
+  ...(extraFields ? extraFields(item) : {}),
+});
+
+export const createMockStoryFindItems = <T extends StoryMockItem>({
+  items,
+  favoritesClient,
+  extraFields,
+}: {
+  items: T[];
+  favoritesClient?: FavoritesClientPublic;
+  extraFields?: (item: T) => Record<string, unknown>;
+}) => {
+  const findItems = createMockFindItems({
+    items,
+    favoritesClient,
+  });
+
+  return async (params: FindItemsParams): Promise<FindItemsResult> => {
+    const result = await findItems({
+      searchQuery: params.searchQuery,
+      filters: params.filters as Parameters<typeof findItems>[0]['filters'],
+      sort: params.sort ?? { field: 'title', direction: 'asc' },
+      page: params.page,
+    });
+
+    return {
+      items: result.items.map((item) => toContentListItem(item, extraFields)),
+      total: result.total,
+    };
+  };
+};
+
 /**
  * Build a mock items array of the requested length by cycling through
  * `MOCK_DASHBOARDS` and appending an index suffix when wrapping.
  */
-const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
+export const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
   const base = MOCK_DASHBOARDS;
   if (count <= base.length) {
     return base.slice(0, count);
@@ -70,16 +326,26 @@ const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
 /**
  * Creates a mock `findItems` function with configurable behavior.
  * Shared across Content List story files.
+ *
+ * Pass the same `favoritesClient` instance used for `services.favorites`
+ * on the provider so that starred items are immediately visible when the
+ * `starred` filter is toggled (both sides share the same in-memory set).
  */
 export const createStoryFindItems = (options?: {
   totalItems?: number;
   delay?: number;
   isEmpty?: boolean;
+  favoritesClient?: FavoritesClientPublic;
 }) => {
-  const { totalItems = MOCK_DASHBOARDS.length, delay = 0, isEmpty = false } = options ?? {};
+  const {
+    totalItems = MOCK_DASHBOARDS.length,
+    delay = 0,
+    isEmpty = false,
+    favoritesClient,
+  } = options ?? {};
 
   const items = buildMockItems(totalItems);
-  const mockFindItems = createMockFindItems({ items });
+  const mockFindItems = createMockStoryFindItems({ items, favoritesClient });
 
   return async (params: FindItemsParams): Promise<FindItemsResult> => {
     if (delay > 0) {
@@ -90,27 +356,100 @@ export const createStoryFindItems = (options?: {
       return { items: [], total: 0 };
     }
 
-    const result = await mockFindItems({
-      searchQuery: params.searchQuery,
-      filters: params.filters,
-      sort: params.sort ?? { field: 'title', direction: 'asc' },
-      page: params.page,
-    });
-
-    return {
-      items: result.items.map((item) => ({
-        id: item.id,
-        title: item.attributes.title,
-        description: item.attributes.description,
-        type: item.type,
-        updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
-        tags: extractTagIds(item.references),
-      })),
-      total: result.total,
-      counts: result.counts,
-    };
+    return mockFindItems(params);
   };
 };
+
+// =============================================================================
+// Mock FilterFacetConfigs
+// =============================================================================
+
+/**
+ * Compute per-key counts from a set of items.
+ */
+const computeCounts = (
+  items: UserContentCommonSchema[],
+  keyFn: (item: UserContentCommonSchema) => string[]
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const item of items) {
+    for (const key of keyFn(item)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+};
+
+/**
+ * Creates a mock {@link FilterFacetConfig} for tags.
+ *
+ * Counts are computed from the provided `items` array. Tag metadata
+ * (name, color, description) comes from `mockTagsService.getTagList()`.
+ */
+export const createMockTagFacetProvider = (
+  items: UserContentCommonSchema[]
+): FilterFacetConfig<Tag> => ({
+  getFacets: async () => {
+    const tagCounts = computeCounts(items, (item) =>
+      (item.references ?? []).filter((ref) => ref.type === 'tag').map((ref) => ref.id)
+    );
+    return mockTagsService.getTagList().map((tag) => ({
+      key: tag.id ?? tag.name,
+      label: tag.name,
+      count: tagCounts[tag.id ?? tag.name] ?? 0,
+      data: tag,
+    }));
+  },
+});
+
+/**
+ * Creates a mock {@link FilterFacetConfig} for user profiles.
+ *
+ * Counts are computed from the provided `items` array using `getCreatorKey`
+ * logic so that managed and no-creator items produce sentinel facet entries.
+ * Profile metadata comes from `MOCK_USER_PROFILES_MAP`.
+ */
+export const createMockUserProfileFacetProvider = (
+  items: UserContentCommonSchema[]
+): FilterFacetConfig<UserProfileEntry> => ({
+  getFacets: async () => {
+    const getCreatorKey = (item: UserContentCommonSchema): string => {
+      if ((item as { managed?: boolean }).managed) {
+        return MANAGED_USER_FILTER;
+      }
+      if (!item.createdBy) {
+        return NO_CREATOR_USER_FILTER;
+      }
+      return item.createdBy;
+    };
+
+    const userCounts = computeCounts(items, (item) => [getCreatorKey(item)]);
+
+    return Object.entries(userCounts).map(([key, count]) => {
+      if (key === MANAGED_USER_FILTER) {
+        return { key, label: MANAGED_USER_LABEL, count, data: undefined };
+      }
+      if (key === NO_CREATOR_USER_FILTER) {
+        return { key, label: NO_CREATOR_USER_LABEL, count, data: undefined };
+      }
+
+      const profile = MOCK_USER_PROFILES_MAP[key];
+      return {
+        key,
+        label: profile?.user.full_name ?? profile?.user.username ?? key,
+        count,
+        data: profile
+          ? {
+              uid: key,
+              user: profile.user,
+              email: profile.user.email ?? '',
+              fullName: profile.user.full_name ?? profile.user.username,
+            }
+          : undefined,
+      };
+    });
+  },
+});
 
 // =============================================================================
 // JSX Serialization

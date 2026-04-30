@@ -30,6 +30,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { Timestamp } from '@kbn/apm-ui-shared';
 import { O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -215,8 +216,11 @@ export function ErrorSampleDetails({
         ) : undefined}
         <EuiFlexItem grow={false}>
           <OpenInDiscover
-            dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
-            variant="button"
+            dataTestSubj="errorSampleOpenInDiscoverButton"
+            variant="iconButton"
+            label={i18n.translate('xpack.apm.errorSampleDetails.openErrorInDiscover', {
+              defaultMessage: 'Open error in Discover',
+            })}
             indexType="error"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -224,6 +228,8 @@ export function ErrorSampleDetails({
               kuery,
               serviceName: error?.service?.name,
               errorGroupId: groupId,
+              errorId: error?.error?.id,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>
@@ -238,7 +244,7 @@ export function ErrorSampleDetails({
         <Summary
           items={[
             <Timestamp
-              timestamp={errorData && error ? (error.timestamp?.us ?? 0) / 1000 : 0}
+              timestamp={errorData && error ? getTimestampUs(error) / 1000 : 0}
               renderMode="tooltip"
             />,
             errorUrl ? (

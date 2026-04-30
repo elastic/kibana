@@ -5,13 +5,13 @@
   },
   "include": [
     "*.ts",
-    ".storybook/**/*.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
     "test/scout_oas_schema/**/*",
-    "test/scout_oas_schema/**/*.json"
+    "test/scout_oas_schema/**/*.json",
+    "test/scout_anonymous_authc/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -65,7 +65,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/logging",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-panel-plugin",
     "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-utility",
     "@kbn/core-test-helpers-model-versions",
@@ -114,6 +113,19 @@
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",
+    "@kbn/code-editor-mock",
+    "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/core-http-browser",
+    "@kbn/lens-common",
+    "@kbn/dashboard-navigation-options-common",
+    "@kbn/dashboard-navigation-options-components",
+    "@kbn/dashboard-navigation-options-schema",
+    "@kbn/as-code-shared-telemetry"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -12,13 +12,14 @@ import { schema } from '@kbn/config-schema';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
-const regionMapStateRegionOptionsSchema = {
+const regionMapConfigRegionOptionsSchema = {
   ems: schema.maybe(
     schema.object({
       boundaries: schema.string({ meta: { description: 'EMS boundaries' } }),
@@ -27,13 +28,13 @@ const regionMapStateRegionOptionsSchema = {
   ),
 };
 
-export const regionMapStateSchemaNoESQL = schema.object(
+export const regionMapConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('region_map'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     /**
      * Metric configuration
      */
@@ -41,34 +42,58 @@ export const regionMapStateSchemaNoESQL = schema.object(
     /**
      * Configure how to break down to regions
      */
-    region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
+    region: mergeAllBucketsWithChartDimensionSchema(
+      regionMapConfigRegionOptionsSchema,
+      'regionMapRegion'
+    ),
   },
-  { meta: { id: 'regionMapNoESQL', title: 'Region Map (DSL)' } }
+  {
+    meta: {
+      id: 'regionMapNoESQL',
+      title: 'Region Map (DSL)',
+      description:
+        'Region Map configuration using a data view, mapping metric values to geographic regions by color.',
+    },
+  }
 );
 
-export const regionMapStateSchemaESQL = schema.object(
+export const regionMapConfigSchemaESQL = schema.object(
   {
     type: schema.literal('region_map'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     /**
      * Metric configuration
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema,
+    metric: esqlColumnWithFormatSchema,
     /**
      * Configure how to break down to regions
      */
-    region: esqlColumnSchema.extends(regionMapStateRegionOptionsSchema),
+    region: esqlColumnSchema.extends(regionMapConfigRegionOptionsSchema),
   },
-  { meta: { id: 'regionMapESQL', title: 'Region Map (ES|QL)' } }
+  {
+    meta: {
+      id: 'regionMapESQL',
+      title: 'Region Map (ES|QL)',
+      description:
+        'Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.',
+    },
+  }
 );
 
-export const regionMapStateSchema = schema.oneOf(
-  [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
-  { meta: { id: 'regionMapChart', title: 'Region Map' } }
+export const regionMapConfigSchema = objectUnion(
+  [regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL],
+  {
+    meta: {
+      id: 'regionMapChart',
+      title: 'Region Map',
+      description:
+        'A choropleth map with geographic regions colored by the aggregated metric value.',
+    },
+  }
 );
 
-export type RegionMapState = TypeOf<typeof regionMapStateSchema>;
-export type RegionMapStateNoESQL = TypeOf<typeof regionMapStateSchemaNoESQL>;
-export type RegionMapStateESQL = TypeOf<typeof regionMapStateSchemaESQL>;
+export type RegionMapConfig = TypeOf<typeof regionMapConfigSchema>;
+export type RegionMapConfigNoESQL = TypeOf<typeof regionMapConfigSchemaNoESQL>;
+export type RegionMapConfigESQL = TypeOf<typeof regionMapConfigSchemaESQL>;

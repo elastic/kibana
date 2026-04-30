@@ -47,6 +47,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CspPage",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -177,6 +178,7 @@
                 "lineNumber": 94,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseOnCloseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -385,7 +387,7 @@
       "label": "CspServerPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/types.ts",
-      "lineNumber": 42,
+      "lineNumber": 43,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -401,7 +403,7 @@
       "label": "CspServerPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/types.ts",
-      "lineNumber": 45,
+      "lineNumber": 46,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

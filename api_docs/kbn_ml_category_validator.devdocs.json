@@ -47,7 +47,7 @@
           "MappingRuntimeFields",
           " | undefined, indicesOptions: ",
           "IndicesOptions",
-          " | undefined, includeExamples?: boolean) => Promise<{ overallValidStatus: ",
+          " | undefined, projectRouting: string | undefined, includeExamples?: boolean) => Promise<{ overallValidStatus: ",
           {
             "pluginId": "@kbn/ml-category-validator",
             "scope": "common",
@@ -111,6 +111,7 @@
             "lineNumber": 34,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "IScopedClusterClient",
             "trackAdoption": false,
             "isRequired": true
           }

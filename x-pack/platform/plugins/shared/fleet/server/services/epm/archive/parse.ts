@@ -11,7 +11,7 @@ import { promisify } from 'util';
 import path from 'path';
 
 import { merge } from '@kbn/std';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { pick } from 'lodash';
 import semverMajor from 'semver/functions/major';
 import semverPrerelease from 'semver/functions/prerelease';
@@ -38,6 +38,7 @@ import {
   RegistryDataStreamKeys,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
+import { getErrorMessage } from '../../../errors/utils';
 import { pkgToPkgKey } from '../registry';
 
 import { traverseArchiveEntries } from '.';
@@ -119,6 +120,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'assets',
   'data_streams',
   'license',
+  'requires',
   'type',
   'categories',
   'conditions',
@@ -239,10 +241,17 @@ export function parseAndVerifyArchive(
   let manifest: ArchivePackage;
   try {
     logger.debug(`Verifying archive - loading yaml`);
-    manifest = yaml.load(manifestBuffer.toString());
+    const parsed = parse(manifestBuffer.toString());
+    // Validate that the parsed result is an object (not a primitive like string, number, etc.)
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('Manifest must be a valid YAML object');
+    }
+    manifest = parsed;
   } catch (error) {
     throw new PackageInvalidArchiveError(
-      `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${error}.`
+      `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${getErrorMessage(
+        error
+      )}.`
     );
   }
 
@@ -319,13 +328,15 @@ export function parseAndVerifyArchive(
   if (paths.includes(tagsFile) || tagsBuffer) {
     let tags: PackageSpecTags[];
     try {
-      tags = yaml.load(tagsBuffer.toString());
+      tags = parse(tagsBuffer.toString());
       logger.debug(`Parsing archive - parsing kibana/tags.yml file`);
       if (tags.length) {
         parsed.asset_tags = tags;
       }
     } catch (error) {
-      throw new PackageInvalidArchiveError(`Could not parse tags file kibana/tags.yml: ${error}.`);
+      throw new PackageInvalidArchiveError(
+        `Could not parse tags file kibana/tags.yml: ${getErrorMessage(error)}.`
+      );
     }
   }
 
@@ -377,10 +388,17 @@ export function parseAndVerifyDataStreams(opts: {
 
     let manifest;
     try {
-      manifest = yaml.load(manifestBuffer.toString());
+      const parsed = parse(manifestBuffer.toString());
+      // Validate that the parsed result is an object (not a primitive like string, number, etc.)
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('Manifest must be a valid YAML object');
+      }
+      manifest = parsed;
     } catch (error) {
       throw new PackageInvalidArchiveError(
-        `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
+        `Could not parse package manifest for data stream '${dataStreamPath}': ${getErrorMessage(
+          error
+        )}.`
       );
     }
 
@@ -390,10 +408,12 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamRoutingRules: RegistryDataStreamRoutingRules[] | undefined;
     if (routingRulesBuffer) {
       try {
-        dataStreamRoutingRules = yaml.load(routingRulesBuffer.toString());
+        dataStreamRoutingRules = parse(routingRulesBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
-          `Could not parse routing rules for data stream '${dataStreamPath}': ${error}.`
+          `Could not parse routing rules for data stream '${dataStreamPath}': ${getErrorMessage(
+            error
+          )}.`
         );
       }
     }
@@ -403,10 +423,12 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
     if (lifecyleBuffer) {
       try {
-        dataStreamLifecyle = yaml.load(lifecyleBuffer.toString());
+        dataStreamLifecyle = parse(lifecyleBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
-          `Could not parse lifecycle for data stream '${dataStreamPath}': ${error}.`
+          `Could not parse lifecycle for data stream '${dataStreamPath}': ${getErrorMessage(
+            error
+          )}.`
         );
       }
     }
@@ -493,6 +515,7 @@ export function parseAndVerifyStreams(
         title: streamTitle,
         vars: manifestVars,
         template_path: templatePath,
+        template_paths: templatePaths,
         ...restOfProps
       } = manifestStream;
       if (!(input && streamTitle)) {
@@ -506,7 +529,9 @@ export function parseAndVerifyStreams(
       const streamObject: RegistryStream = {
         input,
         title: streamTitle,
-        template_path: templatePath || 'stream.yml.hbs',
+        ...(templatePaths?.length
+          ? { template_paths: templatePaths }
+          : { template_path: templatePath || 'stream.yml.hbs' }),
       };
 
       if (vars.length) {
@@ -589,25 +614,46 @@ export function parseAndVerifyPolicyTemplates(
       let parsedMultiple = true;
       if (typeof multiple === 'boolean' && multiple === false) parsedMultiple = false;
 
-      policyTemplates.push(
-        Object.entries(restOfProps).reduce(
-          (validatedPolicyTemplate, [key, value]) => {
-            if (registryPolicyTemplateProps.includes(key as RegistryPolicyTemplateKeys)) {
-              // @ts-expect-error
-              validatedPolicyTemplate[key] = value;
-            }
-            return validatedPolicyTemplate;
-          },
-          {
-            name,
-            title: policyTemplateTitle,
-            description,
-            multiple: parsedMultiple,
-            // template can only have one of input or inputs
-            ...(!input ? { inputs: parsedInputs } : { input }),
-          } as RegistryPolicyTemplate
-        )
-      );
+      const validatedTemplate = Object.entries(restOfProps).reduce(
+        (validatedPolicyTemplate, [key, value]) => {
+          if (registryPolicyTemplateProps.includes(key as RegistryPolicyTemplateKeys)) {
+            // @ts-expect-error
+            validatedPolicyTemplate[key] = value;
+          }
+          return validatedPolicyTemplate;
+        },
+        {
+          name,
+          title: policyTemplateTitle,
+          description,
+          multiple: parsedMultiple,
+          // template can only have one of input or inputs
+          ...(!input ? { inputs: parsedInputs } : { input }),
+        } as RegistryPolicyTemplate
+      ) as RegistryPolicyTemplate & {
+        input?: string;
+        type?: string;
+        dynamic_signal_types?: boolean;
+      };
+
+      // For input-only packages: either type is required, or dynamic_signal_types must be true (package-spec)
+      if (validatedTemplate.input !== undefined) {
+        const hasType = validatedTemplate.type !== undefined && validatedTemplate.type !== '';
+        const hasDynamicSignalTypes = validatedTemplate.dynamic_signal_types === true;
+        if (!hasType && !hasDynamicSignalTypes) {
+          throw new PackageInvalidArchiveError(
+            `Invalid policy template: for input packages, either 'type' is required or 'dynamic_signal_types' must be true. Template: ${JSON.stringify(
+              {
+                name: validatedTemplate.name,
+                type: validatedTemplate.type,
+                dynamic_signal_types: validatedTemplate.dynamic_signal_types,
+              }
+            )}`
+          );
+        }
+      }
+
+      policyTemplates.push(validatedTemplate);
     });
   }
   return policyTemplates;

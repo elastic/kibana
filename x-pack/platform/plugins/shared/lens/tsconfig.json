@@ -119,7 +119,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",
-    "@kbn/presentation-panel-plugin",
     "@kbn/esql-types",
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
@@ -141,7 +140,14 @@
     "@kbn/react-kibana-context-env",
     "@kbn/scout",
     "@kbn/cps-utils",
+    "@kbn/controls-constants",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/field-formats-common",
+    "@kbn/calculate-auto",
+    "@kbn/esql-language",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-telemetry",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

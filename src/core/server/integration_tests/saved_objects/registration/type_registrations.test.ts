@@ -55,6 +55,7 @@ const previouslyRegisteredTypes = [
   'csp_rule',
   'dashboard',
   'data_connector',
+  'data_stream-config',
   'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
@@ -63,9 +64,11 @@ const previouslyRegisteredTypes = [
   'enterprise_search_telemetry',
   'entity-analytics-monitoring-entity-source',
   'watchlist-config',
+  'watchlist-entity-source',
   'entity-definition',
   'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-store-ccs-state',
   'entity-engine-descriptor-v2',
   'entity-store-global-state',
   'epm-packages',
@@ -102,14 +105,17 @@ const previouslyRegisteredTypes = [
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
+  'inference-settings',
   'ingest-agent-policies',
   'ingest-download-sources',
   'ingest-outputs',
   'ingest-package-policies',
   'ingest_manager_settings',
+  'integration-config',
   'inventory-view',
   'investigation',
   'kql-telemetry',
+  'lead-generation-config',
   'legacy-url-alias',
   'lens',
   'lens-ui-telemetry',
@@ -125,6 +131,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
@@ -172,6 +179,7 @@ const previouslyRegisteredTypes = [
   'timelion-sheet',
   'tsvb-validation-telemetry',
   'threshold-explorer-view',
+  'uiam_api_keys_provisioning_status',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
@@ -183,10 +191,16 @@ const previouslyRegisteredTypes = [
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'
+  'user_connector_token',
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
+  'streams-significant-events-settings',
+  'alerting_notification_policy', // renamed in 9.4 https://github.com/elastic/kibana/pull/264182 for alerting_action_policy
+  'alerting_api_key_pending_invalidation',
+  'alerting_rule',
+  'alerting_action_policy',
 ].sort();
 
 describe('SO type registrations', () => {
@@ -201,7 +215,21 @@ describe('SO type registrations', () => {
   });
 
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    root = createRoot({}, { oss: false });
+    root = createRoot(
+      {
+        plugins: {
+          forceEnableAllPlugins: true,
+        },
+        node: {
+          roles: ['ui'],
+        },
+      },
+      {
+        oss: false,
+        // running in 'dev' mode prevents cloud-experiments plugin to fail due to missing config
+        dev: true,
+      }
+    );
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects

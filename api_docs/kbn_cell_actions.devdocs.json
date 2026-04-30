@@ -254,6 +254,7 @@
                 "lineNumber": 137,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CellActionCompatibilityContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -488,6 +489,7 @@
                 "lineNumber": 34,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "CellActionExtend",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -548,6 +550,7 @@
                 "lineNumber": 36,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -980,7 +983,7 @@
           "CellActionsMode",
           "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
           "IconType",
-          " | undefined; extraActionsColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; extraActionsColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "lineNumber": 51,
@@ -1128,6 +1131,7 @@
             "lineNumber": 140,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CellActionCompatibilityContext",
             "trackAdoption": false
           }
         ],
@@ -1192,6 +1196,7 @@
             "lineNumber": 51,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

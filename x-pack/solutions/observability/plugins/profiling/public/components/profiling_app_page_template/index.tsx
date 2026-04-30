@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderContentProps } from '@elastic/eui';
+import type { EuiPageHeaderContentProps, EuiPageHeaderProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
@@ -23,7 +25,11 @@ import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 
-export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
+const headerPaddingFixCss = css`
+  .euiPageHeaderContent {
+    padding-bottom: 0;
+  }
+`;
 
 export function ProfilingAppPageTemplate({
   children,
@@ -35,6 +41,7 @@ export function ProfilingAppPageTemplate({
     defaultMessage: 'Universal Profiling',
   }),
   showBetaBadge = false,
+  customSearchBar,
 }: {
   children: React.ReactElement;
   tabs?: EuiPageHeaderContentProps['tabs'];
@@ -43,9 +50,10 @@ export function ProfilingAppPageTemplate({
   restrictWidth?: boolean;
   pageTitle?: React.ReactNode;
   showBetaBadge?: boolean;
+  customSearchBar?: React.ReactNode;
 }) {
   const {
-    start: { observabilityShared, core },
+    start: { observabilityShared },
   } = useProfilingDependencies();
 
   const [privilegesWarningDismissed, setPrivilegesWarningDismissed] = useLocalStorage(
@@ -58,8 +66,6 @@ export function ProfilingAppPageTemplate({
 
   const history = useHistory();
 
-  const isFeedbackEnabled = core.notifications.feedback.isEnabled();
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [history.location.pathname]);
@@ -69,21 +75,6 @@ export function ProfilingAppPageTemplate({
       noDataConfig={noDataConfig}
       pageHeader={{
         'data-test-subj': 'profilingPageTemplate',
-        rightSideItems: isFeedbackEnabled
-          ? [
-              <EuiButton
-                data-test-subj="profilingProfilingAppPageTemplateGiveFeedbackButton"
-                href={PROFILING_FEEDBACK_LINK}
-                target="_blank"
-                color="warning"
-                iconType="editorComment"
-              >
-                {i18n.translate('xpack.profiling.header.giveFeedbackLink', {
-                  defaultMessage: 'Give feedback',
-                })}
-              </EuiButton>,
-            ]
-          : undefined,
         pageTitle: (
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <EuiFlexItem grow={false}>{pageTitle}</EuiFlexItem>
@@ -100,7 +91,30 @@ export function ProfilingAppPageTemplate({
             )}
           </EuiFlexGroup>
         ),
-        tabs,
+        color: 'subdued' as unknown as EuiPageHeaderProps['color'], // This value is valid but not properly typed
+        children:
+          tabs.length > 0 || !hideSearchBar ? (
+            <EuiFlexGroup direction="column">
+              {tabs.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiTabs size="m" bottomBorder={!hideSearchBar}>
+                    {tabs.map(({ label, ...tabRest }) => (
+                      <EuiTab key={tabRest.href} {...tabRest}>
+                        {label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                </EuiFlexItem>
+              )}
+              {!hideSearchBar && (
+                <EuiFlexItem grow={false}>
+                  {customSearchBar ?? <PrimaryProfilingSearchBar />}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ) : undefined,
+        bottomBorder: 'extended',
+        css: hideSearchBar && tabs.length > 0 ? headerPaddingFixCss : undefined,
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{
@@ -113,13 +127,6 @@ export function ProfilingAppPageTemplate({
       }}
     >
       <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
-        {!hideSearchBar && (
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasShadow={false} color="subdued">
-              <PrimaryProfilingSearchBar />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
         {profilingSetupStatus?.unauthorized === true && privilegesWarningDismissed !== true ? (
           <EuiFlexItem grow={false}>
             <EuiCallOut

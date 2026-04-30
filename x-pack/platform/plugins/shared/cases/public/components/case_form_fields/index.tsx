@@ -16,6 +16,8 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { Assignees } from './assignees';
 import { CustomFields } from './custom_fields';
 import type { CasesConfigurationUI } from '../../containers/types';
+import { KibanaServices } from '../../common/lib/kibana';
+import { CreateCaseTemplateFields } from '../create/template_fields';
 
 interface Props {
   isLoading: boolean;
@@ -33,6 +35,8 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   draftStorageKey,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
+  const config = KibanaServices.getConfig();
+  const isTemplatesV2Enabled = config?.templates?.enabled ?? false;
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">
@@ -48,6 +52,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
         configurationCustomFields={configurationCustomFields}
         isEditMode={isEditMode}
       />
+      {isTemplatesV2Enabled && <CreateCaseTemplateFields />}
     </EuiFlexGroup>
   );
 };

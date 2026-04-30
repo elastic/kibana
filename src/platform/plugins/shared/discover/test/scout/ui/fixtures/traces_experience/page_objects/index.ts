@@ -8,6 +8,10 @@
  */
 
 export { TracesExperiencePage } from './traces_experience';
+export type { TracesControls } from './controls';
+export type { ApmPage } from './apm';
 export type { TracesFlyout } from './flyout';
 export type { TracesGrid } from './grid';
 export type { TracesCharts } from './charts';
+export type { Waterfall, WaterfallItem } from './waterfall';
+export { createWaterfall, getWaterfallItem } from './waterfall';

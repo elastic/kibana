@@ -46,7 +46,8 @@
   },
   "@elastic/appex-sharedux": {
     "src/core/packages/chrome/app-menu": "'app-menu' should be snake_case",
-    "src/core/packages/chrome/navigation/packaging/I18N.md": "'I18N.md' should be snake_case",
+    "src/platform/kbn-ui": "'kbn-ui' should be snake_case",
+    "src/platform/kbn-ui/side-navigation/packaging/I18N.md": "'I18N.md' should be snake_case",
     "src/platform/packages/shared/content-management/access_control/access_control_public": "'access_control_public' should be kebab-case",
     "src/platform/packages/shared/content-management/access_control/access_control_server": "'access_control_server' should be kebab-case",
     "src/platform/packages/shared/content-management/content_editor": "'content_editor' should be kebab-case",
@@ -71,7 +72,6 @@
     "src/platform/packages/shared/shared-ux/button_toolbar": "'button_toolbar' should be kebab-case",
     "src/platform/packages/shared/shared-ux/button/exit_full_screen": "'exit_full_screen' should be kebab-case",
     "src/platform/packages/shared/shared-ux/error_boundary": "'error_boundary' should be kebab-case",
-    "src/platform/packages/shared/shared-ux/feedback_snippet": "'feedback_snippet' should be kebab-case",
     "src/platform/packages/shared/shared-ux/label_formatter": "'label_formatter' should be kebab-case",
     "src/platform/packages/shared/shared-ux/page/solution_nav": "'solution_nav' should be kebab-case",
     "src/platform/packages/shared/shared-ux/prompt/not_found": "'not_found' should be kebab-case",
@@ -173,14 +173,6 @@
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/security_detection_engine/security_detection_engine-8.16.0.zip": "'security_detection_engine-8.16.0.zip' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/test_agentless/1.0.0/img/sample-logo.svg": "'sample-logo.svg' should be snake_case"
   },
-  "@elastic/integration-experience": {
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/aws-cloudwatch.md.njk": "'aws-cloudwatch.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/aws-s3.md.njk": "'aws-s3.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/azure-blob-storage.md.njk": "'azure-blob-storage.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/azure-eventhub.md.njk": "'azure-eventhub.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/gcp-pubsub.md.njk": "'gcp-pubsub.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/ssl-tls.md.njk": "'ssl-tls.md.njk' should be snake_case"
-  },
   "@elastic/kibana-cases": {
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.json": "'bundled-types.json' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml": "'bundled-types.schema.yaml' should be snake_case",
@@ -214,8 +206,7 @@
     "src/core/packages/user-settings": "'user-settings' should be snake_case",
     "src/core/test-helpers": "'test-helpers' should be snake_case",
     "src/platform/packages/private/analytics/utils/analytics_collection_utils": "'analytics_collection_utils' should be kebab-case",
-    "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case",
-    "src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-dashboards.json": "'many-dashboards.json' should be snake_case"
+    "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case"
   },
   "@elastic/kibana-esql": {
     "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
@@ -403,7 +394,6 @@
   },
   "@elastic/search-kibana": {
     "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case",
-    "src/platform/packages/shared/deeplinks/data_sources": "'data_sources' should be kebab-case",
     "src/platform/packages/shared/deeplinks/workplace_ai": "'workplace_ai' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/search_project": "'search_project' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/workplace_ai_project": "'workplace_ai_project' should be kebab-case",

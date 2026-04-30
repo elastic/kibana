@@ -16,10 +16,10 @@ import {
   EventTimestampSchema,
   isTriggerType,
 } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
-import { inferZodType } from '../../../../common/lib/zod';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
@@ -64,40 +64,46 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   return eventSchema.optional();
 }
 
+/**
+ * Extracts a field value from the definition, falling back to the YAML document if not present.
+ */
+function extractFieldFromYaml<T>(
+  definitionValue: T | undefined,
+  yamlDocument: Document | null | undefined,
+  fieldName: string
+): T | undefined {
+  if (definitionValue !== undefined) {
+    return definitionValue;
+  }
+  if (!yamlDocument) {
+    return undefined;
+  }
+  try {
+    const yamlJson = yamlDocument.toJSON();
+    if (yamlJson && typeof yamlJson === 'object' && fieldName in yamlJson) {
+      return (yamlJson as Record<string, unknown>)[fieldName] as T;
+    }
+  } catch {
+    // Ignore errors when extracting from YAML
+  }
+  return undefined;
+}
+
 export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
 ): typeof DynamicWorkflowContextSchema {
-  // If inputs is undefined, try to extract it from the YAML document
-  let inputs = definition.inputs;
-  if (inputs === undefined && yamlDocument) {
-    try {
-      const yamlJson = yamlDocument.toJSON();
-      if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-        inputs = (yamlJson as Record<string, unknown>).inputs as typeof inputs;
-      }
-    } catch (e) {
-      // Ignore errors when extracting from YAML
-    }
-  }
+  const inputs = extractFieldFromYaml(definition.inputs, yamlDocument, 'inputs');
+  const outputs = extractFieldFromYaml(definition.outputs, yamlDocument, 'outputs');
 
-  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  // This handles both array (legacy) and object (new) formats
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
-  const inputsSchema = buildInputsZodValidator(normalizedInputs);
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
   const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
-  // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
-  // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
-  // The merge() method requires both schemas to have the same base structure.
-  // Cast to typeof DynamicWorkflowContextSchema because inputsSchema is ZodType<Record<string, unknown>>
-  // (from buildInputsZodValidator) while the base schema expects ZodObject; runtime shape is compatible.
   return DynamicWorkflowContextSchema.extend({
-    inputs: inputsSchema,
-    // transform an object of consts to an object
-    // with the const name as the key and inferred type as the value
+    inputs: buildFieldsZodValidator(normalizedInputs),
+    output: buildFieldsZodValidator(normalizedOutputs),
     consts: z.object({
       ...Object.fromEntries(
         Object.entries(definition.consts ?? {}).map(([key, value]) => [
@@ -106,7 +112,6 @@ export function getWorkflowContextSchema(
         ])
       ),
     }),
-    // event schema is dynamic based on triggers
     event: eventSchema,
   }) as typeof DynamicWorkflowContextSchema;
 }

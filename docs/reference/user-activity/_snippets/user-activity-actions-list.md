@@ -3,4 +3,5 @@
 
 | Action | Description |
 | --- | --- |
-| `user_logged_in`  | User logged in to Kibana. |
+| `log_in_user`  | User logged in to Kibana. |
+| `log_out_user`  | User logged out of Kibana. |

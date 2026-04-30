@@ -8,6 +8,7 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { MOCK_DASHBOARDS, type DashboardMockItem } from './dashboards';
 import { MOCK_MAPS, type MapMockItem } from './maps';
 import { MOCK_FILES, type FileMockItem } from './files';
@@ -19,8 +20,8 @@ import { mockFavoritesClient } from './services';
 interface MockFindItemsFilters {
   search?: string;
   tag?: { include?: string[]; exclude?: string[] };
-  favoritesOnly?: boolean;
-  users?: string[];
+  createdBy?: { include?: string[]; exclude?: string[] };
+  starred?: { state: 'include' | 'exclude' };
 }
 
 /**
@@ -49,12 +50,21 @@ export type MockContentItem =
  * Configuration for creating a mock findItems function
  */
 export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
-  /** The source array of mock items */
+  /** The source array of mock items. */
   items: T[];
-  /** Optional delay in milliseconds to simulate network latency */
+  /** Optional delay in milliseconds to simulate network latency. */
   delay?: number;
-  /** Optional function to handle status field sorting */
+  /** Optional function to handle status field sorting. */
   statusSortFn?: (a: T, b: T, direction: 'asc' | 'desc') => number;
+  /**
+   * Favorites client instance used to resolve starred-item filtering.
+   *
+   * Defaults to the module-level {@link mockFavoritesClient} singleton.
+   * Pass a story-specific client to ensure the same instance is shared
+   * between the provider (`services.favorites`) and `findItems`, so that
+   * starred items are immediately visible when the `starred` filter is toggled.
+   */
+  favoritesClient?: FavoritesClientPublic;
 }
 
 /**
@@ -63,7 +73,12 @@ export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
 export function createMockFindItems<T extends UserContentCommonSchema>(
   config: MockFindItemsConfig<T>
 ) {
-  const { items: sourceItems, delay = 0, statusSortFn: customStatusSortFn } = config;
+  const {
+    items: sourceItems,
+    delay = 0,
+    statusSortFn: customStatusSortFn,
+    favoritesClient: configFavoritesClient,
+  } = config;
 
   return async ({
     searchQuery,
@@ -110,9 +125,23 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       );
     }
 
-    // Apply favorites filter (mock extension, not in ActiveFilters)
-    if ((filters as { favoritesOnly?: boolean }).favoritesOnly) {
-      const favorites = await mockFavoritesClient.getFavorites();
+    // Apply createdBy include filters (UIDs from query model).
+    const createdByFilter = filters.createdBy;
+    const includeCreators = createdByFilter?.include;
+    if (includeCreators && includeCreators.length > 0) {
+      items = items.filter((item) => matchesUserFilter(item, includeCreators));
+    }
+
+    // Apply createdBy exclude filters.
+    const excludeCreators = createdByFilter?.exclude;
+    if (excludeCreators && excludeCreators.length > 0) {
+      items = items.filter((item) => !matchesUserFilter(item, excludeCreators));
+    }
+
+    // Apply starred filter.
+    if (filters.starred?.state === 'include') {
+      const client = configFavoritesClient ?? mockFavoritesClient;
+      const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
@@ -144,18 +173,6 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Compute per-tag item counts from the full (pre-paginated) result set.
-    // Key by id (or name) to match TagFilterRenderer lookup.
-    const tagCounts: Record<string, number> = {};
-    items.forEach((item) => {
-      item.references?.forEach((ref) => {
-        if (ref.type === 'tag') {
-          const key = ref.id ?? ref.name;
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      });
-    });
-
     // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
@@ -165,7 +182,6 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     return {
       items: paginatedItems,
       total,
-      counts: { tag: tagCounts },
     };
   };
 }
@@ -355,8 +371,18 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
   },
 ];
 
-/** Sentinel value for filtering items without a creator */
+/**
+ * Sentinel value for filtering items without a creator.
+ *
+ * @deprecated Use `MOCK_MANAGED_FILTER` or `MOCK_NO_CREATOR_FILTER` instead.
+ */
 export const NULL_USER = 'no-user';
+
+/** Local sentinel matching `MANAGED_USER_FILTER` from `@kbn/content-list-provider`. */
+const MOCK_MANAGED_FILTER = '__managed__';
+
+/** Local sentinel matching `NO_CREATOR_USER_FILTER` from `@kbn/content-list-provider`. */
+const MOCK_NO_CREATOR_FILTER = '__no_creator__';
 
 /**
  * Build a map of email → uid for user profile lookup.
@@ -386,26 +412,38 @@ function resolveToUid(filterValue: string): string | undefined {
 }
 
 /**
- * Check if an item's creator matches the filter values.
- * Handles both email and uid filter values for backwards compatibility.
+ * Check if an item matches the `createdBy` filter values.
+ *
+ * Recognises the `__managed__` and `__no_creator__` sentinels from
+ * `@kbn/content-list-provider`, as well as the legacy `NULL_USER` value.
+ * Regular UIDs and emails are resolved through `resolveToUid`.
  */
-function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: string[]): boolean {
-  // Resolve all filter values to uids
+function matchesUserFilter(
+  item: { createdBy?: string; managed?: boolean },
+  filterValues: string[]
+): boolean {
+  const includesManaged = filterValues.includes(MOCK_MANAGED_FILTER);
+  const includesNoCreator =
+    filterValues.includes(MOCK_NO_CREATOR_FILTER) || filterValues.includes(NULL_USER);
+
+  if (item.managed && includesManaged) {
+    return true;
+  }
+
+  if (!item.createdBy && !item.managed && includesNoCreator) {
+    return true;
+  }
+
   const resolvedUids = filterValues
-    .filter((v) => v !== NULL_USER)
+    .filter((v) => v !== MOCK_MANAGED_FILTER && v !== MOCK_NO_CREATOR_FILTER && v !== NULL_USER)
     .map(resolveToUid)
     .filter((uid): uid is string => uid !== undefined);
 
-  // Check if NULL_USER is in the filter (matches items without creator)
-  const includesNullUser = filterValues.includes(NULL_USER);
-
-  // Item has no creator
-  if (!itemCreatedBy) {
-    return includesNullUser;
+  if (!item.createdBy) {
+    return false;
   }
 
-  // Check if item's createdBy matches any resolved uid
-  return resolvedUids.includes(itemCreatedBy);
+  return resolvedUids.includes(item.createdBy);
 }
 
 /**
@@ -414,9 +452,15 @@ function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: stri
  *
  * This function uses inline mock data with pre-assigned status values.
  *
- * @param delay - Optional delay in milliseconds to simulate network latency
+ * @param delay - Optional delay in milliseconds to simulate network latency.
+ * @param favoritesClient - Optional favorites client. Defaults to the module-level
+ *   {@link mockFavoritesClient} singleton. Pass a story-specific instance to ensure
+ *   the same client is shared with the provider's `services.favorites`.
  */
-export const createSimpleMockFindItems = (delay: number = 0) => {
+export const createSimpleMockFindItems = (
+  delay: number = 0,
+  favoritesClient?: FavoritesClientPublic
+) => {
   return async ({
     searchQuery,
     filters,
@@ -463,15 +507,23 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       );
     }
 
-    // Apply user filters (createdBy) - supports both email and uid filter values
-    const usersFilter = (filters as { users?: string[] }).users;
-    if (usersFilter && usersFilter.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
+    // Apply createdBy include filters (UIDs from query model).
+    const createdByFilter = filters.createdBy;
+    const includeCreators = createdByFilter?.include;
+    if (includeCreators && includeCreators.length > 0) {
+      items = items.filter((item) => matchesUserFilter(item, includeCreators));
     }
 
-    // Apply favorites filter
-    if (filters.favoritesOnly) {
-      const favorites = await mockFavoritesClient.getFavorites();
+    // Apply createdBy exclude filters.
+    const excludeCreators = createdByFilter?.exclude;
+    if (excludeCreators && excludeCreators.length > 0) {
+      items = items.filter((item) => !matchesUserFilter(item, excludeCreators));
+    }
+
+    // Apply starred filter.
+    if (filters.starred?.state === 'include') {
+      const client = favoritesClient ?? mockFavoritesClient;
+      const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
@@ -498,18 +550,6 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Compute per-tag item counts from the full (pre-paginated) result set.
-    // Key by id (or name) to match TagFilterRenderer lookup.
-    const tagCounts: Record<string, number> = {};
-    items.forEach((item) => {
-      item.references?.forEach((ref) => {
-        if (ref.type === 'tag') {
-          const key = ref.id ?? ref.name;
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      });
-    });
-
     // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
@@ -519,7 +559,6 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     return {
       items: paginatedItems,
       total,
-      counts: { tag: tagCounts },
     };
   };
 };

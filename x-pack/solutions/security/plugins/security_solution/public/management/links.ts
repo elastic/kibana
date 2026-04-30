@@ -15,63 +15,53 @@ import {
   getEndpointAuthzInitialState,
 } from '../../common/endpoint/service/authz';
 import {
-  BLOCKLIST_PATH,
   ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
-  EVENT_FILTERS_PATH,
-  HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SCRIPTS_LIBRARY_PATH,
+  SCRIPT_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
-  TRUSTED_APPS_PATH,
-  TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
-  BLOCKLIST,
-  ENDPOINT_EXCEPTIONS,
+  ARTIFACTS,
   ENDPOINTS,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
-  EVENT_FILTERS,
-  HOST_ISOLATION_EXCEPTIONS,
+  ENTITY_ANALYTICS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
-  SCRIPTS_LIBRARY,
-  TRUSTED_APPLICATIONS,
-  TRUSTED_DEVICES,
+  SCRIPT_LIBRARY,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { links as notesLink } from '../notes/links';
+import {
+  getBlocklistsListPath,
+  getEndpointExceptionsListPath,
+  getEventFiltersListPath,
+  getHostIsolationExceptionsListPath,
+  getTrustedAppsListPath,
+  getTrustedDevicesListPath,
+} from './common/routing';
 import { IconResponseActionHistory } from '../common/icons/response_action_history';
-import { IconBlocklist } from '../common/icons/blocklist';
 import { IconEndpoints } from '../common/icons/endpoints';
 import { IconPolicies } from '../common/icons/policies';
-import { IconEventFilters } from '../common/icons/event_filters';
-import { IconHostIsolationExceptions } from '../common/icons/host_isolation_exceptions';
-import { IconTrustedApplications } from '../common/icons/trusted_applications';
+import { IconArtifacts } from '../common/icons/artifacts';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
+import { IconScriptLibrary } from '../common/icons/script_library';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { IconAssetCriticality } from '../common/icons/asset_criticality';
-import { IconTrustedDevices } from '../common/icons/trusted_devices';
-import { IconEndpointExceptions } from '../common/icons/endpoint_exceptions';
+import { KibanaServices } from '../common/lib/kibana';
 
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity analytics',
     }),
-    linkIds: [
-      SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsEntityStoreManagement,
-    ],
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -80,14 +70,9 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
-      SecurityPageName.trustedApps,
-      SecurityPageName.trustedDevices,
-      SecurityPageName.eventFilters,
-      SecurityPageName.hostIsolationExceptions,
-      SecurityPageName.blocklist,
-      SecurityPageName.endpointExceptions,
+      SecurityPageName.artifacts,
       SecurityPageName.responseActionsHistory,
-      SecurityPageName.scriptsLibrary,
+      SecurityPageName.scriptLibrary,
     ],
   },
   {
@@ -143,105 +128,33 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.trustedApps,
-      title: TRUSTED_APPLICATIONS,
-      description: i18n.translate(
-        'xpack.securitySolution.appLinks.trustedApplicationsDescription',
-        {
-          defaultMessage:
-            'Improve performance or alleviate conflicts with other applications running on your hosts.',
-        }
-      ),
-      landingIcon: IconTrustedApplications,
-      path: TRUSTED_APPS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.trustedDevices,
-      title: TRUSTED_DEVICES,
-      description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
+      id: SecurityPageName.artifacts,
+      title: ARTIFACTS,
+      description: i18n.translate('xpack.securitySolution.appLinks.artifactsDescription', {
         defaultMessage:
-          'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
+          'Manage exceptions, trusted applications, and other settings that control how endpoints are protected and respond to activity.',
       }),
-      landingIcon: IconTrustedDevices,
-      path: TRUSTED_DEVICES_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      experimentalKey: 'trustedDevices',
-      capabilities: [`${SECURITY_FEATURE_ID}.readTrustedDevices`],
-      licenseType: 'enterprise',
-    },
-    {
-      id: SecurityPageName.eventFilters,
-      title: EVENT_FILTERS,
-      description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
-        defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
-      }),
-      landingIcon: IconEventFilters,
-      path: EVENT_FILTERS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.hostIsolationExceptions,
-      title: HOST_ISOLATION_EXCEPTIONS,
-      description: i18n.translate('xpack.securitySolution.appLinks.hostIsolationDescription', {
-        defaultMessage: 'Allow isolated hosts to communicate with specific IPs.',
-      }),
-      landingIcon: IconHostIsolationExceptions,
-      path: HOST_ISOLATION_EXCEPTIONS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.blocklist,
-      title: BLOCKLIST,
-      description: i18n.translate('xpack.securitySolution.appLinks.blocklistDescription', {
-        defaultMessage: 'Exclude unwanted applications from running on your hosts.',
-      }),
-      landingIcon: IconBlocklist,
-      path: BLOCKLIST_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.endpointExceptions,
-      title: ENDPOINT_EXCEPTIONS,
-      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
-        defaultMessage: 'Add exceptions to your hosts.',
-      }),
-      landingIcon: IconEndpointExceptions,
+      landingIcon: IconArtifacts,
       path: ENDPOINT_EXCEPTIONS_PATH,
       skipUrlState: true,
       hideTimeline: true,
-
-      experimentalKey: 'endpointExceptionsMovedUnderManagement',
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
-      title: ENTITY_ANALYTICS_RISK_SCORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: "Monitor entities' risk scores, and track anomalies.",
-      }),
+      title: ENTITY_ANALYTICS,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
+        {
+          defaultMessage:
+            'Manage entity risk scores, entity store, and asset criticality settings.',
+        }
+      ),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       licenseType: 'platinum',
-    },
-    {
-      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-      title: ENTITY_STORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store data for entities observed in events.',
-      }),
-      landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -255,14 +168,14 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.scriptsLibrary,
-      title: SCRIPTS_LIBRARY,
-      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
-        defaultMessage: 'View and manage your scripts library.',
+      id: SecurityPageName.scriptLibrary,
+      title: SCRIPT_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptLibraryDescription', {
+        defaultMessage:
+          'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.',
       }),
-      // TODO: Replace with a custom icon same as other links when available
-      landingIcon: 'broom',
-      path: SCRIPTS_LIBRARY_PATH,
+      landingIcon: IconScriptLibrary,
+      path: SCRIPT_LIBRARY_PATH,
       skipUrlState: true,
       hideTimeline: true,
       experimentalKey: 'responseActionsScriptLibraryManagement',
@@ -277,12 +190,67 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
+/** Artifact read flags used to compute first allowed artifact path. */
+export interface ArtifactAuthz {
+  canReadEndpointExceptions: boolean;
+  canReadTrustedApplications: boolean;
+  canReadTrustedDevices: boolean;
+  canReadEventFilters: boolean;
+  showHostIsolationExceptions: boolean;
+  canReadBlocklist: boolean;
+}
+
+/**
+ * Returns the path for the first artifact tab the user is allowed to access.
+ * Order matches the Artifacts page tab order so the link always points at an allowed route.
+ */
+export const getFirstAllowedArtifactPath = (
+  artifactAuthz: ArtifactAuthz,
+  experimentalFeatures: ExperimentalFeatures
+): string => {
+  const { endpointExceptionsMovedUnderManagement, trustedDevices: trustedDevicesEnabled } =
+    experimentalFeatures;
+  const {
+    canReadEndpointExceptions,
+    canReadTrustedApplications,
+    canReadTrustedDevices,
+    canReadEventFilters,
+    showHostIsolationExceptions,
+    canReadBlocklist,
+  } = artifactAuthz;
+
+  if (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) {
+    return getEndpointExceptionsListPath();
+  }
+  if (canReadTrustedApplications) {
+    return getTrustedAppsListPath();
+  }
+  if (trustedDevicesEnabled && canReadTrustedDevices) {
+    return getTrustedDevicesListPath();
+  }
+  if (canReadEventFilters) {
+    return getEventFiltersListPath();
+  }
+  if (showHostIsolationExceptions) {
+    return getHostIsolationExceptionsListPath();
+  }
+  if (canReadBlocklist) {
+    return getBlocklistsListPath();
+  }
+  return getTrustedAppsListPath();
+};
+
 export const getManagementFilteredLinks = async (
   core: CoreStart,
-  plugins: StartPlugins
+  plugins: StartPlugins,
+  experimentalFeatures: ExperimentalFeatures
 ): Promise<LinkItem> => {
+  const { endpointExceptionsMovedUnderManagement, trustedDevices: trustedDevicesEnabled } =
+    experimentalFeatures;
+
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
+  const isServerless = KibanaServices.getBuildFlavor() === 'serverless';
 
   const {
     canReadActionsLogManagement,
@@ -298,7 +266,7 @@ export const getManagementFilteredLinks = async (
     canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
-      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
+      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles, isServerless)
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
@@ -319,37 +287,50 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
-  if (!canReadEndpointExceptions) {
-    linksToExclude.push(SecurityPageName.endpointExceptions);
+  const canReadAnyArtifact =
+    (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) ||
+    canReadTrustedApplications ||
+    (trustedDevicesEnabled && canReadTrustedDevices) ||
+    canReadEventFilters ||
+    showHostIsolationExceptions ||
+    canReadBlocklist;
+  if (!canReadAnyArtifact) {
+    linksToExclude.push(SecurityPageName.artifacts);
   }
 
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
 
-  if (!showHostIsolationExceptions) {
-    linksToExclude.push(SecurityPageName.hostIsolationExceptions);
-  }
-
-  if (!canReadTrustedApplications) {
-    linksToExclude.push(SecurityPageName.trustedApps);
-  }
-
-  if (!canReadTrustedDevices) {
-    linksToExclude.push(SecurityPageName.trustedDevices);
-  }
-
-  if (!canReadEventFilters) {
-    linksToExclude.push(SecurityPageName.eventFilters);
-  }
-
-  if (!canReadBlocklist) {
-    linksToExclude.push(SecurityPageName.blocklist);
-  }
-
   if (!canReadScriptsLibrary) {
-    linksToExclude.push(SecurityPageName.scriptsLibrary);
+    linksToExclude.push(SecurityPageName.scriptLibrary);
   }
 
-  return excludeLinks(linksToExclude);
+  const filtered = excludeLinks(linksToExclude);
+
+  const artifactsPath = canReadAnyArtifact
+    ? getFirstAllowedArtifactPath(
+        {
+          canReadEndpointExceptions,
+          canReadTrustedApplications,
+          canReadTrustedDevices,
+          canReadEventFilters,
+          showHostIsolationExceptions,
+          canReadBlocklist,
+        },
+        experimentalFeatures
+      )
+    : undefined;
+
+  const linksWithArtifactsPath =
+    filtered.links?.map((link) =>
+      link.id === SecurityPageName.artifacts && artifactsPath != null
+        ? { ...link, path: artifactsPath }
+        : link
+    ) ?? [];
+
+  return {
+    ...filtered,
+    links: linksWithArtifactsPath,
+  };
 };

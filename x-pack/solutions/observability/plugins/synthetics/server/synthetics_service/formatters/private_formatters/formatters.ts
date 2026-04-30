@@ -21,6 +21,6 @@ export const syntheticsPolicyFormatters: Formatters = {
   ...httpFormatters,
   ...icmpFormatters,
   ...tcpFormatters,
-  ...browserFormatters,
   ...commonFormatters,
+  ...browserFormatters,
 };

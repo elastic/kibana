@@ -23,7 +23,7 @@ const DisplayMoreOptionsComponent: React.FC<DisplayMoreOptionsProps> = ({
     <EuiButtonEmpty
       color="primary"
       iconSide="right"
-      iconType={showingMoreOptions ? 'arrowDown' : 'arrowRight'}
+      iconType={showingMoreOptions ? 'chevronSingleDown' : 'chevronSingleRight'}
       flush="left"
       onClick={toggleShowingMoreOptions}
       data-test-subj="jsm-display-more-options"

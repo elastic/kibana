@@ -11,7 +11,15 @@
         "tags": [],
         "label": "OverlayRef",
         "description": [
-          "\nReturned by {@link OverlayStart} methods for closing a mounted overlay."
+          "\nReturned by ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-public.OverlayStart",
+            "text": "OverlayStart"
+          },
+          " methods for closing a mounted overlay."
         ],
         "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
         "lineNumber": 10,
@@ -298,19 +306,11 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx"
+            "path": "src/core/packages/chrome/browser-components/src/shared/chrome_hooks.ts"
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/shared/header_action_menu.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/shared/header_action_menu.tsx"
+            "path": "src/core/packages/chrome/browser-components/src/shared/chrome_hooks.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -450,7 +450,15 @@
           }
         ],
         "returnComment": [
-          "a {@link UnmountCallback } that unmount the element on call."
+          "a ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-public.UnmountCallback",
+            "text": "UnmountCallback"
+          },
+          " that unmount the element on call."
         ],
         "children": [
           {
@@ -469,6 +477,7 @@
             "lineNumber": 22,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -481,7 +490,15 @@
         "tags": [],
         "label": "UnmountCallback",
         "description": [
-          "\nA function that will unmount the element previously mounted by\nthe associated {@link MountPoint}\n"
+          "\nA function that will unmount the element previously mounted by\nthe associated ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-public.MountPoint",
+            "text": "MountPoint"
+          },
+          "\n"
         ],
         "signature": [
           "() => void"

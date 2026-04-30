@@ -7,10 +7,25 @@
 
 import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import {
+  ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from './kibana_context';
 import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+} from '../../../embeddables';
+
+const attachmentTypeByEmbeddableType: Record<MlEmbeddableTypes, string> = {
+  [ANOMALY_SWIMLANE_EMBEDDABLE_TYPE]: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  [ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE]: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  [ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE]: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+};
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.
@@ -37,11 +52,11 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
   });
 
   return useCallback(
-    (persistableState: Partial<Omit<MappedEmbeddableTypeOf<EmbeddableType>, 'id'>>) => {
-      const persistableStateAttachmentState = {
-        ...persistableState,
+    (state: Partial<Omit<MappedEmbeddableTypeOf<EmbeddableType>, 'id'>>) => {
+      const attachmentState = {
+        ...state,
         // Creates unique id based on the input
-        id: stringHash(JSON.stringify(persistableState)).toString(),
+        id: stringHash(JSON.stringify(state)).toString(),
       };
 
       if (!selectCaseModal) {
@@ -51,12 +66,10 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
       selectCaseModal.open({
         getAttachments: () => [
           {
-            type: AttachmentType.persistableState,
-            persistableStateAttachmentTypeId: embeddableType,
-            // TODO Cases: improve type for persistableStateAttachmentState with io-ts
-            persistableStateAttachmentState: JSON.parse(
-              JSON.stringify(persistableStateAttachmentState)
-            ),
+            type: attachmentTypeByEmbeddableType[embeddableType],
+            data: {
+              state: JSON.parse(JSON.stringify(attachmentState)),
+            },
           },
         ],
       });

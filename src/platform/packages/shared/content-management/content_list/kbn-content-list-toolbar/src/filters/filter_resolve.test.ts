@@ -11,14 +11,20 @@ import type { ParsedPart } from '@kbn/content-list-assembly';
 import { filter, type FilterContext } from './part';
 import { SortRenderer } from './sort';
 import { TagFilterRenderer } from './tags';
+import { StarredFilterRenderer } from './starred';
+import { CreatedByFilterRenderer } from './created_by';
 
 // Ensure preset resolve callbacks are registered.
 import './sort/sort';
 import './tags/tag_filter';
+import './starred/starred_filter';
+import './created_by/created_by_filter';
 
 const createContext = (overrides: Partial<FilterContext> = {}): FilterContext => ({
   hasSorting: false,
   hasTags: false,
+  hasStarred: false,
+  hasCreatedBy: false,
   ...overrides,
 });
 
@@ -35,6 +41,22 @@ const createTagsPart = (): ParsedPart => ({
   part: 'filter',
   preset: 'tags',
   instanceId: 'tags',
+  attributes: {},
+});
+
+const createStarredPart = (): ParsedPart => ({
+  type: 'part',
+  part: 'filter',
+  preset: 'starred',
+  instanceId: 'starred',
+  attributes: {},
+});
+
+const createCreatedByPart = (): ParsedPart => ({
+  type: 'part',
+  part: 'filter',
+  preset: 'createdBy',
+  instanceId: 'createdBy',
   attributes: {},
 });
 
@@ -66,6 +88,38 @@ describe('filter.resolve', () => {
 
     it('returns `undefined` for the tags preset when tags are unavailable.', () => {
       const result = filter.resolve(createTagsPart(), createContext({ hasTags: false }));
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('starred preset', () => {
+    it('returns a `SearchFilterConfig` for the starred preset when starred is available.', () => {
+      const result = filter.resolve(createStarredPart(), createContext({ hasStarred: true }));
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      expect((result as { component: unknown }).component).toBe(StarredFilterRenderer);
+    });
+
+    it('returns `undefined` for the starred preset when starred is unavailable.', () => {
+      const result = filter.resolve(createStarredPart(), createContext({ hasStarred: false }));
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('createdBy preset', () => {
+    it('returns a `SearchFilterConfig` for the createdBy preset when user profiles are available.', () => {
+      const result = filter.resolve(createCreatedByPart(), createContext({ hasCreatedBy: true }));
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      expect((result as { component: unknown }).component).toBe(CreatedByFilterRenderer);
+    });
+
+    it('returns `undefined` for the createdBy preset when user profiles are unavailable.', () => {
+      const result = filter.resolve(createCreatedByPart(), createContext({ hasCreatedBy: false }));
 
       expect(result).toBeUndefined();
     });

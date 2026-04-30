@@ -43,10 +43,6 @@ test.describe(
         expect(title).toBe('Infrastructure inventory - Infrastructure - Observability - Elastic');
       });
 
-      await test.step('display inventory survey link', async () => {
-        await expect(inventoryPage.feedbackLink).toBeVisible();
-      });
-
       await test.step('display waffle map', async () => {
         await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
         await expect(inventoryPage.mapViewButton).toHaveAttribute('aria-pressed', 'true');
@@ -116,8 +112,6 @@ test.describe(
         const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
         await expect(waffleNode.container).toBeVisible();
         await expect(waffleNode.name).toHaveText(POD_NAME);
-
-        await expect(inventoryPage.k8sFeedbackLink).toBeVisible();
       });
 
       await test.step('switch to containers', async () => {
@@ -190,12 +184,12 @@ test.describe(
         await inventoryPage.selectPalette('temperature');
 
         const nodesWithValues = [
-          { name: HOST6_NAME, color: '#dbe9ff' },
+          { name: HOST6_NAME, color: '#e3eeff' },
           { name: HOST5_NAME, color: '#61a2ff' },
-          { name: HOST4_NAME, color: '#b5d2ff' },
+          { name: HOST4_NAME, color: '#bbd4ff' },
           { name: HOST3_NAME, color: '#f6726a' },
-          { name: HOST2_NAME, color: '#ffbab3' },
-          { name: HOST1_NAME, color: '#fbefee' },
+          { name: HOST2_NAME, color: '#ffc1ba' },
+          { name: HOST1_NAME, color: '#fbf5f5' },
         ];
 
         for (const node of nodesWithValues) {

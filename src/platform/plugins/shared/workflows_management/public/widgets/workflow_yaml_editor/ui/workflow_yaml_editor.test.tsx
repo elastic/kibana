@@ -9,17 +9,16 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import { getTestProvider } from '../../../shared/mocks/test_providers';
 import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
@@ -50,8 +49,7 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
   useYamlValidation: () => ({
     error: null,
     isLoading: false,
-    validateVariables: jest.fn(),
-    handleMarkersChanged: jest.fn(),
+    validationResults: [],
   }),
 }));
 
@@ -81,6 +79,9 @@ jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
   useSaveYaml: jest.fn(),
 }));
 
+const mockKqlStart = kqlPluginMock.createStartContract();
+const mockFieldFormatsStart = fieldFormatsServiceMock.createStartContract();
+
 // Mock the useKibana hook
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
@@ -92,6 +93,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
           addError: jest.fn(),
         },
       },
+      kql: mockKqlStart,
+      fieldFormats: mockFieldFormatsStart,
     },
   })),
 }));
@@ -144,6 +147,7 @@ jest.mock('./decorations', () => ({
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
+  useWorkflowEventsOnDecorations: jest.fn(),
   useWorkflowIdDecorations: jest.fn(),
 }));
 
@@ -203,6 +207,14 @@ jest.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => ({
   interceptMonacoYamlProvider: jest.fn(),
 }));
 
+jest.mock('./hooks/use_agent_builder_integration', () => ({
+  useAgentBuilderIntegration: jest.fn(() => ({
+    openAgentChat: jest.fn(),
+    isAgentBuilderAvailable: false,
+    proposalManager: null,
+  })),
+}));
+
 jest.mock('@kbn/monaco', () => ({
   monaco: {
     editor: {
@@ -223,22 +235,11 @@ describe('WorkflowYAMLEditor', () => {
     editorRef: { current: null },
   };
 
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
   const renderWithProviders = (
     component: React.ReactElement,
     store?: ReturnType<typeof createMockStore>
   ) => {
-    const testStore = store || createMockStore();
-    return render(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
-          <I18nProviderMock>
-            <Provider store={testStore}>{component}</Provider>
-          </I18nProviderMock>
-        </MemoryRouter>
-      </QueryClientProvider>
-    );
+    return render(component, { wrapper: getTestProvider({ store }) });
   };
 
   beforeEach(() => {
@@ -259,17 +260,7 @@ describe('WorkflowYAMLEditor', () => {
 
   it('updates store when editor content changes', async () => {
     const store = createMockStore();
-    const { container } = render(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
-          <I18nProviderMock>
-            <Provider store={store}>
-              <WorkflowYAMLEditor {...defaultProps} />
-            </Provider>
-          </I18nProviderMock>
-        </MemoryRouter>
-      </QueryClientProvider>
-    );
+    const { container } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
     const textarea = container.querySelector(
       '[data-testid="yaml-textarea"]'
@@ -291,8 +282,6 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
 steps:
   - name: step1
     type: console.log
@@ -337,9 +326,7 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
-      invalid: [ unclosed array
+    invalid: [ unclosed array
 steps:
   - name: step1
 `.trim();

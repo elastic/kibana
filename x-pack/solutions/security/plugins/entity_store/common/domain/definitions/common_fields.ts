@@ -5,20 +5,42 @@
  * 2.0.
  */
 
-import type { EntityType, EntityField } from './entity_schema';
-import { collectValues, newestValue } from './field_retention_operations';
+import type { Condition } from '@kbn/streamlang';
+import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
+import { collectValues, newestValue, oldestValue } from './field_retention_operations';
+
+/**
+ * Dotted ECS paths collected into `entity.relationships.*.raw_identifiers.<path>`.
+ * Keep `EntityRelationship.raw_identifiers` in `entity.schema.yaml` in sync (same paths plus
+ * `entity.id` on the schema for target hints; ingest maps canonical EUIDs via `.entity.id` → `ids`).
+ */
+export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
+  'host.id',
+  'user.id',
+  'user.email',
+  'host.name',
+  'user.name',
+  'service.name',
+] as const;
+
+const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+  'administers',
+  'communicates_with',
+  'depends_on',
+  'owns_inferred',
+  'accesses_infrequently',
+  'accesses_frequently',
+  'owns',
+  'supervises',
+] as const;
 
 export const ENTITY_ID_FIELD = 'entity.id';
-
+export const ENTITY_SOURCE_FIELD = 'entity.source';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
 ): EntityField[] => [
-  newestValue({
-    source: '_index',
-    destination: 'entity.source',
-  }),
   newestValue({ source: 'asset.id' }),
   newestValue({ source: 'asset.name' }),
   newestValue({ source: 'asset.owner' }),
@@ -52,7 +74,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   const prefix = rootField ? `${rootField}.entity` : 'entity';
 
   return [
-    newestValue({ source: `${prefix}.source`, destination: 'entity.source' }),
+    collectValues({ source: 'event.module' }),
+    collectValues({ source: 'event.dataset' }),
+    collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
+    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
@@ -82,13 +107,43 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
+    newestValue({
+      source: `${prefix}.attributes.storage_class`,
+      destination: 'entity.attributes.storage_class',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.permissions`,
+      destination: 'entity.attributes.permissions',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.known_redirects`,
+      destination: 'entity.attributes.known_redirects',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.attributes.oauth_consent_restriction`,
+      destination: 'entity.attributes.oauth_consent_restriction',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
 
     // LIFECYCLE ------------------------------------------------------------
-    newestValue({
-      source: `${prefix}.lifecycle.first_seen`,
+    oldestValue({
+      source: '@timestamp',
       destination: 'entity.lifecycle.first_seen',
       mapping: { type: 'date' },
     }),
+    newestValue({
+      source: '@timestamp',
+      destination: 'entity.lifecycle.last_seen',
+      mapping: { type: 'date' },
+    }),
+    // Raw indices have no entity.lifecycle.*; derive from @timestamp like last_seen.
     newestValue({
       source: `${prefix}.lifecycle.last_activity`,
       destination: 'entity.lifecycle.last_activity',
@@ -115,47 +170,24 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    collectValues({
-      source: `${prefix}.relationships.communicates_with`,
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.depends_on`,
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns_inferred`,
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_infrequently`,
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_frequently`,
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns`,
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.supervises`,
-      destination: 'entity.relationships.supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
+    // Source logs use flat `host.entity.relationships.<relationship>.<identifier>`; the entity index
+    // stores raw bags under `raw_identifiers` and canonical EUIDs under `ids`.
+    ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((relationship) => [
+      ...ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
+        collectValues({
+          source: `${prefix}.relationships.${relationship}.${idField}`,
+          destination: `entity.relationships.${relationship}.raw_identifiers.${idField}`,
+          mapping: { type: 'keyword' },
+          allowAPIUpdate: true,
+        })
+      ),
+      collectValues({
+        source: `${prefix}.relationships.${relationship}.entity.id`,
+        destination: `entity.relationships.${relationship}.ids`,
+        mapping: { type: 'keyword' },
+        allowAPIUpdate: true,
+      }),
+    ]),
     newestValue({
       source: `${prefix}.relationships.resolution.resolved_to`,
       destination: 'entity.relationships.resolution.resolved_to',
@@ -182,3 +214,35 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
   ];
 };
+
+export const ENTITY_SOURCE_FIELD_EVALUATION: FieldEvaluation = {
+  destination: ENTITY_SOURCE_FIELD,
+  sources: [
+    { field: 'event.module' },
+    { field: 'event.dataset' },
+    { field: 'data_stream.dataset' },
+  ],
+  fallbackValue: null,
+  whenClauses: [],
+};
+
+export function isNotEmptyCondition(field: string): Condition {
+  return {
+    and: [
+      { field, exists: true },
+      { field, neq: '' },
+    ],
+  };
+}
+
+/** Returns a condition that is true when the field value is not one of the given values. */
+export function fieldNotOneOfCondition(field: string, values: string[]): Condition {
+  if (values.length === 0) {
+    return { always: {} };
+  }
+  return {
+    not: {
+      or: values.map((v) => ({ field, eq: v })),
+    },
+  };
+}

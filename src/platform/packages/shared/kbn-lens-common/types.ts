@@ -27,6 +27,7 @@ import type {
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   CellValueContext,
+  EmbeddableEditorBreadcrumb,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '@kbn/embeddable-plugin/public';
@@ -428,7 +429,6 @@ export interface LensDocument {
    * savedObjectId must be required when the LensDocument is by ref
    */
   savedObjectId?: string;
-  type?: string; // what is this type for? It's always 'lens'
   title: string;
   description?: string;
   visualizationType: string | null;
@@ -632,7 +632,10 @@ export type VisualizeEditorContext<T extends LensConfiguration = LensConfigurati
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
+  legacyEditorOriginatingApp?: string;
   originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   isVisualizeAction: boolean;
   searchQuery?: Query;
   searchFilters?: Filter[];
@@ -1347,7 +1350,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
 
 export interface LensCellValueAction {
   id: string;
-  iconType: string;
+  iconType: IconType;
   type?: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;

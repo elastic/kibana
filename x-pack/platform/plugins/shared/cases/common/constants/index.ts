@@ -11,13 +11,23 @@ export * from './owners';
 export * from './files';
 export * from './application';
 export * from './observables';
-export { LENS_ATTACHMENT_TYPE } from './visualizations';
+export * from './attachments';
 
 /**
  * Cases connector limits.
  */
-export const MAX_OPEN_CASES = 20;
+export const MAX_OPEN_CASES_DEFAULT_MAXIMUM = 20;
+export const ABSOLUTE_MAX_CASES_PER_RUN = 1000;
 export const DEFAULT_MAX_OPEN_CASES = 5;
+export const MAX_OPEN_CASES_ADVANCED_SETTING = 'cases:maxOpenCasesPerRuleRun' as const;
+
+export const getMaximumOpenCases = (maxOpenCases?: number | null): number => {
+  if (maxOpenCases == null || Number.isNaN(maxOpenCases) || !Number.isFinite(maxOpenCases)) {
+    return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
+  }
+
+  return Math.min(ABSOLUTE_MAX_CASES_PER_RUN, Math.max(1, Math.floor(maxOpenCases)));
+};
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -215,6 +225,7 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
+export const MANAGE_TEMPLATES_CAPABILITY = 'cases_manage_templates' as const;
 
 /**
  * Cases API Tags
@@ -258,6 +269,8 @@ export const LOCAL_STORAGE_KEYS = {
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesTableState: 'cases.list.state',
   templatesTableState: 'templates.list.state',
+  templatesYamlEditorCreateState: 'templates.yaml.editor.create',
+  templatesYamlEditorEditState: 'templates.yaml.editor.edit',
 };
 
 /**
@@ -328,3 +341,4 @@ export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
  * via lsp references.
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
+export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;

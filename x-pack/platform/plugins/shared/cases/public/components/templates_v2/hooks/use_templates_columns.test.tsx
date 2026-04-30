@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { render, renderHook, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 
@@ -21,9 +22,9 @@ describe('useTemplatesColumns', () => {
   const defaultProps = {
     onEdit: jest.fn(),
     onClone: jest.fn(),
-    onSetAsDefault: jest.fn(),
     onExport: jest.fn(),
     onDelete: jest.fn(),
+    onIsEnabledChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -40,8 +41,8 @@ describe('useTemplatesColumns', () => {
   it('returns expected number of columns', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    // Expected columns: name, description, fieldCount, tags, author, lastUsedAt, usageCount, actions
-    expect(result.current.columns.length).toBeGreaterThanOrEqual(8);
+    // Expected columns: name, isEnabled, description, fieldCount, tags, author, lastUsedAt, usageCount, actions
+    expect(result.current.columns.length).toBeGreaterThanOrEqual(9);
   });
 
   it('includes name column', () => {
@@ -50,6 +51,16 @@ describe('useTemplatesColumns', () => {
     const nameColumn = result.current.columns.find((col) => 'field' in col && col.field === 'name');
     expect(nameColumn).toBeDefined();
     expect(nameColumn).toHaveProperty('sortable', true);
+  });
+
+  it('includes enabled column', () => {
+    const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
+
+    const enabledColumn = result.current.columns.find(
+      (col) => 'field' in col && col.field === 'isEnabled'
+    );
+    expect(enabledColumn).toBeDefined();
+    expect(enabledColumn).toHaveProperty('sortable', false);
   });
 
   it('includes description column', () => {
@@ -151,6 +162,93 @@ describe('useTemplatesColumns', () => {
     expect(result.current.columns).not.toBe(firstRenderColumns);
   });
 
+  describe('isEnabled column render', () => {
+    const getIsEnabledColumn = () => {
+      const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
+      return result.current.columns.find(
+        (col) => 'field' in col && col.field === 'isEnabled'
+      ) as EuiTableFieldDataColumnType<TemplateListItem>;
+    };
+
+    const baseTemplate: TemplateListItem = {
+      templateId: 't-1',
+      name: 'Test',
+      owner: 'securitySolution',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      author: 'test-user',
+      fieldSearchMatches: false,
+    };
+
+    it('renders switch as checked when isEnabled is true', () => {
+      const column = getIsEnabledColumn();
+      render(<>{column.render!(true, { ...baseTemplate, isEnabled: true })}</>, { wrapper });
+
+      expect(screen.getByTestId('template-column-enabled-knob')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    it('renders switch as unchecked when isEnabled is false', () => {
+      const column = getIsEnabledColumn();
+      render(<>{column.render!(false, { ...baseTemplate, isEnabled: false })}</>, { wrapper });
+
+      expect(screen.getByTestId('template-column-enabled-knob')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+    });
+
+    it('renders switch as checked when isEnabled is undefined (legacy template defaults to enabled)', () => {
+      const column = getIsEnabledColumn();
+      render(<>{column.render!(undefined, baseTemplate)}</>, { wrapper });
+
+      expect(screen.getByTestId('template-column-enabled-knob')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    it('calls onIsEnabledChange when switch is toggled', async () => {
+      const user = userEvent.setup();
+      const column = getIsEnabledColumn();
+      const template = { ...baseTemplate, isEnabled: true };
+      render(<>{column.render!(true, template)}</>, { wrapper });
+
+      await user.click(screen.getByTestId('template-column-enabled-knob'));
+
+      expect(defaultProps.onIsEnabledChange).toHaveBeenCalledWith(template);
+    });
+
+    it('shows enabled tooltip content when template is enabled', async () => {
+      const user = userEvent.setup();
+      const column = getIsEnabledColumn();
+      render(<>{column.render!(true, { ...baseTemplate, isEnabled: true })}</>, { wrapper });
+
+      await user.hover(screen.getByTestId('template-column-enabled-knob'));
+
+      expect(
+        await screen.findByText('This template is enabled and can be used to create new cases.')
+      ).toBeInTheDocument();
+    });
+
+    it('shows disabled tooltip content when template is disabled', async () => {
+      const user = userEvent.setup();
+      const column = getIsEnabledColumn();
+      render(<>{column.render!(false, { ...baseTemplate, isEnabled: false })}</>, { wrapper });
+
+      await user.hover(screen.getByTestId('template-column-enabled-knob'));
+
+      expect(
+        await screen.findByText(
+          'If the template is disabled, it cannot be used to create new cases.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
   describe('fieldCount column render', () => {
     const getFieldCountColumn = () => {
       const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
@@ -199,7 +297,10 @@ describe('useTemplatesColumns', () => {
       const template = {
         ...baseTemplate,
         fieldCount: 2,
-        fieldNames: ['severity', 'hostname'],
+        fieldNames: [
+          { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+          { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+        ],
         fieldSearchMatches: true,
       };
       render(<>{column.render!(2, template)}</>);

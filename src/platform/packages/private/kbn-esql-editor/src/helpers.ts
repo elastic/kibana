@@ -302,9 +302,15 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
         color: ${theme.euiTheme.colors.textParagraph} !important;
       }
     }
-    .hover-row.status-bar {
+
+    /* Hide View Problem action, it's always the first action */
+    .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
       display: none;
     }
+    .monaco-editor .action-widget {
+      min-width: calc(${theme.euiTheme.size.xl} * 6);
+    }
+
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
     }
@@ -318,6 +324,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       ${euiShadow(theme, 'l')}
       // Suggestions must be rendered above flyouts
       z-index: ${theme.euiTheme.levels.toast} !important;
+    }
+
+    .suggest-widget.message {
+      display: none !important;
     }
 
     .suggest-details-container {
@@ -407,4 +417,64 @@ export const getToggleCommentLines = (lines: string[]): string[] => {
     }
     return line;
   });
+};
+
+/**
+ * Keeps suggestions alive when the text before the cursor ends with:
+ * - a token character (`[\w`]`)
+ * - a space
+ * - `::`
+ * - `.`
+ */
+export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  const lastCharacter = lineContentBeforeCursor.at(-1);
+  const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
+  const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');
+  const dotHasBeenTyped = lineContentBeforeCursor.endsWith('.');
+  const currentTokenHasBeenTyped = Boolean(lastCharacter && /[\w`]/.test(lastCharacter));
+
+  return spaceHasBeenTyped || inlineCastHasBeenTyped || dotHasBeenTyped || currentTokenHasBeenTyped;
+};
+
+/**
+ * Tracks the Monaco suggest-widget visibility so the editor can avoid
+ * re-triggering autocomplete while the popup is already open.
+ */
+export const trackSuggestionPopupState = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
+) => {
+  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
+    | (monaco.editor.IEditorContribution & {
+        widget?: {
+          value?: {
+            onDidShow?: (cb: () => void) => void;
+            onDidHide?: (cb: () => void) => void;
+          };
+        };
+      })
+    | undefined;
+  const suggestionWidget = suggestionController?.widget?.value;
+
+  if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
+    suggestionWidget.onDidShow(() => {
+      isSuggestionPopupOpenRef.current = true;
+    });
+    suggestionWidget.onDidHide(() => {
+      isSuggestionPopupOpenRef.current = false;
+    });
+  }
+};
+
+/**
+ * Checks if the code actions menu is being displayed.
+ * @param editor
+ * @returns
+ */
+export const isCodeActionMenuVisible = (editor: monaco.editor.IStandaloneCodeEditor): boolean => {
+  const actionWidgetList = editor.getDomNode()?.querySelector('.action-widget .actionList');
+  if (actionWidgetList) {
+    return Array.from(actionWidgetList.children).length > 0;
+  }
+  return false;
 };

@@ -29,7 +29,15 @@
           ],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "public",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-public.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -77,10 +85,6 @@
             {
               "plugin": "logstash",
               "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
-            },
-            {
-              "plugin": "monitoring",
-              "path": "x-pack/platform/plugins/private/monitoring/public/plugin.ts"
             },
             {
               "plugin": "painlessLab",
@@ -144,7 +148,20 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [],
+          "references": [
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/upload_license.ts"
+            },
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/start_basic.ts"
+            },
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/start_trial.ts"
+            }
+          ],
           "children": [],
           "returnComment": []
         },
@@ -190,7 +207,15 @@
           "tags": [],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "public",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-public.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -217,7 +242,14 @@
           "tags": [],
           "label": "getLicense",
           "description": [
-            "\nRetrieves the {@link ILicense | licensing information}"
+            "\nRetrieves the ",
+            {
+              "pluginId": "licensing",
+              "scope": "public",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-public.ILicense",
+              "text": "licensing information"
+            }
           ],
           "signature": [
             "() => Promise<",
@@ -344,6 +376,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckLicense",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -364,6 +397,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandler",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -435,7 +469,15 @@
             "tags": [],
             "label": "register",
             "description": [
-              "\nRegister a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}."
+              "\nRegister a feature to be able to notify of it's usages using the ",
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.FeatureUsageServiceStart",
+                "text": "service start contract"
+              },
+              "."
             ],
             "signature": [
               "(featureId: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
@@ -477,6 +519,7 @@
                 "lineNumber": 16,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -590,7 +633,15 @@
         "tags": [],
         "label": "LicensingApiRequestHandlerContext",
         "description": [
-          "\nThe APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing."
+          "\nThe APIs exposed on the `licensing` key of ",
+          {
+            "pluginId": "licensing",
+            "scope": "server",
+            "docId": "kibLicensingPluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
+          " for plugins that depend on licensing."
         ],
         "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
         "lineNumber": 28,
@@ -693,6 +744,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ILicense",
             "trackAdoption": false
           }
         ],
@@ -722,7 +774,15 @@
           ],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -965,7 +1025,15 @@
           "tags": [],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -992,7 +1060,14 @@
           "tags": [],
           "label": "getLicense",
           "description": [
-            "\nRetrieves the {@link ILicense | licensing information}"
+            "\nRetrieves the ",
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.ILicense",
+              "text": "licensing information"
+            }
           ],
           "signature": [
             "() => Promise<",
@@ -1093,6 +1168,7 @@
               "lineNumber": 94,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "IClusterClient",
               "trackAdoption": false,
               "isRequired": true
             },

@@ -20,29 +20,13 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
 const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
-
-jest.mock('@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal', () => {
-  return {
-    AIAgentConfirmationModal: ({
-      onConfirm,
-      onCancel,
-    }: {
-      onConfirm: () => void;
-      onCancel: () => void;
-    }) => (
-      <div data-test-subj="confirmModal">
-        <button data-test-subj="confirmModalConfirm" onClick={onConfirm} />
-        <button data-test-subj="confirmModalCancel" onClick={onCancel} />
-      </div>
-    ),
-  };
-});
 
 // Mock productDocBase
 const mockProductDocBase = {
@@ -82,6 +66,10 @@ describe('GenAiSettingsApp', () => {
       type: 'select',
       options: ['default'],
     },
+    [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
+      value: false,
+      type: 'boolean',
+    },
     ...overrides,
   });
 
@@ -91,6 +79,7 @@ describe('GenAiSettingsApp', () => {
     showAiBreadcrumb: true,
     showAiAssistantsVisibilitySetting: true,
     showChatExperienceSetting: true,
+    showAnonymizationProfilesSection: false,
     ...overrides,
   });
 
@@ -107,6 +96,8 @@ describe('GenAiSettingsApp', () => {
       observabilityAIAssistant: { show: true },
       securitySolutionAssistant: { 'ai-assistant': true },
       agentBuilder: { show: true },
+      anonymization: { show: true, manage: true },
+      advancedSettings: { show: true, save: true },
     };
 
     // Mock feature flags to enable AI Agents by default
@@ -116,6 +107,12 @@ describe('GenAiSettingsApp', () => {
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+    coreStart.http.fetch.mockResolvedValue({
+      page: 1,
+      perPage: 20,
+      total: 0,
+      data: [],
+    });
 
     // Default mock for enabled features
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
@@ -179,16 +176,12 @@ describe('GenAiSettingsApp', () => {
       expect(screen.getByTestId('genAiSettingsPage')).toBeInTheDocument();
       expect(screen.getByTestId('genAiSettingsTitle')).toBeInTheDocument();
 
-      // Connectors section
-      expect(screen.getByTestId('connectorsSection')).toBeInTheDocument();
-      expect(screen.getByTestId('connectorsTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('defaultAiConnectorComboBox')).toBeInTheDocument();
-      expect(screen.getByTestId('defaultAiConnectorCheckbox')).toBeInTheDocument();
-
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
+
+      expect(screen.queryByTestId('anonymizationProfilesSection')).not.toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {
@@ -196,9 +189,17 @@ describe('GenAiSettingsApp', () => {
         createFeatureFlagsMock({ showSpacesIntegration: false })
       );
 
-      renderComponent();
+      const firstRender = renderComponent();
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
+      firstRender.unmount();
+
+      mockUseEnabledFeatures.mockReturnValue(
+        createFeatureFlagsMock({ showAnonymizationProfilesSection: false })
+      );
+      const secondRender = renderComponent();
+      expect(screen.queryByTestId('anonymizationProfilesSection')).not.toBeInTheDocument();
+      secondRender.unmount();
 
       mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
       coreStart.application.capabilities = {
@@ -210,9 +211,43 @@ describe('GenAiSettingsApp', () => {
         },
       };
 
-      renderComponent();
+      const thirdRender = renderComponent();
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
+      thirdRender.unmount();
+    });
+  });
+
+  describe('Anonymization Profiles section', () => {
+    beforeEach(() => {
+      mockUseEnabledFeatures.mockReturnValue(
+        createFeatureFlagsMock({ showAnonymizationProfilesSection: true })
+      );
+    });
+
+    it('switches to read-only mode when manage capability is absent', async () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        anonymization: { show: true, manage: false },
+      };
+
+      renderComponent();
+
+      expect(await screen.findByTestId('anonymizationProfilesSection')).toBeInTheDocument();
+      expect(screen.getByText('Read only')).toBeInTheDocument();
+      expect(screen.getByTestId('anonymizationProfilesCreateProfile')).toBeDisabled();
+    });
+
+    it('opens create profile flyout in manage mode', async () => {
+      renderComponent();
+
+      fireEvent.click(await screen.findByTestId('anonymizationProfilesCreateProfile'));
+      expect(await screen.findByTestId('anonymizationProfilesProfileFlyout')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Cancel'));
+      await waitFor(() => {
+        expect(screen.queryByTestId('anonymizationProfilesProfileFlyout')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -382,8 +417,10 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
-      // Documentation section should not be visible in Classic mode
-      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      // Settings fields load asynchronously; until then `currentChatExperience` falls back to Agent.
+      await waitFor(() => {
+        expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      });
     });
 
     it('shows Documentation section when chat experience is Agent', async () => {
@@ -470,6 +507,96 @@ describe('GenAiSettingsApp', () => {
     });
   });
 
+  describe('Token usage tracking', () => {
+    it('installs the token usage dashboard when the user turns the setting on', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+
+      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: true });
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const tokenUsageSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING}`
+      );
+      fireEvent.click(tokenUsageSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(genAiSettingsApi).toHaveBeenCalledWith(
+          'POST /internal/gen_ai_settings/install_token_usage_dashboard',
+          { signal: null }
+        );
+      });
+    });
+
+    it('does not install the dashboard when token usage tracking is not changed', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(
+        createSettingsMock({
+          [AI_CHAT_EXPERIENCE_TYPE]: {
+            value: AIChatExperience.Classic,
+            userValue: AIChatExperience.Agent,
+            type: 'select',
+            options: [AIChatExperience.Classic, AIChatExperience.Agent],
+          },
+        }) as any
+      );
+
+      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: false });
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const chatExperienceSelect = await screen.findByTestId(
+        `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+      );
+      fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Classic } });
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(saveButton).toBeInTheDocument();
+      });
+
+      expect(genAiSettingsApi).not.toHaveBeenCalled();
+    });
+
+    it('shows a danger toast when the install request fails', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+
+      const genAiSettingsApi = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('boom'), { body: { message: 'boom' } }));
+      const addDanger = jest.spyOn(coreStart.notifications.toasts, 'addDanger');
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const tokenUsageSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING}`
+      );
+      fireEvent.click(tokenUsageSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Failed to install token usage dashboard',
+            text: 'boom',
+          })
+        );
+      });
+    });
+  });
+
   it('returns confirmed opt in telemetry when saving a switch to Agent', async () => {
     const reportEvent = jest.fn();
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
@@ -482,9 +609,6 @@ describe('GenAiSettingsApp', () => {
       `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
     );
     fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Agent } });
-
-    // Close modal to mirror the real flow before saving
-    fireEvent.click(await screen.findByTestId('confirmModalConfirm'));
 
     const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
     fireEvent.click(saveButton);

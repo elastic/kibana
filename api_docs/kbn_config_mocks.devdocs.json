@@ -202,6 +202,7 @@
             "lineNumber": 23,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "DeepPartial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -376,7 +377,7 @@
             "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<Record<string, unknown>, [newOverrides: Record<string, unknown>], unknown>; } & ",
+          ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<Record<string, unknown>, [newOverrides: Record<string, unknown>], unknown>; listAllSettings: jest.MockInstance<{ setting: string; type: string; }[], [], unknown>; } & ",
           "IConfigService"
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
@@ -507,7 +508,7 @@
         "label": "configServiceMock",
         "description": [],
         "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -530,7 +531,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -541,7 +542,7 @@
                 "id": "def-common.configServiceMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  atPath = {},\n  getConfig$ = {},\n}",
                 "description": [],
                 "signature": [
                   "{ atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }"
@@ -601,7 +602,7 @@
                 "id": "def-common.rawConfigServiceMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  rawConfig = {},\n  rawConfig$ = undefined,\n}",
                 "description": [],
                 "signature": [
                   "{ rawConfig?: Record<string, any> | undefined; rawConfig$?: ",

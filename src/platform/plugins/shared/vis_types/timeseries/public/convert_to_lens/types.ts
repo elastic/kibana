@@ -11,7 +11,7 @@ import type { Vis } from '@kbn/visualizations-plugin/public';
 import type {
   MetricVisualizationState as MetricVisConfiguration,
   NavigateToLensContext,
-  XYState as XYConfiguration,
+  XYVisualizationState as XYConfiguration,
   DatatableVisualizationState as TableVisConfiguration,
 } from '@kbn/lens-common';
 import type { TimeRange } from '@kbn/data-plugin/common';

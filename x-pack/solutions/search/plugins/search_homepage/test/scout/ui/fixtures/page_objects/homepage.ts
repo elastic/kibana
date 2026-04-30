@@ -114,6 +114,10 @@ export class Homepage {
     return this.page.testSubj.locator('endpointValueField');
   }
 
+  async getKibanaVersionBadge() {
+    return this.page.testSubj.locator('kibana-version-badge');
+  }
+
   // Body Links methods
   async getBodyLinks() {
     return this.page.testSubj.locator('searchHomepageBodyLinkLink');
@@ -121,5 +125,18 @@ export class Homepage {
 
   async getBodyLinkByText(text: string) {
     return this.page.getByRole('link', { name: text });
+  }
+
+  // Metric Badges methods
+  async getMetricBadgesContainer() {
+    return this.page.testSubj.locator('searchHomepageMetricBadges');
+  }
+
+  async getMetricBadges() {
+    return this.page.locator('[data-test-subj^="searchHomepageMetricBadge-"]');
+  }
+
+  async getMetricBadge(type: string) {
+    return this.page.testSubj.locator(`searchHomepageMetricBadge-${type}`);
   }
 }

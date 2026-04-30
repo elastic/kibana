@@ -38,6 +38,18 @@ import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
 
+export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
+  indices: Record<string, string>;
+  active: Record<string, Alert & AlertData>;
+  recovered: Record<string, Alert & AlertData>;
+  delayed: Record<string, Alert & AlertData>;
+  all: Record<string, Alert & AlertData>;
+  seqNo: Record<string, number | undefined>;
+  primaryTerm: Record<string, number | undefined>;
+  get: (uuid: string) => Alert & AlertData;
+  getById: (id: string) => (Alert & AlertData) | undefined;
+}
+
 export interface AlertRuleData {
   consumer: string;
   executionId: string;

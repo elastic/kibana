@@ -27,7 +27,7 @@
         "label": "AutoOpsPromotionCallout",
         "description": [],
         "signature": [
-          "({ learnMoreLink, cloudConnectUrl, onConnectClick, hasCloudConnectPermission, overrideCalloutProps, }: ",
+          "({ cloudConnectUrl, onConnectClick, hasCloudConnectPermission, overrideCalloutProps, }: ",
           {
             "pluginId": "@kbn/autoops-promotion-callout",
             "scope": "common",
@@ -38,7 +38,7 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-        "lineNumber": 25,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
             "id": "def-common.AutoOpsPromotionCallout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  learnMoreLink,\n  cloudConnectUrl = '/app/cloud_connect',\n  onConnectClick,\n  hasCloudConnectPermission,\n  overrideCalloutProps = {},\n}",
+            "label": "{\n  cloudConnectUrl = '/app/cloud_connect',\n  onConnectClick,\n  hasCloudConnectPermission,\n  overrideCalloutProps = {},\n}",
             "description": [],
             "signature": [
               {
@@ -60,9 +60,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-            "lineNumber": 25,
+            "lineNumber": 24,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "AutoOpsPromotionCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -87,19 +88,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/autoops-promotion-callout",
-            "id": "def-common.AutoOpsPromotionCalloutProps.learnMoreLink",
-            "type": "string",
-            "tags": [],
-            "label": "learnMoreLink",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/autoops-promotion-callout",
             "id": "def-common.AutoOpsPromotionCalloutProps.cloudConnectUrl",
             "type": "string",
             "tags": [],
@@ -109,7 +97,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-            "lineNumber": 17,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -125,7 +113,7 @@
               "((e: React.MouseEvent<Element, MouseEvent>) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-            "lineNumber": 18,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +129,7 @@
                   "React.MouseEvent<Element, MouseEvent>"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-                "lineNumber": 18,
+                "lineNumber": 17,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -161,7 +149,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-            "lineNumber": 19,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -179,7 +167,7 @@
               ", \"children\" | \"title\" | \"onDismiss\">> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

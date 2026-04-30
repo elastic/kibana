@@ -26,12 +26,12 @@ const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
   typeof useDatePickerContext
 >;
 
-const mockSetConversationFlyoutActiveConfig = jest.fn();
-const mockClearConversationFlyoutActiveConfig = jest.fn();
+const mockSetAgentBuilderChatConfig = jest.fn();
+const mockClearAgentBuilderChatConfig = jest.fn();
 
 const mockAgentBuilder = {
-  setConversationFlyoutActiveConfig: mockSetConversationFlyoutActiveConfig,
-  clearConversationFlyoutActiveConfig: mockClearConversationFlyoutActiveConfig,
+  setChatConfig: mockSetAgentBuilderChatConfig,
+  clearChatConfig: mockClearAgentBuilderChatConfig,
 };
 
 const mockGetParsedDateRange = jest.fn().mockReturnValue({
@@ -85,7 +85,7 @@ describe('useHostAttachmentConfig', () => {
 
     renderHook(() => useHostAttachmentConfig());
 
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    expect(mockSetAgentBuilderChatConfig).not.toHaveBeenCalled();
   });
 
   it('does not configure attachment when loading is true', () => {
@@ -93,7 +93,7 @@ describe('useHostAttachmentConfig', () => {
 
     renderHook(() => useHostAttachmentConfig());
 
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    expect(mockSetAgentBuilderChatConfig).not.toHaveBeenCalled();
   });
 
   it('does not configure attachment when entity type is not host', () => {
@@ -101,7 +101,7 @@ describe('useHostAttachmentConfig', () => {
 
     renderHook(() => useHostAttachmentConfig());
 
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    expect(mockSetAgentBuilderChatConfig).not.toHaveBeenCalled();
   });
 
   it('does not configure attachment when entity name is empty', () => {
@@ -109,7 +109,7 @@ describe('useHostAttachmentConfig', () => {
 
     renderHook(() => useHostAttachmentConfig());
 
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    expect(mockSetAgentBuilderChatConfig).not.toHaveBeenCalled();
   });
 
   it('does not configure attachment when date range is missing', () => {
@@ -117,7 +117,7 @@ describe('useHostAttachmentConfig', () => {
 
     renderHook(() => useHostAttachmentConfig());
 
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    expect(mockSetAgentBuilderChatConfig).not.toHaveBeenCalled();
   });
 
   it('configures agent builder with host attachment when all conditions are met', () => {
@@ -125,8 +125,7 @@ describe('useHostAttachmentConfig', () => {
 
     renderHook(() => useHostAttachmentConfig());
 
-    expect(mockSetConversationFlyoutActiveConfig).toHaveBeenCalledWith({
-      agentId: 'observability.agent',
+    expect(mockSetAgentBuilderChatConfig).toHaveBeenCalledWith({
       attachments: [
         expect.objectContaining({
           type: 'observability.host',
@@ -148,6 +147,6 @@ describe('useHostAttachmentConfig', () => {
 
     unmount();
 
-    expect(mockClearConversationFlyoutActiveConfig).toHaveBeenCalled();
+    expect(mockClearAgentBuilderChatConfig).toHaveBeenCalled();
   });
 });

@@ -79,7 +79,7 @@ export const EmptyConnectorsPrompt = ({
             data-test-subj="createFirstActionButton"
             key="create-action"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
             onClick={onCTAClicked}
           >

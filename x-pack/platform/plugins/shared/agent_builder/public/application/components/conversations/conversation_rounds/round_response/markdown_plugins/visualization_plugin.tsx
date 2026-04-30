@@ -90,18 +90,19 @@ export function createVisualizationRenderer({
 
     // Handle visualization result (pre-built Lens config)
     if (toolResult.type === 'visualization') {
-      const { visualization } = toolResult.data;
+      const { visualization, time_range: visTimeRange } = toolResult.data;
       return (
         <VisualizeLens
           lensConfig={visualization}
           dataViews={startDependencies.dataViews}
           lens={startDependencies.lens}
           uiActions={startDependencies.uiActions}
+          timeRange={visTimeRange}
         />
       );
     }
 
-    const { columns, query } = toolResult.data;
+    const { columns, query, time_range: resultTimeRange } = toolResult.data;
 
     if (!query) {
       return <EuiText>Unable to find esql query for {ToolResultAttribute}.</EuiText>;
@@ -115,6 +116,7 @@ export function createVisualizationRenderer({
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
+        timeRange={resultTimeRange}
       />
     );
   };

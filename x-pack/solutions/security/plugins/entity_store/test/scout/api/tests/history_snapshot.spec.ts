@@ -8,29 +8,39 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { forceLogExtraction } from '../fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  forceLogExtraction,
+  normalizeKeywordList,
+} from '../fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { historySnapshot: { frequency: '24h' } },
@@ -42,13 +52,14 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(
@@ -56,17 +67,20 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     async ({ apiClient, esClient }) => {
       await forceLogExtraction(
         apiClient,
-        defaultHeaders,
+        internalHeaders,
         'host',
         '2026-01-20T11:00:00Z',
         '2026-01-20T13:00:00Z'
       );
 
-      const snapshotResponse = await apiClient.post(ENTITY_STORE_ROUTES.FORCE_HISTORY_SNAPSHOT, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      const snapshotResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
       expect(snapshotResponse.statusCode).toBe(200);
       const body = snapshotResponse.body as {
         ok: boolean;
@@ -88,11 +102,11 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       const historyCount = await esClient.count({ index: historyIndex });
       expect(historyCount.count).toBe(body.docCount);
 
-      const entityIdsWithBehaviors = ['host:host-123', 'host:server-01.example.com'] as const;
+      const entityIdsWithBehaviors = ['host:host-123', 'host:server-01'] as const;
       const expectedBehaviorsInHistory = [
-        { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: 'job-1' },
-        { rule_names: 'rule-c', anomaly_job_ids: ['job-2', 'job-3'] },
-      ];
+        { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: ['job-1'] },
+        { rule_names: ['rule-c'], anomaly_job_ids: ['job-2', 'job-3'] },
+      ] as const;
 
       const historySearchResult = await esClient.search({
         index: historyIndex,
@@ -101,7 +115,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       });
 
       const latestSearchResult = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { terms: { 'entity.id': [...entityIdsWithBehaviors] } },
         size: entityIdsWithBehaviors.length,
       });
@@ -125,7 +139,13 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         );
         expect(historyHit).toBeDefined();
         const historyEntity = historyHit!._source!.entity as Record<string, unknown>;
-        expect(historyEntity.behaviors).toStrictEqual(expectedBehavior);
+        const historyBehaviors = historyEntity.behaviors as Record<string, unknown> | undefined;
+        expect(normalizeKeywordList(historyBehaviors?.rule_names)).toStrictEqual(
+          expectedBehavior.rule_names
+        );
+        expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids)).toStrictEqual(
+          expectedBehavior.anomaly_job_ids
+        );
 
         const latestHit = latestHits.find(
           (h) => (h._source!.entity as Record<string, unknown>)?.id === entityId
@@ -133,10 +153,9 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         expect(latestHit).toBeDefined();
         expect(latestHit!._source!['@timestamp']).toBeDefined();
         const latestEntity = latestHit!._source!.entity as Record<string, unknown>;
-        expect(latestEntity.behaviors).toStrictEqual({
-          rule_names: [],
-          anomaly_job_ids: [],
-        });
+        const latestBehaviors = latestEntity.behaviors as Record<string, unknown> | undefined;
+        expect(normalizeKeywordList(latestBehaviors?.rule_names)).toStrictEqual([]);
+        expect(normalizeKeywordList(latestBehaviors?.anomaly_job_ids)).toStrictEqual([]);
         expect((latestEntity.lifecycle as Record<string, unknown>)?.last_activity).toBeDefined();
       }
     }

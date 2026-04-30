@@ -10,9 +10,32 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
+
+const EventTriggersConfigSchema = schema.object({
+  /**
+   * When false, event-driven workflow execution is disabled: event-triggered runs
+   * (triggeredBy not in manual/scheduled/alert) are skipped at execution time.
+   */
+  enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * When false, trigger events are not logged to the trigger-events data stream.
+   */
+  logEvents: schema.boolean({ defaultValue: true }),
+  /**
+   * Maximum depth for event-triggered chains (any workflow in the chain).
+   * Scheduling is skipped when depth exceeds this value.
+   */
+  maxChainDepth: schema.number({ defaultValue: 10, min: 1 }),
+});
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  eventDriven: EventTriggersConfigSchema,
+  /**
+   * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).
+   */
+  maxWorkflowDepth: schema.number({ defaultValue: 10, min: 1 }),
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
@@ -24,6 +47,7 @@ const configSchema = schema.object({
       }
     ),
   }),
+  maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {
@@ -34,6 +58,7 @@ const configSchema = schema.object({
   }),
 });
 
+export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {

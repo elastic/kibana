@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import IndexThresholdRuleTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -36,18 +36,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
     getIndexOptions: () => {
       return Promise.resolve([
         {
@@ -69,7 +57,28 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 });
 
 const dataMock = dataPluginMock.createStartContract();
-const dataViewMock = dataViewPluginMocks.createStartContract();
+const dataViewMock = {
+  ...dataViewPluginMocks.createStartContract(),
+  getFieldsForWildcard: jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]),
+  getIndices: jest.fn().mockResolvedValue([]),
+};
 const chartsStartMock = chartPluginMock.createStartContract();
 
 describe('IndexThresholdRuleTypeExpression', () => {
@@ -84,10 +93,10 @@ describe('IndexThresholdRuleTypeExpression', () => {
       ...overrides,
     };
   }
-  async function setup(ruleParams: IndexThresholdRuleParams) {
+  function setup(ruleParams: IndexThresholdRuleParams) {
     const { errors } = validateExpression(ruleParams);
 
-    const wrapper = mountWithIntl(
+    return renderWithI18n(
       <IndexThresholdRuleTypeExpression
         ruleInterval="1m"
         ruleThrottle="1m"
@@ -104,48 +113,46 @@ describe('IndexThresholdRuleTypeExpression', () => {
         onChangeMetaData={() => {}}
       />
     );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    return wrapper;
   }
 
   test(`should render IndexThresholdRuleTypeExpression with expected components when aggType doesn't require field`, async () => {
-    const wrapper = await setup(getAlertParams());
-    expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="whenExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="groupByExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="visualizationPlaceholder"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdVisualization"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="filterKuery"]').exists()).toBeTruthy();
+    setup(getAlertParams());
+    expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+
+    await screen.findByTestId('whenExpression');
+    expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
+    expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('visualizationPlaceholder')).toBeInTheDocument();
+    expect(screen.queryByTestId('thresholdVisualization')).not.toBeInTheDocument();
+    expect(screen.getByTestId('filterKuery')).toBeInTheDocument();
   });
 
   test(`should render IndexThresholdRuleTypeExpression with expected components when aggType does require field`, async () => {
-    const wrapper = await setup(getAlertParams({ aggType: 'avg' }));
-    expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="whenExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="groupByExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="visualizationPlaceholder"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdVisualization"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="filterKuery"]').exists()).toBeTruthy();
+    setup(getAlertParams({ aggType: 'avg' }));
+    expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+
+    await screen.findByTestId('whenExpression');
+    expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('visualizationPlaceholder')).toBeInTheDocument();
+    expect(screen.queryByTestId('thresholdVisualization')).not.toBeInTheDocument();
+    expect(screen.getByTestId('filterKuery')).toBeInTheDocument();
   });
 
   test(`should render IndexThresholdRuleTypeExpression with visualization when there are no expression errors`, async () => {
-    const wrapper = await setup(getAlertParams({ timeField: '@timestamp' }));
-    expect(wrapper.find('[data-test-subj="visualizationPlaceholder"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="thresholdVisualization"]').exists()).toBeTruthy();
+    setup(getAlertParams({ timeField: '@timestamp' }));
+
+    await screen.findByTestId('whenExpression');
+
+    expect(screen.queryByTestId('visualizationPlaceholder')).not.toBeInTheDocument();
   });
 
-  test(`should set default alert params when params are undefined`, async () => {
-    const wrapper = await setup(
+  test(`should set default alert params when params are undefined`, () => {
+    setup(
       getAlertParams({
         aggType: undefined,
         thresholdComparator: undefined,
@@ -156,32 +163,30 @@ describe('IndexThresholdRuleTypeExpression', () => {
       })
     );
 
-    expect(wrapper.find('button[data-test-subj="selectIndexExpression"]').text()).toEqual(
-      'index test-index'
-    );
-    expect(wrapper.find('button[data-test-subj="whenExpression"]').text()).toEqual(
+    expect(screen.getByTestId('selectIndexExpression')).toHaveTextContent('index test-index');
+    expect(screen.getByTestId('whenExpression')).toHaveTextContent(
       `when ${builtInAggregationTypes[DEFAULT_VALUES.AGGREGATION_TYPE].text}`
     );
-    expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
-      `over ${DEFAULT_VALUES.GROUP_BY} documents `
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
+      `over ${DEFAULT_VALUES.GROUP_BY} documents`
     );
-    expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="thresholdPopover"]').text()).toEqual(
-      `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text} `
+    expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent(
+      `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text}`
     );
-    expect(wrapper.find('button[data-test-subj="forLastExpression"]').text()).toEqual(
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent(
       `for the last ${DEFAULT_VALUES.TIME_WINDOW_SIZE} ${getTimeUnitLabel(
         DEFAULT_VALUES.TIME_WINDOW_UNIT as TIME_UNITS,
         DEFAULT_VALUES.TIME_WINDOW_SIZE.toString()
       )}`
     );
-    expect(
-      wrapper.find('EuiEmptyPrompt[data-test-subj="visualizationPlaceholder"]').text()
-    ).toEqual(`Complete the expression to generate a preview.`);
-    expect(wrapper.find('input[data-test-subj="filterKuery"]').text()).toEqual('');
+    expect(screen.getByTestId('visualizationPlaceholder')).toHaveTextContent(
+      `Complete the expression to generate a preview.`
+    );
+    expect(screen.getByTestId('filterKuery')).toHaveValue('');
   });
 
-  test(`should use alert params when params are defined`, async () => {
+  test(`should use alert params when params are defined`, () => {
     const aggType = 'avg';
     const thresholdComparator = 'between';
     const timeWindowSize = 987;
@@ -191,7 +196,7 @@ describe('IndexThresholdRuleTypeExpression', () => {
     const termSize = '27';
     const termField = 'host.name';
 
-    const wrapper = await setup(
+    setup(
       getAlertParams({
         aggType,
         thresholdComparator,
@@ -204,24 +209,24 @@ describe('IndexThresholdRuleTypeExpression', () => {
       })
     );
 
-    expect(wrapper.find('button[data-test-subj="whenExpression"]').text()).toEqual(
+    expect(screen.getByTestId('whenExpression')).toHaveTextContent(
       `when ${builtInAggregationTypes[aggType].text}`
     );
-    expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
       `grouped over ${groupBy} ${termSize} '${termField}'`
     );
 
-    expect(wrapper.find('button[data-test-subj="thresholdPopover"]').text()).toEqual(
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent(
       `${builtInComparators[thresholdComparator].text} ${threshold[0]} AND ${threshold[1]}`
     );
-    expect(wrapper.find('button[data-test-subj="forLastExpression"]').text()).toEqual(
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent(
       `for the last ${timeWindowSize} ${getTimeUnitLabel(
         timeWindowUnit as TIME_UNITS,
         timeWindowSize.toString()
       )}`
     );
-    expect(
-      wrapper.find('EuiEmptyPrompt[data-test-subj="visualizationPlaceholder"]').text()
-    ).toEqual(`Complete the expression to generate a preview.`);
+    expect(screen.getByTestId('visualizationPlaceholder')).toHaveTextContent(
+      `Complete the expression to generate a preview.`
+    );
   });
 });

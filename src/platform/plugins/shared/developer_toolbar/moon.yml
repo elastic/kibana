@@ -4,25 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/developer-toolbar-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/developer-toolbar-plugin'
+  title: '@kbn/developer-toolbar-plugin'
   description: Moon project for @kbn/developer-toolbar-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/developer_toolbar
+  sourceRoot: src/platform/plugins/shared/developer_toolbar
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-browser'
   - '@kbn/developer-toolbar'
   - '@kbn/core-chrome-layout-components'
   - '@kbn/config-schema'
+  - '@kbn/core-chrome-browser-internal-types'
+  - '@kbn/measure-component'
 tags:
   - plugin
   - prod

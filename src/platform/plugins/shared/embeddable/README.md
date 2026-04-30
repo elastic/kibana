@@ -1,8 +1,9 @@
 ## Table of Contents
 
+  - [Embeddable overview](#embeddable-overview)
   - [Public](#public)
     - [Guiding principles](#guiding-principles)
-    - [Embeddable overview](#embeddable-overview)
+    - [Embeddable public overview](#embeddable-public-overview)
     - [Publishing packages](#publishing-packages)
     - [Embeddable panel](#embeddable-panel)
     - [Best practices](#best-practices)
@@ -10,6 +11,16 @@
   - [Server](#server)
     - [REST APIs](#rest-apis-considerations)
     - [Transforms](#transforms)
+
+
+## Embeddable overview
+Embeddables require registration in both server and public.
+
+### registerEmbeddableServerDefinition
+Server registration defines the embeddable schema and other information required to include embeddables in public REST APIs like "dashboards as code". 
+
+### registerEmbeddablePublicDefinition
+Public registration defines the embeddable's UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 
 
 
 ## Public
@@ -27,12 +38,12 @@ Each embeddable manages its own state. This is because the embeddable system all
 
 An embeddable API shares state via a publishing subject, a read only RxJS Observable. An embeddable API shares setter methods for updating state.
 
-### Embeddable overview
+### Embeddable public overview
 Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 Plugins register new embeddable types with the embeddable plugin.
 ```
-embeddablePublicSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
+embeddablePublicSetup.registerEmbeddablePublicDefinition('my_embeddable_type', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
   return myEmbeddableFactory;
 });
@@ -317,9 +328,10 @@ Containers use schemas to
 - Validate embeddable state, failing REST API requests when schema validation fails.
 
 ```
-embeddableServerSetup.registerTransforms(
-  'myEmbeddableType',
+embeddableServerSetup.registerEmbeddableServerDefinition(
+  'my_embeddable_type',
   {
+    title: 'My embeddable',
     getTransforms: (drilldownTransfroms) => ({
       transformIn: (state: EmbeddableState) => {
         return {

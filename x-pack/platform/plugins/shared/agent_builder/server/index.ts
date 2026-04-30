@@ -20,7 +20,27 @@ export type {
   AgentBuilderPluginStart,
   ToolsSetup,
   ToolsStart,
+  ConversationsStart,
+  ReadOnlyConversationClient,
 } from './types';
+
+export type { ConversationListOptions } from './services/conversation/client/types';
+
+export type {
+  SmlTypeDefinition,
+  SmlChunk,
+  SmlData,
+  SmlContext,
+  SmlToAttachmentContext,
+  SmlListItem,
+  SmlSearchResult,
+  SmlIndexAttachmentParams,
+} from '@kbn/agent-context-layer-plugin/server';
+
+export {
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+} from '@kbn/agent-context-layer-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
@@ -32,3 +52,9 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+
+export { ExecutionStatus } from '@kbn/agent-builder-common';
+export type {
+  ConversationExecutionParams,
+  ConversationAgentExecution,
+} from '@kbn/agent-builder-server/execution';

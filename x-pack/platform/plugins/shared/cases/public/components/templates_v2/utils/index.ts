@@ -45,3 +45,22 @@ export const checkTemplateExists = async (templateId: string): Promise<boolean> 
     return false;
   }
 };
+
+export const getYamlDefaultAsString = (rawDefault: unknown): string => {
+  if (rawDefault === undefined || rawDefault === null) {
+    return '';
+  }
+  if (typeof rawDefault === 'string') {
+    return rawDefault;
+  }
+  if (typeof rawDefault === 'number') {
+    return String(rawDefault);
+  }
+  if (rawDefault instanceof Date) {
+    return rawDefault.toISOString();
+  }
+  if (Array.isArray(rawDefault)) {
+    return JSON.stringify(rawDefault);
+  }
+  return '';
+};

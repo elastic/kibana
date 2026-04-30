@@ -22,6 +22,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -58,8 +59,12 @@ export const ProjectPicker = ({
     return null;
   }
 
+  if (isLoading) {
+    return <ProjectPickerSkeleton />;
+  }
+
   const activeProjectsCount =
-    isLoading || error || !originProject ? totalProjectCount : linkedProjects.length + 1;
+    error || !originProject ? totalProjectCount : linkedProjects.length + 1;
 
   const button = (
     <EuiToolTip
@@ -119,6 +124,7 @@ export const ProjectPicker = ({
         panelPaddingSize="none"
         panelProps={{ css: styles.popover }}
         hasArrow
+        aria-label={strings.getProjectPickerPopoverTitle()}
       >
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
@@ -132,6 +138,7 @@ export const ProjectPicker = ({
         </EuiPopoverTitle>
         {isReadonly && (
           <EuiCallOut
+            announceOnMount={false}
             size="s"
             css={styles.callout}
             title={strings.getProjectPickerReadonlyCallout()}
@@ -148,6 +155,10 @@ export const ProjectPicker = ({
     </EuiTourStep>
   );
 };
+
+export const ProjectPickerSkeleton = () => (
+  <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
+);
 
 export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount: number }) => {
   const styles = useMemoCss(projectPickerStyles);

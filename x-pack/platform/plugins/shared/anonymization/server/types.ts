@@ -6,6 +6,7 @@
  */
 
 import type { EffectivePolicy, AnonymizationProfile } from '@kbn/anonymization-common';
+import type { Logger } from '@kbn/logging';
 
 /**
  * Describes a target for effective policy resolution.
@@ -13,6 +14,35 @@ import type { EffectivePolicy, AnonymizationProfile } from '@kbn/anonymization-c
 export interface AnonymizationTarget {
   type: 'data_view' | 'index_pattern' | 'index';
   id: string;
+}
+
+export interface CreateAnonymizationProfileParams {
+  name: string;
+  description?: string;
+  targetType: AnonymizationTarget['type'];
+  targetId: string;
+  rules: AnonymizationProfile['rules'];
+  namespace: string;
+  createdBy: string;
+}
+
+export interface AnonymizationProfileInitializerContext {
+  namespace: string;
+  target: AnonymizationTarget;
+  logger: Logger;
+  findProfileByTarget: (
+    targetType: AnonymizationTarget['type'],
+    targetId: string
+  ) => Promise<AnonymizationProfile | null>;
+  createProfile: (params: CreateAnonymizationProfileParams) => Promise<AnonymizationProfile>;
+  ensureSalt: () => Promise<string>;
+  checkDataViewExists: (dataViewId: string) => Promise<boolean>;
+}
+
+export interface AnonymizationProfileInitializer {
+  id: string;
+  shouldInitialize: (params: { namespace: string; target: AnonymizationTarget }) => boolean;
+  initialize: (context: AnonymizationProfileInitializerContext) => Promise<void>;
 }
 
 /**
@@ -57,6 +87,7 @@ export interface AnonymizationPolicyService {
 
 export interface AnonymizationPluginSetup {
   isEnabled: () => boolean;
+  registerProfileInitializer: (initializer: AnonymizationProfileInitializer) => void;
 }
 
 export interface AnonymizationPluginStart {
@@ -69,4 +100,5 @@ export interface AnonymizationPluginStart {
    * Returns the policy service for resolving anonymization policy.
    */
   getPolicyService: () => AnonymizationPolicyService;
+  registerProfileInitializer: (initializer: AnonymizationProfileInitializer) => void;
 }

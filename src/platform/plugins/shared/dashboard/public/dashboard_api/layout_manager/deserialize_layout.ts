@@ -21,7 +21,7 @@ export function deserializeLayout(
     panels: {},
     sections: {},
     pinnedPanels: (pinnedPanels ?? []).reduce((prev, panel, index) => {
-      const panelId = panel.uid ?? v4();
+      const panelId = panel.id ?? v4();
       const { width, grow, type, config } = panel;
       childState[panelId] = config; // push to child state
       return { ...prev, [panelId]: { type, width, grow, order: index } };
@@ -29,7 +29,7 @@ export function deserializeLayout(
   };
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
-    const panelId = panel.uid ?? v4();
+    const panelId = panel.id ?? v4();
     layout.panels[panelId] = {
       type: panel.type,
       grid: {
@@ -44,12 +44,9 @@ export function deserializeLayout(
 
   panels?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, uid, ...restOfSection } = widget;
-      const sectionId = uid ?? v4();
-      layout.sections[sectionId] = {
-        collapsed: false,
-        ...restOfSection,
-      };
+      const { panels: sectionPanels, id, ...restOfSection } = widget;
+      const sectionId = id ?? v4();
+      layout.sections[sectionId] = restOfSection;
       sectionPanels.forEach((panel) => {
         pushPanel(panel, sectionId);
       });

@@ -1,0 +1,137 @@
+{
+  "id": "@kbn/core-chrome-browser-context",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-context",
+        "id": "def-common.ChromeServiceProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ChromeServiceProvider",
+        "description": [],
+        "signature": [
+          "({ children, value }: ",
+          "ChromeServiceProviderProps",
+          ") => React.FunctionComponentElement<React.ProviderProps<ChromeContextValue | null>>"
+        ],
+        "path": "src/core/packages/chrome/browser-context/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-context",
+            "id": "def-common.ChromeServiceProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, value }",
+            "description": [],
+            "signature": [
+              "ChromeServiceProviderProps"
+            ],
+            "path": "src/core/packages/chrome/browser-context/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 39,
+            "deprecated": false,
+            "docsReferencedTypeName": "ChromeServiceProviderProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-context",
+        "id": "def-common.useChromeService",
+        "type": "Function",
+        "tags": [],
+        "label": "useChromeService",
+        "description": [],
+        "signature": [
+          "() => ",
+          "InternalChromeStart"
+        ],
+        "path": "src/core/packages/chrome/browser-context/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-context",
+        "id": "def-common.ChromeServiceProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeServiceProviderProps",
+        "description": [],
+        "path": "src/core/packages/chrome/browser-context/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-context",
+            "id": "def-common.ChromeServiceProviderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/browser-context/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-context",
+            "id": "def-common.ChromeServiceProviderProps.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "ChromeContextValue"
+            ],
+            "path": "src/core/packages/chrome/browser-context/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

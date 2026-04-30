@@ -19,7 +19,8 @@ export const casesQueriesKeys = {
   alerts: ['alerts'] as const,
   userActions: ['user-actions'] as const,
   templates: ['templates'] as const,
-  template: (templateId: string) => [...casesQueriesKeys.templates, 'detail', templateId] as const,
+  template: (templateId: string, version?: number) =>
+    [...casesQueriesKeys.templates, 'detail', templateId, version ?? 'latest'] as const,
   templatesList: () => [...casesQueriesKeys.templates, 'list'] as const,
   templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
   templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
@@ -83,6 +84,7 @@ export const casesMutationsKeys = {
   exportTemplate: ['export-template'] as const,
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
+  changeAppliedTemplate: ['change-applied-template'] as const,
 };
 
 export const inferenceKeys = {
@@ -115,6 +117,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
   customFields: {},
+  extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,
   to: DEFAULT_TO_DATE,
 };

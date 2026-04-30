@@ -36,10 +36,6 @@ jest.mock('./inspector_header_link', () => ({
   InspectorHeaderLink: () => <div data-test-subj="mockInspectorLink">Inspector</div>,
 }));
 
-jest.mock('./give_feedback_header_link', () => ({
-  GiveFeedbackHeaderLink: () => <div data-test-subj="mockFeedbackLink">Feedback</div>,
-}));
-
 const mockGetAlertingCapabilities = jest.fn();
 jest.mock('../../../alerting/utils/get_alerting_capabilities', () => ({
   getAlertingCapabilities: () => mockGetAlertingCapabilities(),
@@ -153,12 +149,6 @@ describe('ApmHeaderActionMenu', () => {
       renderHeaderMenu(createMockContext());
 
       expect(screen.getByTestId('mockInspectorLink')).toBeInTheDocument();
-    });
-
-    it('renders feedback header link', () => {
-      renderHeaderMenu(createMockContext());
-
-      expect(screen.getByTestId('mockFeedbackLink')).toBeInTheDocument();
     });
   });
 

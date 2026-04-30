@@ -6,14 +6,14 @@
  */
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 
 interface SkillContextMenuProps {
-  skill: PublicSkillDefinition;
+  skill: PublicSkillSummary;
   onDelete: (skillId: string) => void;
   canManage: boolean;
 }

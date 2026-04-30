@@ -63,6 +63,7 @@
             "lineNumber": 537,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "AddEndpointExceptionListProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -86,7 +87,7 @@
             "section": "def-common.AddExceptionListItemProps",
             "text": "AddExceptionListItemProps"
           },
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/api/index.ts",
         "lineNumber": 115,
@@ -114,6 +115,7 @@
             "lineNumber": 115,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "AddExceptionListItemProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -165,6 +167,7 @@
             "lineNumber": 71,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "AddExceptionListProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -216,6 +219,7 @@
             "lineNumber": 299,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -267,6 +271,7 @@
             "lineNumber": 198,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateListItemParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -318,6 +323,7 @@
             "lineNumber": 467,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiCallByIdProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -341,7 +347,7 @@
             "section": "def-common.ApiCallByIdProps",
             "text": "ApiCallByIdProps"
           },
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/api/index.ts",
         "lineNumber": 504,
@@ -369,6 +375,7 @@
             "lineNumber": 504,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiCallByIdProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -420,6 +427,7 @@
             "lineNumber": 113,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "DeleteListItemParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -471,6 +479,7 @@
             "lineNumber": 221,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "DeleteListParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -526,6 +535,7 @@
             "lineNumber": 650,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "DuplicateExceptionListProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -581,6 +591,7 @@
             "lineNumber": 561,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "ExportExceptionListProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -632,6 +643,7 @@
             "lineNumber": 251,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "ExportListParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -683,6 +695,7 @@
             "lineNumber": 312,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiCallByIdProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -706,7 +719,7 @@
             "section": "def-common.ApiCallByIdProps",
             "text": "ApiCallByIdProps"
           },
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/api/index.ts",
         "lineNumber": 430,
@@ -734,6 +747,7 @@
             "lineNumber": 430,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiCallByIdProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -757,7 +771,7 @@
             "section": "def-common.ApiCallByListIdProps",
             "text": "ApiCallByListIdProps"
           },
-          ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }>"
+          ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/api/index.ts",
         "lineNumber": 377,
@@ -785,6 +799,7 @@
             "lineNumber": 377,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiCallByListIdProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -836,6 +851,7 @@
             "lineNumber": 261,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiCallFetchExceptionListsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -887,6 +903,7 @@
             "lineNumber": 71,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "FindListItemsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -938,6 +955,7 @@
             "lineNumber": 134,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "FindListsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -989,6 +1007,7 @@
             "lineNumber": 89,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "FindListsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1052,6 +1071,7 @@
             "lineNumber": 589,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "GetExceptionFilterFromExceptionListIdsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1115,6 +1135,7 @@
             "lineNumber": 618,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "GetExceptionFilterFromExceptionsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1166,6 +1187,7 @@
             "lineNumber": 326,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "GetListByIdParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1217,6 +1239,7 @@
             "lineNumber": 179,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "ImportListParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1268,6 +1291,7 @@
             "lineNumber": 155,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "PatchListItemParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1319,6 +1343,7 @@
             "lineNumber": 272,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1370,6 +1395,7 @@
             "lineNumber": 285,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1447,6 +1473,7 @@
             "lineNumber": 14,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "TaskEither",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1470,7 +1497,7 @@
             "section": "def-common.UpdateExceptionListItemProps",
             "text": "UpdateExceptionListItemProps"
           },
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/api/index.ts",
         "lineNumber": 203,
@@ -1498,6 +1525,7 @@
             "lineNumber": 203,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdateExceptionListItemProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1549,6 +1577,7 @@
             "lineNumber": 159,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdateExceptionListProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1644,7 +1673,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | \"wait_for\" | undefined"
+              "\"true\" | \"false\" | \"wait_for\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 74,
@@ -1719,7 +1748,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | undefined"
+              "\"true\" | \"false\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 62,
@@ -2254,7 +2283,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | \"wait_for\" | undefined"
+              "\"true\" | \"false\" | \"wait_for\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 52,
@@ -2303,7 +2332,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | undefined"
+              "\"true\" | \"false\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 67,

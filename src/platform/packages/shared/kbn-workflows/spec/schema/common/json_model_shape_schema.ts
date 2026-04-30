@@ -30,26 +30,18 @@ export type JsonSchemaType = (typeof JSON_SCHEMA_TYPE_VALUES)[number];
  * Common JSON Schema format annotation values (Draft 7 / 2020-12 standard).
  * Single source of truth for autocomplete suggestions.
  * Reference: https://json-schema.org/draft-07/schema#section-7.3
+ *
+ * Only formats that fromJSONSchema actively validates are listed here.
+ * Omitted formats (ipv4, ipv6, hostname, regex, etc.) are not enforced by the
+ * converter, so we don't suggest them — users can use `pattern` instead.
  */
 export const JSON_SCHEMA_FORMAT_VALUES = [
   'date-time',
   'date',
   'time',
   'email',
-  'idn-email',
-  'hostname',
-  'idn-hostname',
-  'ipv4',
-  'ipv6',
-  'uri',
-  'uri-reference',
-  'iri',
-  'iri-reference',
-  'uri-template',
-  'json-pointer',
-  'relative-json-pointer',
-  'regex',
   'uuid',
+  'uri',
 ] as const;
 
 export interface JsonSchema {
@@ -61,18 +53,14 @@ export interface JsonSchema {
   default?: string | number | boolean | null | object;
   $ref?: string;
 
-  // Logical Composition
-  allOf?: JsonSchema[];
+  // Logical Composition (allOf is omitted)
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
-  not?: JsonSchema;
 
   // Structure
   properties?: Record<string, JsonSchema>;
-  patternProperties?: Record<string, JsonSchema>;
-  additionalProperties?: boolean | JsonSchema;
+  additionalProperties?: boolean;
   items?: JsonSchema | JsonSchema[];
-  prefixItems?: JsonSchema[];
   required?: string[];
 
   // Reusability
@@ -110,15 +98,11 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'enum',
   'const',
   'properties',
-  'patternProperties',
   'additionalProperties',
   'required',
   'items',
-  'prefixItems',
-  'allOf',
   'anyOf',
   'oneOf',
-  'not',
   '$ref',
   'definitions',
   'minimum',
@@ -134,18 +118,20 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'uniqueItems',
 ] as const satisfies readonly (keyof JsonSchema)[];
 
+/** Shared `type` keyword (single type or array of types). */
+const jsonSchemaTypeField = z
+  .union([z.enum(JSON_SCHEMA_TYPE_VALUES), z.array(z.enum(JSON_SCHEMA_TYPE_VALUES))])
+  .optional();
+
 /**
- * Zod schema representing any JSON Schema node (Draft 7 / 2020-12).
- * Used recursively inside property definitions, allOf/anyOf/oneOf, etc.
- * Allows the full set of JSON Schema keywords because an individual
- * property can be any type (string, number, array, object, ...).
+ * Zod schema representing any JSON Schema node (Draft 7 / 2020-12)
+ * Used recursively inside property definitions, anyOf/oneOf, etc...
+ * Only includes keywords that the fromJSONSchema converter actually enforces
  */
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
     z.object({
-      type: z
-        .union([z.enum(JSON_SCHEMA_TYPE_VALUES), z.array(z.enum(JSON_SCHEMA_TYPE_VALUES))])
-        .optional(),
+      type: jsonSchemaTypeField,
       title: z.string().optional(),
       description: z.string().optional(),
       format: z.enum(JSON_SCHEMA_FORMAT_VALUES).optional(),
@@ -153,20 +139,16 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       $ref: z.string().optional(),
 
       // --- Logical Operators ---
-      allOf: z.array(JsonModelShapeSchema).optional(),
       anyOf: z.array(JsonModelShapeSchema).optional(),
       oneOf: z.array(JsonModelShapeSchema).optional(),
-      not: JsonModelShapeSchema.optional(),
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-      patternProperties: z.record(z.string(), JsonModelShapeSchema).optional(),
-      additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
+      additionalProperties: z.boolean().optional(),
       required: z.array(z.string()).optional(),
 
       // --- Array Properties ---
       items: z.union([JsonModelShapeSchema, z.array(JsonModelShapeSchema)]).optional(),
-      prefixItems: z.array(JsonModelShapeSchema).optional(),
       minItems: z.number().int().nonnegative().optional(),
       maxItems: z.number().int().nonnegative().optional(),
       uniqueItems: z.boolean().optional(),
@@ -205,8 +187,7 @@ export const JsonModelRootShapeSchema = z
     description: z.string().optional(),
     $ref: z.string().optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-    patternProperties: z.record(z.string(), JsonModelShapeSchema).optional(),
-    additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
+    additionalProperties: z.boolean().optional(),
     required: z.array(z.string()).optional(),
     definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
     $defs: z.record(z.string(), JsonModelShapeSchema).optional(),

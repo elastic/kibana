@@ -72,6 +72,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ISearchSource",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -89,6 +90,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CsvConfigType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -335,7 +337,7 @@
           "\nPublic-facing interface\nApps should use this interface to build job params. The browserTimezone and version\nfields become automatically provided by Reporting"
         ],
         "signature": [
-          "{ objectType: string; title: string; columns?: string[] | undefined; forceNow?: string | undefined; layout?: { id?: ",
+          "{ title: string; objectType: string; columns?: string[] | undefined; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -372,7 +374,7 @@
         "label": "JobAppParamsCsvV2",
         "description": [],
         "signature": [
-          "{ objectType: string; title: string; forceNow?: string | undefined; layout?: { id?: ",
+          "{ title: string; objectType: string; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",

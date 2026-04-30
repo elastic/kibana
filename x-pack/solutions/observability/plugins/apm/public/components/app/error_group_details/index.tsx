@@ -11,10 +11,7 @@ import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -208,9 +205,8 @@ export function ErrorGroupDetails() {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setChatConfig({
       newConversation: true,
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
@@ -226,7 +222,7 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, errorId, serviceName, environment, start, end]);
 
@@ -241,11 +237,24 @@ export function ErrorGroupDetails() {
         <EuiFlexItem grow={3}>
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
-              fetchStatus={errorDistributionStatus}
-              distribution={errorDistributionData}
               title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
                 defaultMessage: 'Error occurrences',
               })}
+              fetchStatus={errorDistributionStatus}
+              distribution={errorDistributionData}
+              discoverParams={{
+                label: i18n.translate('xpack.apm.errorGroupDetails.openErrorGroupInDiscover', {
+                  defaultMessage: 'Open error group in Discover',
+                }),
+                rangeFrom,
+                rangeTo,
+                queryParams: {
+                  kuery,
+                  serviceName,
+                  errorGroupId: groupId,
+                  sortDirection: 'DESC',
+                },
+              }}
             />
           </EuiPanel>
         </EuiFlexItem>

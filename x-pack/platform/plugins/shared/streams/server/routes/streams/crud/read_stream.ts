@@ -99,7 +99,7 @@ export async function readStream({
   const privileges = await streamsClient.getPrivileges(name);
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, dataStreamSettings] = await Promise.all([
+  const [ancestors, dataStream] = await Promise.all([
     streamsClient.getAncestors(name),
     privileges.view_index_metadata
       ? streamsClient.getDataStream(name).catch((e) => {
@@ -109,26 +109,33 @@ export async function readStream({
           throw e;
         })
       : Promise.resolve(null),
-    privileges.view_index_metadata
-      ? scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
-          if (isNotFoundError(e)) {
-            return null;
-          }
-          throw e;
-        })
-      : Promise.resolve(null),
   ]);
+
+  // Skip getDataStreamSettings for replicated data streams — they have no local
+  // index template and the ES API returns HTTP 400 in that case.
+  const dataStreamSettings =
+    privileges.view_index_metadata && !dataStream?.replicated
+      ? await scopedClusterClient.asCurrentUser.indices
+          .getDataStreamSettings({ name })
+          .catch((e) => {
+            if (isNotFoundError(e)) {
+              return null;
+            }
+            throw e;
+          })
+      : null;
 
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
       index_mode: dataStream?.index_mode,
+      replicated: dataStream?.replicated ?? false,
       elasticsearch_assets:
-        dataStream && privileges.manage
+        dataStream && privileges.manage && dataStream.replicated !== true
           ? await getUnmanagedElasticsearchAssets({
               dataStream,
-              scopedClusterClient,
+              esClient: scopedClusterClient.asCurrentUser,
             })
           : undefined,
       data_stream_exists: !!dataStream,
@@ -168,6 +175,7 @@ export async function readStream({
     privileges,
     queries,
     index_mode: dataStream?.index_mode,
+    replicated: dataStream?.replicated ?? false,
     data_stream_exists: !!dataStream,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),

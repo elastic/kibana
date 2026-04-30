@@ -14,8 +14,6 @@ import type {
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isLiteral } from '@elastic/esql';
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type {
   GetColumnsByTypeFn,
   ICommandCallbacks,
@@ -23,10 +21,7 @@ import type {
   ISuggestionItem,
 } from '../../../registry/types';
 import { Location } from '../../../registry/types';
-import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
-import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
@@ -53,19 +48,8 @@ export const buildUserDefinedColumnsDefinitions = (
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.variableDefinition', {
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
-    sortText: 'D',
     category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
-
-export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
-  if (!shouldPromote) {
-    return suggestions;
-  }
-  return suggestions.map(({ sortText, ...rest }) => ({
-    ...rest,
-    sortText: `1${sortText}`,
-  }));
-}
 
 export const findFinalWord = (text: string) => {
   const words = text.split(/\s+/);
@@ -82,72 +66,12 @@ export function withinQuotes(text: string) {
   return quoteCount % 2 === 1;
 }
 
-/**
- * This function handles the logic to suggest completions
- * for a given fragment of text in a generic way. A good example is
- * a field name.
- *
- * When typing a field name, there are 2 scenarios
- *
- * 1. field name is incomplete (includes the empty string)
- * KEEP /
- * KEEP fie/
- *
- * 2. field name is complete
- * KEEP field/
- *
- * This function provides a framework for detecting and handling both scenarios in a clean way.
- *
- * @param innerText - the query text before the current cursor position
- * @param isFragmentComplete — return true if the fragment is complete
- * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
- * @param getSuggestionsForComplete - gets suggestions for a complete fragment
- * @returns
- */
-export function handleFragment(
-  innerText: string,
-  isFragmentComplete: (fragment: string) => boolean,
-  getSuggestionsForIncomplete: (
-    fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => ISuggestionItem[] | Promise<ISuggestionItem[]>,
-  getSuggestionsForComplete: (
-    fragment: string,
-    rangeToReplace: { start: number; end: number }
-  ) => ISuggestionItem[] | Promise<ISuggestionItem[]>
-): ISuggestionItem[] | Promise<ISuggestionItem[]> {
-  const { fragment, rangeToReplace } = getFragmentData(innerText);
-  if (!fragment) {
-    return getSuggestionsForIncomplete('');
-  } else {
-    if (isFragmentComplete(fragment)) {
-      return getSuggestionsForComplete(fragment, rangeToReplace);
-    } else {
-      return getSuggestionsForIncomplete(fragment, rangeToReplace);
-    }
-  }
-}
-
-export function getFragmentData(innerText: string) {
-  const fragment = findFinalWord(innerText);
-  if (!fragment) {
-    return { fragment: '', rangeToReplace: { start: 0, end: 0 } };
-  } else {
-    const rangeToReplace = {
-      start: innerText.length - fragment.length,
-      end: innerText.length,
-    };
-    return { fragment, rangeToReplace };
-  }
-}
-
 interface FieldSuggestionsOptions {
   ignoreColumns?: string[];
   values?: boolean;
   addSpaceAfterField?: boolean;
   openSuggestions?: boolean;
   addComma?: boolean;
-  promoteToTop?: boolean;
   canBeMultiValue?: boolean;
 }
 
@@ -162,7 +86,6 @@ export async function getFieldsSuggestions(
     addSpaceAfterField = false,
     openSuggestions = false,
     addComma = false,
-    promoteToTop = true,
     canBeMultiValue = false,
   } = options;
 
@@ -172,14 +95,12 @@ export async function getFieldsSuggestions(
     return ESQLVariableType.FIELDS;
   })();
 
-  const suggestions = await getFieldsByType(types, ignoreColumns, {
+  return (await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
     variableType,
-  });
-
-  return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
+  })) as ISuggestionItem[];
 }
 
 interface FunctionSuggestionOptions {
@@ -332,7 +253,6 @@ export function getControlSuggestion(
             detail: i18n.translate('kbn-esql-language.esql.autocomplete.createControlDetailLabel', {
               defaultMessage: 'Click to create',
             }),
-            sortText: '1',
             category: SuggestionCategory.CUSTOM_ACTION,
             command: {
               id: `esql.control.${type}.create`,
@@ -353,7 +273,6 @@ export function getControlSuggestion(
           i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A',
           undefined,
           undefined,
           SuggestionCategory.USER_DEFINED_COLUMN
@@ -387,141 +306,6 @@ export function getControlSuggestionIfSupported(
   return controlSuggestion;
 }
 
-function getValidFunctionSignaturesForPreviousArgs(
-  fnDefinition: FunctionDefinition,
-  enrichedArgs: Array<
-    ESQLAstItem & {
-      dataType: SupportedDataType | 'unknown';
-    }
-  >,
-  argIndex: number
-) {
-  // Filter down to signatures that match every params up to the current argIndex
-  // e.g. BUCKET(longField, /) => all signatures with first param as long column type
-  // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
-  const relevantFuncSignatures = fnDefinition.signatures.filter(
-    (s) =>
-      s.params?.length >= argIndex &&
-      s.params
-        .slice(0, argIndex)
-        .every(({ type: dataType }, idx) =>
-          argMatchesParamType(
-            enrichedArgs[idx].dataType,
-            dataType,
-            isLiteral(enrichedArgs[idx]),
-            true
-          )
-        )
-  );
-  return relevantFuncSignatures;
-}
-
-/**
- * Given a function signature, returns the compatible types to suggest for the next argument
- *
- * @param fnDefinition: the function definition
- * @param enrichedArgs: AST args with enriched esType info to match with function signatures
- * @param argIndex: the index of the argument to suggest for
- * @returns
- */
-function getCompatibleParamDefs(
-  fnDefinition: FunctionDefinition,
-  enrichedArgs: Array<
-    ESQLAstItem & {
-      dataType: SupportedDataType | 'unknown';
-    }
-  >,
-  argIndex: number
-) {
-  // First, narrow down to valid function signatures based on previous arguments
-  const relevantFuncSignatures = getValidFunctionSignaturesForPreviousArgs(
-    fnDefinition,
-    enrichedArgs,
-    argIndex
-  );
-
-  // Then, get the compatible types to suggest for the next argument
-  const compatibleTypesToSuggestForArg = uniqBy(
-    relevantFuncSignatures
-      .map((signature) => getParamAtPosition(signature, argIndex))
-      .filter(
-        (param): param is NonNullable<ReturnType<typeof getParamAtPosition>> => param != null
-      ),
-    (param) => `${param.type}-${param.constantOnly}`
-  );
-  return compatibleTypesToSuggestForArg;
-}
-
-/**
- * Given a function signature, returns the parameter at the given position, even if it's undefined or null
- *
- * @param {params}
- * @param position
- * @returns
- */
-function strictlyGetParamAtPosition(
-  { params }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params[position] ? params[position] : null;
-}
-
-export function getValidSignaturesAndTypesToSuggestNext(
-  node: ESQLFunction,
-  context: ICommandContext,
-  fnDefinition: FunctionDefinition
-) {
-  const argTypes = node.args.map((arg) =>
-    getExpressionType(arg, context?.columns, context?.unmappedFieldsStrategy)
-  );
-  const enrichedArgs = node.args.map((arg, idx) => ({
-    ...arg,
-    dataType: argTypes[idx],
-  })) as Array<
-    ESQLAstItem & {
-      dataType: SupportedDataType | 'unknown';
-    }
-  >;
-
-  // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER); // NOTE: I think this is checking if the cursor is after a comma.
-  let argIndex = Math.max(node.args.length, 0);
-  if (!shouldGetNextArgument && argIndex) {
-    argIndex -= 1;
-  }
-
-  // For signature filtering: check ALL arguments to eliminate incompatible signatures
-  // BUT only for functions with multiple signatures (overloaded functions like BUCKET)
-  // For single-signature or variadic functions, use the original behavior
-  const isVariadic = fnDefinition.signatures.some((sig) => sig.minParams != null);
-  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
-  const argsToCheckForFiltering =
-    isVariadic || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : enrichedArgs.length;
-
-  const validSignatures = getValidFunctionSignaturesForPreviousArgs(
-    fnDefinition,
-    enrichedArgs,
-    argsToCheckForFiltering
-  );
-  // Retrieve unique of types that are compatiable for the current arg
-  const compatibleParamDefs = getCompatibleParamDefs(fnDefinition, enrichedArgs, argIndex);
-  const hasMoreMandatoryArgs = !validSignatures
-    // Types available to suggest next after this argument is completed
-    .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
-    // when a param is null, it means param is optional
-    // If there's at least one param that is optional, then
-    // no need to suggest comma
-    .some((p) => p === null || p?.optional === true);
-
-  return {
-    compatibleParamDefs,
-    hasMoreMandatoryArgs,
-    enrichedArgs,
-    argIndex,
-    validSignatures,
-  };
-}
-
 export function createInferenceEndpointToCompletionItem(
   inferenceEndpoint: InferenceEndpointAutocompleteItem
 ): ISuggestionItem {
@@ -531,7 +315,6 @@ export function createInferenceEndpointToCompletionItem(
     }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
-    sortText: '1',
     text: inferenceEndpoint.inference_id,
     category: SuggestionCategory.VALUE,
   };
@@ -606,18 +389,7 @@ function createMultiCommand(
   };
 }
 
-export function getLookupIndexCreateSuggestion(
-  innerText: string,
-  indexName?: string
-): ISuggestionItem {
-  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
-  const rangeToReplace =
-    indexName && start !== -1
-      ? {
-          start,
-          end: start + indexName.length,
-        }
-      : undefined;
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
   return {
     label: indexName
       ? i18n.translate(
@@ -647,8 +419,6 @@ export function getLookupIndexCreateSuggestion(
       }
     ),
 
-    sortText: '0',
-
     category: SuggestionCategory.CUSTOM_ACTION,
 
     command: {
@@ -664,8 +434,6 @@ export function getLookupIndexCreateSuggestion(
 
       arguments: [{ indexName }],
     },
-
-    rangeToReplace,
 
     incomplete: true,
   } as ISuggestionItem;

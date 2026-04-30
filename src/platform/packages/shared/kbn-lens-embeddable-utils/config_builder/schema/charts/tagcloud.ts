@@ -10,109 +10,143 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { builderEnums } from '../enums';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 
-const tagcloudStateMetricOptionsSchema = {
-  /**
-   * Whether to show the metric label
-   */
-  show_metric_label: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Show metric label' },
-      defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
-    })
-  ),
-};
-
-const tagcloudStateTagsByOptionsSchema = {
+const tagcloudConfigTagsByOptionsSchema = {
   /**
    * Color configuration
    */
   color: schema.maybe(colorMappingSchema),
 };
 
-const tagcloudStateSharedOptionsSchema = {
-  orientation: schema.maybe(
-    builderEnums.orientation({
-      meta: { description: 'Orientation of the tagcloud' },
-      defaultValue: 'horizontal',
-    })
-  ),
-  font_size: schema.maybe(
-    schema.object(
-      {
-        min: schema.number({
-          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
-          min: 1,
-          meta: { description: 'Minimum font size' },
-        }),
-        max: schema.number({
-          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
-          max: 120,
-          meta: { description: 'Maximum font size' },
-        }),
-      },
-      { meta: { description: 'Minimum and maximum font size for the tags' } }
-    )
-  ),
-};
-
-export const tagcloudStateSchemaNoESQL = schema.object(
+const tagcloudStylingSchema = schema.object(
   {
-    type: schema.literal('tagcloud'),
-    ...sharedPanelInfoSchema,
-    ...dslOnlyPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetSchema,
-    ...tagcloudStateSharedOptionsSchema,
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      tagcloudStateMetricOptionsSchema
+    orientation: schema.maybe(
+      builderEnums.orientation({
+        meta: { description: 'Orientation of the tagcloud.' },
+        defaultValue: 'horizontal',
+      })
+    ),
+    font_size: schema.maybe(
+      schema.object(
+        {
+          min: schema.number({
+            defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
+            min: 1,
+            meta: { description: 'Minimum font size.' },
+          }),
+          max: schema.number({
+            defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
+            max: 120,
+            meta: { description: 'Maximum font size.' },
+          }),
+        },
+        { meta: { description: 'Font size range for tags.' } }
+      )
     ),
     /**
-     * Configure how to break down to tags
+     * Show the metric caption
      */
-    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
+    caption: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({
+            meta: { description: 'When `true`, displays the caption.' },
+            defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
+          }),
+        },
+        {
+          meta: {
+            description:
+              'Caption configuration representing the metric and the tag_by operations labels',
+          },
+        }
+      )
+    ),
   },
-  { meta: { id: 'tagcloudNoESQL', title: 'Tag Cloud Chart (DSL)' } }
-);
-
-export const tagcloudStateSchemaESQL = schema.object(
   {
-    type: schema.literal('tagcloud'),
-    ...sharedPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
-    ...tagcloudStateSharedOptionsSchema,
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(tagcloudStateMetricOptionsSchema),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term).
-     */
-    tag_by: esqlColumnSchema.extends(tagcloudStateTagsByOptionsSchema),
-  },
-  { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
-);
-
-export const tagcloudStateSchema = schema.oneOf(
-  [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
-  {
-    meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },
+    meta: {
+      id: 'tagcloudStyling',
+      title: 'Tag cloud styling',
+      description: 'Visual chart styling options',
+    },
   }
 );
 
-export type TagcloudState = TypeOf<typeof tagcloudStateSchema>;
-export type TagcloudStateNoESQL = TypeOf<typeof tagcloudStateSchemaNoESQL>;
-export type TagcloudStateESQL = TypeOf<typeof tagcloudStateSchemaESQL>;
+export const tagcloudConfigSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('tag_cloud'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceSchema,
+    styling: schema.maybe(tagcloudStylingSchema),
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}, 'tagcloudMetric'),
+    /**
+     * Configure how to break down to tags
+     */
+    tag_by: mergeAllBucketsWithChartDimensionSchema(
+      tagcloudConfigTagsByOptionsSchema,
+      'tagcloudTag'
+    ),
+  },
+  {
+    meta: {
+      id: 'tagcloudNoESQL',
+      title: 'Tag Cloud Chart (DSL)',
+      description: 'Tag Cloud configuration using a data view.',
+    },
+  }
+);
+
+export const tagcloudConfigSchemaESQL = schema.object(
+  {
+    type: schema.literal('tag_cloud'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceEsqlTableSchema,
+    styling: schema.maybe(tagcloudStylingSchema),
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: esqlColumnWithFormatSchema,
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    tag_by: esqlColumnWithFormatSchema.extends(tagcloudConfigTagsByOptionsSchema),
+  },
+  {
+    meta: {
+      id: 'tagcloudESQL',
+      title: 'Tag Cloud Chart (ES|QL)',
+      description: 'Tag Cloud configuration using an ES|QL query.',
+    },
+  }
+);
+
+export const tagcloudConfigSchema = objectUnion(
+  [tagcloudConfigSchemaNoESQL, tagcloudConfigSchemaESQL],
+  {
+    meta: {
+      id: 'tagcloudChart',
+      title: 'Tag Cloud Chart',
+      description: 'A word cloud with terms sized by metric value.',
+    },
+  }
+);
+
+export type TagcloudConfig = TypeOf<typeof tagcloudConfigSchema>;
+export type TagcloudConfigNoESQL = TypeOf<typeof tagcloudConfigSchemaNoESQL>;
+export type TagcloudConfigESQL = TypeOf<typeof tagcloudConfigSchemaESQL>;

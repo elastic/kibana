@@ -11,8 +11,8 @@ import { stringify, type ToStringOptions } from 'yaml';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { isBuiltInStepType } from '@kbn/workflows';
+import { getZodTypeName } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { getZodTypeName } from '../../../../../common/lib/zod';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
@@ -134,7 +134,6 @@ export function connectorTypeRequiresConnectorId(
   dynamicConnectorTypes?: Record<string, unknown>
 ): boolean {
   // Built-in step types don't need connector-id
-  // Use isBuiltInStepType to check against the actual schema definition
   if (isBuiltInStepType(connectorType)) {
     return false;
   }

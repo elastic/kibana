@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
+import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { WorkflowTaskManager } from './workflow_task_manager';
 import { generateExecutionTaskScope } from '../utils';
@@ -171,6 +172,61 @@ describe('WorkflowTaskManager', () => {
           fakeRequest,
         })
       ).rejects.toThrow('Task scheduling failed');
+    });
+  });
+
+  describe('scheduleImmediateResume', () => {
+    it('should schedule a resume task with WORKFLOW_RESUME_TASK_TYPE and no runAt', async () => {
+      mockTaskManager.schedule.mockResolvedValue({ id: 'immediate-task-id' } as any);
+
+      const result = await workflowTaskManager.scheduleImmediateResume({
+        executionId: 'exec-789',
+        spaceId: 'default',
+        fakeRequest,
+      });
+
+      expect(result).toEqual({ taskId: 'immediate-task-id' });
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: {
+            workflowRunId: 'exec-789',
+            spaceId: 'default',
+          } as ResumeWorkflowExecutionParams,
+          state: {},
+          scope: ['workflow:execution:exec-789'],
+        }),
+        { request: fakeRequest }
+      );
+      // runAt must not be set — task runs at the next available slot
+      const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
+      expect(scheduledTask.runAt).toBeUndefined();
+    });
+
+    it('should use executionId-scoped scope string', async () => {
+      mockTaskManager.schedule.mockResolvedValue({ id: 'task-id' } as any);
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId: 'exec-abc',
+        spaceId: 'space-x',
+        fakeRequest,
+      });
+
+      const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
+      expect(scheduledTask.scope).toEqual(['workflow:execution:exec-abc']);
+      expect(scheduledTask.params.spaceId).toBe('space-x');
+    });
+
+    it('should propagate scheduling errors', async () => {
+      mockTaskManager.schedule.mockRejectedValue(new Error('Task manager unavailable'));
+
+      await expect(
+        workflowTaskManager.scheduleImmediateResume({
+          executionId: 'exec-fail',
+          spaceId: 'default',
+          fakeRequest,
+        })
+      ).rejects.toThrow('Task manager unavailable');
     });
   });
 

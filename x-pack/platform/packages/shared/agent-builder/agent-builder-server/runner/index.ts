@@ -22,6 +22,7 @@ export type {
   RunToolParams,
   RunToolReturn,
 } from './runner';
+export { getAgentFromRunContext } from './run_context_utils';
 export {
   type AgentBuilderToolEvent,
   type ToolEventHandlerFn,
@@ -44,10 +45,12 @@ export type {
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
+  ModelSelectionPreferences,
 } from './model_provider';
 export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } from './result_store';
 export type { AttachmentsService } from './attachments_service';
-export type { SkillsService } from './skills_service';
+export type { SkillsService, SkillRegistryListOptions } from './skills_service';
+export type { PluginsService } from './plugins_service';
 export type { ToolManager } from './tool_manager';
 export { ToolManagerToolType } from './tool_manager';
 export type { SkillsStore, WritableSkillsStore } from './skills_store';

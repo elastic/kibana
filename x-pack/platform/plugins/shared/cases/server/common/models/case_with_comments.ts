@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { intersection } from 'lodash';
 import {
@@ -41,7 +42,7 @@ import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
-  flattenCommentSavedObjects,
+  flattenAttachmentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
@@ -58,6 +59,7 @@ import type {
 } from '../../../common/types/api';
 import type {
   AttachmentAttributesV2,
+  AttachmentMode,
   UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 
@@ -98,10 +100,12 @@ export class CaseCommentModel {
     updateRequest,
     updatedAt,
     owner,
+    mode = 'legacy',
   }: {
     updateRequest: AttachmentPatchRequestV2;
     updatedAt: string;
     owner: string;
+    mode?: AttachmentMode;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
@@ -123,7 +127,8 @@ export class CaseCommentModel {
         queryRestAttributes.comment
       ) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
-          attachmentId: id,
+          savedObjectId: id,
+          mode,
         })) as SavedObject<UserCommentAttachmentPayload>;
 
         const updatedReferences = getOrUpdateLensReferences(
@@ -141,14 +146,13 @@ export class CaseCommentModel {
 
       const [comment, commentableCase] = await Promise.all([
         this.params.services.attachmentService.update({
-          attachmentId: id,
+          savedObjectId: id,
           updatedAttributes: {
             ...queryRestAttributes,
             updated_at: updatedAt,
             updated_by: this.params.user,
           },
           options,
-          owner,
         }),
         this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
@@ -249,7 +253,7 @@ export class CaseCommentModel {
         type: UserActionTypes.comment,
         action: UserActionActions.update,
         caseId: this.caseInfo.id,
-        attachmentId: comment.id,
+        savedObjectId: comment.id,
         payload: { attachment: queryRestAttributes },
         user: this.params.user,
         owner,
@@ -264,12 +268,10 @@ export class CaseCommentModel {
     createdDate,
     commentReq,
     id,
-    owner,
   }: {
     createdDate: string;
     commentReq: AttachmentRequestV2;
     id: string;
-    owner: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
@@ -294,7 +296,6 @@ export class CaseCommentModel {
         references,
         id,
         refresh: true,
-        owner,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -305,10 +306,10 @@ export class CaseCommentModel {
         isLegacyAttachmentRequest(attachment)
           ? [
               commentableCase.handleAlertComments([attachment]),
-              this.createLegacyCommentUserAction(comment, attachment),
+              this.createCommentUserAction(comment, attachment),
             ]
           : // TO-DO: handle alert comments for unified attachments
-            [this.createUnifiedCommentUserAction(comment, attachment, owner)]
+            [this.createCommentUserAction(comment, attachment)]
       );
 
       return commentableCase;
@@ -341,6 +342,7 @@ export class CaseCommentModel {
     const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
       {
         caseId: this.caseInfo.id,
+        owner: this.caseInfo.attributes.owner,
       }
     );
 
@@ -426,13 +428,7 @@ export class CaseCommentModel {
       }
     }
 
-    if (
-      req.some(
-        (attachment) =>
-          isLegacyAttachmentRequest(attachment) &&
-          attachment.owner !== this.caseInfo.attributes.owner
-      )
-    ) {
+    if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
 
@@ -514,16 +510,16 @@ export class CaseCommentModel {
     });
   }
 
-  private async createLegacyCommentUserAction(
+  private async createCommentUserAction(
     comment: SavedObject<AttachmentAttributesV2>,
-    req: AttachmentRequest
+    req: AttachmentRequestV2
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.comment,
         action: UserActionActions.create,
         caseId: this.caseInfo.id,
-        attachmentId: comment.id,
+        savedObjectId: comment.id,
         payload: {
           attachment: req,
         },
@@ -534,37 +530,16 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequestV2>,
-    owner: string
+    attachments: Array<{ id: string } & AttachmentRequestV2>
   ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
         id,
-        owner: isLegacyAttachmentRequest(attachment) ? attachment.owner : owner,
+        owner: attachment.owner,
         attachment,
       })),
       user: this.params.user,
-    });
-  }
-
-  private async createUnifiedCommentUserAction(
-    comment: SavedObject<AttachmentAttributesV2>,
-    req: UnifiedAttachmentPayload,
-    owner: string
-  ) {
-    await this.params.services.userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.comment,
-        action: UserActionActions.create,
-        caseId: this.caseInfo.id,
-        attachmentId: comment.id,
-        payload: {
-          attachment: req,
-        },
-        user: this.params.user,
-        owner,
-      },
     });
   }
 
@@ -577,7 +552,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments(): Promise<Case> {
+  public async encodeWithComments({ mode }: { mode: AttachmentMode }): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -586,13 +561,21 @@ export class CaseCommentModel {
           page: 1,
           perPage: MAX_DOCS_PER_PAGE,
         },
+        mode,
       });
-
-      const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
-      const totalEvents = countEventsForID({ comments }) ?? 0;
+      // casting alert and event to legacy until they are migrated
+      const totalAlerts =
+        countAlertsForID({
+          comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
+          id: this.caseInfo.id,
+        }) ?? 0;
+      const totalEvents =
+        countEventsForID({
+          comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
+        }) ?? 0;
 
       const caseResponse = {
-        comments: flattenCommentSavedObjects(comments.saved_objects),
+        comments: flattenAttachmentSavedObjects(comments.saved_objects),
         totalAlerts,
         totalEvents,
         ...this.formatForEncoding(comments.total),
@@ -610,10 +593,8 @@ export class CaseCommentModel {
 
   public async bulkCreate({
     attachments,
-    owner,
   }: {
     attachments: CommentRequestWithId;
-    owner: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest(attachments);
@@ -639,7 +620,6 @@ export class CaseCommentModel {
           };
         }),
         refresh: true,
-        owner,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -656,7 +636,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction(attachmentsWithoutErrors, owner),
+        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
       ]);
 
       return commentableCase;

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { Node, Parent } from 'unist';
+import type { Parent } from 'unist';
+import type { MutableNode } from './markdown_plugins';
 import { render, screen } from '@testing-library/react';
 import { ToolResultType, type EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
@@ -23,6 +24,7 @@ import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
+import dedent from 'dedent';
 
 jest.mock('../../../tools/esql/visualize_esql', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -92,7 +94,7 @@ function createStartDependencies() {
 function getAST(markdown: string) {
   const processor = unified().use(remarkParse);
   const tree = processor.parse(markdown);
-  return processor.runSync(tree) as Parent;
+  return processor.runSync(tree) as unknown as Parent;
 }
 
 describe('chat_message_text', () => {
@@ -125,22 +127,30 @@ describe('chat_message_text', () => {
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
-        setPendingPrompt: jest.fn(),
-        clearPendingPrompt: jest.fn(),
+        addPendingPrompt: jest.fn(),
+        clearPendingPrompts: jest.fn(),
         clearLastRoundResponse: jest.fn(),
+        addBackgroundExecutionCompleteStep: jest.fn(),
+        addCompactionStep: jest.fn(),
+        setCompactionStepComplete: jest.fn(),
       },
     });
   });
 
   describe('visualizationTagParser', () => {
-    function recursivelyFindVisualizationNodes(node: Node | Parent, nodes: Node[] = []) {
-      if (node.children) {
+    function recursivelyFindVisualizationNodes(
+      node: MutableNode | Parent,
+      nodes: MutableNode[] = []
+    ) {
+      if ('children' in node) {
         const parent = node as Parent;
-        parent.children.forEach((child) => recursivelyFindVisualizationNodes(child, nodes));
+        parent.children.forEach((child) =>
+          recursivelyFindVisualizationNodes(child as MutableNode | Parent, nodes)
+        );
       }
 
       if (node.type === 'visualization') {
-        nodes.push(node);
+        nodes.push(node as MutableNode);
       }
 
       return nodes;
@@ -413,6 +423,53 @@ Area Chart
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Line' }));
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Bar' }));
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Area' }));
+    });
+
+    describe('Tabular data', () => {
+      const content = dedent`
+        | Column 1 | Column 2 |
+        | -------- | -------: |
+        | Lorem    | ipsum    |
+      `;
+
+      it('uses scrollable EuiTable to render Markdown tables', () => {
+        render(<ChatMessageText content={content} steps={[]} />);
+
+        const table = screen.getByRole('table');
+        expect(table).toBeInTheDocument();
+
+        // This class is part of the stable API
+        expect(table).toHaveClass('euiTable');
+
+        // Confirms that the table is indeed scrollable without relying on EUI internals
+        expect(table.parentElement).toHaveStyleRule('overflow-inline', 'auto');
+      });
+
+      it('applies min and max width to all cells', () => {
+        render(<ChatMessageText content={content} steps={[]} />);
+
+        const check = (cells: HTMLElement[]) => {
+          for (const cell of cells) {
+            expect(cell).toHaveStyle({
+              'min-width': '10em',
+              'max-width': '30em',
+            });
+          }
+        };
+
+        check(screen.getAllByRole('cell')); // Body cells (<td>)
+        check(screen.getAllByRole('columnheader')); // Header cells (<th>)
+      });
+
+      it('passes parsed column settings to cells', () => {
+        render(<ChatMessageText content={content} steps={[]} />);
+
+        // Column 2 has a right alignment configured, which needs to be passed
+        // to all cells within that column. This ensures the {...rest} props
+        // are correctly passed down in the customized `th` and `td` render functions.
+        expect(screen.getByText('Column 2').closest('th')).toHaveStyle('text-align: right');
+        expect(screen.getByText('ipsum').closest('td')).toHaveStyle('text-align: right');
+      });
     });
   });
 });

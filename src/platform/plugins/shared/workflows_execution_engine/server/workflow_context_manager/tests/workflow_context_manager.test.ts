@@ -83,6 +83,7 @@ describe('WorkflowContextManager', () => {
     templatingEngineMock.evaluateExpression = jest
       .fn()
       .mockImplementation((...args: unknown[]) => args[0]);
+    templatingEngineMock.extractGlobalVariableSegments = jest.fn().mockReturnValue([]);
 
     // Provide a dummy esClient as required by ContextManagerInit
     const esClient = {
@@ -1017,6 +1018,177 @@ describe('WorkflowContextManager', () => {
     });
   });
 
+  describe('while context', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [
+        {
+          name: 'poll_loop',
+          type: 'while',
+          condition: 'steps.poll_loop.check_status.output: "ready"',
+          steps: [
+            {
+              name: 'check_status',
+              type: 'console',
+              with: { message: 'Checking...' },
+            } as ConnectorStep,
+          ],
+        } as any,
+      ],
+    };
+    let testContainer: ReturnType<typeof createTestContainer>;
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+    });
+
+    it('should populate while.iteration from step state', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'poll_loop',
+            nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
+          },
+        ] as StackFrame[],
+      } as EsWorkflowExecution);
+
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) => {
+          if (stepExecutionId === 'poll_loop_generated') {
+            return {
+              stepId: 'poll_loop',
+              stepType: 'while',
+              input: { condition: 'steps.poll_loop.check_status.output: "ready"' },
+              state: { iteration: 2 },
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+      expect(context.while).toEqual({ iteration: 2 });
+    });
+
+    it('should default iteration to 0 when state has no iteration', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'poll_loop',
+            nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
+          },
+        ] as StackFrame[],
+      } as EsWorkflowExecution);
+
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) => {
+          if (stepExecutionId === 'poll_loop_generated') {
+            return {
+              stepId: 'poll_loop',
+              stepType: 'while',
+              input: { condition: 'some condition' },
+              state: {},
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+      expect(context.while).toEqual({ iteration: 0 });
+    });
+
+    it('should merge iteration into steps[stepId]', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'poll_loop',
+            nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
+          },
+        ] as StackFrame[],
+      } as EsWorkflowExecution);
+
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) => {
+          if (stepExecutionId === 'poll_loop_generated') {
+            return {
+              stepId: 'poll_loop',
+              stepType: 'while',
+              input: { condition: 'some condition' },
+              state: { iteration: 3 },
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+      expect(context.steps.poll_loop).toEqual(expect.objectContaining({ iteration: 3 }));
+    });
+
+    it('should have while undefined when no while scope is active', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.while).toBeUndefined();
+    });
+
+    it('should resolve nested while: while.iteration is innermost, outer accessible via steps', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'outer_loop',
+            nestedScopes: [{ nodeId: 'enterWhile_outer_loop' }],
+          },
+          {
+            stepId: 'inner_loop',
+            nestedScopes: [{ nodeId: 'enterWhile_inner_loop' }],
+          },
+        ] as StackFrame[],
+      } as EsWorkflowExecution);
+
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) => {
+          if (stepExecutionId === 'outer_loop_generated') {
+            return {
+              stepId: 'outer_loop',
+              stepType: 'while',
+              input: { condition: 'outer condition' },
+              state: { iteration: 5 },
+            };
+          }
+          if (stepExecutionId === 'inner_loop_generated') {
+            return {
+              stepId: 'inner_loop',
+              stepType: 'while',
+              input: { condition: 'inner condition' },
+              state: { iteration: 2 },
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+      // while.iteration is the innermost (inner_loop)
+      expect(context.while).toEqual({ iteration: 2 });
+      expect(context.steps.outer_loop).toEqual(expect.objectContaining({ iteration: 5 }));
+      expect(context.steps.inner_loop).toEqual(expect.objectContaining({ iteration: 2 }));
+    });
+  });
+
   describe('steps context', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
@@ -1224,7 +1396,7 @@ describe('WorkflowContextManager', () => {
         expect(result).toBe('rendered(Workflow {{workflow.name}} in space {{workflow.spaceId}})');
       });
 
-      it('should provide rendering function with step context', () => {
+      it('should provide rendering function with narrowed context when no step paths are referenced', () => {
         testContainer.underTest.renderValueAccordingToContext(
           'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
         );
@@ -1256,19 +1428,49 @@ describe('WorkflowContextManager', () => {
               userId: 'user-123',
               count: 10,
             },
-            steps: {
-              fetchData: {
-                input: undefined,
-                output: {
-                  data: ['item1', 'item2'],
-                  total: 2,
-                },
-                error: null,
-                status: 'completed',
-              },
-            },
+            steps: {},
           })
         );
+      });
+
+      it('should provide rendering function with only the referenced step paths', () => {
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue([['steps', 'fetchData', 'output', 'total']]);
+
+        testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        expect(renderArgs.steps).toEqual({
+          fetchData: {
+            output: {
+              total: 2,
+            },
+          },
+        });
+      });
+
+      it('should fall back to full context when template path extraction is unsupported', () => {
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue(null);
+
+        testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        expect(renderArgs.steps).toEqual({
+          fetchData: {
+            input: undefined,
+            output: {
+              data: ['item1', 'item2'],
+              total: 2,
+            },
+            error: null,
+            status: 'completed',
+          },
+        });
       });
 
       it('should provide rendering function with object having templates', () => {
@@ -1281,6 +1483,37 @@ describe('WorkflowContextManager', () => {
           },
           expect.anything()
         );
+      });
+
+      it('preserves array shape when both the collection and an indexed item are referenced', () => {
+        testContainer.workflowExecutionState.getLatestStepExecution = jest
+          .fn()
+          .mockImplementation((stepId) => {
+            if (stepId === 'fetchData') {
+              return {
+                state: { status: 'completed' },
+                output: { hits: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] },
+                error: null,
+              };
+            }
+            return undefined;
+          });
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue([
+            ['steps', 'fetchData', 'output', 'hits'],
+            ['steps', 'fetchData', 'output', 'hits', 0, 'id'],
+          ]);
+
+        testContainer.underTest.renderValueAccordingToContext(
+          '{{ steps.fetchData.output.hits | size }} - {{ steps.fetchData.output.hits[0].id }}'
+        );
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        const hits = renderArgs.steps.fetchData.output.hits;
+        expect(Array.isArray(hits)).toBe(true);
+        expect(hits).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
       });
     });
   });

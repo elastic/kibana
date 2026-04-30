@@ -10,13 +10,11 @@
 import React, { useCallback } from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { DocView, DocViewRenderProps } from '../../types';
-import type { DocViewerProps } from './doc_viewer';
+import { useRestorableState } from './restorable_state';
 
 interface Props {
   docView: DocView;
   renderProps: DocViewRenderProps;
-  initialDocViewerState?: DocViewerProps['initialDocViewerState'];
-  onInitialDocViewerStateChange?: DocViewerProps['onInitialDocViewerStateChange'];
 }
 
 type ExtractState<T> = T extends DocView<infer TState> ? TState | undefined : never;
@@ -26,27 +24,21 @@ type ExtractState<T> = T extends DocView<infer TState> ? TState | undefined : ne
  * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
-export const DocViewerTab = ({
-  docView,
-  renderProps,
-  initialDocViewerState,
-  onInitialDocViewerStateChange,
-}: Props) => {
-  const initialState = initialDocViewerState?.docViewerTabsState?.[docView.id] as ExtractState<
-    typeof docView
-  >;
+export const DocViewerTab = ({ docView, renderProps }: Props) => {
+  const [docViewerTabsState, setDocViewerTabsState] = useRestorableState(
+    'docViewerTabsState',
+    undefined
+  );
+  const initialState = docViewerTabsState?.[docView.id] as ExtractState<typeof docView>;
 
   const onInitialStateChange = useCallback(
     (state: object) => {
-      onInitialDocViewerStateChange?.({
-        ...initialDocViewerState,
-        docViewerTabsState: {
-          ...initialDocViewerState?.docViewerTabsState,
-          [docView.id]: state,
-        },
-      });
+      setDocViewerTabsState((prevState) => ({
+        ...prevState,
+        [docView.id]: state,
+      }));
     },
-    [docView.id, initialDocViewerState, onInitialDocViewerStateChange]
+    [docView.id, setDocViewerTabsState]
   );
 
   return (

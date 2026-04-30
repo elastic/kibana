@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_BUILDER_TOUR_STORAGE_KEY } from '@kbn/agent-builder-plugin/public/application/storage_keys';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
 import {
@@ -25,15 +25,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/248076
-  describe.skip('Conversation Error Handling', function () {
+  describe('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
+      await deleteConnectors(supertest);
       await createConnector(llmProxy, supertest);
-      await agentBuilder.navigateToApp('conversations/new');
-      await browser.setLocalStorageItem(AGENT_BUILDER_TOUR_STORAGE_KEY, 'true');
+      await agentBuilder.navigateToApp();
     });
 
     after(async () => {
@@ -45,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         wait_for_completion: true,
         refresh: true,
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
     });
 
@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'This is a successful response after retry';
       const MOCKED_TITLE = 'Error Handling Test';
 
-      await agentBuilder.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp();
 
       // setup interceptors to return 400 error
       await setupAgentDirectError({
@@ -86,26 +86,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Wait for the successful response to appear
+      // Wait for the successful response to appear and contain the expected text
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
 
-      // Assert the successful response is visible
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
-
       // Assert the error is no longer visible
-      const isErrorStillVisible = await agentBuilder.isErrorVisible();
-      expect(isErrorStillVisible).to.be(false);
+      await retry.try(async () => {
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
+      });
     });
 
     it('shows a "not found" prompt when conversation ID does not exist', async () => {
       const INVALID_ID = 'this-id-does-not-exist-12345';
       const initialUrl = await browser.getCurrentUrl();
 
-      await agentBuilder.navigateToApp(`conversations/${INVALID_ID}`);
+      await agentBuilder.navigateToApp(
+        `agents/${agentBuilderDefaultAgentId}/conversations/${INVALID_ID}`
+      );
 
       await testSubjects.existOrFail('errorPrompt');
 
@@ -128,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'This is a successful response in new conversation';
       const MOCKED_TITLE = 'New Conversation After Error';
 
-      await agentBuilder.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp();
 
       // setup interceptors to return 400 error
       await setupAgentDirectError({
@@ -168,12 +169,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
-
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
     });
 
     it('an error does not persist across conversations', async () => {
@@ -218,12 +217,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Navigate back to the successful conversation
       await agentBuilder.navigateToConversationViaHistory(successfulConversationId);
 
-      const isErrorVisibleInSuccessful = await agentBuilder.isErrorVisible();
-      expect(isErrorVisibleInSuccessful).to.be(false);
+      await retry.try(async () => {
+        const isErrorVisibleInSuccessful = await agentBuilder.isErrorVisible();
+        expect(isErrorVisibleInSuccessful).to.be(false);
+      });
 
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(SUCCESSFUL_RESPONSE);
+      await retry.try(async () => {
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(SUCCESSFUL_RESPONSE);
+      });
     });
 
     it('clears the error when the user sends a new message', async () => {
@@ -232,7 +235,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const NEW_RESPONSE = 'This is a successful response after error';
       const MOCKED_TITLE = 'Error Cleared Test';
 
-      await agentBuilder.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp();
 
       // setup interceptors to return 400 error
       await setupAgentDirectError({
@@ -272,8 +275,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Assert the error is cleared and no longer visible
-      const isErrorStillVisible = await agentBuilder.isErrorVisible();
-      expect(isErrorStillVisible).to.be(false);
+      await retry.try(async () => {
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
+      });
     });
 
     it('keeps the previous conversation rounds visible when there is an error', async () => {

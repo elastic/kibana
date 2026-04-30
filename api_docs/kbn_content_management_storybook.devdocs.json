@@ -21,10 +21,10 @@
             "section": "def-public.MockFindItemsConfig",
             "text": "MockFindItemsConfig"
           },
-          "<T>) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: T[]; total: number; counts: { tag: Record<string, number>; }; }>"
+          "<T>) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: T[]; total: number; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 60,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -47,9 +47,10 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 64,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MockFindItemsConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -67,7 +68,15 @@
           "\nCreate mock findItems function for dashboard stories.\nSimplified API for examples - just pass optional delay.\n\nThis function uses inline mock data with pre-assigned status values.\n"
         ],
         "signature": [
-          "(delay?: number) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "(delay?: number, favoritesClient?: ",
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<void> | undefined) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -75,10 +84,10 @@
             "section": "def-public.ItemWithStatus",
             "text": "ItemWithStatus"
           },
-          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
+          "[]; total: number; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 419,
+        "lineNumber": 460,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -90,17 +99,44 @@
             "tags": [],
             "label": "delay",
             "description": [
-              "- Optional delay in milliseconds to simulate network latency"
+              "- Optional delay in milliseconds to simulate network latency."
             ],
             "signature": [
               "number"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 419,
-            "columnNumber": 43,
+            "lineNumber": 461,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-management-storybook",
+            "id": "def-public.createSimpleMockFindItems.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "favoritesClient",
+            "description": [
+              "- Optional favorites client. Defaults to the module-level"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 462,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "FavoritesClientPublic",
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -124,10 +160,10 @@
             "section": "def-public.DashboardMockItem",
             "text": "DashboardMockItem"
           },
-          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
+          "[]; total: number; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 180,
+        "lineNumber": 196,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -138,13 +174,13 @@
             "id": "def-public.mockFindDashboards.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -170,10 +206,10 @@
             "section": "def-public.FileMockItem",
             "text": "FileMockItem"
           },
-          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
+          "[]; total: number; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 194,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -184,13 +220,13 @@
             "id": "def-public.mockFindFiles.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -216,10 +252,10 @@
             "section": "def-public.MapMockItem",
             "text": "MapMockItem"
           },
-          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
+          "[]; total: number; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 187,
+        "lineNumber": 203,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -230,13 +266,13 @@
             "id": "def-public.mockFindMaps.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -262,10 +298,10 @@
             "section": "def-public.VisualizationMockItem",
             "text": "VisualizationMockItem"
           },
-          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
+          "[]; total: number; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 201,
+        "lineNumber": 217,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -276,13 +312,13 @@
             "id": "def-public.mockFindVisualizations.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -503,7 +539,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 209,
+        "lineNumber": 225,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -519,7 +555,7 @@
               "{ title: string; description?: string | undefined; timeRestore: boolean; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 214,
+            "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -537,7 +573,7 @@
               "true"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 219,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -648,7 +684,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -660,13 +696,13 @@
             "tags": [],
             "label": "items",
             "description": [
-              "The source array of mock items"
+              "The source array of mock items."
             ],
             "signature": [
               "T[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -678,13 +714,13 @@
             "tags": [],
             "label": "delay",
             "description": [
-              "Optional delay in milliseconds to simulate network latency"
+              "Optional delay in milliseconds to simulate network latency."
             ],
             "signature": [
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -696,13 +732,13 @@
             "tags": [],
             "label": "statusSortFn",
             "description": [
-              "Optional function to handle status field sorting"
+              "Optional function to handle status field sorting."
             ],
             "signature": [
               "((a: T, b: T, direction: \"asc\" | \"desc\") => number) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -718,9 +754,10 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -735,9 +772,10 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -752,7 +790,7 @@
                   "\"asc\" | \"desc\""
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -760,6 +798,39 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-storybook",
+            "id": "def-public.MockFindItemsConfig.favoritesClient",
+            "type": "Object",
+            "tags": [],
+            "label": "favoritesClient",
+            "description": [
+              "\nFavorites client instance used to resolve starred-item filtering.\n\nDefaults to the module-level ",
+              {
+                "pluginId": "@kbn/content-management-storybook",
+                "scope": "public",
+                "docId": "kibKbnContentManagementStorybookPluginApi",
+                "section": "def-public.mockFavoritesClient",
+                "text": "mockFavoritesClient"
+              },
+              " singleton.\nPass a story-specific client to ensure the same instance is shared\nbetween the provider (`services.favorites`) and `findItems`, so that\nstarred items are immediately visible when the `starred` filter is toggled."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1103,7 +1174,7 @@
           ">[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1178,7 +1249,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1205,19 +1276,35 @@
         "parentPluginId": "@kbn/content-management-storybook",
         "id": "def-public.NULL_USER",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "NULL_USER",
         "description": [
-          "Sentinel value for filtering items without a creator"
+          "\nSentinel value for filtering items without a creator.\n"
         ],
         "signature": [
           "\"no-user\""
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 359,
+        "lineNumber": 379,
         "columnNumber": 14,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/content-list-mock-data",
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts"
+          },
+          {
+            "plugin": "@kbn/content-list-mock-data",
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts"
+          },
+          {
+            "plugin": "@kbn/content-list-mock-data",
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/index.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1289,7 +1376,7 @@
           "\nDashboard mock data wrapped in search response format"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-        "lineNumber": 173,
+        "lineNumber": 201,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1300,9 +1387,11 @@
             "type": "Object",
             "tags": [],
             "label": "result",
-            "description": [],
+            "description": [
+              "\nDashboard mock data wrapped in search response format"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-            "lineNumber": 174,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1315,7 +1404,7 @@
                 "label": "contentTypeId",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-                "lineNumber": 175,
+                "lineNumber": 203,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1328,7 +1417,7 @@
                 "label": "result",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-                "lineNumber": 176,
+                "lineNumber": 204,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1351,7 +1440,7 @@
                       "[]"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-                    "lineNumber": 177,
+                    "lineNumber": 205,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1364,7 +1453,7 @@
                     "label": "pagination",
                     "description": [],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-                    "lineNumber": 178,
+                    "lineNumber": 206,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1377,7 +1466,7 @@
                         "label": "total",
                         "description": [],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
-                        "lineNumber": 179,
+                        "lineNumber": 207,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1420,7 +1509,7 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1447,121 +1536,6 @@
       },
       {
         "parentPluginId": "@kbn/content-management-storybook",
-        "id": "def-public.mockUserProfileServices",
-        "type": "Object",
-        "tags": [],
-        "label": "mockUserProfileServices",
-        "description": [],
-        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-        "lineNumber": 94,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-management-storybook",
-            "id": "def-public.mockUserProfileServices.getUserProfile",
-            "type": "Function",
-            "tags": [],
-            "label": "getUserProfile",
-            "description": [],
-            "signature": [
-              "(uid: string) => Promise<",
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              ">>"
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-            "lineNumber": 95,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/content-management-storybook",
-                "id": "def-public.mockUserProfileServices.getUserProfile.$1",
-                "type": "string",
-                "tags": [],
-                "label": "uid",
-                "description": [],
-                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-                "lineNumber": 83,
-                "columnNumber": 35,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/content-management-storybook",
-            "id": "def-public.mockUserProfileServices.bulkGetUserProfiles",
-            "type": "Function",
-            "tags": [],
-            "label": "bulkGetUserProfiles",
-            "description": [],
-            "signature": [
-              "(uids: string[]) => Promise<",
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/user-profile-components",
-                "scope": "common",
-                "docId": "kibKbnUserProfileComponentsPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              ">[]>"
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-            "lineNumber": 96,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/content-management-storybook",
-                "id": "def-public.mockUserProfileServices.bulkGetUserProfiles.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "uids",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
-                "lineNumber": 87,
-                "columnNumber": 40,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-management-storybook",
         "id": "def-public.TAG_MOCK_SEARCH_RESPONSE",
         "type": "Object",
         "tags": [],
@@ -1581,7 +1555,9 @@
             "type": "Array",
             "tags": [],
             "label": "tags",
-            "description": [],
+            "description": [
+              "\nTag mock data wrapped in search response format"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/content-list-mock-data",
@@ -1622,7 +1598,9 @@
             "type": "Object",
             "tags": [],
             "label": "lens",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 33,
             "columnNumber": 3,
@@ -1663,7 +1641,9 @@
             "type": "Object",
             "tags": [],
             "label": "area",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 34,
             "columnNumber": 3,
@@ -1692,7 +1672,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 34,
-                "columnNumber": 28,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1704,7 +1684,9 @@
             "type": "Object",
             "tags": [],
             "label": "line",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 35,
             "columnNumber": 3,
@@ -1733,7 +1715,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 35,
-                "columnNumber": 28,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1745,7 +1727,9 @@
             "type": "Object",
             "tags": [],
             "label": "bar",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 36,
             "columnNumber": 3,
@@ -1774,7 +1758,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 36,
-                "columnNumber": 34,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1786,7 +1770,9 @@
             "type": "Object",
             "tags": [],
             "label": "pie",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 37,
             "columnNumber": 3,
@@ -1815,7 +1801,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 37,
-                "columnNumber": 26,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1827,7 +1813,9 @@
             "type": "Object",
             "tags": [],
             "label": "metric",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 38,
             "columnNumber": 3,
@@ -1856,7 +1844,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 38,
-                "columnNumber": 32,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1868,7 +1856,9 @@
             "type": "Object",
             "tags": [],
             "label": "gauge",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 39,
             "columnNumber": 3,
@@ -1897,7 +1887,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 39,
-                "columnNumber": 30,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1909,7 +1899,9 @@
             "type": "Object",
             "tags": [],
             "label": "goal",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 40,
             "columnNumber": 3,
@@ -1950,7 +1942,9 @@
             "type": "Object",
             "tags": [],
             "label": "table",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 41,
             "columnNumber": 3,
@@ -1979,7 +1973,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 41,
-                "columnNumber": 30,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1991,7 +1985,9 @@
             "type": "Object",
             "tags": [],
             "label": "tagcloud",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 42,
             "columnNumber": 3,
@@ -2020,7 +2016,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 42,
-                "columnNumber": 36,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2032,7 +2028,9 @@
             "type": "Object",
             "tags": [],
             "label": "markdown",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 43,
             "columnNumber": 3,
@@ -2061,7 +2059,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 43,
-                "columnNumber": 32,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2073,7 +2071,9 @@
             "type": "Object",
             "tags": [],
             "label": "vega",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 44,
             "columnNumber": 3,
@@ -2102,7 +2102,7 @@
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
                 "lineNumber": 44,
-                "columnNumber": 28,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2114,7 +2114,9 @@
             "type": "Object",
             "tags": [],
             "label": "timelion",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 45,
             "columnNumber": 3,
@@ -2155,7 +2157,9 @@
             "type": "Object",
             "tags": [],
             "label": "tsvb",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 46,
             "columnNumber": 3,

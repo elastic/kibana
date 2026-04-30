@@ -23,6 +23,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPopover,
+  EuiSwitch,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -30,7 +31,7 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyCellValue } from '../../empty_value';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { LINE_CLAMP } from '../constants';
 
 type TemplatesColumns =
@@ -51,7 +52,6 @@ interface ActionColumnProps {
   template: Template;
   onEdit: (template: Template) => void;
   onClone: (template: Template) => void;
-  onSetAsDefault: (template: Template) => void;
   onExport: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
@@ -61,7 +61,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
   template,
   onEdit,
   onClone,
-  onSetAsDefault,
   onExport,
   onDelete,
   disableActions = false,
@@ -78,11 +77,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
     closePopover();
     onClone(template);
   }, [closePopover, onClone, template]);
-
-  const handleSetAsDefault = useCallback(() => {
-    closePopover();
-    onSetAsDefault(template);
-  }, [closePopover, onSetAsDefault, template]);
 
   const handleExport = useCallback(() => {
     closePopover();
@@ -113,14 +107,8 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
             'data-test-subj': `template-action-clone-${template.templateId}`,
           },
           {
-            name: i18n.SET_AS_DEFAULT_TEMPLATE,
-            icon: 'check',
-            onClick: handleSetAsDefault,
-            'data-test-subj': `template-action-set-default-${template.templateId}`,
-          },
-          {
             name: i18n.EXPORT_TEMPLATE,
-            icon: 'exportAction',
+            icon: 'upload',
             onClick: handleExport,
             'data-test-subj': `template-action-export-${template.templateId}`,
           },
@@ -136,16 +124,17 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
         ],
       },
     ],
-    [handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete, template.templateId]
+    [handleEdit, handleClone, handleExport, handleDelete, template.templateId]
   );
 
   return (
     <EuiPopover
       id={`template-action-popover-${template.templateId}`}
+      aria-label={i18n.ACTIONS}
       button={
         <EuiButtonIcon
           onClick={togglePopover}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.ACTIONS}
           color="text"
           data-test-subj={`template-action-popover-button-${template.templateId}`}
@@ -173,19 +162,19 @@ const ActionColumn = React.memo(ActionColumnComponent);
 export interface UseTemplatesColumnsProps {
   onEdit: (template: Template) => void;
   onClone: (template: Template) => void;
-  onSetAsDefault: (template: Template) => void;
   onExport: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
+  onIsEnabledChange: (template: Template) => void;
 }
 
 export const useTemplatesColumns = ({
   onEdit,
   onClone,
-  onSetAsDefault,
   onExport,
   onDelete,
   disableActions = false,
+  onIsEnabledChange,
 }: UseTemplatesColumnsProps) => {
   const { euiTheme } = useEuiTheme();
   const columns: TemplatesColumns[] = useMemo(
@@ -202,18 +191,6 @@ export const useTemplatesColumns = ({
                   {name}
                 </EuiLink>
               </EuiFlexItem>
-              {template.isDefault && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    css={css`
-                      border-radius: ${euiTheme.border.radius.small};
-                    `}
-                    data-test-subj="template-column-default-badge"
-                  >
-                    {i18n.DEFAULT}
-                  </EuiBadge>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           ) : (
             getEmptyCellValue()
@@ -274,8 +251,8 @@ export const useTemplatesColumns = ({
                 position="top"
                 content={
                   <div data-test-subj="template-column-fields-tooltip">
-                    {fieldNames.map((name, idx) => (
-                      <div key={`${name}-${idx}`}>{name}</div>
+                    {fieldNames.map((field, idx) => (
+                      <div key={`${field.name}-${idx}`}>{field.label}</div>
                     ))}
                   </div>
                 }
@@ -385,6 +362,35 @@ export const useTemplatesColumns = ({
         width: '8%',
       },
       {
+        field: 'isEnabled',
+        name: i18n.COLUMN_ENABLED,
+        sortable: false,
+        align: 'center',
+        render: (_isEnabled: boolean | undefined, template: Template) => {
+          const isEnabled = template.isEnabled !== false;
+
+          return (
+            <EuiToolTip
+              content={
+                isEnabled
+                  ? i18n.TEMPLATE_ENABLED_CAN_CREATE_CASES
+                  : i18n.TEMPLATE_DISABLED_CANNOT_CREATE_CASES
+              }
+            >
+              <EuiSwitch
+                checked={isEnabled}
+                onChange={() => onIsEnabledChange(template)}
+                label={i18n.COLUMN_ENABLED}
+                showLabel={false}
+                compressed
+                data-test-subj="template-column-enabled-knob"
+              />
+            </EuiToolTip>
+          );
+        },
+        width: '90px',
+      },
+      {
         name: i18n.ACTIONS,
         align: 'right',
         render: (template: Template) => (
@@ -392,7 +398,6 @@ export const useTemplatesColumns = ({
             template={template}
             onEdit={onEdit}
             onClone={onClone}
-            onSetAsDefault={onSetAsDefault}
             onExport={onExport}
             onDelete={onDelete}
             disableActions={disableActions}
@@ -405,8 +410,8 @@ export const useTemplatesColumns = ({
       onEdit,
       euiTheme.size.xs,
       euiTheme.border.radius.small,
+      onIsEnabledChange,
       onClone,
-      onSetAsDefault,
       onExport,
       onDelete,
       disableActions,

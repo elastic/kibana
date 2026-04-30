@@ -488,10 +488,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.find('infraSuggestionsPanel');
     },
 
-    async ensureInventoryFeedbackLinkIsVisible() {
-      await testSubjects.existOrFail('infraInventoryFeedbackLink');
-    },
-
     async ensureKubernetesTourIsVisible() {
       const container = await testSubjects.find('infra-kubernetesTour-text');
       const containerText = await container.getVisibleText();
@@ -502,16 +498,33 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
     },
 
-    async ensureKubernetesFeedbackLinkIsVisible() {
-      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
-    },
-
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
     },
 
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    /**
+     * Closes the host/asset details flyout using Escape (EuiFlyout closes on Escape).
+     * Retries until the flyout is closed or timeout, then waits for the overlay mask
+     * to disappear so the next click (e.g. open flyout button) is not intercepted.
+     */
+    async closeFlyoutWithEscape() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton', {
+          timeout: 1000,
+        }));
+        if (!flyoutClosed) {
+          throw new Error('Flyout still open');
+        }
+      });
+      await retry.waitFor('flyout overlay mask to disappear', async () => {
+        const overlays = await find.allByCssSelector('.euiOverlayMask', 1000);
+        return overlays.length === 0;
+      });
     },
 
     async clickCustomMetricDropdown() {

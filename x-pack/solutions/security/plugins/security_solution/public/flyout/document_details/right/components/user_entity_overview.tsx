@@ -20,19 +20,32 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
+import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
+import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
+import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { getField } from '../../shared/utils';
+import type { IdentityFields } from '../../shared/utils';
+import {
+  getField,
+  isRiskSeverity,
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  normalizeRiskLevel,
+} from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -61,16 +74,24 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
 
 export interface UserEntityOverviewProps {
-  /**
-   * User name for looking up user related ip addresses and risk level
-   */
   userName: string;
+
+  /**
+   * These identity fields for the user are wrong and need to be fixed
+   */
+  identityFields: Record<string, string>;
+  /**
+   * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
+   * so Overview section uses the same entity store data used to decide visibility.
+   */
+  entityRecord?: EntityStoreRecord | null;
 }
 
 export const USER_PREVIEW_BANNER = {
@@ -84,10 +105,16 @@ export const USER_PREVIEW_BANNER = {
 /**
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
+export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
+  userName,
+  identityFields,
+  entityRecord,
+}) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
@@ -104,36 +131,79 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     [from, to]
   );
 
-  const filterQuery = useMemo(
-    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+  const userIdentityFields = useMemo(() => {
+    const legacyFields =
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
+    if (!entityStoreV2Enabled) {
+      return legacyFields;
+    }
+    return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
+  }, [entityStoreV2Enabled, userName, identityFields]);
+
+  const riskScoreFilterQuery = useMemo(
+    () => (userName ? (buildUserNamesFilter([userName]) as ESQuery) : undefined),
     [userName]
   );
+
+  const riskFromEntityRecord = useMemo(
+    () => (entityRecord != null ? getRiskFromEntityRecord(entityRecord) : null),
+    [entityRecord]
+  );
+
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
-    endDate: to,
     userName,
+    entityId: entityStoreV2Enabled ? entityRecord?.entity?.id : undefined,
+    endDate: to,
     indexNames: selectedPatterns,
     startDate: from,
+    skip: entityStoreV2Enabled,
   });
 
   const {
     data: userRisk,
-    isAuthorized,
+    isAuthorized: isRiskScoreAuthorized,
     loading: isRiskScoreLoading,
   } = useRiskScore({
-    filterQuery,
+    filterQuery: riskScoreFilterQuery,
     riskEntity: EntityType.user,
+    skip: entityStoreV2Enabled,
     timerange,
   });
-  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const isRiskScoreExist = !!userRiskData?.user.risk;
+  const userRiskFromSearch = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
+  const userRiskData = useMemo(() => {
+    if (entityStoreV2Enabled && entityRecord) {
+      const riskFromRecord = getRiskFromEntityRecord(entityRecord);
+      if (riskFromRecord != null) {
+        return {
+          user: {
+            name: userName,
+            risk: {
+              calculated_level: riskFromRecord.calculated_level ?? 'Unknown',
+              calculated_score: riskFromRecord.calculated_score,
+              calculated_score_norm: riskFromRecord.calculated_score_norm,
+            },
+          },
+        };
+      }
+    }
+    return userRiskFromSearch;
+  }, [entityStoreV2Enabled, entityRecord, userName, userRiskFromSearch]);
+
+  const isRiskScoreExist = !!userRiskData?.user?.risk;
+  const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
+
+  const userCspIdentityDoc = entityRecord ?? userIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    EntityIdentifierFields.userName,
-    userName
+    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields: userIdentityFields,
+    })
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: userName,
+    entityRecord,
+    identityFields: userIdentityFields,
+    entityType: EntityType.user,
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,
@@ -141,6 +211,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
 
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
+    identityFields: userIdentityFields,
+    entityId: entityRecord?.entity?.id,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -149,9 +221,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     contextID: 'UserEntityOverview',
   });
 
+  const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
-    () => getField(getOr([], 'user.domain', userDetails)),
-    [userDetails]
+    () => getField(getOr([], 'user.domain', userDetailsForDomain)),
+    [userDetailsForDomain]
   );
   const userDomain: DescriptionList[] = useMemo(
     () => [
@@ -173,24 +246,46 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     () => [
       {
         title: LAST_SEEN,
-        description: (
-          <FirstLastSeen
-            indexPatterns={selectedPatterns}
-            field={USER_NAME_FIELD_NAME}
-            value={userName}
-            type={FirstLastSeenType.LAST_SEEN}
-          />
-        ),
+        description:
+          userName != null && userName !== '' ? (
+            entityStoreV2Enabled && entityRecord?.entity?.lifecycle?.last_activity ? (
+              <PreferenceFormattedDateFromPrimitive
+                value={entityRecord.entity.lifecycle.last_activity}
+              />
+            ) : !entityStoreV2Enabled ? (
+              <FirstLastSeen
+                indexPatterns={selectedPatterns}
+                field="user.name"
+                value={userName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            )
+          ) : (
+            getEmptyTagValue()
+          ),
       },
     ],
-    [userName, selectedPatterns]
+    [
+      userName,
+      selectedPatterns,
+      entityStoreV2Enabled,
+      entityRecord?.entity?.lifecycle?.last_activity,
+    ]
   );
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const [userRiskLevel] = useMemo(
-    () => [
+  const isLoading = entityStoreV2Enabled
+    ? riskFromEntityRecord == null && isRiskScoreLoading
+    : isUserDetailsLoading || isRiskScoreLoading;
+
+  const [userRiskLevel] = useMemo(() => {
+    const level = userRiskData?.user?.risk?.calculated_level;
+    const severity = level != null ? normalizeRiskLevel(level) ?? (level as RiskSeverity) : null;
+    return [
       {
         title: (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
@@ -202,18 +297,20 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         ),
         description: (
           <>
-            {userRiskData ? (
-              <RiskScoreLevel severity={userRiskData.user.risk.calculated_level} />
+            {severity && isRiskSeverity(severity) ? (
+              <RiskScoreLevel severity={severity} />
+            ) : userRiskData?.user?.risk != null ? (
+              <RiskScoreLevel severity="Unknown" />
             ) : (
               getEmptyTagValue()
             )}
           </>
         ),
       },
-    ],
-    [userRiskData]
-  );
+    ];
+  }, [userRiskData]);
 
+  const displayName = entityRecord?.entity?.name ?? userName;
   return (
     <EuiFlexGroup
       direction="column"
@@ -224,12 +321,13 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={USER_ICON} />
+            <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              field={USER_NAME_FIELD_NAME}
+              field="user.name"
               value={userName}
+              entityId={entityRecord?.entity?.id}
               scopeId={scopeId}
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
             >
@@ -239,14 +337,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                {userName}
+                {displayName}
               </EuiText>
             </PreviewLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isUserDetailsLoading || isRiskScoreLoading ? (
+        {isLoading ? (
           <EuiSkeletonText
             contentAriaLabel={i18n.translate(
               'xpack.securitySolution.flyout.right.insights.entities.userLoadingAriaLabel',
@@ -279,14 +377,15 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        fieldName={'user.name'}
-        name={userName}
+        entityRecord={entityRecord}
+        identityFields={userIdentityFields}
+        entityType={EntityType.user}
+        queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
-        fieldName={'user.name'}
-        name={userName}
+        identityFields={userIdentityFields}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}

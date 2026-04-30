@@ -1,7 +1,7 @@
 openapi: 3.0.0
 
 info:
-  title: Enable Entity Store
+  title: Get Entity Store Status
   version: '2023-10-31'
 paths:
   /api/entity_store/status:
@@ -10,13 +10,15 @@ paths:
       x-codegen-enabled: true
       operationId: GetEntityStoreStatus
       summary: Get the status of the Entity Store
-            
+      description: Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
+
       parameters:
         - name: include_components
-          in: query  
+          in: query
           schema:
             type: boolean
-          description: If true returns a detailed status of the engine including all it's components
+          description: If true, returns a detailed status of each engine including all its components.
+          example: true
 
       responses:
         '200':
@@ -29,10 +31,12 @@ paths:
                   - status
                   - engines
                 properties:
-                  status: 
+                  status:
                     $ref: './common.schema.yaml#/components/schemas/StoreStatus'
+                    description: The overall status of the Entity Store.
                   engines:
                     type: array
+                    description: Per-engine status information.
                     items:
                       allOf:
                         - $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
@@ -40,5 +44,31 @@ paths:
                           properties:
                             components:
                               type: array
+                              description: Detailed component-level status. Only included when include_components is true.
                               items:
                                 $ref: './common.schema.yaml#/components/schemas/EngineComponentStatus'
+              examples:
+                entityStoreRunning:
+                  summary: Entity Store running with two engines
+                  description: The Entity Store is running with both host and user engines started and using default settings.
+                  value:
+                    status: running
+                    engines:
+                      - type: host
+                        indexPattern: ''
+                        status: started
+                        fieldHistoryLength: 10
+                        lookbackPeriod: '24h'
+                        timestampField: '@timestamp'
+                        timeout: '180s'
+                        frequency: '1m'
+                        delay: '1m'
+                      - type: user
+                        indexPattern: ''
+                        status: started
+                        fieldHistoryLength: 10
+                        lookbackPeriod: '24h'
+                        timestampField: '@timestamp'
+                        timeout: '180s'
+                        frequency: '1m'
+                        delay: '1m'

@@ -40,13 +40,14 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import type { AnomalySwimLaneEmbeddableState } from '../..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
-import type { SwimlaneType } from './explorer_constants';
-import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
@@ -229,7 +230,7 @@ export const AnomalyTimeline: FC = () => {
           : {}),
         // For cases attachment, pass just the job IDs to maintain stale data
         jobIds: selectedJobs?.map((v) => v.id),
-        timeRange: globalTimeRange,
+        time_range: globalTimeRange,
         ...(isDefined(queryString) && queryString !== ''
           ? {
               query: {
@@ -459,7 +460,7 @@ export const AnomalyTimeline: FC = () => {
                     color="text"
                     display="base"
                     isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                     data-test-subj="mlAnomalyTimelinePanelMenu"
                   />

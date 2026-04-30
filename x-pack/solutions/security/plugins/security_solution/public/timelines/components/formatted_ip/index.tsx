@@ -10,12 +10,20 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../common/lib/kibana';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { ChildLink } from '../../../flyout_v2/shared/components/child_link';
+import { Network } from '../../../flyout_v2/network_details';
+import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
+import { defaultToolsFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -54,6 +62,11 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   title,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
 
   const eventContext = useContext(StatefulEventContext);
 
@@ -63,22 +76,48 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         onClick();
       }
 
-      if (eventContext) {
+      const flowTarget = fieldName.includes(FlowTargetSourceDest.destination)
+        ? FlowTargetSourceDest.destination
+        : FlowTargetSourceDest.source;
+
+      if (newFlyoutSystemEnabled) {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: <Network ip={ip} flowTarget={flowTarget} />,
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            size: 's',
+            session: 'start',
+          }
+        );
+      } else if (eventContext) {
         openFlyout({
           right: {
             id: NetworkPanelKey,
             params: {
               ip,
               scopeId: eventContext.timelineID,
-              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-                ? FlowTargetSourceDest.destination
-                : FlowTargetSourceDest.source,
+              flowTarget,
             },
           },
         });
       }
     },
-    [onClick, eventContext, fieldName, openFlyout]
+    [
+      onClick,
+      eventContext,
+      fieldName,
+      openFlyout,
+      newFlyoutSystemEnabled,
+      overlays,
+      services,
+      store,
+      history,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -93,10 +132,13 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           onClick={openNetworkDetailsSidePanel}
           title={title}
         />
+      ) : newFlyoutSystemEnabled ? (
+        <ChildLink field={fieldName} value={address} data-test-subj="network-details" />
       ) : (
         <FlyoutLink
           field={fieldName}
           value={address}
+          identityFields={{ [fieldName]: address }}
           scopeId={eventContext?.timelineID ?? ''}
           data-test-subj="network-details"
         />
@@ -109,6 +151,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
       title,
       eventContext?.timelineID,
       fieldName,
+      newFlyoutSystemEnabled,
     ]
   );
 

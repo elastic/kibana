@@ -5,6 +5,51 @@
     "functions": [
       {
         "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-public.createBatcher",
+        "type": "Function",
+        "tags": [],
+        "label": "createBatcher",
+        "description": [
+          "\nCreate a batch manager for a given collection of a data type.\nWill batch all .get calls given inside a scheduled time window into a single request."
+        ],
+        "signature": [
+          "<Data, Query, R = Data>(config: ",
+          "BatcherConfig",
+          "<Data, Query, R>) => ",
+          "Batcher",
+          "<Data, Query, R>"
+        ],
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/utils/batcher.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.createBatcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "BatcherConfig",
+              "<Data, Query, R>"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/utils/batcher.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "BatcherConfig",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
         "id": "def-public.ManagedAvatarTip",
         "type": "Function",
         "tags": [],
@@ -279,7 +324,7 @@
         "label": "UserProfilesKibanaProvider",
         "description": [],
         "signature": [
-          "({ children, core, }: React.PropsWithChildren<",
+          "({ children, core, suggestPath, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-user-profiles",
             "scope": "public",
@@ -290,7 +335,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-        "lineNumber": 38,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -300,7 +345,7 @@
             "id": "def-public.UserProfilesKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  core,\n}",
+            "label": "{\n  children,\n  core,\n  suggestPath,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -314,7 +359,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-            "lineNumber": 38,
+            "lineNumber": 45,
             "columnNumber": 99,
             "deprecated": false,
             "trackAdoption": false,
@@ -343,7 +388,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-        "lineNumber": 31,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -367,11 +412,99 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-            "lineNumber": 31,
+            "lineNumber": 38,
             "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-public.useSuggestUserProfiles",
+        "type": "Function",
+        "tags": [],
+        "label": "useSuggestUserProfiles",
+        "description": [
+          "\nReact Query hook for searching user profiles by name, email, or username.\n\nUses a 30s `staleTime` since suggest results are transient queries.\nDisabled when `suggestUserProfiles` is not provided (graceful degradation)\nor when `name` is empty. The caller is responsible for debouncing the `name` input."
+        ],
+        "signature": [
+          "(name: string, opts?: { enabled?: boolean | undefined; } | undefined) => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfileData",
+            "text": "UserProfileData"
+          },
+          ">[], unknown>"
+        ],
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.useSuggestUserProfiles.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+            "lineNumber": 49,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.useSuggestUserProfiles.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+            "lineNumber": 49,
+            "columnNumber": 61,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.useSuggestUserProfiles.$2.enabled",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "enabled",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+                "lineNumber": 49,
+                "columnNumber": 63,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -406,7 +539,7 @@
           ">, unknown>"
         ],
         "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -422,7 +555,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -461,7 +594,7 @@
           ">[], unknown>"
         ],
         "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -477,7 +610,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -491,7 +624,7 @@
             "label": "opts",
             "description": [],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
@@ -507,7 +640,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
-                "lineNumber": 30,
+                "lineNumber": 31,
                 "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false
@@ -536,7 +669,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-        "lineNumber": 65,
+        "lineNumber": 88,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -573,10 +706,34 @@
               "UserProfileBulkGetParams",
               ") => Promise<",
               "UserProfile",
-              "<D>[]>; }; }"
+              "<D>[]>; suggest?: (<D extends ",
+              "UserProfileData",
+              ">(path: string, params: ",
+              "UserProfileSuggestParams",
+              ") => Promise<",
+              "UserProfile",
+              "<D>[]>) | undefined; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
             "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.UserProfilesKibanaDependencies.suggestPath",
+            "type": "string",
+            "tags": [],
+            "label": "suggestPath",
+            "description": [
+              "\nPath to the consumer's suggest endpoint (e.g. `/internal/content_management/_suggest_user_profiles`).\nRequired alongside `core.userProfile.suggest` for the suggest feature to work."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -592,7 +749,7 @@
         "label": "UserProfilesServices",
         "description": [],
         "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-        "lineNumber": 24,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -624,7 +781,7 @@
               ">[]>"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-            "lineNumber": 25,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -640,7 +797,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-                "lineNumber": 25,
+                "lineNumber": 31,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -676,7 +833,7 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-            "lineNumber": 26,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -692,8 +849,60 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
-                "lineNumber": 26,
+                "lineNumber": 32,
                 "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.UserProfilesServices.suggestUserProfiles",
+            "type": "Function",
+            "tags": [],
+            "label": "suggestUserProfiles",
+            "description": [],
+            "signature": [
+              "((name: string) => Promise<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfile",
+                "text": "UserProfile"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">[]>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.UserProfilesServices.suggestUserProfiles.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
+                "lineNumber": 33,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -707,7 +916,132 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-public.userProfileKeys",
+        "type": "Object",
+        "tags": [],
+        "label": "userProfileKeys",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.userProfileKeys.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(uid: string) => string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.userProfileKeys.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "uid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+                "lineNumber": 14,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.userProfileKeys.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [],
+            "signature": [
+              "(uids: string[]) => (string | { uids: string[]; })[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.userProfileKeys.bulkGet.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "uids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+                "lineNumber": 15,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-public.userProfileKeys.suggest",
+            "type": "Function",
+            "tags": [],
+            "label": "suggest",
+            "description": [],
+            "signature": [
+              "(name: string) => string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.userProfileKeys.suggest.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
+                "lineNumber": 16,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],

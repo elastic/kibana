@@ -11,9 +11,9 @@ import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kb
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
-import { Parser } from '@elastic/esql';
+import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
@@ -72,9 +72,9 @@ export const registerGetTimeFieldRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${TIMEFIELD_ROUTE}{query}`,
+      path: TIMEFIELD_ROUTE,
       security: {
         authz: {
           enabled: false,
@@ -82,13 +82,13 @@ export const registerGetTimeFieldRoute = (
         },
       },
       validate: {
-        params: schema.object({
+        body: schema.object({
           query: schema.string(),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query } = request.params;
+      const { query } = request.body;
 
       // Query is of the form "from index | where timefield >= ?_tstart".
       // At this point we just want to extract the timefield if present in the query
@@ -110,15 +110,21 @@ export const registerGetTimeFieldRoute = (
         });
       }
       const sources = getIndexPatternFromESQLQuery(query);
+      const subqueryArgs = sourceCommand.args.filter(isSubQuery);
+      const hasSubqueries = subqueryArgs.length > 0;
       const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
       const { views } = await service.getViews().catch(() => ({ views: [] }));
       const viewNames = new Set(views.map(({ name }) => name));
+      const splitSources = sources
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
 
       try {
-        const indices = sources
-          .split(',')
-          .map((index) => index.trim())
-          .filter(Boolean);
+        // In case of subqueries we need to check all indices separately.
+        // Otherwise, pass the full sources string to fieldCaps so Elasticsearch
+        // evaluates the multi-index pattern holistically.
+        const indices = hasSubqueries ? splitSources : [sources];
 
         if (!indices.length) {
           return response.ok({
@@ -126,29 +132,48 @@ export const registerGetTimeFieldRoute = (
           });
         }
 
-        const sourceChecks = await Promise.all(
-          indices.map(async (sourceName) => {
-            // If ES tells us it's a view, skip fieldCaps and inspect the ES|QL schema instead.
-            // This is temporary until we have a proper way to detect the time field for ES|QL views using field caps.
-            if (viewNames.has(sourceName)) {
-              return checkViewLikeSourceForTimestamp({ client, sourceName });
-            }
-
+        const fieldCapsResults = await Promise.all(
+          indices.map(async (index) => {
             try {
               const fieldCapsResp = await client.fieldCaps({
-                index: sourceName,
+                index,
                 fields: '@timestamp',
                 include_unmapped: false,
               });
               return hasTimestampInFieldCapsResponse(fieldCapsResp);
             } catch (fieldCapsError) {
               logger.get().debug(toDebugString(fieldCapsError));
+              return false;
             }
           })
         );
 
+        const allHaveTimestamp = fieldCapsResults.every(Boolean);
+
+        if (allHaveTimestamp) {
+          return response.ok({
+            body: { timeField: ES_TIMESTAMP_FIELD_NAME },
+          });
+        }
+
+        // fieldCaps didn't find @timestamp — check if any sources are views
+        const viewSources = splitSources.filter((name) => viewNames.has(name));
+
+        if (viewSources.length) {
+          const viewChecks = await Promise.all(
+            viewSources.map((viewName) =>
+              checkViewLikeSourceForTimestamp({ client, sourceName: viewName })
+            )
+          );
+          if (viewChecks.every(Boolean)) {
+            return response.ok({
+              body: { timeField: ES_TIMESTAMP_FIELD_NAME },
+            });
+          }
+        }
+
         return response.ok({
-          body: { timeField: sourceChecks.every(Boolean) ? '@timestamp' : undefined },
+          body: { timeField: undefined },
         });
       } catch (error) {
         logger.get().debug(toDebugString(error));

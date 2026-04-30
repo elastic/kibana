@@ -96,7 +96,7 @@ jest.mock('.', () => {
   };
 });
 
-jest.mock('../../connectorland/use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn().mockReturnValue({ data: [] }),
 }));
 

@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
@@ -17,6 +17,7 @@ import type {
   ESQLCommandSummary,
   UnmappedFieldsStrategy,
 } from './types';
+import type { ESQLMessage } from '../definitions/types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -85,8 +86,6 @@ export interface ICommandMethods<TContext = ICommandContext> {
 
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
-  subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
-  viewsSupport?: boolean; // Optional property to indicate if the command suggests/validates ES|QL views (ONLY FROM). This is temporary and we will remove it when views in FROM move to Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
@@ -96,6 +95,8 @@ export interface ICommandMetadata {
   observabilityTier?: string; // Optional property indicating the observability tier availability
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
+  requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
+  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)

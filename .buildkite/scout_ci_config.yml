@@ -3,40 +3,52 @@ plugins:
   enabled:
     - advanced_settings
     - alerting
+    - alerting_v2
     - apm
+    - automatic_import
     - banners
     - cloud_security_posture
     - console
     - custom_branding
     - dashboard
+    - dashboard_markdown
+    - data
     - data_views
     - discover
     - discover_enhanced
     - entity_store
     - exploratory_view
     - fleet
+    - flyoutSystemExamples
     - gen_ai_settings
     - global_search
     - index_management
     - infra
     - intercepts
     - lens
+    - logstash
     - maps
     - navigation
     - observability
     - observability_onboarding
+    - osquery
     - painless_lab
     - profiling
+    - saved_objects_management
+    - saved_objects_tagging
     - search_getting_started
     - search_homepage
+    - search_inference_endpoints
     - security
     - security_solution
+    - serverless_observability
     - share
     - slo
     - spaces
     - streams
     - streams_app
     - synthetics
+    - task_manager
     - transform
     - triggers_actions_ui
     - uptime
@@ -47,14 +59,13 @@ plugins:
 
 packages:
   enabled:
+    - core
+    - kbn-scout
     - kbn-streamlang-tests
   disabled:
-    # Scout's own tests are executed first to validate the Scout framework
-    # (see .buildkite/scripts/steps/test/scout/test_run_builder.sh). Excluded here
-    # so they don't rerun alongside plugin/package Scout tests discovered later.
-    - kbn-scout
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts

@@ -17,16 +17,9 @@ import {
   type PromQLAstExpression,
 } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
-import type {
-  FunctionDefinition,
-  FunctionParameterType,
-  InlineCastingType,
-  PromQLFunctionParamType,
-  Signature,
-  SupportedDataType,
-} from '../types';
+import type { InlineCastingType, PromQLFunctionParamType, SupportedDataType } from '../types';
 import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
-import { isArrayType } from '../types';
+import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';
@@ -47,7 +40,7 @@ import { getPromqlFunctionDefinition } from './promql';
 export function getExpressionType(
   root: ESQLAstItem | undefined,
   columns?: Map<string, ESQLColumnData>,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -74,11 +67,10 @@ export function getExpressionType(
     }
 
     const fnDef = getFunctionDefinition(castFunction);
-    if (!fnDef) {
+    if (!fnDef || fnDef.signatures.length === 0) {
       return 'unknown';
     }
 
-    // Safe to get the first one as all cast functions have a single return type
     return fnDef.signatures[0].returnType;
   }
 
@@ -142,10 +134,10 @@ export function getExpressionType(
       return getExpressionType(root.args[root.args.length - 1], columns, unmappedFieldsStrategy);
     }
 
-    const argTypes = root.args.map((arg) =>
-      getExpressionType(arg, columns, unmappedFieldsStrategy)
-    );
-    const literalMask = root.args.map((arg) => isLiteral(arg));
+    const { argTypes, literalMask } = resolveArgumentTypes(root.args, {
+      columns,
+      unmappedFieldsStrategy,
+    });
     const matchingSignatures = getMatchingSignatures(
       fnDefinition.signatures,
       argTypes,
@@ -182,188 +174,28 @@ export function getExpressionType(
 
 // #endregion type detection
 
-// #region signature matching
+// #region argument resolution
 
-// ES implicitly casts string literal arguments to these types when passed to functions that expect these types
-// e.g. EXPECTS_DATE('2020-01-01') is valid because the string literal is implicitly cast to a date
-export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
-  'date',
-  'date_nanos',
-  'date_period',
-  'time_duration',
-  'version',
-  'ip',
-  'boolean',
-];
-
-/**
- * Returns all signatures matching the given types and arity
- * @param definition
- * @param types
- */
-export function getMatchingSignatures(
-  signatures: Signature[],
-  givenTypes: Array<SupportedDataType | 'unknown'>,
-  // a boolean array indicating which args are literals
-  literalMask: boolean[],
-  acceptUnknown: boolean,
-  acceptPartialMatches: boolean = false
-): Signature[] {
-  return signatures.filter((sig) => {
-    if (sig.isSignatureRepeating && !areRepeatingValueTypesConsistent(givenTypes)) {
-      return false;
-    }
-
-    if (!acceptPartialMatches && !matchesArity(sig, givenTypes.length)) {
-      return false;
-    }
-
-    return givenTypes.every((givenType, index) => {
-      let param;
-      const totalArgs = givenTypes.length;
-      // Default is the last argument when total args is odd (e.g. CASE(cond, val, default))
-      const isDefault = sig.isSignatureRepeating && totalArgs % 2 === 1 && index === totalArgs - 1;
-
-      if (sig.isSignatureRepeating && sig.params.length > 0 && index >= sig.params.length) {
-        if (isDefault) {
-          param = sig.params[1];
-        } else {
-          const paramIndex = index % sig.params.length;
-          param = sig.params[paramIndex];
-        }
-      } else {
-        param = getParamAtPosition(sig, index);
-      }
-
-      if (!param) {
-        return false;
-      }
-
-      const expectedType = unwrapArrayOneLevel(param.type);
-      // Bypass PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING for boolean conditions
-      // Default position is not a condition even though index % 2 === 0
-      const isConditionPosition = sig.isSignatureRepeating && index % 2 === 0 && !isDefault;
-      const effectiveIsLiteral =
-        isConditionPosition && expectedType === 'boolean' ? false : literalMask[index];
-
-      return argMatchesParamType(givenType, expectedType, effectiveIsLiteral, acceptUnknown);
-    });
-  });
-}
-
-/**
- * Checks if all value positions in repeating signatures have compatible types.
- * Values: odd positions (1, 3, 5...) + default (last if odd total).
- */
-function areRepeatingValueTypesConsistent(
-  givenTypes: Array<SupportedDataType | 'unknown'>
-): boolean {
-  const { length } = givenTypes;
-  const isValue = (i: number) => i % 2 === 1 || (length % 2 === 1 && i === length - 1);
-  const valueTypes = givenTypes.filter((_, i) => isValue(i));
-  const [first, ...rest] = valueTypes;
-
-  if (!first || first === 'unknown' || first === 'param') {
-    return true;
+export function resolveArgumentTypes(
+  args: ESQLAstItem[],
+  options?: {
+    columns?: Map<string, ESQLColumnData>;
+    unmappedFieldsStrategy?: UnmappedFieldsStrategy;
   }
+): { argTypes: (SupportedDataType | 'unknown')[]; literalMask: boolean[] } {
+  const { columns, unmappedFieldsStrategy } = options ?? {};
 
-  return rest.every(
-    (type) =>
-      type === 'unknown' ||
-      type === 'param' ||
-      type === first ||
-      bothStringTypes(first, type) ||
-      (first === 'long' && type === 'integer')
-  );
+  return {
+    argTypes: args.map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy)),
+    literalMask: args.map((arg) => {
+      const unwrapped = Array.isArray(arg) ? arg[0] : arg;
+
+      return isLiteral(unwrapped);
+    }),
+  };
 }
 
-/**
- * Checks if the given type matches the expected parameter type
- *
- * @param givenType
- * @param expectedType
- * @param givenIsLiteral
- */
-export function argMatchesParamType(
-  givenType: SupportedDataType | 'unknown',
-  expectedType: FunctionParameterType,
-  givenIsLiteral: boolean,
-  acceptUnknown: boolean
-): boolean {
-  if (
-    givenType === expectedType ||
-    expectedType === 'any' ||
-    givenType === 'param' ||
-    // all ES|QL functions accept null, but this is not reflected
-    // in our function definitions so we let it through here
-    givenType === 'null' ||
-    // Check array types
-    givenType === unwrapArrayOneLevel(expectedType) ||
-    // all functions accept keywords for text parameters
-    bothStringTypes(givenType, expectedType)
-  ) {
-    return true;
-  }
-
-  if (givenType === 'unknown') return acceptUnknown;
-
-  if (
-    givenIsLiteral &&
-    givenType === 'keyword' &&
-    PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
-  )
-    return true;
-
-  return false;
-}
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
-/**
- * Given an array type for example `string[]` it will return `string`
- */
-function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
-}
-
-function matchesArity(signature: FunctionDefinition['signatures'][number], arity: number): boolean {
-  if (signature.minParams) {
-    return arity >= signature.minParams;
-  }
-  return (
-    arity >= signature.params.filter(({ optional }) => !optional).length &&
-    arity <= signature.params.length
-  );
-}
-
-/**
- * Given a function signature, returns the parameter at the given position.
- *
- * Takes into account variadic functions (minParams), returning the last
- * parameter if the position is greater than the number of parameters.
- *
- * @param signature
- * @param position
- * @returns
- */
-export function getParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
-}
-
-// #endregion signature matching
+// #endregion argument resolution
 
 // #region expression completeness
 

@@ -135,8 +135,18 @@ describe('APM HTTP API spans', () => {
         {
           path: '/',
           validate: false,
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason:
+                'This route is part of an HTTP integration test and supports optional authentication.',
+            },
+            authz: {
+              enabled: false,
+              reason:
+                'This route is part of an HTTP integration test and does not require authorization.',
+            },
+          },
         },
         (context, req, res) => res.ok({})
       );

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
+import React, { useMemo, useRef, createContext, useContext, type ReactNode } from 'react';
 import { ContentManagementTagsProvider } from '@kbn/content-management-tags';
+import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
+import { ProfileCache, ProfileCacheContext } from '../services';
 import { ContentListStateProvider } from '../state';
 import { QueryClientProvider, contentListQueryClient } from '../query';
 
@@ -53,6 +55,12 @@ export type ContentListProviderProps = ContentListConfig & {
   services?: ContentListServices;
   /** Feature configuration for enabling/customizing capabilities. */
   features?: ContentListFeatures;
+  /**
+   * Shared profile cache instance (created by the client provider).
+   * When provided, enables user-profile resolution in field definitions,
+   * table cells, and filter popovers.
+   */
+  profileCache?: ProfileCache;
 };
 
 /**
@@ -64,10 +72,15 @@ export type ContentListProviderProps = ContentListConfig & {
  * `features.search` is read once at mount; use a `key` prop to remount if you need to change
  * initial state dynamically.
  *
- * When `services.tags` is provided (and `features.tags` is not `false`), the provider
- * automatically wraps children with the tags service context, enabling tag display
- * and filtering in child components. The tags service's `parseSearchQuery` (if present)
- * is passed through to support extracting tag filters from the search bar query text.
+ * Service-dependent features wrap children with the appropriate context provider:
+ *
+ * - **Tags** (`services.tags`): wraps with `ContentManagementTagsProvider`, enabling tag
+ *   display and filtering. The service's `parseSearchQuery` (if present) is passed through
+ *   to support extracting tag filters from the search bar query text.
+ * - **Favorites** (`services.favorites`): wraps with `FavoritesContextProvider`, enabling
+ *   star buttons and starred filtering.
+ * - **User profiles** (`services.userProfiles`): wraps with `ProfileCacheContext.Provider`,
+ *   providing a shared {@link ProfileCache} for synchronous profile resolution.
  */
 export const ContentListProvider = ({
   children,
@@ -79,15 +92,22 @@ export const ContentListProvider = ({
   queryKeyScope: queryKeyScopeProp,
   features = {},
   services,
+  profileCache,
 }: ContentListProviderProps): JSX.Element => {
   // Derive queryKeyScope: explicit prop takes priority, otherwise derive from id.
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
 
-  const { tags: tagsService } = services ?? {};
+  const {
+    tags: tagsService,
+    favorites: favoritesService,
+    userProfiles: userProfilesService,
+  } = services ?? {};
 
   // Service-dependent features: enabled by default when service exists, unless explicitly disabled.
   const supportsTags = features.tags !== false && !!tagsService;
+  const supportsStarred = features.starred !== false && !!favoritesService;
+  const supportsUserProfiles = features.userProfiles !== false && !!userProfilesService;
 
   // Resolve feature support flags.
   // Selection is disabled when explicitly set to `false` or when the list is read-only.
@@ -98,6 +118,8 @@ export const ContentListProvider = ({
       search: features.search !== false,
       selection: features.selection !== false && !isReadOnly,
       tags: supportsTags,
+      starred: supportsStarred,
+      userProfiles: supportsUserProfiles,
     }),
     [
       features.sorting,
@@ -106,10 +128,11 @@ export const ContentListProvider = ({
       features.selection,
       isReadOnly,
       supportsTags,
+      supportsStarred,
+      supportsUserProfiles,
     ]
   );
 
-  // Create context value.
   const value: ContentListProviderContextValue = useMemo(
     () => ({
       labels,
@@ -125,11 +148,26 @@ export const ContentListProvider = ({
     [labels, item, isReadOnly, id, queryKeyScope, dataSource, features, supports, services]
   );
 
-  // Build provider tree conditionally based on service availability.
+  // Build the provider tree bottom-up (innermost → outermost).
   let content: React.ReactNode = (
     <ContentListContext.Provider value={value}>
       <ContentListStateProvider>{children}</ContentListStateProvider>
     </ContentListContext.Provider>
+  );
+
+  // When the caller provides a ProfileCache (e.g. ContentListClientProvider),
+  // use it directly. Otherwise, create one from the userProfiles service so
+  // direct ContentListProvider consumers get profile resolution automatically.
+  const ownCacheRef = useRef<ProfileCache | undefined>(undefined);
+  if (!profileCache && supportsUserProfiles && userProfilesService) {
+    if (!ownCacheRef.current) {
+      ownCacheRef.current = new ProfileCache(userProfilesService.bulkResolve);
+    }
+  }
+  const resolvedCache = profileCache ?? ownCacheRef.current;
+
+  content = (
+    <ProfileCacheContext.Provider value={resolvedCache}>{content}</ProfileCacheContext.Provider>
   );
 
   // Wrap with tags provider when tags service is available.
@@ -141,6 +179,15 @@ export const ContentListProvider = ({
       >
         {content}
       </ContentManagementTagsProvider>
+    );
+  }
+
+  // Wrap with favorites provider when favorites service is available.
+  if (supportsStarred && favoritesService) {
+    content = (
+      <FavoritesContextProvider favoritesClient={favoritesService}>
+        {content}
+      </FavoritesContextProvider>
     );
   }
 

@@ -280,6 +280,7 @@
             "lineNumber": 34,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleActionsAlertsFilterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -358,6 +359,7 @@
             "lineNumber": 162,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleActionsNotifyWhenProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -426,6 +428,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleFormProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -441,12 +444,12 @@
         "label": "RuleTypeModalComponent",
         "description": [],
         "signature": [
-          "({ http, toasts, filteredRuleTypes, registeredRuleTypes, ...rest }: ",
+          "({ http, toasts, cps, filteredRuleTypes, registeredRuleTypes, ...rest }: ",
           "RuleTypeModalComponentProps",
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -456,13 +459,13 @@
             "id": "def-public.RuleTypeModalComponent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  filteredRuleTypes = EMPTY_ARRAY,\n  registeredRuleTypes,\n  ...rest\n}",
+            "label": "{\n  http,\n  toasts,\n  cps,\n  filteredRuleTypes = EMPTY_ARRAY,\n  registeredRuleTypes,\n  ...rest\n}",
             "description": [],
             "signature": [
               "RuleTypeModalComponentProps"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -753,6 +756,7 @@
             "lineNumber": 18,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "UseRuleTemplateProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2086,6 +2090,7 @@
                 "lineNumber": 32,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetaData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2928,6 +2933,7 @@
                 "lineNumber": 117,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2990,6 +2996,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -3201,6 +3208,7 @@
                 "lineNumber": 96,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "Key",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3232,7 +3240,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"uiamApiKey\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"uiamApiKey\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"lastEnabledAt\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -3262,6 +3270,7 @@
                 "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Prop",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3322,6 +3331,7 @@
                 "lineNumber": 101,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetaData",
                 "trackAdoption": false,
                 "isRequired": true
               }

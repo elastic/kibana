@@ -5,10 +5,67 @@
  * 2.0.
  */
 
-export const expectedHostEntities = [
+import { expect } from '@kbn/scout-security/api';
+import type { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/types';
+import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
+
+const LATEST_INDEX = getLatestEntitiesIndexName('default');
+type Hits = SearchHitsMetadata<unknown>['hits'];
+
+// Takes non sorted hits and compares them by _id, also prints rich information about missing entities
+export function assertEntitiesEqual(
+  expected: Hits,
+  actual: Hits,
+  logError?: (message: string) => void
+) {
+  if (actual.length !== expected.length) {
+    const actualIdSet = new Set(actual.map((h) => h._id));
+    const expectedIdSet = new Set(expected.map((h) => h._id));
+
+    const missingEntities = expected.filter((h) => !actualIdSet.has(h._id));
+    const extraEntities = actual.filter((h) => !expectedIdSet.has(h._id));
+
+    const messageParts: string[] = [];
+    if (missingEntities.length > 0) {
+      logError?.(
+        'Entities present in expected not in actual:' + JSON.stringify(missingEntities, null, 2)
+      );
+      messageParts.push(
+        `Entities present in expected not in actual (${missingEntities.length}): ${missingEntities
+          .map((h) => h._id)
+          .join(', ')}`
+      );
+    }
+    if (extraEntities.length > 0) {
+      logError?.(
+        'Entities present in actual but not in expected:' + JSON.stringify(extraEntities, null, 2)
+      );
+      messageParts.push(
+        `Entities present in actual but not in expected (${extraEntities.length}): ${extraEntities
+          .map((h) => h._id)
+          .join(', ')}`
+      );
+    }
+
+    const lengthMismatchMessage =
+      messageParts.length > 0
+        ? messageParts.join('; ')
+        : `Expected ${expected.length} hits, got ${actual.length} (duplicate _id values may hide which ids differ between expected and actual)`;
+
+    expect(actual, lengthMismatchMessage).toHaveLength(expected.length);
+  }
+
+  for (const expectedHit of expected) {
+    const actualHit = actual.find((h) => h._id === expectedHit._id);
+    expect(actualHit, `Could not find hit with id ${expectedHit._id}`).toBeDefined();
+    expect(actualHit).toMatchObject(expectedHit);
+  }
+}
+
+export const expectedHostEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'a3872e401531d41f50a187fa61fbfffe',
+    _index: LATEST_INDEX,
+    _id: '5c4590a1e799d5fa9d43908d6f609027f1caa55efef5979757a094cfd80f2f81',
     _source: {
       '@timestamp': '2026-01-20T12:05:00.000Z',
       host: { id: 'host-123' },
@@ -21,39 +78,11 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'c51b57fc40995ed530907fcdf981ced9',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:01.000Z',
-      host: { name: 'server-01', domain: 'example.com' },
-      entity: {
-        name: 'server-01',
-        type: 'Host',
-        id: 'host:server-01.example.com',
-        EngineMetadata: { Type: 'host', UntypedId: 'server-01.example.com' },
-      },
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
-    _id: '17acdbddb5f80cc777f3101c120b66a6',
+    _index: LATEST_INDEX,
+    _id: '3ba8efeb63e3aa8c0e7272b25c5e443670e87ac1a78e9e67687da0ee9b7a4b5f',
     _source: {
       '@timestamp': '2026-01-20T12:05:02.000Z',
-      host: { entity: { id: 'host-with-entity-id' }, name: 'server-01', domain: 'example.com' },
-      entity: {
-        name: 'server-01',
-        type: 'Host',
-        id: 'host:host-with-entity-id',
-        EngineMetadata: { Type: 'host', UntypedId: 'host-with-entity-id' },
-      },
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'd5b2488f87685ca7ef426aad7ccc777e',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:02.000Z',
-      host: { name: 'server-01' },
+      host: { domain: 'example.com', name: 'server-01' },
       entity: {
         name: 'server-01',
         type: 'Host',
@@ -63,22 +92,22 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '1260e35e2450159f1676fedb4b67ce46',
+    _index: LATEST_INDEX,
+    _id: '59093c7a60d8eb6d70d09ba7cde21ef58774fee0fe3738498b746b98968d8046',
     _source: {
-      '@timestamp': '2026-01-20T12:05:02.000Z',
-      host: { domain: 'corp.local', hostname: 'workstation-05' },
+      '@timestamp': '2026-01-20T12:05:03.000Z',
+      host: { domain: 'test.org', hostname: 'domain-only-host' },
       entity: {
-        name: 'workstation-05.corp.local',
+        name: 'domain-only-host',
         type: 'Host',
-        id: 'host:workstation-05.corp.local',
-        EngineMetadata: { Type: 'host', UntypedId: 'workstation-05.corp.local' },
+        id: 'host:domain-only-host',
+        EngineMetadata: { Type: 'host', UntypedId: 'domain-only-host' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'b3f4c3355bd6bec40156867ae5ddb158',
+    _index: LATEST_INDEX,
+    _id: 'f8878d2ea2a52d05b08097538e92c89a0146320d0b8f5169d26f7b3d96336918',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
       host: { hostname: 'laptop-01' },
@@ -91,22 +120,8 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '5e72f85ad33f4e4cf981dcff134c050c',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:04.000Z',
-      host: { entity: { id: 'non-generated-host' } },
-      entity: {
-        name: 'non-generated-host',
-        type: 'Host',
-        id: 'host:non-generated-host',
-        EngineMetadata: { Type: 'host', UntypedId: 'non-generated-host' },
-      },
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'cb20977f0b08562677a022f7362b3e9a',
+    _index: LATEST_INDEX,
+    _id: '897ba3ebc6ad71a081e7fc69b79473abaf6d425ab3c42a08e3f92b9a6bac7412',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
       host: { name: 'desktop-02' },
@@ -119,8 +134,8 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '0074d60e067281b4286ec527953c8e7b',
+    _index: LATEST_INDEX,
+    _id: '6746dba00f1e5062c513ff8b4b8707069894308b12a69bd590763ae56880dda9',
     _source: {
       '@timestamp': '2026-01-20T12:05:06.000Z',
       host: { name: 'server-02', domain: 'example.com', id: 'host-456' },
@@ -133,11 +148,11 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '7ce02ea9458bb0c3adccc71ea36acced',
+    _index: LATEST_INDEX,
+    _id: '60cde316aec6a9697ea87bfc44cf2b8c492e1a81408b6c955d367a47a77841c9',
     _source: {
       '@timestamp': '2026-01-20T12:05:07.000Z',
-      host: { domain: 'corp.local', hostname: 'workstation-10', id: 'host-789' },
+      host: { hostname: 'workstation-10', id: 'host-789' },
       entity: {
         name: 'host-789',
         type: 'Host',
@@ -147,39 +162,39 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '180b7320d4ce161699c962c956c9bb46',
+    _index: LATEST_INDEX,
+    _id: '2fb2f574f23c5013662d0e90cb88956b925f54ce381f605ce43970ab9d226fa5',
     _source: {
       '@timestamp': '2026-01-20T12:05:08.000Z',
       host: { name: 'server-03', domain: 'test.com', hostname: 'backup-server' },
       entity: {
         name: 'server-03',
         type: 'Host',
-        id: 'host:server-03.test.com',
-        EngineMetadata: { Type: 'host', UntypedId: 'server-03.test.com' },
+        id: 'host:server-03',
+        EngineMetadata: { Type: 'host', UntypedId: 'server-03' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '8b261663c77543e6a4544fc85cdc62ef',
+    _index: LATEST_INDEX,
+    _id: '09bcd5d78b75a3adef2a52e183f655d678e148594ff151552d119c44a6d0a878',
     _source: {
       '@timestamp': '2026-01-20T12:05:09.000Z',
-      host: { name: 'server-04', domain: 'example.org', id: '' },
+      host: { name: 'server-04' },
       entity: {
         name: 'server-04',
         type: 'Host',
-        id: 'host:server-04.example.org',
-        EngineMetadata: { Type: 'host', UntypedId: 'server-04.example.org' },
+        id: 'host:server-04',
+        EngineMetadata: { Type: 'host', UntypedId: 'server-04' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '9fff579a1f2d32a2c470ed711de1e04b',
+    _index: LATEST_INDEX,
+    _id: 'b0a7cfbcf83d479cf075035daad72b41c3de8ce811d2f6897318f9bc1bb987ac',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
-      host: { entity: { id: '' }, id: 'host-404' },
+      host: { id: 'host-404' },
       entity: {
         name: 'host-404',
         type: 'Host',
@@ -189,25 +204,39 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'b4e5db4fb8eb7f13d284ee386210b26e',
+    _index: LATEST_INDEX,
+    _id: '768eb4b39da6860133158f0bd8e150bb35a6ddafa36a16835876994be3eb1282',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
-      host: { name: 'server-05', domain: 'test.net' },
+      host: { domain: 'test.net', name: 'server-05' },
       entity: {
         name: 'server-05',
         type: 'Host',
-        id: 'host:server-05.test.net',
-        EngineMetadata: { Type: 'host', UntypedId: 'server-05.test.net' },
+        id: 'host:server-05',
+        EngineMetadata: { Type: 'host', UntypedId: 'server-05' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '4bf68ff60fc8b19cec2241992556322a',
+    _index: LATEST_INDEX,
+    _id: 'c08cb55dbe4f377ab1def9e763a82e0f9bf06cf231618e1353982569a7cb0077',
     _source: {
       '@timestamp': '2026-01-20T12:05:11.000Z',
-      host: { name: 'workstation-05', id: '' },
+      host: { domain: 'example.com', hostname: 'empty-name-host', name: '' },
+      entity: {
+        name: 'empty-name-host',
+        type: 'Host',
+        id: 'host:empty-name-host',
+        EngineMetadata: { Type: 'host', UntypedId: 'empty-name-host' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: 'b15370fcb6af62f86e08adfc76d6a4bbddf608c99dd413a328b141c3bc856baa',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:11.000Z',
+      host: { domain: 'corp.local', id: '', name: 'workstation-05' },
       entity: {
         name: 'workstation-05',
         type: 'Host',
@@ -217,25 +246,25 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '40b5875887d5e812570327b9604425a6',
+    _index: LATEST_INDEX,
+    _id: 'ef614751487e09e78b059dabbe45f3520990f98ba845ace99f393c77f887d2da',
     _source: {
       '@timestamp': '2026-01-20T12:05:12.000Z',
       host: { domain: 'corp.local', hostname: 'workstation-20' },
       entity: {
-        name: 'workstation-20.corp.local',
+        name: 'workstation-20',
         type: 'Host',
-        id: 'host:workstation-20.corp.local',
-        EngineMetadata: { Type: 'host', UntypedId: 'workstation-20.corp.local' },
+        id: 'host:workstation-20',
+        EngineMetadata: { Type: 'host', UntypedId: 'workstation-20' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'a5d3d8b58538b9ee1ca73b50d15d4b52',
+    _index: LATEST_INDEX,
+    _id: 'a81cc7862183be0830ee40949661eb3892d2b1f0c9d1d536e6f88e6774c7dfdd',
     _source: {
       '@timestamp': '2026-01-20T12:05:13.000Z',
-      host: { name: 'server-06', domain: '' },
+      host: { domain: '', name: 'server-06' },
       entity: {
         name: 'server-06',
         type: 'Host',
@@ -245,22 +274,8 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'ad6d0148f3ab302b6d9389a05e04e01d',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:16.000Z',
-      host: { entity: { id: 'host-505' } },
-      entity: {
-        name: 'host-505',
-        type: 'Host',
-        id: 'host:host-505',
-        EngineMetadata: { Type: 'host', UntypedId: 'host-505' },
-      },
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'dbc04494402b73d5414cdf90850d777e',
+    _index: LATEST_INDEX,
+    _id: '92a7476f32e5e8edec138184b41959c82fa37050841e24c58d07500addd57aa2',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
       host: { id: 'host-606' },
@@ -273,22 +288,22 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'f69c44458b36688926b09ed388c8b5be',
+    _index: LATEST_INDEX,
+    _id: '1632a83b7ec4a14465d1af6d1896969cf1dc5c212d2a71b2a17087c8de799b7a',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
-      host: { name: 'server-08', domain: 'corp.local', hostname: 'laptop-02' },
+      host: { name: 'server-08' },
       entity: {
         name: 'server-08',
         type: 'Host',
-        id: 'host:server-08.corp.local',
-        EngineMetadata: { Type: 'host', UntypedId: 'server-08.corp.local' },
+        id: 'host:server-08',
+        EngineMetadata: { Type: 'host', UntypedId: 'server-08' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '68c7ffbdcf9404e4494ac43a83719ef5',
+    _index: LATEST_INDEX,
+    _id: 'a8f8ffa08603e5be512b0568c0ac960cac5082415f60a133cc4bac22b87d5e31',
     _source: {
       '@timestamp': '2026-01-20T12:05:18.000Z',
       host: { name: 'server-07' },
@@ -301,8 +316,8 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '1fba7560b67c8b51827bac3b6c86fce1',
+    _index: LATEST_INDEX,
+    _id: 'a46f698d3e156552cbbe33a7640f980187edeaeb241e2b13f3549576f0b67e28',
     _source: {
       '@timestamp': '2026-01-20T12:05:18.000Z',
       host: { hostname: 'workstation-30' },
@@ -314,12 +329,53 @@ export const expectedHostEntities = [
       },
     },
   },
+  {
+    _index: LATEST_INDEX,
+    _id: 'f02169eec02621bcecb234b58b06cec66357c1553c9914fd3f049d234e3008d8',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      host: { id: 'host-nonidp-001' },
+      entity: {
+        name: 'host-nonidp-001',
+        type: 'Host',
+        id: 'host:host-nonidp-001',
+        EngineMetadata: { Type: 'host', UntypedId: 'host-nonidp-001' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: '461490dda53c8f34ea128a61fb4f9463adddfc4f4073be8c45f3a2f05f13e509',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:24.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      entity: {
+        EngineMetadata: {
+          Type: 'host',
+          UntypedId: 'macbookpro-123',
+        },
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:23.000Z',
+          last_seen: '2026-01-20T12:05:24.000Z',
+        },
+        name: 'macbookpro-123',
+        source: 'jamf',
+        id: 'host:macbookpro-123',
+        type: 'Host',
+      },
+    },
+  },
 ];
 
-export const expectedUserEntities = [
+export const expectedUserEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '1d9cb6c21dfa9156571de1281d707719',
+    _index: LATEST_INDEX,
+    _id: 'b567c98b4ef4ba050d3201175d7cbf1ef5a4377e10f1a7ca23f8f7b2c384dbb4',
     _source: {
       '@timestamp': '2026-01-20T12:05:00.000Z',
       user: { name: 'john.doe' },
@@ -327,14 +383,14 @@ export const expectedUserEntities = [
       entity: {
         name: 'john.doe',
         type: 'Identity',
-        id: 'user:john.doe@host-123',
-        EngineMetadata: { Type: 'user', UntypedId: 'john.doe@host-123' },
+        id: 'user:john.doe@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'john.doe@okta' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '34e67fc3f53984dbfd0ed097197cc453',
+    _index: LATEST_INDEX,
+    _id: 'cd38727a29cb7953f67860937ad78e7ccc83bb267d2bdd237c68e8b1c6ca3b88',
     _source: {
       '@timestamp': '2026-01-20T12:05:01.000Z',
       user: { name: 'jane.smith' },
@@ -342,14 +398,14 @@ export const expectedUserEntities = [
       entity: {
         name: 'jane.smith',
         type: 'Identity',
-        id: 'user:jane.smith@host-456',
-        EngineMetadata: { Type: 'user', UntypedId: 'jane.smith@host-456' },
+        id: 'user:jane.smith@host-456@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'jane.smith@host-456@local' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'ba6d49220ff970733fff891e87d09e56',
+    _index: LATEST_INDEX,
+    _id: 'f54b6e21827a7e18b4dfc4736893d3766a9db81bec6e806a1c9afe7fffe3571c',
     _source: {
       '@timestamp': '2026-01-20T12:05:02.000Z',
       user: { name: 'bob.jones' },
@@ -357,125 +413,125 @@ export const expectedUserEntities = [
       entity: {
         name: 'bob.jones',
         type: 'Identity',
-        id: 'user:bob.jones@server-01',
-        EngineMetadata: { Type: 'user', UntypedId: 'bob.jones@server-01' },
+        id: 'user:bob.jones@entra_id',
+        EngineMetadata: { Type: 'user', UntypedId: 'bob.jones@entra_id' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'd0ddd45157d6fe1cbde790dea38d8817',
+    _index: LATEST_INDEX,
+    _id: 'f1e9f0712f2e4f2dc13612daebe203fac9c8c56dcc0b4c3575af8cfdbd05e095',
     _source: {
       '@timestamp': '2026-01-20T12:05:03.000Z',
       user: { name: 'alice.brown', id: 'user-789' },
       entity: {
         name: 'alice.brown',
         type: 'Identity',
-        id: 'user:user-789',
-        EngineMetadata: { Type: 'user', UntypedId: 'user-789' },
+        id: 'user:user-789@microsoft_365',
+        EngineMetadata: { Type: 'user', UntypedId: 'user-789@microsoft_365' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '025d1e3fbf1982fba259d37978ee5709',
+    _index: LATEST_INDEX,
+    _id: 'da02d432b766ee35f68647f9714f619611eb5e05e14bb3ae43e5e4f48e2f6f7e',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
       entity: {
-        name: 'non-generated-user',
+        name: 'arnlod.schmidt',
         type: 'Identity',
-        id: 'user:non-generated-user',
-        EngineMetadata: { Type: 'user', UntypedId: 'non-generated-user' },
+        id: 'user:arnlod.schmidt@elastic.co@active_directory',
+        EngineMetadata: { Type: 'user', UntypedId: 'arnlod.schmidt@elastic.co@active_directory' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'bd55eef67b506ab8735e6f0f59e8bee8',
+    _index: LATEST_INDEX,
+    _id: 'c7ad17bde8724fc1773c8800c2e7adf35ac01661bbd8321fe3f37fd50c5118c6',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
       user: { id: 'user-101' },
       entity: {
-        name: 'user-101',
+        name: 'user-101@microsoft_365',
         type: 'Identity',
-        id: 'user:user-101',
-        EngineMetadata: { Type: 'user', UntypedId: 'user-101' },
+        id: 'user:user-101@microsoft_365',
+        EngineMetadata: { Type: 'user', UntypedId: 'user-101@microsoft_365' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '6f42b467570b3e7ab0d0ae8b60965648',
+    _index: LATEST_INDEX,
+    _id: 'bbbdc4f04c4e3d052dc35f846de9044c144f729499ec0948cf55882e8fc4e33a',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
       user: { email: 'test@example.com' },
       entity: {
-        name: 'test@example.com',
+        name: 'test@example.com@okta',
         type: 'Identity',
-        id: 'user:test@example.com',
-        EngineMetadata: { Type: 'user', UntypedId: 'test@example.com' },
+        id: 'user:test@example.com@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'test@example.com@okta' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '3d6f612371ad997ae58098380912c307',
+    _index: LATEST_INDEX,
+    _id: '62c5dd196f6e5e6c82d94043e99b51fcaf6e976bd4e2a9f0a507f27447d5dc3f',
     _source: {
       '@timestamp': '2026-01-20T12:05:06.000Z',
       user: { domain: 'corp', name: 'charlie.wilson' },
       entity: {
         name: 'charlie.wilson',
         type: 'Identity',
-        id: 'user:charlie.wilson@corp',
-        EngineMetadata: { Type: 'user', UntypedId: 'charlie.wilson@corp' },
+        id: 'user:charlie.wilson@corp@aws',
+        EngineMetadata: { Type: 'user', UntypedId: 'charlie.wilson@corp@aws' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'a870b6e8cd872aeb6696cc70997484fd',
+    _index: LATEST_INDEX,
+    _id: '43d3c510e836c10954b768e31075f42830d555751c01bdcf2c3a068c2e601174',
     _source: {
       '@timestamp': '2026-01-20T12:05:07.000Z',
       user: { name: 'david.lee' },
       entity: {
         name: 'david.lee',
         type: 'Identity',
-        id: 'user:david.lee',
-        EngineMetadata: { Type: 'user', UntypedId: 'david.lee' },
+        id: 'user:david.lee@gcp',
+        EngineMetadata: { Type: 'user', UntypedId: 'david.lee@gcp' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'c049dff0ed865eb3709c2577344652df',
+    _index: LATEST_INDEX,
+    _id: '05547ae5914edf47b9fbd787dedd38148c3f8240c542c1419851718722e8ed1c',
     _source: {
       '@timestamp': '2026-01-20T12:05:08.000Z',
       user: { name: '', id: 'user-202' },
       entity: {
-        name: 'user-202',
+        name: 'user-202@okta',
         type: 'Identity',
-        id: 'user:user-202',
-        EngineMetadata: { Type: 'user', UntypedId: 'user-202' },
+        id: 'user:user-202@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'user-202@okta' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '7b71429fa06bece73a69aa3b6c111933',
+    _index: LATEST_INDEX,
+    _id: '526f58f4a72a4e80f9b95d4a3cd3f67f227c06843a2854336a257b844e2a4489',
     _source: {
       '@timestamp': '2026-01-20T12:05:09.000Z',
       user: { id: 'user-303' },
       entity: {
-        name: 'user-303',
+        name: 'user-303@entra_id',
         type: 'Identity',
-        id: 'user:user-303',
-        EngineMetadata: { Type: 'user', UntypedId: 'user-303' },
+        id: 'user:user-303@entra_id',
+        EngineMetadata: { Type: 'user', UntypedId: 'user-303@entra_id' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'a71d3785ad04601f4b98990e871cd82b',
+    _index: LATEST_INDEX,
+    _id: '16fe33533e168db368bc1fe511528ee3c3fc97f89653d714cb71b7c42a04f350',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
       user: { name: 'eve.martin' },
@@ -483,14 +539,14 @@ export const expectedUserEntities = [
       entity: {
         name: 'eve.martin',
         type: 'Identity',
-        id: 'user:eve.martin@host-404',
-        EngineMetadata: { Type: 'user', UntypedId: 'eve.martin@host-404' },
+        id: 'user:eve.martin@host-404@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'eve.martin@host-404@local' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'd4ccc5552730aec959408caca3473ee7',
+    _index: LATEST_INDEX,
+    _id: 'fe44b2619de15aa30170dde991ee224069d210beda4db607e4bce75bae4c1746',
     _source: {
       '@timestamp': '2026-01-20T12:05:11.000Z',
       user: { name: 'frank.taylor' },
@@ -498,70 +554,70 @@ export const expectedUserEntities = [
       entity: {
         name: 'frank.taylor',
         type: 'Identity',
-        id: 'user:frank.taylor@workstation-05',
-        EngineMetadata: { Type: 'user', UntypedId: 'frank.taylor@workstation-05' },
+        id: 'user:frank.taylor@active_directory',
+        EngineMetadata: { Type: 'user', UntypedId: 'frank.taylor@active_directory' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '9c2027667a9851d44876ae4e4008b108',
+    _index: LATEST_INDEX,
+    _id: '034deba2c721973f2116bccea7d63b237ac1e380208dc9b1c4d555f616b9adfe',
     _source: {
       '@timestamp': '2026-01-20T12:05:12.000Z',
       user: { email: 'grace@example.com', name: 'grace.anderson' },
       entity: {
         name: 'grace.anderson',
         type: 'Identity',
-        id: 'user:grace@example.com',
-        EngineMetadata: { Type: 'user', UntypedId: 'grace@example.com' },
+        id: 'user:grace@example.com@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'grace@example.com@okta' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'fcaaebb1c3ef5431de17f325a54bf97f',
+    _index: LATEST_INDEX,
+    _id: '42df55aa9b3d15a3b0af954aa93c68556cd5bcae0f61796fff74bffffdb51434',
     _source: {
       '@timestamp': '2026-01-20T12:05:13.000Z',
       user: { name: 'henry.clark' },
       entity: {
         name: 'henry.clark',
         type: 'Identity',
-        id: 'user:henry.clark',
-        EngineMetadata: { Type: 'user', UntypedId: 'henry.clark' },
+        id: 'user:henry.clark@entra_id',
+        EngineMetadata: { Type: 'user', UntypedId: 'henry.clark@entra_id' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '8b8b96fb0537d319e1397a175681a6b6',
+    _index: LATEST_INDEX,
+    _id: '1d138cf603a471abef52ffb6333d63dadcf9e34af1788f539cf999c8230727c9',
     _source: {
       '@timestamp': '2026-01-20T12:05:14.000Z',
       user: { domain: '', name: 'iris.davis' },
       entity: {
         name: 'iris.davis',
         type: 'Identity',
-        id: 'user:iris.davis',
-        EngineMetadata: { Type: 'user', UntypedId: 'iris.davis' },
+        id: 'user:iris.davis@aws',
+        EngineMetadata: { Type: 'user', UntypedId: 'iris.davis@aws' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '4b11dd6cf7a4b049ce8afd5f38064094',
+    _index: LATEST_INDEX,
+    _id: 'd2e88c95d22d9a787c932b72328f7d47cade891dda0bc7d8b823b14cf3fc3e23',
     _source: {
       '@timestamp': '2026-01-20T12:05:15.000Z',
       user: { name: 'jack.white' },
       entity: {
         name: 'jack.white',
         type: 'Identity',
-        id: 'user:jack.white',
-        EngineMetadata: { Type: 'user', UntypedId: 'jack.white' },
+        id: 'user:jack.white@gcp',
+        EngineMetadata: { Type: 'user', UntypedId: 'jack.white@gcp' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '9211621cb08e16e69dc48158e35579c8',
+    _index: LATEST_INDEX,
+    _id: '5404b10c22698b0ec86abec4c3bc429a8f8f063ed1dc6eee24b127a3521e9d63',
     _source: {
       '@timestamp': '2026-01-20T12:05:16.000Z',
       user: { name: 'karen.green', id: 'user-505' },
@@ -569,14 +625,14 @@ export const expectedUserEntities = [
       entity: {
         name: 'karen.green',
         type: 'Identity',
-        id: 'user:karen.green@host-505',
-        EngineMetadata: { Type: 'user', UntypedId: 'karen.green@host-505' },
+        id: 'user:user-505@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'user-505@okta' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '5a3d5fc12af596c35c9bcce0ec15e297',
+    _index: LATEST_INDEX,
+    _id: '7b4db899b11d212ff774f38b2253ec037fa88c1592ce5df752045879d8c35872',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
       user: { email: 'larry@example.com', name: 'larry.black' },
@@ -584,14 +640,14 @@ export const expectedUserEntities = [
       entity: {
         name: 'larry.black',
         type: 'Identity',
-        id: 'user:larry.black@host-606',
-        EngineMetadata: { Type: 'user', UntypedId: 'larry.black@host-606' },
+        id: 'user:larry@example.com@entra_id',
+        EngineMetadata: { Type: 'user', UntypedId: 'larry@example.com@entra_id' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '855f0e0353f2a443af0c6baea478a6d8',
+    _index: LATEST_INDEX,
+    _id: '1f49dd57680b1986183a83644a0182b64b921c84e3e464a98a25664186b38f30',
     _source: {
       '@timestamp': '2026-01-20T12:05:18.000Z',
       user: { domain: 'corp', name: 'mary.blue' },
@@ -599,30 +655,172 @@ export const expectedUserEntities = [
       entity: {
         name: 'mary.blue',
         type: 'Identity',
-        id: 'user:mary.blue@server-07',
-        EngineMetadata: { Type: 'user', UntypedId: 'mary.blue@server-07' },
+        id: 'user:mary.blue@corp@active_directory',
+        EngineMetadata: { Type: 'user', UntypedId: 'mary.blue@corp@active_directory' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: '810b6c4feac1dcb16d1d8c428170eae525b7043421d5955a2ebdbe3e811ae5f2',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:19.000Z',
+      user: { name: 'not-captured-no-module' },
+      entity: {
+        name: 'not-captured-no-module',
+        type: 'Identity',
+        id: 'user:not-captured-no-module@unknown',
+        EngineMetadata: { Type: 'user', UntypedId: 'not-captured-no-module@unknown' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: '6d0b61db6529233f9e39eedfc91919e526d7b55d2d9e395c26f8fbce1b5541b5',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:20.000Z',
+      user: { name: 'okta.from.dataset' },
+      entity: {
+        name: 'okta.from.dataset',
+        type: 'Identity',
+        id: 'user:okta.from.dataset@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'okta.from.dataset@okta' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: '139e9d308ffadedbca2ecdcc1d2b6f2ebed8f53a3a33f9bc11328574389f76f3',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:21.000Z',
+      user: { name: 'cloudtrail.user' },
+      entity: {
+        name: 'cloudtrail.user',
+        type: 'Identity',
+        id: 'user:cloudtrail.user@aws',
+        EngineMetadata: { Type: 'user', UntypedId: 'cloudtrail.user@aws' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: 'fb171d701c968880c3eac6a1375c01a8335220f921d1f6d3d35e01e4396b4b74',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:22.000Z',
+      user: { name: 'no.module.user' },
+      entity: {
+        name: 'no.module.user',
+        type: 'Identity',
+        id: 'user:no.module.user@unknown',
+        EngineMetadata: { Type: 'user', UntypedId: 'no.module.user@unknown' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
+    _id: '18668fc50a8bfceef942a50bc1bb0dad7d1b503efa7dd55b4da8bf5086f9e42d',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      user: { name: 'alice.local' },
+      host: { id: 'host-nonidp-001' },
+      entity: {
+        name: 'alice.local',
+        type: 'Identity',
+        id: 'user:alice.local@host-nonidp-001@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'alice.local@host-nonidp-001@local' },
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default-00001',
+    _id: 'b344de5598be1f9ca0f3438b9e1dc4711a3677cea2c4187bc404013764caa3b5',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      event: {
+        kind: 'asset',
+      },
+      user: {
+        name: 'should-be-local',
+        email: 'should_be_local@example.com',
+      },
+      entity: {
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:23.000Z',
+          last_seen: '2026-01-20T12:05:23.000Z',
+        },
+        EngineMetadata: {
+          Type: 'user',
+          UntypedId: 'should-be-local@macbookpro-123@local',
+        },
+        confidence: 'medium',
+        namespace: 'local',
+        name: 'should-be-local',
+        source: 'jamf',
+        id: 'user:should-be-local@macbookpro-123@local',
+        type: 'Identity',
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default-00001',
+    _id: '91e6005b85bd2de67e1610f7bb07e2dd8506088f74729d56b9e8867d8f6dc102',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:24.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      event: {
+        kind: 'asset',
+      },
+      user: {
+        name: 'root',
+      },
+      entity: {
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:24.000Z',
+          last_seen: '2026-01-20T12:05:24.000Z',
+        },
+        EngineMetadata: {
+          Type: 'user',
+          UntypedId: 'root@jamf',
+        },
+        confidence: 'high',
+        namespace: 'jamf',
+        name: 'root',
+        source: 'jamf',
+        id: 'user:root@jamf',
+        type: 'Identity',
       },
     },
   },
 ];
 
-export const expectedServiceEntities = [
+export const expectedServiceEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '15b621f577206d843980a40d38554c70',
+    _index: LATEST_INDEX,
+    _id: '4a03614567f337f8129a115df2fa0ee23657227a4e3c5bcaf6a06e5a295a77a9',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
       entity: {
-        name: 'non-generated-service-id',
+        name: 'mailchimp',
         type: 'Service',
-        id: 'service:non-generated-service-id',
-        EngineMetadata: { Type: 'service', UntypedId: 'non-generated-service-id' },
+        id: 'service:mailchimp',
+        EngineMetadata: { Type: 'service', UntypedId: 'mailchimp' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '0f9d5fcd02e63ca500ca9515f76ce174',
+    _index: LATEST_INDEX,
+    _id: 'c3e453f58f98e329531f73ca57250f78449f73989748271ade0a9880d3255a6a',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
       entity: {
@@ -635,15 +833,15 @@ export const expectedServiceEntities = [
   },
 ];
 
-export const expectedGenericEntities = [
+export const expectedGenericEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '9e606449c558b5253d8b1f028fe7dca0',
+    _index: LATEST_INDEX,
+    _id: 'd98cd38cf7da05a3c32920813a0529fbc6fff7312d0bf774e85e1fc273a5ffdb',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
       entity: {
         name: 'generic-id',
-        id: 'generic:generic-id',
+        id: 'generic-id',
         EngineMetadata: { Type: 'generic', UntypedId: 'generic-id' },
       },
     },

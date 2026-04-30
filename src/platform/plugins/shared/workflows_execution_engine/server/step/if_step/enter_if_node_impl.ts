@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KQLSyntaxError } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
 import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { evaluateCondition } from '../evaluate_condition';
 import type { NodeImplementation } from '../node_implementation';
 
 export class EnterIfNodeImpl implements NodeImplementation {
@@ -26,8 +25,8 @@ export class EnterIfNodeImpl implements NodeImplementation {
 
   public async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
+
+    const successors = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
       successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))
@@ -48,9 +47,16 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const elseNode = successors?.find(
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
-    const renderedCondition =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
-    const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
+    const context = this.stepExecutionRuntime.contextManager.getContext();
+    const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+      thenNode.condition,
+      context
+    );
+    const evaluatedConditionResult = evaluateCondition(
+      renderedCondition,
+      context,
+      this.node.stepId
+    );
     this.stepExecutionRuntime.setInput({
       rawCondition: thenNode.condition as string,
       condition: renderedCondition,
@@ -94,37 +100,5 @@ export class EnterIfNodeImpl implements NodeImplementation {
       `Condition "${thenNode.condition}" evaluated to false for step ${this.node.stepId}. No else branch defined. Exiting if condition.`
     );
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
-  }
-
-  private evaluateCondition(condition: string | boolean | undefined): boolean {
-    if (typeof condition === 'boolean') {
-      return condition;
-    }
-    if (typeof condition === 'undefined') {
-      return false;
-    }
-
-    if (typeof condition === 'string') {
-      try {
-        return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
-      } catch (error) {
-        if (error instanceof KQLSyntaxError) {
-          throw new Error(
-            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
-              error
-            )}`
-          );
-        }
-        throw error;
-      }
-    }
-
-    throw new Error(
-      `Invalid condition type for step ${this.node.stepId}. ` +
-        `Got ${JSON.stringify(
-          condition
-        )} (type: ${typeof condition}), but expected boolean or string. ` +
-        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
-    );
   }
 }

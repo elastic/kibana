@@ -8,10 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isGroupingBucket } from '@kbn/grouping/src';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
@@ -40,16 +41,19 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
+import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
-import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
+import { buildAttacksOnlyFilter, buildConnectorIdFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
 import { AttacksTableSortSelect, DEFAULT_ATTACKS_SORT } from './attacks_table_sort_select';
 import { AlertActionItems } from './alerts_action_items';
 import { AttacksViewOptionsPopover } from './attacks_view_options_popover';
+import { useLocalStorage } from '../../../../common/components/local_storage';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
+export const ATTACKS_TABLE_SORT_STORAGE_KEY = 'securitySolution:attacksTableSort';
 
 export interface TableSectionProps {
   /**
@@ -114,9 +118,7 @@ export const TableSection = React.memo(
 
     const { loading: listsConfigLoading } = useListsConfig();
 
-    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-      TableId.alertsOnAttacksPage
-    );
+    const { showOnlyThreatIndicatorAlerts } = useDataTableFilters(TableId.alertsOnAttacksPage);
 
     // for showing / hiding anonymized data:
     const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -193,7 +195,7 @@ export const TableSection = React.memo(
     // AlertsTable manages global filters itself, so not including `filters`
     const defaultFilters = useMemo(() => {
       return [
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(true),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
@@ -201,7 +203,6 @@ export const TableSection = React.memo(
         ...(showAttacksOnly ? buildAttacksOnlyFilter() : []),
       ];
     }, [
-      showBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       pageFilters,
       assignees,
@@ -254,7 +255,14 @@ export const TableSection = React.memo(
       (props) => {
         const attack = getAttack(props.selectedGroup, props.groupBucket);
         if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
-        return <AttacksGroupTakeActionItems attack={attack} closePopover={props.closePopover} />;
+        return (
+          <AttacksGroupTakeActionItems
+            attack={attack}
+            closePopover={props.closePopover}
+            telemetrySource="attacks_page_group_take_action"
+            isRemoteDocument={isNonLocalIndexName(attack.index ?? '')}
+          />
+        );
       },
       [getAttack, statusFilter]
     );
@@ -270,7 +278,13 @@ export const TableSection = React.memo(
       [openSchedulesFlyout]
     );
 
-    const [sort, setSort] = useState<GroupingSort>(DEFAULT_ATTACKS_SORT);
+    const [sort, setSort] = useLocalStorage<GroupingSort>({
+      key: ATTACKS_TABLE_SORT_STORAGE_KEY,
+      defaultValue: DEFAULT_ATTACKS_SORT,
+      isInvalidDefault: (value) => {
+        return value == null || (Array.isArray(value) && value.length === 0);
+      },
+    });
 
     const attacksTableSortSelect = useMemo(
       () => (
@@ -286,8 +300,10 @@ export const TableSection = React.memo(
           <EuiSpacer />
         </EuiFlexGroup>
       ),
-      [sort]
+      [sort, setSort]
     );
+
+    const dslFilter = useMemo(() => dsl.isNotAttack(), []);
 
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
@@ -312,6 +328,7 @@ export const TableSection = React.memo(
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}
           sort={sort}
+          unitsCountFilter={dslFilter}
         />
       </div>
     );

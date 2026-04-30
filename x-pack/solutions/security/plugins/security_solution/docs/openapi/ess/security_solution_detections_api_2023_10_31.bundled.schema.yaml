@@ -18,11 +18,24 @@ servers:
 paths:
   /api/detection_engine/index:
     delete:
+      description: >
+        Permanently deletes the Elastic Security alerts backing index in the
+        current space, including the alerts
+
+        stored in it. Use with caution; prefer lifecycle policies or the UI when
+        available.
+
+        Call `GET /api/detection_engine/index` first to confirm the index that
+        will be removed.
       operationId: DeleteAlertsIndex
       responses:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -34,24 +47,48 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    message: >-
+                      API [DELETE /api/detection_engine/index] is unauthorized
+                      for the current user. The user needs alerts management
+                      permissions for the space.
+                    status_code: 403
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Not enough permissions response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: The Elastic Security alerts index to delete was not found.
+                    status_code: 404
               schema:
-                type: string
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Index does not exist response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -60,6 +97,14 @@ paths:
         - Security Detections API
         - Alert index API
     get:
+      description: >
+        Returns the backing Elasticsearch index for Elastic Security detection
+        alerts in the current space, and
+
+        whether its mapping is outdated. Use this to verify that an alert index
+        is provisioned before creating
+
+        or running rules that write alerts to it.
       operationId: ReadAlertsIndex
       responses:
         '200':
@@ -85,24 +130,50 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    message: >-
+                      API [GET /api/detection_engine/index] is unauthorized for
+                      the current user. Check Security and Kibana feature
+                      privileges (detection engine / alerts) for the space.
+                    status_code: 403
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Not enough permissions response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: >-
+                      Elastic Security alert index is not found for the current
+                      space.
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -120,6 +191,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -131,24 +206,50 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    message: >-
+                      API [POST /api/detection_engine/index] is unauthorized for
+                      the current user. The user must be able to create indices
+                      for the Elastic Security solution.
+                    status_code: 403
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Not enough permissions response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: >-
+                      A prerequisite resource required to create the alerts
+                      index was not found.
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -222,12 +323,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -271,6 +383,36 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletedRule:
+                  summary: Response shape after a rule is deleted
+                  value:
+                    actions: []
+                    created_at: '2020-02-03T11:19:04.259Z'
+                    created_by: elastic
+                    description: Process started by MS Office program in user folder
+                    enabled: false
+                    false_positives: []
+                    from: now-4200s
+                    id: c41d170b-8ba6-4de6-b8ec-76440a35ace3
+                    immutable: false
+                    interval: 1h
+                    language: kuery
+                    max_signals: 100
+                    name: MS Office child process
+                    query: event.action:Process*
+                    references: []
+                    risk_score: 50
+                    rule_id: process_started_by_ms_office_user_folder
+                    severity: low
+                    tags:
+                      - tag
+                    throttle: null
+                    to: now
+                    type: query
+                    updated_at: '2020-02-03T11:19:04.462Z'
+                    updated_by: elastic
+                    version: 3
               schema:
                 $ref: '#/components/schemas/RuleResponse'
           description: Indicates a successful call.
@@ -504,7 +646,7 @@ paths:
                   anomaly_threshold: 50
                   id: 60b13926-289b-41b1-a537-197ef1fa5059
                   machine_learning_job_id:
-                    - auth_high_count_logon_events
+                    - auth_high_count_logon_events_ea
             schema:
               $ref: '#/components/schemas/RulePatchProps'
         description: |
@@ -656,8 +798,8 @@ paths:
 
         Additionally, you can set up notifications for when rules create alerts.
         The notifications use the [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html).
-        Each action type requires a connector. Connectors store the information
+        framework](https://www.elastic.co/docs/explore-analyze/alerting). Each
+        action type requires a connector. Connectors store the information
         required to send notifications via external systems. The following
         connector types are supported for rule notifications:
 
@@ -686,7 +828,7 @@ paths:
 
         To retrieve connector IDs, which are required to configure rule
         notifications, call the [Find objects
-        API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html)
+        API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects)
         with `"type": "action"` in the request payload.
 
 
@@ -698,7 +840,7 @@ paths:
         API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
 
         * [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+        framework](https://www.elastic.co/docs/explore-analyze/alerting)
 
         * [Connectors
         API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
@@ -1542,7 +1684,7 @@ paths:
                   description: New description of ml rule
                   id: 60b13926-289b-41b1-a537-197ef1fa5059
                   machine_learning_job_id:
-                    - auth_high_count_logon_events
+                    - auth_high_count_logon_events_ea
                   name: New name of ml rule
                   risk_score: 21
                   severity: low
@@ -2192,12 +2334,12 @@ paths:
                             interval: 15m
                             license: Elastic License v2
                             machine_learning_job_id:
-                              - packetbeat_dns_tunneling
+                              - packetbeat_dns_tunneling_ea
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
                               - >-
-                                https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                                https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -2860,7 +3002,7 @@ paths:
 
 
         > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
+        Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects)
         UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
         (experimental) to
         [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
@@ -2871,7 +3013,7 @@ paths:
 
         > Similarly, any value lists used for rule exceptions are not included
         in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
+        lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists)
         UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
         import value lists separately.
       operationId: ExportRules
@@ -2899,6 +3041,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              exportByRuleIds:
+                summary: Request body to export a subset of rules
+                value:
+                  objects:
+                    - rule_id: 343580b5-c811-447c-8d2d-2ccf052c6900
+                    - rule_id: 2938c9fa-53eb-4c04-b79c-33cbf041b18d
             schema:
               nullable: true
               type: object
@@ -2922,6 +3071,15 @@ paths:
         '200':
           content:
             application/ndjson:
+              examples:
+                sampleNdjson:
+                  value: >
+                    {"rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900","name":"Example
+                    rule","type":"query","enabled":true}
+
+                    {"exception_list":true}
+
+                    {"export_summary":{"total_rules":1,"exceptions_count":0}}
               schema:
                 description: >
                   An `.ndjson` file containing the returned rules.
@@ -2961,7 +3119,15 @@ paths:
         is returned, with 20 results per page.
       operationId: FindRules
       parameters:
-        - in: query
+        - description: >
+            List of `alert.attributes` field names to return for each rule (for
+            example `name`, `enabled`).
+
+            If omitted, the default field set is returned. Repeat the parameter
+            to pass multiple field names, or
+
+            use comma-separated values when supported by your client.
+          in: query
           name: fields
           required: false
           schema:
@@ -3045,6 +3211,14 @@ paths:
             items:
               $ref: '#/components/schemas/GapFillStatus'
             type: array
+        - description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          in: query
+          name: gap_auto_fill_scheduler_id
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -3195,7 +3369,7 @@ paths:
         you need All privileges for the Actions and Connectors feature. To
         import rules without actions, you don’t need Actions and Connectors
         privileges. Refer to [Enable and access
-        detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui)
+        detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges)
         for more information.
 
 
@@ -3208,7 +3382,7 @@ paths:
 
 
         > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
+        Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects)
         UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
         (experimental) to
         [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
@@ -3219,7 +3393,7 @@ paths:
 
         > Similarly, any value lists used for rule exceptions are not included
         in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
+        lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists)
         UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
         import value lists separately.
       operationId: ImportRules
@@ -3262,6 +3436,11 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              rulesFile:
+                summary: Multipart part containing a rule export
+                value:
+                  file: rules_import.ndjson
             schema:
               type: object
               properties:
@@ -3496,6 +3675,15 @@ paths:
         - Prebuilt Rules API
   /api/detection_engine/rules/preview:
     post:
+      description: >
+        Simulates a detection rule using the same rule type and query logic as a
+        persisted rule, over a short
+
+        time window, without persisting a rule or writing alerts. Use the
+        response to validate queries, see sample
+
+        matching documents, and inspect execution logs. Pair `invocationCount`
+        and `timeframeEnd` to cap run time.
       operationId: RulePreview
       parameters:
         - description: >-
@@ -3509,6 +3697,23 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              queryRule:
+                value:
+                  description: Find matching events
+                  from: now-24h
+                  index:
+                    - logs-*
+                  invocationCount: 1
+                  language: kuery
+                  max_signals: 20
+                  name: Rule preview
+                  query: 'process.name : *'
+                  risk_score: 25
+                  severity: low
+                  timeframeEnd: '2025-01-20T12:00:00.000Z'
+                  to: now
+                  type: query
             schema:
               anyOf:
                 - allOf:
@@ -3537,14 +3742,31 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: >
+          Rule create payload (same shape as `POST /api/detection_engine/rules`
+          for a given `type`) plus
+
+          `invocationCount` and `timeframeEnd` to control how the preview is
+          executed. Optional
+
+          `enable_logged_requests` surfaces Elasticsearch request logging for
+          debugging.
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    isAborted: false
+                    logs:
+                      - duration: 45
+                        errors: []
+                        requests: []
+                        startedAt: 2025-01-20T10:00:00.000Z
+                        warnings: []
+                    previewId: 7f1c9d1e-4c8a-4a3e-9a5d-0d4f6e1b2a90
               schema:
                 type: object
                 properties:
@@ -3562,6 +3784,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].timeframeEnd: expected string, received
+                      null
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3570,12 +3800,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3600,50 +3841,125 @@ paths:
                 $ref: '#/components/examples/SetAlertAssigneesBodyRemove'
             schema:
               $ref: '#/components/schemas/SetAlertAssigneesBody'
+        description: User profile IDs to add or remove on each listed alert document ID.
         required: true
       responses:
         '200':
           content:
-            application/ndjson:
+            application/json:
               examples:
                 add:
                   value:
-                    batches: 1,
-                    deleted: 0,
+                    batches: 1
+                    deleted: 0
                     failures: []
-                    noops: 0,
-                    requests_per_second: '-1,'
+                    noops: 0
+                    requests_per_second: -1
                     retries:
-                      - bulk: 0,
-                      - search: 0
-                    throttled_millis: 0,
-                    throttled_until_millis: 0,
-                    timed_out: false,
-                    took: 76,
-                    total: 1,
-                    updated: 1,
-                    version_conflicts: 0,
-          description: Indicates a successful call.
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 76
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: >
+            Indicates a successful call. The body matches an Elasticsearch
+            update-by-query response
+
+            (for example `took`, `updated`, `failures`).
         '400':
-          description: Invalid request.
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].ids: at least one alert id is required to
+                      update assignees
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/detection_engine/signals/assignees] is
+                      unauthorized for the current user, this action is granted
+                      by the Kibana Security Solution privileges for cases and
+                      detections
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
       summary: Assign and unassign users from detection alerts
       tags:
         - Security Detections API
+        - Alerts API
   /api/detection_engine/signals/finalize_migration:
     post:
       deprecated: true
       description: >
+        **DEPRECATED.** Completes a legacy alert index migration. Do not
+        automate against this in new code.
+
+        **WARNING:** Finalizing swaps read aliases; confirm the migration has
+        finished successfully before calling.
+
+
         Finalize successful migrations of detection alerts. This replaces the
-        original index's alias with the successfully migrated index's alias.
+        original index's alias with the
 
-        The endpoint is idempotent; therefore, it can safely be used to poll a
-        given migration and, upon completion,
+        successfully migrated index's alias. The endpoint is idempotent, so you
+        can poll until a migration
 
-        finalize it.
+        finishes and then call this operation once.
       operationId: FinalizeAlertsMigration
       requestBody:
         content:
           application/json:
+            examples:
+              oneMigration:
+                value:
+                  migration_ids:
+                    - 924f7c50-505f-11eb-ae0a-3fa2e626a51d
             schema:
               example:
                 migration_ids:
@@ -3683,6 +3999,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].migration_ids: at least one migration id is
+                      required to finalize
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3691,12 +4015,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3708,26 +4043,33 @@ paths:
     delete:
       deprecated: true
       description: >
+        **DEPRECATED.** Cleanup API for old migration artifacts. Do not add new
+        call sites.
+
+        **WARNING:** This schedules deletions; ensure no production reads still
+        point at the source index.
+
+
         Migrations favor data integrity over shard size. Consequently, unused or
         orphaned indices are artifacts of
 
-        the migration process. A successful migration will result in both the
-        old and new indices being present.
+        the migration process. A successful migration can leave both the old and
+        new indices present, so the old
 
-        As such, the old, orphaned index can (and likely should) be deleted.
+        index may be deleted. While you can delete these indices manually, the
+        endpoint applies a deletion policy
 
-
-        While you can delete these indices manually,
-
-        the endpoint accomplishes this task by applying a deletion policy to the
-        relevant index, causing it to be deleted
-
-        after 30 days. It also deletes other artifacts specific to the migration
-        implementation.
+        to the relevant index, causing it to be deleted after 30 days, and
+        removes other migration-specific artifacts.
       operationId: AlertsMigrationCleanup
       requestBody:
         content:
           application/json:
+            examples:
+              cleanupMigrations:
+                value:
+                  migration_ids:
+                    - 924f7c50-505f-11eb-ae0a-3fa2e626a51d
             schema:
               example:
                 migration_ids:
@@ -3766,6 +4108,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].migration_ids: at least one migration id is
+                      required to run cleanup
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3774,12 +4124,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3790,12 +4151,21 @@ paths:
     post:
       deprecated: true
       description: >
-        Initiate a migration of detection alerts.
+        **DEPRECATED.** Legacy API for on-demand reindexing of old
+        `.siem-signals-*` alert indices. Do not build new
 
-        Migrations are initiated per index. While the process is neither
-        destructive nor interferes with existing data, it may be
-        resource-intensive. As such, it is recommended that you plan your
-        migrations accordingly.
+        integrations; upgrade the Elastic Stack and rely on product-managed data
+        lifecycle instead.
+
+        **WARNING:** Migrations can be resource intensive and should be planned
+        during a maintenance window.
+
+
+        Initiate a migration of detection alerts. Migrations are initiated per
+        index. The process is not destructive
+
+        and should not remove existing data, but it can consume significant
+        cluster resources. Plan capacity accordingly.
       operationId: CreateAlertsMigration
       requestBody:
         content:
@@ -3849,6 +4219,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].index: at least one index name is required
+                      to start a migration
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3857,12 +4235,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3873,9 +4262,21 @@ paths:
   /api/detection_engine/signals/migration_status:
     get:
       deprecated: true
-      description: >-
-        Retrieve indices that contain detection alerts of a particular age,
-        along with migration information for each of those indices.
+      description: >
+        **DEPRECATED.** This endpoint was used for historical `.siem-signals-*`
+        index migration workflows. Do not use
+
+        for new automations; there is no supported replacement in this public
+        API.
+
+        **WARNING:** Prefer upgrading through supported Elastic stack upgrades
+        rather than ad-hoc index migrations.
+
+
+        Retrieves indices that contain detection alerts of a particular age,
+        along with migration information for
+
+        each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
         - description: Maximum age of qualifying detection alerts
@@ -3933,6 +4334,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request query].from: expected date-math, received null'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3941,12 +4348,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -4032,6 +4450,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      Failed to parse search request: unknown query clause in
+                      bool filter
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -4040,12 +4466,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -4153,6 +4590,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].signal_ids: at least one alert id is
+                      required to update status
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -4161,12 +4606,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -4176,9 +4632,12 @@ paths:
         - Alerts API
   /api/detection_engine/signals/tags:
     post:
-      description: |
-        And tags to detection alerts, and remove them from alerts.
+      description: >
+        Add tags to detection alerts, and remove them from alerts, by alert IDs
+        or a query, in a single request.
+
         > info
+
         > You cannot add and remove the same alert tag in the same request.
       operationId: SetAlertTags
       requestBody:
@@ -4225,6 +4684,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].tags: cannot add and remove the same tag in
+                      a single request
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -4233,12 +4700,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -4505,7 +4983,7 @@ components:
         rules are used as a foundation for other rules that do generate alerts.
 
         For more information, refer to [About building block
-        rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+        rules](https://www.elastic.co/docs/solutions/security/detect-and-alert/about-building-block-rules).
       type: string
     BulkActionEditPayload:
       anyOf:
@@ -4757,6 +5235,7 @@ components:
         - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
         - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
         - RULE_FILL_GAPS_DISABLED_RULE
+        - USER_INSUFFICIENT_RULE_PRIVILEGES
       type: string
     BulkActionSkipResult:
       type: object
@@ -4778,6 +5257,11 @@ components:
         action:
           enum:
             - delete
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4813,6 +5297,11 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4862,6 +5351,11 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -4977,6 +5471,11 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -5017,6 +5516,11 @@ components:
           enum:
             - enable
           type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -5053,6 +5557,11 @@ components:
         action:
           enum:
             - export
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -5108,6 +5617,11 @@ components:
           required:
             - start_date
             - end_date
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -5143,6 +5657,11 @@ components:
         action:
           enum:
             - run
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -6411,6 +6930,7 @@ components:
         - unfilled
         - in_progress
         - filled
+        - error
       type: string
     HistoryWindowStart:
       description: >-
@@ -7031,13 +7551,13 @@ components:
       description: >
         Maximum number of alerts the rule can create during a single run (the
         rule’s Max alerts per run [advanced
-        setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params)
+        setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params)
         value).
 
         > info
 
         > This setting can be superseded by the [Kibana configuration
-        setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings)
+        setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings)
         `xpack.alerting.rules.run.alerts.max`, which determines the maximum
         alerts generated by any rule in the Kibana alerting framework. For
         example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the
@@ -8545,6 +9065,11 @@ components:
         - name
         - type
     ResponseAction:
+      discriminator:
+        mapping:
+          .endpoint: '#/components/schemas/EndpointResponseAction'
+          .osquery: '#/components/schemas/OsqueryResponseAction'
+        propertyName: action_type_id
       oneOf:
         - $ref: '#/components/schemas/OsqueryResponseAction'
         - $ref: '#/components/schemas/EndpointResponseAction'
@@ -8774,6 +9299,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRuleCreateProps'
+          esql: '#/components/schemas/EsqlRuleCreateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/NewTermsRuleCreateProps'
+          query: '#/components/schemas/QueryRuleCreateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleCreateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleCreateProps'
+          threshold: '#/components/schemas/ThresholdRuleCreateProps'
         propertyName: type
     RuleDescription:
       description: The rule’s description.
@@ -8792,7 +9326,7 @@ components:
     RuleExceptionList:
       description: >
         Array of [exception
-        containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html),
+        containers](https://www.elastic.co/docs/solutions/security/detect-and-alert/detection-rule-concepts),
         which define exceptions that prevent the rule from generating alerts
         even when its other criteria are met.
       type: object
@@ -8847,6 +9381,20 @@ components:
           required:
             - gte
             - lte
+        gap_reason:
+          description: Detected reason for the execution gap
+          type: object
+          properties:
+            type:
+              description: >-
+                The type of reason for the gap (rule_disabled or
+                rule_did_not_run)
+              enum:
+                - rule_disabled
+                - rule_did_not_run
+              type: string
+          required:
+            - type
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution
@@ -9055,15 +9603,15 @@ components:
         - timeframeEnd
     RuleQuery:
       description: >
-        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by
-        the rule to create alerts.
+        [Query](https://www.elastic.co/docs/explore-analyze/query-filter) used
+        by the rule to create alerts.
 
 
         - For indicator match rules, only the query’s results are used to
         determine whether an alert is generated.
 
         - ES|QL rules have additional query requirements. Refer to [Create
-        ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule)
+        ES|QL](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#create-esql-rule)
         rules for more information.
       type: string
     RuleReferenceArray:
@@ -9084,6 +9632,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRule'
         - $ref: '#/components/schemas/EsqlRule'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRule'
+          esql: '#/components/schemas/EsqlRule'
+          machine_learning: '#/components/schemas/MachineLearningRule'
+          new_terms: '#/components/schemas/NewTermsRule'
+          query: '#/components/schemas/QueryRule'
+          saved_query: '#/components/schemas/SavedQueryRule'
+          threat_match: '#/components/schemas/ThreatMatchRule'
+          threshold: '#/components/schemas/ThresholdRule'
         propertyName: type
     RuleRevision:
       description: >
@@ -9141,6 +9698,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/EsqlRuleUpdateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRuleUpdateProps'
+          esql: '#/components/schemas/EsqlRuleUpdateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/NewTermsRuleUpdateProps'
+          query: '#/components/schemas/QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleUpdateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleUpdateProps'
+          threshold: '#/components/schemas/ThresholdRuleUpdateProps'
         propertyName: type
     RuleVersion:
       description: >
@@ -9214,7 +9780,7 @@ components:
     SavedQueryId:
       description: >-
         Kibana [saved
-        search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html)
+        search](https://www.elastic.co/docs/explore-analyze/discover/search-sessions)
         used by the rule to create alerts.
       type: string
     SavedQueryRule:

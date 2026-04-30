@@ -24,8 +24,13 @@ export class GenAiSettingsPage {
    * Navigate to the GenAI Settings page in Stack Management
    */
   async navigateTo() {
-    await this.page.gotoApp('management/ai/genAiSettings');
-    await this.waitForPageToLoad();
+    await expect(async () => {
+      await this.page.gotoApp('management/ai/genAiSettings');
+      await this.page.testSubj.waitForSelector('genAiSettingsPage', {
+        state: 'visible',
+        timeout: 10_000,
+      });
+    }).toPass({ timeout: 35_000, intervals: [500, 1_000, 2_000] });
   }
 
   /**
@@ -49,27 +54,6 @@ export class GenAiSettingsPage {
     return this.page.testSubj.locator(
       'management-settings-editField-aiAssistant:preferredChatExperience'
     );
-  }
-
-  /**
-   * Get the Agent confirmation modal container
-   */
-  getConfirmModal() {
-    return this.page.testSubj.locator('confirmModalTitleText');
-  }
-
-  /**
-   * Get the confirm button in the Agent confirmation modal
-   */
-  getConfirmModalConfirmButton() {
-    return this.page.testSubj.locator('confirmModalConfirmButton');
-  }
-
-  /**
-   * Get the cancel button in the Agent confirmation modal
-   */
-  getConfirmModalCancelButton() {
-    return this.page.testSubj.locator('confirmModalCancelButton');
   }
 
   /**
@@ -216,10 +200,10 @@ export class GenAiSettingsPage {
   }
 
   /**
-   * Get the AI Agent flyout element
+   * Get the AI Agent sidebar panel element
    */
-  getAIAgentFlyout() {
-    return this.page.testSubj.locator('agent-builder-conversation-flyout-wrapper');
+  getAIAgentSidebar() {
+    return this.page.testSubj.locator('sidebarPanel');
   }
 
   /**

@@ -10,13 +10,15 @@ import { apmUseUnifiedTraceWaterfall } from '@kbn/observability-plugin/common';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { useFetcher, type FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 const INITIAL_DATA: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'> = {
   traceItems: [],
   errors: [],
   agentMarks: {},
   entryTransaction: undefined,
+  traceDocsTotal: 0,
+  maxTraceItems: 0,
 };
 
 export interface UnifiedWaterfallFetcherResult {
@@ -24,6 +26,8 @@ export interface UnifiedWaterfallFetcherResult {
   errors: Error[];
   agentMarks: Record<string, number>;
   entryTransaction?: Transaction;
+  traceDocsTotal: number;
+  maxTraceItems: number;
   status: FETCH_STATUS;
 }
 
@@ -57,7 +61,7 @@ export function useUnifiedWaterfallFetcher({
         return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
           params: {
             path: { traceId },
-            query: { start, end, entryTransactionId, serviceName },
+            query: { start, end, entryTransactionId, serviceName, ecsOnly: true },
           },
         });
       }
@@ -65,11 +69,20 @@ export function useUnifiedWaterfallFetcher({
     [traceId, start, end, entryTransactionId, serviceName, useUnified]
   );
 
+  if (traceId === undefined) {
+    return {
+      ...INITIAL_DATA,
+      status: FETCH_STATUS.NOT_INITIATED,
+    };
+  }
+
   return {
     traceItems: data.traceItems,
     errors: data.errors,
     agentMarks: data.agentMarks,
     entryTransaction: data.entryTransaction,
+    traceDocsTotal: data.traceDocsTotal,
+    maxTraceItems: data.maxTraceItems,
     status,
   };
 }
