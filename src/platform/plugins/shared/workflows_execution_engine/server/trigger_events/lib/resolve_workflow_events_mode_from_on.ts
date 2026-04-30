@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowEventsValue } from '@kbn/workflows';
+
 /**
- * List of all locales that are officially supported.
+ * Resolves `on.workflowEvents` the same way event-driven scheduling does: unknown or omitted -> `avoid-loop`.
  */
-export const supportedLocale = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'];
+export function resolveWorkflowEventsModeFromOn(
+  on: Record<string, unknown> | null | undefined
+): WorkflowEventsValue {
+  const raw = on?.workflowEvents;
+  if (raw === 'ignore' || raw === 'allow-all' || raw === 'avoid-loop') {
+    return raw;
+  }
+  return 'avoid-loop';
+}

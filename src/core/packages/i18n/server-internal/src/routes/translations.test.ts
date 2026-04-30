@@ -17,7 +17,7 @@ describe('registerTranslationsRoute', () => {
       router,
       locale: 'en',
       isDist: true,
-      translationHash: 'XXXX',
+      translationHashes: { en: 'XXXX' },
     });
     expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
@@ -38,7 +38,7 @@ describe('registerTranslationsRoute', () => {
     expect(router.get).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        path: '/translations/XXXX/{locale}.json',
+        path: '/translations/{translationHash}/{locale}.json',
         options: {
           access: 'public',
           excludeFromRateLimiter: true,
