@@ -149,14 +149,14 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       if (
         selectedStepExecutionId &&
         workflowExecution &&
-        workflowExecution.id === selectedStepExecutionId &&
+        workflowExecution.id === workflowExecutionId &&
         workflowExecution.context
       ) {
         setExecutionContext(workflowExecution?.context);
       } else {
         setExecutionContext(undefined);
       }
-    }, [selectedStepExecutionId, setExecutionContext, workflowExecution]);
+    }, [selectedStepExecutionId, workflowExecutionId, setExecutionContext, workflowExecution]);
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
       const results = stepExecutionsList?.results ?? [];
