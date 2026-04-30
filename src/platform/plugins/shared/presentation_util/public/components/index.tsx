@@ -10,7 +10,7 @@
 import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
-import { SaveModalDashboardProps } from './types';
+import type { SaveModalDashboardProps } from './types';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.
