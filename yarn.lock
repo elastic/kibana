@@ -4606,6 +4606,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -5159,6 +5163,10 @@
   uid ""
 
 "@kbn/content-list-toolbar@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list@link:src/platform/packages/shared/content-management/content_list/kbn-content-list":
   version "0.0.0"
   uid ""
 
@@ -9027,10 +9035,6 @@
   uid ""
 
 "@kbn/shared-ux-error-boundary@link:src/platform/packages/shared/shared-ux/error_boundary":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-feedback-snippet@link:src/platform/packages/shared/shared-ux/feedback_snippet":
   version "0.0.0"
   uid ""
 
@@ -14139,11 +14143,6 @@
     "@types/node" "*"
     "@types/responselike" "*"
 
-"@types/canvas-confetti@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/@types/canvas-confetti/-/canvas-confetti-1.9.0.tgz#d1077752e046413c9881fbb2ba34a70ebe3c1773"
-  integrity sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==
-
 "@types/chance@1.1.7":
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/@types/chance/-/chance-1.1.7.tgz#388c19748fe97bbe60552c83a056001a3c973082"
@@ -17867,11 +17866,6 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001754, can
   version "1.0.30001781"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001781.tgz#344b47c03eb8168b79c3c158b872bcfbdd02a400"
   integrity sha512-RdwNCyMsNBftLjW6w01z8bKEvT6e/5tpPVEgtn22TiLGlstHOVecsX2KHFkD5e/vRnIE4EGzpuIODb3mtswtkw==
-
-canvas-confetti@1.9.4:
-  version "1.9.4"
-  resolved "https://registry.yarnpkg.com/canvas-confetti/-/canvas-confetti-1.9.4.tgz#4412a5daa96afd0b4d70ecd66b65ce8db3022b2b"
-  integrity sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==
 
 canvg@3.0.11:
   version "3.0.11"
@@ -28101,10 +28095,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.12.13:
-  version "2.12.13"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.13.tgz#a31499607337148d059ad8b4e2977bfbabfd353d"
-  integrity sha512-9CV2mXT9+z0J26MQDfEZZkj/psJ5Er/w0w+t95FWdaGH/DTlhNZBx8vBO5jSYv8AZEnl3ouX+AaTT68KXdAIag==
+msw@2.12.14:
+  version "2.12.14"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.14.tgz#98c018182e0800277bb327025c5487861a239cbf"
+  integrity sha512-4KXa4nVBIBjbDbd7vfQNuQ25eFxug0aropCQFoI0JdOBuJWamkT1yLVIWReFI8SiTRc+H1hKzaNk+cLk2N9rtQ==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.41.2"
