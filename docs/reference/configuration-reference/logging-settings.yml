@@ -213,7 +213,7 @@ groups:
           - option: http
           - option: grpc
         applies_to:
-          stack: ga
+          stack: ga 9.5
           self: ga
           ech: unavailable
 
