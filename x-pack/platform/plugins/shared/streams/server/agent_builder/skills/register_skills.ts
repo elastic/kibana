@@ -7,28 +7,28 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
-import type { GetScopedClients } from '../../routes/types';
+import type { WorkflowsManagementApi } from '../../lib/workflows/workflow_execution_client';
 import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
-  getScopedClients,
   telemetry,
+  workflowsManagementApi,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  workflowsManagementApi?: WorkflowsManagementApi;
 }): void => {
-  if (!agentBuilder) {
+  if (!agentBuilder || !workflowsManagementApi) {
     return;
   }
 
   const streamsSkills = [
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
-    createKiIdentificationManagementSkill({ getScopedClients, telemetry }),
+    createKiIdentificationManagementSkill({ telemetry, workflowsManagementApi }),
   ];
 
   for (const skill of streamsSkills) {

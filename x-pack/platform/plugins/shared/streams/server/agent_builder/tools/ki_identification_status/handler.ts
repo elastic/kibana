@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import type { OnboardingResult } from '@kbn/streams-schema';
-import type { TaskClient } from '../../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
 import {
-  getOnboardingTaskId,
-  type OnboardingTaskParams,
-} from '../../../lib/tasks/task_definitions/onboarding';
+  WorkflowExecutionClient,
+  type WorkflowsManagementApi,
+  type WorkflowExecutionResult,
+} from '../../../lib/workflows/workflow_execution_client';
+import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../common/constants';
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
-  taskClient: TaskClient<StreamsTaskType>;
+  workflowsManagementApi: WorkflowsManagementApi;
 }
 
 export async function getKiIdentificationStatusToolHandler({
   streamName,
-  taskClient,
-}: GetKiIdentificationStatusHandlerParams) {
-  const taskId = getOnboardingTaskId(streamName);
-  const status = await taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
+  workflowsManagementApi,
+}: GetKiIdentificationStatusHandlerParams): Promise<
+  WorkflowExecutionResult & { stream_name: string }
+> {
+  const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+  const execution = await client.getLatestExecution(streamName);
 
   return {
     stream_name: streamName,
-    task_id: taskId,
-    ...status,
+    ...execution,
   };
 }

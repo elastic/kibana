@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { WorkflowsManagementApi } from '../../../lib/workflows/workflow_execution_client';
 import { classifyError } from '../../utils/error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
@@ -22,29 +22,28 @@ const cancelSchema = z.object({
 });
 
 export const createKiIdentificationCancelTool = ({
-  getScopedClients,
+  workflowsManagementApi,
 }: {
-  getScopedClients: GetScopedClients;
+  workflowsManagementApi: WorkflowsManagementApi;
 }): BuiltinSkillBoundedTool<typeof cancelSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Cancel an in-progress KI identification background task for a stream.
+    Cancel an in-progress KI identification workflow for a stream.
 
     Use this tool to:
-    - Stop a running KI identification background task when the user requests cancellation
+    - Stop a running KI identification workflow when the user requests cancellation
 
     Returns:
-    - On success: task cancel acknowledgement payload with stream, task id, and status
+    - On success: cancel acknowledgement payload with stream and status
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: cancelSchema,
-  handler: async ({ stream_name: streamName }, { request }) => {
+  handler: async ({ stream_name: streamName }) => {
     try {
-      const { taskClient } = await getScopedClients({ request });
       const data = await cancelKiIdentificationToolHandler({
         stream_name: streamName,
-        task_client: taskClient,
+        workflowsManagementApi,
       });
 
       return {
@@ -62,7 +61,7 @@ export const createKiIdentificationCancelTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to cancel KI identification background task for "${streamName}": ${message}`,
+              message: `Failed to cancel KI identification workflow for "${streamName}": ${message}`,
               stream: streamName,
               operation: 'ki_identification_cancel',
               likely_cause: classifyError(err),

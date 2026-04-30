@@ -11,23 +11,32 @@ import { OnboardingStep } from '@kbn/streams-schema';
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = () => {
-    const taskClient = {
-      schedule: jest.fn().mockResolvedValue(undefined),
+    const workflowsManagementApi = {
+      getWorkflow: jest.fn().mockResolvedValue({
+        id: '.streams-ki-onboarding',
+        name: 'onboarding',
+        enabled: true,
+        definition: {},
+        yaml: '',
+      }),
+      runWorkflow: jest.fn().mockResolvedValue('exec-1'),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
+      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
 
     return {
-      taskClient,
+      workflowsManagementApi,
       request: httpServerMock.createKibanaRequest(),
     };
   };
 
-  it('schedules task and returns tracking Kibana path', async () => {
-    const { taskClient, request } = setup();
+  it('runs workflow and returns tracking Kibana path', async () => {
+    const { workflowsManagementApi, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
       steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
-      taskClient: taskClient as never,
+      workflowsManagementApi: workflowsManagementApi as never,
       request,
     });
 
@@ -35,14 +44,13 @@ describe('startKiIdentificationToolHandler', () => {
       kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
     });
 
-    expect(taskClient.schedule).toHaveBeenCalledWith(
+    expect(workflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
-        task: {
-          type: 'streams_onboarding',
-          id: 'streams_onboarding_logs.nginx',
-          space: '*',
-        },
-      })
+        id: '.streams-ki-onboarding',
+      }),
+      'default',
+      expect.objectContaining({ streamName: 'logs.nginx' }),
+      expect.anything()
     );
   });
 });

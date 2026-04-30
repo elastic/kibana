@@ -162,12 +162,11 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
-      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
-      const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+      const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(soClient);
 
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
@@ -258,6 +257,7 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
+        workflowsManagementApi: plugins.workflowsManagement?.management,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -353,7 +353,8 @@ export class StreamsPlugin
 
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
-    const routeRegistrationOptions = {
+    registerRoutes({
+      repository: streamsRouteRepository,
       dependencies: {
         server: this.server,
         telemetry: telemetryClient,
@@ -361,13 +362,12 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
+        workflowsManagementApi: plugins.workflowsManagement?.management,
       },
       core,
       logger: this.logger,
       runDevModeChecks: this.isDev,
-    };
-
-    registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
+    });
 
     registerFeatureFlags(core, this.logger);
 

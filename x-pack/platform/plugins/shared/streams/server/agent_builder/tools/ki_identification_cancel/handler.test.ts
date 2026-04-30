@@ -5,25 +5,35 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 describe('cancelKiIdentificationToolHandler', () => {
-  it('cancels task and returns cancel acknowledgement payload', async () => {
-    const taskClient = {
-      cancel: jest.fn().mockResolvedValue(undefined),
+  it('cancels workflow execution and returns cancel acknowledgement', async () => {
+    const workflowsManagementApi = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        results: [
+          {
+            id: 'exec-1',
+            status: 'running',
+            context: { inputs: { streamName: 'logs.nginx' } },
+          },
+        ],
+      }),
+      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
 
     const result = await cancelKiIdentificationToolHandler({
       stream_name: 'logs.nginx',
-      task_client: taskClient as never,
+      workflowsManagementApi: workflowsManagementApi as never,
     });
 
-    expect(taskClient.cancel).toHaveBeenCalledWith('streams_onboarding_logs.nginx');
+    expect(workflowsManagementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default'
+    );
     expect(result).toEqual({
       stream_name: 'logs.nginx',
-      task_id: 'streams_onboarding_logs.nginx',
-      status: TaskStatus.BeingCanceled,
+      status: 'cancelled',
     });
   });
 });

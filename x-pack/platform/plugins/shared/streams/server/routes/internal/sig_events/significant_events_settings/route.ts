@@ -54,8 +54,9 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       throw new Error('Continuous KI extraction workflow service is not available');
     }
 
-    const { licensing, uiSettingsClient, globalUiSettingsClient, taskClient } =
-      await getScopedClients({ request });
+    const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { continuousKiExtraction } = params.body;
@@ -92,7 +93,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       await continuousKiExtractionWorkflowService.ensureWorkflow({
         enabled,
         request,
-        taskClient,
       });
     } catch (err) {
       if (Object.keys(previousValues).length > 0) {

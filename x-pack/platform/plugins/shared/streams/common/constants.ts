@@ -67,6 +67,9 @@ export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';
 
 // Workflow identity
 export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
+export const KI_ONBOARDING_WORKFLOW_UUID = 'workflow-68c0af3c-dbfa-536b-bdda-dc598f389ab3';
+export const KI_FEATURES_IDENTIFICATION_WORKFLOW_UUID =
+  'workflow-f99f5ed8-6a69-5382-8358-75e2a561e54c';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
@@ -76,5 +79,3 @@ export const COORDINATOR_INTERVAL_MINUTES = 10;
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;
-
-export const POLL_DELAY_SECONDS = 5;

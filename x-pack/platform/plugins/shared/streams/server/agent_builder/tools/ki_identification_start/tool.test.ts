@@ -6,7 +6,7 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext } from '../../utils/test_helpers';
 import { OnboardingStep } from '@kbn/streams-schema';
 
 describe('createKiIdentificationStartTool', () => {
@@ -15,18 +15,30 @@ describe('createKiIdentificationStartTool', () => {
   };
 
   const setup = () => {
-    const { getScopedClients, taskClient } = createMockGetScopedClients();
+    const workflowsManagementApi = {
+      getWorkflow: jest.fn().mockResolvedValue({
+        id: '.streams-ki-onboarding',
+        name: 'onboarding',
+        enabled: true,
+        definition: {},
+        yaml: '',
+      }),
+      runWorkflow: jest.fn().mockResolvedValue('exec-1'),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
+      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    };
+
     const tool = createKiIdentificationStartTool({
-      getScopedClients,
+      workflowsManagementApi: workflowsManagementApi as never,
       telemetry: telemetry as never,
     });
     const context = createMockToolContext();
 
-    return { tool, context, taskClient };
+    return { tool, context, workflowsManagementApi };
   };
 
-  it('schedules onboarding and returns immediately by default', async () => {
-    const { tool, context, taskClient } = setup();
+  it('runs workflow and returns immediately by default', async () => {
+    const { tool, context, workflowsManagementApi } = setup();
 
     const result = await tool.handler(
       {
@@ -36,22 +48,15 @@ describe('createKiIdentificationStartTool', () => {
       context
     );
 
-    expect(taskClient.schedule).toHaveBeenCalledWith(
+    expect(workflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
-        task: {
-          type: 'streams_onboarding',
-          id: 'streams_onboarding_logs.nginx',
-          space: '*',
-        },
-        params: expect.objectContaining({
-          streamName: 'logs.nginx',
-          steps: ['features_identification', 'queries_generation'],
-          from: expect.any(Number),
-          to: expect.any(Number),
-        }),
-        request: context.request,
-      })
+        id: '.streams-ki-onboarding',
+      }),
+      'default',
+      expect.objectContaining({ streamName: 'logs.nginx' }),
+      expect.anything()
     );
+
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
@@ -60,9 +65,9 @@ describe('createKiIdentificationStartTool', () => {
     }
   });
 
-  it('returns error result when scheduling fails', async () => {
-    const { tool, context, taskClient } = setup();
-    taskClient.schedule.mockRejectedValueOnce(new Error('version conflict'));
+  it('returns error result when workflow run fails', async () => {
+    const { tool, context, workflowsManagementApi } = setup();
+    workflowsManagementApi.runWorkflow.mockRejectedValueOnce(new Error('version conflict'));
 
     const result = await tool.handler(
       {

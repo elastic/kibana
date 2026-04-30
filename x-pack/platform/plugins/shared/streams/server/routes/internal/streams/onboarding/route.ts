@@ -6,30 +6,27 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
-  getOnboardingTaskId,
-  STREAMS_ONBOARDING_TASK_TYPE,
-  type OnboardingTaskParams,
-} from '../../../../lib/tasks/task_definitions/onboarding';
+  STREAMS_API_PRIVILEGES,
+  KI_ONBOARDING_WORKFLOW_UUID,
+} from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { handleTaskAction } from '../../../utils/task_helpers';
-import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
+import {
+  WorkflowExecutionClient,
+  type WorkflowExecutionResult,
+} from '../../../../lib/workflows/workflow_execution_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
 
-export type OnboardingTaskResult = TaskResult<OnboardingResult>;
-
-export const onboardingTaskRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/onboarding/_task',
+const onboardingRunRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/onboarding/_run',
   options: {
     access: 'internal',
-    summary: 'Onboard stream',
+    summary: 'Run stream onboarding workflow',
     description:
-      'Generate features and queries for a stream, the data that is necessary for insights discovery.',
+      'Triggers the onboarding workflow that generates features and queries for a stream.',
   },
   security: {
     authz: {
@@ -38,7 +35,7 @@ export const onboardingTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
-    body: taskActionSchema({
+    body: z.object({
       from: timestampFromString,
       to: timestampFromString,
       steps: z
@@ -59,53 +56,49 @@ export const onboardingTaskRoute = createServerRoute({
         ),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    workflowsManagementApi,
+  }): Promise<WorkflowExecutionResult> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const {
-      path: { streamName },
-      body,
-    } = params;
+    if (!workflowsManagementApi) {
+      throw new Error('Workflows management is not available');
+    }
 
-    const onboardingTaskId = getOnboardingTaskId(streamName);
+    const { streamName } = params.path;
+    const { from, to, steps, connectors } = params.body;
 
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: STREAMS_ONBOARDING_TASK_TYPE,
-              taskId: onboardingTaskId,
-              params: {
-                streamName,
-                from: body.from,
-                to: body.to,
-                steps: body.steps,
-                connectors: body.connectors,
-              },
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
+    const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
 
-    return handleTaskAction<OnboardingTaskParams, OnboardingResult>({
-      taskClient,
-      taskId: onboardingTaskId,
-      ...actionParams,
-    });
+    const skipFeatures = !steps.includes(OnboardingStep.FeaturesIdentification);
+    const skipQueries = !steps.includes(OnboardingStep.QueriesGeneration);
+
+    return client.run(
+      {
+        streamName,
+        featuresStart: from,
+        featuresEnd: to,
+        skipFeatures,
+        skipQueries,
+        ...(connectors?.features && { featuresConnectorId: connectors.features }),
+        ...(connectors?.queries && { queriesConnectorId: connectors.queries }),
+      },
+      request
+    );
   },
 });
 
-export const onboardingStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/onboarding/_status',
+const onboardingExecutionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/onboarding/_execution',
   options: {
     access: 'internal',
-    summary: 'Check the status of stream onboarding',
-    description: 'Check the status of onboarding progress for a stream',
+    summary: 'Get the latest onboarding workflow execution for a stream',
+    description: 'Returns the latest workflow execution status and output for the given stream.',
   },
   security: {
     authz: {
@@ -115,22 +108,68 @@ export const onboardingStatusRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    workflowsManagementApi,
+  }): Promise<WorkflowExecutionResult> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const {
-      path: { streamName },
-    } = params;
-    const taskId = getOnboardingTaskId(streamName);
+    if (!workflowsManagementApi) {
+      throw new Error('Workflows management is not available');
+    }
 
-    return taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
+    const { streamName } = params.path;
+    const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+
+    return client.getLatestExecution(streamName);
+  },
+});
+
+const onboardingCancelRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/onboarding/_cancel',
+  options: {
+    access: 'internal',
+    summary: 'Cancel running onboarding workflow for a stream',
+    description:
+      'Cancels the currently running onboarding workflow execution for the given stream.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    workflowsManagementApi,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    if (!workflowsManagementApi) {
+      throw new Error('Workflows management is not available');
+    }
+
+    const { streamName } = params.path;
+    const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+
+    await client.cancelExecution(streamName);
+
+    return { acknowledged: true };
   },
 });
 
 export const internalOnboardingRoutes = {
-  ...onboardingTaskRoute,
-  ...onboardingStatusRoute,
+  ...onboardingRunRoute,
+  ...onboardingExecutionRoute,
+  ...onboardingCancelRoute,
 };

@@ -12,7 +12,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { OnboardingStep } from '@kbn/streams-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
-import type { GetScopedClients } from '../../../routes/types';
+import type { WorkflowsManagementApi } from '../../../lib/workflows/workflow_execution_client';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
@@ -35,10 +35,10 @@ const onboardingStartSchema = z.object({
 });
 
 export const createKiIdentificationStartTool = ({
-  getScopedClients,
+  workflowsManagementApi,
   telemetry,
 }: {
-  getScopedClients: GetScopedClients;
+  workflowsManagementApi: WorkflowsManagementApi;
   telemetry: EbtTelemetryClient;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_START_TOOL_ID,
@@ -61,7 +61,6 @@ export const createKiIdentificationStartTool = ({
   schema: onboardingStartSchema,
   handler: async ({ stream_name: streamName, steps, connectors }, { request }) => {
     try {
-      const { taskClient } = await getScopedClients({ request });
       const resolvedSteps = steps ?? [
         OnboardingStep.FeaturesIdentification,
         OnboardingStep.QueriesGeneration,
@@ -71,7 +70,7 @@ export const createKiIdentificationStartTool = ({
         streamName,
         steps: resolvedSteps,
         connectors,
-        taskClient,
+        workflowsManagementApi,
         request,
       });
 

@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { WorkflowsManagementApi } from '../../../lib/workflows/workflow_execution_client';
 import { classifyError } from '../../utils/error_utils';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
@@ -22,34 +22,33 @@ const onboardingStatusSchema = z.object({
 });
 
 export const createKiIdentificationStatusTool = ({
-  getScopedClients,
+  workflowsManagementApi,
 }: {
-  getScopedClients: GetScopedClients;
+  workflowsManagementApi: WorkflowsManagementApi;
 }): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Get current status for a stream KI identification background task.
+    Get current status for a stream KI identification workflow.
 
-    Use this tool after starting KI identification to check whether the background task is still
+    Use this tool after starting KI identification to check whether the workflow is still
     running, completed, failed, or canceled.
 
     Use this tool to:
-    - Poll KI identification background task progress programmatically
+    - Poll KI identification workflow progress programmatically
     - Retrieve completed KI identification results
-    - Inspect failure details when the background task fails
+    - Inspect failure details when the workflow fails
 
     Returns:
-    - On success: task status payload for the stream (includes terminal results when available)
+    - On success: workflow execution status for the stream (includes terminal results when available)
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStatusSchema,
-  handler: async ({ stream_name: streamName }, { request }) => {
+  handler: async ({ stream_name: streamName }) => {
     try {
-      const { taskClient } = await getScopedClients({ request });
       const data = await getKiIdentificationStatusToolHandler({
         streamName,
-        taskClient,
+        workflowsManagementApi,
       });
 
       return {
@@ -67,7 +66,7 @@ export const createKiIdentificationStatusTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to get KI identification background task status for "${streamName}": ${message}`,
+              message: `Failed to get KI identification workflow status for "${streamName}": ${message}`,
               stream: streamName,
               operation: 'ki_identification_status',
               likely_cause: classifyError(err),

@@ -8,13 +8,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { OnboardingStep } from '@kbn/streams-schema';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
-import type { TaskClient } from '../../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
 import {
-  getOnboardingTaskId,
-  STREAMS_ONBOARDING_TASK_TYPE,
-  type OnboardingTaskParams,
-} from '../../../lib/tasks/task_definitions/onboarding';
+  WorkflowExecutionClient,
+  type WorkflowsManagementApi,
+} from '../../../lib/workflows/workflow_execution_client';
+import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../common/constants';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -25,7 +23,7 @@ interface StartKiIdentificationHandlerParams {
     features?: string;
     queries?: string;
   };
-  taskClient: TaskClient<StreamsTaskType>;
+  workflowsManagementApi: WorkflowsManagementApi;
   request: KibanaRequest;
 }
 
@@ -37,27 +35,28 @@ export async function startKiIdentificationToolHandler({
   streamName,
   steps,
   connectors,
-  taskClient,
+  workflowsManagementApi,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName);
   const now = Date.now();
 
-  await taskClient.schedule<OnboardingTaskParams>({
-    task: {
-      type: STREAMS_ONBOARDING_TASK_TYPE,
-      id: taskId,
-      space: '*',
-    },
-    params: {
+  const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+
+  const skipFeatures = !steps.includes('features_identification' as OnboardingStep);
+  const skipQueries = !steps.includes('queries_generation' as OnboardingStep);
+
+  await client.run(
+    {
       streamName,
-      from: now - DEFAULT_LOOKBACK_MS,
-      to: now,
-      steps,
-      connectors,
+      featuresStart: now - DEFAULT_LOOKBACK_MS,
+      featuresEnd: now,
+      skipFeatures,
+      skipQueries,
+      ...(connectors?.features && { featuresConnectorId: connectors.features }),
+      ...(connectors?.queries && { queriesConnectorId: connectors.queries }),
     },
-    request,
-  });
+    request
+  );
 
   const location = getStreamsLocation({
     name: streamName,

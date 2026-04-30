@@ -16,11 +16,9 @@ import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
-import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
-import type { MemoryGenerationTaskParams } from '../../tasks/task_definitions/memory_generation';
-import { MEMORY_GENERATION_TASK_TYPE } from '../../tasks/task_definitions/memory_generation';
 import { MemoryServiceImpl } from '../../memory';
 import { createMemoryDiscoveryTools } from '../memory_discovery_tools';
 
@@ -146,24 +144,6 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { streamNames, connectorId: connectorIdOverride },
                   { insights, tokensUsed: result.tokens_used }
                 );
-
-                if (insights.length > 0 && useMemory && runContext.fakeRequest) {
-                  try {
-                    await taskClient.schedule<MemoryGenerationTaskParams>({
-                      task: {
-                        type: MEMORY_GENERATION_TASK_TYPE,
-                        id: uuidv4(),
-                        space: '*',
-                      },
-                      params: { insights },
-                      request: runContext.fakeRequest,
-                    });
-                  } catch (scheduleError) {
-                    taskLogger.warn(
-                      `Failed to schedule memory generation: ${getErrorMessage(scheduleError)}`
-                    );
-                  }
-                }
               } catch (error) {
                 // Get connector info for error enrichment, preserving the original error if lookup fails
                 let errorMessage = parseError(error).message;
