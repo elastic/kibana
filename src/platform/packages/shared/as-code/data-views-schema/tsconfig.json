@@ -8,6 +8,5 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/data-views-plugin",
-    "@kbn/as-code-shared-schemas"
   ]
 }
