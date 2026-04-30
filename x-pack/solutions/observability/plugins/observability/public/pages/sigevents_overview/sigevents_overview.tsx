@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -57,6 +58,25 @@ export function SigeventsOverviewPage() {
   const { services } = useKibana();
   const { agentBuilder } = services;
   const { euiTheme } = useEuiTheme();
+  const history = useHistory();
+  const location = useLocation();
+
+  // Strip time range params from the URL — this page does not use a time range
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const hasTimeParams =
+      params.has('rangeFrom') ||
+      params.has('rangeTo') ||
+      params.has('refreshInterval') ||
+      params.has('refreshPaused');
+    if (hasTimeParams) {
+      params.delete('rangeFrom');
+      params.delete('rangeTo');
+      params.delete('refreshInterval');
+      params.delete('refreshPaused');
+      history.replace({ ...location, search: params.toString() });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { loading, error, data: eventData, otherPromotedEvents } = useFetchLatestSignificantEvent();
   const {
@@ -141,6 +161,8 @@ export function SigeventsOverviewPage() {
     () => agentBuilder?.getEmbeddableConversation(),
     [agentBuilder]
   );
+
+  const isLlmAvailable = !!EmbeddableConversation;
 
   const detailFields = eventData?.detailFields;
 
@@ -317,6 +339,7 @@ export function SigeventsOverviewPage() {
                   onViewDetails={openDetailFlyout}
                   onRemediate={handleRemediate}
                   onRemediateEvent={handleRemediateEvent}
+                  isLlmAvailable={isLlmAvailable}
                 />
               ) : (
                 <SigeventsOverview
@@ -325,6 +348,7 @@ export function SigeventsOverviewPage() {
                   lowerPriorityEvents={overviewData?.acknowledgedEvents}
                   onViewDetails={openDetailFlyout}
                   onRemediateEvent={handleRemediateEvent}
+                  isLlmAvailable={isLlmAvailable}
                 />
               )}
             </EuiFlexItem>
@@ -374,6 +398,7 @@ export function SigeventsOverviewPage() {
               event={detailFields}
               hideHeader
               onRemediate={handleFlyoutRemediate}
+              isLlmAvailable={isLlmAvailable}
             />
           </EuiFlyoutBody>
         </EuiFlyout>

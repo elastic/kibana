@@ -226,13 +226,7 @@ const sigeventsAwareCompleteRoutes: Record<RoutePath, RouteDefinition> = {
   ...completeRoutes,
   [OVERVIEW_PATH]: {
     handler: () => {
-      return (
-        <HasDataContextProvider>
-          <DatePickerContextProvider>
-            <SigeventsOverviewPage />
-          </DatePickerContextProvider>
-        </HasDataContextProvider>
-      );
+      return <SigeventsOverviewPage />;
     },
     params: {},
     exact: true,
