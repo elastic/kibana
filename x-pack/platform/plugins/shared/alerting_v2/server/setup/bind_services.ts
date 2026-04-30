@@ -19,7 +19,7 @@ import {
   DispatcherEnabledProviderToken,
   DispatcherServiceInternalToken,
 } from '../lib/dispatcher/tokens';
-import { DISPATCHER_ENABLED_SETTING_ID } from '../lib/dispatcher/ui_settings';
+import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced_settings';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
@@ -67,6 +67,12 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { RuleDoctorInsightsClient } from '../lib/rule_doctor_insights_client/rule_doctor_insights_client';
+import { SpaceContext } from '../routes/rule_doctor_insights/space_context';
+import {
+  InsightsClientScopedToken,
+  InsightsClientInternalToken,
+} from '../lib/rule_doctor_insights_client/tokens';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -235,8 +241,26 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return async () => {
         const soClient = savedObjects.createInternalRepository();
         const client = uiSettings.globalAsScopedToClient(soClient);
-        return client.get<boolean>(DISPATCHER_ENABLED_SETTING_ID);
+        return client.get<boolean>(ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID);
       };
+    })
+    .inSingletonScope();
+
+  bind(SpaceContext).toSelf().inRequestScope();
+
+  bind(InsightsClientScopedToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceScopedToken);
+      return new RuleDoctorInsightsClient(esClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(InsightsClientInternalToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceInternalToken);
+      return new RuleDoctorInsightsClient(esClient, loggerService);
     })
     .inSingletonScope();
 

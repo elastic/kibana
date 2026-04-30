@@ -109,7 +109,6 @@
         "eventsource-parser",
         "fast-glob",
         "gpt-tokenizer",
-        "langsmith",
         "openai",
         "@types/json-schema",
         "table",
@@ -326,29 +325,17 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "matchDepNames": [
-        "react-element-to-jsx-string"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-element-to-jsx-string"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
     {
-      "matchDepNames": [
-        "react-use"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-use"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -369,11 +356,7 @@
       "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "Team:SharedUX",
-        "effort:high",
-        "upgrade-risk:high"
-      ],
+      "addLabels": ["Team:SharedUX", "effort:high", "upgrade-risk:high"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -1226,17 +1209,9 @@
     },
     {
       "groupName": "hjson",
-      "matchDepNames": [
-        "@types/hjson",
-        "hjson"
-      ],
-      "reviewers": [
-        "team:kibana-visualizations",
-        "team:fleet"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@types/hjson", "hjson"],
+      "reviewers": ["team:kibana-visualizations", "team:fleet"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1313,12 +1288,7 @@
       "matchDepNames": ["kea"],
       "reviewers": ["team:search-kibana"],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "Team:Search",
-        "Team:Enterprise Search",
-        "effort:high",
-        "upgrade-risk:medium"
-      ],
+      "addLabels": ["Team:Search", "Team:Enterprise Search", "effort:high", "upgrade-risk:medium"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1812,11 +1782,7 @@
       "matchDepNames": ["camelcase-keys"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "Team: SecuritySolution",
-        "effort:low",
-        "blocked"
-      ],
+      "addLabels": ["Team: SecuritySolution", "effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2141,11 +2107,7 @@
         "team:security-solution"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": [
-        "ci:all-cypress-suites",
-        "effort:high",
-        "upgrade-risk:high"
-      ],
+      "addLabels": ["ci:all-cypress-suites", "effort:high", "upgrade-risk:high"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2153,14 +2115,6 @@
       "groupName": "Peggy",
       "matchDepNames": ["peggy"],
       "reviewers": ["team:kibana-visualizations", "team:kibana-data-discovery"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "Cytoscape",
-      "matchDepNames": ["cytoscape", "cytoscape-dagre"],
-      "reviewers": ["team:ml-ui"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2207,6 +2161,15 @@
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Security Generative AI"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "langsmith",
+      "matchDepNames": ["langsmith"],
+      "reviewers": ["team:security-threat-hunting"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2279,15 +2242,9 @@
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": [
-        "@elastic/esql"
-      ],
-      "reviewers": [
-        "team:kibana-esql"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@elastic/esql"],
+      "reviewers": ["team:kibana-esql"],
+      "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2492,15 +2449,9 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": [
-        "oxlint"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["oxlint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2623,15 +2574,9 @@
     },
     {
       "groupName": "alerting v2 dependencies",
-      "matchDepNames": [
-        "apache-arrow"
-      ],
-      "reviewers": [
-        "team:response-ops"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["apache-arrow"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
       "addLabels": ["Team:ResponseOps"],
       "enabled": true,
       "minimumReleaseAge": "14 days"

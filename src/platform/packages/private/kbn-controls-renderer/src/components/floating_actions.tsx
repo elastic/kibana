@@ -16,7 +16,6 @@ import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import {
   apiCanLockHoverActions,
   type EmbeddableApiContext,
@@ -36,7 +35,7 @@ export interface FloatingActionsProps {
   disabledActions?: string[];
 }
 
-export type FloatingActionItem = Omit<AnyApiAction, 'MenuItem'> & {
+export type FloatingActionItem = Omit<Action<EmbeddableApiContext>, 'MenuItem'> & {
   MenuItem: FC<{}>;
 };
 
