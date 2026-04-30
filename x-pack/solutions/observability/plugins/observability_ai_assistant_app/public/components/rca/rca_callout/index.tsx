@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButton,
   EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
@@ -19,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
@@ -87,16 +87,16 @@ export function RootCauseAnalysisCallout({
                   )}
                 </EuiFormLabel>
               </EuiFlexGroup>
-              <EuiButton
+              <AiButton
                 data-test-subj="observabilityAiAssistantAppRootCauseAnalysisCalloutStartAnalysisButton"
                 iconType="sparkles"
-                fill
+                variant="accent"
                 onClick={onClick}
               >
                 {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
                   defaultMessage: 'Start analysis',
                 })}
-              </EuiButton>
+              </AiButton>
             </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiFlexGroup>

@@ -8,7 +8,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import { chatSystemIndex } from '@kbn/agent-builder-server';
+import { chatSystemIndex } from '../../../common/indices';
 import type { SmlCrawlerStateDocument } from './types';
 
 export const smlCrawlerStateIndexName = chatSystemIndex('sml-crawler-state');
