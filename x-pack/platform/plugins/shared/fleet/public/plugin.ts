@@ -79,11 +79,6 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import {
-  createCustomIntegrationsSearchProvider,
-  createPackageSearchProvider,
-} from './search_provider';
-import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
 import type {
@@ -281,8 +276,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register components for home/add data integration
     if (deps.home) {
-      deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
-      deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+      const { home } = deps;
+      import('./components/home_integration').then(
+        ({ TutorialDirectoryHeaderLink, TutorialModuleNotice }) => {
+          home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
+          home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+        }
+      );
 
       deps.home.featureCatalogue.register({
         id: 'fleet',
@@ -301,9 +301,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     }
 
     if (deps.globalSearch) {
-      deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
-      deps.globalSearch.registerResultProvider(
-        createCustomIntegrationsSearchProvider(deps.customIntegrations)
+      const { globalSearch } = deps;
+      import('./search_provider').then(
+        ({ createPackageSearchProvider, createCustomIntegrationsSearchProvider }) => {
+          globalSearch.registerResultProvider(createPackageSearchProvider(core));
+          globalSearch.registerResultProvider(
+            createCustomIntegrationsSearchProvider(deps.customIntegrations)
+          );
+        }
       );
     }
 
