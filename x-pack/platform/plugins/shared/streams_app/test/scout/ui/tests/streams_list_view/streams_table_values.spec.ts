@@ -6,6 +6,7 @@
  */
 
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
@@ -114,12 +115,21 @@ test.describe(
     });
 
     test('should display correct doc count in the table', async ({ pageObjects, page }) => {
-      // In serverless, indexing the failed docs takes longer, so we need to wait to ensure the doc counts are correct
-      await page.waitForTimeout(30000);
-      await page.reload();
+      // Poll until GOOD_QUALITY_STREAM reaches expected count (proxy for indexing completion)
+      await expect
+        .poll(
+          async () => {
+            await page.reload();
+            await pageObjects.streams.expectStreamsTableVisible();
+            return page
+              .locator(`[data-test-subj="streamsDocCount-${GOOD_QUALITY_STREAM}"]`)
+              .textContent();
+          },
+          { timeout: 90_000, intervals: [5000] }
+        )
+        .toBe('50');
 
-      // Verify the document count for each stream in the default time range - last 15 minutes
-      await pageObjects.streams.verifyDocCount(GOOD_QUALITY_STREAM, 50);
+      // Remaining counts are verified on the already-loaded page
       await pageObjects.streams.verifyDocCount(DEGRADED_QUALITY_STREAM, 52);
       await pageObjects.streams.verifyDocCount(POOR_QUALITY_STREAM, 60);
     });

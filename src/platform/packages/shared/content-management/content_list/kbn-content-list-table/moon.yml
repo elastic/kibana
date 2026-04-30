@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/user-profile-components'
+  - '@kbn/shared-ux-utility'
 tags:
   - shared-browser
   - package

@@ -122,6 +122,11 @@ export const DiscoverSessionSaveModalContainer = ({
 
       if (!response.discoverSession) return;
 
+      const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
+      const shouldNavigateToSavedSession =
+        (isEmbeddedEditor && userWantsCopy) ||
+        (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
+
       if (props.dashboardId) {
         scopedEbtManager.trackDiscoverToDashboardEvent({
           [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.savedSession,
@@ -131,6 +136,7 @@ export const DiscoverSessionSaveModalContainer = ({
         services.embeddableEditor.transferBackToEditor(TransferAction.SaveByReference, {
           app: 'dashboards',
           path: props.dashboardId === 'new' ? '#/create' : `#/view/${props.dashboardId}`,
+          newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
           },
@@ -149,11 +155,6 @@ export const DiscoverSessionSaveModalContainer = ({
       if (onSaveCb) {
         onSaveCb();
       } else {
-        const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
-        const shouldNavigateToSavedSession =
-          (isEmbeddedEditor && userWantsCopy) ||
-          (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
-
         if (shouldNavigateToSavedSession) {
           services.embeddableEditor.clearEditorState();
           services.locator.navigate({
