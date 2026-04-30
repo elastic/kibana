@@ -12,41 +12,41 @@ applies_to:
 
 You do not need to configure any settings to run Kibana in English.
 
-`i18n.defaultLocale` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`i18n.defaultLocale` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.5+`
 :   The locale used for server-rendered strings and as the default for users
-    who haven't picked a preferred language. Must be one of `i18n.locales` when
+    who haven't picked a preferred language. Must be one of the values listed in `i18n.locales` when
     that setting is non-empty.
 
     **Default: `en`**
 
-`i18n.locales`
-:   The list of locales that {{kib}} offers in the per-user language picker.
-    Locales not in this list are unavailable to users, even if translation files
-    for them are installed. Set to `[]` to disable the per-user language picker.
+`i18n.locales` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.5+`
+:   The list of locales that {{kib}} offers to each user in the language picker.
+    Locales not in this list are not available to users, even if translation files
+    for them are installed. Set to `[]` to disable the language picker.
 
     **Default:** `["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]`
 
-`i18n.locale` (deprecated)
+`i18n.locale` {applies_to}`stack: deprecated 9.5+`
 :   Replaced by `i18n.defaultLocale`. {{kib}} continues to honor `i18n.locale`
     if set, logging a deprecation warning at startup.
 
 ## Built-in and custom locales
 
 {{kib}} ships translation files for English, French, Japanese, Simplified
-Chinese, and German. Plugins (and admin-installed translation files) may add
+Chinese, and German. Plugins (and admin-installed translation files) can add
 additional locales. Any locale you list in `i18n.locales` for which a
 translation file exists will be served; locales without translation files fall
-back to the source strings.
+back to the source English.
 
 ## Per-user language selection
 
-When `i18n.locales` is non-empty, individual users can choose their preferred
+When `i18n.locales` is not empty, individual users can choose their preferred
 display language:
 
-* **User Profile page** — Non-cloud users can select a language from the
+* {applies_to}`self: ` **User Profile page** — Users can select a language from the
   **Language** section on their profile page (*User icon → Profile*).
-* **User menu** — Cloud users can select a language from the **Language**
-  option in the user menu at the top of the screen.
+* {applies_to}`serverless:` {applies_to}`ech:` **User menu** — Users can select a language from the **Language**
+  option in the user menu available from the application header.
 
 When a user sets a preferred language, it is stored in their user profile and
 takes effect after a page reload.
