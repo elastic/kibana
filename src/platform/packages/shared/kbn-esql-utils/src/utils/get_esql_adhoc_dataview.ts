@@ -76,19 +76,23 @@ export async function getESQLAdHocDataview({
   const [timeFieldName, timeFieldType] = (await getESQLTimeFieldFromQuery({ query, http })) ?? [];
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
+
+  const skipFetchFields = options?.skipFetchFields ?? false;
+
   const prefix = options?.idPrefix ?? 'esql';
+  const postFix = skipFetchFields ? 'skip-fetch-fields' : 'fetch-fields';
   const dataViewId =
     options?.id ??
     (await sha256(
-      timeFieldName ? `${prefix}-${indexPattern}-${timeFieldName}` : `${prefix}-${indexPattern}`
+      timeFieldName
+        ? `${prefix}-${indexPattern}-${timeFieldName}-${postFix}`
+        : `${prefix}-${indexPattern}-${postFix}`
     ));
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
-
-  const skipFetchFields = options?.skipFetchFields ?? false;
 
   const dataView = await dataViewsService.create(
     {
