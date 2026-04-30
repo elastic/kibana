@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QUERY_TYPE_STATS, TaskStatus } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';
@@ -29,38 +29,46 @@ export function usePromotableQueries(streamName: string) {
     perPage: 1_000,
   });
 
-  const { getOnboardingTaskStatus } = useOnboardingApi();
+  const { getOnboardingExecution } = useOnboardingApi();
 
-  const onboardingTaskStatusResult = useQuery({
-    queryKey: ['onboardingTaskStatus', streamName, 'promotableQueries'],
-    queryFn: () => getOnboardingTaskStatus(streamName),
+  const onboardingExecutionResult = useQuery({
+    queryKey: ['onboardingExecution', streamName, 'promotableQueries'],
+    queryFn: () => getOnboardingExecution(streamName),
   });
 
-  const onboardingTaskStatus = onboardingTaskStatusResult.data;
+  const execution = onboardingExecutionResult.data;
   const filteredQueries = useMemo(() => {
-    const taskStatus = onboardingTaskStatus?.status;
-    const queriesTaskResult =
-      taskStatus === TaskStatus.Completed ? onboardingTaskStatus?.queriesTaskResult : undefined;
-    const generatedQueries =
-      queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries : [];
-    const generatedQueriesEsqlSet = new Set(
-      generatedQueries.map((query) => query.esql.query.trim()).filter((esql) => esql.length > 0)
+    if (execution?.status !== 'completed') {
+      return [];
+    }
+
+    const outputs = (execution.output as Record<string, unknown> | undefined)?.outputs as
+      | { persistedQueries?: Array<{ esql: { query: string } }> }
+      | undefined;
+
+    const persistedQueries = outputs?.persistedQueries ?? [];
+    const persistedQueriesEsqlSet = new Set(
+      persistedQueries.map((query) => query.esql.query.trim()).filter((esql) => esql.length > 0)
     );
+
+    if (persistedQueriesEsqlSet.size === 0) {
+      return [];
+    }
 
     return (discoveryQueriesResult.data?.queries ?? [])
       .filter(
         (queryRow) =>
           queryRow.query.type !== QUERY_TYPE_STATS &&
-          generatedQueriesEsqlSet.has(queryRow.query.esql.query.trim())
+          persistedQueriesEsqlSet.has(queryRow.query.esql.query.trim())
       )
       .filter((queryRow) => (queryRow.query.severity_score ?? 0) >= HIGH_SEVERITY_THRESHOLD);
-  }, [discoveryQueriesResult.data?.queries, onboardingTaskStatus]);
+  }, [discoveryQueriesResult.data?.queries, execution]);
 
   return {
     queries: filteredQueries,
-    isLoading: discoveryQueriesResult.isLoading || onboardingTaskStatusResult.isLoading,
+    isLoading: discoveryQueriesResult.isLoading || onboardingExecutionResult.isLoading,
     refetch: async () => {
-      await Promise.all([discoveryQueriesResult.refetch(), onboardingTaskStatusResult.refetch()]);
+      await Promise.all([discoveryQueriesResult.refetch(), onboardingExecutionResult.refetch()]);
     },
   };
 }

@@ -21,7 +21,6 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import React from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
 import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
-import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { usePromotableQueries } from '../../../../hooks/sig_events/use_promotable_queries';
 import { getFormattedError } from '../../../../util/errors';
@@ -43,7 +42,6 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
   const queryClient = useQueryClient();
 
   const { queries, isLoading, refetch } = usePromotableQueries(streamName);
-  const { acknowledgeOnboardingTask } = useOnboardingApi();
   const { promote } = useQueriesApi();
 
   const promoteMutation = useMutation<{ promoted: number }, Error>({
@@ -65,31 +63,12 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
     },
   });
 
-  const acknowledgeTaskMutation = useMutation<void, Error>({
-    mutationFn: async () => {
-      await acknowledgeOnboardingTask(streamName);
-    },
-    onSuccess: async () => {
-      await refetch();
-    },
-    onError: (error) => {
-      toasts.addError(getFormattedError(error), {
-        title: ACKNOWLEDGE_ERROR_TOAST_TITLE,
-      });
-    },
-  });
-
-  if (isLoading || acknowledgeTaskMutation.isLoading || queries.length === 0) {
+  if (isLoading || queries.length === 0) {
     return null;
   }
 
   return (
-    <EuiCallOut
-      color="primary"
-      size="s"
-      onDismiss={() => acknowledgeTaskMutation.mutate()}
-      data-test-subj="streamsAppPromotionCallout"
-    >
+    <EuiCallOut color="primary" size="s" data-test-subj="streamsAppPromotionCallout">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <AssetImage type="significantEventsEmptyState" size={62} />
@@ -162,13 +141,6 @@ const PROMOTION_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEvents.promotionCallout.errorToast',
   {
     defaultMessage: 'Failed to promote queries',
-  }
-);
-
-const ACKNOWLEDGE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEvents.promotionCallout.acknowledgeError',
-  {
-    defaultMessage: 'Failed to acknowledge generation results',
   }
 );
 

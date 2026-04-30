@@ -8,36 +8,34 @@
 import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { TaskStatus, type OnboardingResult, type TaskResult } from '@kbn/streams-schema';
-import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import {
+  useOnboardingApi,
+  type WorkflowExecutionResult,
+} from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
 import { useKibana } from '../../../../hooks/use_kibana';
 
+type ExecutionStatus = WorkflowExecutionResult['status'];
+
 interface Props {
   streamName: string;
-  onComplete: (
-    completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
-  ) => void;
-  onError: (
-    failedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Failed }>
-  ) => void;
+  onComplete: (result: WorkflowExecutionResult) => void;
+  onError: (result: WorkflowExecutionResult) => void;
 }
 
 export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: Props) {
-  const previousTaskStatusRef = useRef<TaskStatus | null>(null);
-  const [knowledgeIndicatorsTaskState, setKnowledgeIndicatorsTaskState] =
-    useState<TaskResult<OnboardingResult> | null>(null);
+  const previousStatusRef = useRef<ExecutionStatus | null>(null);
+  const [executionState, setExecutionState] = useState<WorkflowExecutionResult | null>(null);
 
   const {
     core: {
       notifications: { toasts },
     },
   } = useKibana();
-  const { getOnboardingTaskStatus, scheduleOnboardingTask, cancelOnboardingTask } =
-    useOnboardingApi();
+  const { getOnboardingExecution, runOnboarding, cancelOnboarding } = useOnboardingApi();
 
-  const scheduleTaskMutation = useMutation({
-    mutationFn: scheduleOnboardingTask,
+  const runMutation = useMutation({
+    mutationFn: runOnboarding,
     onError: (error: Error) => {
       toasts.addError(getFormattedError(error), {
         title: KNOWLEDGE_INDICATORS_TASK_SCHEDULING_FAILURE_TITLE,
@@ -45,8 +43,8 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
     },
   });
 
-  const cancelTaskMutation = useMutation({
-    mutationFn: cancelOnboardingTask,
+  const cancelMutation = useMutation({
+    mutationFn: cancelOnboarding,
     onError: (error: Error) => {
       toasts.addError(getFormattedError(error), {
         title: INSIGHTS_DISCOVERY_CANCELLATION_FAILURE_TITLE,
@@ -55,86 +53,67 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
   });
 
   useEffect(() => {
-    getOnboardingTaskStatus(streamName)
-      .then((taskState) => {
-        setKnowledgeIndicatorsTaskState(taskState);
-        previousTaskStatusRef.current = taskState.status;
+    getOnboardingExecution(streamName)
+      .then((result) => {
+        setExecutionState(result);
+        previousStatusRef.current = result.status;
       })
       .catch(() => {
-        setKnowledgeIndicatorsTaskState({ status: TaskStatus.NotStarted });
-        previousTaskStatusRef.current = TaskStatus.NotStarted;
+        setExecutionState({ status: 'not_found' });
+        previousStatusRef.current = 'not_found';
       });
-    /**
-     * Explicitly running this hook only once to get the initial
-     * task state
-     */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scheduleKnowledgeIndicatorsTask = useCallback(() => {
-    setKnowledgeIndicatorsTaskState({
-      status: TaskStatus.InProgress,
-    });
-
-    scheduleTaskMutation.mutate(streamName);
-  }, [scheduleTaskMutation, streamName]);
+    setExecutionState({ status: 'pending' });
+    runMutation.mutate(streamName);
+  }, [runMutation, streamName]);
 
   const cancelKnowledgeIndicatorsTask = useCallback(() => {
-    setKnowledgeIndicatorsTaskState({
-      status: TaskStatus.BeingCanceled,
-    });
-
-    cancelTaskMutation.mutate(streamName);
-  }, [cancelTaskMutation, streamName]);
+    setExecutionState({ status: 'cancelled' });
+    cancelMutation.mutate(streamName);
+  }, [cancelMutation, streamName]);
 
   const isPending =
-    knowledgeIndicatorsTaskState !== null &&
-    [TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(knowledgeIndicatorsTaskState.status);
+    executionState !== null && ['pending', 'running'].includes(executionState.status);
 
   const fetchStatus = async () => {
-    const taskState = await getOnboardingTaskStatus(streamName);
+    const result = await getOnboardingExecution(streamName);
 
-    setKnowledgeIndicatorsTaskState(taskState);
+    setExecutionState(result);
 
-    /**
-     * Firing an explicit callback when tasks **changes** to
-     * Completed state, so components can react by reloading
-     * task-related data. This handles the case when there was
-     * a successful task ran in the past and the task state
-     * reports Completed status, callback won't be fired in that
-     * case.
-     */
     if (
-      previousTaskStatusRef.current !== null &&
-      previousTaskStatusRef.current !== TaskStatus.Completed &&
-      taskState.status === TaskStatus.Completed
+      previousStatusRef.current !== null &&
+      previousStatusRef.current !== 'completed' &&
+      result.status === 'completed'
     ) {
-      onComplete(taskState);
+      onComplete(result);
     }
 
     if (
-      previousTaskStatusRef.current !== null &&
-      previousTaskStatusRef.current !== TaskStatus.Failed &&
-      taskState.status === TaskStatus.Failed
+      previousStatusRef.current !== null &&
+      previousStatusRef.current !== 'failed' &&
+      result.status === 'failed'
     ) {
-      onError(taskState);
+      onError(result);
     }
 
-    previousTaskStatusRef.current = taskState.status;
+    previousStatusRef.current = result.status;
 
-    return taskState;
+    return result;
   };
 
-  useQuery<TaskResult<OnboardingResult>, Error>({
+  useQuery<WorkflowExecutionResult, Error>({
     queryKey: ['knowledgeIndicatorsTaskStatus', streamName],
     queryFn: fetchStatus,
-    enabled: !scheduleTaskMutation.isLoading && !cancelTaskMutation.isLoading,
+    enabled: !runMutation.isLoading && !cancelMutation.isLoading,
     refetchInterval: 2000,
   });
 
   return {
     isPending,
-    knowledgeIndicatorsTaskState,
+    knowledgeIndicatorsTaskState: executionState,
     scheduleKnowledgeIndicatorsTask,
     cancelKnowledgeIndicatorsTask,
   };

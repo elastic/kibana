@@ -8,10 +8,13 @@
 import { useAbortController } from '@kbn/react-hooks';
 import type { OnboardingStep } from '@kbn/streams-schema';
 import { useMemo } from 'react';
+import type { WorkflowExecutionResult } from '@kbn/streams-plugin/server/lib/workflows/workflow_execution_client';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
-export interface ScheduleOnboardingOptions {
+export type { WorkflowExecutionResult };
+
+export interface RunOnboardingOptions {
   steps?: OnboardingStep[];
   connectors?: {
     features?: string;
@@ -32,17 +35,19 @@ export function useOnboardingApi() {
 
   return useMemo(
     () => ({
-      scheduleOnboardingTask: async (streamName: string, options?: ScheduleOnboardingOptions) => {
+      runOnboarding: async (
+        streamName: string,
+        options?: RunOnboardingOptions
+      ): Promise<WorkflowExecutionResult> => {
         const { from, to } = getLast24HoursTimeRange();
 
         return streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_task',
+          'POST /internal/streams/{streamName}/onboarding/_run',
           {
             signal,
             params: {
               path: { streamName },
               body: {
-                action: 'schedule' as const,
                 from,
                 to,
                 ...(options?.steps !== undefined && { steps: options.steps }),
@@ -52,9 +57,9 @@ export function useOnboardingApi() {
           }
         );
       },
-      getOnboardingTaskStatus: async (streamName: string) => {
+      getOnboardingExecution: async (streamName: string): Promise<WorkflowExecutionResult> => {
         return streamsRepositoryClient.fetch(
-          'GET /internal/streams/{streamName}/onboarding/_status',
+          'GET /internal/streams/{streamName}/onboarding/_execution',
           {
             signal,
             params: {
@@ -63,30 +68,13 @@ export function useOnboardingApi() {
           }
         );
       },
-      cancelOnboardingTask: async (streamName: string) => {
+      cancelOnboarding: async (streamName: string) => {
         await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_task',
+          'POST /internal/streams/{streamName}/onboarding/_cancel',
           {
             signal,
             params: {
               path: { streamName },
-              body: {
-                action: 'cancel' as const,
-              },
-            },
-          }
-        );
-      },
-      acknowledgeOnboardingTask: async (streamName: string) => {
-        await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_task',
-          {
-            signal,
-            params: {
-              path: { streamName },
-              body: {
-                action: 'acknowledge' as const,
-              },
             },
           }
         );

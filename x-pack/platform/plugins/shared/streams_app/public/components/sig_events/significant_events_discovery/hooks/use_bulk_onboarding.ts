@@ -6,21 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useState } from 'react';
-import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
-import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import type { WorkflowExecutionResult } from '../../../../hooks/use_onboarding_api';
+import { useOnboardingApi, type RunOnboardingOptions } from '../../../../hooks/use_onboarding_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import type { OnboardingConfig } from '../components/shared/types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
-type StreamStatusUpdateCallback = (
-  streamName: string,
-  result: TaskResult<OnboardingResult>
-) => void;
+type StreamStatusUpdateCallback = (streamName: string, result: WorkflowExecutionResult) => void;
 
 interface UseBulkOnboardingOptions {
   onboardingConfig: OnboardingConfig;
@@ -37,14 +33,14 @@ export function useBulkOnboarding({
     },
   } = useKibana();
 
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
+  const { runOnboarding, cancelOnboarding } = useOnboardingApi();
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
     useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
 
   const [isScheduling, setIsScheduling] = useState(false);
 
   const bulkScheduleOnboardingTask = useCallback(
-    async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
+    async (streamNames: string[], options?: RunOnboardingOptions): Promise<string[]> => {
       setIsScheduling(true);
       const succeeded: string[] = [];
       const failures: Array<{ streamName: string; error: unknown }> = [];
@@ -53,7 +49,7 @@ export function useBulkOnboarding({
           streamNames,
           async (streamName) => {
             try {
-              await scheduleOnboardingTask(streamName, options);
+              await runOnboarding(streamName, options);
               succeeded.push(streamName);
             } catch (error) {
               failures.push({ streamName, error });
@@ -91,7 +87,7 @@ export function useBulkOnboarding({
 
       return succeeded;
     },
-    [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
+    [runOnboarding, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
   );
 
   const bulkOnboardAll = useCallback(
@@ -119,7 +115,7 @@ export function useBulkOnboarding({
 
   return {
     isScheduling,
-    cancelOnboardingTask,
+    cancelOnboarding,
     bulkScheduleOnboardingTask,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,

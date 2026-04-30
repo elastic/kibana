@@ -8,7 +8,7 @@
 import {
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
-  POLL_DELAY_SECONDS,
+  KI_ONBOARDING_WORKFLOW_UUID,
 } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
@@ -45,23 +45,31 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     expect(WORKFLOW_YAML).not.toMatch(/name: excludedStreamPatterns[\s\S]*?default:/m);
   });
 
-  it('uses the correct poll delay duration', () => {
-    assertYamlContains(`duration: "${POLL_DELAY_SECONDS}s"`);
-  });
-
   it('calls the eligibility endpoint with the correct query params', () => {
     assertYamlContains('_extraction/_eligible');
     assertYamlContains('maxScheduledStreams={{ inputs.maxScheduledStreams }}');
     assertYamlContains('lookbackHours={{ inputs.lookbackHours }}');
     assertYamlContains(
-      '{%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}'
+      '{%- if inputs.extractionIntervalHours != null %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}'
     );
     assertYamlContains(
       '{%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}'
     );
   });
 
-  it('calls the task scheduling endpoint', () => {
-    assertYamlContains('features/_task');
+  it('launches the onboarding subworkflow asynchronously by UUID with skipQueries', () => {
+    assertYamlContains('type: workflow.executeAsync');
+    assertYamlContains(`workflow-id: "${KI_ONBOARDING_WORKFLOW_UUID}"`);
+    assertYamlContains('skipQueries: true');
+  });
+
+  it('passes the resolved intervalHours from _eligible to the onboarding workflow', () => {
+    assertYamlContains(
+      'featuresRecencyThresholdHours: "${{ steps.get_eligible.output.resolvedIntervalHours }}"'
+    );
+  });
+
+  it('polls each stream execution via the _execution endpoint', () => {
+    assertYamlContains('/onboarding/_execution');
   });
 });

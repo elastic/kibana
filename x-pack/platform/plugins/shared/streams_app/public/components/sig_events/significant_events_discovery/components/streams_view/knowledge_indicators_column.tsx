@@ -7,13 +7,14 @@
 
 import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { OnboardingResult, Streams, TaskResult } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamFeatures } from '../../../../../hooks/sig_events/use_stream_features';
+import type { WorkflowExecutionResult } from '../../../../../hooks/use_onboarding_api';
 
 interface KnowledgeIndicatorsColumnProps {
   stream: Streams.all.Definition;
-  streamOnboardingResult?: TaskResult<OnboardingResult>;
+  streamOnboardingResult?: WorkflowExecutionResult;
 }
 
 export function KnowledgeIndicatorsColumn({

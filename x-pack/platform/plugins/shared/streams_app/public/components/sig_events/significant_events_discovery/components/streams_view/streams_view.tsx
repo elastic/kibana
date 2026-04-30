@@ -34,7 +34,7 @@ import {
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
-const IN_PROGRESS_STATUSES = new Set<TaskStatus>([TaskStatus.InProgress, TaskStatus.BeingCanceled]);
+const IN_PROGRESS_STATUSES = new Set(['pending', 'running']);
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -64,7 +64,7 @@ export function StreamsView() {
     queriesConnectors,
     generatingStreamNames,
     streamStatusMap,
-    cancelOnboardingTask,
+    cancelOnboarding,
     bulkScheduleOnboardingTask,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,
@@ -210,7 +210,7 @@ export function StreamsView() {
   };
 
   const onStopOnboardingActionClick = (streamName: string) => {
-    cancelOnboardingTask(streamName);
+    cancelOnboarding(streamName);
   };
 
   return (

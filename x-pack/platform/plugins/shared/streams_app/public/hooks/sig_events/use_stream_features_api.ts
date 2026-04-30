@@ -7,14 +7,14 @@
 
 import { useMemo } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
-import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/sig_events/features/route';
+import type { WorkflowExecutionResult } from '@kbn/streams-plugin/server/lib/workflows/workflow_execution_client';
 import { useKibana } from '../use_kibana';
 import { getLast24HoursTimeRange } from '../../util/time_range';
 
 interface StreamFeaturesApi {
-  getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
-  scheduleFeaturesIdentificationTask: () => Promise<void>;
-  cancelFeaturesIdentificationTask: () => Promise<void>;
+  getFeaturesIdentificationExecution: () => Promise<WorkflowExecutionResult>;
+  runFeaturesIdentification: () => Promise<WorkflowExecutionResult>;
+  cancelFeaturesIdentification: () => Promise<void>;
   deleteFeature: (uuid: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
   excludeFeaturesInBulk: (uuids: string[]) => Promise<void>;
@@ -34,36 +34,32 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
 
   return useMemo(
     () => ({
-      getFeaturesIdentificationStatus: async () => {
-        return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features/_status', {
+      getFeaturesIdentificationExecution: async () => {
+        return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features/_execution', {
           signal,
           params: {
             path: { name: streamName },
           },
         });
       },
-      scheduleFeaturesIdentificationTask: async () => {
+      runFeaturesIdentification: async () => {
         const { from, to } = getLast24HoursTimeRange();
-        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
+        return streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_run', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              action: 'schedule',
               to,
               from,
             },
           },
         });
       },
-      cancelFeaturesIdentificationTask: async () => {
-        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
+      cancelFeaturesIdentification: async () => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_cancel', {
           signal,
           params: {
             path: { name: streamName },
-            body: {
-              action: 'cancel',
-            },
           },
         });
       },

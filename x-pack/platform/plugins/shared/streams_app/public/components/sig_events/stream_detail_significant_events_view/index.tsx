@@ -20,15 +20,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
-import {
-  TaskStatus,
-  type OnboardingResult,
-  type Streams,
-  type TaskResult,
-} from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
+import type { WorkflowExecutionResult } from '../../../hooks/use_onboarding_api';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EmptyState } from './empty_state';
@@ -89,27 +85,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     refetch,
   } = useFetchKnowledgeIndicators({ definition });
   const onKnowledgeIndicatorsTaskComplete = useCallback(
-    (
-      completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
-    ) => {
-      const queriesTaskResult = completedTaskState.queriesTaskResult;
-      const featuresTaskResult = completedTaskState.featuresTaskResult;
-      const generatedFeaturesCount =
-        featuresTaskResult?.status === TaskStatus.Completed
-          ? featuresTaskResult.features.length
-          : 0;
-      const generatedQueriesCount =
-        queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
-
+    (_result: WorkflowExecutionResult) => {
       toasts.addSuccess({
         title: i18n.translate(
           'xpack.streams.significantEventsTable.generateMoreSuccessToastTitle',
           {
-            defaultMessage:
-              '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
-            values: {
-              count: generatedFeaturesCount + generatedQueriesCount,
-            },
+            defaultMessage: 'Knowledge indicators generated successfully',
           }
         ),
       });
@@ -118,7 +99,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
         queryClient.invalidateQueries({
-          queryKey: ['onboardingTaskStatus', definition.stream.name],
+          queryKey: ['knowledgeIndicatorsTaskStatus', definition.stream.name],
         }),
       ]);
     },
@@ -126,10 +107,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   );
 
   const onKnowledgeIndicatorsTaskError = useCallback(
-    (failedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Failed }>) => {
+    (result: WorkflowExecutionResult) => {
       toasts.addDanger({
         title: KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE,
-        text: failedTaskState.error,
+        text: result.error ?? undefined,
       });
     },
     [toasts]
@@ -148,7 +129,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   useInterval(
     refetch,
-    knowledgeIndicatorsTaskState?.status === TaskStatus.InProgress ? 5000 : null
+    knowledgeIndicatorsTaskState?.status === 'pending' ||
+      knowledgeIndicatorsTaskState?.status === 'running'
+      ? 5000
+      : null
   );
 
   const ruleKnowledgeIndicators = useMemo(
@@ -186,7 +170,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [typeFilterOptions]
   );
   const isKnowledgeIndicatorsGenerationCanceling =
-    knowledgeIndicatorsTaskState?.status === TaskStatus.BeingCanceled;
+    knowledgeIndicatorsTaskState?.status === 'cancelled';
   const isGenerateButtonDisabled =
     knowledgeIndicatorsTaskState === null || isKnowledgeIndicatorsGenerationPending;
 
