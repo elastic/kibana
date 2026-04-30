@@ -25,6 +25,12 @@ import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 
+const headerPaddingFixCss = css`
+  .euiPageHeaderContent {
+    padding-bottom: 0;
+  }
+`;
+
 export function ProfilingAppPageTemplate({
   children,
   tabs = [],
@@ -106,14 +112,7 @@ export function ProfilingAppPageTemplate({
             </EuiFlexGroup>
           ) : undefined,
         bottomBorder: 'extended',
-        css:
-          hideSearchBar && tabs.length > 0
-            ? css`
-                .euiPageHeaderContent {
-                  padding-bottom: 0px;
-                }
-              `
-            : undefined,
+        css: hideSearchBar && tabs.length > 0 ? headerPaddingFixCss : undefined,
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{
