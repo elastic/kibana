@@ -11,14 +11,10 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchCrudTypes } from '../../common/content_management';
 import { SAVED_SEARCH_TYPE } from './constants';
 
-const hasDuplicatedTitle = async (
+export async function hasLibraryItemWithTitle(
   title: string,
   contentManagement: ContentManagementPublicStart['client']
-): Promise<boolean | void> => {
-  if (!title) {
-    return;
-  }
-
+): Promise<boolean> {
   const response = await contentManagement.search<
     SavedSearchCrudTypes['SearchIn'],
     SavedSearchCrudTypes['SearchOut']
@@ -34,28 +30,4 @@ const hasDuplicatedTitle = async (
   });
 
   return response.hits.some((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
-};
-
-export const checkForDuplicateTitle = async ({
-  title,
-  isTitleDuplicateConfirmed,
-  onTitleDuplicate,
-  contentManagement,
-}: {
-  title: string | undefined;
-  isTitleDuplicateConfirmed: boolean | undefined;
-  onTitleDuplicate: (() => void) | undefined;
-  contentManagement: ContentManagementPublicStart['client'];
-}) => {
-  if (
-    title &&
-    !isTitleDuplicateConfirmed &&
-    onTitleDuplicate &&
-    (await hasDuplicatedTitle(title, contentManagement))
-  ) {
-    onTitleDuplicate();
-    return Promise.reject(new Error(`Saved Discover session title already exists: ${title}`));
-  }
-
-  return;
-};
+}

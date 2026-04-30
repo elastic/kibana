@@ -16,7 +16,6 @@ import type { SortOrder } from '@kbn/discover-utils';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import type { DiscoverSession, SavedSearchAttributes } from '../../common';
 
 export type SaveDiscoverSessionParams = Pick<
@@ -70,19 +69,6 @@ export const saveDiscoverSession = async (
   savedObjectsTagging: SavedObjectsTaggingApi | undefined
 ): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
-
-  if (isNew) {
-    try {
-      await checkForDuplicateTitle({
-        title: discoverSession.title,
-        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
-        onTitleDuplicate: options.onTitleDuplicate,
-        contentManagement,
-      });
-    } catch {
-      return;
-    }
-  }
 
   const tabReferences: SavedObjectReference[] = [];
 
