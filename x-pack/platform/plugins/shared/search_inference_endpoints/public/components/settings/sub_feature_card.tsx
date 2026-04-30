@@ -52,9 +52,9 @@ interface SubFeatureCardProps {
   effectiveRecommendedEndpoints: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
-  globalDefaultId: string;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
+  globalDefaultId: string;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -64,9 +64,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   effectiveRecommendedEndpoints,
   onEndpointsChange,
   invalidEndpointIds,
-  globalDefaultId,
   hasSavedObject,
   isFeatureDirty,
+  globalDefaultId,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -271,10 +271,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 globalDefaultRow={
                   showGlobalDefaultRow
                     ? {
-                        globalDefaultId,
                         icon: globalDefaultIcon,
                         label: globalDefaultLabel,
                         showBadge: !isFeatureDirty,
+                        globalDefaultId,
                       }
                     : undefined
                 }
@@ -286,10 +286,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                     {showGlobalDefaultRow && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
-                        globalDefaultId={globalDefaultId}
                         icon={globalDefaultIcon}
                         label={globalDefaultLabel}
                         showBadge={!isFeatureDirty}
+                        globalDefaultId={globalDefaultId}
                       />
                     )}
                     <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
@@ -492,18 +492,18 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
 
 interface GlobalDefaultLockedRowProps {
   featureId: string;
-  globalDefaultId: string;
   icon: string;
   label: string;
   showBadge: boolean;
+  globalDefaultId: string;
 }
 
 const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
   featureId,
-  globalDefaultId,
   icon,
   label,
   showBadge,
+  globalDefaultId,
 }) => (
   <>
     <EuiSplitPanel.Inner
@@ -562,10 +562,10 @@ interface RecommendedEndpointsListProps {
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
   globalDefaultRow?: {
-    globalDefaultId: string;
     icon: string;
     label: string;
     showBadge: boolean;
+    globalDefaultId: string;
   };
 }
 
@@ -581,10 +581,10 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
       {globalDefaultRow && (
         <GlobalDefaultLockedRow
           featureId={featureId}
-          globalDefaultId={globalDefaultRow.globalDefaultId}
           icon={globalDefaultRow.icon}
           label={globalDefaultRow.label}
           showBadge={globalDefaultRow.showBadge}
+          globalDefaultId={globalDefaultRow.globalDefaultId}
         />
       )}
       {endpointIds.map((endpointId, index) => {

@@ -264,11 +264,11 @@ export const ModelSettings: React.FC = () => {
                       hasSavedObject: hasSavedObject[f.featureId] ?? false,
                       isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
-                    globalDefaultId={defaultModelState.defaultModelId}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
+                    globalDefaultId={defaultModelState.defaultModelId}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>

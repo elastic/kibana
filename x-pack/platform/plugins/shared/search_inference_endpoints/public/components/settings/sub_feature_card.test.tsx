@@ -120,9 +120,9 @@ describe('SubFeatureCard', () => {
   const onEndpointsChange = jest.fn();
 
   const defaultGlobalRowProps = {
-    globalDefaultId: NO_DEFAULT_MODEL,
     hasSavedObject: true,
     isFeatureDirty: false,
+    globalDefaultId: NO_DEFAULT_MODEL,
   };
 
   beforeEach(() => {
@@ -138,9 +138,9 @@ describe('SubFeatureCard', () => {
     invalidEndpointIds: Set<string> = new Set(),
     effectiveRecommendedEndpoints: string[] = ['__different__'],
     globalRowOverrides?: Partial<{
-      globalDefaultId: string;
       hasSavedObject: boolean;
       isFeatureDirty: boolean;
+      globalDefaultId: string;
     }>
   ) =>
     render(
@@ -377,9 +377,9 @@ describe('SubFeatureCard', () => {
   describe('Global default row', () => {
     it('renders locked global default row and badge in custom mode when no saved object and global model is set', () => {
       renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
-        globalDefaultId: 'ep-3',
         hasSavedObject: false,
         isFeatureDirty: false,
+        globalDefaultId: 'ep-3',
       });
 
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
@@ -389,9 +389,9 @@ describe('SubFeatureCard', () => {
 
     it('hides the Global default badge when the feature is dirty but keeps the subdued row', () => {
       renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
-        globalDefaultId: 'ep-3',
         hasSavedObject: false,
         isFeatureDirty: true,
+        globalDefaultId: 'ep-3',
       });
 
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
@@ -400,9 +400,9 @@ describe('SubFeatureCard', () => {
 
     it('does not render the global default row when the feature has saved settings', () => {
       renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
-        globalDefaultId: 'ep-3',
         hasSavedObject: true,
         isFeatureDirty: false,
+        globalDefaultId: 'ep-3',
       });
 
       expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
@@ -418,9 +418,9 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
-            globalDefaultId="ep-3"
             hasSavedObject={false}
             isFeatureDirty={false}
+            globalDefaultId="ep-3"
           />
         </Wrapper>
       );
@@ -430,9 +430,9 @@ describe('SubFeatureCard', () => {
 
     it('suppresses the Default badge on the first draggable when the global default row is shown', () => {
       renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
-        globalDefaultId: 'ep-3',
         hasSavedObject: false,
         isFeatureDirty: false,
+        globalDefaultId: 'ep-3',
       });
 
       expect(screen.queryByText('Default')).not.toBeInTheDocument();

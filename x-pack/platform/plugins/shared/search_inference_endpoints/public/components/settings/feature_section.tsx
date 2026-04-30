@@ -32,22 +32,22 @@ interface FeatureSectionProps {
   parentName: string;
   parentDescription: string;
   features: FeatureSettingItem[];
-  globalDefaultId: string;
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
   isBeta?: boolean;
+  globalDefaultId: string;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
   parentName,
   parentDescription,
   features,
-  globalDefaultId,
   onEndpointsChange,
   invalidEndpointIds,
   isTechPreview = false,
   isBeta = false,
+  globalDefaultId,
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
@@ -112,9 +112,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
                     onEndpointsChange={onEndpointsChange}
                     invalidEndpointIds={invalidEndpointIds}
-                    globalDefaultId={globalDefaultId}
                     hasSavedObject={hasSavedObject}
                     isFeatureDirty={isFeatureDirty}
+                    globalDefaultId={globalDefaultId}
                   />
                 </EuiFlexItem>
               )
