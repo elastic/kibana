@@ -148,10 +148,11 @@ describe('Elasticsearch Errors', () => {
       const numDataNodes = stats.nodes.count.data ?? 1;
       const totalShards = stats.indices.shards.total ?? 0;
       const maxShardsPerNode = Math.floor(totalShards / numDataNodes);
-      // eslint-disable-next-line no-console
-      console.log(
-        `[isClusterShardLimitExceeded] numDataNodes=${numDataNodes}, totalShards=${totalShards}, maxShardsPerNode=${maxShardsPerNode}`
-      );
+      root.logger
+        .get('test.isClusterShardLimitExceeded')
+        .info(
+          `numDataNodes=${numDataNodes}, totalShards=${totalShards}, maxShardsPerNode=${maxShardsPerNode}`
+        );
       await client.cluster.putSettings({
         persistent: { cluster: { max_shards_per_node: 1 } },
       });
