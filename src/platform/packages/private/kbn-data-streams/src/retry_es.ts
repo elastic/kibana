@@ -20,7 +20,7 @@ const retryResponseStatuses = [
 ];
 
 const boundedRetryAttempts = 3;
-const maxIndefiniteRetryDelayMs = 64_000;
+const maxRetryDelayMs = 64_000;
 
 function isRetryableEsClientError(e: Error): boolean {
   if (
@@ -34,8 +34,8 @@ function isRetryableEsClientError(e: Error): boolean {
   return false;
 }
 
-function getExponentialDelayMs(attempt: number, { maxDelayMs }: { maxDelayMs: number }) {
-  return Math.min(1000 * Math.pow(2, attempt), maxDelayMs);
+function getExponentialDelayMs(attempt: number) {
+  return Math.min(1000 * Math.pow(2, attempt), maxRetryDelayMs);
 }
 
 interface RequestParamsMeta {
@@ -91,9 +91,7 @@ export async function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions =
       retryCount++;
 
       if (error instanceof EsErrors.ResponseError && error.statusCode === 429) {
-        const retryDelay = getExponentialDelayMs(retryCount - 1, {
-          maxDelayMs: maxIndefiniteRetryDelayMs,
-        });
+        const retryDelay = getExponentialDelayMs(retryCount - 1);
         const dataStream = options.dataStreamName
           ? ` for data stream [${options.dataStreamName}]`
           : '';
@@ -115,7 +113,7 @@ export async function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions =
         throw error;
       }
 
-      await delay(getExponentialDelayMs(retryCount - 1, { maxDelayMs: Number.MAX_SAFE_INTEGER }));
+      await delay(getExponentialDelayMs(retryCount - 1));
     }
   }
 }
