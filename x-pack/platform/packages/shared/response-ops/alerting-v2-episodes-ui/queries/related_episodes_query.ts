@@ -13,7 +13,7 @@ import { addEpisodeAggregation } from './episodes_query';
 // Subset of `ALERT_EPISODE_FIELDS` actually populated by this query. The action
 // `last_*` columns are excluded because we only read from `.rule-events` here
 // and don't run the action INLINE STATS — keeping them caused a runtime error.
-const RELATED_EPISODE_FIELDS = [
+export const RELATED_EPISODE_FIELDS = [
   '@timestamp',
   'episode.id',
   'episode.status',
