@@ -13,7 +13,14 @@ export function validateConnectorId(value: string): void {
     if (value.length === 0) {
       throw new Error('Connector ID is required.');
     }
-    throw new Error(`Connector ID must be ${CONNECTOR_ID_MAX_LENGTH} characters or less.`);
+    if (value.length > CONNECTOR_ID_MAX_LENGTH) {
+      throw new Error(
+        `Connector ID must be ${CONNECTOR_ID_MAX_LENGTH} characters or less (received ${value.length}).`
+      );
+    }
+    throw new Error(
+      'Connector ID must not contain path separators ("/") or traversal sequences ("..").'
+    );
   }
   if (!isValidId(value, CONNECTOR_ID_MAX_LENGTH, 1)) {
     throw new Error('Connector ID must contain only lowercase letters, numbers, and hyphens.');
