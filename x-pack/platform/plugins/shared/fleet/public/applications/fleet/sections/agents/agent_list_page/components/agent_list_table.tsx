@@ -9,6 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { type CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -37,6 +38,10 @@ import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
 } from '../../../../../../../common/services/version_specific_policies_utils';
+
+import { ExperimentalFeaturesService } from '../../../../services';
+
+import { configGroupLabel } from '../../../../../../../common/services/config_group_label';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -105,6 +110,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   } = props;
 
   const authz = useAuthz();
+  const { enableOpAMP } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
@@ -236,7 +242,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
-            <EuiIcon type="info" />
+            <EuiIcon type="info" aria-hidden={true} />
           </span>
         </EuiToolTip>
       ),
@@ -264,7 +270,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
-            <EuiIcon type="info" />
+            <EuiIcon type="info" aria-hidden={true} />
           </span>
         </EuiToolTip>
       ),
@@ -347,6 +353,26 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         </EuiFlexGroup>
       ),
     },
+    ...(enableOpAMP
+      ? [
+          {
+            field: 'config_group' as keyof Agent,
+            sortable: false,
+            name: i18n.translate('xpack.fleet.agentList.configGroupColumnTitle', {
+              defaultMessage: 'Config group',
+            }),
+            width: '120px',
+            render: (configGroup: string | undefined) => {
+              if (!configGroup) return <EuiText color="subdued">{'—'}</EuiText>;
+              return (
+                <EuiToolTip content={configGroup}>
+                  <EuiCode>{configGroupLabel(configGroup)}</EuiCode>
+                </EuiToolTip>
+              );
+            },
+          },
+        ]
+      : []),
     {
       name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {
         defaultMessage: 'Actions',

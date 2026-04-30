@@ -443,4 +443,24 @@ describe('searchHitToAgent', () => {
       },
     });
   });
+
+  it('maps config_group from fields to agent', () => {
+    const hit = {
+      _source: { type: 'OPAMP', active: true, enrolled_at: '2023-01-01T00:00:00Z' },
+      fields: { status: ['online'], config_group: ['logs[otlpreceiver|batch|otlpexporter]'] },
+      _id: 'agent-1',
+    };
+    const agent = searchHitToAgent(hit as any);
+    expect(agent.config_group).toBe('logs[otlpreceiver|batch|otlpexporter]');
+  });
+
+  it('leaves config_group undefined when not present in fields', () => {
+    const hit = {
+      _source: { type: 'PERMANENT', active: true, enrolled_at: '2023-01-01T00:00:00Z' },
+      fields: { status: ['online'] },
+      _id: 'agent-2',
+    };
+    const agent = searchHitToAgent(hit as any);
+    expect(agent.config_group).toBeUndefined();
+  });
 });

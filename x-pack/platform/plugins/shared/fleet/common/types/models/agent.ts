@@ -177,6 +177,7 @@ export interface Agent extends AgentBase {
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
   outputs?: OutputMap;
   status?: AgentStatus;
+  config_group?: string;
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;

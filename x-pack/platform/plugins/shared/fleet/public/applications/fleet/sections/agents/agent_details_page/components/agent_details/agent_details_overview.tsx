@@ -206,7 +206,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     `}
                   >
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
-                      {agent.local_metadata.elastic.agent.version}
+                      {agent.local_metadata?.elastic?.agent.version}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <AgentUpgradeStatus
@@ -264,7 +264,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               }),
               description:
                 typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
-                  ? agent.local_metadata.elastic.agent.log_level
+                  ? agent.local_metadata?.elastic?.agent.log_level
                   : '-',
               hidden: agent.type === 'OPAMP',
             },
@@ -273,7 +273,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Privilege mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                agent.local_metadata?.elastic?.agent.unprivileged === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
                     defaultMessage="Running as non-root"
@@ -292,7 +292,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               }),
               description:
                 typeof agent.local_metadata?.elastic?.agent?.snapshot === 'boolean'
-                  ? agent.local_metadata.elastic.agent.snapshot === true
+                  ? agent.local_metadata?.elastic?.agent.snapshot === true
                     ? 'snapshot'
                     : 'stable'
                   : '-',
@@ -360,7 +360,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'FIPS mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.fips === true ? (
+                agent.local_metadata?.elastic?.agent.fips === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.fipsModeCompliantText"
                     defaultMessage="Enabled"
