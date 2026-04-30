@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type SyntheticEvent } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { SecurityCellActions, CellActionsMode } from '../../../common/components/cell_actions';
@@ -24,8 +24,10 @@ import { formatRiskScore } from '../../common';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
+  openHostFlyout,
 }: {
   dispatchSeverityUpdate: (s: RiskSeverity) => void;
+  openHostFlyout: (hostName: string) => void;
 }): HostRiskScoreColumns => [
   {
     field: 'host.name',
@@ -50,7 +52,14 @@ export const getHostRiskScoreColumns = ({
               telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
-            <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
+            <HostDetailsLink
+              hostName={hostName}
+              hostTab={HostsTableType.risk}
+              onClick={(e: SyntheticEvent) => {
+                e.preventDefault();
+                openHostFlyout(hostName);
+              }}
+            />
           </SecurityCellActions>
         );
       }

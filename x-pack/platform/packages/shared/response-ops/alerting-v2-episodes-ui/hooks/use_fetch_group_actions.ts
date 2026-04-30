@@ -46,6 +46,8 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
           lastSnoozeAction: row.last_snooze_action ?? null,
           snoozeExpiry: row.snooze_expiry ?? null,
           tags: tagsFromRow(row.tags),
+          lastSnoozeActor: row.last_snooze_actor ?? null,
+          lastDeactivateActor: row.last_deactivate_actor ?? null,
         });
       }
       return map;
