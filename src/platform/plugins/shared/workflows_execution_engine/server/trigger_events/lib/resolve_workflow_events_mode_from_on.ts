@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomRequestHandlerContext } from '@kbn/core/server';
-import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server';
+import type { WorkflowEventsValue } from '@kbn/workflows';
 
-/** Request handler context for example routes; includes workflows from workflows_extensions. */
-export type ExampleRequestHandlerContext = CustomRequestHandlerContext<{
-  workflows: WorkflowsApiRequestHandlerContext;
-}>;
+/**
+ * Resolves `on.workflowEvents` the same way event-driven scheduling does: unknown or omitted -> `avoid-loop`.
+ */
+export function resolveWorkflowEventsModeFromOn(
+  on: Record<string, unknown> | null | undefined
+): WorkflowEventsValue {
+  const raw = on?.workflowEvents;
+  if (raw === 'ignore' || raw === 'allow-all' || raw === 'avoid-loop') {
+    return raw;
+  }
+  return 'avoid-loop';
+}

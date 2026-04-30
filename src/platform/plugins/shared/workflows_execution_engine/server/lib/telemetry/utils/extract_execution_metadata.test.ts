@@ -14,9 +14,11 @@ import {
   extractAlertRuleId,
   extractCompositionContext,
   extractEventChainDepthFromExecution,
+  extractEventChainVisitedWorkflowIdsFromExecution,
   extractExecutionMetadata,
   extractQueueDelayMs,
   extractTimeToFirstStep,
+  mergeEmitterWorkflowIntoEventChainVisited,
 } from './extract_execution_metadata';
 
 const createMockWorkflowExecution = (
@@ -510,6 +512,17 @@ describe('extractEventChainDepthFromExecution', () => {
     ).toBeUndefined();
   });
 
+  it('prefers root eventChainDepth over context.event', () => {
+    expect(
+      extractEventChainDepthFromExecution(
+        createMockWorkflowExecution({
+          eventChainDepth: 5,
+          context: { event: { eventChainDepth: 2 } },
+        })
+      )
+    ).toBe(5);
+  });
+
   it('includes eventChainDepth in extractExecutionMetadata when set', () => {
     const meta = extractExecutionMetadata(
       createMockWorkflowExecution({
@@ -518,5 +531,74 @@ describe('extractEventChainDepthFromExecution', () => {
       []
     );
     expect(meta.eventChainDepth).toBe(1);
+  });
+});
+
+describe('extractEventChainVisitedWorkflowIdsFromExecution', () => {
+  it('returns ids from context.event.eventChainVisitedWorkflowIds', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(
+        createMockWorkflowExecution({
+          context: { event: { eventChainVisitedWorkflowIds: ['wf-a', 'wf-b'] } },
+        }),
+        10
+      )
+    ).toEqual(['wf-a', 'wf-b']);
+  });
+
+  it('prefers root eventChainVisitedWorkflowIds over context.event', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(
+        createMockWorkflowExecution({
+          eventChainVisitedWorkflowIds: ['root-a'],
+          context: { event: { eventChainVisitedWorkflowIds: ['ctx-b'] } },
+        }),
+        10
+      )
+    ).toEqual(['root-a']);
+  });
+
+  it('returns empty array when missing', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(createMockWorkflowExecution(), 10)
+    ).toEqual([]);
+  });
+
+  it('truncates visited ids to maxCount (matches maxEventChainDepth cap)', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(
+        createMockWorkflowExecution({
+          eventChainVisitedWorkflowIds: ['wf-a', 'wf-b', 'wf-c', 'wf-d'],
+        }),
+        2
+      )
+    ).toEqual(['wf-a', 'wf-b']);
+  });
+});
+
+describe('mergeEmitterWorkflowIntoEventChainVisited', () => {
+  it('appends emitter workflow id when not already trailing', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a'], 'wf-b', 10)).toEqual([
+      'wf-a',
+      'wf-b',
+    ]);
+  });
+
+  it('does not duplicate when emitter is already trailing', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a', 'wf-b'], 'wf-b', 10)).toEqual([
+      'wf-a',
+      'wf-b',
+    ]);
+  });
+
+  it('returns base list when emitter is omitted', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a'], undefined, 10)).toEqual(['wf-a']);
+  });
+
+  it('respects maxCount', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a', 'wf-b'], 'wf-c', 2)).toEqual([
+      'wf-a',
+      'wf-b',
+    ]);
   });
 });
