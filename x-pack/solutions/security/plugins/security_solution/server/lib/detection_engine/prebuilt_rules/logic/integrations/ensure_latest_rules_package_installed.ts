@@ -19,7 +19,7 @@ export async function ensureLatestRulesPackageInstalled(
     'ensureLatestRulesPackageInstalled: Fetching latest versions of prebuilt rule assets'
   );
 
-  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets({ size: 1 });
 
   logger.debug(
     `ensureLatestRulesPackageInstalled: Fetching latest versions of prebuilt rule assets - done. Fetched assets: ${latestPrebuiltRules.length}.`

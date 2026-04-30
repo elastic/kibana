@@ -9,7 +9,7 @@ components:
     GranularRulesSearchMode:
       type: string
       description: |
-        Search mode for free-text search combined with the KQL `filter`.
+        Search mode for free-text search combined with `filter`.
       enum:
         - legacy
       default: legacy
@@ -20,7 +20,7 @@ components:
       required:
         - term
       description: |
-        Free-text search combined with the KQL `filter`. Interpreted according to search mode.
+        Free-text search combined with `filter`. Interpreted according to search mode.
       properties:
         term:
           type: string
@@ -30,7 +30,7 @@ components:
     GranularRulesFilterMode:
       type: string
       description: |
-        How `GranularRulesFilter.term` is interpreted. Only KQL against alerting saved objects is supported today.
+        How `GranularRulesFilter.term` is interpreted. Defaults to KQL.
       enum:
         - KQL
       default: KQL
@@ -41,8 +41,7 @@ components:
       required:
         - term
       description: |
-        Structured KQL filter applied to alert saved objects (`term` is the KQL string).
-        Only `mode` value `KQL` (or omitted) is supported; other modes are rejected by request validation.
+        String filter expression interpreted according to `mode`.
       properties:
         term:
           type: string

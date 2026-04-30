@@ -17,7 +17,6 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
-  GranularRulesFilter,
   GranularRulesSearch,
   FacetCounts,
 } from '../../rule_management/granular_rules/granular_rules_contract.gen';
@@ -237,9 +236,9 @@ export const ReviewRuleInstallationRequestBody = lazySchema(() =>
        */
       per_page: z.number().int().min(1).max(500).optional().default(20),
       /**
-       * Structured KQL filter applied to prebuilt rule assets.
+       * KQL filter string applied to prebuilt rule assets.
        */
-      filter: GranularRulesFilter.optional(),
+      filter: z.string().optional(),
       /**
        * Free-text search.
        */

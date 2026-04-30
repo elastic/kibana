@@ -39,10 +39,10 @@ export const buildPrebuiltRuleInstallationKql = ({
     parts.push(`(${trimmedFilter})`);
   }
 
-  const mode = search?.mode ?? 'legacy';
+  const searchMode = search?.mode ?? 'legacy';
   const trimmedSearch = search?.term?.trim();
 
-  if (trimmedSearch && mode === 'legacy') {
+  if (trimmedSearch && searchMode === 'legacy') {
     parts.push(`(${convertPrebuiltRuleAssetSearchTermToKQL(trimmedSearch)})`);
   }
 

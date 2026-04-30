@@ -11,6 +11,7 @@ import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleVersionSpecifier } from '../../rule_versions/rule_version_specifier';
 import type { BasicRuleInfo } from '../../basic_rule_info';
+import type { FetchLatestAssetsOptions } from './methods/fetch_latest_assets';
 import { fetchLatestAssets } from './methods/fetch_latest_assets';
 import { fetchLatestVersions } from './methods/fetch_latest_versions';
 import type {
@@ -23,7 +24,7 @@ import type { DeprecatedPrebuiltRuleAsset } from '../../../model/rule_assets/dep
 import { fetchDeprecatedRules } from './methods/fetch_deprecated_rules';
 
 export interface IPrebuiltRuleAssetsClient {
-  fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
+  fetchLatestAssets: (options?: FetchLatestAssetsOptions) => Promise<PrebuiltRuleAsset[]>;
 
   fetchLatestVersions: (args?: {
     ruleIds?: string[];
@@ -45,9 +46,9 @@ export const createPrebuiltRuleAssetsClient = (
   savedObjectsClient: SavedObjectsClientContract
 ): IPrebuiltRuleAssetsClient => {
   return {
-    fetchLatestAssets: () => {
+    fetchLatestAssets: (options) => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestAssets', async () => {
-        return fetchLatestAssets(savedObjectsClient);
+        return fetchLatestAssets(savedObjectsClient, options);
       });
     },
 

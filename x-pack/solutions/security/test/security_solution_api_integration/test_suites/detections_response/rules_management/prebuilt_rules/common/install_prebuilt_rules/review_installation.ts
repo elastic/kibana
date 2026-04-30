@@ -21,8 +21,6 @@ import {
   reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
 
-const installReviewKqlFilter = (term: string) => ({ term, mode: 'KQL' as const });
-
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -346,7 +344,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: installReviewKqlFilter('security-rule.tags: "tag-a"'),
+          filter: { term: 'security-rule.tags: "tag-a"', mode: 'KQL' },
         });
 
         expect(response.stats.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
@@ -557,7 +555,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: installReviewKqlFilter(''),
+            filter: { term: '', mode: 'KQL' },
           });
 
           expect(emptyNameResponse.rules).toHaveLength(2);
@@ -579,7 +577,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter('security-rule.name: "My rule 1"'),
+              filter: { term: 'security-rule.name: "My rule 1"', mode: 'KQL' },
             });
 
             expect(response.rules).toEqual([
@@ -596,7 +594,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter('security-rule.name.keyword: *rule*'),
+              filter: { term: 'security-rule.name.keyword: *rule*', mode: 'KQL' },
             });
 
             expect(response.rules).toHaveLength(3);
@@ -618,7 +616,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter('security-rule.name: "mY rulE 1"'),
+              filter: { term: 'security-rule.name: "mY rulE 1"', mode: 'KQL' },
             });
 
             expect(response.rules).toEqual([
@@ -648,7 +646,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter('security-rule.tags: "tag-b"'),
+              filter: { term: 'security-rule.tags: "tag-b"', mode: 'KQL' },
             });
 
             expect(singleTagResponse.rules).toHaveLength(2);
@@ -684,7 +682,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter('security-rule.tags: "tag-d"'),
+              filter: { term: 'security-rule.tags: "tag-d"', mode: 'KQL' },
             });
 
             expect(singleTagResponse.rules).toEqual([]);
@@ -710,9 +708,10 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter(
-                '(security-rule.tags: "tag-a") AND (security-rule.tags: "tag-b")'
-              ),
+              filter: {
+                term: '(security-rule.tags: "tag-a") AND (security-rule.tags: "tag-b")',
+                mode: 'KQL',
+              },
             });
 
             expect(multipleTagsResponse.rules).toEqual([
@@ -741,9 +740,10 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: installReviewKqlFilter(
-                '(security-rule.tags: "tag-a") AND (security-rule.tags: "tag-c")'
-              ),
+              filter: {
+                term: '(security-rule.tags: "tag-a") AND (security-rule.tags: "tag-c")',
+                mode: 'KQL',
+              },
             });
 
             expect(multipleTagsResponse.rules).toEqual([]);
@@ -786,7 +786,10 @@ export default ({ getService }: FtrProviderContext): void => {
               await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
 
               const response = await reviewPrebuiltRulesToInstall(supertest, {
-                filter: installReviewKqlFilter(`security-rule.tags: "${tag.replace(/"/g, '\\"')}"`),
+                filter: {
+                  term: `security-rule.tags: "${tag.replace(/"/g, '\\"')}"`,
+                  mode: 'KQL',
+                },
               });
               expect(response.rules).toEqual([
                 expect.objectContaining({
@@ -809,7 +812,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const response = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: installReviewKqlFilter('security-rule.name.keyword: *Rule*'),
+            filter: { term: 'security-rule.name.keyword: *Rule*', mode: 'KQL' },
           });
 
           expect(response).toMatchObject({
@@ -847,7 +850,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const response = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: installReviewKqlFilter('security-rule.tags: "tag-a"'),
+            filter: { term: 'security-rule.tags: "tag-a"', mode: 'KQL' },
           });
 
           expect(response).toMatchObject({
@@ -884,7 +887,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
           sort: [{ field: 'name', order: 'desc' }],
-          filter: installReviewKqlFilter('security-rule.tags: "tag-b"'),
+          filter: { term: 'security-rule.tags: "tag-b"', mode: 'KQL' },
         });
 
         expect(response.rules).toEqual([
@@ -934,7 +937,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: installReviewKqlFilter('security-rule.tags: "tag-a"'),
+          filter: { term: 'security-rule.tags: "tag-a"', mode: 'KQL' },
           search: { term: 'phishing', mode: 'legacy' },
         });
 
@@ -970,7 +973,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = (await reviewPrebuiltRulesToInstall(
           supertest,
           {
-            filter: installReviewKqlFilter('security-rule.name: ('),
+            filter: { term: 'security-rule.name: (', mode: 'KQL' },
           },
           400
         )) as unknown as { status_code: number; message: string[] };
@@ -1012,7 +1015,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: installReviewKqlFilter('security-rule.tags: "tag-a"'),
+          filter: { term: 'security-rule.tags: "tag-a"', mode: 'KQL' },
           aggregations: { counts: ['tags'] },
         });
 

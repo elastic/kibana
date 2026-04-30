@@ -9,37 +9,46 @@ import type { SearchRulesRequestBodyInput } from '../../../../../../../common/ap
 import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
-  validateSearchRulesKqlFilter,
+  validateSearchRulesFilter,
   validateSearchRulesRequestBody,
 } from './request_schema_validation';
 
 const gapParamsTogetherMessage =
   'Query fields "gap_fill_statuses", "gaps_range_start" and "gaps_range_end" has to be specified together';
 
-describe('validateSearchRulesKqlFilter', () => {
-  it('accepts empty and whitespace filter', () => {
-    expect(validateSearchRulesKqlFilter(undefined)).toEqual([]);
-    expect(validateSearchRulesKqlFilter('')).toEqual([]);
-    expect(validateSearchRulesKqlFilter('   ')).toEqual([]);
+describe('validateSearchRulesFilter', () => {
+  it('accepts empty and whitespace term', () => {
+    expect(validateSearchRulesFilter(undefined)).toEqual([]);
+    expect(validateSearchRulesFilter({ term: '', mode: 'KQL' })).toEqual([]);
+    expect(validateSearchRulesFilter({ term: '   ', mode: 'KQL' })).toEqual([]);
   });
 
-  it('accepts valid KQL with alert.attributes prefix', () => {
-    expect(validateSearchRulesKqlFilter('alert.attributes.enabled: true')).toEqual([]);
-    expect(validateSearchRulesKqlFilter('alert.attributes.name: "My rule"')).toEqual([]);
+  it('defaults to KQL mode when omitted', () => {
+    expect(validateSearchRulesFilter({ term: 'alert.attributes.enabled: true' })).toEqual([]);
   });
 
   it('returns an error for syntactically invalid KQL', () => {
-    const errors = validateSearchRulesKqlFilter('alert.attributes.name: (');
+    const errors = validateSearchRulesFilter({
+      term: 'alert.attributes.name: (',
+      mode: 'KQL',
+    });
     expect(errors).toHaveLength(1);
     expect(errors[0]).toContain('invalid KQL filter');
   });
 
   it('returns an error when filter exceeds max length', () => {
     const filler = 'a'.repeat(MAX_SEARCH_RULES_FILTER_KQL_LENGTH);
-    const errors = validateSearchRulesKqlFilter(`${filler}x`);
+    const errors = validateSearchRulesFilter({ term: `${filler}x`, mode: 'KQL' });
     expect(errors).toEqual([
       `filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`,
     ]);
+  });
+
+  it('returns an error for unsupported mode', () => {
+    const errors = validateSearchRulesFilter(
+      JSON.parse('{"term":"alert.attributes.enabled:true","mode":"esql"}')
+    );
+    expect(errors).toEqual(['unsupported filter.mode "esql"']);
   });
 });
 

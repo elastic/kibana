@@ -11,7 +11,7 @@ import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
 } from '../../../rule_management/api/rules/search_rules/request_schema_validation';
-import type { PrebuiltRuleAssetsFacetCategory } from '../../../../../../common/api/detection_engine';
+import type { GranularRulesFilterMode } from '../../../../../../common/api/detection_engine';
 
 describe('validateReviewRuleInstallationRequestBody', () => {
   const defaultInput = {
@@ -57,6 +57,14 @@ describe('validateReviewRuleInstallationRequestBody', () => {
         filter: { term: `${filler}x`, mode: 'KQL' },
       })
     ).toEqual([`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`]);
+  });
+
+  it('rejects unsupported filter.mode', () => {
+    const errors = validateReviewRuleInstallationRequestBody({
+      ...defaultInput,
+      filter: { term: 'x', mode: 'esql' as unknown as GranularRulesFilterMode },
+    });
+    expect(errors).toContain('unsupported filter.mode "esql"');
   });
 
   it('accepts sort as a non-empty array of criteria', () => {

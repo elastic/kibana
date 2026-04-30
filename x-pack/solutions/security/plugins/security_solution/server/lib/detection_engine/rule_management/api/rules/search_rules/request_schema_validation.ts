@@ -15,15 +15,15 @@ export const MAX_SEARCH_RULES_SEARCH_TERM_LENGTH = 1000;
 
 export const MAX_SEARCH_RULES_FILTER_KQL_LENGTH = 10_000;
 
-export const validateSearchRulesKqlFilter = (filter: string | undefined): string[] => {
-  if (filter == null || filter.trim() === '') {
+const validateKqlFilterTerm = (term: string | undefined): string[] => {
+  if (term == null || term.trim() === '') {
     return [];
   }
-  if (filter.length > MAX_SEARCH_RULES_FILTER_KQL_LENGTH) {
+  if (term.length > MAX_SEARCH_RULES_FILTER_KQL_LENGTH) {
     return [`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`];
   }
   try {
-    fromKueryExpression(filter);
+    fromKueryExpression(term);
     return [];
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -39,7 +39,7 @@ export const validateSearchRulesFilter = (filter: GranularRulesFilter | undefine
   if (mode !== 'KQL') {
     return [`unsupported filter.mode "${mode}"`];
   }
-  return validateSearchRulesKqlFilter(filter.term);
+  return validateKqlFilterTerm(filter.term);
 };
 
 export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {

@@ -17,14 +17,14 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
-  * Search mode for free-text search combined with the KQL `filter`.
+  * Search mode for free-text search combined with `filter`.
 
   */
 export const GranularRulesSearchMode = lazySchema(() => z.literal('legacy').default('legacy'));
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
 
 /**
-  * Free-text search combined with the KQL `filter`. Interpreted according to search mode.
+  * Free-text search combined with `filter`. Interpreted according to search mode.
 
   */
 export const GranularRulesSearch = lazySchema(() =>
@@ -38,15 +38,14 @@ export const GranularRulesSearch = lazySchema(() =>
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
 
 /**
-  * How `GranularRulesFilter.term` is interpreted. Only KQL against alerting saved objects is supported today.
+  * How `GranularRulesFilter.term` is interpreted. Defaults to KQL.
 
   */
 export const GranularRulesFilterMode = lazySchema(() => z.literal('KQL').default('KQL'));
 export type GranularRulesFilterMode = z.infer<typeof GranularRulesFilterMode>;
 
 /**
-  * Structured KQL filter applied to alert saved objects (`term` is the KQL string).
-Only `mode` value `KQL` (or omitted) is supported; other modes are rejected by request validation.
+  * String filter expression interpreted according to `mode`.
 
   */
 export const GranularRulesFilter = lazySchema(() =>

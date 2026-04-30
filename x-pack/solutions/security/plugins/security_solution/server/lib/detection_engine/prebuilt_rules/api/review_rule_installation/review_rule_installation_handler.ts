@@ -93,7 +93,8 @@ export const reviewRuleInstallationHandler = async (
   const { page, per_page: perPage, filter, search, aggregations, sort, fields } = request.body;
 
   logger.debug(
-    `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}, sort=${sort}, filter=${filter}, search=${search}, aggregations=${aggregations}`
+    () =>
+      `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}`
   );
 
   try {

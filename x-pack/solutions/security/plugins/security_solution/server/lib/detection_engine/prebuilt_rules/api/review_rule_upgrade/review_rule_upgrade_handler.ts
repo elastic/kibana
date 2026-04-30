@@ -44,8 +44,7 @@ import {
   expandRawAggregationResult,
 } from '../../../rule_management/logic/search/granular_facet_aggregations';
 
-// Identity fields always returned regardless of `fields`, so callers can still
-// match results to rules. Kept in sync with the installation-review baseline.
+// Identity fields always returned regardless of `fields` subselection.
 const REVIEW_UPGRADE_BASELINE_FIELDS: ReadonlySet<ReviewRuleInstallationField> = new Set([
   'rule_id',
   'id',
@@ -98,11 +97,7 @@ export const reviewRuleUpgradeHandler = async (
 
   logger.debug(
     () =>
-      `reviewRuleUpgradeHandler: Executing handler with params: page=${page}, perPage=${perPage}, filter=${filter}, search=${JSON.stringify(
-        search
-      )}, aggregations=${JSON.stringify(aggregations)}, sort=${JSON.stringify(
-        sort
-      )}, fields=${JSON.stringify(fields)}`
+      `reviewRuleUpgradeHandler: Executing handler with params: page=${page}, perPage=${perPage}`
   );
 
   try {
@@ -188,7 +183,7 @@ async function calculateUpgradeableRulesDiff({
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
   const latestVersionsMap = new Map(allLatestVersions.map((version) => [version.rule_id, version]));
 
-  const combinedKql = buildGranularRulesKql({ filter: filter?.term, search });
+  const combinedKql = buildGranularRulesKql({ filter, search });
 
   // Push the user-supplied KQL down into the installed-rules SO fetch so single-rule lookups
   // (e.g. filtering by `rule_id`) don't pull every prebuilt rule and then narrow afterwards.
