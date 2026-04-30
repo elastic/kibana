@@ -33,8 +33,6 @@ interface DiamondNodeProps {
   badge?: ReactNode;
   ariaLabel?: string;
   groupedCount?: number;
-  isSearchMatch?: boolean;
-  isActiveSearchMatch?: boolean;
 }
 
 export const DiamondNode = memo(
@@ -51,8 +49,6 @@ export const DiamondNode = memo(
     badge,
     ariaLabel: customAriaLabel,
     groupedCount,
-    isSearchMatch = false,
-    isActiveSearchMatch = false,
   }: DiamondNodeProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -166,7 +162,7 @@ export const DiamondNode = memo(
     `;
 
     return (
-      <HighlightWrapper isSearchMatch={isSearchMatch} isActiveSearchMatch={isActiveSearchMatch}>
+      <HighlightWrapper nodeId={id}>
         <EuiFlexGroup
           direction="column"
           alignItems="center"

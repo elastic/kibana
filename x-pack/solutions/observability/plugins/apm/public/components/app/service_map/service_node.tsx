@@ -27,7 +27,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
-import { useServiceMapSearchHighlight } from './service_map_search_context';
 import { HighlightWrapper } from '../../shared/service_map/highlight_wrapper';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
@@ -42,7 +41,6 @@ export const ServiceNode = memo(
     const { onSloBadgeClick } = useServiceMapSloFlyout();
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
-    const { isSearchMatch, isActiveSearchMatch } = useServiceMapSearchHighlight(data.id);
 
     const borderColor = useMemo(() => {
       if (data.serviceAnomalyStats?.healthStatus) {
@@ -175,11 +173,7 @@ export const ServiceNode = memo(
     });
 
     return (
-      <HighlightWrapper
-        isSearchMatch={isSearchMatch}
-        isActiveSearchMatch={isActiveSearchMatch}
-        contextHighlight={contextHighlight}
-      >
+      <HighlightWrapper nodeId={data.id} contextHighlight={contextHighlight}>
         <EuiFlexGroup
           direction="column"
           alignItems="center"

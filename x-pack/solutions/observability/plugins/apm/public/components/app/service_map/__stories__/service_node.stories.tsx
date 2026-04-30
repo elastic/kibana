@@ -253,7 +253,7 @@ export const OpenTelemetryAgents: StoryObj = {
   },
 };
 
-export const SearchHighlight: StoryObj = {
+export const HighlightStates: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
       <div style={{ textAlign: 'center' }}>
@@ -268,99 +268,32 @@ export const SearchHighlight: StoryObj = {
         <LabelText>No highlight</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
-        <WithSearchHighlight matchNodeIds={new Set(['match-only'])} activeMatchNodeId={null}>
-          <ServiceNode
-            {...createNodeProps({
-              id: 'match-only',
-              label: 'match-only',
-              isService: true,
-              agentName: 'nodejs',
-            })}
-          />
-        </WithSearchHighlight>
-        <LabelText>Search match (inactive)</LabelText>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'context-highlight',
+            label: 'context-highlight',
+            isService: true,
+            agentName: 'nodejs',
+            contextHighlight: true,
+          })}
+        />
+        <LabelText>Context highlight</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <WithSearchHighlight
-          matchNodeIds={new Set(['active-match'])}
-          activeMatchNodeId="active-match"
+          matchNodeIds={new Set(['search-overrides'])}
+          activeMatchNodeId="search-overrides"
         >
           <ServiceNode
             {...createNodeProps({
-              id: 'active-match',
-              label: 'active-match',
+              id: 'search-overrides',
+              label: 'search-overrides',
               isService: true,
               agentName: 'go',
             })}
           />
         </WithSearchHighlight>
-        <LabelText>Active search match</LabelText>
-      </div>
-    </div>
-  ),
-};
-
-export const SearchHighlightWithAnomalyBorder: StoryObj = {
-  render: () => (
-    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
-      <div style={{ textAlign: 'center' }}>
-        <WithSearchHighlight
-          matchNodeIds={new Set(['warning-match'])}
-          activeMatchNodeId="warning-match"
-        >
-          <ServiceNode
-            {...createNodeProps({
-              id: 'warning-match',
-              label: 'warning-match',
-              isService: true,
-              agentName: 'python',
-              serviceAnomalyStats: {
-                healthStatus: ServiceHealthStatus.warning,
-                transactionType: 'request',
-                anomalyScore: 50,
-              },
-            })}
-          />
-        </WithSearchHighlight>
-        <LabelText>Active match + Warning border</LabelText>
-      </div>
-      <div style={{ textAlign: 'center' }}>
-        <WithSearchHighlight
-          matchNodeIds={new Set(['critical-match'])}
-          activeMatchNodeId="critical-match"
-        >
-          <ServiceNode
-            {...createNodeProps({
-              id: 'critical-match',
-              label: 'critical-match',
-              isService: true,
-              agentName: 'ruby',
-              serviceAnomalyStats: {
-                healthStatus: ServiceHealthStatus.critical,
-                transactionType: 'request',
-                anomalyScore: 85,
-              },
-            })}
-          />
-        </WithSearchHighlight>
-        <LabelText>Active match + Critical border</LabelText>
-      </div>
-      <div style={{ textAlign: 'center' }}>
-        <WithSearchHighlight matchNodeIds={new Set(['healthy-match'])} activeMatchNodeId={null}>
-          <ServiceNode
-            {...createNodeProps({
-              id: 'healthy-match',
-              label: 'healthy-match',
-              isService: true,
-              agentName: 'java',
-              serviceAnomalyStats: {
-                healthStatus: ServiceHealthStatus.healthy,
-                transactionType: 'request',
-              },
-            })}
-          />
-        </WithSearchHighlight>
-        <LabelText>Inactive match + Healthy border</LabelText>
+        <LabelText>Search overrides context</LabelText>
       </div>
     </div>
   ),

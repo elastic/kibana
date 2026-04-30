@@ -8,21 +8,21 @@
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useServiceMapSearchHighlight } from '../../app/service_map/service_map_search_context';
 
 interface HighlightWrapperProps {
-  isSearchMatch: boolean;
-  isActiveSearchMatch: boolean;
+  nodeId: string;
   contextHighlight?: boolean;
   children: React.ReactNode;
 }
 
 export function HighlightWrapper({
-  isSearchMatch,
-  isActiveSearchMatch,
+  nodeId,
   contextHighlight = false,
   children,
 }: HighlightWrapperProps) {
   const { euiTheme } = useEuiTheme();
+  const { isSearchMatch, isActiveSearchMatch } = useServiceMapSearchHighlight(nodeId);
 
   const frameStyles = useMemo(
     () => css`
