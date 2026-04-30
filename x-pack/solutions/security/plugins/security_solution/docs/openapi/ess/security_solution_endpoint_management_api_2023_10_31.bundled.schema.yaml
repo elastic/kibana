@@ -149,9 +149,8 @@ paths:
                 actionStatus:
                   summary: Pending response actions per agent
                   value:
-                    body:
-                      data:
-                        agent_id: afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                    data:
+                      - agent_id: afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
                         pending_actions:
                           execute: 0
                           get-file: 0
@@ -937,9 +936,8 @@ paths:
                 actionsState:
                   summary: Response actions state with encryption enabled
                   value:
-                    body:
-                      data:
-                        canEncrypt: true
+                    data:
+                      canEncrypt: true
               schema:
                 $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
@@ -1451,41 +1449,34 @@ components:
     ActionStateSuccessResponse:
       type: object
       properties:
-        body:
+        data:
           type: object
           properties:
-            data:
-              type: object
-              properties:
-                canEncrypt:
-                  description: >-
-                    Whether the Kibana instance has encryption enabled for
-                    response actions.
-                  type: boolean
-          required:
-            - data
+            canEncrypt:
+              description: >-
+                Whether the Kibana instance has encryption enabled for response
+                actions.
+              type: boolean
       required:
-        - body
+        - data
     ActionStatusSuccessResponse:
       type: object
       properties:
-        body:
-          type: object
-          properties:
-            data:
-              type: object
-              properties:
-                agent_id:
-                  $ref: '#/components/schemas/AgentId'
-                pending_actions:
-                  $ref: '#/components/schemas/PendingActionsSchema'
-              required:
-                - agent_id
-                - pending_actions
-          required:
-            - data
+        data:
+          description: One pending-actions summary entry per requested agent.
+          items:
+            type: object
+            properties:
+              agent_id:
+                $ref: '#/components/schemas/AgentId'
+              pending_actions:
+                $ref: '#/components/schemas/PendingActionsSchema'
+            required:
+              - agent_id
+              - pending_actions
+          type: array
       required:
-        - body
+        - data
     AgentId:
       description: Agent ID
       type: string
