@@ -103,8 +103,6 @@ describe('exportScheduledQueryParamsSchema', () => {
   });
 
   it('rejects a missing scheduleId', () => {
-    expect(() =>
-      exportScheduledQueryParamsSchema.validate({ executionCount: 1 })
-    ).toThrow();
+    expect(() => exportScheduledQueryParamsSchema.validate({ executionCount: 1 })).toThrow();
   });
 });
