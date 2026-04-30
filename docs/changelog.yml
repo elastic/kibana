@@ -293,12 +293,12 @@ rules:
         'kibana':
           exclude_types:
             - docs
-          # match_areas: any
-          # include_areas:
-          #   - "Alerting and Reporting":
-          #   - "Dashboards and Visualizations"
-          #   - "Discover and ES|QL"
-          #   - Other
+          match_areas: any
+          include_areas:
+            - "Alerting and Reporting"
+            - "Dashboards and Visualizations"
+            - "Discover and ES|QL"
+            - Other
         'observability':
           exclude_types:
             - docs
