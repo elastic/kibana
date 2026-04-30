@@ -816,72 +816,32 @@ describe('buildEsqlFetchSubscribe', () => {
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 
-  test('should remove dropped columns from the DROP command', async () => {
-    const { toolkit, replaceUrlState, dataState, tabId } = await setupTest({});
+  test('should strip removed selected columns when default columns do not change', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({
+      appState: { columns: ['field1', 'field2'] },
+    });
     const documents$ = dataState.data$.documents$;
 
-    const sevenRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
-      result: [{ id: '1', raw: sevenRaw, flattened: sevenRaw } as unknown as DataTableRecord],
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
       query: { esql: 'from the-data-view-title' },
     });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     replaceUrlState.mockClear();
 
-    toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
-        appState: { columns: ['f1', 'f2'] },
-      })
-    );
-
-    const afterDropRaw = { f1: 1, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
-      result: [
-        { id: '1', raw: afterDropRaw, flattened: afterDropRaw } as unknown as DataTableRecord,
-      ],
-      query: { esql: 'from the-data-view-title | drop f2' },
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
-    expect(replaceUrlState).toHaveBeenCalledWith({ tabId, appState: { columns: ['f1'] } });
-  });
-
-  test('should not spuriously clear columns running the same DROP query a second time', async () => {
-    const { toolkit, replaceUrlState, dataState } = await setupTest({});
-    const documents$ = dataState.data$.documents$;
-
-    const sevenRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
-    documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      result: [{ id: '1', raw: sevenRaw, flattened: sevenRaw } as unknown as DataTableRecord],
-      query: { esql: 'from the-data-view-title' },
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
-    toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
-        appState: { columns: ['f1', 'f2'] },
-      })
-    );
-
-    const dropRaw = { f1: 1, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
-    documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      result: [{ id: '1', raw: dropRaw, flattened: dropRaw } as unknown as DataTableRecord],
-      query: { esql: 'from the-data-view-title | drop f2' },
-    });
-    toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
-        appState: { columns: ['f1'] },
-      })
-    );
-    replaceUrlState.mockClear();
-
-    documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      result: [{ id: '1', raw: dropRaw, flattened: dropRaw } as unknown as DataTableRecord],
-      query: { esql: 'from the-data-view-title | drop f2' },
-    });
-
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 });
