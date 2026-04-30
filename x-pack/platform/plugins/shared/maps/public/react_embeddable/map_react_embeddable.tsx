@@ -75,7 +75,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
-    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+    const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
