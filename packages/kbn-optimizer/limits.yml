@@ -3,6 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 48000
   agentBuilderPlatform: 8737
+  agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -50,7 +51,7 @@ pageLoadAssetSize:
   elasticAssistant: 299886
   elasticAssistantSharedState: 4881
   elasticConsole: 4442
-  embeddable: 19807
+  embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
@@ -70,7 +71,7 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
-  feedback: 6413
+  feedback: 6248
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
@@ -115,7 +116,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
-  ml: 99829
+  ml: 99842
   mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
@@ -162,7 +163,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 171041
+  securitySolution: 171101
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412

@@ -98,7 +98,7 @@ describe('sml_task_definitions', () => {
       const callArg = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
       expect(callArg).toHaveProperty(SML_CRAWLER_TASK_TYPE);
       expect(callArg[SML_CRAWLER_TASK_TYPE]).toMatchObject({
-        title: 'Agent Builder: SML Crawler',
+        title: 'Agent Context Layer: SML Crawler',
         timeout: '10m',
         maxAttempts: 3,
       });
@@ -191,19 +191,19 @@ describe('sml_task_definitions', () => {
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
       expect(mockTaskManager.ensureScheduled).toHaveBeenNthCalledWith(1, {
-        id: 'agent_builder:sml_crawler:visualization',
+        id: 'agent_context_layer:sml_crawler:visualization',
         taskType: SML_CRAWLER_TASK_TYPE,
         params: { attachmentType: 'visualization' },
         schedule: { interval: '10m' },
-        scope: ['agentBuilder'],
+        scope: ['agentContextLayer'],
         state: {},
       });
       expect(mockTaskManager.ensureScheduled).toHaveBeenNthCalledWith(2, {
-        id: 'agent_builder:sml_crawler:dashboard',
+        id: 'agent_context_layer:sml_crawler:dashboard',
         taskType: SML_CRAWLER_TASK_TYPE,
         params: { attachmentType: 'dashboard' },
         schedule: { interval: '10m' },
-        scope: ['agentBuilder'],
+        scope: ['agentContextLayer'],
         state: {},
       });
     });

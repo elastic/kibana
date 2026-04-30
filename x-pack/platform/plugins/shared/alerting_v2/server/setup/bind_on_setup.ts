@@ -22,6 +22,11 @@ import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_cli
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
+import {
+  ACTION_POLICY_EVENT_ACTIONS,
+  ACTION_POLICY_EVENT_PROVIDER,
+} from '../lib/dispatcher/steps/constants';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -53,6 +58,18 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
     uiSettingsSetup.registerGlobal(alertingV2UiSettings);
+
+    const eventLogService = container.get(
+      PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
+    );
+    eventLogService.registerProviderActions(
+      ACTION_POLICY_EVENT_PROVIDER,
+      Object.values(ACTION_POLICY_EVENT_ACTIONS)
+    );
+    const eventLogger = eventLogService.getLogger({
+      event: { provider: ACTION_POLICY_EVENT_PROVIDER },
+    });
+    container.bind(EventLoggerToken).toConstantValue(eventLogger);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
