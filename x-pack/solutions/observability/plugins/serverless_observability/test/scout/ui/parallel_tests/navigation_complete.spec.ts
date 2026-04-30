@@ -129,7 +129,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-integrations"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Integrations' })).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'integrations' })).toBeVisible();
       });
 
       await test.step('data_management → Fleet', async () => {
