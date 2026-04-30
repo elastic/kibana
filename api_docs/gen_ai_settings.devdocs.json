@@ -71,7 +71,19 @@
         "label": "GenAiSettingsServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/gen_ai_settings/connectors/{connectorId}\": ",
+          "{ \"POST /internal/gen_ai_settings/install_token_usage_dashboard\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/gen_ai_settings/install_token_usage_dashboard\", undefined, ",
+          "GenAiSettingsRouteHandlerResources",
+          ", { installed: boolean; }, ",
+          "GenAiSettingsRouteCreateOptions",
+          ">; \"GET /internal/gen_ai_settings/connectors/{connectorId}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -124,7 +136,7 @@
           ">; }"
         ],
         "path": "x-pack/platform/plugins/private/gen_ai_settings/server/routes/get_global_gen_ai_settings_route_repository.ts",
-        "lineNumber": 16,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
