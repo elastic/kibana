@@ -6,7 +6,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 76778
+  alertingVTwo: 48973
   apm: 26000
   apmSourcesAccess: 2278
   automaticImport: 18629
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   elasticAssistant: 299886
   elasticAssistantSharedState: 4881
   elasticConsole: 4442
-  embeddable: 16634
+  embeddable: 19807
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718

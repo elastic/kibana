@@ -16,7 +16,6 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -31,7 +30,6 @@ import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
-import { createRuleAttachmentDefinition } from './agent_builder/attachments/rule_attachment_definition';
 
 export type { AlertingV2PublicStart } from './types';
 export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
@@ -68,16 +66,21 @@ export const module = new ContainerModule(({ bind }) => {
       if (experimentalEnabled && diContainer.isBound(agentBuilderToken)) {
         const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
         const rulesApi = diContainer.get(RulesApi);
-        agentBuilder.attachments.addAttachmentType(
-          RULE_ATTACHMENT_TYPE,
-          createRuleAttachmentDefinition({
-            rulesApi,
-            application: coreStart.application,
-            basePath: coreStart.http.basePath,
-            notifications: coreStart.notifications,
-            container: diContainer,
-          })
-        );
+        import(
+          /* webpackChunkName: "alerting_v2_rule_attachment" */
+          './agent_builder/attachments/rule_attachment_definition'
+        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE }) => {
+          agentBuilder.attachments.addAttachmentType(
+            RULE_ATTACHMENT_TYPE,
+            createRuleAttachmentDefinition({
+              rulesApi,
+              application: coreStart.application,
+              basePath: coreStart.http.basePath,
+              notifications: coreStart.notifications,
+              container: diContainer,
+            })
+          );
+        });
       }
     });
 

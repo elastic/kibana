@@ -11,8 +11,9 @@ import {
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+
+export { RULE_ATTACHMENT_TYPE };
 import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
