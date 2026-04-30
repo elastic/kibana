@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
@@ -28,6 +28,7 @@ export interface ApmEmbeddableContextProps {
   kuery?: string;
 }
 
+/** Providers for dashboard/flyout embeddables. Uses `I18nProvider` for react-intl but omits Core `i18n.Context` (`EuiContext`) and `KibanaThemeProvider` so the DOM stays shallow for flyout flex layout; theme/CSS still comes from the host `KibanaRenderContextProvider`. */
 export function ApmEmbeddableContext({
   rangeFrom = 'now-15m',
   rangeTo = 'now',
@@ -73,36 +74,33 @@ export function ApmEmbeddableContext({
 
   createCallApmApi(deps.coreStart);
 
-  const I18nContext = deps.coreStart.i18n.Context;
   return (
-    <I18nContext>
+    <I18nProvider>
       <ApmPluginContext.Provider value={services}>
-        <KibanaThemeProvider theme={deps.coreStart.theme}>
-          <KibanaContextProvider
-            services={{
-              ...deps.coreStart,
-              apmSourcesAccess: deps.pluginsStart.apmSourcesAccess,
-              dataViews: deps.pluginsStart.dataViews,
-            }}
-          >
-            <RouterProvider router={apmRouter as any} history={history}>
-              <TimeRangeMetadataContextProvider
-                uiSettings={deps.coreStart.uiSettings}
-                start={resolvedStart ?? rangeFrom}
-                end={resolvedEnd ?? rangeTo}
-                kuery={kuery}
-                useSpanName={false}
-              >
-                <LicenseProvider>
-                  <ApmIndexSettingsContextProvider>
-                    <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-                  </ApmIndexSettingsContextProvider>
-                </LicenseProvider>
-              </TimeRangeMetadataContextProvider>
-            </RouterProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
+        <KibanaContextProvider
+          services={{
+            ...deps.coreStart,
+            apmSourcesAccess: deps.pluginsStart.apmSourcesAccess,
+            dataViews: deps.pluginsStart.dataViews,
+          }}
+        >
+          <RouterProvider router={apmRouter as any} history={history}>
+            <TimeRangeMetadataContextProvider
+              uiSettings={deps.coreStart.uiSettings}
+              start={resolvedStart ?? rangeFrom}
+              end={resolvedEnd ?? rangeTo}
+              kuery={kuery}
+              useSpanName={false}
+            >
+              <LicenseProvider>
+                <ApmIndexSettingsContextProvider>
+                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                </ApmIndexSettingsContextProvider>
+              </LicenseProvider>
+            </TimeRangeMetadataContextProvider>
+          </RouterProvider>
+        </KibanaContextProvider>
       </ApmPluginContext.Provider>
-    </I18nContext>
+    </I18nProvider>
   );
 }
