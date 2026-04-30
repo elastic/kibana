@@ -36,8 +36,7 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
@@ -78,8 +77,6 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
     text: option,
   }));
 }
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {

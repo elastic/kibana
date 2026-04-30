@@ -15,8 +15,7 @@ import type {
 } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboardWithSaveResult,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import {
@@ -27,10 +26,6 @@ import {
 } from '../../kibana_services';
 import type { SavedMap } from './saved_map';
 import { hasLibraryItemWithTitle } from '../../content_management';
-
-const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
-  LazySavedObjectSaveModalDashboardWithSaveResult
-);
 
 export function getTopNavConfig({
   savedMap,
@@ -216,7 +211,7 @@ export function getTopNavConfig({
           );
         } else {
           saveModal = (
-            <SavedObjectSaveModalDashboardWithSaveResult
+            <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
               mustCopyOnSaveMessage={

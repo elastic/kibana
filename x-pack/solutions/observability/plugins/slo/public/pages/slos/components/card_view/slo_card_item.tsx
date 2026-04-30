@@ -11,8 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -29,7 +28,6 @@ import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;

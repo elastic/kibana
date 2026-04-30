@@ -27,8 +27,7 @@ import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -59,8 +58,6 @@ import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import { NoChangePointsCallout } from './no_change_points_callout';
 
 const selectControlCss = { width: '350px' };
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 /**
  * Contains panels with controls and change point results.

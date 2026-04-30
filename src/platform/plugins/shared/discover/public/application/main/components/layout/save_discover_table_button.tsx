@@ -10,8 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
@@ -22,8 +21,6 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard, <></>);
 
 const OBJECT_TYPE = i18n.translate('discover.saveDiscoverTable.modalTitle', {
   defaultMessage: 'Discover table',

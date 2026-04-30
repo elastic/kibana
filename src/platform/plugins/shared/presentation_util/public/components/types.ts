@@ -18,21 +18,17 @@ interface SaveModalDocumentInfo {
 /** The options for saving a dashboard. */
 export type DashboardSavingOption = 'new' | 'existing' | null;
 
-/** Props for the save modal with dashboard options. */
-export interface SaveModalDashboardProps<T = void> {
+interface SaveModalDashboardBaseProps<SaveResponse = void> {
   /** Information about the document being saved. */
   documentInfo: SaveModalDocumentInfo;
-  /** Whether the object can be saved by reference. */
-  canSaveByReference: boolean;
   /** The type of object being saved. */
   objectType: string;
   /** Callback invoked when the modal is closed. */
   onClose: () => void;
-  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
   /** Callback invoked when the save action is triggered. */
   onSave: (
     props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }
-  ) => Promise<T>;
+  ) => Promise<SaveResponse>;
   /** Optional tag selector element or render function. */
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   /** Message displayed when the user must copy on save. */
@@ -48,3 +44,20 @@ export interface SaveModalDashboardProps<T = void> {
   /** Callback invoked when the copy-on-save option changes. */
   onCopyOnSaveChangeCb?: (newCopyOnSave: boolean) => void;
 }
+
+interface SaveModalDashboardByValueProps<SaveResponse = void> extends SaveModalDashboardBaseProps<SaveResponse> {
+  /** object can not be saved by reference. */
+  canSaveByReference: false;
+}
+
+interface SaveModalDashboardByValueAndByReferenceProps<SaveResponse = void>
+  extends SaveModalDashboardBaseProps<SaveResponse> {
+  /** object can be saved by reference. */
+  canSaveByReference: true;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
+}
+
+/** Props for the save modal with dashboard options. */
+export type SaveModalDashboardProps<SaveResponse = void> =
+  | SaveModalDashboardByValueProps<SaveResponse>
+  | SaveModalDashboardByValueAndByReferenceProps<SaveResponse>;

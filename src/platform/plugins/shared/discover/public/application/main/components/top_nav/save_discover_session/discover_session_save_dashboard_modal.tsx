@@ -14,12 +14,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export type DiscoverSessionSaveDashboardModalSaveProps = OnSaveProps & {
   addToLibrary?: boolean;

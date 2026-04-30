@@ -22,8 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useState } from 'react';
 import { useMemo } from 'react';
@@ -34,8 +33,6 @@ import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-rand
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 interface AttachmentsMenuProps {
   randomSamplerMode: RandomSamplerOption;

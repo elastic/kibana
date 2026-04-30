@@ -24,8 +24,7 @@ import type {
 } from '@kbn/saved-objects-plugin/public';
 import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboardWithSaveResult,
-  withSuspense,
+  SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type {
@@ -82,10 +81,6 @@ export interface TopNavConfigParams {
   showBadge: boolean;
   eventEmitter?: EventEmitter;
 }
-
-const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
-  LazySavedObjectSaveModalDashboardWithSaveResult
-);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize_v2) return false;
@@ -682,7 +677,7 @@ export const getTopNavConfig = (
                 );
               } else {
                 saveModal = (
-                  <SavedObjectSaveModalDashboardWithSaveResult
+                  <SavedObjectSaveModalDashboard
                     documentInfo={{
                       id: visualizeCapabilities.save ? savedVis?.id : undefined,
                       title: savedVis?.title || '',
