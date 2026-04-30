@@ -736,7 +736,6 @@ src/platform/packages/shared/shared-ux/column-presets @elastic/eui @elastic/appe
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/document_data_cascade/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/feedback_snippet @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/context @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_picker/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_upload/impl @elastic/appex-sharedux
