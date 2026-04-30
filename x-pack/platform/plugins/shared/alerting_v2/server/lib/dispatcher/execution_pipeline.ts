@@ -32,6 +32,10 @@ import {
 } from './telemetry';
 
 /**
+ * Build a parallel group of dispatcher steps. Use only for steps that read
+ * non-overlapping fields from prior pipeline state and produce non-overlapping
+ * deltas.
+ *
  * Group semantics for {@link DispatcherParallelGroup} — chosen to preserve
  * today's serial behavior exactly, up to per-stage `duration_ms`:
  *   - All children always start (no skip-on-first-error within the group).
@@ -49,10 +53,6 @@ import {
  *   - Halt precedence is declaration order: the first child that halted
  *     or threw decides the group's halt reason. This matches the serial
  *     "first halt wins" intuition and is independent of finish order.
- *
- * Build a parallel group of dispatcher steps. Use only for steps that
- * read non-overlapping fields from prior pipeline state and produce
- * non-overlapping deltas.
  */
 export const parallelGroup = (...steps: readonly DispatcherStep[]): DispatcherParallelGroup => ({
   kind: 'parallel',
