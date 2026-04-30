@@ -9,7 +9,7 @@ applies_to:
 
 # Outlook connector [outlook-action-type]
 
-The Outlook connector connects to the Microsoft Graph API and enables federated search and browsing of email in Microsoft Outlook. You can configure either a delegated Bearer token (for access on behalf of a user) or OAuth client credentials (for app-only access to a mailbox).
+The Outlook connector connects to the Microsoft Graph API and enables federated search and browsing of email in Microsoft Outlook. It uses OAuth Authorization Code flow to access the authenticated user's mailbox on their behalf.
 
 ## Create connectors in {{kib}} [define-outlook-ui]
 
@@ -17,25 +17,21 @@ You can create an Outlook connector in **{{stack-manage-app}} > {{connectors-ui}
 
 ### Connector configuration [outlook-connector-configuration]
 
-#### Bearer token (delegated auth)
-
-Microsoft API token
-:   A Microsoft Bearer token obtained through the delegated OAuth flow (for example, a user access token from the Authorization Code flow). Provides access to the authenticated user's mailbox.
-
-#### OAuth client credentials (app-only auth)
-
 Client ID
-:   The Application (client) ID of your Azure Active Directory (Azure AD) application registration.
+:   The Application (client) ID of your Microsoft Entra ID application registration.
 
 Client secret
-:   The client secret generated for your Azure AD application.
+:   The client secret generated for your Microsoft Entra ID application.
+
+Authorization URL
+:   The authorization endpoint for your Microsoft Entra tenant: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your tenant ID.
 
 Token URL
-:   The token endpoint for your Azure AD tenant: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`. Replace `{tenant-id}` with your Azure AD tenant ID.
+:   The token endpoint for your Microsoft Entra tenant: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`. Replace `{tenant-id}` with your tenant ID.
 
 ## Test connectors [outlook-action-configuration]
 
-You can test connectors when creating or editing the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's profile (delegated auth) or checking Microsoft Graph API accessibility (app-only auth).
+You can test connectors when creating or editing the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's profile from Microsoft Graph.
 
 ## Available actions [outlook-available-actions]
 
@@ -55,7 +51,6 @@ Searches Outlook mail using the Microsoft Graph Search API with Keyword Query La
 Parameters:
 
 - `query` (required): KQL query string. Examples: `subject:budget Q4`, `from:alice@contoso.com`, `hasAttachments:true AND subject:report`.
-- `userId` (optional): Required for app-only auth. The user's ID or UPN (for example, `user@contoso.com`).
 - `from` (optional): Zero-based pagination offset (default: 0).
 - `size` (optional): Number of results to return (1–25, default 10).
 
@@ -66,7 +61,6 @@ Lists email messages from a mailbox folder. Supports OData filters for finer con
 Parameters:
 
 - `folderId` (optional): Folder name or ID. Well-known names: `inbox`, `sentitems`, `drafts`, `deleteditems`, `junkemail`. Omit to list from the full mailbox.
-- `userId` (optional): Required for app-only auth.
 - `top` (optional): Maximum number of messages (1–100, default 20).
 - `filter` (optional): OData `$filter` expression, for example `isRead eq false` or `receivedDateTime ge 2024-01-01T00:00:00Z`.
 - `orderby` (optional): OData sort expression, for example `receivedDateTime desc` (default).
@@ -78,7 +72,6 @@ Retrieves a single Outlook message by ID, including the full HTML or text body.
 Parameters:
 
 - `messageId` (required): The message ID from list messages or search messages.
-- `userId` (optional): Required for app-only auth.
 
 ### List attachments
 
@@ -87,7 +80,6 @@ Lists attachments on a message with metadata (name, content type, size).
 Parameters:
 
 - `messageId` (required): The message ID.
-- `userId` (optional): Required for app-only auth.
 
 ### Get attachment
 
@@ -97,7 +89,6 @@ Parameters:
 
 - `messageId` (required): The message ID.
 - `attachmentId` (required): The attachment ID from list attachments.
-- `userId` (optional): Required for app-only auth.
 
 ::::{note}
 Attachment content can be large. Only call this action when you have a plan to process the binary data, for example, via an Elasticsearch ingest pipeline attachment processor.
@@ -109,7 +100,6 @@ Lists mail folders in a mailbox, including their item counts.
 
 Parameters:
 
-- `userId` (optional): Required for app-only auth.
 - `includeHidden` (optional): Whether to include hidden system folders (default: `false`).
 
 ## Connector networking configuration [outlook-connector-networking-configuration]
@@ -118,29 +108,14 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [outlook-api-credentials]
 
-To use the Outlook connector, you need a Microsoft Azure AD application with the required Graph API permissions.
+To use the Outlook connector, you need a Microsoft Entra ID application registration with the required Graph API permissions.
 
-### Bearer token (delegated auth)
-
-1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
-2. Create a new application registration.
+1. Sign in to the [Azure portal](https://portal.azure.com). Select **Microsoft Entra ID → App registrations**.
+2. Create a new application registration. Under **Redirect URIs**, add your Kibana callback URL.
 3. Under **API permissions**, add the following **Delegated** permissions for Microsoft Graph:
    - `Mail.Read` — Read user mail
    - `Mail.ReadBasic` — Read basic mail metadata
-4. Obtain a user access token through the OAuth delegated flow (for example, Authorization Code flow).
-5. In the **Microsoft API token** field, enter your user access token.
-
-### OAuth client credentials (app-only auth)
-
-1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
-2. Create a new application registration.
-3. Under **API permissions**, add the following **Application** permissions for Microsoft Graph:
-   - `Mail.Read` — Read all users' mail
-   - `Mail.ReadBasic.All` — Read all users' basic mail metadata
-4. Grant admin consent for the permissions.
-5. Under **Certificates & secrets**, create a new client secret.
-6. Copy the **Application (client) ID**, **client secret value**, and **tenant ID**. In the connector configuration, enter the client ID and client secret, and set the Token URL to `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
-
-::::{note}
-App-only auth requires passing a `userId` (user ID or UPN, for example `user@contoso.com`) to each action, because there is no signed-in user context.
-::::
+   - `offline_access` — Maintain access to data you have given it access to
+4. Under **Certificates & secrets**, create a new client secret and note the value.
+5. Copy the **Application (client) ID**, **client secret value**, and **tenant ID**.
+6. In the connector configuration, enter the client ID, client secret, and set the authorization and token URLs using your tenant ID.
