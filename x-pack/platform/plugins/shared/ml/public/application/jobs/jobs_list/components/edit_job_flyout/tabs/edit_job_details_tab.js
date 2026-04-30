@@ -199,9 +199,9 @@ export class EditJobDetailsTabUI extends Component {
           <span>
             <FormattedMessage
               id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitEstimatedLabel"
-              defaultMessage="Estimated model memory limit: {modelMemoryLimit}"
+              defaultMessage="Estimated model memory limit: {modelMemoryLimit} "
               values={{ modelMemoryLimit: mmlEstimation }}
-            />{' '}
+            />
             <EuiButtonEmpty
               size="xs"
               flush="left"
