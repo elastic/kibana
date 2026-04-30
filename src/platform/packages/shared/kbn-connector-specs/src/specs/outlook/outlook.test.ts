@@ -153,18 +153,18 @@ describe('Outlook', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should omit from/size when not provided', async () => {
+    it('should forward custom from/size pagination values', async () => {
       mockClient.post.mockResolvedValue({ data: { value: [] } });
 
       await Outlook.actions.searchMessages.handler(mockContext, {
         query: 'test',
-        from: 0,
-        size: 10,
+        from: 5,
+        size: 25,
       });
 
       const callArgs = mockClient.post.mock.calls[0];
-      expect(callArgs[1].requests[0].from).toBe(0);
-      expect(callArgs[1].requests[0].size).toBe(10);
+      expect(callArgs[1].requests[0].from).toBe(5);
+      expect(callArgs[1].requests[0].size).toBe(25);
     });
 
     it('should propagate API errors', async () => {

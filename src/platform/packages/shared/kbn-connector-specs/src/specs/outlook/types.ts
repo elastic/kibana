@@ -102,3 +102,60 @@ export const ListFoldersInputSchema = z.object({
     ),
 });
 export type ListFoldersInput = z.infer<typeof ListFoldersInputSchema>;
+
+// =============================================================================
+// Action output schemas
+// =============================================================================
+
+const EmailAddressSchema = z.object({
+  emailAddress: z.object({
+    name: z.string().optional(),
+    address: z.string(),
+  }),
+});
+
+export const SearchMessagesOutputSchema = z.object({
+  value: z.array(
+    z.object({
+      searchTerms: z.array(z.string()).optional(),
+      hitsContainers: z.array(
+        z.object({
+          hits: z
+            .array(
+              z.object({
+                hitId: z.string(),
+                rank: z.number(),
+                summary: z.string().optional(),
+                resource: z
+                  .object({ id: z.string(), subject: z.string().optional() })
+                  .passthrough(),
+              })
+            )
+            .optional(),
+          total: z.number().optional(),
+          moreResultsAvailable: z.boolean().optional(),
+        })
+      ),
+    })
+  ),
+});
+
+export const GetMessageOutputSchema = z.object({
+  id: z.string(),
+  subject: z.string().optional(),
+  from: EmailAddressSchema.optional(),
+  toRecipients: z.array(EmailAddressSchema).optional(),
+  ccRecipients: z.array(EmailAddressSchema).optional(),
+  bccRecipients: z.array(EmailAddressSchema).optional(),
+  replyTo: z.array(EmailAddressSchema).optional(),
+  receivedDateTime: z.string().optional(),
+  sentDateTime: z.string().optional(),
+  isRead: z.boolean().optional(),
+  hasAttachments: z.boolean().optional(),
+  body: z.object({ contentType: z.string(), content: z.string() }).optional(),
+  bodyPreview: z.string().optional(),
+  conversationId: z.string().optional(),
+  importance: z.string().optional(),
+  webLink: z.string().optional(),
+  internetMessageId: z.string().optional(),
+});

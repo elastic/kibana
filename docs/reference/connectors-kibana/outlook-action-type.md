@@ -3,7 +3,7 @@ navigation_title: "Outlook"
 type: reference
 description: "Use the Outlook connector to search emails, list folders, and read messages and attachments from Microsoft Outlook."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.5
   serverless: preview
 ---
 

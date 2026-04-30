@@ -17,6 +17,8 @@ import {
   GetAttachmentInputSchema,
   ListAttachmentsInputSchema,
   ListFoldersInputSchema,
+  SearchMessagesOutputSchema,
+  GetMessageOutputSchema,
 } from './types';
 import type {
   SearchMessagesInput,
@@ -62,7 +64,7 @@ export const Outlook: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.outlook.auth.oauthCode.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize — replace {tenantId} with your Azure AD tenant ID.',
+                    'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize — replace {tenantId} with your Microsoft Entra tenant ID.',
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -73,7 +75,7 @@ export const Outlook: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.outlook.auth.oauthCode.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token — replace {tenantId} with your Azure AD tenant ID.',
+                    'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token — replace {tenantId} with your Microsoft Entra tenant ID.',
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -92,7 +94,7 @@ export const Outlook: ConnectorSpec = {
       description:
         "Search Outlook emails using the Microsoft Graph Search API with KQL syntax. Supports filtering by sender, subject, body content, attachment presence, and date ranges. Searches the signed-in user's mailbox. Returns hits with message ID, subject, sender, received date, and a short summary.",
       input: SearchMessagesInputSchema,
-      output: z.any(),
+      output: SearchMessagesOutputSchema,
       handler: async (ctx, input: SearchMessagesInput) => {
         const searchRequest = {
           requests: [
@@ -101,8 +103,8 @@ export const Outlook: ConnectorSpec = {
               query: {
                 queryString: input.query,
               },
-              ...(input.from !== undefined && { from: input.from }),
-              ...(input.size !== undefined && { size: input.size }),
+              from: input.from,
+              size: input.size,
             },
           ],
         };
@@ -146,7 +148,7 @@ export const Outlook: ConnectorSpec = {
       description:
         'Retrieve the full details of a single Outlook email message by ID, including the HTML or text body. Use listMessages or searchMessages to discover message IDs.',
       input: GetMessageInputSchema,
-      output: z.any(),
+      output: GetMessageOutputSchema,
       handler: async (ctx, input: GetMessageInput) => {
         const url = `${GRAPH_BASE}/me/messages/${input.messageId}`;
 
