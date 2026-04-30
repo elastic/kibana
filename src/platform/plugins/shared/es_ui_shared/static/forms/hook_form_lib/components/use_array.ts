@@ -60,6 +60,9 @@ export const getInternalArrayFieldPath = (path: string): string => `${path}__arr
 /**
  * Use UseArray to dynamically add fields to your form.
  *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ *
  * example:
  * If your form data looks like this:
  *

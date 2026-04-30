@@ -31,6 +31,9 @@ interface Options {
  * This is useful to detect if a form has changed and we need to display a confirm modal
  * to the user before they navigate away and lose their changes.
  *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ *
  * @param options - Optional options object
  * @returns flag to indicate if the form has been modified
  */
