@@ -98,18 +98,18 @@ export function EpisodeDetailsPage() {
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
-    services,
+    expressions,
   });
 
   const { data: groupActionsMap } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
-    services,
+    expressions,
   });
 
   const episodeBreadcrumbTitle =
     rule?.metadata.name != null && rule.metadata.name.length > 0
       ? rule.metadata.name
-      : i18n.BREADCRUMB_EPISODE_DETAILS_FALLBACK;
+      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
   const smallMediaQuery = useEuiMaxBreakpoint('s');
@@ -265,7 +265,7 @@ export function EpisodeDetailsPage() {
               {
                 id: 'episode_details',
                 'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
-                label: i18n.SIDEBAR_TAB_DETAILS,
+                label: i18n.SIDEBAR_TAB_TITLE_DETAILS,
               },
               {
                 id: 'runbook',
@@ -304,15 +304,15 @@ export function EpisodeDetailsPage() {
               type="responsiveColumn"
               listItems={[
                 {
-                  title: i18n.LABEL_EPISODE_ID,
+                  title: i18n.EPISODE_ID_LABEL,
                   description: episodeId ?? '—',
                 },
                 {
-                  title: i18n.LABEL_GROUPING,
+                  title: i18n.GROUPING_LABEL,
                   description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
                 },
                 {
-                  title: i18n.LABEL_TRIGGERED,
+                  title: i18n.TRIGGERED_LABEL,
                   description: triggeredAt
                     ? new Date(triggeredAt).toLocaleString(undefined, {
                         dateStyle: 'medium',
@@ -321,11 +321,12 @@ export function EpisodeDetailsPage() {
                     : '—',
                 },
                 {
-                  title: i18n.LABEL_DURATION,
-                  description: durationMs != null ? i18n.formatDurationMs(durationMs) : '—',
+                  title: i18n.DURATION_LABEL,
+                  description:
+                    durationMs != null ? i18n.FORMAT_EPISODE_DURATION_MS(durationMs) : '—',
                 },
                 {
-                  title: i18n.LABEL_ASSIGNEE,
+                  title: i18n.ASSIGNEE_LABEL,
                   description: (
                     <EpisodeAssigneeCell
                       assigneeUid={episodeAction?.lastAssigneeUid}
@@ -644,7 +645,12 @@ export function EpisodeDetailsPage() {
               {mainPanel === 'metadata' ? (
                 <EpisodeMetadataTab episodeId={episodeId} ruleQuery={rule?.evaluation.query.base} />
               ) : (
-                <EpisodeOverviewTab episodeId={episodeId} eventRows={eventRows} rule={rule} />
+                <EpisodeOverviewTab
+                  episodeId={episodeId}
+                  eventRows={eventRows}
+                  groupHash={groupHash}
+                  rule={rule}
+                />
               )}
             </EuiSplitPanel.Inner>
             {sidebarPanelInner}
