@@ -12,8 +12,8 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import { useStableCallback } from '@kbn/react-hooks';
 import type { UnifiedHistogramFetch$, UnifiedHistogramFetch$Arguments } from '../../../types';
-import { useStableCallback } from '../../../hooks/use_stable_callback';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,

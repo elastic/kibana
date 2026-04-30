@@ -29,6 +29,7 @@
     "@kbn/config-schema",
     "@kbn/workflows",
     "@kbn/workflows-ui",
+    "@kbn/workflows-yaml",
     "@kbn/zod",
     "@kbn/code-editor",
     "@kbn/monaco",
@@ -76,9 +77,6 @@
     "@kbn/core-http-server-mocks",
     "@kbn/connector-specs",
     "@kbn/workflows-extensions",
-    "@kbn/core-data-streams-server",
-    "@kbn/data-streams",
-    "@kbn/es-mappings",
     "@kbn/alerts-ui-shared",
     "@kbn/ai-assistant-icon",
     "@kbn/licensing-plugin",
@@ -102,7 +100,8 @@
     "@kbn/cloud-plugin",
     "@kbn/kbn-client",
     "@kbn/rule-data-utils",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/core-saved-objects-common"
   ],
   "exclude": ["target/**/*"]
 }
