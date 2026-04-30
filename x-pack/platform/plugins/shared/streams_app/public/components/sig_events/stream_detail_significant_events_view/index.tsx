@@ -116,10 +116,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           }
         ),
         text: featuresSkipped
-          ? i18n.translate(
-              'xpack.streams.significantEventsTable.featuresSkippedToastText',
-              { defaultMessage: 'Feature identification was skipped.' }
-            )
+          ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
+              defaultMessage: 'Feature identification was skipped.',
+            })
           : undefined,
       });
 
