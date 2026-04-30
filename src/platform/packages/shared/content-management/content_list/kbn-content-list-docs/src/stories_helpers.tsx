@@ -158,47 +158,52 @@ export const DashboardListingEmptyPromptMock = ({
 }) => {
   const headingId = useGeneratedHtmlId({ prefix: 'dashboardListingHeading' });
   return (
-  <EuiEmptyPrompt
-    iconType="dashboardApp"
-    title={
-      <h1 id={headingId} data-test-subj="emptyListPrompt">
-        {inProgress ? 'Dashboard in progress' : 'Create your first dashboard'}
-      </h1>
-    }
-    body={
-      <>
-        <p>
-          Analyze all of your Elastic data in one place by creating a dashboard and adding
-          visualizations.
-        </p>
-        {!inProgress && (
+    <EuiEmptyPrompt
+      iconType="dashboardApp"
+      title={
+        <h1 id={headingId} data-test-subj="emptyListPrompt">
+          {inProgress ? 'Dashboard in progress' : 'Create your first dashboard'}
+        </h1>
+      }
+      body={
+        <>
           <p>
-            New to Kibana? <EuiLink href="#">Add some sample data</EuiLink> to take a test drive.
+            Analyze all of your Elastic data in one place by creating a dashboard and adding
+            visualizations.
           </p>
-        )}
-      </>
-    }
-    actions={
-      inProgress ? (
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="danger" data-test-subj="discardDashboardPromptButton">
-              Reset changes
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="pencil" color="primary" data-test-subj="newItemButton">
-              Continue editing
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiButton fill iconType="plusCircle" data-test-subj="newItemButton">
-          Create a dashboard
-        </EuiButton>
-      )
-    }
-  />
+          {!inProgress && (
+            <p>
+              New to Kibana? <EuiLink href="#">Add some sample data</EuiLink> to take a test drive.
+            </p>
+          )}
+        </>
+      }
+      actions={
+        inProgress ? (
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" color="danger" data-test-subj="discardDashboardPromptButton">
+                Reset changes
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill iconType="pencil" color="primary" data-test-subj="newItemButton">
+                Continue editing
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiButton fill iconType="plusCircle" data-test-subj="newItemButton">
+            Create a dashboard
+          </EuiButton>
+        )
+      }
+    />
   );
 };
 
