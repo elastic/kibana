@@ -8,18 +8,17 @@
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
-import type { SmlSearchResult } from '../../../sml';
+import type { SmlSearchResult } from '@kbn/agent-context-layer-plugin/server';
 import { createSmlSearchTool } from './sml_search';
 
 const mockSearch = jest.fn();
-const getSmlService = jest.fn(() => ({
+const getAgentContextLayer = jest.fn(() => ({
   search: mockSearch,
   checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
-  listTypeDefinitions: jest.fn(),
-  getCrawler: jest.fn(),
+  resolveSmlAttachItems: jest.fn(),
 }));
 
 const mockContext = {
@@ -36,26 +35,26 @@ describe('createSmlSearchTool', () => {
   });
 
   it('has correct id and tags', () => {
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     expect(tool.id).toBe(platformCoreTools.smlSearch);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['sml', 'search']);
   });
 
   it('description mentions workflows and wildcard query', () => {
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     expect(tool.description).toContain('workflows');
     expect(tool.description).toContain('"*"');
   });
 
   it('calls search with correct params', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     await tool.handler(
       { query: 'cpu usage', size: 20 },
       mockContext as unknown as ToolHandlerContext
     );
-    expect(getSmlService).toHaveBeenCalled();
+    expect(getAgentContextLayer).toHaveBeenCalled();
     expect(mockSearch).toHaveBeenCalledWith({
       query: 'cpu usage',
       size: 20,
@@ -81,7 +80,7 @@ describe('createSmlSearchTool', () => {
       },
     ];
     mockSearch.mockResolvedValue({ results: hits, total: 1 });
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     const result = (await tool.handler(
       { query: 'cpu' },
       mockContext as unknown as ToolHandlerContext
@@ -106,7 +105,7 @@ describe('createSmlSearchTool', () => {
 
   it('returns "No results found" when empty', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     const result = (await tool.handler(
       { query: 'nonexistent' },
       mockContext as unknown as ToolHandlerContext
@@ -131,7 +130,7 @@ describe('createSmlSearchTool', () => {
 
   it('uses default size when not provided', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
-    const tool = createSmlSearchTool({ getSmlService });
+    const tool = createSmlSearchTool({ getAgentContextLayer });
     await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
