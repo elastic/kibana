@@ -21,6 +21,35 @@ const sortCombinationsToDataGridSort = (
     }))
   );
 
+const getLatestSortingColumn = (
+  sortingConfig: EuiDataGridSorting['columns'],
+  previousSortingConfig: EuiDataGridSorting['columns']
+): EuiDataGridSorting['columns'] => {
+  if (sortingConfig.length <= 1) {
+    return sortingConfig;
+  }
+
+  const previousSortingConfigById = new Map(
+    previousSortingConfig.map((sortItem) => [sortItem.id, sortItem.direction])
+  );
+  const addedSortingColumn = sortingConfig.find(
+    (sortItem) => !previousSortingConfigById.has(sortItem.id)
+  );
+  if (addedSortingColumn) {
+    return [addedSortingColumn];
+  }
+
+  const updatedSortingColumn = sortingConfig.find(
+    (sortItem) => previousSortingConfigById.get(sortItem.id) !== sortItem.direction
+  );
+  if (updatedSortingColumn) {
+    return [updatedSortingColumn];
+  }
+
+  const lastSortingColumn = sortingConfig[sortingConfig.length - 1];
+  return lastSortingColumn ? [lastSortingColumn] : [];
+};
+
 export function useSorting(
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
   visibleColumns: string[],
@@ -45,10 +74,11 @@ export function useSorting(
 
   const onSort = useCallback<EuiDataGridSorting['onSort']>(
     (sortingConfig) => {
-      onSortChange([...sortingConfig, ...invisibleColumnsSort]);
-      setSortingColumns(sortingConfig);
+      const latestSortingColumn = getLatestSortingColumn(sortingConfig, sortingColumns);
+      onSortChange([...latestSortingColumn, ...invisibleColumnsSort]);
+      setSortingColumns(latestSortingColumn);
     },
-    [onSortChange, invisibleColumnsSort]
+    [onSortChange, invisibleColumnsSort, sortingColumns]
   );
 
   return { sortingColumns, onSort };

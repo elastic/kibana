@@ -40,6 +40,20 @@ describe('useSorting', () => {
     expect(result.current.sortingColumns).toStrictEqual([{ direction: 'asc', id: 'field' }]);
   });
 
+  it('should replace an existing visible sort with the latest selected column', () => {
+    const { result } = renderHook(() => useSorting(onSortChange, ['@timestamp', 'field']));
+
+    act(() => {
+      result.current.onSort([
+        { id: '@timestamp', direction: 'desc' },
+        { id: 'field', direction: 'asc' },
+      ]);
+    });
+
+    expect(onSortChange).toHaveBeenCalledWith([{ direction: 'asc', id: 'field' }]);
+    expect(result.current.sortingColumns).toStrictEqual([{ direction: 'asc', id: 'field' }]);
+  });
+
   it('should exclude any inactive column from the final sort configuration', () => {
     const { result } = renderHook(() =>
       useSorting(
