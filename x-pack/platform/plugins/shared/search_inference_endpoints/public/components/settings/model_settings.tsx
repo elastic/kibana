@@ -40,6 +40,8 @@ export const ModelSettings: React.FC = () => {
     effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
     save: saveFeatures,
   } = useModelSettingsForm();
@@ -259,7 +261,10 @@ export const ModelSettings: React.FC = () => {
                       effectiveRecommendedEndpoints:
                         effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
                       feature: f,
+                      hasSavedObject: hasSavedObject[f.featureId] ?? false,
+                      isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
+                    globalDefaultId={defaultModelState.defaultModelId}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}

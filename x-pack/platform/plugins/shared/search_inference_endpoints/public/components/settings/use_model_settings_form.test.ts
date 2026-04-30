@@ -229,4 +229,39 @@ describe('useModelSettingsForm', () => {
 
     expect(result.current.isLoading).toBe(true);
   });
+
+  it('exposes hasSavedObject false when no saved feature rows exist', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.hasSavedObject.child_1).toBe(false);
+    expect(result.current.hasSavedObject.child_2).toBe(false);
+  });
+
+  it('sets hasSavedObject true only for features present in saved settings', () => {
+    mockUseInferenceSettings.mockReturnValue({
+      data: {
+        data: {
+          features: [{ feature_id: 'child_1', endpoints: [{ id: 'saved-1' }] }],
+        },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.hasSavedObject.child_1).toBe(true);
+    expect(result.current.hasSavedObject.child_2).toBe(false);
+  });
+
+  it('exposes dirtyFeatureIds when assignments differ from defaults', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.dirtyFeatureIds.size).toBe(0);
+
+    act(() => {
+      result.current.updateEndpoints('child_1', ['endpoint-x']);
+    });
+
+    expect(result.current.dirtyFeatureIds.has('child_1')).toBe(true);
+  });
 });

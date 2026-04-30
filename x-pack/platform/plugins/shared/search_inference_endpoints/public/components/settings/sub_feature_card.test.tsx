@@ -16,6 +16,7 @@ import { SubFeatureCard } from './sub_feature_card';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
@@ -118,6 +119,12 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 describe('SubFeatureCard', () => {
   const onEndpointsChange = jest.fn();
 
+  const defaultGlobalRowProps = {
+    globalDefaultId: NO_DEFAULT_MODEL,
+    hasSavedObject: true,
+    isFeatureDirty: false,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseConnectors.mockReturnValue({ data: mockConnectors });
@@ -129,7 +136,12 @@ describe('SubFeatureCard', () => {
     endpointIds: string[],
     overrides?: Partial<InferenceFeatureConfig>,
     invalidEndpointIds: Set<string> = new Set(),
-    effectiveRecommendedEndpoints: string[] = ['__different__']
+    effectiveRecommendedEndpoints: string[] = ['__different__'],
+    globalRowOverrides?: Partial<{
+      globalDefaultId: string;
+      hasSavedObject: boolean;
+      isFeatureDirty: boolean;
+    }>
   ) =>
     render(
       <Wrapper>
@@ -140,6 +152,8 @@ describe('SubFeatureCard', () => {
           effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
           onEndpointsChange={onEndpointsChange}
           invalidEndpointIds={invalidEndpointIds}
+          {...defaultGlobalRowProps}
+          {...globalRowOverrides}
         />
       </Wrapper>
     );
@@ -187,6 +201,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
@@ -218,6 +233,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
@@ -237,6 +253,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
@@ -261,6 +278,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
@@ -280,6 +298,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
@@ -300,6 +319,7 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set(['ep-1'])}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
@@ -345,11 +365,77 @@ describe('SubFeatureCard', () => {
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
             invalidEndpointIds={new Set()}
+            {...defaultGlobalRowProps}
           />
         </Wrapper>
       );
 
       expect(screen.queryByTestId('subFeatureOverflowMenu-test_feature')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Global default row', () => {
+    it('renders locked global default row and badge in custom mode when no saved object and global model is set', () => {
+      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('global-default-badge-test_feature')).toBeInTheDocument();
+      expect(screen.getByText('Global default')).toBeInTheDocument();
+    });
+
+    it('hides the Global default badge when the feature is dirty but keeps the subdued row', () => {
+      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: true,
+      });
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.queryByTestId('global-default-badge-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('does not render the global default row when the feature has saved settings', () => {
+      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: true,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('renders the global default row in recommended-defaults mode when applicable', () => {
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={['ep-1']}
+            effectiveRecommendedEndpoints={['ep-1']}
+            onEndpointsChange={onEndpointsChange}
+            invalidEndpointIds={new Set()}
+            globalDefaultId="ep-3"
+            hasSavedObject={false}
+            isFeatureDirty={false}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+    });
+
+    it('suppresses the Default badge on the first draggable when the global default row is shown', () => {
+      renderCard(['ep-1', 'ep-2'], undefined, new Set(), ['__different__'], {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByText('Default')).not.toBeInTheDocument();
     });
   });
 

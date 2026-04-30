@@ -24,12 +24,15 @@ interface FeatureSettingItem {
   endpointIds: string[];
   effectiveRecommendedEndpoints: string[];
   feature: InferenceFeatureConfig;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 interface FeatureSectionProps {
   parentName: string;
   parentDescription: string;
   features: FeatureSettingItem[];
+  globalDefaultId: string;
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
@@ -40,6 +43,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   parentName,
   parentDescription,
   features,
+  globalDefaultId,
   onEndpointsChange,
   invalidEndpointIds,
   isTechPreview = false,
@@ -92,18 +96,29 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
           </EuiText>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="xl">
-            {features.map(({ endpointIds, effectiveRecommendedEndpoints, feature }) => (
-              <EuiFlexItem key={feature.featureId} grow={false}>
-                <SubFeatureCard
-                  featureId={feature.featureId}
-                  feature={feature}
-                  endpointIds={endpointIds}
-                  effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
-                  onEndpointsChange={onEndpointsChange}
-                  invalidEndpointIds={invalidEndpointIds}
-                />
-              </EuiFlexItem>
-            ))}
+            {features.map(
+              ({
+                endpointIds,
+                effectiveRecommendedEndpoints,
+                feature,
+                hasSavedObject,
+                isFeatureDirty,
+              }) => (
+                <EuiFlexItem key={feature.featureId} grow={false}>
+                  <SubFeatureCard
+                    featureId={feature.featureId}
+                    feature={feature}
+                    endpointIds={endpointIds}
+                    effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
+                    onEndpointsChange={onEndpointsChange}
+                    invalidEndpointIds={invalidEndpointIds}
+                    globalDefaultId={globalDefaultId}
+                    hasSavedObject={hasSavedObject}
+                    isFeatureDirty={isFeatureDirty}
+                  />
+                </EuiFlexItem>
+              )
+            )}
           </EuiFlexGroup>
         )}
       </EuiPanel>

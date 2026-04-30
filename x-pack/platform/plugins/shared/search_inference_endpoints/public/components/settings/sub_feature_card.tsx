@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
@@ -53,6 +54,9 @@ interface SubFeatureCardProps {
   effectiveRecommendedEndpoints: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+  globalDefaultId: string;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -62,6 +66,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   effectiveRecommendedEndpoints,
   onEndpointsChange,
   invalidEndpointIds,
+  globalDefaultId,
+  hasSavedObject,
+  isFeatureDirty,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -113,6 +120,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const hiddenCount = endpointIds.length - COLLAPSED_COUNT;
   const canAddMore =
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
+
+  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
+  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+    endpointDisplayMap.get(globalDefaultId) ?? {};
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -256,14 +267,34 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
 
             {useRecommendedDefaults ? (
               <RecommendedEndpointsList
+                featureId={featureId}
                 endpointIds={endpointIds}
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
+                globalDefaultRow={
+                  showGlobalDefaultRow
+                    ? {
+                        globalDefaultId,
+                        icon: globalDefaultIcon,
+                        label: globalDefaultLabel,
+                        showBadge: !isFeatureDirty,
+                      }
+                    : undefined
+                }
               />
             ) : (
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
                   <EuiSplitPanel.Outer hasBorder>
+                    {showGlobalDefaultRow && (
+                      <GlobalDefaultLockedRow
+                        featureId={featureId}
+                        globalDefaultId={globalDefaultId}
+                        icon={globalDefaultIcon}
+                        label={globalDefaultLabel}
+                        showBadge={!isFeatureDirty}
+                      />
+                    )}
                     <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
                       {visibleEndpoints.map((endpointId, index) => (
                         <EuiDraggable
@@ -343,7 +374,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         </EuiText>
                                       </EuiToolTip>
                                     </EuiFlexItem>
-                                    {index === 0 && (
+                                    {index === 0 && !showGlobalDefaultRow && (
                                       <EuiFlexItem grow={false}>
                                         <EuiBadge color="hollow">
                                           {i18n.translate(
@@ -418,6 +449,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   {(!hasOverflow || isExpanded) && hasOtherSubFeatures && (
                     <EuiFlexItem grow={false}>
                       <EuiPopover
+                        aria-label={i18n.translate(
+                          'xpack.searchInferenceEndpoints.settings.subFeatureOverflow.popoverAriaLabel',
+                          { defaultMessage: 'More actions' }
+                        )}
                         button={
                           <EuiButtonIcon
                             iconType="boxesVertical"
@@ -492,19 +527,103 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   );
 };
 
+interface GlobalDefaultLockedRowProps {
+  featureId: string;
+  globalDefaultId: string;
+  icon: string;
+  label: string;
+  showBadge: boolean;
+}
+
+const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
+  featureId,
+  globalDefaultId,
+  icon,
+  label,
+  showBadge,
+}) => (
+  <>
+    <EuiSplitPanel.Inner
+      paddingSize="s"
+      color="subdued"
+      data-test-subj={`global-default-row-${featureId}`}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiPanel color="transparent" paddingSize="none">
+            <EuiIcon type="lock" size="s" color="subdued" aria-hidden />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} size="m" aria-hidden />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EuiToolTip title={label} content={globalDefaultId} position="top">
+            <EuiText
+              size="s"
+              color="subdued"
+              tabIndex={0}
+              css={css`
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              `}
+            >
+              <span>{label}</span>
+            </EuiText>
+          </EuiToolTip>
+        </EuiFlexItem>
+        {showBadge && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj={`global-default-badge-${featureId}`}>
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.globalDefaultBadge', {
+                defaultMessage: 'Global default',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiSplitPanel.Inner>
+    <EuiHorizontalRule margin="none" />
+  </>
+);
+
 interface RecommendedEndpointsListProps {
+  featureId: string;
   endpointIds: string[];
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
+  globalDefaultRow?: {
+    globalDefaultId: string;
+    icon: string;
+    label: string;
+    showBadge: boolean;
+  };
 }
 
 const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
+  featureId,
   endpointIds,
   endpointDisplayMap,
   invalidEndpointIds,
+  globalDefaultRow,
 }) => {
   return (
     <EuiSplitPanel.Outer hasBorder>
+      {globalDefaultRow && (
+        <GlobalDefaultLockedRow
+          featureId={featureId}
+          globalDefaultId={globalDefaultRow.globalDefaultId}
+          icon={globalDefaultRow.icon}
+          label={globalDefaultRow.label}
+          showBadge={globalDefaultRow.showBadge}
+        />
+      )}
       {endpointIds.map((endpointId, index) => {
         const { icon = 'compute', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);

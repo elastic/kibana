@@ -73,6 +73,8 @@ const defaultFormState = {
     },
   ],
   invalidEndpointIds: new Set<string>(),
+  hasSavedObject: {} as Record<string, boolean>,
+  dirtyFeatureIds: new Set<string>() as ReadonlySet<string>,
   updateEndpoints: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
 };
