@@ -63,6 +63,7 @@ export function QueryStreamFlyout({
   disableSubmitWhenLoading = false,
 }: QueryStreamFlyoutProps) {
   const { core, dependencies } = useKibana();
+  const { uiSettings } = core;
   const { data } = dependencies.start;
 
   const { timeState } = useTimefilter();
@@ -110,11 +111,12 @@ export function QueryStreamFlyout({
         start: timeStateRef.current.start,
         end: timeStateRef.current.end,
         dropNullColumns: true,
+        uiSettings,
       });
 
       return esqlResultToPlainObjects(results) as SampleDocument[];
     },
-    [data.search.search]
+    [data.search.search, uiSettings]
   );
 
   useEffect(() => {

@@ -159,9 +159,8 @@ export function useMonitorListColumns({
       render: (locations: ServiceLocations, monitor: EncryptedSyntheticsSavedMonitor) =>
         locations ? (
           <MonitorLocations
-            monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
+            configId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            overviewStatus={overviewStatus}
             spaces={monitor.spaces}
           />
         ) : null,

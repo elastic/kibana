@@ -1538,12 +1538,12 @@
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
+            "plugin": "@kbn/ml-common-types",
+            "path": "x-pack/platform/packages/shared/ml/common-types/modules.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
+            "plugin": "@kbn/ml-common-types",
+            "path": "x-pack/platform/packages/shared/ml/common-types/modules.ts"
           }
         ],
         "initialIsOpen": false
