@@ -25,7 +25,7 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6738
-  controls: 4489
+  controls: 4478
   core: 320
   cps: 5080
   crossClusterReplication: 7691
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   elasticAssistant: 137486
   elasticAssistantSharedState: 3369
   elasticConsole: 850
-  embeddable: 760
+  embeddable: 895
   embeddableAlertsTable: 1263
   enterpriseSearch: 28392
   entityStore: 1216
@@ -132,7 +132,6 @@ pageLoadAssetSize:
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  presentationPanel: 442
   presentationUtil: 771
   productDocBase: 3614
   productIntercept: 4738
@@ -174,7 +173,7 @@ pageLoadAssetSize:
   share: 440
   shared-core: 315647
   shared-misc: 77817
-  shared-packages: 3079892
+  shared-packages: 3079800
   shared-plugins: 10954901
   shared-solution-packages: 184340
   slo: 19696
