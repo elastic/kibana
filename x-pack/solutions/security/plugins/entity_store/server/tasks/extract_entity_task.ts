@@ -19,6 +19,11 @@ import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { wrapTaskRun } from '../telemetry/traces';
+import {
+  coerceTaskState,
+  toTaskManagerState,
+  type ExtractEntityTaskState,
+} from './extract_entity_task_state';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -43,16 +48,13 @@ async function runTask({
 }): Promise<RunResult> {
   logger.info(`Running extract entity task`);
 
-  const currentState = taskInstance.state;
-  const runs = currentState.runs || 0;
-  const namespace = currentState.namespace;
+  const currentState = coerceTaskState(taskInstance.state);
+  const { runs, namespace } = currentState;
 
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);
     return {
-      state: {
-        ...currentState,
-      },
+      state: toTaskManagerState({ ...currentState } satisfies ExtractEntityTaskState),
     };
   }
 
@@ -80,28 +82,34 @@ async function runTask({
       );
     }
 
-    const updatedState = {
+    const updatedState: ExtractEntityTaskState = {
       namespace,
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
       lastExtractionSuccess: extractionResult.success,
       status: 'success',
+      // KI definition states are preserved across runs; the loop in a
+      // follow-up PR will read and write into this map. Pre-loop runs
+      // simply pass through whatever was already persisted (typically
+      // undefined for non-generic types and for legacy state).
+      kiDefinitionStates: currentState.kiDefinitionStates,
     };
 
     return {
-      state: updatedState,
+      state: toTaskManagerState(updatedState),
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
+    const errorState: ExtractEntityTaskState = {
+      ...currentState,
+      lastError: e.message,
+      lastErrorTimestamp: new Date().toISOString(),
+      status: 'error',
+      entityType,
+    };
     return {
-      state: {
-        ...currentState,
-        lastError: e.message,
-        lastErrorTimestamp: new Date().toISOString(),
-        status: 'error',
-        entityType,
-      },
+      state: toTaskManagerState(errorState),
     };
   }
 }
