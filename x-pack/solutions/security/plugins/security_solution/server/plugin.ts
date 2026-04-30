@@ -131,6 +131,7 @@ import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generati
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
+import { registerRiskScoreRunNowRoute } from './lib/entity_analytics/risk_score/routes/run_now';
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
@@ -656,6 +657,22 @@ export class Plugin implements ISecuritySolutionPlugin {
       trialCompanionDeps,
       enableDataGeneratorRoutes
     );
+
+    if (experimentalFeatures.riskScoringSyncRunRouteEnabled) {
+      registerRiskScoreRunNowRoute({
+        router,
+        logger,
+        maintainerDeps: {
+          getStartServices: core.getStartServices,
+          kibanaVersion: pluginContext.env.packageInfo.version,
+          logger: this.logger,
+          auditLogger: plugins.security?.audit.withoutRequest,
+          productFeaturesService,
+          entityAnalyticsConfig: config.entityAnalytics,
+          telemetry: core.analytics,
+        },
+      });
+    }
 
     registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(

@@ -15,6 +15,7 @@ import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entit
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 import { dataViewRouteHelpersFactory } from './data_view';
+import { entityMaintainerRouteHelpersFactory } from './entity_maintainers';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
@@ -290,7 +291,8 @@ export const EntityStoreUtils = (
       dataViewPattern = 'logs-*',
       waitForEntities = true,
       entityTypes = ['user', 'host'],
-      maintainerAutoStart = false,
+      stopMaintainerAfterInstall = true,
+      maintainerAutoStart: _ignoredAutoStart,
       ...installBody
     } = body;
     const installRequestBody = { ...installBody, entityTypes };
@@ -340,19 +342,41 @@ export const EntityStoreUtils = (
       await waitForEntityStoreEntities({ es, log, count: 1, namespace });
     }
 
-    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init';
-    if (namespace !== 'default') {
-      maintainersUrl = `/s/${namespace}${maintainersUrl}`;
+    // Install schedules the risk-score maintainer with enabled: true.
+    // Stop it and wait for any in-flight run to settle so tests can set up
+    // preconditions before triggering scoring via the sync run_now route.
+    // The run_now route calls ensureRiskScoreSetup before scoring, so the
+    // data stream and other resources are created on first use even if
+    // we stop the maintainer before its first Task Manager execution.
+    // Tests that need the maintainer running (e.g. async lifecycle tests)
+    // pass stopMaintainerAfterInstall: false to skip this block.
+    if (stopMaintainerAfterInstall) {
+      const maintainerRoutes = entityMaintainerRouteHelpersFactory(
+        supertest,
+        namespace !== 'default' ? namespace : undefined
+      );
+      try {
+        await maintainerRoutes.stopMaintainer('risk-score');
+      } catch (e) {
+        log.debug(`stopMaintainer after install failed (may not be registered yet): ${e.message}`);
+      }
+      let lastSeenRuns = -1;
+      await retry.waitForWithTimeout(
+        'risk-score maintainer to settle after install',
+        30_000,
+        async () => {
+          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
+          const maintainer = response.body.maintainers.find(
+            (m: { id: string; runs: number }) => m.id === 'risk-score'
+          );
+          const runs = maintainer?.runs ?? 0;
+          if (runs === lastSeenRuns) return true;
+          lastSeenRuns = runs;
+          return false;
+        }
+      );
     }
 
-    const maintainersRes = await supertest
-      .post(maintainersUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
-      .send({ autoStart: maintainerAutoStart });
-
-    expect([200, 201]).to.contain(maintainersRes.status);
     return res;
   };
 

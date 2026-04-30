@@ -60,6 +60,9 @@ export default ({ getService }: FtrProviderContext): void => {
       stopMaintainer: async () => {
         throw new Error('Preview API tests do not use maintainer route stopMaintainer');
       },
+      runRiskScoreNow: async () => {
+        throw new Error('Preview API tests do not use maintainer route runRiskScoreNow');
+      },
     },
   });
   const setEntityStoreV2Setting = async (enabled: boolean) => {

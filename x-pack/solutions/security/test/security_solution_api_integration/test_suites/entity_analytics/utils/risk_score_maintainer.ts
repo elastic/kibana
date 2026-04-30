@@ -37,14 +37,18 @@ interface RetryServiceLike {
 
 type MaintainerRoutesLike = Pick<
   ReturnType<typeof entityMaintainerRouteHelpersFactory>,
-  'getMaintainers' | 'runMaintainer' | 'runMaintainerSync' | 'startMaintainer' | 'stopMaintainer'
+  | 'getMaintainers'
+  | 'runMaintainer'
+  | 'runMaintainerSync'
+  | 'runRiskScoreNow'
+  | 'startMaintainer'
+  | 'stopMaintainer'
 >;
 
 interface EntityStoreUtilsLike {
   installEntityStoreV2: (body?: {
     entityTypes: string[];
     dataViewPattern?: string;
-    maintainerAutoStart?: boolean;
   }) => Promise<unknown>;
   forceUpdateEntityViaCrud: (params: {
     entityType: EntityType;
@@ -359,15 +363,15 @@ export const riskScoreMaintainerScenarioFactory = ({
     minRuns?: number;
     timeoutMs?: number;
   } = {}) => {
+    // installEntityStoreV2 stops the maintainer and waits for it to settle
+    // after install so tests start from a clean slate.
     await entityStoreUtils.installEntityStoreV2({
       entityTypes,
       dataViewPattern,
-      maintainerAutoStart: false,
     });
-    await routes.stopMaintainer('risk-score');
 
     if (runMode === 'sync') {
-      await routes.runMaintainerSync('risk-score');
+      await routes.runRiskScoreNow();
       return;
     }
 

@@ -44,8 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
   const entityStoreIndex = getEntitiesAlias(ENTITY_LATEST, 'default');
 
-  // Failing: See https://github.com/elastic/kibana/issues/265177
-  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
+  describe('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
     this.tags(['esGate']);
 
     context('with test log data', () => {
@@ -276,7 +275,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
         await refreshResolutionLookup();
 
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.runRiskScoreNow();
 
         const resolutionScore = await waitForResolutionScore({
           entityId: targetUser.expectedEuid,
@@ -331,7 +330,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreEntities({ es, log, count: 1 });
 
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.runRiskScoreNow();
 
         const baseScore = await waitForBaseScore({
           entityId: user.expectedEuid,
@@ -375,7 +374,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForResolutionRelationship(silentAlias.expectedEuid, targetUser.expectedEuid);
         await refreshResolutionLookup();
 
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.runRiskScoreNow();
 
         const resolutionScore = await waitForResolutionScore({
           entityId: targetUser.expectedEuid,
@@ -414,7 +413,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
         await refreshResolutionLookup();
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.runRiskScoreNow();
 
         const linkedResolutionScore = await waitForResolutionScore({
           entityId: targetUser.expectedEuid,
@@ -439,7 +438,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         await refreshResolutionLookup();
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.runRiskScoreNow();
 
         let postUnlinkRunId: string | undefined;
         await retry.waitForWithTimeout(
@@ -582,7 +581,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await waitForResolutionRelationship(silentAlias.expectedEuid, targetUser.expectedEuid);
 
           await refreshResolutionLookup();
-          await maintainerRoutes.runMaintainerSync('risk-score');
+          await maintainerRoutes.runRiskScoreNow();
 
           const resolutionScore = await waitForResolutionScore({
             entityId: targetUser.expectedEuid,

@@ -234,6 +234,12 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: false,
 
   /**
+   * Enables a security_solution-internal sync route for running the risk score
+   * maintainer directly, bypassing Task Manager. Test/debug only.
+   */
+  riskScoringSyncRunRouteEnabled: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */

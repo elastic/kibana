@@ -40,7 +40,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/264305
+  // Task lifecycle tests depend on Task Manager scheduling which is inherently
+  // non-deterministic. The sync run_now route cannot help here because this
+  // test specifically validates the start/stop/restart Task Manager flow.
   describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
     this.tags(['esGate']);
 

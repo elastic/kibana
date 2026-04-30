@@ -139,6 +139,22 @@ export const entityMaintainerRouteHelpersFactory = (
       const maintainers: EntityMaintainerResponse[] = response.body.maintainers ?? [];
       return maintainers.find((m) => m.id === 'risk-score') ?? null;
     },
+
+    runRiskScoreNow: async (expectStatusCode: number = 200) => {
+      let url = '/internal/risk_score/run_now';
+      if (namespace) {
+        url = `/s/${namespace}${url}`;
+      }
+      const response = await supertest
+        .post(url)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana')
+        .timeout(10 * 60 * 1000)
+        .send()
+        .expect(expectStatusCode);
+      return response;
+    },
   };
 };
 

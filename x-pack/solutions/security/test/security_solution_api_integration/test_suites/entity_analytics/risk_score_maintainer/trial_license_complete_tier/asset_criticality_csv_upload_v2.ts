@@ -75,8 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/265098
-  describe.skip('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
+  describe('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
 
