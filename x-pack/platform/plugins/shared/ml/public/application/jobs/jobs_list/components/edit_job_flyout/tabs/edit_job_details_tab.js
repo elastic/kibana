@@ -33,7 +33,7 @@ export class EditJobDetailsTabUI extends Component {
       groups: [],
       selectedGroups: [],
       mml: '',
-      mmlEstimation: '',
+      mmlEstimation: undefined,
       mmlValidationError: '',
       groupsValidationError: '',
       modelSnapshotRetentionDays: 1,
@@ -275,7 +275,6 @@ export class EditJobDetailsTabUI extends Component {
               onChange={this.onMmlChange}
               isInvalid={mmlValidationError !== ''}
               error={mmlValidationError}
-              placeholder={mml === '' ? mmlEstimation : undefined}
               disabled={datafeedRunning || !jobClosed}
             />
           </EuiFormRow>
