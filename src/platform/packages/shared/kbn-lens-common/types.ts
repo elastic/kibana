@@ -94,7 +94,7 @@ import type {
 } from './visualizations/types';
 import type { DatasourceStates, GeneralDatasourceState } from './datasources/types';
 import type { LENS_ITEM_LATEST_VERSION } from './content_management/constants';
-import { HasLibraryTransforms } from '@kbn/presentation-publishing';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 
 export interface LensInspector {
   getInspectorAdapters: () => Adapters;
