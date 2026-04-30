@@ -1232,9 +1232,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       isLoading ||
       (output && !hasChanged) ||
       (isLogstash && !hasEncryptedSavedObjectConfigured) ||
-     (!isKafka && (sslCertificateAuthoritiesInput.props.isInvalid ||
-  sslCertificateInput.props.isInvalid || sslKeyInput.props.isInvalid)) ||
-  (isKafka && (kafkaSslCertificateAuthoritiesInput.props.isInvalid ||
-  kafkaSslCertificateInput.props.isInvalid || kafkaSslKeyInput.props.isInvalid)),
+      (!isKafka &&
+        (sslCertificateAuthoritiesInput.props.isInvalid ||
+          sslCertificateInput.props.isInvalid ||
+          sslKeyInput.props.isInvalid)) ||
+      (isKafka &&
+        (kafkaSslCertificateAuthoritiesInput.props.isInvalid ||
+          kafkaSslCertificateInput.props.isInvalid ||
+          kafkaSslKeyInput.props.isInvalid)),
   };
 }
