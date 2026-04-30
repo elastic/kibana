@@ -10,7 +10,7 @@
 /**
  * Resolve-aware verifier for "is this file imported anywhere?"
  *
- * Walks every .ts/.tsx in the repo, finds:
+ * Walks every .ts/.tsx/.js/.jsx in the repo, finds:
  *   - static imports:    import x from '<spec>'
  *   - dynamic imports:   import('<spec>')
  *   - require:           require('<spec>')
@@ -18,7 +18,7 @@
  *   - package-id deep:   import x from '@kbn/<pkg>/<sub>'
  *
  * Resolves each spec Node-style relative to the importing file:
- *   <base>.ts | <base>.tsx | <base>/index.ts | <base>/index.tsx
+ *   <base>{.ts,.tsx,.js,.jsx} | <base>/index{.ts,.tsx,.js,.jsx}
  *
  * Reports any importer whose resolution matches the candidate file.
  *
@@ -52,9 +52,9 @@ if (!existsSync(candidate)) {
   console.error(`note: candidate ${candidate} does not exist on disk; verifying as path string.`);
 }
 
-// Build the set of all .ts/.tsx files in the repo (excluding node_modules, target, build, and dotfiles)
+// Build the set of all .ts/.tsx/.js/.jsx files in the repo (excluding node_modules, target, build, and dotfiles)
 const allFiles = execSync(
-  `git -C "${REPO_ROOT}" ls-files '*.ts' '*.tsx'`,
+  `git -C "${REPO_ROOT}" ls-files '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs'`,
   { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 }
 )
   .split('\n')
@@ -109,7 +109,7 @@ function resolveSpec(spec, fromFile) {
   } else {
     return null; // bare specifier into node_modules — out of scope
   }
-  for (const ext of ['', '.ts', '.tsx', '/index.ts', '/index.tsx']) {
+  for (const ext of ['', '.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx', '/index.js', '/index.jsx']) {
     const p = base + ext;
     if (!existsSync(p)) continue;
     // The empty-extension branch must only match files; otherwise a bare

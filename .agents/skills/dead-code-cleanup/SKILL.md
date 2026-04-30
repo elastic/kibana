@@ -99,14 +99,14 @@ For each package, the right `entry:` set is:
   the wrong choice makes the real entry look unused.
 - Test/story/mock entries (so the things they reference don't appear as unused):
   ```
-  **/*.test.{ts,tsx}
-  **/*.stories.{ts,tsx}
-  **/__mocks__/**/*.{ts,tsx}
-  **/__storybook_mocks__/**/*.{ts,tsx}
-  **/*.mock.{ts,tsx}
+  **/*.test.{ts,tsx,js,jsx}
+  **/*.stories.{ts,tsx,js,jsx}
+  **/__mocks__/**/*.{ts,tsx,js,jsx}
+  **/__storybook_mocks__/**/*.{ts,tsx,js,jsx}
+  **/*.mock.{ts,tsx,js,jsx}
   **/tsd_tests/test_d/**/*.ts
   ```
-- `**/__jest__/**/*.{ts,tsx}` if the package has a `__jest__/` directory (some plugins
+- `**/__jest__/**/*.{ts,tsx,js,jsx}` if the package has a `__jest__/` directory (some plugins
   put integration tests there, outside the standard `server/public/common/src` glob).
 
 ### Verify a candidate
