@@ -36,12 +36,9 @@ export class BasePath implements IBasePath {
     this.assetsHrefBase = assetsHrefBase ?? this.serverBasePath;
     this.publicBaseUrl = publicBaseUrl;
 
-    const resolvedServerBasePath = this.serverBasePath;
     const namespacedPath =
-      resolvedServerBasePath &&
-      resolvedServerBasePath !== '/' &&
-      basePath.startsWith(resolvedServerBasePath)
-        ? basePath.slice(resolvedServerBasePath.length)
+      serverBasePath && serverBasePath !== '/' && basePath.startsWith(serverBasePath)
+        ? basePath.slice(serverBasePath.length)
         : basePath;
     const match = namespacedPath.match(spaceContextRegex);
     this.spaceId = match?.[1] ?? DEFAULT_SPACE_ID;

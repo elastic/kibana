@@ -76,6 +76,28 @@ describe('BasePath', () => {
     });
   });
 
+  describe('spaceId', () => {
+    it('extracts the spaceId from basePath when no serverBasePath is provided', () => {
+      expect(new BasePath({ basePath: '/s/myspace' }).spaceId).toEqual('myspace');
+    });
+
+    it('extracts the spaceId from basePath after stripping serverBasePath', () => {
+      expect(
+        new BasePath({ basePath: '/kibana/s/myspace', serverBasePath: '/kibana' }).spaceId
+      ).toEqual('myspace');
+    });
+
+    it('defaults to "default" when basePath has no space prefix', () => {
+      expect(new BasePath({ basePath: '/kibana', serverBasePath: '/kibana' }).spaceId).toEqual(
+        'default'
+      );
+    });
+
+    it('defaults to "default" when basePath is empty', () => {
+      expect(new BasePath({ basePath: '' }).spaceId).toEqual('default');
+    });
+  });
+
   describe('serverBasePath', () => {
     it('defaults to basePath', () => {
       expect(new BasePath({ basePath: '/foo/bar' }).serverBasePath).toEqual('/foo/bar');
