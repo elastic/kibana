@@ -11,23 +11,12 @@ import type { DashboardSanitizeResponseBody, DashboardState } from '../../server
 import { DASHBOARD_INTERNAL_API_PATH } from '../../common/constants';
 import { coreServices } from '../services/kibana_services';
 
-const DEFAULT_DASHBOARD_TITLE = 'New dashboard';
-
 export async function sanitizeDashboard(dashboardState: DashboardState) {
-  const normalizedTitle = dashboardState.title.trim();
-  const dashboardStateWithTitle: DashboardState =
-    normalizedTitle.length > 0
-      ? dashboardState
-      : {
-          ...dashboardState,
-          title: DEFAULT_DASHBOARD_TITLE,
-        };
-
   const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
     `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     {
       version: '1',
-      body: JSON.stringify(dashboardStateWithTitle),
+      body: JSON.stringify(dashboardState),
     }
   );
 
