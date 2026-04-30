@@ -93,7 +93,7 @@ export default function (providerContext: FtrProviderContext) {
           id: PARENT_PKG,
         });
         expect(pkgSO.attributes.previous_dependency_versions).to.eql([
-          { name: DEP_PKG, previousVersion: null },
+          { name: DEP_PKG, previous_version: null },
         ]);
 
         await rollbackPackage(PARENT_PKG);
@@ -126,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
           id: PARENT_PKG,
         });
         expect(pkgSO.attributes.previous_dependency_versions).to.eql([
-          { name: DEP_PKG, previousVersion: '1.0.0' },
+          { name: DEP_PKG, previous_version: '1.0.0' },
         ]);
 
         await rollbackPackage(PARENT_PKG);
