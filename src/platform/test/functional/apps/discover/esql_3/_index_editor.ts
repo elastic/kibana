@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const es = getService('es');
   const retry = getService('retry');
-  const browser = getService('browser');
   const dataGrid = getService('dataGrid');
 
   const { indexEditor, common, discover } = getPageObjects([
