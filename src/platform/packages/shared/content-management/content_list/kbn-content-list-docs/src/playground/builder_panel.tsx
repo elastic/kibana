@@ -322,12 +322,19 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
         </JsxPropBlock>
       </JsxTag>
 
-      {/* ── Toolbar (child of Provider) ──────────────────────────── */}
+      {/* ── ContentList shell (child of Provider) ────────────────── */}
+      <JsxTag name="ContentList" indent={1}>
+        <JsxPropBlock name="emptyState">
+          <JsxTag name="ContentListEmptyState" selfClosing />
+        </JsxPropBlock>
+      </JsxTag>
+
+      {/* ── Toolbar (child of ContentList) ───────────────────────── */}
       {toolbar.filters.length === 0 ? (
-        <JsxTag name="ContentListToolbar" selfClosing indent={1} />
+        <JsxTag name="ContentListToolbar" selfClosing indent={2} />
       ) : (
         <>
-          <JsxTag name="ContentListToolbar" indent={1} />
+          <JsxTag name="ContentListToolbar" indent={2} />
 
           <div css={nestedContentCss}>
             <JsxTag name="Filters" indent={0} />
@@ -361,18 +368,18 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
             <JsxTag name="Filters" closing indent={0} />
           </div>
 
-          <JsxTag name="ContentListToolbar" closing indent={1} />
+          <JsxTag name="ContentListToolbar" closing indent={2} />
         </>
       )}
 
-      {/* ── Table (child of Provider) ────────────────────────────── */}
+      {/* ── Table (child of ContentList) ─────────────────────────── */}
       {table.columns.length === 0 ? (
         <EuiToolTip content="No explicit columns — default columns are displayed.">
-          <JsxTag name="ContentListTable" selfClosing indent={1} />
+          <JsxTag name="ContentListTable" selfClosing indent={2} />
         </EuiToolTip>
       ) : (
         <>
-          <JsxTag name="ContentListTable" indent={1} />
+          <JsxTag name="ContentListTable" indent={2} />
 
           <div css={nestedContentCss}>
             <EuiDroppable droppableId="columns" type="COLUMN" spacing="s">
@@ -412,12 +419,14 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
             </EuiDroppable>
           </div>
 
-          <JsxTag name="ContentListTable" closing indent={1} />
+          <JsxTag name="ContentListTable" closing indent={2} />
         </>
       )}
 
-      {/* ── Footer (child of Provider) ───────────────────────────── */}
-      <JsxTag name="ContentListFooter" selfClosing indent={1} />
+      {/* ── Footer (child of ContentList) ────────────────────────── */}
+      <JsxTag name="ContentListFooter" selfClosing indent={2} />
+
+      <JsxTag name="ContentList" closing indent={1} />
       <JsxTag name="ContentListProvider" closing indent={0} />
     </div>
   );
