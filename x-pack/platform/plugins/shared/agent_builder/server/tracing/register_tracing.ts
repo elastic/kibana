@@ -11,7 +11,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { LateBindingSpanProcessor } from '@kbn/tracing';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { ElasticsearchOtlpExporter } from '@kbn/inference-tracing';
+import { ElasticsearchOtlpExporter } from '@kbn/tracing';
 import { LRUCache } from 'lru-cache';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
@@ -23,6 +23,7 @@ const createCachedIsEnabled = (core: CoreStart, logger: Logger): (() => boolean)
     max: 1,
     ttl: SETTING_CACHE_TTL_MS,
     allowStale: true,
+    noDeleteOnStaleGet: true,
     noDeleteOnFetchRejection: true,
     fetchMethod: async () => {
       const internalRepo = core.savedObjects.createInternalRepository();
@@ -33,11 +34,18 @@ const createCachedIsEnabled = (core: CoreStart, logger: Logger): (() => boolean)
     },
   });
 
+  // Eagerly populate the cache so the first synchronous isEnabled() call has a value
   cache.fetch('enabled').catch((error) => {
     logger.error(`Failed to fetch tracing settings: ${error.message}`);
   });
 
-  return () => cache.get('enabled') ?? false;
+  return () => {
+    // Stale-while-revalidate: trigger a background refresh when the entry is past TTL.
+    void cache.fetch('enabled').catch((error) => {
+      logger.error(`Failed to refresh tracing settings: ${error.message}`);
+    });
+    return cache.get('enabled') ?? false;
+  };
 };
 
 export const registerTracingExporter = ({

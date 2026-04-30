@@ -90,7 +90,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
     "@kbn/management-settings-ids",
-    "@kbn/agent-context-layer-plugin",
     "@kbn/std",
     "@kbn/use-observable",
     "@kbn/cloud-plugin",

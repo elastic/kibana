@@ -183,6 +183,5 @@
     "@kbn/product-doc-common",
     "@kbn/lens-common",
     "@kbn/alerting-v2-episodes-ui",
-    "@kbn/agent-context-layer-plugin"
   ]
 }

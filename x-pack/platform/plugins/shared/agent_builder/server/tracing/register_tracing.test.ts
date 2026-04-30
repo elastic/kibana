@@ -6,7 +6,7 @@
  */
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { ElasticsearchOtlpExporter } from '@kbn/inference-tracing';
+import { ElasticsearchOtlpExporter } from '@kbn/tracing';
 import { LateBindingSpanProcessor } from '@kbn/tracing';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -25,11 +25,15 @@ jest.mock('@kbn/core/server', () => {
 jest.mock('lru-cache', () => ({
   LRUCache: jest.fn().mockImplementation((options: { fetchMethod: () => Promise<boolean> }) => {
     let stored: boolean | undefined;
-    const pendingLoad = Promise.resolve().then(async () => {
-      stored = await options.fetchMethod();
-    });
+
+    const refresh = () =>
+      options.fetchMethod().then((v) => {
+        stored = v;
+        return v;
+      });
+
     return {
-      fetch: jest.fn(() => pendingLoad),
+      fetch: jest.fn(() => refresh()),
       get: jest.fn(() => stored),
     };
   }),
@@ -39,14 +43,11 @@ jest.mock('@kbn/tracing', () => ({
   LateBindingSpanProcessor: {
     register: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
   },
+  ElasticsearchOtlpExporter: jest.fn(),
 }));
 
 jest.mock('@opentelemetry/exporter-trace-otlp-proto', () => ({
   OTLPTraceExporter: jest.fn(),
-}));
-
-jest.mock('@kbn/inference-tracing', () => ({
-  ElasticsearchOtlpExporter: jest.fn(),
 }));
 
 jest.mock('./agent_builder_span_processor', () => ({
@@ -63,11 +64,13 @@ const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as jest.MockedClas
   typeof AgentBuilderSpanProcessor
 >;
 
+const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
+
 describe('registerTracingExporter', () => {
   const logger = loggerMock.create();
 
   afterEach(async () => {
-    await new Promise<void>((resolve) => setImmediate(resolve));
+    await flushPromises();
   });
 
   function createCore() {
@@ -175,8 +178,55 @@ describe('registerTracingExporter', () => {
     const { isEnabled } = ctorOpts;
     expect(isEnabled!()).toBe(false);
 
-    await new Promise<void>((resolve) => setImmediate(resolve));
+    await flushPromises();
 
     expect(isEnabled!()).toBe(true);
+  });
+
+  it('refreshes the cache value when setting changes', async () => {
+    const coreStart = createCore();
+    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
+    scopedUiSettings.get.mockResolvedValue(true);
+
+    const tracingConfig: TracingConfig = {
+      enabled: true,
+      scheduledDelay: 100,
+    };
+
+    registerTracingExporter({ core: coreStart, tracingConfig, logger });
+    await flushPromises();
+
+    const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    expect(isEnabled!()).toBe(true);
+
+    scopedUiSettings.get.mockResolvedValue(false);
+    isEnabled!();
+    await flushPromises();
+
+    expect(isEnabled!()).toBe(false);
+  });
+
+  it('logs error when fetch rejects', async () => {
+    const coreStart = createCore();
+    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
+    scopedUiSettings.get.mockResolvedValue(true);
+
+    const tracingConfig: TracingConfig = {
+      enabled: true,
+      scheduledDelay: 100,
+    };
+
+    registerTracingExporter({ core: coreStart, tracingConfig, logger });
+    await flushPromises();
+
+    scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
+
+    const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    isEnabled!();
+    await flushPromises();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to refresh tracing settings')
+    );
   });
 });

@@ -39,7 +39,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     this.isEnabled = opts.isEnabled ?? (() => true);
   }
 
-  onStart(span: tracing.Span, parentContext: api.Context): void {
+  async onStart(span: tracing.Span, parentContext: api.Context): Promise<void> {
     if (!this.isEnabled()) {
       return;
     }

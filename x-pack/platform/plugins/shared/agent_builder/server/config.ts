@@ -11,8 +11,8 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 const scheduledDelay = schema.conditional(
   schema.contextRef('dev'),
   true,
-  schema.number({ defaultValue: 1000 }),
-  schema.number({ defaultValue: 5000 })
+  schema.number({ defaultValue: 1000, min: 50 }),
+  schema.number({ defaultValue: 5000, min: 50 })
 );
 
 export const configSchema = schema.object({

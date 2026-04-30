@@ -34,7 +34,6 @@
     "@kbn/connector-specs",
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
-    "@kbn/agent-context-layer-plugin",
     "@kbn/actions-plugin"
   ]
 }

@@ -16,6 +16,5 @@ export {
 } from './src/baggage';
 
 export { isInferenceSpan } from './src/is_inference_span';
-export { ElasticsearchOtlpExporter } from './src/elasticsearch_otlp_exporter';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';
