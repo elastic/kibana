@@ -137,6 +137,7 @@ describe('applyConfigOverrides', () => {
         password: 'changeme',
       },
       plugins: { paths: [] },
+      server: { basePath: '/kbn' },
       xpack: {
         cloud: {
           id: 'ftr_fake_cloud_id',
@@ -161,6 +162,16 @@ describe('applyConfigOverrides', () => {
         },
       },
     });
+  });
+
+  it('omits the fixed base path in stateful dev mode when `--no-base-path` is passed', () => {
+    const config = applyConfigOverrides({}, { dev: true, basePath: false }, {}, {});
+    expect(config.server).toBeUndefined();
+  });
+
+  it('keeps a user-provided server.basePath in stateful dev mode', () => {
+    const config = applyConfigOverrides({ server: { basePath: '/custom' } }, { dev: true }, {}, {});
+    expect(config.server).toEqual({ basePath: '/custom' });
   });
 
   it('omits UIAM config if `--no-uiam` flag is passed in serverless dev mode', () => {

@@ -127,7 +127,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
         extraCliOptions
       );
     } else {
-      tryConfigureStatefulSamlProvider(rawConfig, extraCliOptions);
+      tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -304,8 +304,6 @@ export default function (program) {
     );
 
     const isServerlessSamlSupported = isServerlessMode && opts.ssl !== false;
-    const isStatefulSamlSupported = !isServerlessMode && !!opts.dev && MOCK_IDP_PLUGIN_SUPPORTED;
-    const isSamlSupported = isServerlessSamlSupported || isStatefulSamlSupported;
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -318,9 +316,11 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      // We also want to run without base path when SAML Mock IdP is configured so that Elasticsearch can
-      // connect to Kibana's mock identity provider.
-      basePath: opts.runExamples || isSamlSupported ? false : !!opts.basePath,
+      // For Serverless SAML Mock IdP we also disable the base path because Serverless does not
+      // support a custom `server.basePath`. The stateful SAML Mock IdP path keeps the base path
+      // proxy enabled and pins it to a fixed value via `server.basePath` (see
+      // `tryConfigureStatefulSamlProvider`), so SP/ACS endpoints stay aligned with Kibana's URL.
+      basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
@@ -544,10 +544,11 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
 /**
  * Tries to configure SAML provider in stateful (traditional) mode and applies the necessary configuration.
  * @param rawConfig Full configuration object.
+ * @param opts CLI options.
  * @param extraCliOptions Extra CLI options.
  * @returns {boolean} True if SAML provider was successfully configured.
  */
-function tryConfigureStatefulSamlProvider(rawConfig, extraCliOptions) {
+function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   if (!MOCK_IDP_PLUGIN_SUPPORTED) {
     return false;
   }
@@ -562,6 +563,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, extraCliOptions) {
 
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
+    MOCK_IDP_KIBANA_BASE_PATH,
     MOCK_IDP_REALM_NAME,
     MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
@@ -613,6 +615,13 @@ function tryConfigureStatefulSamlProvider(rawConfig, extraCliOptions) {
 
   if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
     lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+  }
+
+  // Pin Kibana to a fixed base path so SP/ACS endpoints in Elasticsearch's SAML realm stay aligned
+  // with Kibana's URL across restarts (the dev proxy otherwise generates a random one each run).
+  // Skipped when the user passed `--no-base-path` or already configured a custom value.
+  if (opts.basePath !== false && !_.has(rawConfig, 'server.basePath')) {
+    lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
   }
 
   return true;

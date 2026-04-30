@@ -15,6 +15,7 @@ import { tmpdir } from 'os';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import {
+  MOCK_IDP_KIBANA_BASE_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_ATTRIBUTE_PRINCIPAL,
@@ -30,7 +31,8 @@ import { parseTimeoutToMs } from '../utils';
 import { createCliError } from '../errors';
 import type { Command } from './types';
 
-const DEFAULT_KIBANA_URL = 'http://localhost:5601';
+// Matches the fixed base path applied to stateful Kibana when running with the SAML Mock IdP.
+const DEFAULT_KIBANA_URL = `http://localhost:5601${MOCK_IDP_KIBANA_BASE_PATH}`;
 
 export const snapshot: Command = {
   description: 'Downloads and run from a nightly snapshot',
