@@ -7,18 +7,11 @@
 
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
 import {
-  buildCompositeSloSummaryDocId,
   fetchCompositeSloSummariesFromIndex,
   mapCompositeSummaryIndexSource,
 } from './composite_slo_summary_index';
 
 describe('composite_slo_summary_index', () => {
-  describe('buildCompositeSloSummaryDocId', () => {
-    it('matches task document id format', () => {
-      expect(buildCompositeSloSummaryDocId('default', 'abc-123')).toBe('default:abc-123');
-    });
-  });
-
   describe('mapCompositeSummaryIndexSource', () => {
     it('maps stored summary fields to API summary shape', () => {
       const persisted = mapCompositeSummaryIndexSource({
@@ -119,40 +112,56 @@ describe('composite_slo_summary_index', () => {
   });
 
   describe('fetchCompositeSloSummariesFromIndex', () => {
-    it('mgets expected ids and maps found sources', async () => {
-      const mget = jest.fn().mockResolvedValue({
-        docs: [
-          {
-            found: true,
-            _source: {
-              sliValue: 0.99,
-              status: 'HEALTHY',
-              errorBudgetInitial: 0.01,
-              errorBudgetConsumed: 0,
-              errorBudgetRemaining: 1,
-              errorBudgetIsEstimated: false,
-              fiveMinuteBurnRate: 0,
-              oneHourBurnRate: 0,
-              oneDayBurnRate: 0,
+    it('searches by ids + spaceId and maps found sources by _id', async () => {
+      const search = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'comp-a',
+              _source: {
+                sliValue: 0.99,
+                status: 'HEALTHY',
+                errorBudgetInitial: 0.01,
+                errorBudgetConsumed: 0,
+                errorBudgetRemaining: 1,
+                errorBudgetIsEstimated: false,
+                fiveMinuteBurnRate: 0,
+                oneHourBurnRate: 0,
+                oneDayBurnRate: 0,
+              },
             },
-          },
-          { found: false },
-        ],
+          ],
+        },
       });
-      const esClient = { mget } as unknown as import('@kbn/core/server').ElasticsearchClient;
+      const esClient = { search } as unknown as import('@kbn/core/server').ElasticsearchClient;
 
       const map = await fetchCompositeSloSummariesFromIndex(esClient, 'default', [
         'comp-a',
         'comp-b',
       ]);
 
-      expect(mget).toHaveBeenCalledWith({
+      expect(search).toHaveBeenCalledWith({
         index: COMPOSITE_SUMMARY_INDEX_NAME,
-        ids: ['default:comp-a', 'default:comp-b'],
+        size: 2,
+        query: {
+          bool: {
+            filter: [{ ids: { values: ['comp-a', 'comp-b'] } }, { term: { spaceId: 'default' } }],
+          },
+        },
       });
       expect(map.size).toBe(1);
       expect(map.get('comp-a')?.summary.sliValue).toBe(0.99);
       expect(map.get('comp-b')).toBeUndefined();
+    });
+
+    it('returns empty map when no ids are provided', async () => {
+      const search = jest.fn();
+      const esClient = { search } as unknown as import('@kbn/core/server').ElasticsearchClient;
+
+      const map = await fetchCompositeSloSummariesFromIndex(esClient, 'default', []);
+
+      expect(search).not.toHaveBeenCalled();
+      expect(map.size).toBe(0);
     });
   });
 });

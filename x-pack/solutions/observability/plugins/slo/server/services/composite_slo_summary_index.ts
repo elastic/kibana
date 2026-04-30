@@ -15,10 +15,6 @@ export interface PersistedCompositeSummary {
   members?: CompositeSLOMemberSummary[];
 }
 
-export function buildCompositeSloSummaryDocId(spaceId: string, compositeId: string): string {
-  return `${spaceId}:${compositeId}`;
-}
-
 export function mapCompositeSummaryIndexSource(
   source: unknown
 ): PersistedCompositeSummary | undefined {
@@ -55,27 +51,21 @@ export async function fetchCompositeSloSummariesFromIndex(
     return result;
   }
 
-  const ids = compositeIds.map((id) => buildCompositeSloSummaryDocId(spaceId, id));
-
-  const response = await esClient.mget({
+  const response = await esClient.search({
     index: COMPOSITE_SUMMARY_INDEX_NAME,
-    ids,
+    size: compositeIds.length,
+    query: {
+      bool: {
+        filter: [{ ids: { values: [...compositeIds] } }, { term: { spaceId } }],
+      },
+    },
   });
 
-  if (response.docs.length !== ids.length) {
-    throw new Error(
-      `composite summary mget: expected ${ids.length} docs, got ${response.docs.length}`
-    );
-  }
-
-  for (let i = 0; i < compositeIds.length; i++) {
-    const compositeId = compositeIds[i];
-    const doc = response.docs[i];
-    if ('found' in doc && doc.found && doc._source) {
-      const persisted = mapCompositeSummaryIndexSource(doc._source);
-      if (persisted) {
-        result.set(compositeId, persisted);
-      }
+  for (const hit of response.hits.hits) {
+    if (!hit._source) continue;
+    const persisted = mapCompositeSummaryIndexSource(hit._source);
+    if (persisted) {
+      result.set(hit._id as string, persisted);
     }
   }
 

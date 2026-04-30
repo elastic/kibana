@@ -15,16 +15,15 @@ import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 // TODO: move into CompositeSummaryRepository alongside the upsert added for inline summary persist on create/update
 export const deleteCompositeSummaryDoc = async (
   esClient: ElasticsearchClient,
-  spaceId: string,
   id: string,
   logger: Logger
 ): Promise<void> => {
   try {
-    await esClient.delete({ index: COMPOSITE_SUMMARY_INDEX_NAME, id: `${spaceId}:${id}` });
+    await esClient.delete({ index: COMPOSITE_SUMMARY_INDEX_NAME, id });
   } catch (err) {
     // 404 means the summary doc was never written (e.g. task hasn't run yet) — not an error
     if (err?.statusCode !== 404) {
-      logger.error(`Failed to delete composite summary doc [${spaceId}:${id}]: ${err}`);
+      logger.error(`Failed to delete composite summary doc [${id}]: ${err}`);
     }
   }
 };
@@ -41,16 +40,11 @@ export const deleteCompositeSLORoute = createSloServerRoute({
   handler: async ({ response, params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
+    const { soClient, scopedClusterClient } = await getScopedClients({ request, logger });
     const repository = new DefaultCompositeSLORepository(soClient, logger);
 
     await repository.deleteById(params.path.id);
-    await deleteCompositeSummaryDoc(
-      scopedClusterClient.asCurrentUser,
-      spaceId,
-      params.path.id,
-      logger
-    );
+    await deleteCompositeSummaryDoc(scopedClusterClient.asCurrentUser, params.path.id, logger);
 
     return response.noContent();
   },

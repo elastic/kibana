@@ -304,7 +304,7 @@ function buildBulkOps(
           memberSummaries
         );
         bulkOps.push({
-          index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `${spaceId}:${compositeSlo.id}` },
+          index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: compositeSlo.id },
         });
         bulkOps.push(
           buildSummaryDoc(compositeSlo, compositeSummary, members, spaceId, unresolvedMemberIds)
