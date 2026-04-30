@@ -108,9 +108,6 @@ describe('RulesClientFactory', () => {
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
       changeTrackingService: {
-        register: jest.fn(),
-        isInitialized: jest.fn(),
-        initialize: jest.fn(),
         asScoped: jest.fn().mockReturnValue(scopedChangeTrackingService),
       },
       kibanaVersion: '7.10.0',

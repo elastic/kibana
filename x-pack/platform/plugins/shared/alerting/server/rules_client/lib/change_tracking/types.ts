@@ -46,9 +46,6 @@ export interface ChangeTrackingServiceInitializeParams {
 }
 
 export interface IChangeTrackingService {
-  register(module: RuleTypeSolution): void;
-  isInitialized(module: RuleTypeSolution): boolean;
-  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams): void;
   asScoped(request: KibanaRequest): IScopedChangeTrackingService;
 }
 
