@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { WorkflowsPlugin } from './plugin';
-
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new WorkflowsPlugin(initializerContext);
-}
-export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';
+export type { ContentListPhase } from './types';
+export { derivePhase, derivePhaseFromState, type DerivePhaseInput } from './derive_phase';
+export {
+  useContentListPhase,
+  useIsInitialLoad,
+  useIsEmpty,
+  useIsFiltering,
+  useIsFiltered,
+  useIsPopulated,
+} from './use_content_list_phase';
