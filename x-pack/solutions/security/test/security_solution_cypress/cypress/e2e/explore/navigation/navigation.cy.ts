@@ -409,10 +409,13 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   });
 
   it('navigates to the Timelines page', () => {
+    // Investigations panel opener may live under chrome "More" when the strip is full (e.g. Agent entry).
+    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.TIMELINES, true);
     cy.url().should('include', TIMELINES_URL);
   });
   it('navigates to the Osquery page', () => {
+    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.OSQUERY, true);
     cy.url().should('include', OSQUERY_URL);
   });
