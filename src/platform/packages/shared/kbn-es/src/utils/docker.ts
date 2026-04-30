@@ -36,7 +36,12 @@ import {
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
 } from '@kbn/mock-idp-utils';
 
-import { initializeUiamContainers, runUiamContainer, getUiamContainers } from './docker_uiam';
+import {
+  initializeUiamContainers,
+  runUiamContainer,
+  getUiamContainers,
+  setupUiamCosmosDbDataDir,
+} from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
@@ -1007,7 +1012,12 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.info(`[runServerlessCluster] Docker image(s) ready (${elapsed()})`);
 
   log.info('[runServerlessCluster] Setting up serverless volumes...');
-  const volumeCmd = await setupServerlessVolumes(log, options);
+  const [volumeCmd, cosmosDbDataPath] = await Promise.all([
+    setupServerlessVolumes(log, options),
+    options.uiam
+      ? setupUiamCosmosDbDataDir(log, { basePath: options.basePath, clean: options.clean })
+      : Promise.resolve(undefined),
+  ]);
   log.info(`[runServerlessCluster] Serverless volumes ready (${elapsed()})`);
 
   const portCmd = resolvePort(options);
@@ -1028,8 +1038,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       return node.name;
     }).concat(
       options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
+        ? getUiamContainers({ includeOAuth: options.uiamOAuth, cosmosDbDataPath }).map(
+            (container) => runUiamContainer(log, container)
           )
         : []
     )
