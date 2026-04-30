@@ -55,6 +55,7 @@ type PanelProps = Pick<
  */
 export function LensRenderer({
   title,
+  description,
   withDefaultActions,
   extraActions,
   showInspector,
@@ -100,7 +101,9 @@ export function LensRenderer({
     return rest;
   }, [props.attributes]);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
+    props.attributes
+      ? { attributes: cleanedAttributes, description }
+      : createEmptyLensState(null, title)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
