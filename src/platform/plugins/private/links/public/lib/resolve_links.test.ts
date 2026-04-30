@@ -11,6 +11,7 @@ import { resolveLinkInfo, resolveLinks, serializeResolvedLinks } from './resolve
 import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
 import type { ResolvedLink } from '../types';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
   fetchDashboard: async (id: string) => {
@@ -35,12 +36,14 @@ describe('resolveLinkInfo', () => {
     const link: Link = {
       type: DASHBOARD_LINK_TYPE,
       destination: '001',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     };
     const resolvedLink = await resolveLinkInfo(link);
     expect(resolvedLink).toEqual({
       title: 'Dashboard 001',
       description: 'Some descriptive text.',
       label: undefined,
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     });
   });
 
@@ -49,12 +52,14 @@ describe('resolveLinkInfo', () => {
       type: DASHBOARD_LINK_TYPE,
       destination: '001',
       label: 'My Dashboard',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     };
     const resolvedLink = await resolveLinkInfo(link);
     expect(resolvedLink).toEqual({
       title: 'Dashboard 001',
       description: 'Some descriptive text.',
       label: 'My Dashboard',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     });
   });
 
@@ -62,6 +67,7 @@ describe('resolveLinkInfo', () => {
     const link: Link = {
       type: DASHBOARD_LINK_TYPE,
       destination: '404',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     };
     const resolvedLink = await resolveLinkInfo(link);
     expect(resolvedLink).toEqual({
@@ -78,10 +84,12 @@ describe('resolveLinks', () => {
       {
         type: DASHBOARD_LINK_TYPE,
         destination: '404',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       {
         type: DASHBOARD_LINK_TYPE,
         destination: '404',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
     ];
     const resolvedLinks = await resolveLinks(links);
@@ -98,6 +106,7 @@ describe('serializeResolvedLinks', () => {
         destination: '404',
         id: '1',
         title: 'Link 1',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
     ];
     const serializedLinks = serializeResolvedLinks(links);

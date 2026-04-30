@@ -17,26 +17,32 @@ import type { Link } from '../../server';
 import type { LinksApi, ResolvedLink } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../common/constants';
 
 const getLinks = (): Link[] => [
   {
     type: 'dashboardLink',
     label: '',
     destination: '999',
+    options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   },
   {
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
+    options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   },
   {
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
+    options: DEFAULT_EXTERNAL_LINK_OPTIONS,
   },
   {
     type: 'externalLink',
     destination: 'https://elastic.co',
+    options: DEFAULT_EXTERNAL_LINK_OPTIONS,
   },
 ];
 
@@ -48,6 +54,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     destination: '999',
     title: 'Dashboard 1',
     description: 'Dashboard 1 description',
+    options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   },
   {
     id: '002',
@@ -56,6 +63,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     destination: '888',
     title: 'Dashboard 2',
     description: 'Dashboard 2 description',
+    options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   },
   {
     id: '003',
@@ -63,12 +71,14 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     label: 'Example homepage',
     destination: 'https://example.com',
     title: 'Example homepage',
+    options: DEFAULT_EXTERNAL_LINK_OPTIONS,
   },
   {
     id: '004',
     type: 'externalLink',
     destination: 'https://elastic.co',
     title: 'https://elastic.co',
+    options: DEFAULT_EXTERNAL_LINK_OPTIONS,
   },
 ];
 
