@@ -37,6 +37,29 @@ import { loadAllActions, loadConnectorAuthStatus } from '../../../lib/action_con
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
 
+type ConnectorAuthStatusError = string | undefined;
+
+function getAuthStatusLoadErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'body' in error) {
+    const body = (error as { body?: { message?: string } }).body;
+    if (typeof body?.message === 'string' && body.message.length > 0) {
+      return body.message;
+    }
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  if (typeof error === 'string' && error.length > 0) {
+    return error;
+  }
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.connector.home.unableToLoadAuthStatusFallbackDetail',
+    {
+      defaultMessage: 'Check the Kibana logs for more information.',
+    }
+  );
+}
+
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
 export interface MatchParams {
@@ -67,6 +90,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
+  const [connectorAuthStatusError, setConnectorAuthStatusError] =
+    useState<ConnectorAuthStatusError>(undefined);
 
   const editItem = useCallback(
     (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => {
@@ -80,7 +105,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     try {
       const [actionsResponse, authStatusMap] = await Promise.all([
         loadAllActions({ http }),
-        loadConnectorAuthStatus({ http }).catch(() => {
+        loadConnectorAuthStatus({ http }).catch((error: unknown) => {
+          const message = getAuthStatusLoadErrorMessage(error);
           toasts.addDanger({
             title: i18n.translate(
               'xpack.triggersActionsUI.sections.connector.home.unableToLoadAuthStatusMessage',
@@ -88,10 +114,16 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
                 defaultMessage: 'Unable to load connector authentication status',
               }
             ),
+            text: message,
           });
+          setConnectorAuthStatusError(message);
           return null;
         }),
       ]);
+
+      if (authStatusMap !== null) {
+        setConnectorAuthStatusError(undefined);
+      }
 
       const actionsWithAuth = actionsResponse.map((connector) => {
         const authEntry = authStatusMap?.[connector.id];
@@ -181,6 +213,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       actions,
       loadActions,
       setActions,
+      connectorAuthStatusError,
     });
   };
 

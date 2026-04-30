@@ -82,6 +82,7 @@ const ActionsConnectorsList = ({
   actions,
   loadActions,
   setActions,
+  connectorAuthStatusError,
 }: {
   setAddFlyoutVisibility: (state: boolean) => void;
   editItem: (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => void;
@@ -89,6 +90,7 @@ const ActionsConnectorsList = ({
   actions: ActionConnector[];
   loadActions: () => Promise<void>;
   setActions: (state: ActionConnector[]) => void;
+  connectorAuthStatusError?: string;
 }) => {
   const {
     http,
@@ -407,22 +409,29 @@ const ActionsConnectorsList = ({
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            {usesOAuthAuthorizationCode(item) &&
-              !isDisabledEarsConnector(item) &&
-              (item.userAuthStatus === 'connected' || item.userAuthStatus === 'not_connected') && (
-                <OAuthOperations
-                  item={item}
-                  onConnectionStatusChange={(changedConnectorId, status) =>
-                    setActions(
-                      actions.map((connector) =>
-                        connector.id === changedConnectorId
-                          ? { ...connector, userAuthStatus: status }
-                          : connector
-                      )
-                    )
-                  }
-                />
-              )}
+            {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
+              <>
+                {connectorAuthStatusError ? (
+                  <DisabledOAuthConnectOperation errorMessage={connectorAuthStatusError} />
+                ) : (
+                  (item.userAuthStatus === 'connected' ||
+                    item.userAuthStatus === 'not_connected') && (
+                    <OAuthOperations
+                      item={item}
+                      onConnectionStatusChange={(changedConnectorId, status) =>
+                        setActions(
+                          actions.map((connector) =>
+                            connector.id === changedConnectorId
+                              ? { ...connector, userAuthStatus: status }
+                              : connector
+                          )
+                        )
+                      }
+                    />
+                  )
+                )}
+              </>
+            )}
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {showFixButton && (
               <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
@@ -687,6 +696,36 @@ const DeleteOperation: React.FunctionComponent<{
           )}
           onClick={onDelete}
           iconType={'trash'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+};
+
+const DisabledOAuthConnectOperation: React.FunctionComponent<{
+  errorMessage: string;
+}> = ({ errorMessage }) => {
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthStatusLoadFailedTooltip',
+          {
+            defaultMessage: 'Unable to load connector authentication status. {errorMessage}',
+            values: { errorMessage },
+          }
+        )}
+      >
+        <EuiButtonIcon
+          isDisabled
+          data-test-subj="authorizeConnectorDisabledAuthStatusError"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthStatusLoadFailedAuthorizeAriaLabel',
+            {
+              defaultMessage: 'Authorize unavailable — authentication status could not be loaded',
+            }
+          )}
+          iconType="link"
         />
       </EuiToolTip>
     </EuiFlexItem>

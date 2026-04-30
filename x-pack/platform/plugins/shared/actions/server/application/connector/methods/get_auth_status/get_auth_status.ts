@@ -8,11 +8,12 @@
 import type { AuthMode } from '@kbn/connector-specs';
 import { findConnectorsSo } from '../../../../data/connector';
 import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
+import { filterInferenceConnectors } from '../get_all';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import { getUserTokenConnectorsForProfile, resolveProfileUidForRequest } from '../../lib';
-import { filterInferenceConnectors } from '../get_all/get_all';
-import type { GetAuthStatusParams, GetAuthStatusResult } from './types';
+import { getUserTokenConnectorsForProfile } from '../../lib';
 import type { Connector } from '../../types';
+import type { GetAuthStatusParams, GetAuthStatusResult } from './types';
+import type { RawAction } from '../../../../types';
 
 function deriveUserAuthStatus(
   connectorId: string,
@@ -33,12 +34,7 @@ export async function getAuthStatus({
 }: GetAuthStatusParams): Promise<GetAuthStatusResult> {
   await context.authorization.ensureAuthorized({ operation: 'get' });
 
-  const profileUid = await resolveProfileUidForRequest({
-    request: context.request,
-    getCurrentUser: context.getCurrentUser,
-    getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
-    getCurrentUserProfileIdFromBasicAuth: context.getCurrentUserProfileIdFromBasicAuth,
-  });
+  const profileUid = await context.getCurrentUserProfileId?.(context.request);
 
   const userTokenConnectors = await getUserTokenConnectorsForProfile({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -52,12 +48,15 @@ export async function getAuthStatus({
   const { saved_objects: savedObjects } = await findConnectorsSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     namespace,
+    fields: ['authMode'],
   });
 
   const results: GetAuthStatusResult = {};
 
   for (const so of savedObjects) {
-    const authMode = getAuthMode(so.attributes.authMode as Connector['authMode'] | undefined);
+    const authMode = getAuthMode(
+      (so.attributes as RawAction | undefined)?.authMode as Connector['authMode'] | undefined
+    );
     results[so.id] = {
       userAuthStatus: deriveUserAuthStatus(so.id, userTokenConnectors, authMode),
     };
@@ -66,6 +65,7 @@ export async function getAuthStatus({
   const nonSystemInMemory = context.inMemoryConnectors.filter(
     (connector) => !connector.isSystemAction
   );
+
   const filteredInMemory = await filterInferenceConnectors(
     context.scopedClusterClient.asInternalUser,
     nonSystemInMemory

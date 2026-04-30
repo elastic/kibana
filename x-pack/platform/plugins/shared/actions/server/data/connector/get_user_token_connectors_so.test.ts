@@ -31,6 +31,7 @@ describe('getUserTokenConnectorsSo', () => {
       expect.objectContaining({
         type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         perPage: 10000,
+        fields: ['connectorId'],
         filter: nodeBuilder.is(
           `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
           'test-profile-uid'
@@ -98,30 +99,5 @@ describe('getUserTokenConnectorsSo', () => {
     });
 
     expect(result).toEqual({ connectorIds: [] });
-  });
-
-  it('scopes the filter to the provided profileUid (not other users)', async () => {
-    savedObjectsClient.find.mockResolvedValueOnce({
-      total: 0,
-      per_page: 10000,
-      page: 1,
-      saved_objects: [],
-    });
-
-    await getUserTokenConnectorsSo({ savedObjectsClient, profileUid: 'profile-xyz' });
-
-    const callArg = savedObjectsClient.find.mock.calls[0][0];
-    expect(callArg.filter).toEqual(
-      nodeBuilder.is(
-        `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
-        'profile-xyz'
-      )
-    );
-    expect(callArg.filter).not.toEqual(
-      nodeBuilder.is(
-        `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
-        'other-profile'
-      )
-    );
   });
 });

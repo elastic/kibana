@@ -26,6 +26,17 @@ import type { InMemoryConnector } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { filterInferenceConnectors } from '../get_all';
+
+jest.mock('../get_all', () => {
+  const actual = jest.requireActual('../get_all');
+  return {
+    ...actual,
+    filterInferenceConnectors: jest.fn(
+      async (_esClient: unknown, connectors: InMemoryConnector[]) => connectors
+    ),
+  };
+});
 
 jest.mock('../../../../lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
@@ -59,6 +70,9 @@ const authTypeRegistry: AuthTypeRegistry =
 describe('getAuthStatus()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest
+      .mocked(filterInferenceConnectors)
+      .mockImplementation(async (_esClient, connectors) => connectors);
     actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
     actionsClient = new ActionsClient({
       logger,
@@ -112,11 +126,11 @@ describe('getAuthStatus()', () => {
   function buildActionsClientWithProfile({
     inMemoryConnectors = [],
     profileUid,
-    getCurrentUserProfileIdFromBasicAuth,
+    getCurrentUserProfileId: getCurrentUserProfileIdOverride,
   }: {
     inMemoryConnectors?: InMemoryConnector[];
     profileUid?: string;
-    getCurrentUserProfileIdFromBasicAuth?: (req: KibanaRequest) => Promise<string | undefined>;
+    getCurrentUserProfileId?: (req: KibanaRequest) => Promise<string | undefined>;
   } = {}) {
     return new ActionsClient({
       logger,
@@ -135,8 +149,8 @@ describe('getAuthStatus()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
-      getCurrentUser: async () => (profileUid ? { profile_uid: profileUid } : null),
-      getCurrentUserProfileIdFromBasicAuth,
+      getCurrentUserProfileId:
+        getCurrentUserProfileIdOverride ?? (async () => profileUid ?? undefined),
     });
   }
 
@@ -173,6 +187,14 @@ describe('getAuthStatus()', () => {
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-shared']).toEqual({ userAuthStatus: 'not_applicable' });
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        type: 'action',
+        perPage: 10000,
+        fields: ['authMode'],
+      })
+    );
   });
 
   test('returns connected for per-user connector with matching token', async () => {
@@ -258,6 +280,61 @@ describe('getAuthStatus()', () => {
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-per-user']).toEqual({ userAuthStatus: 'not_connected' });
+  });
+
+  test('applies filterInferenceConnectors to in-memory connectors and omits filtered-out ids', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 0,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 0,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [],
+      });
+
+    const kept = createMockInMemoryConnector({
+      id: 'in-memory-kept',
+      actionTypeId: '.slack',
+      isPreconfigured: true,
+      name: 'Kept connector',
+      authMode: 'per-user',
+    });
+    const dropped = createMockInMemoryConnector({
+      id: 'in-memory-dropped',
+      actionTypeId: '.inference',
+      isPreconfigured: true,
+      name: 'Dropped inference connector',
+      config: { inferenceId: 'no-endpoint' },
+      authMode: 'per-user',
+    });
+
+    jest
+      .mocked(filterInferenceConnectors)
+      .mockImplementationOnce(async (_esClient, connectors) =>
+        connectors.filter((c) => c.id === 'in-memory-kept')
+      );
+
+    actionsClient = buildActionsClientWithProfile({
+      profileUid: 'test-profile-uid',
+      inMemoryConnectors: [kept, dropped],
+    });
+
+    const result = await actionsClient.getAuthStatus();
+
+    expect(filterInferenceConnectors).toHaveBeenCalledWith(
+      scopedClusterClient.asInternalUser,
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'in-memory-kept' }),
+        expect.objectContaining({ id: 'in-memory-dropped' }),
+      ])
+    );
+    expect(result['in-memory-kept']).toEqual({ userAuthStatus: 'not_applicable' });
+    expect(result['in-memory-dropped']).toBeUndefined();
   });
 
   test('returns not_applicable for in-memory preconfigured connectors', async () => {
@@ -379,7 +456,7 @@ describe('getAuthStatus()', () => {
       });
 
     actionsClient = buildActionsClientWithProfile({
-      getCurrentUserProfileIdFromBasicAuth: async () => 'test-profile-uid',
+      getCurrentUserProfileId: async () => 'test-profile-uid',
     });
     const result = await actionsClient.getAuthStatus();
 

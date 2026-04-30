@@ -126,9 +126,7 @@ export interface ConstructorOptions {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
-  getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
-  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
-  getCurrentUserProfileIdFromBasicAuth?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -155,15 +153,10 @@ export interface ActionsClientContext {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
-  getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
-  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
-  getCurrentUserProfileIdFromBasicAuth?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
-const getCurrentUserNoop = async (
-  _request: KibanaRequest
-): Promise<{ profile_uid?: string } | null> => null;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -190,9 +183,7 @@ export class ActionsClient {
     spaces,
     isESOCanEncrypt,
     connectorLifecycleListeners,
-    getCurrentUser,
-    getCurrentUserProfileIdFromAPIKey,
-    getCurrentUserProfileIdFromBasicAuth,
+    getCurrentUserProfileId,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -216,9 +207,7 @@ export class ActionsClient {
       spaces,
       isESOCanEncrypt,
       connectorLifecycleListeners,
-      getCurrentUser: getCurrentUser ?? getCurrentUserNoop,
-      getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
-      getCurrentUserProfileIdFromBasicAuth: getCurrentUserProfileIdFromBasicAuth ?? noop,
+      getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
     };
   }
 
@@ -480,9 +469,7 @@ export class ActionsClient {
           );
         }
 
-        const profileUid = await this.context.getCurrentUserProfileIdFromAPIKey?.(
-          this.context.request
-        );
+        const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
 
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,

@@ -27,6 +27,7 @@ export const getUserTokenConnectorsSo = async ({
   const result = await savedObjectsClient.find<UserConnectorToken>({
     perPage: MAX_ACTIONS_RETURNED,
     type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    fields: ['connectorId'],
     filter: nodeBuilder.is(
       `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
       profileUid

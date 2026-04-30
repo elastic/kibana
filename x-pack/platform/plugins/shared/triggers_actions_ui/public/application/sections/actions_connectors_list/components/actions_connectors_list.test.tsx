@@ -1051,5 +1051,47 @@ describe('actions_connectors_list', () => {
       expect(screen.queryByTestId('disconnectConnector')).not.toBeInTheDocument();
       expect(screen.queryByTestId('cancelAuthorizeConnector')).not.toBeInTheDocument();
     });
+
+    it('shows disabled authorize control with tooltip when connectorAuthStatusError is set', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+            connectorAuthStatusError="Auth status endpoint failed"
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      const disabledAuthorize = await screen.findByTestId(
+        'authorizeConnectorDisabledAuthStatusError'
+      );
+      expect(disabledAuthorize).toBeDisabled();
+      expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disconnectConnector')).not.toBeInTheDocument();
+
+      await user.hover(disabledAuthorize);
+      expect(
+        await screen.findByText(
+          /Unable to load connector authentication status\. Auth status endpoint failed/
+        )
+      ).toBeInTheDocument();
+    });
   });
 });

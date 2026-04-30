@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -56,8 +57,6 @@ import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace } from './lib';
-import { getCurrentUserProfileIdFromAPIKey as getCurrentUserProfileIdFromAPIKeyForRequest } from './lib/get_current_user_profile_id_from_api_key';
-import { getCurrentUserProfileIdFromBasicAuth as getCurrentUserProfileIdFromBasicAuthForRequest } from './lib/get_current_user_profile_id_from_basic_auth';
 import type {
   Services,
   ActionType,
@@ -595,10 +594,7 @@ export class ActionsPlugin
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
         connectorLifecycleListeners: this.connectorLifecycleListeners,
-        getCurrentUser: async (requestWithAuth: KibanaRequest) =>
-          core.security.authc.getCurrentUser(requestWithAuth),
-        getCurrentUserProfileIdFromAPIKey,
-        getCurrentUserProfileIdFromBasicAuth,
+        getCurrentUserProfileId,
       });
     };
 
@@ -679,11 +675,60 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
-    const getCurrentUserProfileIdFromAPIKey = async (request: KibanaRequest) =>
-      getCurrentUserProfileIdFromAPIKeyForRequest(request, core.elasticsearch.client, logger);
+    async function getCurrentUserProfileIdFromAPIKey(
+      request: KibanaRequest
+    ): Promise<string | undefined> {
+      try {
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+        if (!id) {
+          logger.debug(`Failed to decode API key ID from Authorization header.`);
+          return undefined;
+        }
 
-    const getCurrentUserProfileIdFromBasicAuth = async (request: KibanaRequest) =>
-      getCurrentUserProfileIdFromBasicAuthForRequest(request, core.elasticsearch.client, logger);
+        const response = await core.elasticsearch.client
+          .asScoped(request)
+          .asCurrentUser.security.getApiKey({
+            with_profile_uid: true,
+            id,
+          });
+
+        if (response.api_keys && response.api_keys.length > 0) {
+          return response.api_keys[0].profile_uid;
+        }
+
+        logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      } catch (error) {
+        logger.debug(
+          `Failed to retrieve API key for user profile retrieval: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return undefined;
+    }
+
+    async function getCurrentUserProfileId(
+      requestWithAuth: KibanaRequest
+    ): Promise<string | undefined> {
+      try {
+        const profile = await plugins.security?.userProfiles.getCurrent({
+          request: requestWithAuth,
+        });
+        if (profile?.uid) {
+          return profile.uid;
+        }
+      } catch (error) {
+        logger.debug(
+          `Failed to retrieve user profile from current auth context: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+
+      return undefined;
+    }
 
     actionExecutor!.initialize({
       logger,
@@ -939,8 +984,8 @@ export class ActionsPlugin
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [coreStart, { taskManager, encryptedSavedObjects, eventLog }] =
-        await core.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
 
       const coreContext = await context.core;
@@ -995,20 +1040,12 @@ export class ActionsPlugin
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
             connectorLifecycleListeners,
-            getCurrentUser: async (requestWithAuth: KibanaRequest) =>
-              coreStart.security.authc.getCurrentUser(requestWithAuth),
-            getCurrentUserProfileIdFromAPIKey: (requestWithAuth: KibanaRequest) =>
-              getCurrentUserProfileIdFromAPIKeyForRequest(
-                requestWithAuth,
-                coreStart.elasticsearch.client,
-                logger
-              ),
-            getCurrentUserProfileIdFromBasicAuth: (requestWithAuth: KibanaRequest) =>
-              getCurrentUserProfileIdFromBasicAuthForRequest(
-                requestWithAuth,
-                coreStart.elasticsearch.client,
-                logger
-              ),
+            getCurrentUserProfileId: async (requestWithAuth: KibanaRequest) => {
+              const profile = await pluginsStart.security?.userProfiles.getCurrent({
+                request: requestWithAuth,
+              });
+              return profile?.uid;
+            },
           });
         },
         listTypes: (featureId?: string) => {
