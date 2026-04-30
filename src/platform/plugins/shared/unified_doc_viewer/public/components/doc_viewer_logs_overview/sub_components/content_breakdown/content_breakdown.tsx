@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 
 import {
+  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
@@ -56,14 +56,15 @@ export const ContentBreakdown = ({
             language: 'txt',
             // Pass field name for highlight lookup in hit.highlight.
             // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
-            children: fieldFormats
-              .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-              .reactConvert(value ?? '', {
-                hit: hit.raw,
-                field: field ? dataView.fields.getByName(field) ?? { name: field } : undefined,
-              }),
+            children: formatFieldStringValueWithHighlights({
+              value: value ?? '',
+              hit: hit.raw,
+              fieldFormats,
+              dataView,
+              fieldName: field,
+            }),
           },
-    [dataView.fields, field, fieldFormats, formattedValue, hit.raw, value]
+    [dataView, field, fieldFormats, formattedValue, hit.raw, value]
   );
   const hasMessageField = field && value;
 

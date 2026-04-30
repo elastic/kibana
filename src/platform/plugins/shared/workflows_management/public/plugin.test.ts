@@ -8,8 +8,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
@@ -51,7 +53,7 @@ describe('WorkflowsPlugin', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    plugin = new WorkflowsPlugin();
+    plugin = new WorkflowsPlugin(coreMock.createPluginInitializerContext());
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
     setupDeps = {
@@ -102,19 +104,84 @@ describe('WorkflowsPlugin', () => {
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
     });
 
-    it('should subscribe to license changes', () => {
-      coreSetup.uiSettings.get.mockReturnValue(false);
-      plugin.setup(coreSetup, setupDeps as any);
+    describe('app visibility (visibleIn)', () => {
+      const setReadCapability = (canReadWorkflow: boolean) => {
+        coreStart.application.capabilities = {
+          ...coreStart.application.capabilities,
+          [WORKFLOWS_MANAGEMENT_FEATURE_ID]: { readWorkflow: canReadWorkflow },
+        } as any;
+      };
 
-      const license$ = new BehaviorSubject({
-        isActive: true,
-        hasAtLeast: jest.fn().mockReturnValue(true),
+      const setLicenseValid = (isValid: boolean) => {
+        startDeps.licensing.license$ = new BehaviorSubject({
+          isActive: true,
+          isAvailable: true,
+          hasAtLeast: jest.fn().mockReturnValue(isValid),
+        }) as any;
+      };
+
+      /**
+       * Registers the workflows app via setup() and subscribes to its updater$
+       * before start() runs, so the synchronous emission triggered by
+       * subscribeAppVisibilityChanges() is captured.
+       */
+      const captureAppUpdates = (): Array<Partial<AppUpdatableFields>> => {
+        coreSetup.uiSettings.get.mockReturnValue(true);
+        plugin.setup(coreSetup, setupDeps as any);
+
+        const registeredApp = coreSetup.application.register.mock.calls[0][0] as App;
+        const updates: Array<Partial<AppUpdatableFields>> = [];
+        registeredApp.updater$!.subscribe((updater: AppUpdater) => {
+          const fields = updater({} as App);
+          if (fields) updates.push(fields);
+        });
+        return updates;
+      };
+
+      it('should make the app visible everywhere when authorized and available', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(updates).toHaveLength(1);
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'home', 'kibanaOverview', 'sideNav']);
       });
-      startDeps.licensing.license$ = license$ as any;
 
-      plugin.start(coreStart, startDeps as any);
+      it('should hide the app from sideNav when the user lacks read capability', () => {
+        setReadCapability(false);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
 
-      expect(license$.observed).toBe(true);
+        plugin.start(coreStart, startDeps as any);
+
+        expect(updates).toHaveLength(1);
+        expect(updates[0].visibleIn).toEqual(['globalSearch']);
+        expect(updates[0].visibleIn).not.toContain('sideNav');
+      });
+
+      it('should keep the app in sideNav and globalSearch when authorized but unavailable', () => {
+        setReadCapability(true);
+        setLicenseValid(false);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(updates).toHaveLength(1);
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
+      });
+
+      it('should hide the app from sideNav for unauthorized users even when unavailable', () => {
+        setReadCapability(false);
+        setLicenseValid(false);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(updates).toHaveLength(1);
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
+      });
     });
   });
 });
