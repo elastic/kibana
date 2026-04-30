@@ -40,58 +40,6 @@ const MAX_JOBS = 500;
 // they request too many repetitions for a single config.
 const MAX_SCOUT_COUNT_PER_CONFIG = 50;
 
-function getScoutConfigGroupType(configPath: string): string | null {
-  // Match platform paths: x-pack/platform/... or src/platform/...
-  if (/^(x-pack|src)\/platform\//.test(configPath)) {
-    return 'platform';
-  }
-  // Match solution paths: x-pack/solutions/<solution>/plugins/...
-  const match = configPath.match(/^x-pack\/solutions\/([^/]+)\/plugins\//);
-  if (match) {
-    return match[1];
-  }
-  return null;
-}
-
-function getScoutServerRunFlags(configPath: string): string[] {
-  const groupType = getScoutConfigGroupType(configPath);
-
-  if (!groupType) {
-    throw new Error(
-      `Unable to determine scout config group type from path: ${configPath}. ` +
-        `Expected path to match platform pattern (x-pack/platform/... or src/platform/...) ` +
-        `or solution pattern (x-pack/solutions/<solution>/plugins/...)`
-    );
-  }
-
-  if (groupType === 'platform') {
-    return [
-      '--arch stateful --domain classic',
-      '--arch serverless --domain search',
-      '--arch serverless --domain observability_complete',
-      '--arch serverless --domain security_complete',
-    ];
-  }
-
-  if (groupType === 'workplaceai') {
-    return ['--arch serverless --domain workplaceai'];
-  }
-  if (groupType === 'observability') {
-    return [
-      '--arch stateful --domain classic',
-      '--arch serverless --domain observability_complete',
-    ];
-  }
-  if (groupType === 'security') {
-    return ['--arch stateful --domain classic', '--arch serverless --domain security_complete'];
-  }
-  if (groupType === 'search') {
-    return ['--arch stateful --domain classic', '--arch serverless --domain search'];
-  }
-
-  throw new Error(`Unknown solution type: ${groupType}.`);
-}
-
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -182,6 +130,7 @@ function getTestSuitesFromJson(json: string) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
+const hasScoutSuites = testSuites.some((t) => t.type === 'scoutConfig' && t.count > 0);
 
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
@@ -213,8 +162,6 @@ steps.push({
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
-<<<<<<< HEAD
-=======
 if (hasScoutSuites) {
   // Single step that bootstraps Kibana, runs Scout config discovery, and dynamically
   // uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
@@ -252,78 +199,14 @@ if (hasScoutSuites) {
   });
 }
 
->>>>>>> 06d1970ceabe (Split scout flaky test runs by arch+domain (#265991))
 let suiteIndex = 0;
 for (const testSuite of testSuites) {
   if (testSuite.count <= 0) {
     continue;
   }
 
-<<<<<<< HEAD
-  if (testSuite.type === 'ftrConfig') {
-    steps.push({
-      command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
-      env: {
-        FTR_CONFIG: testSuite.ftrConfig,
-      },
-      key: `${TestSuiteType.FTR}-${suiteIndex++}`,
-      label: `${testSuite.ftrConfig}`,
-      parallelism: testSuite.count,
-      concurrency,
-      concurrency_group: process.env.UUID,
-      concurrency_method: 'eager',
-      agents: expandAgentQueue('n2-4-spot'),
-      depends_on: 'build',
-      timeout_in_minutes: 150,
-      retry: {
-        automatic: [{ exit_status: '-1', limit: 3 }],
-      },
-    });
-    continue;
-  }
-
-  if (testSuite.type === 'scoutConfig') {
-    const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
-
-    steps.push({
-      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
-      env: {
-        SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_REPORTER_ENABLED: 'true',
-        SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
-      },
-      key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
-      label: `${testSuite.scoutConfig}`,
-      parallelism: testSuite.count,
-      concurrency,
-      concurrency_group: process.env.UUID,
-      concurrency_method: 'eager',
-      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-      depends_on: 'build',
-      timeout_in_minutes: 60,
-      retry: {
-        automatic: [{ exit_status: '-1', limit: 3 }],
-      },
-    });
-    continue;
-  }
-
-  const [category, suiteName] = testSuite.key.split('/');
-  switch (category) {
-    case 'cypress':
-      const group = groups.find((g) => g.key === testSuite.key);
-      if (!group) {
-        throw new Error(
-          `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
-        );
-      }
-      const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
-      const diskSizeGb = suiteName.includes('defend_workflows') ? 120 : undefined;
-=======
   switch (testSuite.type) {
     case 'ftrConfig':
->>>>>>> 06d1970ceabe (Split scout flaky test runs by arch+domain (#265991))
       steps.push({
         command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
         env: {
