@@ -49,6 +49,7 @@ export enum TransferAction {
 interface TransferOptionsBase {
   path?: string;
   app?: string;
+  newPanel?: boolean;
 }
 
 interface ByValueTransferOptions extends TransferOptionsBase {
@@ -146,7 +147,9 @@ export class EmbeddableEditorService {
                   {
                     type: SEARCH_EMBEDDABLE_TYPE,
                     serializedState,
-                    embeddableId: this.embeddableState?.embeddableId,
+                    embeddableId: options?.newPanel
+                      ? undefined
+                      : this.embeddableState?.embeddableId,
                   },
                 ]
               : [],
