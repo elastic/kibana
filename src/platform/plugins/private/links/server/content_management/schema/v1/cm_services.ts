@@ -18,6 +18,7 @@ import {
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
@@ -37,7 +38,9 @@ export const dashboardLinkSchema = schema.object({
     meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: dashboardNavigationOptionsSchema,
+  options: schema.oneOf([dashboardNavigationOptionsSchema], {
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+  }),
 });
 
 export const externalLinkOptionsSchema = schema.object(
@@ -62,7 +65,9 @@ export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: externalLinkOptionsSchema,
+  options: schema.oneOf([externalLinkOptionsSchema], {
+    defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS,
+  }),
 });
 
 export const linksArraySchema = schema.arrayOf(
