@@ -231,14 +231,15 @@ EOF
           echo "" >> "$REPORT_FILE"
           
           # Extract metrics for each node (anonymized as "Node 1", "Node 2", ...)
-          echo "$JSON_PART" | jq -r '.nodes | to_entries[] |
+          # First to_entries yields {key: es_node_id, value: stats}; second gives numeric index + inner pair
+          echo "$JSON_PART" | jq -r '.nodes | to_entries | to_entries[] |
             "#### Node \(.key + 1)",
-            "- **CPU Usage**: \(.value.os.cpu.percent // .value.cpu.percent // "unknown")%",
-            "- **JVM Heap Used**: \(.value.jvm.mem.heap_used_percent)% (\((.value.jvm.mem.heap_used_in_bytes // 0) / 1024 / 1024 | floor)MB / \((.value.jvm.mem.heap_max_in_bytes // 0) / 1024 / 1024 | floor)MB)",
-            "- **OS Memory Used**: \(.value.os.mem.used_percent)% (\(((.value.os.mem.total_in_bytes // 0) - (.value.os.mem.free_in_bytes // 0)) / 1024 / 1024 | floor)MB / \((.value.os.mem.total_in_bytes // 0) / 1024 / 1024 | floor)MB)",
-            "- **Load Average (1m/5m/15m)**: \(.value.os.cpu.load_average."1m" | tostring) / \(.value.os.cpu.load_average."5m" | tostring) / \(.value.os.cpu.load_average."15m" | tostring)",
-            "- **GC Young Collections**: \(.value.jvm.gc.collectors.young.collection_count) (total time: \(.value.jvm.gc.collectors.young.collection_time_in_millis)ms)",
-            "- **GC Old Collections**: \(.value.jvm.gc.collectors.old.collection_count) (total time: \(.value.jvm.gc.collectors.old.collection_time_in_millis)ms)",
+            "- **CPU Usage**: \(.value.value.os.cpu.percent // .value.value.cpu.percent // "unknown")%",
+            "- **JVM Heap Used**: \(.value.value.jvm.mem.heap_used_percent)% (\((.value.value.jvm.mem.heap_used_in_bytes // 0) / 1024 / 1024 | floor)MB / \((.value.value.jvm.mem.heap_max_in_bytes // 0) / 1024 / 1024 | floor)MB)",
+            "- **OS Memory Used**: \(.value.value.os.mem.used_percent)% (\(((.value.value.os.mem.total_in_bytes // 0) - (.value.value.os.mem.free_in_bytes // 0)) / 1024 / 1024 | floor)MB / \((.value.value.os.mem.total_in_bytes // 0) / 1024 / 1024 | floor)MB)",
+            "- **Load Average (1m/5m/15m)**: \(.value.value.os.cpu.load_average."1m" | tostring) / \(.value.value.os.cpu.load_average."5m" | tostring) / \(.value.value.os.cpu.load_average."15m" | tostring)",
+            "- **GC Young Collections**: \(.value.value.jvm.gc.collectors.young.collection_count) (total time: \(.value.value.jvm.gc.collectors.young.collection_time_in_millis)ms)",
+            "- **GC Old Collections**: \(.value.value.jvm.gc.collectors.old.collection_count) (total time: \(.value.value.jvm.gc.collectors.old.collection_time_in_millis)ms)",
             ""' >> "$REPORT_FILE"
         fi
       fi
