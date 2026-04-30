@@ -200,7 +200,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
       };
 
-      if (!scopedQueryPayload) {
+      if (!scopedQueryPayload && !scopeEpisodeQueryPayload) {
         if (userConfirmedSaveWithoutFiltersRef.current) {
           userConfirmedSaveWithoutFiltersRef.current = false;
         } else {
