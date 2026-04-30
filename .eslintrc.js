@@ -395,6 +395,91 @@ const RESTRICTED_IMPORTS = [
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/**
+ * Files that already import axios. New axios imports must not be added here;
+ * this list is expected to shrink as consumers migrate to the native `fetch` API.
+ * Globs are scoped to existing feature boundaries to keep the leak surface small.
+ */
+const AXIOS_LEGACY_CONSUMERS = [
+  '.buildkite/**/*.{js,mjs,ts,tsx,jsx}',
+  'packages/kbn-ci-stats-performance-metrics/**/*.{js,mjs,ts,tsx}',
+  'packages/kbn-failed-test-reporter-cli/**/*.{js,mjs,ts,tsx}',
+  'packages/kbn-generate/**/*.{js,mjs,ts,tsx}',
+  'src/dev/build/lib/**/*.{js,mjs,ts,tsx}',
+  'src/dev/build/tasks/**/*.{js,mjs,ts,tsx}',
+  'src/dev/prs/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/private/kbn-ci-stats-reporter/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/private/kbn-journeys/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-kbn-client/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-test-saml-auth/**/*.{js,mjs,ts,tsx}',
+  'src/platform/plugins/shared/workflows_management/server/connectors/workflows/**/*.{js,mjs,ts,tsx}',
+  'src/platform/test/api_integration/apis/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
+  'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/shared/kbn-evals/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/canvas/common/lib/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/data_usage/server/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/indices_metadata/server/lib/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/actions/server/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/cloud_connect/server/routes/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/cloud_connect/server/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/dataset_quality/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/fleet/server/services/agents/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
+  'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
+  'x-pack/platform/test/api_integration/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/fleet_cypress/agent.ts',
+  'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
+  'x-pack/platform/test/fleet_cypress/fleet_server.ts',
+  'x-pack/platform/test/fleet_multi_cluster/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/ui_capabilities/common/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/kbn-synthetics-forge/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/apm/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/observability_onboarding/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/elastic_assistant/scripts/**/*.{js,mjs,ts,tsx,jsx}',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/parallel_serverless.ts',
+  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/project_handler/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/scripts/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
 /**
@@ -2912,6 +2997,23 @@ module.exports = {
               '!@kbn/core-chrome-layout-utils',
             ],
           },
+        ],
+      },
+    },
+    {
+      // Allow axios in files that already use it. New axios imports are blocked
+      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
+      // as consumers migrate to the native `fetch` API. Placed last so it wins
+      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
+      // security_solution and workflows_management blocks). The trade-off: the
+      // 35 allowlisted files that overlap with those blocks lose their
+      // `*legacy*` pattern check; verified that none of them currently import
+      // any path matching `*legacy*`.
+      files: AXIOS_LEGACY_CONSUMERS,
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },

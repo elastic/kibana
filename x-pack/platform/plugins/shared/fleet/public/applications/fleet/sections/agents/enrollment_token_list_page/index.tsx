@@ -7,24 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { HorizontalAlignment } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiIcon,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiFilterGroup,
+  EuiFilterButton,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
-import { ApiKeyField } from '../../../../../components/api_key_field';
-
-import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
 import {
   ENROLLMENT_API_KEYS_INDEX,
   SO_SEARCH_LIMIT,
@@ -36,80 +34,51 @@ import {
   usePagination,
   useGetEnrollmentAPIKeysQuery,
   useGetAgentPolicies,
-  sendGetOneEnrollmentAPIKey,
-  useStartServices,
-  sendDeleteOneEnrollmentAPIKey,
 } from '../../../hooks';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 import { DefaultLayout } from '../../../layouts';
+import { AgentPolicyFilter } from '../agent_list_page/components/filter_bar/agent_policy_filter';
+import { HierarchicalActionsMenu } from '../components';
 
-import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
+import { ConfirmRevokeModal, ConfirmDeleteModal } from './components/confirm_bulk_action_modal';
+import { Divider, getTokenActionItems } from './components/token_actions';
+import { getColumns } from './components/columns';
+import { useBulkActions } from './hooks/use_bulk_actions';
+import { buildKuery } from './utils/build_kuery';
 
-const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh: () => void }> = ({
-  apiKey,
-  refresh,
-}) => {
-  const { notifications } = useStartServices();
-  const [state, setState] = useState<'CONFIRM_VISIBLE' | 'CONFIRM_HIDDEN'>('CONFIRM_HIDDEN');
+import type { ActiveFilter } from './utils/build_kuery';
 
-  const onCancel = () => setState('CONFIRM_HIDDEN');
-  const onConfirm = async () => {
-    try {
-      const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id);
-      if (res.error) {
-        throw res.error;
-      }
-    } catch (err) {
-      notifications.toasts.addError(err as Error, {
-        title: 'Error',
-      });
-    }
-    setState('CONFIRM_HIDDEN');
-    refresh();
-  };
-  return (
-    <>
-      {state === 'CONFIRM_VISIBLE' && (
-        <ConfirmEnrollmentTokenDelete
-          enrollmentKey={apiKey}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-        />
-      )}
-      <EuiToolTip
-        content={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
-          defaultMessage: 'Revoke token',
-        })}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          data-test-subj="enrollmentTokenTable.revokeBtn"
-          aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
-            defaultMessage: 'Revoke token',
-          })}
-          onClick={() => setState('CONFIRM_VISIBLE')}
-          iconType="trash"
-          color="danger"
-        />
-      </EuiToolTip>
-    </>
-  );
-};
-
-const NOT_HIDDEN_KUERY = 'not hidden:true';
+type SelectionMode = 'manual' | 'query';
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('enrollment_tokens');
+  const { euiTheme } = useEuiTheme();
   const [isModalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([]);
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>('active');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
 
-  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
-    page: pagination.currentPage,
-    perPage: pagination.pageSize,
-    kuery: search.trim() !== '' ? `(${search}) and (${NOT_HIDDEN_KUERY})` : NOT_HIDDEN_KUERY,
-  });
+  const [selectedTokens, setSelectedTokens] = useState<EnrollmentAPIKey[]>([]);
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
+
+  const hasNonDefaultFilters =
+    search !== '' || selectedPolicyIds.length > 0 || activeFilter !== 'active';
+
+  const clearSelection = () => {
+    setSelectedTokens([]);
+    setSelectionMode('manual');
+  };
+
+  const resetFilters = () => {
+    setSearch('');
+    setSelectedPolicyIds([]);
+    setActiveFilter('active');
+    setPagination({ ...pagination, currentPage: 1 });
+    clearSelection();
+  };
+
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
@@ -124,115 +93,79 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     {}
   );
 
+  const visibleAgentPolicies = agentPolicies.filter((p) => !p.is_managed && !p.supports_agentless);
+  const excludedPolicyIds = agentPolicies
+    .filter((p) => p.is_managed || p.supports_agentless)
+    .map((p) => p.id);
+
+  const kuery = buildKuery(search, selectedPolicyIds, activeFilter, excludedPolicyIds);
+
+  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+    kuery,
+  });
+
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
-  const rowItems =
-    enrollmentAPIKeysRequest?.data?.items.filter((enrollmentKey) => {
-      if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
-      const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
-      // Filter legacy enrollment api keys without the hidden flag
-      return !agentPolicy?.is_managed && !agentPolicy?.supports_agentless;
-    }) || [];
+  const rowItems = enrollmentAPIKeysRequest?.data?.items ?? [];
 
-  const columns = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.nameTitle', {
-        defaultMessage: 'Name',
-      }),
-      render: (value: string) => (
-        <span className="eui-textTruncate" title={value}>
-          {value}
-        </span>
-      ),
-    },
-    {
-      field: 'id',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.secretTitle', {
-        defaultMessage: 'Secret',
-      }),
-      width: '215px',
-      render: (apiKeyId: string) => {
-        return (
-          <ApiKeyField
-            apiKeyId={apiKeyId}
-            sendGetAPIKey={sendGetOneEnrollmentAPIKey}
-            tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
-              response.data?.item.api_key
-            }
-            length={60}
-          />
-        );
-      },
-    },
-    {
-      field: 'policy_id',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.policyTitle', {
-        defaultMessage: 'Agent policy',
-      }),
-      render: (policyId: string) => {
-        const agentPolicy = agentPoliciesById[policyId];
-        const value = agentPolicy ? agentPolicy.name : policyId;
-        return (
-          <span className="eui-textTruncate" title={value}>
-            {value}
-          </span>
-        );
-      },
-    },
-    {
-      field: 'created_at',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.createdAtTitle', {
-        defaultMessage: 'Created on',
-      }),
-      width: '150px',
-      render: (createdAt: string) => {
-        return createdAt ? (
-          <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
-        ) : null;
-      },
-    },
-    {
-      field: 'active',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.activeTitle', {
-        defaultMessage: 'Active',
-      }),
-      width: '70px',
-      align: 'center' as HorizontalAlignment,
-      render: (active: boolean) => {
-        return <EuiIcon size="m" color={active ? 'success' : 'danger'} type="dot" />;
-      },
-    },
-    {
-      field: 'actions',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.actionsTitle', {
-        defaultMessage: 'Actions',
-      }),
-      width: '70px',
-      render: (_: any, apiKey: EnrollmentAPIKey) => {
-        const agentPolicy = agentPolicies.find((c) => c.id === apiKey.policy_id);
-        const canUnenroll = apiKey.active && !agentPolicy?.is_managed;
-        return (
-          canUnenroll && (
-            <DeleteButton apiKey={apiKey} refresh={() => enrollmentAPIKeysRequest.refetch()} />
-          )
-        );
-      },
-    },
-  ];
+  const refresh = () => {
+    clearSelection();
+    enrollmentAPIKeysRequest.refetch();
+  };
 
-  const isLoading =
+  const { bulkActionPending, setBulkActionPending, isBulkActionInProgress, onBulkActionConfirm } =
+    useBulkActions({
+      kuery,
+      selectedTokens,
+      selectionMode,
+      refresh,
+    });
+
+  const selectedCount = selectionMode === 'query' ? total : selectedTokens.length;
+  const showSelectionInfo =
+    isBulkActionInProgress ||
+    (selectionMode === 'manual' && selectedTokens.length > 0) ||
+    (selectionMode === 'query' && total > 0);
+  const showSelectEverything =
+    selectionMode === 'manual' &&
+    selectedTokens.length === rowItems.length &&
+    rowItems.length < total;
+
+  const columns = getColumns({
+    agentPoliciesById,
+    agentPolicies,
+    refresh: () => enrollmentAPIKeysRequest.refetch(),
+  });
+
+  const isInitialLoading =
     enrollmentAPIKeysRequest.isInitialLoading ||
     (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest);
+  const isLoading = isInitialLoading || enrollmentAPIKeysRequest.isFetching;
 
   return (
     <DefaultLayout section="enrollment_tokens">
       {isModalOpen && (
         <NewEnrollmentTokenModal
           agentPolicies={agentPolicies}
-          onClose={(key?: EnrollmentAPIKey) => {
+          onClose={() => {
             setModalOpen(false);
             enrollmentAPIKeysRequest.refetch();
           }}
+        />
+      )}
+      {bulkActionPending === 'revoke' && (
+        <ConfirmRevokeModal
+          count={selectedCount}
+          onCancel={() => setBulkActionPending(null)}
+          onConfirm={onBulkActionConfirm}
+        />
+      )}
+      {bulkActionPending === 'delete' && (
+        <ConfirmDeleteModal
+          count={selectedCount}
+          onCancel={() => setBulkActionPending(null)}
+          onConfirm={onBulkActionConfirm}
         />
       )}
       <EuiText color="subdued">
@@ -242,22 +175,92 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
-          <SearchBar
-            value={search}
-            indexPattern={ENROLLMENT_API_KEYS_INDEX}
-            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
-            onChange={(newSearch) => {
-              setPagination({
-                ...pagination,
-                currentPage: 1,
-              });
-              setSearch(newSearch);
-            }}
-            dataTestSubj="enrollmentKeysList.queryInput"
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <SearchBar
+                value={search}
+                indexPattern={ENROLLMENT_API_KEYS_INDEX}
+                fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
+                onChange={(newSearch) => {
+                  setPagination({ ...pagination, currentPage: 1 });
+                  clearSelection();
+                  setSearch(newSearch);
+                }}
+                dataTestSubj="enrollmentKeysList.queryInput"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <AgentPolicyFilter
+                  selectedAgentPolicies={selectedPolicyIds}
+                  onSelectedAgentPoliciesChange={(ids) => {
+                    setPagination({ ...pagination, currentPage: 1 });
+                    clearSelection();
+                    setSelectedPolicyIds(ids);
+                  }}
+                  agentPolicies={visibleAgentPolicies}
+                />
+                <EuiFilterButton
+                  isToggle
+                  isSelected={activeFilter === 'active'}
+                  withNext
+                  onClick={() => {
+                    setPagination({ ...pagination, currentPage: 1 });
+                    clearSelection();
+                    setActiveFilter(activeFilter === 'active' ? 'all' : 'active');
+                  }}
+                  data-test-subj="enrollmentTokensList.filterActive"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentTokensList.filterActive"
+                    defaultMessage="Active"
+                  />
+                </EuiFilterButton>
+                <EuiFilterButton
+                  isToggle
+                  isSelected={activeFilter === 'inactive'}
+                  onClick={() => {
+                    setPagination({ ...pagination, currentPage: 1 });
+                    clearSelection();
+                    setActiveFilter(activeFilter === 'inactive' ? 'all' : 'inactive');
+                  }}
+                  data-test-subj="enrollmentTokensList.filterInactive"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentTokensList.filterInactive"
+                    defaultMessage="Inactive"
+                  />
+                </EuiFilterButton>
+              </EuiFilterGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
+        {showSelectionInfo && (
+          <EuiFlexItem grow={false}>
+            <HierarchicalActionsMenu
+              items={getTokenActionItems({
+                onRevoke: () => setBulkActionPending('revoke'),
+                onDelete: () => setBulkActionPending('delete'),
+                plural: true,
+              })}
+              button={{
+                props: {
+                  iconType: 'arrowDown',
+                  iconSide: 'right',
+                  color: 'primary',
+                  isLoading: isBulkActionInProgress,
+                },
+                children: i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionsButton', {
+                  defaultMessage: '{count, plural, one {# token} other {# tokens}} selected',
+                  values: { count: selectedCount },
+                }),
+              }}
+              data-test-subj="enrollmentTokensList.bulkActionsMenu"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="createEnrollmentTokenButton"
@@ -272,8 +275,80 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minHeight: euiTheme.size.xl }}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.enrollmentTokensList.totalTokens"
+              defaultMessage="Showing {count, plural, one {# token} other {# tokens}}"
+              values={{ count: total }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {showSelectionInfo && (
+          <>
+            <EuiFlexItem grow={false}>
+              <Divider />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="selectedTokenCountLabel">
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentTokensList.tokensSelected"
+                  defaultMessage="{selectionMode, select,
+                    manual {{count, plural, one {# token} other {# tokens}}}
+                    other {All tokens}
+                  } selected"
+                  values={{ selectionMode, count: selectedTokens.length }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </>
+        )}
+        {showSelectEverything && (
+          <>
+            <EuiFlexItem grow={false}>
+              <Divider />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="both"
+                onClick={() => setSelectionMode('query')}
+                data-test-subj="enrollmentTokensList.selectAllButton"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentTokensList.selectAllButton"
+                  defaultMessage="Select everything on all pages"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
+        {showSelectionInfo && (
+          <>
+            <EuiFlexItem grow={false}>
+              <Divider />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="both"
+                onClick={clearSelection}
+                data-test-subj="enrollmentTokensList.clearSelectionButton"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentTokensList.clearSelectionButton"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiBasicTable<EnrollmentAPIKey>
+        compressed
         data-test-subj="enrollmentTokenListTable"
         tableCaption={i18n.translate(
           'xpack.fleet.enrollmentTokensList.enrollmentTokens.tableCaption',
@@ -283,21 +358,57 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         )}
         loading={isLoading}
         noItemsMessage={
-          isLoading ? (
-            <FormattedMessage
-              id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
-              defaultMessage="Loading enrollment tokens..."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
-              defaultMessage="No enrollment tokens found."
-            />
-          )
+          <>
+            <EuiSpacer size="s" />
+            {isInitialLoading ? (
+              <FormattedMessage
+                id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
+                defaultMessage="Loading enrollment tokens..."
+              />
+            ) : (
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
+                  defaultMessage="No enrollment tokens found."
+                />
+                {hasNonDefaultFilters && (
+                  <>
+                    {' '}
+                    <EuiLink
+                      onClick={resetFilters}
+                      data-test-subj="enrollmentTokensList.clearFiltersButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.enrollmentTokensList.clearFiltersLink"
+                        defaultMessage="Clear filters"
+                      />
+                    </EuiLink>
+                  </>
+                )}
+              </>
+            )}
+            <EuiSpacer size="s" />
+          </>
         }
         items={total ? rowItems : []}
         itemId="id"
         columns={columns}
+        rowProps={(item: EnrollmentAPIKey) => ({
+          css: !item.active
+            ? css`
+                & td {
+                  color: ${euiTheme.colors.subduedText};
+                }
+              `
+            : undefined,
+        })}
+        selection={{
+          selected: selectionMode === 'query' ? rowItems : selectedTokens,
+          onSelectionChange: (items: EnrollmentAPIKey[]) => {
+            setSelectionMode('manual');
+            setSelectedTokens(items);
+          },
+        }}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
@@ -305,12 +416,11 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           pageSizeOptions,
         }}
         onChange={({ page }: { page: { index: number; size: number } }) => {
-          const newPagination = {
+          setPagination({
             ...pagination,
             currentPage: page.index + 1,
             pageSize: page.size,
-          };
-          setPagination(newPagination);
+          });
         }}
       />
     </DefaultLayout>

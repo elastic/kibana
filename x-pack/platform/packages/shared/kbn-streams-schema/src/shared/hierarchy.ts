@@ -96,22 +96,26 @@ export function getParentId(id: string): string | undefined {
     return undefined;
   }
 
-  for (let i = parts.length - 1; i > 0; i--) {
-    const potentialParent = parts.slice(0, i).join('.');
+  // For streams in a known root hierarchy (e.g. logs, logs.otel, logs.ecs),
+  // walk up from the immediate parent to find the nearest known ancestor.
+  const matchedRoot = matchesAnyRoot(id);
+  if (matchedRoot) {
+    for (let i = parts.length - 1; i > 0; i--) {
+      const potentialParent = parts.slice(0, i).join('.');
 
-    // If this potential parent is a known root, return it
-    if (ROOT_STREAM_NAMES.includes(potentialParent as RootStreamName)) {
-      return potentialParent;
-    }
+      if (ROOT_STREAM_NAMES.includes(potentialParent as RootStreamName)) {
+        return potentialParent;
+      }
 
-    // If this potential parent matches any root hierarchy, it could be a valid parent
-    if (matchesAnyRoot(potentialParent)) {
-      return potentialParent;
+      if (matchesAnyRoot(potentialParent)) {
+        return potentialParent;
+      }
     }
   }
 
-  // Fallback: return first segment for unknown hierarchies
-  return parts[0];
+  // For unknown hierarchies (e.g. "test.child.grandchild"), the immediate
+  // parent is simply all segments except the last one.
+  return parts.slice(0, -1).join('.');
 }
 
 export function isRoot(id: string): boolean {

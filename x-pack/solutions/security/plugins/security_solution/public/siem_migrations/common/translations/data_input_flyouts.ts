@@ -22,3 +22,11 @@ export const QRADAR_COPYRIGHT_NOTICE = i18n.translate(
       'IBM® and QRadar® are registered trademarks of International Business Machines Corporation, registered in many jurisdictions worldwide.',
   }
 );
+
+export const SENTINEL_COPYRIGHT_NOTICE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.sentinel.copyrightNotice',
+  {
+    defaultMessage:
+      'Microsoft, Microsoft Azure, and Microsoft Sentinel are trademarks or registered trademarks of Microsoft Corporation in the United States and other countries.',
+  }
+);
