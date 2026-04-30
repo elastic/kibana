@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder } from '@elastic/esql';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
@@ -50,7 +50,7 @@ describe('getSampleDocumentsEsql', () => {
 
     expect(query).toHaveBeenCalledTimes(1);
     expect(query).toHaveBeenCalledWith({
-      query: 'FROM logs-a,logs-b METADATA _id, _source | LIMIT 2',
+      query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
       filter: {
         bool: {
           filter: [
@@ -120,19 +120,13 @@ describe('getSampleDocumentsEsql', () => {
       start: 100,
       end: 200,
       kql: 'log.level:"error"',
-      whereCondition: Builder.expression.func.unary(
-        'NOT',
-        Builder.expression.func.binary('==', [
-          Builder.expression.column('service.name'),
-          Builder.expression.literal.string('checkout'),
-        ])
-      ),
+      whereCondition: esql.exp`NOT ${esql.col(['service', 'name'])} == ${esql.str('checkout')}`,
       loadUnmappedFields: true,
       size: 5,
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields="LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND NOT `service.name` == "checkout" | LIMIT 5'
+      'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND NOT service.name == "checkout" | LIMIT 5'
     );
   });
 
@@ -180,19 +174,16 @@ describe('getSampleDocumentsEsql', () => {
       start: 100,
       end: 200,
       kql: 'log.level:"error"',
-      whereCondition: Builder.expression.func.binary('==', [
-        Builder.expression.column('service.name'),
-        Builder.expression.literal.string('checkout'),
-      ]),
+      whereCondition: esql.exp`${esql.col(['service', 'name'])} == ${esql.str('checkout')}`,
       loadUnmappedFields: true,
       sampleSize: 2,
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields="LOAD"; FROM logs-* | WHERE KQL("log.level:\\"error\\"") AND `service.name` == "checkout" | STATS total = COUNT(*)'
+      'SET unmapped_fields = "LOAD"; FROM logs-* | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)'
     );
     expect(query.mock.calls[1][0].query).toBe(
-      'SET unmapped_fields="LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND `service.name` == "checkout" | SAMPLE 0.6 | LIMIT 20'
+      'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20'
     );
     expect(query.mock.calls[0][0].filter).toEqual(query.mock.calls[1][0].filter);
   });

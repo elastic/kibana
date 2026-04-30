@@ -6,7 +6,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { Builder } from '@elastic/esql';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/streams-schema';
@@ -103,7 +103,7 @@ export async function fetchSampleDocuments({
   const diverseSize = Math.round(size * diverseRatio);
   const whereCondition = entityFilters
     .map((filter) => conditionToESQLAst({ not: filter }))
-    .reduce((acc, current) => Builder.expression.func.binary('and', [acc, current]));
+    .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([

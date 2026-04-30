@@ -11,8 +11,8 @@ import type {
   QueryDslQueryContainer,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { BasicPrettyPrinter, Builder } from '@elastic/esql';
-import type { ESQLAstCommand, ESQLAstExpression } from '@elastic/esql/types';
+import { esql, type ComposerQuery, type ComposerQueryTagHole } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
@@ -20,6 +20,8 @@ import { castArray } from 'lodash';
 
 const SAMPLE_PROBABILITY_FACTOR = 3;
 const SAMPLE_LIMIT_FACTOR = 10;
+
+type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
 interface GetSampleDocumentsEsqlParams {
   esClient: ElasticsearchClient;
@@ -29,7 +31,7 @@ interface GetSampleDocumentsEsqlParams {
   kql?: string;
   size?: number;
   sampleSize?: number;
-  whereCondition?: ESQLAstExpression;
+  whereCondition?: WhereCondition;
   loadUnmappedFields?: boolean;
 }
 
@@ -136,14 +138,16 @@ export async function getSampleDocumentsEsql({
   whereCondition,
   loadUnmappedFields = false,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
-  const indices = (Array.isArray(index) ? index : [index]).join(',');
+  const indices = Array.isArray(index) ? index : [index];
   const filter = { bool: { filter: dateRangeQuery(start, end) } };
 
-  const whereAst = buildWhereAst({ kql, whereCondition });
-  const fromCommand = Builder.command({
-    name: 'from',
-    args: [Builder.expression.source.index(indices), buildMetadataOption()],
-  });
+  const whereExpression = buildWhereExpression({ kql, whereCondition });
+  const printQuery = (query: ComposerQuery) => {
+    if (loadUnmappedFields) {
+      query.addSetCommand('unmapped_fields', 'LOAD');
+    }
+    return query.print('basic');
+  };
 
   const buildQuery = ({
     sampleProbability,
@@ -152,65 +156,27 @@ export async function getSampleDocumentsEsql({
     sampleProbability?: number;
     limit?: number;
   } = {}) => {
-    const commands: ESQLAstCommand[] = [fromCommand];
-    if (whereAst) {
-      commands.push(Builder.command({ name: 'where', args: [whereAst] }));
+    let query = esql.from(indices, ['_id', '_source']);
+    if (whereExpression) {
+      query = query.where`${whereExpression}`;
     }
     if (sampleProbability !== undefined && sampleProbability < 1) {
-      commands.push(
-        Builder.command({
-          name: 'sample',
-          args: [
-            Builder.expression.literal.numeric({
-              value: sampleProbability,
-              literalType: 'double',
-            }),
-          ],
-        })
-      );
+      query = query.sample(sampleProbability);
     }
     if (limit !== undefined) {
-      commands.push(
-        Builder.command({
-          name: 'limit',
-          args: [
-            Builder.expression.literal.numeric({
-              value: limit,
-              literalType: 'integer',
-            }),
-          ],
-        })
-      );
+      query = query.limit(limit);
     }
 
-    const body = BasicPrettyPrinter.print(Builder.expression.query(commands));
-    return loadUnmappedFields ? `SET unmapped_fields="LOAD"; ${body}` : body;
+    return printQuery(query);
   };
 
   const buildCountQuery = () => {
-    const commands: ESQLAstCommand[] = [
-      Builder.command({
-        name: 'from',
-        args: [Builder.expression.source.index(indices)],
-      }),
-    ];
-    if (whereAst) {
-      commands.push(Builder.command({ name: 'where', args: [whereAst] }));
+    let query = esql.from(indices);
+    if (whereExpression) {
+      query = query.where`${whereExpression}`;
     }
-    commands.push(
-      Builder.command({
-        name: 'stats',
-        args: [
-          Builder.expression.func.binary('=', [
-            Builder.expression.column('total'),
-            Builder.expression.func.call('COUNT', [Builder.expression.column('*')]),
-          ]),
-        ],
-      })
-    );
-
-    const body = BasicPrettyPrinter.print(Builder.expression.query(commands));
-    return loadUnmappedFields ? `SET unmapped_fields="LOAD"; ${body}` : body;
+    query = query.pipe`STATS total = COUNT(*)`;
+    return printQuery(query);
   };
 
   if (sampleSize !== undefined) {
@@ -251,31 +217,19 @@ export async function getSampleDocumentsEsql({
   return { hits, total: hits.length };
 }
 
-function buildWhereAst({
+function buildWhereExpression({
   kql,
   whereCondition,
 }: {
   kql?: string;
-  whereCondition?: ESQLAstExpression;
+  whereCondition?: WhereCondition;
 }) {
-  const kqlCondition = kql
-    ? Builder.expression.func.call('KQL', [Builder.expression.literal.string(kql)])
-    : undefined;
+  const kqlCondition = kql ? esql.exp`KQL(${esql.str(kql)})` : undefined;
 
   if (kqlCondition && whereCondition) {
-    return Builder.expression.func.binary('and', [kqlCondition, whereCondition]);
+    return esql.exp`${kqlCondition} AND ${whereCondition}`;
   }
   return kqlCondition ?? whereCondition;
-}
-
-function buildMetadataOption() {
-  return Builder.option({
-    name: 'METADATA',
-    args: [
-      Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
-      Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] }),
-    ],
-  });
 }
 
 function parseHits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {
