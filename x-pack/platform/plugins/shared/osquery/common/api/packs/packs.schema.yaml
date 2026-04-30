@@ -170,7 +170,7 @@ paths:
                       updated_by: 'elastic'
                       policy_ids:
                         - 'my_policy_id'
-                      shards: []
+                      shards: {}
     delete:
       summary: Delete a pack
       description: Delete a query pack using the pack ID.

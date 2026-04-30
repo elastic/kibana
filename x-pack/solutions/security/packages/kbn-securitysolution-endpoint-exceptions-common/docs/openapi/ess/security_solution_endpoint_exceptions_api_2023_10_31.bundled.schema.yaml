@@ -208,8 +208,8 @@ paths:
                 notFound:
                   value:
                     message: >-
-                      endpoint list item item_id: "block-malicious-file" not
-                      found
+                      exception list item item_id: "block-malicious-file" does
+                      not exist
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -287,9 +287,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: >-
-                      Either "item_id" or "id" needs to be defined in the
-                      request
+                    message: id or item_id required
                     statusCode: 400
               schema:
                 oneOf:
@@ -331,8 +329,8 @@ paths:
                 notFound:
                   value:
                     message: >-
-                      endpoint list item item_id: "block-malicious-file" not
-                      found
+                      exception list item item_id: "block-malicious-file" does
+                      not exist
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -504,8 +502,8 @@ paths:
                 alreadyExists:
                   value:
                     message: >-
-                      endpoint list item with item_id: "block-malicious-file"
-                      already exists
+                      exception list item id: "block-malicious-file" already
+                      exists
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -671,9 +669,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      endpoint list item item_id: "block-malicious-file" not
-                      found
+                    message: 'list item item_id: "block-malicious-file" not found'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -847,7 +843,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: 'exception list id: "endpoint_list" does not exist'
+                    message: 'list id: "endpoint_list" does not exist'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'

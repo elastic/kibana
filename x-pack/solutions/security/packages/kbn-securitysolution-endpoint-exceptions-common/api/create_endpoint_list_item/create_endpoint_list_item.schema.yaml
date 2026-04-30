@@ -156,7 +156,7 @@ paths:
                 alreadyExists:
                   value:
                     status_code: 409
-                    message: 'endpoint list item with item_id: "block-malicious-file" already exists'
+                    message: 'exception list item id: "block-malicious-file" already exists'
         500:
           description: Internal server error
           content:

@@ -69,7 +69,7 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: 'Either "item_id" or "id" needs to be defined in the request'
+                    message: 'id or item_id required'
         401:
           description: Unsuccessful authentication
           content:
@@ -104,7 +104,7 @@ paths:
                 notFound:
                   value:
                     status_code: 404
-                    message: 'endpoint list item item_id: "block-malicious-file" not found'
+                    message: 'exception list item item_id: "block-malicious-file" does not exist'
         500:
           description: Internal server error
           content:

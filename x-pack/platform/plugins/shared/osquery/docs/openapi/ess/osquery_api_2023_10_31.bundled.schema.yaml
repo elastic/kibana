@@ -567,7 +567,7 @@ paths:
                           snapshot: true
                           timeout: 120
                       saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
-                      shards: []
+                      shards: {}
                       updated_at: '2025-02-26T13:37:30.452Z'
                       updated_by: elastic
                       version: 1

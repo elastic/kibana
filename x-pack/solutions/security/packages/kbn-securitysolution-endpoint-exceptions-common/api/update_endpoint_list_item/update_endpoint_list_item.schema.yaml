@@ -148,7 +148,7 @@ paths:
                 notFound:
                   value:
                     status_code: 404
-                    message: 'endpoint list item item_id: "block-malicious-file" not found'
+                    message: 'list item item_id: "block-malicious-file" not found'
         500:
           description: Internal server error
           content:
