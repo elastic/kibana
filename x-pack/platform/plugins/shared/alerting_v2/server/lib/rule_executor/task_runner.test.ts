@@ -90,10 +90,10 @@ describe('RuleExecutorTaskRunner', () => {
         finalState: createRulePipelineState(),
       });
 
-      const thrown = await runner.run({ taskInstance, abortController }).catch((error) => error);
+      const result = await runner.run({ taskInstance, abortController }).catch((error) => error);
 
-      expect(thrown).toBeInstanceOf(Error);
-      expect(isUnrecoverableError(thrown)).toBe(true);
+      expect(result).toBeInstanceOf(Error);
+      expect(isUnrecoverableError(result)).toBe(true);
     });
 
     it('preserves previous state when pipeline halts with rule_disabled', async () => {
