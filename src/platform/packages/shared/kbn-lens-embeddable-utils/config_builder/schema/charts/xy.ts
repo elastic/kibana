@@ -28,7 +28,7 @@ import {
   xScaleSchema,
 } from './shared';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
 import { cornerPositionSchema } from '../alignments';
@@ -41,6 +41,7 @@ import {
   DEFAULT_PARTIAL_BUCKETS_VISIBLE,
   DEFAULT_POINTS_VISIBILITY,
 } from '../../transforms/charts/xy/defaults';
+import { objectUnion } from './utils/object_union';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -199,16 +200,8 @@ export const sharedAxisSchema = {
   ),
 };
 
-const yAxisAnchorSchema = schema.oneOf([schema.literal('start'), schema.literal('end')], {
-  meta: {
-    description:
-      'Position of the Y-axis relative to the chart orientation: start places it on the leading side (left in vertical charts), end on the trailing side (right in vertical charts).',
-  },
-});
-
 const yAxisSchema = schema.object(
   {
-    anchor: schema.maybe(yAxisAnchorSchema),
     ...sharedAxisSchema,
     scale: schema.maybe(yScaleSchema),
     domain: schema.maybe(yDomainSchema),
@@ -216,7 +209,7 @@ const yAxisSchema = schema.object(
   {
     meta: {
       description:
-        'Y-axis configuration with optional anchor, scale, and bounds. The anchor controls which side of the chart the axis renders on.',
+        'Y-axis configuration with scale and bounds. The axis position is determined by the key: y renders on the start side (left in vertical charts), y2 on the end side (right in vertical charts).',
     },
   }
 );
@@ -261,6 +254,27 @@ export const xyDataLayerSharedSchema = {
   ),
 };
 
+const legendSeriesHeaderSchema = schema.object(
+  {
+    visible: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, shows the legend table series header.' },
+      })
+    ),
+    text: schema.maybe(
+      schema.string({
+        meta: { description: 'Legend table series header text.' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyLegendSeriesHeader',
+      description: 'Legend table series header configuration.',
+    },
+  }
+);
+
 /**
  * Common legend configuration properties for positioning and statistics
  */
@@ -272,22 +286,12 @@ const sharedLegendSchema = {
       maxSize: statisticsOptionsSize,
     })
   ),
+  series_header: schema.maybe(legendSeriesHeaderSchema),
 };
 
 /**
  * Layout Schemas
  */
-const legendTruncateMaxPixelsSchema = schema.maybe(
-  schema.number({
-    defaultValue: 250,
-    min: 10,
-    max: 1000,
-    meta: {
-      description: 'Maximum pixels before truncating legend items in list layout',
-      id: 'legendTruncateMaxPixels',
-    },
-  })
-);
 const legendTruncateEnabledSchema = schema.maybe(
   schema.boolean({
     meta: {
@@ -306,12 +310,6 @@ const gridLayout = schema.object({
 });
 const listLayout = schema.object({
   type: schema.literal('list'),
-  truncate: schema.maybe(
-    schema.object({
-      max_pixels: legendTruncateMaxPixelsSchema,
-      enabled: legendTruncateEnabledSchema,
-    })
-  ),
 });
 
 const XY_API_LINE_INTERPOLATION = {
@@ -578,14 +576,14 @@ const xySharedSettings = {
       {
         x: schema.maybe(xAxisSchema),
         y: schema.maybe(yAxisSchema),
-        secondary_y: schema.maybe(yAxisSchema),
+        y2: schema.maybe(yAxisSchema),
       },
       {
         meta: {
           id: 'vis_api_xy_axis_config',
           title: 'Axis',
           description:
-            'Axis configuration for X, primary Y, and secondary Y axes. The primary Y axis defaults to the start (leading) side, and the secondary Y axis defaults to the end (trailing) side.',
+            'Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.',
         },
       }
     )
@@ -593,11 +591,11 @@ const xySharedSettings = {
   styling: schema.maybe(xyStylingSchema),
 };
 
-const yAxisIdReferenceSchema = schema.oneOf([schema.literal('y'), schema.literal('secondary_y')], {
+const yMetricOnAxisSchema = schema.oneOf([schema.literal('y'), schema.literal('y2')], {
   defaultValue: 'y',
   meta: {
     description:
-      'ID of the axis definition this Y metric is bound to; links the metric to the matching axis configuration in axis.y or axis.secondary_y. If omitted, the metric is bound to the primary Y axis.',
+      'The Y axis this metric is plotted on. Values match the root axis configuration keys (axis.y, axis.y2). If omitted, defaults to the Y axis start (leading) side.',
   },
 });
 /**
@@ -609,24 +607,37 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema({
-        collapse_by: schema.maybe(collapseBySchema),
-        color: schema.maybe(colorMappingSchema),
-        aggregate_first: schema.maybe(
-          schema.boolean({
-            meta: { description: 'Whether to aggregate before splitting series' },
-          })
-        ),
-      })
+      mergeAllBucketsWithChartDimensionSchema(
+        {
+          collapse_by: schema.maybe(collapseBySchema),
+          color: schema.maybe(colorMappingSchema),
+          aggregate_first: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When `true`, aggregates data before splitting into series. Defaults to `false`.',
+              },
+            })
+          ),
+        },
+        'xyBreakdown'
+      )
     ),
     y: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-        axis_id: schema.maybe(yAxisIdReferenceSchema),
-        color: schema.maybe(staticColorSchema),
-      }),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        {
+          axis: schema.maybe(yMetricOnAxisSchema),
+          color: schema.maybe(
+            schema.oneOf([staticColorSchema, autoColorSchema], {
+              defaultValue: AUTO_COLOR,
+            })
+          ),
+        },
+        'xyY'
+      ),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
-    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
+    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({}, 'xyX')),
   },
   {
     meta: {
@@ -657,8 +668,12 @@ const xyDataLayerSchemaESQL = schema.object(
     y: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(
         {
-          axis_id: schema.maybe(yAxisIdReferenceSchema),
-          color: schema.maybe(staticColorSchema),
+          axis: schema.maybe(yMetricOnAxisSchema),
+          color: schema.maybe(
+            schema.oneOf([staticColorSchema, autoColorSchema], {
+              defaultValue: AUTO_COLOR,
+            })
+          ),
         },
         { meta: { description: 'ES|QL column for Y-axis metric' } }
       ),
@@ -730,18 +745,22 @@ const referenceLineLayerShared = {
       meta: { description: 'Line style' },
     })
   ),
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   position: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
       meta: { description: 'Position of the icon and label relative to the reference line' },
     })
   ),
-  axis_id: schema.maybe(
-    schema.oneOf([schema.literal('x'), schema.literal('y'), schema.literal('secondary_y')], {
+  axis: schema.maybe(
+    schema.oneOf([schema.literal('x'), schema.literal('y'), schema.literal('y2')], {
       defaultValue: 'y',
       meta: {
         description:
-          'ID of the axis this reference line applies to. If omitted, the reference line is bound to the primary Y axis.',
+          'The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.',
       },
     })
   ),
@@ -754,9 +773,9 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    type: schema.literal('referenceLines'),
+    type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
+      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared, 'xyRefLine'),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
@@ -776,7 +795,7 @@ const referenceLineLayerSchemaESQL = schema.object(
   {
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    type: schema.literal('referenceLines'),
+    type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(esqlColumnWithFormatSchema.extends(referenceLineLayerShared), {
       meta: { description: 'Array of ES|QL-based reference line thresholds' },
       minSize: 1,
@@ -796,7 +815,11 @@ const referenceLineLayerSchemaESQL = schema.object(
  * Common properties for all annotation types
  */
 const annotationEventShared = {
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   visible: schema.maybe(schema.boolean({ meta: { description: 'Show the annotation' } })),
 };
 
@@ -966,7 +989,7 @@ const annotationByRefLayerSchema = schema.object(
   }
 );
 
-const annotationLayerSchema = schema.oneOf(
+const annotationLayerSchema = objectUnion(
   [annotationLayerByValueSchema, annotationByRefLayerSchema],
   {
     meta: {
@@ -976,8 +999,12 @@ const annotationLayerSchema = schema.oneOf(
   }
 );
 
-const xyLayerUnionNoESQL = schema.oneOf(
-  [xyDataLayerSchemaNoESQL, referenceLineLayerSchemaNoESQL, annotationLayerSchema],
+const xyLayerUnionNoESQL = objectUnion(
+  [
+    xyDataLayerSchemaNoESQL,
+    referenceLineLayerSchemaNoESQL,
+    ...annotationLayerSchema.getUnionTypes(),
+  ],
   {
     meta: {
       id: 'xyLayersNoESQL',
@@ -986,7 +1013,7 @@ const xyLayerUnionNoESQL = schema.oneOf(
   }
 );
 
-const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL, referenceLineLayerSchemaESQL], {
+const xyLayerUnionESQL = objectUnion([xyDataLayerSchemaESQL], {
   meta: {
     id: 'xyLayersESQL',
     description: 'XY chart layer types for ES|QL queries',
@@ -996,7 +1023,7 @@ const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL, referenceLineLayer
 /**
  * XY chart state for DSL layers
  */
-export const xyStateSchemaNoESQL = schema.object(
+export const xyConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
@@ -1018,9 +1045,9 @@ export const xyStateSchemaNoESQL = schema.object(
 );
 
 /**
- * XY chart state for ES|QL layers only (data and reference lines)
+ * XY chart state for ES|QL layers only (reference lines are not supported)
  */
-export const xyStateSchemaESQL = schema.object(
+export const xyConfigSchemaESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
@@ -1043,7 +1070,7 @@ export const xyStateSchemaESQL = schema.object(
 /**
  * XY chart state
  */
-export const xyStateSchema = schema.oneOf([xyStateSchemaNoESQL, xyStateSchemaESQL], {
+export const xyConfigSchema = objectUnion([xyConfigSchemaNoESQL, xyConfigSchemaESQL], {
   meta: {
     id: 'xyChart',
     title: 'XY Chart',
@@ -1051,23 +1078,27 @@ export const xyStateSchema = schema.oneOf([xyStateSchemaNoESQL, xyStateSchemaESQ
   },
 });
 
-export type XYStateNoESQL = TypeOf<typeof xyStateSchemaNoESQL>;
-export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
-export type XYState = TypeOf<typeof xyStateSchema>;
+export type XYConfigNoESQL = TypeOf<typeof xyConfigSchemaNoESQL>;
+export type XYConfigESQL = TypeOf<typeof xyConfigSchemaESQL>;
+export type XYConfig = TypeOf<typeof xyConfigSchema>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
+/**
+ * @deprecated ES|QL reference lines are not yet supported
+ */
 export type ReferenceLineLayerTypeESQL = TypeOf<typeof referenceLineLayerSchemaESQL>;
 export type ReferenceLineLayerTypeNoESQL = TypeOf<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
-export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
+/**
+ * Reference line layers are not support but included to keep existing logic
+ */
+export type LayerTypeESQL = TypeOf<typeof xyLayerUnionESQL> | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
-
-export type XYStyling = TypeOf<typeof xyStylingSchema>;

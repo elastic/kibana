@@ -19,12 +19,12 @@ import { LENS_TAGCLOUD_DEFAULT_STATE, TAGCLOUD_ORIENTATION } from '@kbn/lens-com
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type {
-  LensApiState,
-  TagcloudState,
+  LensApiConfig,
+  TagcloudConfig,
   LensApiAllMetricOrFormulaOperations,
   LensApiBucketOperations,
-  TagcloudStateESQL,
-  TagcloudStateNoESQL,
+  TagcloudConfigESQL,
+  TagcloudConfigNoESQL,
 } from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -40,7 +40,11 @@ import {
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
+import {
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
+  fromColorMappingAPIToLensState,
+  fromColorMappingLensStateToAPI,
+} from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import {
@@ -48,6 +52,7 @@ import {
   getLensStateLayer,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
+  stripUndefined,
 } from './utils';
 
 const ACCESSOR = 'tagcloud_accessor';
@@ -55,22 +60,22 @@ function getAccessorName(type: 'metric' | 'tag') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: TagcloudState): LensTagCloudState {
+function buildVisualizationState(config: TagcloudConfig): LensTagCloudState {
   const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
     valueAccessor: getAccessorName('metric'),
-    orientation: layer.orientation
-      ? layer.orientation === 'horizontal'
+    orientation: layer.styling?.orientation
+      ? layer.styling.orientation === 'horizontal'
         ? TAGCLOUD_ORIENTATION.SINGLE
-        : layer.orientation === 'vertical'
+        : layer.styling.orientation === 'vertical'
         ? TAGCLOUD_ORIENTATION.RIGHT_ANGLED
         : TAGCLOUD_ORIENTATION.MULTIPLE
       : LENS_TAGCLOUD_DEFAULT_STATE.orientation,
-    maxFontSize: layer.font_size?.max ?? LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
-    minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
-    showLabel: layer.caption?.visible ?? LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
+    maxFontSize: layer.styling?.font_size?.max ?? LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
+    minFontSize: layer.styling?.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
+    showLabel: layer.styling?.caption?.visible ?? LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
     tagAccessor: getAccessorName('tag'),
     ...(layer.tag_by.color ? { ...fromColorMappingAPIToLensState(layer.tag_by.color) } : {}),
   };
@@ -82,7 +87,7 @@ function getTagcloudDataset(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
-): TagcloudState['data_source'] {
+): TagcloudConfig['data_source'] {
   const dataSource = buildDataSourceState(
     layer,
     layerId,
@@ -101,7 +106,7 @@ function getTagcloudDataset(
 function getTagcloudMetric(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
-): TagcloudState['metric'] {
+): TagcloudConfig['metric'] {
   if (visualization.valueAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
@@ -119,18 +124,20 @@ function getTagcloudMetric(
 function getTagcloudTagBy(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
-): TagcloudState['tag_by'] {
+): TagcloudConfig['tag_by'] {
   if (visualization.tagAccessor == null) {
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+  const color =
+    fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+    DEFAULT_CATEGORICAL_COLOR_MAPPING;
 
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
       : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
-    ...(color && { color }),
+    color,
   };
 }
 
@@ -141,7 +148,7 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): TagcloudState {
+): TagcloudConfig {
   const dataSource = getTagcloudDataset(
     layer,
     adHocDataViews,
@@ -158,21 +165,23 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     metric,
     tag_by: tagBy,
-    orientation:
-      visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
-        ? 'horizontal'
-        : visualization.orientation === TAGCLOUD_ORIENTATION.MULTIPLE
-        ? 'angled'
-        : 'vertical',
-    font_size: {
-      min: visualization.minFontSize,
-      max: visualization.maxFontSize,
-    },
-    caption: { visible: visualization.showLabel },
-  } as TagcloudState;
+    styling: stripUndefined({
+      orientation:
+        visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
+          ? 'horizontal'
+          : visualization.orientation === TAGCLOUD_ORIENTATION.MULTIPLE
+          ? 'angled'
+          : 'vertical',
+      font_size: {
+        min: visualization.minFontSize,
+        max: visualization.maxFontSize,
+      },
+      caption: { visible: visualization.showLabel },
+    }),
+  } as TagcloudConfig;
 }
 
-function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: TagcloudConfigNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -188,7 +197,7 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
   return layers;
 }
 
-function getValueColumns(layer: TagcloudStateESQL) {
+function getValueColumns(layer: TagcloudConfigESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
     getValueColumn(getAccessorName('tag'), layer.tag_by),
@@ -205,10 +214,10 @@ type TagcloudAttributesWithoutFiltersAndQuery = Omit<TagcloudAttributes, 'state'
 };
 
 export function fromAPItoLensState(
-  config: TagcloudState
+  config: TagcloudConfig
 ): TagcloudAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as TagcloudStateNoESQL);
+    buildFormBasedLayer(cfg as TagcloudConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -237,7 +246,7 @@ export function fromAPItoLensState(
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'tag_cloud' }> {
+): Extract<LensApiConfig, { type: 'tag_cloud' }> {
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);

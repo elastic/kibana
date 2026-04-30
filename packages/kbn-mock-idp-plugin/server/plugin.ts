@@ -28,7 +28,7 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   projectTypeToAlias,
 } from '@kbn/mock-idp-utils';
-import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
+import { parseSAMLRequest } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
 
@@ -171,22 +171,33 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             : {};
 
           try {
-            const requestId = await getSAMLRequestId(request.body.url);
-            if (requestId) {
-              logger.info(`Sending SAML response for request ID: ${requestId}`);
+            const samlRequestInfo = await parseSAMLRequest(request.body.url);
+            if (samlRequestInfo?.requestId) {
+              logger.info(`Sending SAML response for request ID: ${samlRequestInfo.requestId}`);
             }
+
+            const kibanaAcsUrl = `${protocol}://${hostname}:${port}${pathname}`;
+            const destinationUrl = samlRequestInfo?.acsUrl ?? kibanaAcsUrl;
+
+            const parsed = new URL(request.body.url, 'https://localhost');
+            const relayState = parsed.searchParams.get('RelayState') ?? undefined;
 
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
-                  kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                  kibanaUrl: destinationUrl,
                   username: request.body.username,
                   full_name: request.body.full_name ?? undefined,
                   email: request.body.email ?? undefined,
                   roles: request.body.roles,
-                  ...(requestId ? { authnRequestId: requestId } : {}),
+                  ...(samlRequestInfo?.requestId
+                    ? { authnRequestId: samlRequestInfo.requestId }
+                    : {}),
+                  ...(samlRequestInfo?.issuer ? { spEntityId: samlRequestInfo.issuer } : {}),
                   ...serverlessOptions,
                 }),
+                ...(samlRequestInfo?.acsUrl ? { acsUrl: samlRequestInfo.acsUrl } : {}),
+                ...(relayState ? { RelayState: relayState } : {}),
               },
             });
           } catch (err) {

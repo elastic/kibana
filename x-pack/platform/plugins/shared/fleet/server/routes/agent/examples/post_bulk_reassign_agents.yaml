@@ -1,0 +1,32 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postBulkReassignAgentsRequestExample:
+          description: 'Reassign multiple agents to a different policy'
+          value:
+            policy_id: 'agent-policy-id-2'
+            agents:
+              - 'agent-id-1'
+              - 'agent-id-2'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postBulkReassignAgentsExample:
+            description: 'Bulk reassign action result'
+            value:
+              actionId: 'action-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

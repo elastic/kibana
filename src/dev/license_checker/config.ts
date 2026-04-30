@@ -86,13 +86,13 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
   '@img/sharp-libvips-darwin-arm64@1.2.4': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linuxmusl-x64@1.2.4': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.2.4': ['LGPL-3.0-or-later'],
-  'dompurify@3.3.2': ['(MPL-2.0 OR Apache-2.0)'],
+  'dompurify@3.4.1': ['(MPL-2.0 OR Apache-2.0)'],
 };
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
+  '@elastic/ems-client@8.7.0': ['Elastic License 2.0'],
   '@elastic/esql': ['Elastic License 2.0'],
   '@elastic/eui': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   '@elastic/eui-theme-borealis': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],

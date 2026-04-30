@@ -32,6 +32,7 @@ import {
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -219,7 +220,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     });
   }, [openPreviewPanel, hostName, entityId, scopeId, telemetry]);
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const hostIdentityFieldsForStore = useMemo(
@@ -240,7 +241,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const relatedUsersIndexNames = useMemo((): string[] => {
     if (entityStoreV2Enabled && spaceId != null) {
       const namespace = spaceId || 'default';
-      return [`.entities.v2.latest.security_${namespace}`];
+      return [getEntitiesAlias(ENTITY_LATEST, namespace)];
     }
     return selectedPatterns;
   }, [entityStoreV2Enabled, spaceId, selectedPatterns]);
@@ -490,7 +491,11 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnomalyTableProvider
-        criteriaFields={hostToCriteria(hostDetails)}
+        criteriaFields={hostToCriteria({
+          hostItem: hostDetails,
+          euid: euidApi?.euid,
+          entityRecord: entityStoreV2Enabled ? hostEntityFromStoreResult?.entityRecord : undefined,
+        })}
         startDate={from}
         endDate={to}
         skip={isInitializing}
@@ -539,6 +544,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
+          entityRecord={observedHost.entityRecord}
           identityFields={hostInsightsIdentityFields}
           entityType={EntityType.host}
           queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-document-details-host-entities`}

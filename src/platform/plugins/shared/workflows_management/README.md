@@ -14,6 +14,7 @@ The workflows management plugin provides the user interface and management capab
 - [Features](#features)
 - [Architecture](#architecture)
 - [Dependencies](#dependencies)
+- [API versioning, compatibility, and stability](#api-versioning-compatibility-and-stability)
 - [API Endpoints](#api-endpoints)
 - [UI Application](#ui-application)
 - [Development](#development)
@@ -26,22 +27,22 @@ To use workflows, you need an **active Enterprise license**. Workflows are not a
 
 ---
 
-## Enable the Feature Flag
+## The Feature Flag
 
-The workflows management UI is developed behind a UI setting (feature flag). By default, the feature is disabled. To enable it for development or testing, add the following to your `kibana.dev.yml`:
+The workflows feature UI setting is enabled by default, it can be disabled via Kibana config with:
 
 ```yml
 uiSettings.overrides:
-  workflows:ui:enabled: true
+  workflows:ui:enabled: false
 ```
 
-If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
+If running in Serverless or Cloud dev environments, you can disable it via API:
 
 ```bash
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "workflows:ui:enabled": true
+      "workflows:ui:enabled": false
    }
 }
 ```
@@ -156,433 +157,71 @@ The management plugin follows a layered architecture:
 
 ---
 
+## API versioning, compatibility, and stability
+
+This section summarizes how public Workflows HTTP APIs are versioned and how that appears in documentation. For authoritative paths, parameters, and examples, use the generated OpenAPI surface.
+
+### Version compatibility
+
+| Topic | Detail |
+|--------|--------|
+| **API date version** | Public routes use version `2023-10-31` (see `API_VERSION` in [`server/api/routes/utils/route_constants.ts`](./server/api/routes/utils/route_constants.ts)). |
+| **Version header** | Send `elastic-api-version: 2023-10-31` on requests to public endpoints, consistent with [Kibana HTTP API versioning](https://github.com/elastic/kibana/blob/main/dev_docs/contributing/kibana_http_api_design_guidelines.mdx#versioning). |
+| **Stack introduction** | Public Workflows REST APIs are annotated with `since: 9.4.0` for stack deployments. |
+| **License** | An **Enterprise** license is required (see [Requirements](#requirements)). |
+| **Privileges** | Access is enforced via `workflowsManagement` feature privileges (see route `security` blocks under [`server/api/routes/`](./server/api/routes/)). |
+| **UI setting `workflows:ui:enabled`** | Controls whether the **Workflows management application and related UI** are registered in the browser. It does **not** remove public REST routes under `/api/workflows`; those routes remain subject to license and authorization checks. |
+| **Spaces** | Public URLs are space-aware (for example `/s/{space_id}/api/workflows` in documentation); see [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces). |
+
+---
+
 ## API Endpoints
 
-The plugin exposes comprehensive REST API endpoints for workflow management.
-
-### Workflow Management
-
-#### Search Workflows
-
-```http
-POST /api/workflows/search
-```
-
-**Request Body:**
-```json
-{
-  "limit": 20,
-  "page": 1,
-  "enabled": true,
-  "createdBy": "user@example.com",
-  "query": "search term"
-}
-```
-
-**Response:**
-```json
-{
-  "results": [...],
-  "_pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 42
-  }
-}
-```
-
----
-
-#### Get Workflow by ID
-
-```http
-GET /api/workflows/{id}
-```
-
-**Response:**
-```json
-{
-  "id": "workflow-id",
-  "name": "My Workflow",
-  "description": "Workflow description",
-  "enabled": true,
-  "definition": {...},
-  "yaml": "workflow yaml content",
-  "valid": true,
-  "createdAt": "2024-01-01T00:00:00Z",
-  "createdBy": "user@example.com",
-  "lastUpdatedAt": "2024-01-01T00:00:00Z",
-  "lastUpdatedBy": "user@example.com"
-}
-```
-
----
-
-#### Create Workflow
-
-```http
-POST /api/workflows
-```
-
-**Request Body:**
-```json
-{
-  "name": "My New Workflow",
-  "description": "Description of the workflow",
-  "enabled": true,
-  "definition": {...},
-  "yaml": "workflow yaml definition"
-}
-```
-
-**Response:** Returns the created workflow object
-
----
-
-#### Update Workflow
-
-```http
-PUT /api/workflows/{id}
-```
-
-**Request Body:** Partial workflow object with fields to update
-
-**Response:** Returns the updated workflow object
-
----
-
-#### Delete Workflow
-
-```http
-DELETE /api/workflows/{id}
-```
-
-**Response:** 200 OK on success
-
----
-
-#### Clone Workflow
-
-```http
-POST /api/workflows/{id}/clone
-```
-
-**Response:** Returns the newly cloned workflow object
-
----
-
-#### Bulk Delete Workflows
-
-```http
-DELETE /api/workflows
-```
-
-**Request Body:**
-```json
-{
-  "ids": ["workflow-id-1", "workflow-id-2"]
-}
-```
-
----
-
-### Workflow Execution
-
-#### Run Workflow
-
-```http
-POST /api/workflows/{id}/run
-```
-
-**Request Body:**
-```json
-{
-  "inputs": {
-    "param1": "value1",
-    "param2": "value2"
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "workflowExecutionId": "execution-id"
-}
-```
-
----
-
-#### Test Workflow (without saving)
-
-```http
-POST /api/workflows/test
-```
-
-**Request Body:**
-```json
-{
-  "workflowYaml": "workflow yaml definition",
-  "inputs": {
-    "param1": "value1"
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "workflowExecutionId": "execution-id"
-}
-```
-
----
-
-#### Test Single Step
-
-```http
-POST /api/workflows/testStep
-```
-
-**Request Body:**
-```json
-{
-  "stepId": "step-1",
-  "workflowId": "workflow-0d8d376e-07f9-47a2-b8a2-852081d75ddc",
-  "contextOverride": {
-    "spaceId": "default",
-    "inputs": {...}
-  },
-  "workflowYaml": "workflow yaml definition"
-}
-```
-
-**Response:**
-```json
-{
-  "workflowExecutionId": "execution-id"
-}
-```
-
----
-
-### Workflow Execution Monitoring
-
-#### Get Workflow Executions
-
-```http
-GET /api/workflowExecutions?workflowId={id}&statuses=running&page=1&perPage=20
-```
-
-**Query Parameters:**
-- `workflowId` (required): Workflow ID
-- `statuses` (optional): Filter by status (pending, running, completed, failed, cancelled)
-- `executionTypes` (optional): Filter by execution type
-- `page` (optional): Page number (default: 1)
-- `perPage` (optional): Results per page (default: 20, max: 100)
-
-**Response:**
-```json
-{
-  "results": [...],
-  "_pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 10
-  }
-}
-```
-
----
-
-#### Get Execution by ID
-
-```http
-GET /api/workflowExecutions/{workflowExecutionId}
-```
-
-**Response:**
-```json
-{
-  "id": "execution-id",
-  "spaceId": "default",
-  "status": "completed",
-  "startedAt": "2024-01-01T00:00:00Z",
-  "finishedAt": "2024-01-01T00:05:00Z",
-  "workflowId": "workflow-id",
-  "workflowName": "My Workflow",
-  "workflowDefinition": {...},
-  "stepId": null,
-  "stepExecutions": [...],
-  "duration": 300000,
-  "triggeredBy": "manual",
-  "yaml": "..."
-}
-```
-
----
-
-#### Get Execution Logs
-
-```http
-GET /api/workflowExecutions/{workflowExecutionId}/logs?limit=50&offset=0&sortField=@timestamp&sortOrder=asc&stepExecutionId=step-1
-```
-
-**Query Parameters:**
-- `limit` (optional): Maximum number of logs to return (default: 50, max: 1000)
-- `offset` (optional): Number of logs to skip (default: 0)
-- `sortField` (optional): Field to sort by (default: `@timestamp`)
-- `sortOrder` (optional): Sort order - `asc` or `desc` (default: `asc`)
-- `stepExecutionId` (optional): Filter logs by step execution ID
-
-**Response:**
-```json
-{
-  "logs": [
-    {
-      "id": "log-id",
-      "timestamp": "2024-01-01T00:00:00Z",
-      "level": "info",
-      "message": "Step started",
-      "stepId": "step-1",
-      "stepName": "Step Name",
-      "connectorType": "action",
-      "duration": 5000,
-      "additionalData": {
-        "workflowId": "workflow-id",
-        "workflowName": "My Workflow",
-        "executionId": "execution-id",
-        "event": {...}
-      }
-    }
-  ],
-  "total": 100,
-  "limit": 50,
-  "offset": 0
-}
-```
-
----
-
-#### Get Step Execution Details
-
-```http
-GET /api/workflowExecutions/{executionId}/steps/{id}
-```
-
-**Response:** Detailed information about a specific step execution
-
----
-
-#### Cancel Workflow Execution
-
-```http
-POST /api/workflowExecutions/{workflowExecutionId}/cancel
-```
-
-**Response:** 200 OK on success
-
----
-
-### Workflow Statistics & Analytics
-
-#### Get Workflow Statistics
-
-```http
-GET /api/workflows/stats
-```
-
-**Response:**
-```json
-{
-  "workflows": {
-    "enabled": 30,
-    "disabled": 20
-  },
-  "executions": [
-    {
-      "date": "2024-01-01",
-      "timestamp": "2024-01-01T00:00:00Z",
-      "completed": 100,
-      "failed": 5,
-      "cancelled": 2
-    }
-  ]
-}
-```
-
----
-
-#### Get Workflow Aggregations
-
-```http
-GET /api/workflows/aggs?fields=field1&fields=field2
-```
-
-**Query Parameters:**
-- `fields` (required): Array of field names to aggregate
-
-**Response:**
-```json
-{
-  "field1": [
-    {
-      "key": "value1",
-      "label": "Value 1"
-    },
-    {
-      "key": "value2",
-      "label": "Value 2"
-    }
-  ],
-  "field2": [
-    {
-      "key": "value3",
-      "label": "Value 3"
-    }
-  ]
-}
-```
-
----
-
-### Connectors
-
-#### Get Available Connectors
-
-```http
-GET /api/workflows/connectors
-```
-
-**Response:**
-```json
-{
-  "connectorTypes": [
-    {
-      "id": ".slack",
-      "name": "Slack",
-      "enabled": true,
-      "count": 5
-    }
-  ],
-  "totalConnectors": 15
-}
-```
-
----
-
-### Schema & Validation
-
-#### Get Workflow JSON Schema
-
-```http
-GET /api/workflows/workflow-json-schema?loose=false
-```
-
-**Query Parameters:**
-- `loose` (required): Boolean - Whether to use loose validation
-
-**Response:** JSON Schema for workflow validation
+Public HTTP APIs live under `/api/workflows` (space-aware in docs as `/s/{space_id}/api/workflows/...`). Send `elastic-api-version: 2023-10-31` on requests.
+
+**OpenAPI (OAS) documentation for these endpoints:** use the generated bundles—[`kibana.yaml`](../../../../../oas_docs/output/kibana.yaml) (stateful) and [`kibana.serverless.yaml`](../../../../../oas_docs/output/kibana.serverless.yaml) (serverless)—or the published [Workflows API group (stateful)](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows) and [Workflows API group (serverless)](https://www.elastic.co/docs/api/doc/serverless/group/endpoint-workflows). Each public operation lists parameters, request bodies, responses, and examples.
+
+### Public routes
+
+| Method | Path | Summary |
+|--------|------|---------|
+| GET | `/api/workflows` | List workflows (pagination and filters via query string). |
+| POST | `/api/workflows` | Bulk create workflows. |
+| DELETE | `/api/workflows` | Bulk delete workflows. |
+| POST | `/api/workflows/mget` | Get multiple workflows by ID. |
+| POST | `/api/workflows/export` | Export workflows. |
+| GET | `/api/workflows/stats` | Workflow statistics. |
+| GET | `/api/workflows/aggs` | Workflow aggregations. |
+| GET | `/api/workflows/connectors` | Available connector types. |
+| GET | `/api/workflows/schema` | Workflow JSON schema. |
+| POST | `/api/workflows/workflow` | Create a workflow. |
+| GET | `/api/workflows/workflow/{id}` | Get a workflow by ID. |
+| PUT | `/api/workflows/workflow/{id}` | Update a workflow. |
+| DELETE | `/api/workflows/workflow/{id}` | Delete a workflow. |
+| POST | `/api/workflows/workflow/{id}/clone` | Clone a workflow. |
+| POST | `/api/workflows/workflow/{id}/run` | Run a workflow. |
+| GET | `/api/workflows/workflow/{workflowId}/executions` | List executions for a workflow. |
+| GET | `/api/workflows/workflow/{workflowId}/executions/steps` | List step executions for a workflow. |
+| POST | `/api/workflows/workflow/{workflowId}/executions/cancel` | Cancel all active executions for a workflow. |
+| POST | `/api/workflows/test` | Test a workflow without persisting it. |
+| POST | `/api/workflows/step/test` | Test a single workflow step. |
+| GET | `/api/workflows/executions/{executionId}` | Get an execution by ID. |
+| GET | `/api/workflows/executions/{executionId}/children` | List child executions. |
+| GET | `/api/workflows/executions/{executionId}/logs` | Execution logs. |
+| GET | `/api/workflows/executions/{executionId}/step/{stepExecutionId}` | Get a step execution. |
+| POST | `/api/workflows/executions/{executionId}/cancel` | Cancel an execution. |
+| POST | `/api/workflows/executions/{executionId}/resume` | Resume an execution. |
+| GET | `/api/workflows/executions/{executionId}/trigger_event_trace` | Trigger event trace for an execution. |
+
+### Internal routes
+
+These routes use `access: internal` and are **not** included in the public OpenAPI bundles above. They use a numeric `elastic-api-version` (see `INTERNAL_API_VERSION` in [`server/api/routes/utils/route_constants.ts`](./server/api/routes/utils/route_constants.ts)). For validate, example payloads live in [`validate_workflow.yaml`](./server/api/routes/examples/validate_workflow.yaml).
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
+| POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
+| POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
 
 ---
 
@@ -608,44 +247,28 @@ The workflows management UI is available at `/app/workflows` when the feature fl
 - `/app/workflows/{id}/executions` - View workflow execution history
 - `/app/workflows/executions/{executionId}` - View execution details
 
-### Pagination
+### Pagination (HTTP APIs)
 
-All paginated endpoints follow a consistent pagination strategy:
+Many list endpoints accept `page` and `size` (or route-specific defaults) as **query parameters** on `GET` requests. Exact fields and response envelopes differ by route—use the OpenAPI entries for each operation.
 
-**Request Parameters:**
-- `page` (number, default: 1) - Page number (1-indexed)
-- `size` (number, default: 100) - Number of items per page
+**Examples** (add `elastic-api-version: 2023-10-31` and auth headers as for any public Kibana API):
 
-**Response Structure:**
-```json
-{
-  "results": [...],
-  "page": 1,
-  "size": 100,
-  "total": 100
-}
+List workflows (free-text `query` plus pagination):
+
+```http
+GET /api/workflows?page=1&size=20&query=sales
 ```
 
-**Examples:**
+List executions for a workflow:
 
-Search workflows:
-```bash
-POST /api/workflows/search
-{
-  "page": 1,
-  "size": 100,
-  "query": "sales"
-}
+```http
+GET /api/workflows/workflow/{workflowId}/executions?page=1&size=20
 ```
 
-Get workflow executions:
-```bash
-GET /api/workflowExecutions?workflowId=xxx&page=1&size=100
-```
+Execution logs (see the **workflows** OpenAPI operation for required vs optional query fields such as `size`, `page`, and `stepExecutionId`):
 
-Get execution logs:
-```bash
-GET /api/workflowExecutions/{id}/logs?page=1&size=100
+```http
+GET /api/workflows/executions/{executionId}/logs
 ```
 
 ---

@@ -18,8 +18,9 @@ import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_he
  * to spin up a local k8s cluster with the required resources.
  */
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 /**
@@ -30,12 +31,16 @@ test.beforeEach(async ({ page }) => {
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
+/**
+ * Kubernetes onboarding with OTel can be slow — increase test timeout to 10 minutes.
+ */
 test('Otel Kubernetes', async ({
   page,
   onboardingHomePage,
   otelKubernetesFlowPage,
   wiredStreamsSelector,
 }) => {
+  test.setTimeout(10 * 60 * 1000);
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';

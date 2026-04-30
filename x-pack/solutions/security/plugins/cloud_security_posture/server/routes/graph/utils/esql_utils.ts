@@ -114,12 +114,12 @@ export const JSON_OBJECT_END = '"}"';
  * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
  * This is the preferred method for enriching actor and target entities with entity store data.
  *
- * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default')
+ * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default-00001')
  * @returns ESQL statements for LOOKUP JOIN enrichment
  *
  * @example
  * ```typescript
- * buildLookupJoinEsql('.entities.v2.latest.security_default')
+ * buildLookupJoinEsql('.entities.v2.latest.security_default-00001')
  * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
  * ```
  */
@@ -132,7 +132,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntityName    = entity.name
 | RENAME actorEntityType    = entity.type
 | RENAME actorEntitySubType = entity.sub_type
-| RENAME actorHostIp        = host.ip
+| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME actorLookupEntityId = entity.id
 | RENAME actorEntityEngineType = entity.EngineMetadata.Type
 
@@ -141,7 +141,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME targetEntityName    = entity.name
 | RENAME targetEntityType    = entity.type
 | RENAME targetEntitySubType = entity.sub_type
-| RENAME targetHostIp        = host.ip
+| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME targetLookupEntityId = entity.id
 | RENAME targetEntityEngineType = entity.EngineMetadata.Type`;
 };

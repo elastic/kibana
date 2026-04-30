@@ -4,19 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { sloIdSchema } from '../../../schema/slo';
-import { compositeSloDefinitionSchema } from '../../../schema/composite_slo';
+import { z } from '@kbn/zod';
+import {
+  compositeSloIdSchema,
+  compositeSloBaseDefinitionSchema,
+  compositeSloMemberSummarySchema,
+  compositeSloSummarySchema,
+} from '../../../schema/composite_slo';
 
-const getCompositeSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
+const getCompositeSLOParamsSchema = z.object({
+  path: z.object({
+    id: compositeSloIdSchema,
   }),
 });
 
-const getCompositeSLOResponseSchema = compositeSloDefinitionSchema;
+const getCompositeSLOResponseSchema = compositeSloBaseDefinitionSchema.extend({
+  summary: compositeSloSummarySchema,
+  members: z.array(compositeSloMemberSummarySchema),
+});
 
-type GetCompositeSLOResponse = t.OutputOf<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLOResponse = z.infer<typeof getCompositeSLOResponseSchema>;
 
 export { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema };
 export type { GetCompositeSLOResponse };

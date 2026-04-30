@@ -10,6 +10,7 @@
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { MarkdownAttributes } from '../markdown_saved_object';
+import { markdownLibraryItemSchema } from './schema';
 
 // CRU is Create, Read, Update
 export function getMarkdownCRUResponseBody(
@@ -17,7 +18,9 @@ export function getMarkdownCRUResponseBody(
 ) {
   return {
     id: savedObject.id,
-    data: savedObject.attributes as MarkdownAttributes,
+    // Route does not apply defaults to response
+    // Instead, call validate to ensure defaults are applied to response
+    data: markdownLibraryItemSchema.validate(savedObject.attributes),
     meta: getMeta(savedObject),
   };
 }

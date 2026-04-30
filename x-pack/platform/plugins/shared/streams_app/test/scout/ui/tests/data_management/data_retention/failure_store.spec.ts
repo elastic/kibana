@@ -11,6 +11,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
   openRetentionModal,
+  saveFailureStoreChanges,
   saveRetentionChanges,
   setCustomRetention,
   setFailureStoreRetention,
@@ -31,6 +32,8 @@ test.describe('Stream data retention - updating failure store', () => {
       },
       { meta: true }
     );
+    // Ensure logs.otel has a backing data stream (deferred by default) so retention UI renders
+    await apiServices.streams.restoreDataStream('logs.otel');
     await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',
@@ -115,7 +118,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
       // Enable disable lifecycle
       await page.getByTestId('disabledLifecycle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
 
       // Verify infinite retention is shown
       await expect(page.getByTestId('failureStoreRetention-metric').getByText('∞')).toBeVisible();
@@ -134,7 +137,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Enable inherit failure store
       await page.getByTestId('streamFailureStoreEditRetention').click();
       await page.getByTestId('inheritFailureStoreSwitch').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
       await expect(
         page.getByTestId('failureStoreRetention-metric').getByText('30 days')
       ).toBeVisible();
@@ -171,7 +174,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Disable failure store
       await page.getByTestId('streamFailureStoreEditRetention').click();
       await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
       await expect(
         page.getByTestId('disabledFailureStorePanel').getByText('Failure store disabled')
       ).toBeVisible();
@@ -187,7 +190,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Enable failure store again
       await page.getByTestId('streamsAppFailureStoreEnableButton').click();
       await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
       await expect(
         page.getByTestId('failureStoreRetention-metric').getByText('30 days')
       ).toBeVisible();
@@ -212,7 +215,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
       // Enable disable lifecycle
       await page.getByTestId('disabledLifecycle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
 
       // Verify infinite retention is shown
       await expect(page.getByTestId('failureStoreRetention-metric').getByText('∞')).toBeVisible();
@@ -231,7 +234,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Enable inherit failure store
       await page.getByTestId('streamFailureStoreEditRetention').click();
       await page.getByTestId('inheritFailureStoreSwitch').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
       await expect(
         page.getByTestId('failureStoreRetention-metric').getByText('30 days')
       ).toBeVisible();

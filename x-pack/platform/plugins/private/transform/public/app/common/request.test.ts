@@ -243,10 +243,11 @@ describe('Transform: Common', () => {
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',
-      transformSettingsMaxPageSearchSize: 500,
+      transformSettingsMaxPageSearchSize: 5000,
       transformSettingsDocsPerSecond: null,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
+      deferValidation: false,
       touched: true,
       valid: true,
     };
@@ -328,6 +329,7 @@ describe('Transform: Common', () => {
       transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
+      deferValidation: false,
       touched: true,
       valid: true,
     };
@@ -398,7 +400,7 @@ describe('Transform: Common', () => {
   test('getCreateTransformSettingsRequestBody() skips default settings', () => {
     const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: null,
-      transformSettingsMaxPageSearchSize: 500,
+      transformSettingsMaxPageSearchSize: 5000,
     };
 
     const request = getCreateTransformSettingsRequestBody(transformDetailsState);

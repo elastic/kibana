@@ -18,12 +18,14 @@ import type { EntityFilterActions } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 import {
   emitFilterToggle,
+  emitIsOneOfFilterToggle,
   isFilterActiveForScope,
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
   isInitialEntityForScope,
+  emitPinnedEuidToggle,
 } from '../../filters/filter_store';
-import { RELATED_ENTITY } from '../../../common/constants';
+import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 
 /**
  * Hook to handle the entity node expand popover.
@@ -53,12 +55,66 @@ export const useEntityNodeExpandPopover = (
 
       const sourceFields = getSourceFieldsFromNode(node.data);
 
+      const engineType =
+        'documentsData' in node.data &&
+        Array.isArray(node.data.documentsData) &&
+        node.data.documentsData.length > 0
+          ? (
+              node.data.documentsData[0] as {
+                entity?: { engine_type?: string };
+              }
+            ).entity?.engine_type
+          : undefined;
+
+      const getRelatedFieldAndValues = ():
+        | {
+            field: typeof RELATED_USER | typeof RELATED_HOST | typeof RELATED_ENTITY;
+            values: string[];
+          }
+        | undefined => {
+        if (engineType === 'user') {
+          const values = Object.entries(sourceFields ?? {})
+            .filter(([field]) => field.startsWith('user.'))
+            .flatMap(([, value]) => ([] as string[]).concat(value));
+          return { field: RELATED_USER, values };
+        }
+        if (engineType === 'host') {
+          const values = Object.entries(sourceFields ?? {})
+            .filter(([field]) => field.startsWith('host.'))
+            .flatMap(([, value]) => ([] as string[]).concat(value));
+          return { field: RELATED_HOST, values };
+        }
+        const entityFieldValues = Object.entries(sourceFields ?? {})
+          .filter(([field]) => field.startsWith('entity.'))
+          .flatMap(([, value]) => ([] as string[]).concat(value));
+        // Include node.id for backward compatibility with older data that may not have entity.* fields
+        const values = entityFieldValues.includes(node.id)
+          ? entityFieldValues
+          : [...entityFieldValues, node.id];
+        return { field: RELATED_ENTITY, values };
+      };
+
       const entityFilterActions: EntityFilterActions = {
         toggleEntityFilter: (role, action) => {
           for (const [field, value] of Object.entries(sourceFields ?? {})) {
             // Flatten string | string[] to string[] so each value gets its own OR'd phrase filter
             for (const v of ([] as string[]).concat(value)) {
               emitFilterToggle(scopeId, fieldForRole(field, role), v, action);
+            }
+          }
+          if (action === 'show') {
+            emitPinnedEuidToggle(scopeId, node.id, 'show');
+          } else {
+            // Only unpin when no entity filters remain active for either role
+            const hasRemainingFilters = (['actor', 'target'] as const).some((r) =>
+              Object.entries(sourceFields ?? {}).some(([field, value]) =>
+                ([] as string[])
+                  .concat(value)
+                  .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, r), v))
+              )
+            );
+            if (!hasRemainingFilters) {
+              emitPinnedEuidToggle(scopeId, node.id, 'hide');
             }
           }
         },
@@ -68,8 +124,20 @@ export const useEntityNodeExpandPopover = (
               .concat(value)
               .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, role), v))
           ),
-        toggleRelatedEvents: (action) => emitFilterToggle(scopeId, RELATED_ENTITY, node.id, action),
-        isRelatedEventsActive: () => isFilterActiveForScope(scopeId, RELATED_ENTITY, node.id),
+        toggleRelatedEvents: (action) => {
+          const related = getRelatedFieldAndValues();
+          if (!related) return;
+          if (related.values.length === 1) {
+            emitFilterToggle(scopeId, related.field, related.values[0], action);
+          } else if (related.values.length > 1) {
+            emitIsOneOfFilterToggle(scopeId, related.field, related.values, action);
+          }
+        },
+        isRelatedEventsActive: () => {
+          const related = getRelatedFieldAndValues();
+          if (!related) return false;
+          return isFilterActiveForScope(scopeId, related.field, related.values);
+        },
       };
 
       return getEntityExpandItems({

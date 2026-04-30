@@ -10,8 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  ALL_SAVED_OBJECT_INDICES,
+  type ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
 import {
   getAggregatedTypesDocuments,
   addExcludedTypesToBoolQuery,
@@ -20,56 +22,42 @@ import {
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  kibanaIndex: string;
   kibanaVersion: string;
 }
 
 const getKnownTypes = (typeRegistry: ISavedObjectTypeRegistry) =>
   typeRegistry.getAllTypes().map((type) => type.name);
 
-const getTargetIndices = ({
-  types,
-  typeRegistry,
-  kibanaVersion,
-  kibanaIndex,
-}: {
-  types: string[];
-  typeRegistry: ISavedObjectTypeRegistry;
-  kibanaIndex: string;
-  kibanaVersion: string;
-}) => {
-  return [
-    ...new Set(
-      types.map((type) =>
-        getIndexForType({
-          type,
-          typeRegistry,
-          kibanaVersion,
-          defaultIndex: kibanaIndex,
-        })
-      )
-    ),
-  ];
+/**
+ * Returns the versioned aliases for ALL known Kibana SO indices.
+ *
+ * Using the canonical {@link ALL_SAVED_OBJECT_INDICES} list instead of deriving indices from
+ * registered types ensures that documents from disabled plugins (whose types are therefore not
+ * registered) are also checked. For example, if `cloudSecurityPosture` is disabled because
+ * `fleet` is disabled, its saved object types are not registered, but its documents still exist
+ * in `.kibana_security_solution`. Without this explicit list, that index would be skipped
+ * entirely if no other registered type happened to use it.
+ *
+ * Note: some of these version-aliased indices may not exist (e.g. if a plugin was never
+ * loaded), so callers should use `ignore_unavailable: true` in their ES requests.
+ */
+const getTargetIndices = ({ kibanaVersion }: { kibanaVersion: string }) => {
+  return ALL_SAVED_OBJECT_INDICES.map((index) => `${index}_${kibanaVersion}`);
 };
 
 const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
-  kibanaIndex,
   kibanaVersion,
 }: UnknownTypesDeprecationOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
-  const targetIndices = getTargetIndices({
-    types: knownTypes,
-    typeRegistry,
-    kibanaIndex,
-    kibanaVersion,
-  });
+  const targetIndices = getTargetIndices({ kibanaVersion });
   const excludeRegisteredTypes = addExcludedTypesToBoolQuery(knownTypes);
   return await getAggregatedTypesDocuments(
     esClient.asInternalUser,
     targetIndices,
-    excludeRegisteredTypes
+    excludeRegisteredTypes,
+    { ignoreUnavailable: true }
   );
 };
 
@@ -119,28 +107,22 @@ export const getUnknownTypesDeprecations = async (
 interface DeleteUnknownTypesOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  kibanaIndex: string;
   kibanaVersion: string;
 }
 
 export const deleteUnknownTypeObjects = async ({
   esClient,
   typeRegistry,
-  kibanaIndex,
   kibanaVersion,
 }: DeleteUnknownTypesOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
-  const targetIndices = getTargetIndices({
-    types: knownTypes,
-    typeRegistry,
-    kibanaIndex,
-    kibanaVersion,
-  });
+  const targetIndices = getTargetIndices({ kibanaVersion });
   const nonRegisteredTypesQuery = addExcludedTypesToBoolQuery(knownTypes);
 
   await esClient.asInternalUser.deleteByQuery({
     index: targetIndices,
     wait_for_completion: false,
     query: nonRegisteredTypesQuery,
+    ignore_unavailable: true,
   });
 };

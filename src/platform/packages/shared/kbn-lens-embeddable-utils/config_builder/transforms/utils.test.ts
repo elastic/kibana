@@ -17,6 +17,7 @@ import {
   buildDataSourceState,
   isSingleLayer,
   generateLayer,
+  generateApiLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
 } from './utils';
@@ -28,7 +29,7 @@ import type {
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { LensApiState, MetricState } from '../schema';
+import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 
@@ -82,17 +83,6 @@ describe('getDatasetIndex', () => {
         "timeFieldName": undefined,
       }
     `);
-  });
-
-  test('returns undefined if no query or iundex provided', () => {
-    const result = getDataSourceIndex({
-      type: 'table',
-      table: {
-        columns: [],
-        rows: [],
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`undefined`);
   });
 });
 
@@ -254,7 +244,7 @@ describe('buildDatasourceStates', () => {
           },
         },
         sampling: 1,
-        ignore_global_filters: false,
+        ignore_global_filters: true,
       },
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
@@ -271,6 +261,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
+                "ignoreGlobalFilters": true,
                 "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
@@ -291,6 +282,22 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+});
+
+describe('generateApiLayer', () => {
+  test('returns text based ignore_global_filters from layer state', () => {
+    const result = generateApiLayer({
+      index: 'test-index',
+      query: { esql: 'FROM test-index' },
+      columns: [],
+      ignoreGlobalFilters: true,
+    });
+
+    expect(result).toEqual({
+      sampling: 1,
+      ignore_global_filters: true,
+    });
   });
 });
 
@@ -471,7 +478,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as MetricState;
+    } as MetricConfig;
 
     const result = generateLayer('layer_1', options);
 
@@ -490,7 +497,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as MetricState;
+    } as MetricConfig;
 
     const result = generateLayer('layer_0', options);
 
@@ -509,7 +516,7 @@ describe('generateLayer', () => {
 
 describe('filtersAndQueryToLensState', () => {
   test('converts API filters and query to Lens state format', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
       data_source: {
@@ -562,7 +569,7 @@ describe('filtersAndQueryToLensState', () => {
   });
 
   test('handles missing filters and query gracefully', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
       data_source: {
@@ -594,7 +601,7 @@ describe('filtersAndQueryToLensState', () => {
   });
 
   test('extracts filter data view references when applicable', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
       data_source: {
