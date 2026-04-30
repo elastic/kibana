@@ -31,6 +31,7 @@ import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
+import { useScrollToOrigin } from './use_scroll_to_origin';
 import { WaterfallLegends } from './waterfall_legends';
 import { WaterfallAccordionButton } from './waterfall_accordion_button';
 import { WaterfallSizeWarning } from './waterfall_size_warning';
@@ -161,6 +162,9 @@ function TraceWaterfallComponent() {
     scrollStrategy,
   } = useTraceWaterfallContext();
 
+  const [isContextSpanVisible, setIsContextSpanVisible] = useState(true);
+  const scrollToOriginRef = useRef<() => void>(() => {});
+
   const showScrollToOrigin = scrollStrategy === 'parent' && (contextSpanIds?.length ?? 0) > 0;
   const showToolbar = showCriticalPathControl || showScrollToOrigin;
 
@@ -192,7 +196,10 @@ function TraceWaterfallComponent() {
                   margin-left: auto;
                 `}
               >
-                <ScrollToOriginButton />
+                <ScrollToOriginButton
+                  isDisabled={isContextSpanVisible}
+                  onClick={() => scrollToOriginRef.current()}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -271,7 +278,10 @@ function TraceWaterfallComponent() {
               min-height: 0;
             `}
           >
-            <TraceTree />
+            <TraceTree
+              setIsContextSpanVisible={setIsContextSpanVisible}
+              scrollToOriginRef={scrollToOriginRef}
+            />
           </div>
         </div>
       </EuiFlexItem>
@@ -279,7 +289,13 @@ function TraceWaterfallComponent() {
   );
 }
 
-function TraceTree() {
+function TraceTree({
+  setIsContextSpanVisible,
+  scrollToOriginRef,
+}: {
+  setIsContextSpanVisible: (visible: boolean) => void;
+  scrollToOriginRef: React.MutableRefObject<() => void>;
+}) {
   const {
     traceWaterfallMap,
     traceWaterfall,
@@ -327,6 +343,14 @@ function TraceTree() {
     return index >= 0 ? index : undefined;
   }, [scrollToContextOnMount, scrollStrategy, scrollComplete, contextSpanIds, visibleList]);
 
+  const { onScrolled } = useScrollToOrigin({
+    contextSpanIds,
+    visibleList,
+    listRef,
+    scrollToOriginRef,
+    setIsContextSpanVisible,
+  });
+
   const onRowsRendered = useCallback(
     ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
       if (
@@ -336,8 +360,9 @@ function TraceTree() {
       ) {
         setScrollComplete(true);
       }
+      onScrolled({ startIndex, stopIndex });
     },
-    [scrollToIndex]
+    [scrollToIndex, onScrolled]
   );
 
   const rowRenderer: ListRowRenderer = useCallback(

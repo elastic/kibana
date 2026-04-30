@@ -21,18 +21,29 @@ const disabledTooltip = i18n.translate('xpack.apm.traceWaterfall.scrollToOrigin.
   defaultMessage: 'Originally selected span is visible',
 });
 
-// TODO: add isDisabled and onClick in phase 2
-export function ScrollToOriginButton(props: {}) {
+export function ScrollToOriginButton({
+  isDisabled,
+  onClick,
+}: {
+  isDisabled: boolean;
+  onClick: () => void;
+}) {
   return (
-    <EuiToolTip content={activeTooltip}>
-      <EuiButtonEmpty
-        size="xs"
-        iconType="arrowLeft"
-        onClick={() => {}}
-        data-test-subj="waterfallScrollToOriginButton"
-      >
-        {label}
-      </EuiButtonEmpty>
+    <EuiToolTip content={isDisabled ? disabledTooltip : activeTooltip}>
+      <span tabIndex={0} style={{ display: 'inline-block' }}>
+        <EuiButtonEmpty
+          size="xs"
+          iconType="sortLeft"
+          isDisabled={isDisabled}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            onClick();
+            e.currentTarget.blur();
+          }}
+          data-test-subj="waterfallScrollToOriginButton"
+        >
+          {label}
+        </EuiButtonEmpty>
+      </span>
     </EuiToolTip>
   );
 }
