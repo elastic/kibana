@@ -11,6 +11,8 @@ import { parse as yamlLoad } from 'yaml';
 import {
   getAgentImageConfig,
   expandAgentQueue,
+  getOptimalSpotZones,
+  SPOT_ZONE_POOL,
   DEFAULT_AGENT_IMAGE_CONFIG,
   ELASTIC_IMAGES_QA_PROJECT,
   FIPS_140_3_IMAGE,
@@ -128,8 +130,83 @@ describe('agent_images', () => {
     });
   });
 
+  describe('getOptimalSpotZones', () => {
+    const utcDate = (hour: number, dayOfWeek: number = 2): Date => {
+      const d = new Date(Date.UTC(2026, 3, 28 + dayOfWeek, hour, 0, 0));
+      return d;
+    };
+
+    it('always returns at least 6 zones regardless of time', () => {
+      for (let hour = 0; hour < 24; hour++) {
+        const zones = getOptimalSpotZones(utcDate(hour)).split(',');
+        expect(zones.length).toBeGreaterThanOrEqual(6);
+      }
+    });
+
+    it('only selects zones from the known pool', () => {
+      const poolZones = new Set(SPOT_ZONE_POOL.map((e) => e.zone));
+      for (let hour = 0; hour < 24; hour++) {
+        const zones = getOptimalSpotZones(utcDate(hour)).split(',');
+        for (const z of zones) {
+          expect(poolZones).toContain(z);
+        }
+      }
+    });
+
+    it('always includes us-central1 zones (largest region)', () => {
+      for (let hour = 0; hour < 24; hour++) {
+        const zones = getOptimalSpotZones(utcDate(hour));
+        expect(zones).toContain('us-central1');
+      }
+    });
+
+    it('prefers off-peak zones — EU zones appear when US is in business hours', () => {
+      // UTC 18 → US-Central local 12pm (peak), EU local 7pm (evening/off-peak)
+      const zones = getOptimalSpotZones(utcDate(18));
+      expect(zones).toContain('europe-west1');
+    });
+
+    it('includes Asia zones during US business hours (Asia is in deep night)', () => {
+      // UTC 16 → US-Central 10am (peak), Taiwan midnight, Tokyo 1am (deep off-peak)
+      const zones = getOptimalSpotZones(utcDate(16));
+      expect(zones).toContain('asia-east1');
+      expect(zones).toContain('asia-northeast1');
+    });
+
+    it('omits EU zones when both US and EU are off-peak and US alone is sufficient', () => {
+      // UTC 4 → US-Central local 10pm (late evening), EU local 5am (deep night)
+      // Both are off-peak, but US zones dominate on capacity and fill min slots
+      const zones = getOptimalSpotZones(utcDate(4)).split(',');
+      const usZones = zones.filter((z) => z.startsWith('us-'));
+      // US zones should be the majority since they have the highest capacity scores
+      expect(usZones.length).toBeGreaterThanOrEqual(6);
+    });
+
+    it('returns more zones on weekends due to weekend capacity boost', () => {
+      const weekday = getOptimalSpotZones(utcDate(16, 2)).split(','); // Tuesday
+      const weekend = getOptimalSpotZones(utcDate(16, 6)).split(','); // Saturday
+      expect(weekend.length).toBeGreaterThanOrEqual(weekday.length);
+    });
+
+    it('orders zones by score (best first)', () => {
+      // UTC 3 → US is deep night (high score), EU is early morning
+      const zones = getOptimalSpotZones(utcDate(3)).split(',');
+      // us-central1 (30.1% capacity) should come before smaller regions
+      const firstZone = zones[0];
+      expect(firstZone).toMatch(/^us-central1/);
+    });
+
+    it('spreads across multiple regions (not all in one region)', () => {
+      for (let hour = 0; hour < 24; hour++) {
+        const zones = getOptimalSpotZones(utcDate(hour)).split(',');
+        const regions = new Set(zones.map((z) => z.replace(/-[a-z]$/, '')));
+        expect(regions.size).toBeGreaterThanOrEqual(3);
+      }
+    });
+  });
+
   describe('expandAgentQueue', () => {
-    it('returns spot config for default queue', () => {
+    it('returns spot config for default queue with spotZones', () => {
       const config = expandAgentQueue();
 
       expect(config).toEqual(
@@ -139,9 +216,11 @@ describe('agent_images', () => {
           provider: DEFAULT_AGENT_IMAGE_CONFIG.provider,
         })
       );
+      expect(config).toHaveProperty('spotZones');
+      expect((config as Record<string, unknown>).spotZones).toContain('us-central1');
     });
 
-    it('returns virt config for virt queue', () => {
+    it('returns virt config for virt queue with spotZones', () => {
       const config = expandAgentQueue('n2-4-virt');
 
       expect(config).toEqual(
@@ -150,6 +229,7 @@ describe('agent_images', () => {
           enableNestedVirtualization: true,
         })
       );
+      expect(config).toHaveProperty('spotZones');
     });
 
     it('uses custom disk size when provided', () => {
@@ -169,6 +249,7 @@ describe('agent_images', () => {
       );
       expect(config).not.toHaveProperty('preemptible');
       expect(config).not.toHaveProperty('enableNestedVirtualization');
+      expect(config).not.toHaveProperty('spotZones');
     });
   });
 });

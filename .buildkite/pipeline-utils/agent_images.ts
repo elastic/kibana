@@ -80,9 +80,89 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   return config;
 }
 
+// Pool of candidate zones in the largest GCP regions for n2-standard-4 spot.
+// Each entry carries the metadata needed to score it at pipeline-generation time.
+//   capacityPct — region's share of all GCP public IPs (proxy for excess capacity)
+//   utcOffset  — representative UTC offset (ignores DST; ±1 h doesn't shift peaks meaningfully)
+interface SpotZoneEntry {
+  zone: string;
+  capacityPct: number;
+  utcOffset: number;
+}
+
+const SPOT_ZONE_POOL: SpotZoneEntry[] = [
+  // US regions — together ~46% of all GCP capacity, spot $0.057/hr
+  { zone: 'us-central1-a', capacityPct: 30.1, utcOffset: -6 },
+  { zone: 'us-central1-f', capacityPct: 30.1, utcOffset: -6 },
+  { zone: 'us-east1-b', capacityPct: 8.3, utcOffset: -5 },
+  { zone: 'us-east1-c', capacityPct: 8.3, utcOffset: -5 },
+  { zone: 'us-west1-a', capacityPct: 7.5, utcOffset: -8 },
+  { zone: 'us-west1-b', capacityPct: 7.5, utcOffset: -8 },
+  // EU regions — together ~12% of GCP capacity, spot $0.032–$0.074/hr
+  { zone: 'europe-west1-b', capacityPct: 7.1, utcOffset: 1 },
+  { zone: 'europe-west1-c', capacityPct: 7.1, utcOffset: 1 },
+  { zone: 'europe-west4-a', capacityPct: 4.9, utcOffset: 1 },
+  { zone: 'europe-west4-b', capacityPct: 4.9, utcOffset: 1 },
+  // Asia regions — together ~5.5% of GCP capacity, spot $0.059–$0.060/hr
+  // Opposite timezone to US: deep off-peak when US devs are working.
+  { zone: 'asia-east1-a', capacityPct: 3.0, utcOffset: 8 },
+  { zone: 'asia-east1-b', capacityPct: 3.0, utcOffset: 8 },
+  { zone: 'asia-northeast1-a', capacityPct: 2.5, utcOffset: 9 },
+  { zone: 'asia-northeast1-b', capacityPct: 2.5, utcOffset: 9 },
+];
+
+const MIN_ZONES = 6;
+const INCLUSION_SCORE_RATIO = 0.5;
+
+// Score a zone by how much excess spot capacity it is likely to have right now.
+// Higher score = deeper off-peak + larger region = lower preemption risk.
+const scoreZone = (entry: SpotZoneEntry, utcHour: number, isWeekend: boolean): number => {
+  const localHour = ((utcHour + entry.utcOffset) % 24 + 24) % 24;
+
+  let offPeakFactor: number;
+  if (localHour >= 0 && localHour < 6) {
+    offPeakFactor = 1.0; // deep night — maximum excess capacity
+  } else if (localHour >= 6 && localHour < 9) {
+    offPeakFactor = 0.8; // early morning — still quiet
+  } else if (localHour >= 9 && localHour < 17) {
+    offPeakFactor = 0.3; // business hours — peak demand
+  } else if (localHour >= 17 && localHour < 21) {
+    offPeakFactor = 0.6; // evening — demand tapering
+  } else {
+    offPeakFactor = 0.85; // late evening — approaching off-peak
+  }
+
+  const weekendBoost = isWeekend ? 1.3 : 1.0;
+  return entry.capacityPct * offPeakFactor * weekendBoost;
+};
+
+// Select and order spot zones based on current time and day.
+// GCP best practice: "nights and weekends are the best times to run large
+// clusters of Spot VMs." We score every candidate zone by
+// regionCapacity × offPeakFactor × weekendBoost, then pick at least
+// MIN_ZONES and any additional zone scoring within INCLUSION_SCORE_RATIO
+// of the cutoff — so the list naturally grows when multiple regions are
+// off-peak simultaneously (e.g. weekday night in the US → EU still
+// qualifies) and shrinks when few zones have excess capacity.
+const getOptimalSpotZones = (now: Date = new Date()): string => {
+  const utcHour = now.getUTCHours();
+  const dayOfWeek = now.getUTCDay();
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  const scored = SPOT_ZONE_POOL.map((entry) => ({
+    zone: entry.zone,
+    score: scoreZone(entry, utcHour, isWeekend),
+  })).sort((a, b) => b.score - a.score);
+
+  const cutoffScore = scored[MIN_ZONES - 1].score * INCLUSION_SCORE_RATIO;
+  const selected = scored.filter((z, i) => i < MIN_ZONES || z.score >= cutoffScore);
+
+  return selected.map((z) => z.zone).join(',');
+};
+
 const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
-  const zonesToUse = 'southamerica-east1-c,asia-south2-a,us-central1-f';
+  const zonesToUse = getOptimalSpotZones();
   const additionalProps =
     {
       spot: { preemptible: true, spotZones: zonesToUse },
@@ -97,4 +177,4 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) 
   };
 };
 
-export { getAgentImageConfig, expandAgentQueue };
+export { getAgentImageConfig, expandAgentQueue, getOptimalSpotZones, SPOT_ZONE_POOL };
