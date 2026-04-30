@@ -28,6 +28,7 @@ import type {
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import type { OsqueryIcon } from './components/osquery_icon';
 
 /**
  * Minimal DataProvider type for timeline integration within the osquery plugin.
@@ -58,6 +59,7 @@ export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResult: ReturnType<typeof getLazyOsqueryResult>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
+  OsqueryIcon: typeof OsqueryIcon;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
