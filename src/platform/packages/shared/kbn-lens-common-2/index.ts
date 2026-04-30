@@ -71,10 +71,14 @@ export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
  * - Panel settings
  * - other props from the embeddable
  */
-export type LensSerializedAPIConfig =
-  | LensByRefSerializedAPIConfig
-  | LensByValueSerializedAPIConfig
-  | LensByValueFlattenedSerializedAPIConfig;
+export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;
+
+/**
+ * The full wire-level serialized type that includes the flattened lens by value variant.
+ * Used at serialization/deserialization boundaries where the panel config
+ * may arrive in the flat wire shape (with `lens.apiFormat` enabled).
+ */
+export type LensWireAPIConfig = LensSerializedAPIConfig | LensByValueFlattenedSerializedAPIConfig;
 
 export interface LegacyLensStateApi {
   /**
@@ -86,7 +90,7 @@ export interface LegacyLensStateApi {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedAPIConfig> &
+  DefaultEmbeddableApi<LensWireAPIConfig> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -108,7 +112,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
+    HasLibraryTransforms<LensWireAPIConfig, LensWireAPIConfig> &
     // Let the container know the view mode
     PublishesViewMode &
     // Let the container know the saved object id

@@ -22,7 +22,7 @@ import type {
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
 
 export interface StateManagementConfig {
@@ -52,7 +52,7 @@ export function initializeStateManagement(
 
   const resolveAttributes = (
     value: LensSerializedState['attributes'] | undefined,
-    state?: LensSerializedAPIConfig
+    state?: LensWireAPIConfig
   ) => {
     if (value !== undefined) return value;
     if (state && 'attributes' in state && state.attributes) {

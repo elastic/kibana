@@ -17,6 +17,7 @@ import type {
   LensByValueFlattenedSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
   LensSerializedAPIConfig,
+  LensWireAPIConfig,
 } from '@kbn/lens-common-2';
 
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
@@ -46,15 +47,19 @@ export function isByRefLensConfig(
 }
 
 export function isFlattenedAPIConfig(
-  config: FlattenedLensByValuePanelSchema | LensSerializedAPIConfig | LensByValueSerializedState
-): config is FlattenedLensByValuePanelSchema {
+  config:
+    | FlattenedLensByValuePanelSchema
+    | LensWireAPIConfig
+    | LensSerializedAPIConfig
+    | LensByValueSerializedState
+): config is FlattenedLensByValuePanelSchema | LensByValueFlattenedSerializedAPIConfig {
   return (
     typeof config === 'object' && config !== null && 'type' in config && !('attributes' in config)
   );
 }
 
 export function unflattenAPIConfig(
-  config: FlattenedLensByValuePanelSchema
+  config: FlattenedLensByValuePanelSchema | LensByValueFlattenedSerializedAPIConfig
 ): LensByValueSerializedAPIConfig {
   const { title, description, hide_title, hide_border, time_range, drilldowns, ...attributes } =
     config;

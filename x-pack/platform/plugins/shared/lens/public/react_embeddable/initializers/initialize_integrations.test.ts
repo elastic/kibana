@@ -42,7 +42,7 @@ describe('Dashboard services API', () => {
       const api = setupIntegrationsApi({ attributes });
       const serializedState = api.serializeState();
       expect(serializedState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
-      expect(serializedState.ref_id).toBeUndefined();
+      expect((serializedState as { ref_id?: string }).ref_id).toBeUndefined();
     });
 
     it('should serialize state for a by-reference panel', async () => {
