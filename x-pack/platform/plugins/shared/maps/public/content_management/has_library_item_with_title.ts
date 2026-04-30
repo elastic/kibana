@@ -7,9 +7,7 @@
 
 import { getMapClient } from './maps_client';
 
-export const hasLibraryItemWithTitle = async (
-  title: string
-) => {
+export const hasLibraryItemWithTitle = async (title: string) => {
   const { hits } = await getMapClient().search(
     {
       text: `"${title}"`,

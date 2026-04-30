@@ -17,9 +17,7 @@ export interface HasLibraryTransforms<
   /**
    * @returns {Promise<boolean>}
    */
-  hasLibraryItemWithTitle: (
-    title: string,
-  ) => Promise<boolean>;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
 
   /**
    *

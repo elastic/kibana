@@ -79,6 +79,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
 import type { LensSavedObjectAttributes, StructuredDatasourceStates } from './embeddable/types';
@@ -94,7 +95,6 @@ import type {
 } from './visualizations/types';
 import type { DatasourceStates, GeneralDatasourceState } from './datasources/types';
 import type { LENS_ITEM_LATEST_VERSION } from './content_management/constants';
-import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 
 export interface LensInspector {
   getInspectorAdapters: () => Adapters;

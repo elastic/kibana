@@ -58,5 +58,5 @@ export class LensDocumentService implements ILensDocumentService {
     });
 
     return response.some((item) => item.title.toLowerCase() === title.toLowerCase());
-  }
+  };
 }

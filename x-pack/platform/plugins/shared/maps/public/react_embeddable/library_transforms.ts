@@ -54,6 +54,6 @@ export function initializeLibraryTransforms(
     },
     getSerializedStateByReference: serializeByReference,
     getSerializedStateByValue: serializeByValue,
-    hasLibraryItemWithTitle
+    hasLibraryItemWithTitle,
   };
 }
