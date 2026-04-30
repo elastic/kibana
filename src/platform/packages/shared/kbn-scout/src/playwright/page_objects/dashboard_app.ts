@@ -21,8 +21,6 @@ type CommonlyUsedTimeRange =
   | 'Last_90 days'
   | 'Last_1 year';
 
-const EXTENDED_TIMEOUT = 45_000;
-
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
@@ -141,7 +139,7 @@ export class DashboardApp {
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     await this.page.gotoApp('dashboards', { hash: '/create' });
-    await expect(this.addTopNavButton).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(this.addTopNavButton).toBeVisible({ timeout: 20_000 });
   }
 
   private getSettingsFlyout() {
@@ -288,7 +286,7 @@ export class DashboardApp {
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
-      timeout: EXTENDED_TIMEOUT,
+      timeout: 30_000,
     });
   }
 
@@ -320,7 +318,7 @@ export class DashboardApp {
 
     // Wait for search results to load
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
-      timeout: EXTENDED_TIMEOUT,
+      timeout: 30_000,
     });
   }
 
@@ -426,7 +424,7 @@ export class DashboardApp {
   async waitForPanelsToLoad(
     expectedCount: number,
     options: { timeout: number; selector: string } = {
-      timeout: EXTENDED_TIMEOUT,
+      timeout: 20000,
       selector: '[data-test-subj="embeddablePanel"][data-render-complete="true"]',
     }
   ) {
