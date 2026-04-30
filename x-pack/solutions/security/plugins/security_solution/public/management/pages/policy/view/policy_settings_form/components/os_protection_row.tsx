@@ -19,7 +19,7 @@ import {
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { OS_TITLES } from '../../../../../common/translations';
 
-const OS_LABEL_WIDTH_PX = 120;
+const OS_LABEL_WIDTH_PX = 80;
 
 export interface OsProtectionRowProps {
   os: OperatingSystem;

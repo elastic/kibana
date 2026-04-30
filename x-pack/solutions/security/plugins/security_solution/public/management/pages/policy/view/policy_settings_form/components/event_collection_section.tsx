@@ -221,12 +221,13 @@ export const EventCollectionSection = memo<EventCollectionSectionProps>(
             </EuiFlexGroup>
 
             <EuiPanel
-              hasBorder
+              hasBorder={false}
               hasShadow={false}
               paddingSize="none"
               color="subdued"
               css={css`
-                border-color: ${euiTheme.colors.borderBaseSubdued};
+                border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                border-radius: ${euiTheme.border.radius.medium};
                 padding-block: ${euiTheme.size.s};
                 padding-inline: ${euiTheme.size.m};
               `}

@@ -11,7 +11,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSelect, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useDeviceControlSectionSelected } from '../../hooks/use_device_control_section_selected';
-import { policySectionDropdownWrapperCss } from '../policy_section_layout';
+import { policySectionDeviceControlDropdownWrapperCss } from '../policy_section_layout';
 import { OS_TITLES } from '../../../../../../common/translations';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
@@ -248,7 +248,7 @@ const OsAccessLevelSelect = memo<OsAccessLevelSelectProps>(
     );
 
     return (
-      <div css={policySectionDropdownWrapperCss}>
+      <div css={policySectionDeviceControlDropdownWrapperCss}>
         <EuiSelect
           options={ACCESS_LEVEL_OPTIONS}
           value={currentLevel}
