@@ -179,13 +179,9 @@ export class EditJobDetailsTabUI extends Component {
       mmlHelpText,
     } = this.state;
 
-    const { datafeedRunning, jobClosed } = this.props;
+    const { datafeedRunning, jobClosed, hasDatafeed } = this.props;
     const canApplyEstimatedMml =
-      mmlEstimation !== undefined &&
-      mmlEstimation !== '' &&
-      mml !== mmlEstimation &&
-      !datafeedRunning &&
-      jobClosed;
+      mml !== mmlEstimation && !datafeedRunning && jobClosed && hasDatafeed;
 
     let mmlEstimationHelpText = null;
     if (canApplyEstimatedMml) {
@@ -206,7 +202,6 @@ export class EditJobDetailsTabUI extends Component {
               size="xs"
               flush="left"
               onClick={this.onApplyMmlEstimation}
-              isDisabled={!canApplyEstimatedMml}
               css={{ verticalAlign: 'initial' }}
             >
               <FormattedMessage

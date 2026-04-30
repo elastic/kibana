@@ -188,14 +188,16 @@ export class EditJobFlyoutUI extends Component {
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
     const jobClosed = job.state === JOB_STATE.CLOSED;
 
-    this.estimateModelMemoryLimit({
-      earliestMs: job.data_counts.earliest_record_timestamp,
-      latestMs: job.data_counts.latest_record_timestamp,
-      indexPattern: job.datafeed_config.indices.join(','),
-      query: job.datafeed_config.query,
-      timeFieldName: job.data_description.time_field,
-      analysisConfig: job.analysis_config,
-    });
+    if (jobClosed && job.datafeed_config && job.data_counts) {
+      this.estimateModelMemoryLimit({
+        earliestMs: job.data_counts.earliest_record_timestamp,
+        latestMs: job.data_counts.latest_record_timestamp,
+        indexPattern: job.datafeed_config.indices.join(','),
+        query: job.datafeed_config.query,
+        timeFieldName: job.data_description.time_field,
+        analysisConfig: job.analysis_config,
+      });
+    }
 
     this.setState({
       job,
@@ -370,6 +372,7 @@ export class EditJobFlyoutUI extends Component {
         datafeedRunning,
         jobClosed,
         modelMemoryEstimation,
+        hasDatafeed,
       } = this.state;
 
       const tabs = [
@@ -393,6 +396,7 @@ export class EditJobFlyoutUI extends Component {
               jobGroupsValidationError={jobGroupsValidationError}
               jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
               modelMemoryEstimation={modelMemoryEstimation}
+              hasDatafeed={hasDatafeed}
             />
           ),
         },
