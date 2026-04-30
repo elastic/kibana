@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { v4 as generateId } from 'uuid';
+import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
 
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-
-import { PhaseTracker } from './phase_tracker';
+import type { HasSerializedChildState } from '@kbn/presentation-publishing';
+import useAsync from 'react-use/lib/useAsync';
+import { PanelLoader } from '@kbn/panel-loader';
+import { useEuiTheme } from '@elastic/eui';
+import type { PresentationPanelProps } from './panel_component/types';
+import type { DefaultEmbeddableApi } from './types';
+import { untilPluginStartServicesReady } from '../kibana_services';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
-import type { SerializedDrilldowns } from '../../server';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -40,110 +38,70 @@ export const EmbeddableRenderer = <
   maybeId?: string;
   getParentApi: () => ParentApi;
   onApiAvailable?: (api: Api) => void;
-  panelProps?: Pick<
-    PresentationPanelProps<Api>,
-    | 'showShadow'
-    | 'showBorder'
-    | 'showBadges'
-    | 'showNotifications'
-    | 'hideLoader'
-    | 'hideHeader'
-    | 'hideInspector'
-    | 'setDragHandles'
-    | 'getActions'
-  >;
+  panelProps?: Omit<PresentationPanelProps<Api>, 'Component' | 'componentApi'>;
   hidePanelChrome?: boolean;
 }) => {
-  const phaseTracker = useRef(new PhaseTracker());
+  const { euiTheme } = useEuiTheme();
+  const { loading, value, error } = useAsync(async () => {
+    const startTime = performance.now();
 
-  const getComponent = useCallback(
-    async () => {
-      const uuid = maybeId ?? generateId();
+    const [, factory, { buildEmbeddable, PhaseTracker, PresentationPanel }] = await Promise.all([
+      untilPluginStartServicesReady(),
+      getReactEmbeddableFactory<SerializedState, Api>(type),
+      import('../async_module'),
+    ]);
 
-      /**
-       * Build the embeddable
-       */
-      const parentApi = getParentApi();
+    const phaseTracker = new PhaseTracker(startTime);
 
-      const buildEmbeddable = async () => {
-        const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
+    const { Component, componentApi } = await buildEmbeddable<SerializedState, Api>({
+      factory,
+      maybeId,
+      parentApi: getParentApi(),
+      phaseTracker,
+      type,
+    });
 
-        const finalizeApi = (apiRegistration: EmbeddableApiRegistration<SerializedState, Api>) => {
-          const hasLockedHoverActions$ = new BehaviorSubject(false);
-          const panelCapabilitiesDefaults: HasPanelCapabilities = {
-            isExpandable: true,
-            isDuplicable: true,
-            isCustomizable: true,
-            isPinnable: false,
-          };
-          return {
-            // Spread default panel capabilities first, allow apiRegistration to override them
-            ...panelCapabilitiesDefaults,
-            ...apiRegistration,
-            uuid,
-            phase$: phaseTracker.current.getPhase$(),
-            parentApi,
-            hasLockedHoverActions$,
-            lockHoverActions: (lock: boolean) => {
-              hasLockedHoverActions$.next(lock);
-            },
-            type: factory.type,
-          } as unknown as Api;
-        };
+    phaseTracker.trackPhaseEvents(componentApi);
+    onApiAvailable?.(componentApi);
 
-        const initialState = parentApi.getSerializedStateForChild(uuid) ?? ({} as SerializedState);
-        const { api, Component } = await factory.buildEmbeddable({
-          initialState,
-          finalizeApi,
-          uuid,
-          parentApi,
-          initializeDrilldownsManager: async (
-            embeddableUuid: string,
-            state: SerializedDrilldowns
-          ) => {
-            const { initializeDrilldownsManager } = await import('../async_module');
-            return initializeDrilldownsManager(embeddableUuid, state);
-          },
-        });
+    return {
+      Component,
+      componentApi,
+      Panel: PresentationPanel,
+      phaseTracker,
+    };
+    // Ancestry chain is expected to use 'key' attribute to reset DOM and state
+    // when unwrappedComponent needs to be re-loaded
+  }, [type]);
 
-        phaseTracker.current.trackPhaseEvents(uuid, api);
+  useEffect(() => {
+    return () => {
+      value?.phaseTracker.cleanup();
+    };
+  }, [value]);
 
-        return { api, Component };
-      };
+  if (loading)
+    return panelProps?.hideLoader ? null : (
+      <PanelLoader
+        showShadow={panelProps?.showShadow}
+        showBorder={panelProps?.showBorder}
+        css={css`
+          border-radius: ${euiTheme.border.radius.medium};
+        `}
+        dataTestSubj="embeddablePanelLoadingIndicator"
+      />
+    );
 
-      try {
-        const { api, Component } = await buildEmbeddable();
-        onApiAvailable?.(api);
-        return { componentApi: api, Component };
-      } catch (e) {
-        /**
-         * critical error encountered when trying to build the api / embeddable;
-         * since no API is available, create a dummy API that allows the panel to be deleted
-         * */
-        const errorApi = {
-          uuid,
-          blockingError$: new BehaviorSubject(e),
-        } as unknown as Api;
-        if (apiIsPresentationContainer(parentApi)) {
-          errorApi.parentApi = parentApi;
-        }
-        onApiAvailable?.(errorApi);
-        return { componentApi: errorApi, Component: () => <span /> };
-      }
-    },
-    /**
-     * Disabling exhaustive deps because we do not want to re-fetch the component
-     * from the embeddable registry unless the type changes.
-     */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [type]
-  );
+  if (error || !value) {
+    return <div>{error?.message}</div>;
+  }
 
   return (
-    <PresentationPanel<Api, {}>
+    <value.Panel<Api, {}>
+      Component={value.Component}
+      componentApi={value.componentApi}
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
-      getComponent={getComponent}
     />
   );
 };
