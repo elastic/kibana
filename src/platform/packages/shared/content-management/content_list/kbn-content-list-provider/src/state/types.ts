@@ -96,6 +96,35 @@ export interface ContentListQueryData {
   isFetching: boolean;
   /** Error from the most recent fetch attempt. */
   error?: Error;
+  /**
+   * `true` when the content type has no objects in Elasticsearch and no query
+   * is active. Use this to render a full-page CTA prompt ("Create your first
+   * {entity}"). Mutually exclusive with {@link hasNoResults}.
+   *
+   * Derived from the latest **settled** query data and held stable during
+   * background refetches (`keepPreviousData`). It does not reset to `false`
+   * on every in-flight fetch — only when the newly resolved result contains
+   * items or an active query is detected.
+   */
+  hasNoItems: boolean;
+  /**
+   * `true` when a search or filter is active and returned zero hits. Use this
+   * to render a "no matching results" message inside the table. Mutually
+   * exclusive with {@link hasNoItems}.
+   *
+   * Like {@link hasNoItems}, this is derived from settled data and held stable
+   * during background refetches. It transitions to `false` only when the
+   * resolved result contains hits or the query is cleared.
+   */
+  hasNoResults: boolean;
+  /**
+   * `true` when at least one search term, flag, or field filter is active.
+   *
+   * Derived from the parsed `activeFilters` rather than `queryText` so it is
+   * not confused by whitespace or formatting variations. Drives the
+   * `'filtering'` branch in {@link derivePhase}.
+   */
+  hasActiveQuery: boolean;
 }
 
 /**

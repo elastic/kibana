@@ -2120,14 +2120,6 @@
       "enabled": true
     },
     {
-      "groupName": "Cytoscape",
-      "matchDepNames": ["cytoscape", "cytoscape-dagre"],
-      "reviewers": ["team:ml-ui"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "hdr-histogram-js",
       "matchDepNames": ["hdr-histogram-js"],
       "reviewers": ["team:obs-presentation-team"],
