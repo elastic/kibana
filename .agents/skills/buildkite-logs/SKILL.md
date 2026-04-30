@@ -23,21 +23,13 @@ if [ -z "$BUILDKITE_API_TOKEN" ]; then
 fi
 BK_AUTH="Authorization: Bearer $BUILDKITE_API_TOKEN"
 ORG="elastic"
-PIPELINE="kibana-pull-request"
+PIPELINE="kibana"
 BASE="https://api.buildkite.com/v2"
 ```
 
 If the token is missing, ask the user to export it:
+
 > You can create a token at https://buildkite.com/user/api-access-tokens (scope: read_builds, read_artifacts).
-
----
-
-## URL takes priority
-
-**If the user provides a Buildkite URL, always extract the build number from that URL and fetch it directly. Never fall back to "latest build for the PR" when the user has given an explicit URL.**
-
-Pattern: `https://buildkite.com/elastic/kibana-pull-request/builds/<BUILD_NUMBER>[/...]`
-Extract `<BUILD_NUMBER>` and use it immediately. Do not query by PR number instead.
 
 ---
 
@@ -51,33 +43,39 @@ curl -sf -H "$BK_AUTH" \
 ```
 
 To get a build number from a Buildkite URL like
-`https://buildkite.com/elastic/kibana-pull-request/builds/414685`, extract `414685`.
+`https://buildkite.com/elastic/kibana/builds/123456`, extract `123456`.
 
 ---
 
-## Fetch latest build for a PR
+## Fetch builds for a PR
 
-The API returns builds **newest-first**, so `.[0]` is always the most recent build.
+> **Warning:** `pull_request_id` is **not a valid query parameter** on the Buildkite builds API.
+> It only exists as a field on build response objects. Passing it as a filter is silently ignored,
+> causing the API to return all builds for the pipeline. Always filter by `branch` instead.
+
+First resolve the PR's head branch via the GitHub API:
 
 ```bash
 PR=<number>
-curl -sf -H "$BK_AUTH" \
-  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?pull_request_id=$PR&per_page=1" \
-  | jq '.[0] | {number,state,branch,web_url,jobs:[.jobs[]|{id,name,state,exit_status}]}'
+BRANCH=$(curl -sf "https://api.github.com/repos/elastic/kibana/pulls/$PR" | jq -r '.head.ref')
+USER=$(curl -sf "https://api.github.com/repos/elastic/kibana/pulls/$PR" | jq -r '.user.login')
+# Buildkite uses "user:branch" format for fork branches
+FULL_BRANCH="${USER}:${BRANCH}"
 ```
 
-When the user reports a failure without a URL, use the `state` filter to fetch only failed
-builds directly — no page-size guessing needed:
+Then query builds by branch:
 
 ```bash
+# Latest build
 curl -sf -H "$BK_AUTH" \
-  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?pull_request_id=$PR&state[]=failed&state[]=failing&per_page=1" \
+  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?branch=$FULL_BRANCH&per_page=1" \
   | jq '.[0] | {number,state,branch,web_url,jobs:[.jobs[]|{id,name,state,exit_status}]}'
-```
 
-Valid `state` values include: `running`, `passed`, `failing`, `failed`, `canceled`, `finished`
-(where `finished` matches `passed`, `failed`, `blocked`, `canceled`).
-Also supports arrays: `state[]=failed&state[]=failing`.
+# All builds (paginate with &page=N if result is 100)
+curl -sf -H "$BK_AUTH" \
+  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?branch=$FULL_BRANCH&per_page=100" \
+  | jq 'length'
+```
 
 ---
 
@@ -115,6 +113,7 @@ For large logs, focus on the last 200–500 lines plus any lines matching
 ---
 
 ## Workflow: understand job definition for PR build
+
 1. Analyse .buildkite/pipelines/pull_request/base.yml
 2. Analyse any relevant yml files in the folder
 
@@ -135,6 +134,7 @@ curl -sL -H "$BK_AUTH" \
 ```
 
 Artifacts for a single job:
+
 ```bash
 JOB_ID=<uuid>
 curl -sf -H "$BK_AUTH" \
@@ -148,10 +148,10 @@ curl -sf -H "$BK_AUTH" \
 
 Kibana has multiple pipelines. Common slugs:
 
-| Pipeline | Slug |
-|---|---|
-| PR | `kibana-pull-request` |
-| On-merge | `kibana-on-merge` |
+| Pipeline          | Slug                             |
+| ----------------- | -------------------------------- |
+| PR                | `kibana-pull-request`            |
+| On-merge          | `kibana-on-merge`                |
 | Flaky test runner | `kibana-flaky-test-suite-runner` |
 
 Substitute the `PIPELINE` variable as needed.
