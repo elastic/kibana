@@ -23,8 +23,12 @@ const COMM_COLUMNS = [
 const ACCESSES_CONFIG = {
   id: 'elastic_defend',
   relationshipType: 'accesses' as const,
-  enableFrequencyClassification: true,
-};
+  bucketTargetsByAccessCount: {
+    threshold: 4,
+    aboveThresholdRelationship: 'accesses_frequently',
+    belowThresholdRelationship: 'accesses_infrequently',
+  },
+} as const;
 const COMM_CONFIG = {
   id: 'okta',
   relationshipType: 'communicates_with' as const,
@@ -91,6 +95,34 @@ describe('parseTargetsPerActorRows — accesses', () => {
     );
     expect(rec.relationships.accesses_frequently).toEqual([]);
     expect(rec.relationships.accesses_infrequently).toEqual([]);
+  });
+
+  it('writes the bucket relationship keys the config declares (engine has no hardcoded names)', () => {
+    // Same shape as accesses but with a different schema-valid pair to prove
+    // the parser reads keys from config, not from a baked-in literal.
+    const ownsConfig = {
+      id: 'hypothetical_owns_bucketed',
+      relationshipType: 'accesses' as const,
+      bucketTargetsByAccessCount: {
+        threshold: 4,
+        aboveThresholdRelationship: 'owns',
+        belowThresholdRelationship: 'owns_inferred',
+      },
+    } as const;
+    const [rec] = parseTargetsPerActorRows(
+      [
+        { name: 'actorUserId', type: 'keyword' },
+        { name: 'owns', type: 'keyword' },
+        { name: 'owns_inferred', type: 'keyword' },
+      ],
+      [['user:alice@corp', ['host:1', 'host:2'], 'host:3']],
+      ownsConfig,
+      createLogger()
+    );
+    expect(rec.relationships.owns).toEqual(['host:1', 'host:2']);
+    expect(rec.relationships.owns_inferred).toEqual(['host:3']);
+    expect(rec.relationships.accesses_frequently).toBeUndefined();
+    expect(rec.relationships.accesses_infrequently).toBeUndefined();
   });
 });
 

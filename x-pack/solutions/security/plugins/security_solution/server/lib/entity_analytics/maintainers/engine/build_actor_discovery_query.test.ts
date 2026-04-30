@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { euid } from '@kbn/entity-store/common/euid_helpers';
+
 import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
 import type { RelationshipIntegrationConfig, CompositeBucket } from './types';
+
+const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('host');
+const USER_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('user');
 
 const accessesConfig: RelationshipIntegrationConfig = {
   id: 'test_accesses',
@@ -14,8 +19,13 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-test-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
-  enableFrequencyClassification: true,
-  esqlWhereClause: 'event.action == "log_on"',
+  bucketTargetsByAccessCount: {
+    threshold: 4,
+    aboveThresholdRelationship: 'accesses_frequently',
+    belowThresholdRelationship: 'accesses_infrequently',
+  },
+  requireTargetEntityIdExists: true,
+  esqlWhereClause: 'event.action == "log_on" AND event.outcome == "success"',
 };
 
 const communicatesConfig: RelationshipIntegrationConfig = {
@@ -45,17 +55,69 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     expect(queryStr).toContain('user');
   });
 
-  it('includes event.outcome:success filter for accesses', () => {
-    const result = buildActorDiscoveryQuery(accessesConfig, undefined);
-    const queryStr = JSON.stringify(result);
-    expect(queryStr).toContain('event.outcome');
-    expect(queryStr).toContain('success');
+  it('does NOT inject the engine-side event.outcome == "success" term filter that used to be auto-applied to accesses', () => {
+    // The engine must no longer carry "accesses == success" semantics — that
+    // belongs in the integration's compositeAggAdditionalFilters. Note: an
+    // unrelated `event.outcome != "failure"` baseline appears inside
+    // getEuidDocumentsContainsIdFilter and is expected.
+    const filters = (
+      buildActorDiscoveryQuery(accessesConfig, undefined) as {
+        query: { bool: { filter: Array<Record<string, unknown>> } };
+      }
+    ).query.bool.filter;
+    const successTerm = filters.find(
+      (f) => JSON.stringify(f) === JSON.stringify({ term: { 'event.outcome': 'success' } })
+    );
+    expect(successTerm).toBeUndefined();
   });
 
-  it('does NOT include event.outcome:success filter for communicates_with', () => {
-    const result = buildActorDiscoveryQuery(communicatesConfig, undefined);
-    const queryStr = JSON.stringify(result);
-    expect(queryStr).not.toContain('"success"');
+  describe('requireTargetEntityIdExists', () => {
+    it('emits the targetEntityType EUID-exists DSL filter when the flag is true (host target)', () => {
+      const filters = (
+        buildActorDiscoveryQuery(accessesConfig, undefined) as {
+          query: { bool: { filter: Array<Record<string, unknown>> } };
+        }
+      ).query.bool.filter;
+      const expected = JSON.stringify(HOST_EUID_FILTER);
+      const hasHostFilter = filters.some((f) => JSON.stringify(f) === expected);
+      expect(hasHostFilter).toBe(true);
+    });
+
+    it('parameterizes the gate by targetEntityType — a user-targeted config emits the user-EUID filter, not host', () => {
+      const userTargetConfig: RelationshipIntegrationConfig = {
+        ...communicatesConfig,
+        requireTargetEntityIdExists: true,
+      };
+      const filters = (
+        buildActorDiscoveryQuery(userTargetConfig, undefined) as {
+          query: { bool: { filter: Array<Record<string, unknown>> } };
+        }
+      ).query.bool.filter;
+
+      const hostShape = JSON.stringify(HOST_EUID_FILTER);
+      const userShape = JSON.stringify(USER_EUID_FILTER);
+      // User-EUID filter appears at least twice (actor identity + target gate),
+      // host-EUID filter never appears as a top-level filter.
+      const userMatches = filters.filter((f) => JSON.stringify(f) === userShape).length;
+      const hostMatches = filters.filter((f) => JSON.stringify(f) === hostShape).length;
+      expect(userMatches).toBeGreaterThanOrEqual(2);
+      expect(hostMatches).toBe(0);
+    });
+
+    it('does NOT emit a target EUID-exists filter when the flag is omitted', () => {
+      const filters = (
+        buildActorDiscoveryQuery(communicatesConfig, undefined) as {
+          query: { bool: { filter: Array<Record<string, unknown>> } };
+        }
+      ).query.bool.filter;
+      // Only the actor-side user EUID filter should appear; no second copy and no host filter.
+      const userShape = JSON.stringify(USER_EUID_FILTER);
+      const hostShape = JSON.stringify(HOST_EUID_FILTER);
+      const userMatches = filters.filter((f) => JSON.stringify(f) === userShape).length;
+      const hostMatches = filters.filter((f) => JSON.stringify(f) === hostShape).length;
+      expect(userMatches).toBe(1);
+      expect(hostMatches).toBe(0);
+    });
   });
 
   it('uses actorFields as composite sources when provided', () => {

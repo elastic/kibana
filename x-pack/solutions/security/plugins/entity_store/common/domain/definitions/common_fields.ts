@@ -23,7 +23,13 @@ export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
   'service.name',
 ] as const;
 
-const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+/**
+ * Closed enum of every relationship-type identifier the entity store stores under
+ * `entity.relationships.<key>`. Also consumed by maintainers (e.g. the relationship
+ * engine in security_solution) so they can declare which keys their pipeline writes
+ * to without re-stating the schema.
+ */
+export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'administers',
   'communicates_with',
   'depends_on',
@@ -33,6 +39,8 @@ const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'owns',
   'supervises',
 ] as const;
+
+export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];
 
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';

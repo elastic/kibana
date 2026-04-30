@@ -33,18 +33,24 @@ function toStringArray(value: unknown): string[] {
  * runs on the override path because the default builder generates the columns
  * itself and cannot drift.
  */
+type ParseConfig = Pick<
+  RelationshipIntegrationConfig,
+  'id' | 'relationshipType' | 'bucketTargetsByAccessCount' | 'esqlQueryOverride'
+>;
+
 function warnIfOverrideColumnsMissing(
   columns: EsqlColumn[],
-  config: Pick<
-    RelationshipIntegrationConfig,
-    'id' | 'relationshipType' | 'enableFrequencyClassification' | 'esqlQueryOverride'
-  >,
+  config: ParseConfig,
   logger: Logger
 ): void {
   if (!config.esqlQueryOverride) return;
   const colNames = new Set(columns.map((c) => c.name));
-  const expected = config.enableFrequencyClassification
-    ? ['actorUserId', 'accesses_frequently', 'accesses_infrequently']
+  const expected = config.bucketTargetsByAccessCount
+    ? [
+        'actorUserId',
+        config.bucketTargetsByAccessCount.aboveThresholdRelationship,
+        config.bucketTargetsByAccessCount.belowThresholdRelationship,
+      ]
     : ['actorUserId', config.relationshipType];
   const missing = expected.filter((n) => !colNames.has(n));
   if (missing.length > 0) {
@@ -59,10 +65,7 @@ function warnIfOverrideColumnsMissing(
 export const parseTargetsPerActorRows = (
   columns: EsqlColumn[],
   values: unknown[][],
-  config: Pick<
-    RelationshipIntegrationConfig,
-    'id' | 'relationshipType' | 'enableFrequencyClassification' | 'esqlQueryOverride'
-  >,
+  config: ParseConfig,
   logger: Logger
 ): ProcessedEngineRecord[] => {
   warnIfOverrideColumnsMissing(columns, config, logger);
@@ -76,13 +79,15 @@ export const parseTargetsPerActorRows = (
     const actorUserId = record.actorUserId != null ? String(record.actorUserId) : null;
 
     // TODO(follow-up): entityType hardcoded to 'user' — use actorEntityType from config.
-    if (config.enableFrequencyClassification) {
+    if (config.bucketTargetsByAccessCount) {
+      const { aboveThresholdRelationship: above, belowThresholdRelationship: below } =
+        config.bucketTargetsByAccessCount;
       return {
         entityId: actorUserId,
         entityType: 'user' as const,
         relationships: {
-          accesses_frequently: toStringArray(record.accesses_frequently),
-          accesses_infrequently: toStringArray(record.accesses_infrequently),
+          [above]: toStringArray(record[above]),
+          [below]: toStringArray(record[below]),
         },
       };
     }

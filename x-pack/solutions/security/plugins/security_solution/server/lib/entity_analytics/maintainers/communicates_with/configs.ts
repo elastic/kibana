@@ -85,6 +85,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
+    requireTargetEntityIdExists: true,
     esqlWhereClause: `user.name IS NOT NULL`,
   },
   {
@@ -93,6 +94,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
+    requireTargetEntityIdExists: true,
     esqlWhereClause: `aws.cloudtrail.user_identity.type IN (${HUMAN_IAM_IDENTITY_TYPES.map(
       (t) => `"${t}"`
     ).join(', ')})

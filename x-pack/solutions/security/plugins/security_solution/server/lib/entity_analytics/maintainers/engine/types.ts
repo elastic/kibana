@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityRelationshipKey } from '@kbn/entity-store/common/domain/definitions/common_fields';
 
 export interface CompositeAfterKey {
   [key: string]: string | null;
@@ -37,18 +38,32 @@ export interface RelationshipIntegrationConfig {
   targetEntityType: TargetEntityType;
   /**
    * Integration-specific ESQL WHERE clause — the single source of integration-specific
-   * query logic. For 'accesses': timestamp, user/host ID existence, and
-   * event.outcome == "success" are added automatically.
+   * query logic. The engine adds only timestamp + actor-identity + (optional)
+   * target-EUID existence filters; everything else (event.action, event.outcome,
+   * etc.) belongs here.
    */
   esqlWhereClause: string;
   /**
    * Additional DSL filters applied to the composite aggregation (Step 1).
-   * Use this when the integration's actors only appear in a specific event subset
-   * (e.g. log_on events for Elastic Defend, ssh_login for system.auth). Without
-   * it, the composite agg finds users from ALL event types and its bucket filter
-   * misses actors who only appear in the target event type.
+   * Use this to mirror the same data-shape narrowing that `esqlWhereClause` applies
+   * in Step 2 (e.g. event.action / event.outcome term filters), so the actors
+   * surfaced in Step 1 actually have matching documents in Step 2.
    */
   compositeAggAdditionalFilters?: QueryDslQueryContainer[];
+  /**
+   * When true, both Step 1 (composite agg) and Step 2 (ES|QL) require the source
+   * document to contain a resolvable EUID for `targetEntityType`. Use this for
+   * integrations whose target field is mandatory on every event (e.g. logon
+   * events always carry a host). The gate is parameterized by `targetEntityType`,
+   * so a user-targeted config with this flag emits a `user.*` existence check
+   * and a host-targeted config emits a `host.*` existence check.
+   *
+   * Setting it makes Step 1 and Step 2 narrow consistently — without it, an
+   * `esqlWhereClause` that filters to events with a target EUID would still
+   * surface actors in Step 1 who never appear in such events, wasting Step 2
+   * work and risking MAX_ITERATIONS exhaustion.
+   */
+  requireTargetEntityIdExists?: boolean;
   /**
    * Actor field names used as composite aggregation sources and bucket filter keys.
    * Defaults to ECS user identity fields. Set this for integrations whose actor is
@@ -78,34 +93,43 @@ export interface RelationshipIntegrationConfig {
    * express the integration's query (e.g. multi-type targets, non-ECS actor fields).
    *
    * When set, the following engine-provided behaviours are NOT applied:
-   * - event.outcome == "success" pre-filtering
-   * - EUID existence filters (user / host)
+   * - actor / target EUID existence filters
    * - getFieldEvaluationsEsql / getEuidEvaluation helpers (future source-field changes
    *   will not propagate automatically)
-   * - enableFrequencyClassification frequency bucketing
+   * - bucketTargetsByAccessCount access-count classification
    * - LIMIT COMPOSITE_PAGE_SIZE ceiling
    *
    * Column contract — the query MUST emit these exact column names or results will be
    * silently empty:
    * - `actorUserId` (string) — the actor's full EUID, e.g. "user:alice@okta"
-   * - when enableFrequencyClassification is true:
+   * - when bucketTargetsByAccessCount is set:
    *     `accesses_frequently` and `accesses_infrequently` (string | string[])
    * - otherwise:
    *     a column named after `relationshipType` (e.g. `communicates_with`) (string | string[])
    */
   esqlQueryOverride?: (namespace: string) => string;
   /**
-   * When true, the engine classifies targets into accesses_frequently / accesses_infrequently
-   * buckets by access count, applies event.outcome == "success" pre-filtering, and requires
-   * the target entity to be present in the entity store.
-   * Set this for accesses-type relationships. Default: false.
+   * When set, the engine classifies targets into two buckets by access count and
+   * emits two relationship columns instead of one. Set this only on relationship
+   * patterns whose semantics call for it. Omit for relationships that should
+   * produce a flat targets-per-actor list.
+   *
+   * Every field is required so the engine carries no implicit data-tuning
+   * defaults and the bucket relationship keys are declared explicitly at the
+   * config call site (no engine-level coupling to specific schema field names).
+   *
+   * - `threshold`: actor→target pairs with `COUNT(*) >= threshold` are classified
+   *    into `aboveThresholdRelationship`, the rest into `belowThresholdRelationship`.
+   * - `aboveThresholdRelationship` / `belowThresholdRelationship`: the two
+   *    `entity.relationships.<key>` keys this maintainer writes to. Both must be
+   *    members of the entity store's `EntityRelationshipKey` union (TypeScript
+   *    enforces this).
    */
-  enableFrequencyClassification?: boolean;
-  /**
-   * Frequency threshold for accesses_frequently vs accesses_infrequently classification.
-   * Only used when enableFrequencyClassification is true. Default: 4.
-   */
-  frequencyThreshold?: number;
+  bucketTargetsByAccessCount?: {
+    threshold: number;
+    aboveThresholdRelationship: EntityRelationshipKey;
+    belowThresholdRelationship: EntityRelationshipKey;
+  };
 }
 
 /**

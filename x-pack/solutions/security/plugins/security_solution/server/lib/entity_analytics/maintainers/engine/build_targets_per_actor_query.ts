@@ -11,8 +11,6 @@ import { getFieldEvaluationsEsql } from '@kbn/entity-store/common/domain/euid';
 import type { RelationshipIntegrationConfig } from './types';
 import { COMPOSITE_PAGE_SIZE } from './constants';
 
-const DEFAULT_FREQUENCY_THRESHOLD = 4;
-
 function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace: string): string {
   const indexPattern = config.indexPattern(namespace);
   // TODO(follow-up): 'user' hardcoded for actor — thread actorEntityType through config.
@@ -28,26 +26,26 @@ function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace:
     ? `\n    ${config.additionalTargetFilter}`
     : '';
 
-  const outcomeFilterLine = config.enableFrequencyClassification
-    ? `    AND event.outcome == "success"\n`
+  const targetIdFilterLine = config.requireTargetEntityIdExists
+    ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
     : '';
-  const hostIdFilterLine =
-    config.targetEntityType === 'host'
-      ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter('host')})\n`
-      : '';
 
-  const statsClause = config.enableFrequencyClassification
+  const statsClause = config.bucketTargetsByAccessCount
     ? (() => {
-        const threshold = config.frequencyThreshold ?? DEFAULT_FREQUENCY_THRESHOLD;
+        const {
+          threshold,
+          aboveThresholdRelationship: above,
+          belowThresholdRelationship: below,
+        } = config.bucketTargetsByAccessCount;
         return `| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
-    access_count >= ${threshold}, "accesses_frequently",
-    "accesses_infrequently"
+    access_count >= ${threshold}, "${above}",
+    "${below}"
   )
 | STATS targets = VALUES(targetEntityId) BY access_type, actorUserId
 | STATS
-    accesses_frequently   = VALUES(targets) WHERE access_type == "accesses_frequently",
-    accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently"
+    ${above} = VALUES(targets) WHERE access_type == "${above}",
+    ${below} = VALUES(targets) WHERE access_type == "${below}"
   BY actorUserId`;
       })()
     : `| STATS ${config.relationshipType} = VALUES(targetEntityId) BY actorUserId`;
@@ -62,8 +60,8 @@ function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace:
   return `SET unmapped_fields="nullify";
 FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
-${outcomeFilterLine}    AND (${userIdFilter})
-${hostIdFilterLine}${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
+    AND (${userIdFilter})
+${targetIdFilterLine}${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
 | WHERE COALESCE(actorUserId, "") != ""
 | EVAL targetEntityId = ${targetEval}
 | MV_EXPAND targetEntityId
@@ -77,9 +75,9 @@ ${statsClause}
  *
  * If esqlQueryOverride is provided, delegates to it directly.
  * NOTE: overrides must emit columns named `actorUserId` plus either
- * `accesses_frequently` + `accesses_infrequently` (when enableFrequencyClassification is true)
- * or `<relationshipType>` (e.g. `communicates_with`) otherwise. Mismatched column names
- * produce silent empty results.
+ * `<aboveThresholdRelationship>` + `<belowThresholdRelationship>` (when
+ * bucketTargetsByAccessCount is set) or `<relationshipType>` (e.g. `communicates_with`)
+ * otherwise. Mismatched column names produce silent empty results.
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,

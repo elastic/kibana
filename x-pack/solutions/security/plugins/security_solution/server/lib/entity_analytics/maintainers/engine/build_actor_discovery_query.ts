@@ -27,9 +27,8 @@ export const buildActorDiscoveryQuery = (
     euid.dsl.getEuidDocumentsContainsIdFilter('user'),
   ];
 
-  if (config.enableFrequencyClassification) {
-    baseFilters.push({ term: { 'event.outcome': 'success' } });
-    baseFilters.push(euid.dsl.getEuidDocumentsContainsIdFilter('host'));
+  if (config.requireTargetEntityIdExists) {
+    baseFilters.push(euid.dsl.getEuidDocumentsContainsIdFilter(config.targetEntityType));
   }
 
   if (config.compositeAggAdditionalFilters?.length) {
