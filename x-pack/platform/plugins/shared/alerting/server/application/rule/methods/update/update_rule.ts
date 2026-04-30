@@ -321,7 +321,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     username,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
-    existing: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
+    apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
 
   const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(

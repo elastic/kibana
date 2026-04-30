@@ -218,7 +218,7 @@ async function prepareApiKeys(
     username,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
-    existing: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+    apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
   });
 
   // collect generated API keys

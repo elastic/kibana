@@ -154,7 +154,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           ruleName: attributes.name,
           username,
           shouldUpdateApiKey: true,
-          existing: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
+          apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
         })
       : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
 

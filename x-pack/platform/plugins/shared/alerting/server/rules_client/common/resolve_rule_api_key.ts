@@ -13,16 +13,11 @@ export interface ResolvedAPIKey {
   isAuthTypeApiKey: boolean;
 }
 
-export interface ExistingRuleKeyState {
+export interface RuleApiKeyOwnership {
   apiKeyCreatedByUser?: boolean | null;
 }
 
 const cloneKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
-  if (!context.cloneAPIKey) {
-    throw new Error(
-      'cloneAPIKey is not available on RulesClientContext — this should never happen as it is always defined by the factory'
-    );
-  }
   return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
 };
 
@@ -37,18 +32,18 @@ export const resolveRuleAPIKey = async (
   context: RulesClientContext,
   name: string,
   enabled: boolean,
-  existing?: ExistingRuleKeyState
+  apiKeyOwnership?: RuleApiKeyOwnership
 ): Promise<ResolvedAPIKey> => {
   if (!enabled) {
     return { createdAPIKey: null, isAuthTypeApiKey: false };
   }
 
-  if (!existing && context.cloneApiKeysOnCreate) {
+  if (!apiKeyOwnership && context.cloneApiKeysOnCreate) {
     return cloneKey(context, name);
   }
 
   const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
-  const frameworkManaged = existing?.apiKeyCreatedByUser === false;
+  const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
 
   if (frameworkManaged) {
     return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name);
