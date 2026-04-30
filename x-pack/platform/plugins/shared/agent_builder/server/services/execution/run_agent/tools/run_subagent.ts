@@ -14,6 +14,7 @@ import {
   internalTools,
   SubagentExecutionMode,
 } from '@kbn/agent-builder-common';
+import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -30,11 +31,17 @@ const schema = z.object({
     .describe(
       'Set to true to run this agent in the background. You will be notified when it completes.'
     ),
+  effort: z
+    .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
+    .optional()
+    .describe('The effort level of the task.'),
 });
 
 const toolDescription = `Start a sub-agent to perform a specific task.
 
 The sub-agent runs with the same configuration as the current agent. Use this to delegate complex sub-tasks.
+
+The effort level will be used to select the model - "low" means a faster and smaller model, "high" means a slower and more powerful model. Choose accordingly.
 
 ## Writing the prompt
 
@@ -89,13 +96,21 @@ export const createSubagentTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['subagent'],
-    handler: async ({ description, prompt, run_in_background = false }, context) => {
+    handler: async (
+      { description, prompt, run_in_background = false, effort = 'medium' },
+      { events, modelProvider }
+    ) => {
       try {
         const fullPrompt = `${description}\n\n${prompt}`;
 
+        const subAgentModel = await modelProvider.selectModel({
+          effortLevel: effort as EffortLevel,
+        });
+        const selectedConnectorId = subAgentModel.connector.connectorId;
+
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,
-          connectorId,
+          connectorId: selectedConnectorId,
           capabilities,
           parentExecutionId,
           prompt: fullPrompt,
@@ -104,7 +119,7 @@ export const createSubagentTool = ({
         });
 
         // Emit progress with execution ID so the UI can show "Watch" before results arrive
-        context.events.reportProgress(`Sub-agent execution ${executionId} started`, {
+        events.reportProgress(`Sub-agent execution ${executionId} started`, {
           metadata: {
             agent_execution_id: executionId,
             internal: 'true',

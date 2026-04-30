@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { css } from '@emotion/react';
 import { RelatedEpisodesRuleSubsection } from './related_episodes_rule_subsection';
 import { RelatedEpisodesGroupSubsection } from './related_episodes_group_subsection';
 import * as i18n from './translations';
@@ -27,44 +26,28 @@ export function RelatedAlertEpisodesSection({
   ruleId,
 }: RelatedAlertEpisodesSectionProps) {
   return (
-    <EuiAccordion
-      id="alertingV2RelatedAlertEpisodes"
-      paddingSize="none"
-      buttonProps={{
-        paddingSize: 'm',
-        css: css`
-          .euiAccordion__buttonContent {
-            width: 100%;
-          }
-        `,
-      }}
-      buttonContent={
-        <EuiText>
-          <h3>{i18n.RELATED_EPISODES_TITLE}</h3>
-        </EuiText>
-      }
-      initialIsOpen
-      data-test-subj="alertingV2RelatedAlertEpisodesAccordion"
-    >
-      <>
-        {groupHash ? (
-          <>
-            <RelatedEpisodesGroupSubsection
-              currentEpisodeId={currentEpisodeId}
-              groupHash={groupHash}
-              rule={rule}
-              ruleId={ruleId}
-            />
-            <EuiSpacer size="l" />
-          </>
-        ) : null}
-        <RelatedEpisodesRuleSubsection
-          currentEpisodeId={currentEpisodeId}
-          currentGroupHash={groupHash}
-          rule={rule}
-          ruleId={ruleId}
-        />
-      </>
-    </EuiAccordion>
+    <>
+      <EuiTitle size="m" data-test-subj="alertingV2RelatedAlertEpisodesSection">
+        <h2>{i18n.RELATED_EPISODES_TITLE}</h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      {groupHash ? (
+        <>
+          <RelatedEpisodesGroupSubsection
+            currentEpisodeId={currentEpisodeId}
+            groupHash={groupHash}
+            rule={rule}
+            ruleId={ruleId}
+          />
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
+      <RelatedEpisodesRuleSubsection
+        currentEpisodeId={currentEpisodeId}
+        currentGroupHash={groupHash}
+        rule={rule}
+        ruleId={ruleId}
+      />
+    </>
   );
 }

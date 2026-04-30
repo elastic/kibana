@@ -96,7 +96,7 @@ export function RelatedEpisodesGroupSubsection({
         padding-inline: ${euiTheme.size.m};
       `}
     >
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h4>{i18n.RELATED_SAME_GROUP_TITLE}</h4>
       </EuiTitle>
       <EuiText size="s" color="subdued" css={{ marginBlockStart: euiTheme.size.xs }}>

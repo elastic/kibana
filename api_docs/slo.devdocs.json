@@ -896,7 +896,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -904,7 +912,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -914,7 +930,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1426,6 +1450,7 @@
                 "lineNumber": 38,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetSLOGroupedStatsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1462,6 +1487,7 @@
                 "lineNumber": 39,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindSLOParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1515,6 +1541,7 @@
                 "lineNumber": 40,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetSLOParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1598,6 +1625,7 @@
               "lineNumber": 37,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }

@@ -15,6 +15,20 @@ export const EPISODE_DETAILS_BREADCRUMB_FALLBACK = i18n.translate(
   }
 );
 
+export const OVERVIEW_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabOverview',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
+export const METADATA_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabMetadata',
+  {
+    defaultMessage: 'Metadata',
+  }
+);
+
 /** --- Duration (sidebar) --- */
 export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
   if (ms < 1000) {
@@ -139,7 +153,45 @@ export const DURATION_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.du
 export const ASSIGNEE_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.assigneeLabel', {
   defaultMessage: 'Assignee',
 });
+
+export const ACTIONS_OVERVIEW_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.actionsOverviewTitle',
+  {
+    defaultMessage: 'Actions overview',
+  }
+);
+
+export const ACTIONS_OVERVIEW_EMPTY = i18n.translate(
+  'xpack.alertingV2.episodeDetails.actionsOverviewEmpty',
+  {
+    defaultMessage: 'No actions have been taken on this episode.',
+  }
+);
+
+export const LABEL_ACKNOWLEDGED_BY = i18n.translate(
+  'xpack.alertingV2.episodeDetails.acknowledgedByLabel',
+  {
+    defaultMessage: 'Acknowledged by',
+  }
+);
+
+export const LABEL_SNOOZED_BY = i18n.translate('xpack.alertingV2.episodeDetails.snoozedByLabel', {
+  defaultMessage: 'Snoozed by',
+});
+
+export const LABEL_SNOOZED_UNTIL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedUntilLabel',
+  {
+    defaultMessage: 'Snoozed until',
+  }
+);
+
+export const LABEL_RESOLVED_BY = i18n.translate('xpack.alertingV2.episodeDetails.resolvedByLabel', {
+  defaultMessage: 'Resolved by',
+});
+
 /** --- Rule overview panel --- */
+
 export const RULE_OVERVIEW_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleOverviewTitle',
   {
@@ -174,6 +226,13 @@ export const RELATED_EPISODES_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.relatedEpisodesTitle',
   {
     defaultMessage: 'Related alert episodes',
+  }
+);
+
+export const RELATED_EPISODES_EMPTY = i18n.translate(
+  'xpack.alertingV2.episodeDetails.relatedEpisodesEmpty',
+  {
+    defaultMessage: 'No related episodes found.',
   }
 );
 

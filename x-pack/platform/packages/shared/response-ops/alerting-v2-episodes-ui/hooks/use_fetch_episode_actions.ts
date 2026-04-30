@@ -34,6 +34,7 @@ export const useFetchEpisodeActions = ({
           groupHash: row.group_hash ?? null,
           lastAckAction: row.last_ack_action ?? null,
           lastAssigneeUid: row.last_assignee_uid ?? null,
+          lastAckActor: row.last_ack_actor ?? null,
         });
       }
       return map;

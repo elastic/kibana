@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { createDeprecationLog, deleteDeprecationLogs } = initHelpers(getService);
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   // Skipped to enable ES promotion
   describe.skip('Elasticsearch deprecation logs', function () {
     describe('GET /api/upgrade_assistant/deprecation_logging', () => {

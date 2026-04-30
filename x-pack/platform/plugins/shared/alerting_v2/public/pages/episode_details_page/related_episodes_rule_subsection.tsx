@@ -96,7 +96,7 @@ export function RelatedEpisodesRuleSubsection({
         padding-bottom: ${euiTheme.size.m};
       `}
     >
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h4>
           {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}
         </h4>

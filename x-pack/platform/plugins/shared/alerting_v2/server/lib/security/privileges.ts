@@ -22,9 +22,13 @@ export const ALERTING_V2_API_PRIVILEGES = {
     read: 'read-alerting-v2-alerts',
     write: 'write-alerting-v2-alerts',
   },
-  notificationPolicies: {
-    read: 'read-alerting-v2-notification-policies',
-    write: 'write-alerting-v2-notification-policies',
+  actionPolicies: {
+    read: 'read-alerting-v2-action-policies',
+    write: 'write-alerting-v2-action-policies',
+  },
+  ruleDoctor: {
+    read: 'read-alerting-v2-rule-doctor',
+    write: 'write-alerting-v2-rule-doctor',
   },
 } as const;
 
@@ -41,8 +45,10 @@ const getPrivileges = () => ({
       ALERTING_V2_API_PRIVILEGES.rules.write,
       ALERTING_V2_API_PRIVILEGES.alerts.read,
       ALERTING_V2_API_PRIVILEGES.alerts.write,
-      ALERTING_V2_API_PRIVILEGES.notificationPolicies.read,
-      ALERTING_V2_API_PRIVILEGES.notificationPolicies.write,
+      ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
+      ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.write,
     ],
   },
   read: {
@@ -55,7 +61,8 @@ const getPrivileges = () => ({
     api: [
       ALERTING_V2_API_PRIVILEGES.rules.read,
       ALERTING_V2_API_PRIVILEGES.alerts.read,
-      ALERTING_V2_API_PRIVILEGES.notificationPolicies.read,
+      ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
     ],
   },
 });
