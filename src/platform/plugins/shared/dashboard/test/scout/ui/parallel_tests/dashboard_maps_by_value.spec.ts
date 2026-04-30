@@ -74,6 +74,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   };
 
   spaceTest('adds a map by value', async ({ pageObjects }) => {
+    //TODO: remove comment
     await spaceTest.step('add map panel', async () => {
       await createAndAddMapByValue(pageObjects);
     });
