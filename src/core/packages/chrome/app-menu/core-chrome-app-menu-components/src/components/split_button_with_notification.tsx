@@ -26,6 +26,7 @@ export interface SplitButtonWithNotificationProps {
   iconType?: IconType;
   iconSize?: EuiButtonProps['iconSize'];
   isDisabled?: boolean;
+  disabled?: boolean;
   isLoading?: boolean;
   isMainButtonLoading?: boolean;
   isMainButtonDisabled?: boolean;
@@ -64,23 +65,25 @@ export interface SplitButtonWithNotificationProps {
 }
 
 export const SplitButtonWithNotification = ({
+  color = 'primary',
+  size = 'm',
+  disabled = false,
+  isDisabled = false,
+  isLoading = false,
+  'data-test-subj': dataTestSubj,
+  css: cssProp,
+  fullWidth,
+
   children,
   onClick,
   iconType,
   iconSize,
-  isDisabled = false,
-  isLoading = false,
-  isMainButtonLoading,
-  isMainButtonDisabled,
+  isMainButtonLoading = false,
+  isMainButtonDisabled = false,
   isSelected,
-  color = 'primary',
-  size = 'm',
   href,
   target,
   id,
-  'data-test-subj': dataTestSubj,
-  css: cssProp,
-  fullWidth,
   'aria-haspopup': ariaHasPopup,
 
   secondaryButtonIcon,
@@ -103,7 +106,8 @@ export const SplitButtonWithNotification = ({
   const buttonSizes = euiButtonSizeMap(euiThemeContext);
   const secondaryButtonWidth = buttonSizes[size]?.height;
 
-  const disableIndicatorOnClick = isDisabled || isLoading;
+  const isEffectivelyDisabled = disabled || isDisabled;
+  const disableIndicatorOnClick = isEffectivelyDisabled || isLoading;
 
   return (
     <div
@@ -116,7 +120,7 @@ export const SplitButtonWithNotification = ({
         data-test-subj={dataTestSubj}
         color={color}
         size={size}
-        isDisabled={isDisabled}
+        isDisabled={isEffectivelyDisabled}
         isLoading={isLoading}
         css={[
           fullWidth &&
@@ -129,7 +133,7 @@ export const SplitButtonWithNotification = ({
       >
         <EuiSplitButton.ActionPrimary
           id={id}
-          onClick={onClick}
+          onClick={onClick as MouseEventHandler}
           iconType={iconType}
           iconSize={iconSize}
           isDisabled={isMainButtonDisabled}
@@ -178,9 +182,7 @@ export const SplitButtonWithNotification = ({
               color={notificationIndicatorColor}
               content={notifcationIndicatorTooltipContent}
               iconProps={{
-                onClick: disableIndicatorOnClick
-                  ? undefined
-                  : (onClick as MouseEventHandler<SVGElement> | undefined),
+                onClick: disableIndicatorOnClick ? undefined : (onClick as MouseEventHandler),
               }}
             />
           </span>
