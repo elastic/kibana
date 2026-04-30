@@ -97,6 +97,7 @@ function getCommonProperties(
       'customDescription' in fieldAttr && { custom_description: fieldAttr.customDescription }),
     ...(format?.id && { format: { type: format.id, params: format.params } }),
     ...(includePopularity &&
+      fieldAttr &&
       'count' in fieldAttr &&
       fieldAttr.count !== undefined && { popularity: fieldAttr.count }),
   };
