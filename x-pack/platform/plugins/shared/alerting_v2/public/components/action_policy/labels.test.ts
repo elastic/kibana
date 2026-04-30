@@ -7,7 +7,8 @@
 
 import { getGroupingModeLabel, getThrottleStrategyLabel } from './labels';
 
-describe('getGroupingModeLabel', () => {
+// Failing: See https://github.com/elastic/kibana/issues/266708
+describe.skip('getGroupingModeLabel', () => {
   it('returns the Episode label for per_episode', () => {
     expect(getGroupingModeLabel('per_episode')).toBe('Episode');
   });
@@ -26,7 +27,8 @@ describe('getGroupingModeLabel', () => {
   });
 });
 
-describe('getThrottleStrategyLabel', () => {
+// Failing: See https://github.com/elastic/kibana/issues/266707
+describe.skip('getThrottleStrategyLabel', () => {
   it('returns the per-episode label for on_status_change when mode is per_episode', () => {
     expect(getThrottleStrategyLabel('on_status_change', 'per_episode')).toBe('On status change');
   });

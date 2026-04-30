@@ -13,4 +13,5 @@ export {
   initializeTriggerEventsClient,
   type TriggerEventDocument,
   type TriggerEventsDataStreamClient,
+  writeTriggerEvent,
 } from './trigger_events_data_stream';
