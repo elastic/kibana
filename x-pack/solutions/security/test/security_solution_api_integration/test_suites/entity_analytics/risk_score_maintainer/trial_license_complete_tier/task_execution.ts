@@ -22,6 +22,7 @@ import {
   indexListOfDocumentsFactory,
   setupMaintainerLogsDataStream,
   cleanupMaintainerLogsDataStream,
+  waitForMaintainerRun,
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -102,11 +103,10 @@ export default ({ getService }: FtrProviderContext): void => {
           riskScore: 40,
         });
 
-        // Run via Task Manager so this test exercises the real scheduler path.
-        // installAndRunMaintainer ends with waitForMaintainerRun, which waits
-        // for the runs count to stabilise across two consecutive polls — a
-        // stronger idle guarantee than polling taskStatus alone. Stopping
-        // immediately after it returns avoids the version-conflict race.
+        // Install the entity store and run initial scoring synchronously.
+        // installAndRunMaintainer with 'async' uses the sync run_now route for
+        // the initial scoring pass, then starts the maintainer so it's in
+        // "started" state for the stop/start lifecycle test below.
         await maintainerScenario.installAndRunMaintainer({
           dataViewPattern: testLogsIndex,
           runMode: 'async',
@@ -123,10 +123,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
-        // Use the sync run_now route (bypasses Task Manager's runSoon) to verify
-        // scoring resumes after the stop/start cycle without wedging on a
-        // version_conflict_engine_exception in the task document.
-        await maintainerRoutes.runRiskScoreNow();
+        // Exercise the real Task Manager scheduler path. startMaintainer uses
+        // bulkEnable with runSoon=false, so TM won't auto-run the task.
+        // waitForMaintainerRun triggers runSoon once the task is idle to kick
+        // off the run, then waits for completion and settles.
+        await waitForMaintainerRun({ retry, routes: maintainerRoutes });
 
         await waitForRiskScoresToBePresent({ es, log, scoreCount: preRestartCount + 1 });
         const postRestartScores = await readRiskScores(es);

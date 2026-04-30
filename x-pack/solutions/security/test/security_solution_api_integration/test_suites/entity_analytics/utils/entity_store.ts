@@ -47,11 +47,15 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       settingsUrl = `/s/${namespace}${settingsUrl}`;
     }
+
+    // Temporarily enable V2 so the uninstall API isn't blocked by the
+    // feature flag middleware (which returns 403 when V2 is disabled).
+    // A previous test's cleanup may have already disabled V2.
     await supertest
       .post(settingsUrl)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
       .expect(200);
 
     // Use the supported uninstall API so maintainers are removed via
@@ -90,6 +94,14 @@ export const EntityStoreUtils = (
     } catch (e) {
       log.warning(`Error deleting engines: ${e.message}`);
     }
+
+    // Disable V2 to leave a clean slate for the next test.
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .expect(200);
   };
 
   const initEntityEngineForEntityType = async (entityType: EntityType) => {
