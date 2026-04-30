@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -64,9 +64,48 @@ export function SigeventsOverviewPage() {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
+  const returnFocusRef = useRef<Element | null>(null);
 
-  const openDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(true), []);
-  const closeDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(false), []);
+  const openDetailFlyout = useCallback(() => {
+    returnFocusRef.current = document.activeElement;
+    setIsDetailFlyoutOpen(true);
+  }, []);
+  const closeDetailFlyout = useCallback(() => {
+    setIsDetailFlyoutOpen(false);
+    requestAnimationFrame(() => {
+      (returnFocusRef.current as HTMLElement | null)?.focus();
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isDetailFlyoutOpen) {
+      return;
+    }
+
+    // Focus the close button inside the flyout once it renders
+    const timerId = setTimeout(() => {
+      const flyout = document.querySelector<HTMLElement>(
+        '[data-test-subj="obltSigeventsDetailFlyout"]'
+      );
+      const closeBtn = flyout?.querySelector<HTMLElement>(
+        '[data-test-subj="euiFlyoutCloseButton"]'
+      );
+      closeBtn?.focus();
+    }, 50);
+
+    // Handle Escape key to close the flyout
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDetailFlyout();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(timerId);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDetailFlyoutOpen, closeDetailFlyout]);
 
   const handleRemediate = useCallback(() => {
     const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
