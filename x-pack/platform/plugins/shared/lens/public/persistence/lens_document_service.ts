@@ -48,7 +48,7 @@ export class LensDocumentService implements ILensDocumentService {
     return this.client.search(options);
   }
 
-  async hasLibraryItemWithTitle(title: string): Promise<boolean> {
+  hasLibraryItemWithTitle = async (title: string): Promise<boolean> => {
     // Elasticsearch will return the most relevant results first, which means exact matches should come
     // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
     const response = await this.search({
