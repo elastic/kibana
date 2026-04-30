@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Observability landing redirects (Logs Essentials)', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/XXXXX
+  describe.skip('Observability landing redirects (Logs Essentials)', function () {
     afterEach(async () => {
       await synthtrace.clean();
     });

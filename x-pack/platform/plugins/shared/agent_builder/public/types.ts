@@ -6,6 +6,7 @@
  */
 
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type React from 'react';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
@@ -35,6 +36,9 @@ import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-c
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
+
+export type { EmbeddableConversationProps };
+
 export interface ConversationSidebarRef {
   close(): void;
 }
@@ -77,9 +81,35 @@ export interface AgentBuilderStartDependencies {
 export interface AgentBuilderPluginSetup {}
 
 /**
+ * Component type for the embeddable conversation.
+ * Use `getEmbeddableConversation()` to obtain a configured instance.
+ */
+export type EmbeddableConversationComponent = React.FC<EmbeddableConversationProps>;
+
+/**
  * Public start contract for the browser-side agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
+  /**
+   * Returns a React component for embedding a conversation inline on a page.
+   * The component includes all necessary providers and context.
+   *
+   * @returns A configured conversation component ready for inline rendering
+   *
+   * @example
+   * ```tsx
+   * const EmbeddableConversation = plugins.agentBuilder.getEmbeddableConversation();
+   *
+   * return (
+   *   <EmbeddableConversation
+   *     sessionTag="sigevents"
+   *     agentId="observability.sigevents"
+   *     initialMessage="What are the significant events?"
+   *   />
+   * );
+   * ```
+   */
+  getEmbeddableConversation: () => EmbeddableConversationComponent;
   /**
    * Agent service contract, can be used to list agents.
    */

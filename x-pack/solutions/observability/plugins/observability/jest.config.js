@@ -18,4 +18,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/observability/plugins/observability/{common,public,server}/**/*.{js,ts,tsx}',
   ],
+  coveragePathIgnorePatterns: ['\\.stories\\.tsx$'],
 };

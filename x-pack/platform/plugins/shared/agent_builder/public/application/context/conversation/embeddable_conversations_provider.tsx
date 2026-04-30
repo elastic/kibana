@@ -38,6 +38,21 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
+  // Track last synced initialMessage to detect parent changes
+  const lastSyncedInitialMessageRef = useRef(contextProps.initialMessage);
+
+  // Sync initialMessage and autoSendInitialMessage when parent props change
+  useEffect(() => {
+    if (contextProps.initialMessage !== lastSyncedInitialMessageRef.current) {
+      lastSyncedInitialMessageRef.current = contextProps.initialMessage;
+      setCurrentProps((prevProps) => ({
+        ...prevProps,
+        initialMessage: contextProps.initialMessage,
+        autoSendInitialMessage: contextProps.autoSendInitialMessage,
+      }));
+    }
+  }, [contextProps.initialMessage, contextProps.autoSendInitialMessage]);
+
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
@@ -191,10 +206,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
+      hideWelcomeTitle: currentProps.hideWelcomeTitle,
+      initialTitle: currentProps.initialTitle,
+      hideCloseButton: currentProps.hideCloseButton,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
+      autoFocus: currentProps.autoFocus ?? true,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
@@ -207,10 +226,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }),
     [
       conversationId,
+      currentProps.hideWelcomeTitle,
+      currentProps.initialTitle,
+      currentProps.hideCloseButton,
       currentProps.sessionTag,
       currentProps.agentId,
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
+      currentProps.autoFocus,
       currentProps.browserApiTools,
       currentProps.attachments,
       upsertAttachments,

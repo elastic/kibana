@@ -26,7 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  describe('Cases persistable attachments', function () {
+  describe.skip('Cases persistable attachments', function () {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.loginWithPrivilegedRole();

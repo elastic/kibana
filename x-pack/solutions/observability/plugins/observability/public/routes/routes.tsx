@@ -15,9 +15,14 @@ import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
 import { LandingPage } from '../pages/landing/landing';
 import { OverviewPage } from '../pages/overview/overview';
+import { SigeventsOverviewPage } from '../pages/sigevents_overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { RulePage } from '../pages/rules/rule';
+import {
+  OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
+  OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT,
+} from '../../common';
 import {
   ALERT_DETAIL_PATH,
   ALERTS_PATH,
@@ -221,10 +226,41 @@ const routes: Record<RoutePath, RouteDefinition> = {
   },
 };
 
+function SigeventsOrOverviewPage() {
+  const { featureFlags } = useKibana().services;
+  const isSigeventsEnabled = featureFlags.getBooleanValue(
+    OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
+    OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT
+  );
+
+  if (isSigeventsEnabled) {
+    return <SigeventsOverviewPage />;
+  }
+  return <OverviewPage />;
+}
+
+const sigeventsAwareCompleteRoutes: Record<RoutePath, RouteDefinition> = {
+  ...completeRoutes,
+  [OVERVIEW_PATH]: {
+    handler: () => {
+      return (
+        <HasDataContextProvider>
+          <DatePickerContextProvider>
+            <SigeventsOrOverviewPage />
+          </DatePickerContextProvider>
+        </HasDataContextProvider>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+};
+
 export const useAppRoutes = () => {
   const { pricing } = useKibana().services;
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
+
   return {
-    ...(isCompleteOverviewEnabled ? { ...completeRoutes, ...routes } : { ...routes }),
+    ...(isCompleteOverviewEnabled ? { ...sigeventsAwareCompleteRoutes, ...routes } : { ...routes }),
   };
 };

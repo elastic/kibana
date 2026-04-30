@@ -25,7 +25,8 @@ export interface ConversationRightActionsProps {
 }
 
 export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
-  const { isEmbeddedContext } = useConversationContext();
+  const { isEmbeddedContext, hideCloseButton } = useConversationContext();
+  const showCloseButton = isEmbeddedContext && !hideCloseButton;
 
   return (
     <EuiFlexGroup
@@ -35,8 +36,8 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
-      {isEmbeddedContext && (
+      <MoreActionsButton onCloseSidebar={showCloseButton ? onClose : undefined} />
+      {showCloseButton && (
         <EuiButtonIcon
           color="text"
           iconType="cross"

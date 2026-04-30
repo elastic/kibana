@@ -158,6 +158,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod
