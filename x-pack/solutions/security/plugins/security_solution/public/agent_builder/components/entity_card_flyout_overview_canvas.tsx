@@ -249,7 +249,9 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     skip: !!observedHost?.entityRecord,
   });
 
-  const { refetch } = riskScoreState;
+  const { inspect, refetch, loading } = riskScoreState;
+  const { data: hostRisk } = riskScoreState;
+  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -294,8 +296,8 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
 
   useQueryInspector({
     deleteQuery,
-    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : null,
-    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : false,
+    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
     queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
     refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
     setQuery,
@@ -313,7 +315,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
   const isRiskScoreExist = observedHost.entityRecord
     ? !!getRiskFromEntityRecord(observedHost.entityRecord)
-    : false;
+    : !!hostRiskData?.host?.risk;
 
   const onCriticalitySave =
     entityFromStoreResult.entityRecord && observedHost.entityRecord
@@ -851,7 +853,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     filterQuery: serviceNameFilterQuery as unknown as ESQuery | undefined,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: !!observedService?.entityRecord,
+    skip: !!entityFromStoreResult.entityRecord,
   });
 
   const { inspect, refetch, loading } = riskScoreState;

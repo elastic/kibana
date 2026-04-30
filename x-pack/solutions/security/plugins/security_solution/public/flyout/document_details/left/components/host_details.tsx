@@ -336,7 +336,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     entityId,
     indexNames: relatedUsersIndexNames,
     from: timestamp, // related users are users who were successfully authenticated onto this host AFTER alert time
-    skip: false,
+    skip: spaceId == null,
   });
 
   const relatedUsersColumns: Array<EuiBasicTableColumn<RelatedUser>> = useMemo(
