@@ -380,7 +380,7 @@ describe('agentless_policy_helper', () => {
     it('should return the semver label for a single only-agentless template', () => {
       const packageInfo = {
         name: 'my-package',
-        version: '1.0.0',
+        version: '1.0.0-preview',
         policy_templates: [
           {
             name: 'template1',
@@ -390,25 +390,7 @@ describe('agentless_policy_helper', () => {
           },
         ] as RegistryPolicyTemplate[],
       };
-      expect(getAgentlessRelease(packageInfo, 'template1')).toBe('ga');
-    });
-
-    it('should return AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT for an absent release field on a dual-mode template', () => {
-      const packageInfo = {
-        name: 'my-package',
-        version: '1.0.0',
-        policy_templates: [
-          {
-            name: 'template1',
-            title: 'Template 1',
-            description: '',
-            deployment_modes: { agentless: { enabled: true }, default: { enabled: true } },
-          },
-        ] as RegistryPolicyTemplate[],
-      };
-      expect(getAgentlessRelease(packageInfo, 'template1')).toBe(
-        AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT
-      );
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe('preview');
     });
 
     it('should return ga when release is explicitly set to GA', () => {
@@ -463,7 +445,7 @@ describe('agentless_policy_helper', () => {
             name: 'template2',
             title: 'Template 2',
             description: '',
-            deployment_modes: { agentless: { enabled: true } },
+            deployment_modes: { agentless: { enabled: true }, default: { enabled: true } },
           },
         ] as RegistryPolicyTemplate[],
       };
@@ -472,7 +454,7 @@ describe('agentless_policy_helper', () => {
       );
     });
 
-    it('should return beta for an explicit beta release on a dual-mode template', () => {
+    it('should return beta for an explicit beta release', () => {
       const packageInfo = {
         name: 'my-package',
         version: '1.0.0',
@@ -491,7 +473,7 @@ describe('agentless_policy_helper', () => {
       expect(getAgentlessRelease(packageInfo, 'template1')).toBe('beta');
     });
 
-    it('should return beta for an unknown release value', () => {
+    it('should return least maturity for an unknown release value', () => {
       const packageInfo = {
         name: 'my-package',
         version: '1.0.0',
