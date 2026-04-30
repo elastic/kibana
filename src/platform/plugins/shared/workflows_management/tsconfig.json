@@ -16,7 +16,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/eval-kql",
     "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/esql-utils",
