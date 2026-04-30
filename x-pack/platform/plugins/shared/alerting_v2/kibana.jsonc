@@ -27,7 +27,8 @@
       "charts",
       "management",
       "kibanaUtils",
-      "share"
+      "share",
+      "unifiedDocViewer"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],
