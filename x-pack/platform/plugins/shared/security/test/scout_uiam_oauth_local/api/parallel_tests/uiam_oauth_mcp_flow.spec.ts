@@ -44,7 +44,7 @@ apiTest.describe(
         projectType: projectType!,
         roles: ['admin'],
         email: 'elastic_admin@elastic.co',
-        audience: `${kibanaBaseUrl}/`,
+        audience: kibanaBaseUrl,
       });
     });
 
