@@ -132,6 +132,7 @@ import { AttackDetailsProvider } from './attack_details/context';
 import { AttackDetailsPreviewPanel, AttackDetailsRightPanel } from './attack_details';
 import { AttackDetailsLeftPanel } from './attack_details/left';
 import type { IOCDetailsProps } from './ioc_details/types';
+import { IOCDetailsProvider } from './ioc_details/context';
 import { IOCPanel } from './ioc_details';
 import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
 
@@ -380,10 +381,9 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   {
     key: IOCRightPanelKey,
     component: (props) => (
-      <IOCPanel
-        params={(props as IOCDetailsProps).params}
-        path={props.path as IOCDetailsProps['path']}
-      />
+      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <IOCPanel path={props.path as IOCDetailsProps['path']} />
+      </IOCDetailsProvider>
     ),
     'aria-label': IOC_RIGHT_PANEL_ARIA_LABEL,
   },
