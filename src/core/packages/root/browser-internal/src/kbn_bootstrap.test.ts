@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
+import {
+  apmSystem,
+  fatalErrorMock,
+  i18nLoad,
+  i18nGetIsInitialized,
+} from './kbn_bootstrap.test.mocks';
 import { __kbnBootstrap__ } from '.';
 
 describe('kbn_bootstrap', () => {
@@ -42,5 +47,14 @@ describe('kbn_bootstrap', () => {
     await __kbnBootstrap__();
 
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips i18n.load and does not report a fatal error when i18n is already initialized', async () => {
+    i18nGetIsInitialized.mockReturnValueOnce(true);
+
+    await __kbnBootstrap__();
+
+    expect(i18nLoad).not.toHaveBeenCalled();
+    expect(fatalErrorMock.add).not.toHaveBeenCalled();
   });
 });
