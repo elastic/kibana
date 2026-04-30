@@ -41,6 +41,7 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
             Collections.sort(pipeNames);
             for (def p : pipeNames) {
               def pipe = cfg.service.pipelines[p];
+              if (pipe == null || !(pipe instanceof Map)) continue;
               def r  = pipe.receivers  instanceof List ? new ArrayList(pipe.receivers)  : new ArrayList();
               def pr = pipe.processors instanceof List ? new ArrayList(pipe.processors) : new ArrayList();
               def ex = pipe.exporters  instanceof List ? new ArrayList(pipe.exporters)  : new ArrayList();
