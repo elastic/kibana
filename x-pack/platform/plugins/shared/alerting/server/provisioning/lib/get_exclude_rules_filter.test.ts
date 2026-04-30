@@ -93,7 +93,9 @@ describe('getExcludeRulesFilter', () => {
           expect.objectContaining({
             function: 'is',
             arguments: expect.arrayContaining([
-              expect.objectContaining({ value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.status` }),
+              expect.objectContaining({
+                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.status`,
+              }),
               expect.objectContaining({ value: UiamApiKeyProvisioningStatus.FAILED }),
             ]),
           }),
