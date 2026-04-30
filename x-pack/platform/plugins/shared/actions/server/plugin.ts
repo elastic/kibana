@@ -93,6 +93,7 @@ import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
@@ -675,6 +676,12 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
+    /**
+     * Resolves profile UID from the `Authorization` API-key header for callers that run under a
+     * `FakeRequest` (action executor / background execution), where there is no browser session
+     * and `userProfiles.getCurrent` cannot run. For real `KibanaRequest` traffic, use
+     * `getCurrentUserProfileIdFromRequest` instead.
+     */
     async function getCurrentUserProfileIdFromAPIKey(
       request: KibanaRequest
     ): Promise<string | undefined> {
@@ -709,26 +716,8 @@ export class ActionsPlugin
       return undefined;
     }
 
-    async function getCurrentUserProfileId(
-      requestWithAuth: KibanaRequest
-    ): Promise<string | undefined> {
-      try {
-        const profile = await plugins.security?.userProfiles.getCurrent({
-          request: requestWithAuth,
-        });
-        if (profile?.uid) {
-          return profile.uid;
-        }
-      } catch (error) {
-        logger.debug(
-          `Failed to retrieve user profile from current auth context: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-
-      return undefined;
-    }
+    const getCurrentUserProfileId = (requestWithAuth: KibanaRequest) =>
+      getCurrentUserProfileIdFromRequest(requestWithAuth, plugins.security, logger);
 
     actionExecutor!.initialize({
       logger,
@@ -1040,12 +1029,8 @@ export class ActionsPlugin
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
             connectorLifecycleListeners,
-            getCurrentUserProfileId: async (requestWithAuth: KibanaRequest) => {
-              const profile = await pluginsStart.security?.userProfiles.getCurrent({
-                request: requestWithAuth,
-              });
-              return profile?.uid;
-            },
+            getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
+              getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
           });
         },
         listTypes: (featureId?: string) => {

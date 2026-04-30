@@ -18,9 +18,9 @@ import type { RawAction } from '../../../../types';
 function deriveUserAuthStatus(
   connectorId: string,
   userTokenConnectors: GetUserTokenConnectorsSoResult,
-  authMode: AuthMode | undefined
+  authMode: AuthMode
 ): GetAuthStatusResult[string]['userAuthStatus'] {
-  if (!authMode || authMode === 'shared') {
+  if (authMode === 'shared') {
     return 'not_applicable';
   }
   if (userTokenConnectors.connectorIds.includes(connectorId)) {
