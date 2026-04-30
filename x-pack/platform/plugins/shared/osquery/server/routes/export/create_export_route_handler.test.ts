@@ -309,7 +309,7 @@ describe('createExportRouteHandler', () => {
     await handler(createContext(), request, response, baseParams);
 
     const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
-    expect(esQueryArg.bool.must_not).toEqual([{ match_phrase: { 'osquery.uid': '0' } }]);
+    expect(esQueryArg?.bool?.must_not).toEqual([{ match_phrase: { 'osquery.uid': '0' } }]);
     expect(response.ok).toHaveBeenCalled();
   });
 
