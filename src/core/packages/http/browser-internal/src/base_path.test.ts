@@ -96,6 +96,20 @@ describe('BasePath', () => {
     it('defaults to "default" when basePath is empty', () => {
       expect(new BasePath({ basePath: '' }).spaceId).toEqual('default');
     });
+
+    it('ignores /s/<id> segments in the middle of the path', () => {
+      expect(new BasePath({ basePath: '/this/is/a/crazy/path/s/myspace' }).spaceId).toEqual(
+        'default'
+      );
+    });
+
+    it('does not match a path ending in /s without a space id', () => {
+      expect(new BasePath({ basePath: '/this/is/a/crazy/path/s' }).spaceId).toEqual('default');
+    });
+
+    it('returns "default" when the explicit space prefix is the default space', () => {
+      expect(new BasePath({ basePath: '/s/default' }).spaceId).toEqual('default');
+    });
   });
 
   describe('serverBasePath', () => {
