@@ -26,11 +26,14 @@ import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { classifyStreams, parseExcludePatterns, type StreamCandidate } from './classify_streams';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { areFeaturesRecentBatch } from '../../../../lib/sig_events/features/are_features_recent';
+import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../../common/constants';
+import { WorkflowExecutionClient } from '../../../../lib/workflows/workflow_execution_client';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 export interface EligibleStreamsResponse {
   candidates: StreamCandidate[];
+  alreadyRunning: string[];
   upToDate: StreamCandidate[];
   excluded: string[];
   unsupported: string[];
@@ -84,6 +87,7 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    workflowsManagementApi,
   }): Promise<EligibleStreamsResponse> => {
     const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing, getFeatureClient } =
       await getScopedClients({ request });
@@ -115,7 +119,11 @@ const eligibleStreamsRoute = createServerRoute({
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
-    const [connectorId, allStreams, featureClient] = await Promise.all([
+    const onboardingClient = workflowsManagementApi
+      ? new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID)
+      : undefined;
+
+    const [connectorId, allStreams, featureClient, runningStreamNames] = await Promise.all([
       resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -124,6 +132,7 @@ const eligibleStreamsRoute = createServerRoute({
       }),
       streamsClient.listStreams(),
       getFeatureClient(),
+      onboardingClient?.getRunningStreamNames() ?? Promise.resolve([]),
     ]);
 
     const supportedStreams = allStreams.filter(
@@ -147,15 +156,22 @@ const eligibleStreamsRoute = createServerRoute({
       excludedStreamPatterns: resolvedExcludedPatterns,
     });
 
-    const toSchedule = allCandidates.slice(0, maxStreams);
-    const skipped = allCandidates.slice(maxStreams);
+    const runningSet = new Set(runningStreamNames);
+    const filteredCandidates = allCandidates.filter((c) => !runningSet.has(c.streamName));
+    const filteredUpToDate = upToDate.filter((c) => !runningSet.has(c.streamName));
+    const alreadyRunning = runningStreamNames;
+
+    const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
+    const toSchedule = filteredCandidates.slice(0, availableSlots);
+    const skipped = filteredCandidates.slice(availableSlots);
 
     const now = Date.now();
     const start = now - lookbackHours * 3_600_000;
 
     return {
       candidates: toSchedule,
-      upToDate,
+      alreadyRunning,
+      upToDate: filteredUpToDate,
       excluded,
       unsupported,
       skipped,

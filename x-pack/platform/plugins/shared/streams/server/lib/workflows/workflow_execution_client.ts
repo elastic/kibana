@@ -124,6 +124,30 @@ export class WorkflowExecutionClient {
     return { status: 'not_found' };
   }
 
+  async getRunningStreamNames(): Promise<string[]> {
+    const { results } = await this.managementApi.getWorkflowExecutions(
+      {
+        workflowId: this.workflowId,
+        statuses: [...NonTerminalExecutionStatuses],
+        omitStepRuns: true,
+        size: MAX_SEARCH_SIZE,
+      },
+      DEFAULT_SPACE_ID
+    );
+
+    const names: string[] = [];
+    for (const listItem of results) {
+      const full = await this.managementApi.getWorkflowExecution(listItem.id, DEFAULT_SPACE_ID, {
+        includeOutput: true,
+      });
+      const name = full && getStreamNameFromContext(full.context);
+      if (name) {
+        names.push(name);
+      }
+    }
+    return names;
+  }
+
   async cancelExecution(streamName: string): Promise<void> {
     const match = await this.findExecutionForStream(streamName, [...NonTerminalExecutionStatuses]);
 

@@ -9,7 +9,10 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import {
+  CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  KI_ONBOARDING_WORKFLOW_UUID,
+} from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 import { pollUntil } from './poll_until';
 
@@ -34,15 +37,52 @@ export const createContinuousKiExtractionWorkflowService = (
     return { results, total };
   };
 
+  const cancelChildOnboardingWorkflows = async () => {
+    const { results } = await managementApi.getWorkflowExecutions(
+      {
+        workflowId: KI_ONBOARDING_WORKFLOW_UUID,
+        statuses: [...NonTerminalExecutionStatuses],
+        omitStepRuns: true,
+        size: 50,
+      },
+      DEFAULT_SPACE_ID
+    );
+
+    const toCancel: string[] = [];
+    for (const item of results) {
+      const full = await managementApi.getWorkflowExecution(item.id, DEFAULT_SPACE_ID, {
+        includeOutput: true,
+      });
+      if (full?.context?.parentWorkflowId === CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID) {
+        toCancel.push(item.id);
+      }
+    }
+
+    if (toCancel.length > 0) {
+      await Promise.all(
+        toCancel.map((id) => managementApi.cancelWorkflowExecution(id, DEFAULT_SPACE_ID))
+      );
+      log.debug(
+        () =>
+          `Cancelled ${toCancel.length} onboarding workflow(s) triggered by continuous extraction`
+      );
+    }
+  };
+
   const cancelAndAwaitTermination = async () => {
     const { results } = await getNonTerminalExecutions();
     if (results.length === 0) {
       return;
     }
 
-    await Promise.all(
-      results.map((result) => managementApi.cancelWorkflowExecution(result.id, DEFAULT_SPACE_ID))
-    );
+    await Promise.all([
+      ...results.map((result) =>
+        managementApi.cancelWorkflowExecution(result.id, DEFAULT_SPACE_ID)
+      ),
+      cancelChildOnboardingWorkflows().catch((err) =>
+        log.warn(`Failed to cancel child onboarding workflows: ${err}`)
+      ),
+    ]);
 
     log.debug(() => `Requested cancellation for ${results.length} running workflow execution(s)`);
 

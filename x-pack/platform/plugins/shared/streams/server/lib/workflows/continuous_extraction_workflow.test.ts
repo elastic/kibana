@@ -63,13 +63,13 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     assertYamlContains('skipQueries: true');
   });
 
+  it('polls each stream execution via the _execution endpoint', () => {
+    assertYamlContains('/onboarding/_execution');
+  });
+
   it('passes the resolved intervalHours from _eligible to the onboarding workflow', () => {
     assertYamlContains(
       'featuresRecencyThresholdHours: "${{ steps.get_eligible.output.resolvedIntervalHours }}"'
     );
-  });
-
-  it('polls each stream execution via the _execution endpoint', () => {
-    assertYamlContains('/onboarding/_execution');
   });
 });
