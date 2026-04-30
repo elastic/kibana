@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilder: 48000
-  agentBuilderPlatform: 8886
+  agentBuilderPlatform: 8737
   agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
   aiops: 15227
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 299886
   elasticAssistantSharedState: 4881
-  elasticConsole: 4451
+  elasticConsole: 4442
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
@@ -117,7 +117,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
-  ml: 102030
+  ml: 99842
   mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
@@ -133,7 +133,6 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 47422
   painlessLab: 6299
-  presentationPanel: 10886
   presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
@@ -156,7 +155,7 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 13404
+  searchInferenceEndpoints: 9765
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -164,7 +163,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 171186
+  securitySolution: 171101
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
@@ -172,7 +171,7 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 64618
+  share: 64066
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
