@@ -45,6 +45,7 @@
                 "lineNumber": 51,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnalyticsServiceStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -243,6 +244,7 @@
                 "lineNumber": 160,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "TelemetryQuerySubmittedProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -402,6 +404,7 @@
                 "lineNumber": 194,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLVariableType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -425,6 +428,7 @@
                 "lineNumber": 195,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ControlTriggerSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -500,6 +504,7 @@
                 "lineNumber": 213,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLVariableType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -523,6 +528,7 @@
                 "lineNumber": 214,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ControlTriggerSource",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -573,6 +579,7 @@
                 "lineNumber": 222,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLVariableType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -863,6 +870,7 @@
                 "lineNumber": 261,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TelemetryLatencyProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -913,6 +921,7 @@
                 "lineNumber": 265,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "TelemetryLatencyProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -963,6 +972,7 @@
                 "lineNumber": 270,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "TelemetryLatencyProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1009,7 +1019,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 976,
+        "lineNumber": 987,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1048,9 +1058,10 @@
               ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-            "lineNumber": 976,
+            "lineNumber": 987,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1247,6 +1258,7 @@
             "lineNumber": 34,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "AnalyticsServiceSetup",
             "trackAdoption": false
           }
         ],
@@ -1440,7 +1452,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 989,
+        "lineNumber": 1000,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

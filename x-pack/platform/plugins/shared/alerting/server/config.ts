@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { TypeOf, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
 import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT } from './application/gaps/types/scheduler';
@@ -66,6 +67,13 @@ const rulesSchema = schema.object({
   }),
 });
 
+const ruleChangeTrackingSolutions: Type<RuleTypeSolution | 'all'> = schema.oneOf([
+  schema.literal('security'),
+  schema.literal('observability'),
+  schema.literal('stack'),
+  schema.literal('all'),
+]);
+
 export const configSchema = schema.object({
   healthCheck: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
@@ -76,6 +84,10 @@ export const configSchema = schema.object({
   }),
   maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
+  ruleChangeTracking: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    scope: schema.arrayOf(ruleChangeTrackingSolutions, { defaultValue: ['security'] }),
+  }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
   rulesSettings: schema.object({

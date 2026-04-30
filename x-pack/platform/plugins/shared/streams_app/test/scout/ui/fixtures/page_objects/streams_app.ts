@@ -142,7 +142,10 @@ export class StreamsApp {
   }
 
   async gotoAdvancedTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'advanced');
+    // Navigate to a stable tab first, then open Advanced to avoid races from direct URL nav
+    await this.gotoDataRetentionTab(streamName);
+    await this.page.getByRole('tab', { name: 'Advanced' }).click();
+    await this.page.waitForURL(/\/advanced/);
   }
 
   async gotoAttachmentsTab(streamName: string) {
@@ -1347,5 +1350,38 @@ export class StreamsApp {
 
   async clickQueryStreamFormDeleteButton() {
     await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
+  }
+
+  async createRootQueryStream(name: string, esqlQuery: string) {
+    await this.clickCreateQueryStreamButton();
+    await this.fillRoutingRuleName(name);
+    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.clickQueryStreamFlyoutSaveButton();
+  }
+
+  async openCreateChildQueryStreamForm() {
+    await this.clickQueryModeCreateQueryStreamButton();
+    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+  }
+
+  async fillAndSaveChildQueryStream(childName: string, esqlQuery: string) {
+    await this.fillRoutingRuleName(childName);
+    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.clickQueryStreamFormCreateButton();
+  }
+
+  async createChildQueryStreamFromPartitioningTab(childName: string, esqlQuery: string) {
+    await this.openCreateChildQueryStreamForm();
+    await this.fillAndSaveChildQueryStream(childName, esqlQuery);
+  }
+
+  async deleteQueryStreamFromAdvancedTab(streamName: string) {
+    await this.clickStreamNameLink(streamName);
+    await this.clickQueryStreamDetailsTab('advanced');
+    await this.clickDeleteQueryStreamButton();
+    await this.fillDeleteQueryStreamModalInput(streamName);
+    await this.clickDeleteQueryStreamModalDeleteButton();
+    await this.queryStreamDeletedSuccessToast.waitFor({ state: 'visible' });
   }
 }

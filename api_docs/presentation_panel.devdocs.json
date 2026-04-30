@@ -52,6 +52,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PresentationPanelProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -91,6 +92,7 @@
             "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "PresentationPanelErrorProps",
             "trackAdoption": false,
             "isRequired": true
           }
