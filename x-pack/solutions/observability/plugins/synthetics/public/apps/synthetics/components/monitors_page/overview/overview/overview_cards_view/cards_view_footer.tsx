@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { useOverviewStatus } from '../../../hooks/use_overview_status';
-import { selectOverviewState } from '../../../../../state';
+import { selectOverviewGroupBy, selectOverviewPageState } from '../../../../../state';
 import type { OverviewStatusMetaData } from '../../types';
 
 const OVERVIEW_ROW_COUNT = 4;
@@ -22,10 +22,8 @@ export const CardsViewFooter = ({
   currentIndex: number;
   monitorsSortedByStatus: OverviewStatusMetaData[];
 }) => {
-  const {
-    pageState: { perPage },
-    groupBy: { field: groupField },
-  } = useSelector(selectOverviewState);
+  const { perPage } = useSelector(selectOverviewPageState);
+  const { field: groupField } = useSelector(selectOverviewGroupBy);
   const isUnGrouped = groupField === 'none';
   const { allConfigs, loaded } = useOverviewStatus({
     scopeStatusByLocation: true,

@@ -368,8 +368,8 @@
                   "<D>"
                 ],
                 "path": "node_modules/axios/index.d.ts",
-                "lineNumber": 735,
-                "columnNumber": 5,
+                "lineNumber": 650,
+                "columnNumber": 44,
                 "deprecated": false,
                 "docsReferencedTypeName": "AxiosRequestConfig",
                 "trackAdoption": false
