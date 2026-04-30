@@ -5,31 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import type { FieldPath } from 'react-hook-form';
 import type { IlmPhasesFlyoutFormInternal, TimeUnit } from './form';
 export { TIME_UNIT_OPTIONS } from '../shared';
-
-export const ILM_PHASE_ORDER: PhaseName[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
-
-export const PHASE_LABELS: Record<PhaseName, string> = {
-  hot: i18n.translate('xpack.streams.editIlmPhasesFlyout.phaseLabelHot', {
-    defaultMessage: 'Hot',
-  }),
-  warm: i18n.translate('xpack.streams.editIlmPhasesFlyout.phaseLabelWarm', {
-    defaultMessage: 'Warm',
-  }),
-  cold: i18n.translate('xpack.streams.editIlmPhasesFlyout.phaseLabelCold', {
-    defaultMessage: 'Cold',
-  }),
-  frozen: i18n.translate('xpack.streams.editIlmPhasesFlyout.phaseLabelFrozen', {
-    defaultMessage: 'Frozen',
-  }),
-  delete: i18n.translate('xpack.streams.editIlmPhasesFlyout.phaseLabelDelete', {
-    defaultMessage: 'Delete',
-  }),
-};
 
 export const DEFAULT_NEW_PHASE_MIN_AGE: { value: string; unit: TimeUnit } = {
   value: '30',
