@@ -34,12 +34,6 @@ export const SearchMessagesInputSchema = z.object({
 export type SearchMessagesInput = z.infer<typeof SearchMessagesInputSchema>;
 
 export const ListMessagesInputSchema = z.object({
-  userId: z
-    .string()
-    .optional()
-    .describe(
-      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
-    ),
   folderId: z
     .string()
     .optional()
@@ -73,12 +67,6 @@ export const GetMessageInputSchema = z.object({
     .describe(
       'The ID of the Outlook message to retrieve. Obtain this from listMessages (the "id" field on each message object) or searchMessages (the resource.id field in hits).'
     ),
-  userId: z
-    .string()
-    .optional()
-    .describe(
-      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
-    ),
 });
 export type GetMessageInput = z.infer<typeof GetMessageInputSchema>;
 
@@ -93,12 +81,6 @@ export const GetAttachmentInputSchema = z.object({
     .describe(
       'The ID of the attachment to retrieve. Use listAttachments to discover attachment IDs for a given message.'
     ),
-  userId: z
-    .string()
-    .optional()
-    .describe(
-      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
-    ),
 });
 export type GetAttachmentInput = z.infer<typeof GetAttachmentInputSchema>;
 
@@ -108,22 +90,10 @@ export const ListAttachmentsInputSchema = z.object({
     .describe(
       'The ID of the Outlook message whose attachments you want to list. Use listMessages or searchMessages to find message IDs.'
     ),
-  userId: z
-    .string()
-    .optional()
-    .describe(
-      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
-    ),
 });
 export type ListAttachmentsInput = z.infer<typeof ListAttachmentsInputSchema>;
 
 export const ListFoldersInputSchema = z.object({
-  userId: z
-    .string()
-    .optional()
-    .describe(
-      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
-    ),
   includeHidden: z
     .boolean()
     .default(false)
