@@ -32,7 +32,6 @@ test.describe(
       browserAuth,
       pageObjects,
       page,
-      pageObjects,
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAsViewer();
@@ -45,7 +44,6 @@ test.describe(
       browserAuth,
       pageObjects,
       page,
-      pageObjects,
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAs('editor');
@@ -75,7 +73,7 @@ test.describe(
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
       await browserAuth.loginAsViewer();
-      await page.reload();
+      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
     });
@@ -87,7 +85,7 @@ test.describe(
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
       await browserAuth.loginAs('editor');
-      await page.reload();
+      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
     });
@@ -99,7 +97,7 @@ test.describe(
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
       await browserAuth.loginAsAdmin();
-      await page.reload();
+      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
     });
