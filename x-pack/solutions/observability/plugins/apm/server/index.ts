@@ -129,7 +129,6 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 };
 
 export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
-export { APMPlugin } from './plugin';
 export type { APMPluginSetup } from './types';
 export type {
   APMServerRouteRepository,

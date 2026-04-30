@@ -68,6 +68,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
         return AddFromLibraryFlyout;
       },
+      getAddFromLibraryContentComponent: async () => {
+        const { AddFromLibraryContent } = await import(
+          './add_from_library/add_from_library_flyout'
+        );
+        return AddFromLibraryContent;
+      },
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
