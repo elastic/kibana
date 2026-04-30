@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
+import Boom from '@hapi/boom';
 
 import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
