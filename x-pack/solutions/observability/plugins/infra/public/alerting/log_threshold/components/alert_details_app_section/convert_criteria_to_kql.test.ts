@@ -53,18 +53,15 @@ describe('convertCriteriaToKQL', () => {
       }
     );
 
-    it.each(specialValues)(
-      'produces parseable KQL for "matches phrase" with value %p',
-      (value) => {
-        const kql = convertCriteriaToKQL({
-          field,
-          comparator: Comparator.MATCH_PHRASE,
-          value,
-        });
+    it.each(specialValues)('produces parseable KQL for "matches phrase" with value %p', (value) => {
+      const kql = convertCriteriaToKQL({
+        field,
+        comparator: Comparator.MATCH_PHRASE,
+        value,
+      });
 
-        expect(() => fromKueryExpression(kql)).not.toThrow();
-      }
-    );
+      expect(() => fromKueryExpression(kql)).not.toThrow();
+    });
 
     it('escapes embedded backslashes and double quotes', () => {
       const value = 'has "quote" and \\backslash';
@@ -81,15 +78,15 @@ describe('convertCriteriaToKQL', () => {
 
   describe('range comparators', () => {
     it('renders numeric values without quotes', () => {
-      expect(
-        convertCriteriaToKQL({ field: 'count', comparator: Comparator.GT, value: 5 })
-      ).toBe('count > 5');
+      expect(convertCriteriaToKQL({ field: 'count', comparator: Comparator.GT, value: 5 })).toBe(
+        'count > 5'
+      );
       expect(
         convertCriteriaToKQL({ field: 'count', comparator: Comparator.GT_OR_EQ, value: 5 })
       ).toBe('count >= 5');
-      expect(
-        convertCriteriaToKQL({ field: 'count', comparator: Comparator.LT, value: 5 })
-      ).toBe('count < 5');
+      expect(convertCriteriaToKQL({ field: 'count', comparator: Comparator.LT, value: 5 })).toBe(
+        'count < 5'
+      );
       expect(
         convertCriteriaToKQL({ field: 'count', comparator: Comparator.LT_OR_EQ, value: 5 })
       ).toBe('count <= 5');
