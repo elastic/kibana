@@ -13,8 +13,8 @@ import type { StartDeps } from './plugin';
 
 export let coreServices: CoreStart;
 export let embeddableService: EmbeddableStart;
-export let logger: Logger;
 export let taggingService: SavedObjectTaggingStart | undefined;
+export let logger: Logger;
 
 export const setKibanaServices = (core: CoreStart, deps: StartDeps, _logger: Logger) => {
   coreServices = core;
