@@ -91,6 +91,7 @@ const nonAlertMockHit = createMockHit({
   'signal.rule.id': 'rule-2',
 });
 const onAlertUpdated = jest.fn();
+const mockRenderCellActions = jest.fn(({ children }) => <>{children}</>);
 
 describe('InsightsSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
@@ -107,7 +108,11 @@ describe('InsightsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <InsightsSection hit={hit} onAlertUpdated={onAlertUpdated} />
+            <InsightsSection
+              hit={hit}
+              renderCellActions={mockRenderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
           </Router>
         </Provider>
       </IntlProvider>
@@ -173,7 +178,11 @@ describe('InsightsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <InsightsSection hit={nonAlertMockHit} onAlertUpdated={onAlertUpdated} />
+            <InsightsSection
+              hit={nonAlertMockHit}
+              renderCellActions={mockRenderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
           </Router>
         </Provider>
       </IntlProvider>
