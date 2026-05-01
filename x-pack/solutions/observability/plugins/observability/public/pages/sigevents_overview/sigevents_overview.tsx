@@ -89,6 +89,7 @@ export function SigeventsOverviewPage() {
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
+  const [conversationKey, setConversationKey] = useState(0);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
   const returnFocusRef = useRef<Element | null>(null);
 
@@ -401,6 +402,7 @@ export function SigeventsOverviewPage() {
                 style={{ minHeight: 0 }}
               >
                 <EmbeddableConversation
+                  key={conversationKey}
                   sessionTag="sigevents"
                   hideWelcomeTitle
                   hideCloseButton
@@ -408,6 +410,7 @@ export function SigeventsOverviewPage() {
                   initialMessage={remediationPrompt}
                   autoSendInitialMessage={!!remediationPrompt}
                   autoFocus={false}
+                  newConversation={conversationKey > 0}
                 />
               </EuiFlexItem>
             )}
