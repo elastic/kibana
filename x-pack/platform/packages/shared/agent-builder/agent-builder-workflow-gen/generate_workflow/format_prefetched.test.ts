@@ -9,6 +9,7 @@ import {
   groupConnectorsByActionType,
   formatConnectorsBlock,
   formatStepEntry,
+  collapseSubActionFamilies,
 } from './format_prefetched';
 import type { ConnectorSummary, StepDefinitionSummary } from './types';
 
@@ -139,5 +140,41 @@ describe('formatStepEntry', () => {
   it('handles the slack_api edge case (id with underscore vs label "Slack API")', () => {
     expect(formatStepEntry(step({ id: 'slack_api', label: 'Slack API', description: undefined })))
       .toBe('- slack_api');
+  });
+});
+
+describe('collapseSubActionFamilies', () => {
+  const mkStep = (id: string): StepDefinitionSummary => ({
+    id,
+    label: id,
+    category: 'external',
+  });
+
+  it('keeps small families enumerated', () => {
+    const steps = ['slack', 'slack_api', 'email'].map(mkStep);
+
+    expect(collapseSubActionFamilies(steps, 5)).toEqual({
+      enumerated: steps,
+      collapsed: [],
+    });
+  });
+
+  it('collapses families with more than threshold sub-actions', () => {
+    const githubIds = Array.from({ length: 10 }).map((_, i) => `github.action${i}`);
+    const slackIds = ['slack', 'slack_api'];
+    const steps = [...githubIds, ...slackIds].map(mkStep);
+
+    const result = collapseSubActionFamilies(steps, 5);
+    expect(result.enumerated.map((s) => s.id)).toEqual(['slack', 'slack_api']);
+    expect(result.collapsed).toEqual([{ prefix: 'github', count: 10 }]);
+  });
+
+  it('treats top-level (no dot) entries each as their own prefix family of 1', () => {
+    const steps = ['email', 'slack', 'console'].map(mkStep);
+    expect(collapseSubActionFamilies(steps, 5).enumerated.map((s) => s.id)).toEqual([
+      'email',
+      'slack',
+      'console',
+    ]);
   });
 });

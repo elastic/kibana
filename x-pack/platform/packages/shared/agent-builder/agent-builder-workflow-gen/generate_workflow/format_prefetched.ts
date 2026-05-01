@@ -67,3 +67,52 @@ export const formatStepEntry = (s: StepDefinitionSummary): string => {
   }
   return line;
 };
+
+/* ---------------- Sub-action family collapse ---------------- */
+
+export interface CollapsedFamily {
+  prefix: string;
+  count: number;
+}
+
+export interface CollapsedFamilies {
+  enumerated: StepDefinitionSummary[];
+  collapsed: CollapsedFamily[];
+}
+
+const prefixOf = (id: string): string => {
+  const dot = id.indexOf('.');
+  return dot === -1 ? id : id.slice(0, dot);
+};
+
+export const collapseSubActionFamilies = (
+  steps: StepDefinitionSummary[],
+  threshold: number
+): CollapsedFamilies => {
+  const byPrefix = new Map<string, StepDefinitionSummary[]>();
+  for (const s of steps) {
+    const p = prefixOf(s.id);
+    const arr = byPrefix.get(p);
+    if (arr) {
+      arr.push(s);
+    } else {
+      byPrefix.set(p, [s]);
+    }
+  }
+
+  const enumerated: StepDefinitionSummary[] = [];
+  const collapsed: CollapsedFamily[] = [];
+
+  for (const [prefix, group] of byPrefix) {
+    // A "family" is only meaningful when there are multiple sub-actions sharing
+    // the same prefix. A single id with no dot is just a step, not a family.
+    const isMultiActionFamily = group.length > 1 && group.every((s) => s.id.includes('.'));
+    if (isMultiActionFamily && group.length > threshold) {
+      collapsed.push({ prefix, count: group.length });
+    } else {
+      enumerated.push(...group);
+    }
+  }
+
+  return { enumerated, collapsed };
+};
