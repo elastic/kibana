@@ -76,10 +76,14 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
     setSelection(null);
   }, [config, selectedPipelineId, setNodes, setEdges]);
 
-  // Add health separately so that we don't have to re-run the layout algorithm when health changes
   useEffect(() => {
-    enrichNodesWithHealth(nodes, health);
-  }, [nodes, health]);
+    setNodes((currentNodes) => {
+      const updated = currentNodes.map((n) => ({ ...n, data: { ...n.data } }));
+      enrichNodesWithHealth(updated, health);
+
+      return updated;
+    });
+  }, [health, setNodes]);
 
   useEffect(() => {
     fitView({ padding: 0.1 });
