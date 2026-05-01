@@ -278,7 +278,7 @@ Then the response contains an empty rules array
 **Automation**: API integration tests.
 
 ```Gherkin
-Given a custom (non-prebuilt) rule is installed with a rule_id
+Given a custom rule is installed with a rule_id
 And the package contains a deprecated rule asset with the same rule_id
 When the user requests the deprecation review with no filter
 Then the response contains an empty rules array
@@ -289,7 +289,7 @@ Then the response contains an empty rules array
 **Automation**: API integration tests.
 
 ```Gherkin
-Given a custom (non-prebuilt) rule is installed with a rule_id
+Given a custom rule is installed with a rule_id
 And the package contains a deprecated rule asset with the same rule_id
 When the user requests the deprecation review filtered to the custom rule's SO id
 Then the response contains an empty rules array
