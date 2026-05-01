@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 
@@ -101,15 +102,9 @@ export interface ValidationResult {
  * subsequent turns.
  */
 
-export interface RecordedToolCall {
-  id: string;
-  name: string;
-  args: unknown;
-}
-
 export interface AgentStepAction {
   type: 'agent_step';
-  toolCalls: RecordedToolCall[];
+  toolCalls: ToolCall[];
   text?: string;
 }
 

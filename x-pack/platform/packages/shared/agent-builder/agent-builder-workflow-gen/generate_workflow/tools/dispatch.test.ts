@@ -14,7 +14,7 @@ describe('dispatchToolCall', () => {
   it('replaces YAML on set_yaml', async () => {
     const result = await dispatchToolCall(
       { yaml: '' },
-      { name: TOOL_NAMES.setYaml, args: { yaml: 'name: foo\nversion: "1"\n' } },
+      { toolCallId: 't1', toolName: TOOL_NAMES.setYaml, args: { yaml: 'name: foo\nversion: "1"\n' } },
       baseDeps
     );
 
@@ -26,7 +26,7 @@ describe('dispatchToolCall', () => {
     const result = await dispatchToolCall(
       { yaml: '' },
       {
-        name: TOOL_NAMES.insertStep,
+        toolCallId: 't1', toolName: TOOL_NAMES.insertStep,
         args: { step: { name: 's1', type: 'console', with: { message: 'hi' } } },
       },
       baseDeps
@@ -42,7 +42,7 @@ describe('dispatchToolCall', () => {
     const result = await dispatchToolCall(
       { yaml: initial },
       {
-        name: TOOL_NAMES.insertStep,
+        toolCallId: 't1', toolName: TOOL_NAMES.insertStep,
         args: { step: { name: 'b', type: 'console', with: { message: 'bye' } } },
       },
       baseDeps
@@ -56,7 +56,7 @@ describe('dispatchToolCall', () => {
   it('rejects unknown tool names', async () => {
     const result = await dispatchToolCall(
       { yaml: '' },
-      { name: 'definitely_not_a_tool', args: {} },
+      { toolCallId: 't1', toolName: 'definitely_not_a_tool', args: {} },
       baseDeps
     );
 

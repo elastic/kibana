@@ -6,7 +6,7 @@
  */
 
 import { StateGraph } from '@langchain/langgraph';
-import { isAIMessage } from '@langchain/core/messages';
+import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -55,17 +55,12 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
   const agentNode = async (state: StateType): Promise<Partial<StateType>> => {
     const messages = buildMessagesFromActions(state);
     const aiMessage = await modelWithTools.invoke(messages);
-    const toolCalls = isAIMessage(aiMessage) ? aiMessage.tool_calls ?? [] : [];
 
     return {
       actions: [
         agentStepAction({
-          toolCalls: toolCalls.map((tc) => ({
-            id: tc.id ?? '',
-            name: tc.name,
-            args: tc.args,
-          })),
-          text: typeof aiMessage.content === 'string' ? aiMessage.content : undefined,
+          toolCalls: extractToolCalls(aiMessage),
+          text: extractTextContent(aiMessage),
         }),
       ],
     };
@@ -84,18 +79,14 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
     const newActions: Action[] = [];
 
     for (const call of lastAgentStep.toolCalls) {
-      const result = await dispatchToolCall(
-        { yaml },
-        { name: call.name, args: call.args },
-        dispatchDeps
-      );
+      const result = await dispatchToolCall({ yaml }, call, dispatchDeps);
       if (result.yaml !== undefined) {
         yaml = result.yaml;
       }
       newActions.push(
         toolResultAction({
-          toolCallId: call.id,
-          name: call.name,
+          toolCallId: call.toolCallId,
+          name: call.toolName,
           success: result.message.success,
           data: result.message.data,
           error: result.message.error,

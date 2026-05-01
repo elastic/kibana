@@ -11,6 +11,7 @@ import {
   modifyStepProperty,
   deleteStep,
 } from '@kbn/workflows-yaml';
+import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
 import { TOOL_NAMES, type ToolName } from './schemas';
 import { lookupStepDefinitions, lookupTriggerDefinitions, type LookupDeps } from './lookup';
 
@@ -18,12 +19,6 @@ export interface ToolMessage {
   success: boolean;
   data?: unknown;
   error?: string;
-}
-
-export interface DispatchInput {
-  name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: any;
 }
 
 export interface DispatchResult {
@@ -34,10 +29,10 @@ export interface DispatchResult {
 
 export const dispatchToolCall = async (
   state: { yaml: string },
-  call: DispatchInput,
+  call: ToolCall,
   deps: LookupDeps
 ): Promise<DispatchResult> => {
-  switch (call.name as ToolName) {
+  switch (call.toolName as ToolName) {
     case TOOL_NAMES.setYaml: {
       const newYaml = call.args.yaml as string;
       return { yaml: newYaml, message: { success: true, data: { length: newYaml.length } } };
@@ -80,6 +75,6 @@ export const dispatchToolCall = async (
       return { message: { success: true, data } };
     }
     default:
-      return { message: { success: false, error: `Unknown tool: ${call.name}` } };
+      return { message: { success: false, error: `Unknown tool: ${call.toolName}` } };
   }
 };

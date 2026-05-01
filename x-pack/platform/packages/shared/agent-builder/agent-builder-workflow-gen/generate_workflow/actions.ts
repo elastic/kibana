@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Action,
-  AgentStepAction,
-  RecordedToolCall,
-  ToolResultAction,
-  ValidateAction,
-} from './types';
+import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
+import type { Action, AgentStepAction, ToolResultAction, ValidateAction } from './types';
 
 /**
  * Factories — use these instead of constructing action object literals at the
@@ -22,7 +17,7 @@ export const agentStepAction = ({
   toolCalls,
   text,
 }: {
-  toolCalls: RecordedToolCall[];
+  toolCalls: ToolCall[];
   text?: string;
 }): AgentStepAction => ({
   type: 'agent_step',

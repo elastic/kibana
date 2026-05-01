@@ -57,9 +57,9 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
         new AIMessage({
           content: action.text ?? '',
           tool_calls: action.toolCalls.map((tc) => ({
-            id: tc.id,
-            name: tc.name,
-            args: tc.args as Record<string, unknown>,
+            id: tc.toolCallId,
+            name: tc.toolName,
+            args: tc.args,
           })),
         })
       );
