@@ -128,6 +128,7 @@ export const TruncatedBadgeList = memo(
             <EuiToolTip position="top" title={overflowTooltipTitle} content={hidden.join(', ')}>
               <EuiBadge
                 color="hollow"
+                tabIndex={0}
                 data-test-subj={overflowTestSubj}
                 aria-label={DEFAULT_OVERFLOW_ARIA_LABEL(hidden.length)}
               >
