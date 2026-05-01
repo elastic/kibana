@@ -281,4 +281,43 @@ describe('useFetchLatestSignificantEvent', () => {
 
     expect(result.current.data!.description).toBe('Use this recommendation');
   });
+
+  it('handles a minimal doc with missing optional fields', async () => {
+    const minimalDoc = {
+      '@timestamp': timestamp,
+      event_id: 'minimal-1',
+      discovery_id: 'd-1',
+      discovery_slug: 'slug-1',
+      verdict: 'promoted',
+      title: 'Minimal event',
+      impact: 'critical',
+      verdict_id: 'v-1',
+      last_reviewed_at: timestamp,
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: minimalDoc }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data).not.toBeNull();
+    expect(result.current.data!.mainEventTitle).toBe('Minimal event');
+    expect(result.current.data!.impactedServices).toHaveLength(0);
+    expect(result.current.data!.impactedCards).toHaveLength(0);
+    expect(result.current.data!.detailFields.summary).toBe('');
+    expect(result.current.data!.detailFields.rootCause).toBe('');
+    expect(result.current.data!.detailFields.recommendations).toHaveLength(0);
+    expect(result.current.data!.detailFields.streamNames).toHaveLength(0);
+    expect(result.current.data!.detailFields.evidences).toHaveLength(0);
+    expect(result.current.data!.detailFields.dependencyEdges).toHaveLength(0);
+    expect(result.current.data!.detailFields.causeKis).toHaveLength(0);
+  });
 });

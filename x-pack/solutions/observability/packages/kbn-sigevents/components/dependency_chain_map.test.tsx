@@ -21,6 +21,20 @@ jest.mock('@xyflow/react', () => {
   };
 });
 
+jest.mock('@dagrejs/dagre', () => {
+  const actual = jest.requireActual('@dagrejs/dagre');
+  return {
+    __esModule: true,
+    default: {
+      ...actual,
+      graphlib: actual.graphlib,
+      layout: jest.fn(actual.layout),
+    },
+  };
+});
+
+import Dagre from '@dagrejs/dagre';
+
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('DependencyChainMap', () => {
@@ -86,5 +100,18 @@ describe('DependencyChainMap', () => {
     expect(
       container.querySelector('[data-test-subj="sigeventsDependencyChainMap"]')
     ).not.toBeInTheDocument();
+  });
+
+  it('falls back to grid layout when Dagre.layout throws', () => {
+    (Dagre.layout as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('Layout failed');
+    });
+
+    const { container } = renderWithIntl(
+      <DependencyChainMap dependencyEdges={defaultEdges} causeKis={defaultCauseKis} />
+    );
+    const reactFlow = container.querySelector('[data-test-subj="reactFlow"]');
+    // Still renders nodes even with the fallback
+    expect(reactFlow).toHaveAttribute('data-nodes', '3');
   });
 });

@@ -170,4 +170,49 @@ describe('SignificantEventDetailBody', () => {
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={unknownSeverityEvent} />);
     expect(screen.getAllByText('Low').length).toBeGreaterThan(0);
   });
+
+  it('renders "Monitor" recommended action label and eye icon', () => {
+    const monitorEvent = { ...mockEvent, recommendedAction: 'monitor' as const };
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={monitorEvent} />);
+    expect(screen.getAllByText('Monitor').length).toBeGreaterThan(0);
+  });
+
+  it('renders "Resolve" recommended action label and checkInCircleFilled icon', () => {
+    const resolveEvent = { ...mockEvent, recommendedAction: 'resolve' as const };
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={resolveEvent} />);
+    expect(screen.getAllByText('Resolve').length).toBeGreaterThan(0);
+  });
+
+  it('renders "Investigate" recommended action label and search icon', () => {
+    const investigateEvent = { ...mockEvent, recommendedAction: 'investigate' as const };
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={investigateEvent} />);
+    expect(screen.getAllByText('Investigate').length).toBeGreaterThan(0);
+  });
+
+  it('renders impacting label as dash when no exposed edges exist', () => {
+    const noExposedEvent = {
+      ...mockEvent,
+      dependencyEdges: [
+        { source: 'svc-a', target: 'svc-b', protocol: 'grpc', exposure: 'not_exposed' as const },
+      ],
+    };
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={noExposedEvent} />);
+
+    // Expand General information panel to see the impacting label
+    fireEvent.click(screen.getAllByTestId('sigeventsOverviewInfoPanelToggle')[0]);
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('renders singular "1 service" when one exposed edge source exists', () => {
+    const singleServiceEvent = {
+      ...mockEvent,
+      dependencyEdges: [
+        { source: 'svc-a', target: 'svc-b', protocol: 'grpc', exposure: 'exposed' as const },
+      ],
+    };
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={singleServiceEvent} />);
+
+    fireEvent.click(screen.getAllByTestId('sigeventsOverviewInfoPanelToggle')[0]);
+    expect(screen.getByText('1 service')).toBeInTheDocument();
+  });
 });

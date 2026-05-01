@@ -268,4 +268,50 @@ describe('useFetchSystemOverview', () => {
     // Unknown priority is skipped; critical gets counted
     expect(result.current.data!.sigEventsByPriority.critical).toEqual({ open: 2, resolved: 0 });
   });
+
+  it('handles missing aggregations gracefully (null responses)', async () => {
+    mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
+      if (params.index === 'traces-*') {
+        return of({
+          rawResponse: {
+            aggregations: undefined,
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+          },
+        });
+      }
+      if (params.index === 'logs-*') {
+        return of({
+          rawResponse: {
+            aggregations: undefined,
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+          },
+        });
+      }
+      if (params.index === 'sigevents-events-ms' && params.size === 5) {
+        return of({
+          rawResponse: {
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+          },
+        });
+      }
+      if (params.index === 'sigevents-events-ms' && params.size === 0) {
+        return of({
+          rawResponse: {
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+            aggregations: undefined,
+          },
+        });
+      }
+      return of({ rawResponse: { hits: { hits: [], total: { value: 0, relation: 'eq' } } } });
+    });
+
+    const { result } = renderHook(() => useFetchSystemOverview(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.serviceCount).toBe(0);
+    expect(result.current.data!.sigEventsByPriority.critical).toEqual({ open: 0, resolved: 0 });
+  });
 });

@@ -75,7 +75,26 @@ export interface SignificantEventDetailBodyProps {
 }
 
 export function SignificantEventDetailBody(props: SignificantEventDetailBodyProps) {
-  const { event, detectedAtLabel, hideHeader = false, onRemediate, onOpenDetails } = props;
+  const {
+    event: rawEvent,
+    detectedAtLabel,
+    hideHeader = false,
+    onRemediate,
+    onOpenDetails,
+  } = props;
+
+  const event = useMemo<SignificantEventDetailFields>(
+    () => ({
+      ...rawEvent,
+      dependencyEdges: rawEvent.dependencyEdges ?? [],
+      recommendations: rawEvent.recommendations ?? [],
+      evidences: rawEvent.evidences ?? [],
+      causeKis: rawEvent.causeKis ?? [],
+      ruleNames: rawEvent.ruleNames ?? [],
+      streamNames: rawEvent.streamNames ?? [],
+    }),
+    [rawEvent]
+  );
 
   const impactColor: EuiBadgeProps['color'] = useMemo(() => {
     if (event.severityColor === 'danger') return 'danger';
