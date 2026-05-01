@@ -17,19 +17,13 @@ const execAsync = promisify(ChildProcess.execFile);
 /**
  * @param {string} repoRoot
  * @param {string} output
- * @param {boolean} isJJ
- * @returns {Iterable<string>}
+ * @returns {Set<string>}
  */
-function parseFilesOutput(repoRoot, output, isJJ = false) {
+function parseLsFilesOutput(repoRoot, output) {
   const files = new Set();
 
   for (const line of output.split('\n').map((l) => l.trim())) {
     if (!line) {
-      continue;
-    }
-    if (isJJ) {
-      // jj only lists files that currently exist on disk
-      files.add(line);
       continue;
     }
 
@@ -65,87 +59,190 @@ function getGitFlags(repoRoot, include = undefined, exclude = undefined) {
 }
 
 /**
- * Detect a jj workspace that is not colocated with a git working tree. In this
- * case `git ls-files` cannot run because there is no `.git` directory, and
- * pointing it at the main workspace would reflect the wrong checkout.
- * @param {string} repoRoot
- * @returns {boolean}
- */
-function isJjOnlyWorkspace(repoRoot) {
-  return Fs.existsSync(Path.join(repoRoot, '.jj')) && !Fs.existsSync(Path.join(repoRoot, '.git'));
-}
-
-/**
- * @param {string} repoRoot
- * @param {string[] | undefined} include
- * @param {string[] | undefined} exclude
- * @returns {string[]}
- */
-function getJjFlags(repoRoot, include = undefined, exclude = undefined) {
-  const args = ['file', 'list'];
-  const includes = include?.map((p) => (Path.isAbsolute(p) ? Path.relative(repoRoot, p) : p)) ?? [];
-  const excludes = exclude?.map((p) => (Path.isAbsolute(p) ? Path.relative(repoRoot, p) : p)) ?? [];
-
-  if (!includes.length && !excludes.length) {
-    return args;
-  }
-
-  const base = includes.length ? includes.join(' | ') : 'all()';
-  const expr = excludes.length ? `(${base}) ~ (${excludes.join(' | ')})` : base;
-  args.push('--', expr);
-  return args;
-}
-
-/**
- * List the files in the repo, only including files which are manged by version
- * control or "untracked" (new, not committed, and not ignored).
+ * List the files in the repo, only including files which are managed by version
+ * control or "untracked" (new, not committed, and not ignored). Falls back to a
+ * filesystem walk that skips a fixed set of generated/ignored directories when
+ * `git ls-files` is unavailable (e.g. tarball checkout, jj workspace).
  * @param {string} repoRoot limit the list to specfic absolute paths
  * @param {string[] | undefined} include limit the list to specfic absolute paths
  * @param {string[] | undefined} exclude exclude specific absolute paths
  * @returns {Promise<Iterable<string>>}
  */
 async function getRepoRels(repoRoot, include = undefined, exclude = undefined) {
-  if (isJjOnlyWorkspace(repoRoot)) {
-    const proc = await execAsync('jj', getJjFlags(repoRoot, include, exclude), {
+  try {
+    const proc = await execAsync('git', getGitFlags(repoRoot, include, exclude), {
       cwd: repoRoot,
       encoding: 'utf8',
       maxBuffer: Infinity,
     });
-    return parseFilesOutput(repoRoot, proc.stdout, true);
+    return parseLsFilesOutput(repoRoot, proc.stdout);
+  } catch {
+    return fsWalkFallback(repoRoot, include, exclude);
   }
-
-  const proc = await execAsync('git', getGitFlags(repoRoot, include, exclude), {
-    cwd: repoRoot,
-    encoding: 'utf8',
-    maxBuffer: Infinity,
-  });
-
-  return parseFilesOutput(repoRoot, proc.stdout);
 }
 
 /**
- * Synchronously list the files in the repo, only including files which are manged by version
- * control or "untracked" (new, not committed, and not ignored).
+ * Synchronously list the files in the repo, only including files which are managed by version
+ * control or "untracked" (new, not committed, and not ignored). Falls back to a
+ * filesystem walk that skips a fixed set of generated/ignored directories when
+ * `git ls-files` is unavailable (e.g. tarball checkout, jj workspace).
  * @param {string} repoRoot limit the list to specfic absolute paths
  * @param {string[] | undefined} include limit the list to specfic absolute paths
  * @param {string[] | undefined} exclude exclude specific absolute paths
  * @returns {Iterable<string>}
  */
 function getRepoRelsSync(repoRoot, include = undefined, exclude = undefined) {
-  if (isJjOnlyWorkspace(repoRoot)) {
-    const stdout = ChildProcess.execFileSync('jj', getJjFlags(repoRoot, include, exclude), {
+  try {
+    const stdout = ChildProcess.execFileSync('git', getGitFlags(repoRoot, include, exclude), {
       cwd: repoRoot,
       encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
-    return parseFilesOutput(repoRoot, stdout, true);
+    return parseLsFilesOutput(repoRoot, stdout);
+  } catch {
+    return fsWalkFallback(repoRoot, include, exclude);
+  }
+}
+
+/** ====================================================
+ *  Fallback: use the filesystem if `git ls-files` fails
+ *  ====================================================
+ */
+
+/**
+ * @typedef {{ names: Set<string>; rootRelPaths: Set<string> }} FallbackSkipSet
+ */
+
+/** @type {Map<string, FallbackSkipSet>} */
+const skipSetCache = new Map();
+
+/**
+ * Read the repo's `.gitignore` and extract directory entries suitable for
+ * pruning during the fallback FS walk. `ignore` package is also able to parse
+ * .gitignore but isn't yet available if this code is being run during bootstrap
+ * @param {string} repoRoot
+ * @returns {FallbackSkipSet}
+ */
+function loadFallbackSkipSet(repoRoot) {
+  const cached = skipSetCache.get(repoRoot);
+  if (cached) {
+    return cached;
   }
 
-  const stdout = ChildProcess.execFileSync('git', getGitFlags(repoRoot, include, exclude), {
-    cwd: repoRoot,
-    encoding: 'utf8',
-  });
+  // Always skip VCS metadata; never useful but not always present in .gitignore
+  const result = { names: new Set(['.git', '.jj']), rootRelPaths: new Set() };
 
-  return parseFilesOutput(repoRoot, stdout);
+  let gitignore;
+  try {
+    gitignore = Fs.readFileSync(Path.join(repoRoot, '.gitignore'), 'utf8');
+  } catch {
+    skipSetCache.set(repoRoot, result);
+    return result;
+  }
+
+  for (const raw of gitignore.split('\n')) {
+    const line = raw.trim();
+    // Ignore comments
+    if (!line || line.startsWith('#') || line.startsWith('!')) {
+      continue;
+    }
+
+    const stripped = line.replace(/^\//, '').replace(/\/$/, ''); // Strip leading and trailing slashes
+    const hasIntermediateSlash = stripped.includes('/');
+    const hasGlob = /[*?[\]]/.test(stripped); // *, ?, [ or ] (gitignore glob chars)
+    if (!stripped || hasIntermediateSlash || hasGlob) {
+      continue;
+    }
+
+    const isRootRelative = line.startsWith('/');
+    if (isRootRelative) {
+      result.rootRelPaths.add(stripped);
+    } else {
+      result.names.add(stripped);
+    }
+  }
+
+  skipSetCache.set(repoRoot, result);
+  return result;
+}
+
+/**
+ * Strip a leading `.` from each path segment. Node's `path.matchesGlob`
+ * treats dot-prefixed segments as hidden and refuses to let `**` traverse
+ * them, so without this e.g. `.storybook/kibana.jsonc` would silently fall out
+ * of the result set.
+ */
+function undot(segPath) {
+  return segPath
+    .split('/')
+    .map((seg) => (seg === '.' || seg === '..' ? seg : seg.replace(/^\./, '')))
+    .join('/');
+}
+
+/**
+ * @param {string} repoRoot
+ * @param {string[] | undefined} include
+ * @param {string[] | undefined} exclude
+ * @returns {Set<string>}
+ */
+function fsWalkFallback(repoRoot, include = undefined, exclude = undefined) {
+  const includePatterns = include?.map((p) =>
+    undot(Path.isAbsolute(p) ? Path.relative(repoRoot, p) : p)
+  );
+  const excludePatterns = exclude?.map((p) =>
+    undot(Path.isAbsolute(p) ? Path.relative(repoRoot, p) : p)
+  );
+  const skipSet = loadFallbackSkipSet(repoRoot);
+
+  const files = new Set();
+
+  /** @param {string} absDir */
+  const walk = (absDir) => {
+    let entries;
+    try {
+      entries = Fs.readdirSync(absDir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    const atRepoRoot = absDir === repoRoot;
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        if (skipSet.names.has(entry.name)) {
+          continue;
+        }
+        if (atRepoRoot && skipSet.rootRelPaths.has(entry.name)) {
+          continue;
+        }
+        walk(Path.join(absDir, entry.name));
+        continue;
+      }
+
+      if (!entry.isFile()) {
+        continue;
+      }
+
+      const repoRel = Path.relative(repoRoot, Path.join(absDir, entry.name));
+      const repoRelForMatch = undot(repoRel);
+      if (
+        includePatterns &&
+        !includePatterns.some((pat) => Path.matchesGlob(repoRelForMatch, pat))
+      ) {
+        continue;
+      }
+      if (
+        excludePatterns &&
+        excludePatterns.some((pat) => Path.matchesGlob(repoRelForMatch, pat))
+      ) {
+        continue;
+      }
+      files.add(repoRel);
+    }
+  };
+
+  walk(repoRoot);
+  return files;
 }
 
 module.exports = { getRepoRels, getRepoRelsSync };
