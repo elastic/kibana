@@ -25,6 +25,7 @@ import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
+import { generateWorkflowTool } from './workflows/generate_workflow';
 
 export const registerTools = ({
   coreSetup,
@@ -52,7 +53,8 @@ export const registerTools = ({
   if (setupDeps.workflowsManagement) {
     tools.push(
       getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
-      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement })
+      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      generateWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement })
     );
   }
 

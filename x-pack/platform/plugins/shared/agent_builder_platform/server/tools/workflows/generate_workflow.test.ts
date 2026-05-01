@@ -56,7 +56,7 @@ describe('generateWorkflowTool', () => {
       })
     );
 
-    expect(out.results).toEqual([{ type: ToolResultType.other, data: { workflow } }]);
+    expect((out as { results: unknown[] }).results).toEqual([{ type: ToolResultType.other, data: { workflow } }]);
   });
 
   it('returns an errorResult when generateWorkflow throws', async () => {
@@ -65,6 +65,6 @@ describe('generateWorkflowTool', () => {
     const tool = generateWorkflowTool({ workflowsManagement });
     const out = await tool.handler({ query: 'q' } as any, baseContext);
 
-    expect(out.results).toEqual([{ type: ToolResultType.error, data: { message: 'boom' } }]);
+    expect((out as { results: unknown[] }).results).toEqual([{ type: ToolResultType.error, data: { message: 'boom' } }]);
   });
 });
