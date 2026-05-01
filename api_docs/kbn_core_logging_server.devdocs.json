@@ -233,7 +233,14 @@
         "tags": [],
         "label": "LoggerContextConfigInput",
         "description": [
-          "\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+          "\nInput used to configure logging dynamically using ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.LoggingServiceSetup.configure",
+            "text": "LoggingServiceSetup.configure"
+          }
         ],
         "path": "src/core/packages/logging/server/src/contracts.ts",
         "lineNumber": 42,
@@ -335,6 +342,7 @@
                 "lineNumber": 39,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -554,6 +562,130 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.OtelAppenderConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelAppenderConfig",
+        "description": [
+          "\nConfiguration of an OpenTelemetry (OTLP) log appender.\nShips log records to an OTLP-compatible endpoint over HTTP.\n"
+        ],
+        "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Discriminator for this appender type."
+            ],
+            "signature": [
+              "\"otel\""
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [
+              "\nThe protocol to use for the OTLP exporter.\nDefaults to 'grpc'."
+            ],
+            "signature": [
+              "\"http\" | \"proto\" | \"grpc\""
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "\nOptional HTTP headers sent with every request, e.g. for authentication.\nDefaults to an empty object."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "\nControls how the log record body is serialised.\n\n- `pattern` (**default**): the message is formatted to a human-readable string\n  and indexed as `body.text` in Elastic. Elastic's ingest aliases `body.text`\n  to the ECS `message` field, so records are visible in Logs Explorer.\n  When no explicit `pattern` string is provided, the appender uses\n  `%message %error` - level, timestamp, and logger name are omitted because\n  they are already captured as dedicated top-level OTLP fields.\n  Meta fields are included as a `log.meta` attribute.\n\n- `json`: the full `LogRecord` is sent as a structured object and indexed as\n  `body.structured`. **Note**: the ECS `message` field will be empty in Logs\n  Explorer because it aliases `body.text`, which JSON layout does not populate.\n  Use this only when the consuming backend natively handles `body.structured`.\n  Meta fields are part of the body (not repeated in attributes)."
+            ],
+            "signature": [
+              "LayoutConfigType",
+              " | undefined"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [
+              "\nAdditional resource attributes merged on top of the auto-detected host,\nprocess, OS and service attributes. Can be used to override defaults such\nas `service.name`. Because Kibana expands dotted YAML keys into nested\nobjects, wrap dotted attribute names in `[brackets]`:\n`\"[service.name]\": my-kibana`"
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
         "id": "def-server.PatternLayoutConfigType",
         "type": "Interface",
         "tags": [],
@@ -727,7 +859,15 @@
             "tags": [],
             "label": "appenders",
             "description": [
-              "\nThe {@link Appender | appender(s)} to pass the log event to after\nimplementing the specified rewrite policy."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.Appender",
+                "text": "appender(s)"
+              },
+              " to pass the log event to after\nimplementing the specified rewrite policy."
             ],
             "signature": [
               "string[]"
@@ -745,7 +885,15 @@
             "tags": [],
             "label": "policy",
             "description": [
-              "\nThe {@link RewritePolicy | policy} to use to manipulate the provided data."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.RewritePolicy",
+                "text": "policy"
+              },
+              " to use to manipulate the provided data."
             ],
             "signature": [
               "MetaRewritePolicyConfig"
@@ -832,7 +980,15 @@
             "tags": [],
             "label": "policy",
             "description": [
-              "\nThe {@link TriggeringPolicy | policy} to use to determine if a rollover should occur."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.TriggeringPolicy",
+                "text": "policy"
+              },
+              " to use to determine if a rollover should occur."
             ],
             "signature": [
               "TimeIntervalTriggeringPolicyConfig",
@@ -852,7 +1008,15 @@
             "tags": [],
             "label": "strategy",
             "description": [
-              "\nThe {@link RollingStrategy | rollout strategy} to use for rolling."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.RollingStrategy",
+                "text": "rollout strategy"
+              },
+              " to use for rolling."
             ],
             "signature": [
               "NumericRollingStrategyConfig"
@@ -870,7 +1034,15 @@
             "tags": [],
             "label": "retention",
             "description": [
-              "\nThe {@link RetentionPolicy | retention strategy} to use to know which files to keep."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.RetentionPolicy",
+                "text": "retention strategy"
+              },
+              " to use to know which files to keep."
             ],
             "signature": [
               "RetentionPolicyConfig",
@@ -1021,12 +1193,14 @@
           " | ",
           "FileAppenderConfig",
           " | ",
+          "OtelAppenderConfig",
+          " | ",
           "RewriteAppenderConfig",
           " | ",
           "RollingFileAppenderConfig"
         ],
         "path": "src/core/packages/logging/server/src/appenders/index.ts",
-        "lineNumber": 33,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1039,7 +1213,22 @@
         "tags": [],
         "label": "LayoutConfigType",
         "description": [
-          "\nConfiguration of a logging layout.\nSee {@link JsonLayoutConfigType} and {@link PatternLayoutConfigType}"
+          "\nConfiguration of a logging layout.\nSee ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.JsonLayoutConfigType",
+            "text": "JsonLayoutConfigType"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.PatternLayoutConfigType",
+            "text": "PatternLayoutConfigType"
+          }
         ],
         "signature": [
           "PatternLayoutConfigType",
@@ -1060,7 +1249,15 @@
         "tags": [],
         "label": "RewritePolicyConfig",
         "description": [
-          "\nAvailable rewrite policies which specify what part of a {@link LogRecord}\ncan be modified."
+          "\nAvailable rewrite policies which specify what part of a ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.LogRecord",
+            "text": "LogRecord"
+          },
+          "\ncan be modified."
         ],
         "signature": [
           "MetaRewritePolicyConfig"
@@ -1096,7 +1293,22 @@
         "tags": [],
         "label": "TriggeringPolicyConfig",
         "description": [
-          "\nAny of the existing policy's configuration\n\nSee {@link SizeLimitTriggeringPolicyConfig} and {@link TimeIntervalTriggeringPolicyConfig}"
+          "\nAny of the existing policy's configuration\n\nSee ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.SizeLimitTriggeringPolicyConfig",
+            "text": "SizeLimitTriggeringPolicyConfig"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+            "text": "TimeIntervalTriggeringPolicyConfig"
+          }
         ],
         "signature": [
           "TimeIntervalTriggeringPolicyConfig",

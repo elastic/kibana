@@ -24,13 +24,13 @@ import {
 import { NonEmptyString } from '../../../../common_attributes.gen';
 
 /**
- * Object containing Attack Discovery schedule.
+ * Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
  */
 export const AttackDiscoveryGenericResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type AttackDiscoveryGenericResponse = z.infer<typeof AttackDiscoveryGenericResponse>;
 
 /**
- * Generic error response for Attack Discovery schedule operations
+ * Error response for Attack discovery schedule operations when the request is rejected. Uses `status_code` (snake_case), `error`, and `message` to match the implementation.
  */
 export const AttackDiscoveryGenericError = lazySchema(() =>
   z.object({

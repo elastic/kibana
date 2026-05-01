@@ -173,6 +173,7 @@
             "lineNumber": 55,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -258,6 +259,7 @@
             "lineNumber": 478,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -313,6 +315,7 @@
             "lineNumber": 147,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFilter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -366,6 +369,7 @@
             "lineNumber": 96,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFilter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -419,6 +423,7 @@
             "lineNumber": 122,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFilter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -472,6 +477,7 @@
             "lineNumber": 115,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFilter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -525,6 +531,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFilter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -604,6 +611,7 @@
             "lineNumber": 70,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFilter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -630,6 +638,7 @@
             "lineNumber": 70,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -738,6 +747,7 @@
             "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": false
           }

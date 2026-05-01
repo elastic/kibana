@@ -53,6 +53,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -76,6 +77,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BulkUpdateEntitiesParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -144,6 +146,7 @@
             "lineNumber": 16,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Readonly",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -181,7 +184,7 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }; }>"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }; }>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/public/index.ts",
         "lineNumber": 34,
@@ -242,6 +245,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -265,6 +269,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchEntitiesFromEntityStoreParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -360,6 +365,7 @@
             "lineNumber": 55,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Services",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -485,10 +491,18 @@
         "tags": [],
         "label": "EntityStoreEuidApi",
         "description": [
-          "\nEUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.\nAligns with the {@link euid} object from this module."
+          "\nEUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.\nAligns with the ",
+          {
+            "pluginId": "entityStore",
+            "scope": "public",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-public.euid",
+            "text": "euid"
+          },
+          " object from this module."
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 111,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -521,10 +535,10 @@
               "QueryDslQueryContainer",
               "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
               "QueryDslQueryContainer",
-              "; }; }"
+              "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-            "lineNumber": 116,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -874,10 +888,10 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 108,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1000,6 +1014,7 @@
                 "lineNumber": 67,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ResolutionClientOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1178,6 +1193,7 @@
             "lineNumber": 38,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Dataset",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1572,6 +1588,7 @@
                 "lineNumber": 90,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "EntityMaintainerTaskMethodContext",
                 "trackAdoption": false
               }
             ]
@@ -1775,6 +1792,7 @@
               "lineNumber": 77,
               "columnNumber": 41,
               "deprecated": false,
+              "docsReferencedTypeName": "RegisterEntityMaintainerConfig",
               "trackAdoption": false
             }
           ]
@@ -1835,6 +1853,7 @@
               "lineNumber": 82,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "ElasticsearchClient",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -1897,6 +1916,7 @@
               "lineNumber": 83,
               "columnNumber": 28,
               "deprecated": false,
+              "docsReferencedTypeName": "ElasticsearchClient",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -1958,6 +1978,7 @@
             "lineNumber": 38,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Dataset",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2012,6 +2033,7 @@
             "lineNumber": 28,
             "columnNumber": 65,
             "deprecated": false,
+            "docsReferencedTypeName": "IndexPatternOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2217,7 +2239,7 @@
       {
         "parentPluginId": "entityStore",
         "id": "def-common.AssetCriticalityLevel",
-        "type": "Type",
+        "type": "Any",
         "tags": [],
         "label": "AssetCriticalityLevel",
         "description": [
@@ -2227,8 +2249,8 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 271,
-        "columnNumber": 1,
+        "lineNumber": 282,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2236,7 +2258,7 @@
       {
         "parentPluginId": "entityStore",
         "id": "def-common.AssetCriticalityLevel",
-        "type": "Any",
+        "type": "Type",
         "tags": [],
         "label": "AssetCriticalityLevel",
         "description": [],
@@ -2244,8 +2266,8 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 275,
-        "columnNumber": 14,
+        "lineNumber": 285,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2261,7 +2283,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 710,
+        "lineNumber": 729,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2360,7 +2382,7 @@
         "label": "EntityMaintainerResponseItem",
         "description": [],
         "signature": [
-          "{ id: string; taskStatus: any; interval: string; description: any; nextRunAt: any; minLicense: any; customState: any; runs: number; lastSuccessTimestamp: any; lastErrorTimestamp: any; }"
+          "{ id: string; taskStatus: any; interval: string; description: string | null; nextRunAt: string | null; minLicense: any; customState: Record<string, unknown> | null; runs: number; lastSuccessTimestamp: string | null; lastErrorTimestamp: string | null; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
         "lineNumber": 15,
@@ -2496,7 +2518,7 @@
         "label": "GetEntityMaintainersResponse",
         "description": [],
         "signature": [
-          "{ maintainers: { id: string; taskStatus: any; interval: string; description: any; nextRunAt: any; minLicense: any; customState: any; runs: number; lastSuccessTimestamp: any; lastErrorTimestamp: any; }[]; }"
+          "{ maintainers: { id: string; taskStatus: any; interval: string; description: string | null; nextRunAt: string | null; minLicense: any; customState: Record<string, unknown> | null; runs: number; lastSuccessTimestamp: string | null; lastErrorTimestamp: string | null; }[]; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
         "lineNumber": 29,
@@ -2623,7 +2645,7 @@
           "$ZodTypeInternals<any, unknown>>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 711,
+        "lineNumber": 730,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

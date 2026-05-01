@@ -17,7 +17,7 @@ page_description: |
 
   {{kib}} relies on three high-level entities to set the logging service: appenders, loggers, and root. These can be configured in the `logging` namespace in `kibana.yml`.
 
-  * Appenders define where log messages are displayed (stdout or console) and their layout (`pattern` or `json`). They also allow you to specify if you want the logs stored and, if so, where (file on the disk).
+  * Appenders define where log messages are displayed (stdout or console) and their layout (`pattern` or `json`). They also allow you to specify if you want the logs stored and, if so, where (file on the disk), or shipped to an OpenTelemetry (OTLP) endpoint.
   * Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
   * Root is a logger that applies to all the log entries in {{kib}}.
 
@@ -69,6 +69,32 @@ groups:
           self: ga
           ech: unavailable
 
+      - setting: logging.appenders[].otel
+        description: |
+          Ships log records to an OpenTelemetry-compatible (OTLP) endpoint over HTTP, Protobuf, or gRPC. Records are buffered by the OpenTelemetry SDK's `BatchLogRecordProcessor` and flushed periodically or on shutdown.
+
+          To forward all logs to an OTLP endpoint, add the appender to `logging.root.appenders`:
+
+          ```yaml
+          logging:
+            appenders:
+              otlp:
+                type: otel
+                protocol: proto
+                url: https://collector:4318/v1/logs
+                headers:
+                  Authorization: 'Bearer <token>'
+                attributes:
+                  '[deployment.environment]': production
+            root:
+              appenders: [default, otlp]
+          ```
+        datatype: string
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
       - setting: logging.appenders[].<appender-name>.type
         description: |
           The appender type determines where the log messages are sent. Required.
@@ -76,6 +102,7 @@ groups:
         options:
           - option: console
           - option: file
+          - option: otel
           - option: rewrite
           - option: rolling-file
         applies_to:
@@ -156,6 +183,69 @@ groups:
         default: 7
         applies_to:
           stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.url
+        description: |
+          The OTLP endpoint URL to which log records are shipped. Required for the `otel` appender type.
+
+          The expected path depends on the chosen protocol:
+          * HTTP/Protobuf (`http` or `proto`): typically ends in `/v1/logs`. For example, `https://collector:4318/v1/logs`.
+          * gRPC (`grpc`): a bare host and port without a path. For example, `https://collector:4317`.
+        datatype: string
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.protocol
+        description: |
+          The transport protocol used to send log records to the OTLP endpoint. Applies to the `otel` appender type only.
+
+          * `proto` (default): OTLP over HTTP using Protobuf encoding. More compact than `http` (JSON) and more broadly compatible than `grpc`, which requires HTTP/2.
+          * `http`: OTLP over HTTP using JSON encoding.
+          * `grpc`: OTLP over gRPC. Headers must be provided as gRPC metadata key-value pairs.
+        datatype: enum
+        default: proto
+        options:
+          - option: proto
+          - option: http
+          - option: grpc
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.headers
+        description: |
+          Optional map of HTTP headers sent with every request to the OTLP endpoint. Applies to the `otel` appender type only. Commonly used for authentication. For example, `Authorization: 'Bearer <token>'` or `Authorization: 'ApiKey <base64>'`.
+
+          For the `grpc` protocol the key-value pairs are sent as gRPC metadata instead of HTTP headers.
+
+          ::::{warning}
+          Header values are stored in plain text in `kibana.yml`. Use a secrets management solution or environment-variable substitution to avoid exposing credentials.
+          ::::
+        datatype: object
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.attributes
+        description: |
+          Optional map of additional OpenTelemetry resource attributes merged on top of the auto-detected host, process, OS, and service attributes. Applies to the `otel` appender type only. Can be used to set or override attributes such as `service.name` or `deployment.environment`.
+
+          Because Kibana expands dotted YAML keys into nested objects, wrap dotted attribute names in square brackets:
+
+          ```yaml
+          attributes:
+            '[service.name]': my-kibana
+            '[deployment.environment]': production
+          ```
+        datatype: object
+        applies_to:
+          stack: ga 9.5
           self: ga
           ech: unavailable
 

@@ -76,6 +76,7 @@ export function registerUpdateRoute(
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
+            req.serverTiming,
             isDashboardAppRequest
           );
           return result.meta.updated_at === result.meta.created_at
