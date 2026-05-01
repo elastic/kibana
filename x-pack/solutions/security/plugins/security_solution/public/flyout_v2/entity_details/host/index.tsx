@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -264,9 +264,7 @@ export const Host: FC<HostProps> = memo(function Host({
         )}
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
-        <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
-        </EuiFlyoutFooter>
+        <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
       )}
     </>
   );

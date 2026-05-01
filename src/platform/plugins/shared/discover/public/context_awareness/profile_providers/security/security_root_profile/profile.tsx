@@ -18,6 +18,8 @@ import { createDefaultSecuritySolutionAppStateGetter as createDefaultSecuritySol
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
 import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
 
+const HOST_CELL_RENDERER_FIELDS = ['host.name', 'host.hostname'];
+
 interface SecurityRootProfileContext {
   getSecuritySolutionCellRenderer?: (
     fieldName: string
@@ -38,6 +40,16 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
+
+          for (const fieldName of HOST_CELL_RENDERER_FIELDS) {
+            if (!entries[fieldName]) {
+              const renderer = context.getSecuritySolutionCellRenderer?.(fieldName);
+              if (renderer) {
+                entries[fieldName] = renderer;
+              }
+            }
+          }
+
           if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
             return entries;
           }

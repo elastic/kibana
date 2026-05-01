@@ -17,6 +17,7 @@ import { getEcsField } from '../../flyout/document_details/right/components/tabl
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { IpCellRenderer } from './ip_cell_renderer';
+import { HostCellRenderer, HOST_CELL_RENDERER_FIELDS } from './host_cell_renderer';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export type SecuritySolutionRowCellRendererGetter = Awaited<
@@ -88,6 +89,12 @@ export const getCellRendererForGivenRecord = (
     if (ecsField?.type === IP_FIELD_TYPE) {
       return function IpFieldRenderer(props: DataGridCellValueElementProps) {
         return <IpCellRenderer {...props} services={services} store={store} />;
+      };
+    }
+
+    if (HOST_CELL_RENDERER_FIELDS.has(fieldName)) {
+      return function HostFieldRenderer(props: DataGridCellValueElementProps) {
+        return <HostCellRenderer {...props} services={services} store={store} />;
       };
     }
 

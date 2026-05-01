@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../../../flyout/entity_details/shared/components/take_action';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 export interface FooterProps {
   identityFields: IdentityFields;
@@ -23,6 +24,7 @@ export interface FooterProps {
  * Footer for the host details flyout containing the asset-inventory TakeAction button.
  */
 export const Footer = ({ identityFields, entity }: FooterProps) => {
+  const isInSecurityApp = useIsInSecurityApp();
   const hostName = useMemo(
     () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
     [identityFields]
@@ -41,7 +43,7 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
           <TakeAction
-            isDisabled={!hostName}
+            isDisabled={!hostName || !isInSecurityApp}
             kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}
           />
         </EuiFlexItem>
