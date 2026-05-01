@@ -51,6 +51,10 @@ test.describe(
 
       await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
         await pageObjects.datePicker.setCommonlyUsedTime('Last_1_hour');
+        await page
+          .getByTestId('dateRangePickerControlButton')
+          .waitFor({ timeout: EXTENDED_TIMEOUT });
+        await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
       await test.step('open add panel flyout', async () => {

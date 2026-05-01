@@ -23,7 +23,8 @@
     "@kbn/content-list-mock-data",
     "@kbn/content-management-favorites-public",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/content-management-tags"
+    "@kbn/content-management-tags",
+    "@kbn/content-list-page"
   ],
   "exclude": [
     "target/**/*"
