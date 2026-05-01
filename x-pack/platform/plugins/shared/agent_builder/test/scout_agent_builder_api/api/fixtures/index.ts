@@ -8,9 +8,13 @@
 import { Readable } from 'stream';
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { apiTest as baseApiTest, mergeTests } from '@kbn/scout';
-import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import type { ApmSynthtraceFixtureClient, SynthtraceFixture } from '@kbn/scout-synthtrace';
 import { getSynthtraceClient, synthtraceFixture } from '@kbn/scout-synthtrace';
-import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import type {
+  ApmFields,
+  ApmSynthtracePipelines,
+  SynthtraceGenerator,
+} from '@kbn/synthtrace-client';
 import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { withAuth } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { COMMON_HEADERS } from './constants';
@@ -36,12 +40,24 @@ export const apiTest = mergeTests(baseApiTest, synthtraceFixture).extend<
         { skipInstallation: true }
       );
 
-      const index = async (events: SynthtraceGenerator<ApmFields>) => {
-        await apmEsClient.index(Readable.from(Array.from(events)));
+      const index = async (
+        events: SynthtraceGenerator<ApmFields>,
+        pipelineCallback?: (base: Readable) => NodeJS.WritableStream
+      ) => {
+        await apmEsClient.index(Readable.from(Array.from(events)), pipelineCallback);
       };
+
       const clean = async () => await apmEsClient.clean();
 
-      await use({ index, clean });
+      const setPipeline: ApmSynthtraceFixtureClient['setPipeline'] =
+        apmEsClient.setPipeline.bind(apmEsClient);
+
+      const resolvePipelineType: ApmSynthtraceFixtureClient['resolvePipelineType'] = (
+        pipeline: ApmSynthtracePipelines,
+        options?
+      ) => apmEsClient.resolvePipelineType(pipeline, options);
+
+      await use({ index, clean, setPipeline, resolvePipelineType });
     },
     { scope: 'worker' },
   ],
