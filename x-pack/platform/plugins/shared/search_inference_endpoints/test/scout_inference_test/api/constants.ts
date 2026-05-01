@@ -8,6 +8,7 @@
 import type { KibanaRole } from '@kbn/scout';
 
 export const INFERENCE_SETTINGS_API_PATH = 'internal/search_inference_endpoints/settings';
+export const INFERENCE_CONNECTORS_API_PATH = 'internal/search_inference_endpoints/connectors';
 export const API_VERSION = '1';
 
 export const COMMON_HEADERS = {

@@ -6,12 +6,14 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { SearchInferenceEndpointsPlugin } from './plugin';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
+  INFERENCE_SETTINGS_SO_TYPE,
   MODEL_SETTINGS_APP_ID,
   PLUGIN_ID,
   PLUGIN_NAME,
@@ -86,6 +88,28 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       expect(feature.privileges?.read).toMatchObject({
         disabled: true,
+      });
+    });
+  });
+
+  describe('start()', () => {
+    it('endpoints.getForFeature reads inference settings with getScopedClient', async () => {
+      const coreStart = coreMock.createStart();
+      plugin.setup(coreSetup, { features });
+
+      const startContract = plugin.start(coreStart, {
+        actions: actionsMock.createStart(),
+        inference: {
+          getConnectorById: jest.fn().mockRejectedValue(new Error('not found')),
+          getConnectorList: jest.fn().mockResolvedValue([]),
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      await startContract.endpoints.getForFeature('any_feature', request);
+
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
       });
     });
   });

@@ -8,12 +8,19 @@
 import { expect } from '@kbn/scout/api';
 import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { apiTest } from '../fixtures';
-import { COMMON_HEADERS, INFERENCE_SETTINGS_API_PATH, SAMPLE_FEATURES } from '../constants';
+import {
+  COMMON_HEADERS,
+  INFERENCE_CONNECTORS_API_PATH,
+  INFERENCE_SETTINGS_API_PATH,
+  SAMPLE_FEATURES,
+} from '../constants';
 
 const SPACE_A = 'inference-settings-space-a';
 const SPACE_B = 'inference-settings-space-b';
 
 const spaceApiPath = (spaceId: string) => `s/${spaceId}/${INFERENCE_SETTINGS_API_PATH}`;
+const spaceConnectorsUrl = (spaceId: string, featureId: string) =>
+  `s/${spaceId}/${INFERENCE_CONNECTORS_API_PATH}?featureId=${encodeURIComponent(featureId)}`;
 
 apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   let cookieHeader: Record<string, string>;
@@ -97,4 +104,37 @@ apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCA
     expect(responseA.body.data.features).toStrictEqual(settingsA.features);
     expect(responseB.body.data.features).toStrictEqual(settingsB.features);
   });
+
+  apiTest(
+    'connectors API uses per-space inference settings for the same feature',
+    async ({ apiClient }) => {
+      await apiClient.put(spaceApiPath(SPACE_A), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderAnthropic] }),
+      });
+      await apiClient.put(spaceApiPath(SPACE_B), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderClaudeOpus] }),
+      });
+
+      const resA = await apiClient.get(spaceConnectorsUrl(SPACE_A, 'agent_builder'), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+      });
+      const resB = await apiClient.get(spaceConnectorsUrl(SPACE_B, 'agent_builder'), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+      });
+
+      expect(resA).toHaveStatusCode(200);
+      expect(resB).toHaveStatusCode(200);
+      expect(resA.body.soEntryFound).toBe(true);
+      expect(resB.body.soEntryFound).toBe(true);
+
+      const idsA = (resA.body.connectors ?? []).map((c: { connectorId: string }) => c.connectorId);
+      const idsB = (resB.body.connectors ?? []).map((c: { connectorId: string }) => c.connectorId);
+      const expectedIdA = SAMPLE_FEATURES.agentBuilderAnthropic.endpoints[0].id;
+      const expectedIdB = SAMPLE_FEATURES.agentBuilderClaudeOpus.endpoints[0].id;
+      expect(idsA).toStrictEqual([expectedIdA]);
+      expect(idsB).toStrictEqual([expectedIdB]);
+    }
+  );
 });
