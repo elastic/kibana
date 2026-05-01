@@ -246,7 +246,7 @@ export const EventSchema = schema.maybe(
           )
         ),
         cps_scope_expression: ecsString(),
-        cps_scope_linked_projects: schema.maybe(schema.arrayOf(schema.any())),
+        cps_scope_linked_projects: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
         action: schema.maybe(
