@@ -24,6 +24,7 @@ export const platformCoreTools = {
   getIndexMapping: platformCoreTool('get_index_mapping'),
   getDocumentById: platformCoreTool('get_document_by_id'),
   generateEsql: platformCoreTool('generate_esql'),
+  generateWorkflow: platformCoreTool('generate_workflow'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
