@@ -119,7 +119,7 @@ apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCA
       );
       expect(catalogIds.length).toBeGreaterThanOrEqual(2);
       const idForA = catalogIds[0];
-      const distinctFromFirst = catalogIds.filter((id) => id !== idForA);
+      const distinctFromFirst = catalogIds.filter((id: string) => id !== idForA);
       expect(distinctFromFirst.length).toBeGreaterThan(0);
       const idForB = distinctFromFirst[0];
 
