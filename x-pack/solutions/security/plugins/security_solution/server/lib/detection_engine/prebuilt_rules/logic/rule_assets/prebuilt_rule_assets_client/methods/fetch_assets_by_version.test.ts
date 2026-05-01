@@ -129,7 +129,7 @@ describe('fetchAssetsByVersion', () => {
     expect(call._source).toBeUndefined();
   });
 
-  it('orders returned assets to match the `versions` argument when ES hits are in a different order', async () => {
+  describe('result ordering', () => {
     const versions = [
       { rule_id: 'rule-a', version: 1 },
       { rule_id: 'rule-b', version: 1 },
@@ -145,18 +145,37 @@ describe('fetchAssetsByVersion', () => {
       },
     });
 
-    searchMock.mockResolvedValue({
-      ...emptySearchResponse,
-      hits: {
-        total: { value: 3, relation: 'eq' },
-        max_score: null,
-        hits: [hit('rule-c'), hit('rule-a'), hit('rule-b')],
-      },
+    it('orders returned assets to match the `versions` argument when no `sort` is provided', async () => {
+      searchMock.mockResolvedValue({
+        ...emptySearchResponse,
+        hits: {
+          total: { value: 3, relation: 'eq' },
+          max_score: null,
+          hits: [hit('rule-c'), hit('rule-a'), hit('rule-b')],
+        },
+      });
+
+      const { assets } = await fetchAssetsByVersion(savedObjectsClient, versions);
+
+      expect(assets.map((a) => a.rule_id)).toEqual(['rule-a', 'rule-b', 'rule-c']);
     });
 
-    const { assets } = await fetchAssetsByVersion(savedObjectsClient, versions);
+    it('preserves the ES hit order when `sort` is provided', async () => {
+      searchMock.mockResolvedValue({
+        ...emptySearchResponse,
+        hits: {
+          total: { value: 3, relation: 'eq' },
+          max_score: null,
+          hits: [hit('rule-c'), hit('rule-a'), hit('rule-b')],
+        },
+      });
 
-    expect(assets.map((a) => a.rule_id)).toEqual(['rule-a', 'rule-b', 'rule-c']);
+      const { assets } = await fetchAssetsByVersion(savedObjectsClient, versions, {
+        sort: [{ [`${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`]: 'asc' }],
+      });
+
+      expect(assets.map((a) => a.rule_id)).toEqual(['rule-c', 'rule-a', 'rule-b']);
+    });
   });
 
   describe('size parameter', () => {

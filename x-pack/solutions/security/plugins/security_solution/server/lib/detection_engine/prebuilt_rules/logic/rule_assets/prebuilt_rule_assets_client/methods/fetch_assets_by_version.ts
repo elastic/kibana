@@ -59,7 +59,6 @@ export interface FetchAssetsByVersionResult {
  * @param savedObjectsClient - The saved objects client used to query the saved objects store
  * @param versions - An array of rule version specifiers, each containing a rule_id and version.
  * @param params - Optional search options (e.g. `aggs`, `sort`, `_source`) merged into the underlying SO search.
- * @returns A promise that resolves to assets (and optional aggregations when requested).
  */
 export async function fetchAssetsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
@@ -116,14 +115,17 @@ export async function fetchAssetsByVersion(
     ruleAssetsMap.set(getPrebuiltRuleAssetSoId(asset.rule_id, asset.version), asset);
   }
 
-  const orderedRuleAssets: PrebuiltRuleAsset[] = [];
-
-  for (const id of soIds) {
-    const asset = ruleAssetsMap.get(id);
-    if (asset !== undefined) {
-      orderedRuleAssets.push(asset);
-    }
-  }
+  // When the caller specifies `sort`, ES already returned hits in the requested
+  // order and `Map` preserves insertion order, so emitting the map's values
+  // honors that sort. Otherwise (no sort) we restore the caller's `versions`
+  // order so unsorted callers get a deterministic shape that matches their
+  // input.
+  const orderedRuleAssets: PrebuiltRuleAsset[] = params?.sort
+    ? Array.from(ruleAssetsMap.values())
+    : soIds.flatMap((id) => {
+        const asset = ruleAssetsMap.get(id);
+        return asset !== undefined ? [asset] : [];
+      });
 
   return {
     assets: validatePrebuiltRuleAssets(orderedRuleAssets),
