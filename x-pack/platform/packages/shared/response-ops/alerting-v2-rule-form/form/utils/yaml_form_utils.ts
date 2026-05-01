@@ -38,27 +38,47 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   return parsedArtifacts.length ? parsedArtifacts : undefined;
 };
 
-const serializeStateTransition = (
-  st?: StateTransition
-): { state_transition: Record<string, unknown> } | {} => {
-  if (!st) return {};
-  const out: Record<string, unknown> = {};
+interface YamlStateTransition {
+  pending_count?: number;
+  pending_timeframe?: string;
+  recovering_count?: number;
+  recovering_timeframe?: string;
+}
+
+interface YamlRecoveryPolicy {
+  type: string;
+  query?: { base: string };
+}
+
+interface YamlRuleObject {
+  kind: string;
+  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
+  time_field: string;
+  schedule: { every: string; lookback: string };
+  evaluation: { query: { base: string } };
+  grouping?: { fields: string[] };
+  state_transition?: YamlStateTransition;
+  recovery_policy?: YamlRecoveryPolicy;
+  artifacts?: Array<{ id: string; type: string; value: string }>;
+}
+
+const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
+  if (!st) return undefined;
+  const out: YamlStateTransition = {};
   if (st.pendingCount != null) out.pending_count = st.pendingCount;
   if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
   if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
   if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
-  return Object.keys(out).length ? { state_transition: out } : {};
+  return Object.keys(out).length ? out : undefined;
 };
 
-const serializeRecoveryPolicy = (
-  rp?: RecoveryPolicy
-): { recovery_policy: Record<string, unknown> } | {} => {
-  if (!rp) return {};
-  const out: Record<string, unknown> = { type: rp.type };
+const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | undefined => {
+  if (!rp) return undefined;
+  const out: YamlRecoveryPolicy = { type: rp.type };
   if (rp.type === 'query' && rp.query?.base) {
     out.query = { base: rp.query.base };
   }
-  return { recovery_policy: out };
+  return out;
 };
 
 /**
@@ -70,29 +90,34 @@ const serializeRecoveryPolicy = (
  * of the create payload at all. The form keeps its own `metadata.enabled` for the
  * Enabled toggle UI; that's stripped by the request mappers before the API call.
  */
-export const formValuesToYamlObject = (values: FormValues): Record<string, unknown> => ({
-  kind: values.kind,
-  metadata: {
-    name: values.metadata.name,
-    ...(values.metadata.description && { description: values.metadata.description }),
-    ...(values.metadata.owner && { owner: values.metadata.owner }),
-    ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
-  },
-  time_field: values.timeField,
-  schedule: {
-    every: values.schedule.every,
-    lookback: values.schedule.lookback,
-  },
-  evaluation: {
-    query: {
-      base: values.evaluation.query.base,
+export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
+  const st = serializeStateTransition(values.stateTransition);
+  const rp = serializeRecoveryPolicy(values.recoveryPolicy);
+
+  return {
+    kind: values.kind,
+    metadata: {
+      name: values.metadata.name,
+      ...(values.metadata.description && { description: values.metadata.description }),
+      ...(values.metadata.owner && { owner: values.metadata.owner }),
+      ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
     },
-  },
-  ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
-  ...serializeStateTransition(values.stateTransition),
-  ...serializeRecoveryPolicy(values.recoveryPolicy),
-  ...(values.artifacts?.length && { artifacts: values.artifacts }),
-});
+    time_field: values.timeField,
+    schedule: {
+      every: values.schedule.every,
+      lookback: values.schedule.lookback,
+    },
+    evaluation: {
+      query: {
+        base: values.evaluation.query.base,
+      },
+    },
+    ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
+    ...(st && { state_transition: st }),
+    ...(rp && { recovery_policy: rp }),
+    ...(values.artifacts?.length && { artifacts: values.artifacts }),
+  };
+};
 
 /**
  * Parse and validate YAML string to FormValues
