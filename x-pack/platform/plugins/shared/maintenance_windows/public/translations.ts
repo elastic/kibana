@@ -178,7 +178,7 @@ export const CREATE_FORM_SCOPED_QUERY_TITLE = i18n.translate(
 export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.createForm.scopedQuery.description',
   {
-    defaultMessage: 'Supress alert notifications during maintenance',
+    defaultMessage: 'Suppress alert notifications during maintenance',
   }
 );
 
