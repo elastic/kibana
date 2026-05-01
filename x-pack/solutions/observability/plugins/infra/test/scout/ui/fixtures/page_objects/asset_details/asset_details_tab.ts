@@ -15,7 +15,8 @@ export type AssetDetailsPageTabName =
   | 'Profiling'
   | 'Logs'
   | 'Anomalies'
-  | 'Osquery';
+  | 'Osquery'
+  | 'Dashboards';
 
 export abstract class AssetDetailsTab {
   public abstract readonly tabName: AssetDetailsPageTabName;

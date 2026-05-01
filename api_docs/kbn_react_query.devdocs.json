@@ -14561,7 +14561,11 @@
               },
               {
                 "plugin": "@kbn/alerting-v2-episodes-ui",
-                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query.ts"
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_same_rule_episodes_query.ts"
+              },
+              {
+                "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_same_group_episodes_query.ts"
               },
               {
                 "plugin": "@kbn/elastic-assistant",
