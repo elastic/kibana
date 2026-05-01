@@ -24,7 +24,7 @@ import '@xyflow/react/dist/style.css';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { OTelCollectorConfig } from '../../../../../common/types';
+import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common/types';
 
 import { OTelComponentDetail } from '../component_detail';
 
@@ -43,11 +43,13 @@ const nodeTypes: NodeTypes = {
 interface GraphViewProps {
   config: OTelCollectorConfig;
   selectedPipelineId: string;
+  health?: ComponentHealth;
 }
 
 const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
   config,
   selectedPipelineId,
+  health,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedNode, setSelectedNode] = useState<Node<OTelGraphNodeData> | null>(null);
@@ -119,6 +121,7 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
         css={css`
           min-width: 0;
         `}
+        grow={4}
       >
         <EuiPanel
           hasBorder
@@ -149,11 +152,12 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
         </EuiPanel>
       </EuiFlexItem>
       {selectedNode && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={2}>
           <OTelComponentDetail
             componentId={selectedNode.data.label}
             componentType={selectedNode.data.componentType}
             config={config}
+            health={health}
             onClose={handleClose}
           />
         </EuiFlexItem>
