@@ -6,24 +6,34 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
   prefetchTriggerDefinitions,
 } from './prefetch';
 
+jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
+  getAllConnectors: jest.fn().mockReturnValue([]),
+}));
+
+const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
+
 const buildApi = (
   overrides: Partial<{
     getAvailableConnectors: jest.Mock;
-    getAllConnectors: jest.Mock;
   }> = {}
 ) =>
   ({
     getAvailableConnectors:
       overrides.getAvailableConnectors ??
       jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
-    getAllConnectors: overrides.getAllConnectors ?? jest.fn().mockReturnValue([]),
   } as any);
+
+beforeEach(() => {
+  getAllConnectorsMock.mockReset();
+  getAllConnectorsMock.mockReturnValue([]);
+});
 
 describe('prefetch helpers', () => {
   describe('prefetchConnectors', () => {
@@ -92,7 +102,7 @@ describe('prefetch helpers', () => {
       }
     });
 
-    it('includes connector contracts returned by api.getAllConnectors (e.g. elasticsearch.request)', async () => {
+    it('includes connector contracts returned by getAllConnectors (e.g. elasticsearch.request)', async () => {
       const esRequest = {
         type: 'elasticsearch.request',
         summary: 'Elasticsearch Request',
@@ -109,12 +119,10 @@ describe('prefetch helpers', () => {
         outputSchema: {},
       } as unknown as ConnectorContractUnion;
 
-      const api = buildApi({
-        getAllConnectors: jest.fn().mockReturnValue([esRequest, customStep]),
-      });
+      getAllConnectorsMock.mockReturnValue([esRequest, customStep]);
 
       const result = await prefetchStepDefinitions({
-        api,
+        api: buildApi(),
         spaceId: 'default',
         request: {} as any,
       });

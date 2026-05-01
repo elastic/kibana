@@ -14,6 +14,7 @@ import {
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
 import {
   categorizeConnectorType,
   formatBuiltInStep,
@@ -72,9 +73,9 @@ export const lookupStepDefinitions = async (
   const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
   const builtIns = builtInStepDefinitions.map(formatBuiltInStep);
 
-  const allConnectors = deps.api
-    .getAllConnectors()
-    .filter((c) => !builtInIds.has(c.type) && !c.deprecation);
+  const allConnectors = getAllConnectors().filter(
+    (c) => !builtInIds.has(c.type) && !c.deprecation
+  );
   const allConnectorEntries = allConnectors.map(formatConnectorStep);
 
   const knownIds = new Set<string>(builtInIds);

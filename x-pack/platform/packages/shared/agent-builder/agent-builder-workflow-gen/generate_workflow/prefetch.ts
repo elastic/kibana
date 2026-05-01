@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions, builtInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
 import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
 interface DepsBase {
@@ -77,7 +78,7 @@ export const prefetchStepDefinitions = async ({
   // `elasticsearch.search`, …), plus step definitions registered via
   // `workflowsExtensions`. Already excludes built-in flow control / data.* /
   // ai.* steps which come from `builtInStepDefinitions` above.
-  const allConnectors = api.getAllConnectors();
+  const allConnectors = getAllConnectors();
   const allConnectorIds = new Set<string>();
   const allConnectorSummaries: StepDefinitionSummary[] = [];
   for (const c of allConnectors) {

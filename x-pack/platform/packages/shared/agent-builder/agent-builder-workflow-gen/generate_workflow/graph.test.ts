@@ -30,7 +30,6 @@ steps:
       getAvailableConnectors: jest
         .fn()
         .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
-      getAllConnectors: jest.fn().mockReturnValue([]),
       validateWorkflow: jest.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],
