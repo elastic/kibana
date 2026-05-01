@@ -111,3 +111,20 @@ export const buildBoundTools = (): StructuredToolInterface[] => [
     schema: getTriggerDefinitionsSchema,
   }),
 ];
+
+/**
+ * Subset of tool names whose execution mutates the workflow YAML state.
+ * The graph runs validation after each of these per-call dispatches.
+ * Lookup tools (`get_step_definitions`, `get_trigger_definitions`) are
+ * intentionally excluded — they don't change the YAML.
+ */
+export const EDIT_TOOL_NAMES = new Set<ToolName>([
+  TOOL_NAMES.setYaml,
+  TOOL_NAMES.insertStep,
+  TOOL_NAMES.modifyStep,
+  TOOL_NAMES.modifyStepProperty,
+  TOOL_NAMES.deleteStep,
+]);
+
+export const isEditToolName = (name: string): name is ToolName =>
+  EDIT_TOOL_NAMES.has(name as ToolName);
