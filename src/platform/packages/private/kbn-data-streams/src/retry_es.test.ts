@@ -119,6 +119,7 @@ describe('retryEs', () => {
       .mockRejectedValueOnce(error)
       .mockRejectedValueOnce(error)
       .mockRejectedValueOnce(error)
+      .mockRejectedValueOnce(error)
       .mockResolvedValue('done');
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
@@ -130,14 +131,17 @@ describe('retryEs', () => {
     await jest.advanceTimersByTimeAsync(16_000);
     await jest.advanceTimersByTimeAsync(32_000);
     await jest.advanceTimersByTimeAsync(64_000);
+    await jest.advanceTimersByTimeAsync(64_000);
 
     await expect(promise).resolves.toBe('done');
+    expect(logger.warn).toHaveBeenCalledTimes(8);
     expect(logger.warn).toHaveBeenLastCalledWith(
-      expect.stringContaining('attempt 7 in 64 seconds')
+      expect.stringContaining('attempt 8 in 64 seconds')
     );
   });
 
   it('retries non-429 retryable errors up to the bounded retry count', async () => {
+    const logger = loggingSystemMock.createLogger();
     const error = createResponseError({
       statusCode: 503,
       type: 'service_unavailable',
@@ -149,7 +153,7 @@ describe('retryEs', () => {
       .mockRejectedValueOnce(error)
       .mockResolvedValue('done');
 
-    const promise = retryEs(operation);
+    const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
     await jest.advanceTimersByTimeAsync(1_000);
     await jest.advanceTimersByTimeAsync(2_000);
@@ -157,16 +161,18 @@ describe('retryEs', () => {
 
     await expect(promise).resolves.toBe('done');
     expect(operation).toHaveBeenCalledTimes(4);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('rejects non-429 retryable errors after the bounded retry count', async () => {
+    const logger = loggingSystemMock.createLogger();
     const error = createResponseError({
       statusCode: 503,
       type: 'service_unavailable',
     });
     const operation = jest.fn().mockRejectedValue(error);
 
-    const promise = retryEs(operation);
+    const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
     const assertion = expect(promise).rejects.toBe(error);
 
     await jest.advanceTimersByTimeAsync(1_000);
@@ -175,5 +181,6 @@ describe('retryEs', () => {
 
     await assertion;
     expect(operation).toHaveBeenCalledTimes(4);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
