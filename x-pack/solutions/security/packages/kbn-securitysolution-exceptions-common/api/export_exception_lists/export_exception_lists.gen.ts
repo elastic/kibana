@@ -28,7 +28,10 @@ export const ExportExceptionListsRequestQuery = lazySchema(() =>
      * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
      */
     include_expired_exceptions: z.enum(['true', 'false']).default('true'),
-    namespace_type: ExceptionNamespaceType,
+    /**
+     * Determines whether the exception lists are in the default namespace (`single`) or in the global `agnostic` namespace. Defaults to `single` if not provided.
+     */
+    namespace_type: ExceptionNamespaceType.optional(),
   })
 );
 export type ExportExceptionListsRequestQuery = z.infer<typeof ExportExceptionListsRequestQuery>;

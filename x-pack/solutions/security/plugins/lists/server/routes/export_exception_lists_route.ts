@@ -7,8 +7,9 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ExportExceptionListsRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -21,7 +22,7 @@ export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_URL}/_bulk_export`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [EXCEPTIONS_API_READ],
         },
       },
     })
@@ -41,12 +42,11 @@ export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
           const {
             filter,
             include_expired_exceptions: includeExpiredExceptionsString,
-            namespace_type: namespaceType,
+            namespace_type: namespaceType = 'single',
           } = request.query;
           const exceptionListsClient = await getExceptionListClient(context);
 
-          // Defaults to including expired exceptions if query param is not present
-          const includeExpiredExceptions = (includeExpiredExceptionsString ?? 'true') === 'true';
+          const includeExpiredExceptions = includeExpiredExceptionsString === 'true';
 
           const exportContent = await exceptionListsClient.exportExceptionListsAndItems({
             filter,
@@ -56,15 +56,18 @@ export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
 
           if (exportContent == null) {
             return siemResponse.error({
-              body: `No lists found for filter: "${filter}"`,
+              body: filter
+                ? `No exception lists found for filter: "${filter}"`
+                : 'No exception lists found',
               statusCode: 404,
             });
           }
 
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
           return response.ok({
             body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,
             headers: {
-              'Content-Disposition': `attachment; filename="TODOAllExceptionListsMaybeAddTimestampHere.ndjson"`,
+              'Content-Disposition': `attachment; filename="exception_lists_export_${timestamp}.ndjson"`,
               'Content-Type': 'application/ndjson',
             },
           });
