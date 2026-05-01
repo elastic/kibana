@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiPagination,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { RegistryImage, PackageSpecScreenshot } from '../../../../../../../../common/types';
@@ -32,8 +33,8 @@ const Pagination = styled(EuiPagination)`
 
 const COLLAPSED_HEIGHT_PX = 360;
 
-const ImageContainer = styled.div<{ isCollapsed: boolean }>`
-  ${({ isCollapsed }) =>
+const ImageContainer = styled.div<{ isCollapsed: boolean; backgroundColor: string }>`
+  ${({ isCollapsed, backgroundColor }) =>
     isCollapsed
       ? `
     max-height: ${COLLAPSED_HEIGHT_PX}px;
@@ -46,7 +47,7 @@ const ImageContainer = styled.div<{ isCollapsed: boolean }>`
       left: 0;
       right: 0;
       height: 40px;
-      background: linear-gradient(to bottom, transparent, white);
+      background: linear-gradient(to bottom, transparent, ${backgroundColor});
       pointer-events: none;
       z-index: 1;
     }
@@ -56,6 +57,7 @@ const ImageContainer = styled.div<{ isCollapsed: boolean }>`
 
 export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageName, version }) => {
   const { toPackageImage } = useLinks();
+  const { euiTheme } = useEuiTheme();
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
@@ -116,7 +118,11 @@ export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageNam
 
       {/* Current screenshot */}
       <EuiFlexItem>
-        <ImageContainer ref={imageContainerRef} isCollapsed={!isExpanded && isOverflowing}>
+        <ImageContainer
+          ref={imageContainerRef}
+          isCollapsed={!isExpanded && isOverflowing}
+          backgroundColor={euiTheme.colors.emptyShade}
+        >
           {currentImageUrl ? (
             <EuiImage
               allowFullScreen
