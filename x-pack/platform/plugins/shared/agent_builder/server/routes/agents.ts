@@ -59,6 +59,16 @@ const PLUGINS_SCHEMA = schema.arrayOf(
   }
 );
 
+const CONNECTORS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Connector ID to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of connector IDs to associate with the agent.' },
+  }
+);
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -239,6 +249,7 @@ export function registerAgentRoutes({
                     )
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                  connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -382,6 +393,7 @@ export function registerAgentRoutes({
                       )
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                    connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

@@ -13,7 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
   createInternalError,
@@ -102,6 +102,8 @@ export interface CreateScopedRunnerDeps {
   executionMode: AgentExecutionMode;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
+  /** The effective agent configuration for the current run (with overrides applied). */
+  agentConfiguration?: AgentConfiguration;
 }
 
 export type CreateRunnerDeps = Omit<
