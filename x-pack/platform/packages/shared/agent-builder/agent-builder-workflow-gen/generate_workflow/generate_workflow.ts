@@ -19,6 +19,7 @@ export const generateWorkflow = async ({
   request,
   spaceId,
   workflowsApi,
+  workflowsExtensions,
 }: GenerateWorkflowParams): Promise<GenerateWorkflowResponse> => {
   const graph = createGenerateWorkflowGraph({
     model,
@@ -26,6 +27,7 @@ export const generateWorkflow = async ({
     request,
     spaceId,
     logger,
+    workflowsExtensions,
   });
 
   return withActiveInferenceSpan(

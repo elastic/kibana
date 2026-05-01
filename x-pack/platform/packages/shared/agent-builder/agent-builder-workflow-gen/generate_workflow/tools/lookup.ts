@@ -14,6 +14,7 @@ import {
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   categorizeConnectorType,
   formatBuiltInStep,
@@ -33,6 +34,7 @@ export interface LookupDeps {
   api: WorkflowsManagementApi;
   spaceId: string;
   request: KibanaRequest;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 const buildConnectorStepEntries = async ({
@@ -70,9 +72,17 @@ export const lookupStepDefinitions = async (
   args: { stepType?: string; search?: string },
   deps: LookupDeps
 ): Promise<unknown> => {
+  await deps.workflowsExtensions.isReady();
+
+  const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
+  const customStepDefs = deps.workflowsExtensions
+    .getAllStepDefinitions()
+    .filter((s) => !builtInIds.has(s.id));
+
   const builtIns = builtInStepDefinitions.map(formatBuiltInStep);
+  const customs = customStepDefs.map(formatBuiltInStep);
   const connectors = await buildConnectorStepEntries(deps);
-  const all = [...builtIns, ...connectors];
+  const all = [...builtIns, ...customs, ...connectors];
 
   let filtered = all;
   if (args.stepType) {

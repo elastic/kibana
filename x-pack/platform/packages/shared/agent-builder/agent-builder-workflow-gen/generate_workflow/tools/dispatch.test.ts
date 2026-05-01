@@ -9,7 +9,20 @@ import { dispatchToolCall } from './dispatch';
 import { TOOL_NAMES } from './schemas';
 
 describe('dispatchToolCall', () => {
-  const baseDeps = { api: {} as any, spaceId: 'default', request: {} as any };
+  const baseDeps = {
+    api: {} as any,
+    spaceId: 'default',
+    request: {} as any,
+    workflowsExtensions: {
+      getAllStepDefinitions: jest.fn().mockReturnValue([]),
+      getStepDefinition: jest.fn(),
+      hasStepDefinition: jest.fn(),
+      isReady: jest.fn().mockResolvedValue(undefined),
+      getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+      getTriggerDefinition: jest.fn(),
+      getClient: jest.fn(),
+    } as any,
+  };
 
   it('replaces YAML on set_yaml', async () => {
     const result = await dispatchToolCall(
