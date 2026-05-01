@@ -217,6 +217,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: 'description',
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: true,
         initialTags: [],
         initialTimeRestore: false,
@@ -244,6 +245,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: 'description',
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: true,
         initialTags: [],
         initialTimeRestore: false,
@@ -272,6 +274,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: 'description',
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: false,
         initialTags: [],
         initialTimeRestore: false,
@@ -296,6 +299,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
       expect(modalProps).toEqual({
         description: undefined,
+        hasLibraryItemWithTitle: expect.any(Function),
         hideDashboardOptions: false,
         initialTags: [],
         initialTimeRestore: false,
