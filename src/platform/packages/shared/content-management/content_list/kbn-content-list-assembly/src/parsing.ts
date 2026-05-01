@@ -128,18 +128,14 @@ export const parseDeclarativeChildren = (children: ReactNode, assembly: string):
  * The loop handles arbitrarily deep nesting (e.g. `memo(forwardRef(fn))`).
  * Returns `undefined` if the final unwrapped value is not a function.
  */
-const unwrapComponentType = (
-  type: unknown
-): ((...args: unknown[]) => unknown) | undefined => {
+const unwrapComponentType = (type: unknown): ((...args: unknown[]) => unknown) | undefined => {
   let current = type;
   while (current !== null && typeof current === 'object') {
     // React.memo wraps as { $$typeof, type }; forwardRef wraps as { $$typeof, render }.
     const wrapped = current as Record<string, unknown>;
     current = wrapped.type ?? wrapped.render;
   }
-  return typeof current === 'function'
-    ? (current as (...args: unknown[]) => unknown)
-    : undefined;
+  return typeof current === 'function' ? (current as (...args: unknown[]) => unknown) : undefined;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
