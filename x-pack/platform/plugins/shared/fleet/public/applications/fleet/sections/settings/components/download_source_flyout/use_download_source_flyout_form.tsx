@@ -23,6 +23,12 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import type { DownloadSourceBase } from '../../../../../../../common/types';
 
+import {
+  validateSslPathInput,
+  validateSslPathInputSecret,
+  validateSslPathsCombo,
+} from '../ssl_form_validators';
+
 import { confirmUpdate } from './confirm_update';
 
 export type AuthType = 'none' | 'username_password' | 'api_key';
@@ -77,19 +83,19 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     downloadSource?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     undefined
   );
   const sslCertificateInput = useInput(
     downloadSource?.ssl?.certificate ?? '',
-    undefined,
+    validateSslPathInput,
     undefined
   );
-  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', undefined, undefined);
+  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', validateSslPathInput, undefined);
 
   const sslKeySecretInput = useSecretInput(
     (downloadSource as DownloadSourceBase)?.secrets?.ssl?.key,
-    undefined,
+    validateSslPathInputSecret,
     undefined
   );
 
@@ -158,6 +164,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const nameInputValid = nameInput.validate();
     const hostValid = hostInput.validate();
 
+    const sslCertificateAuthoritiesValid = sslCertificateAuthoritiesInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -212,6 +219,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     return (
       nameInputValid &&
       hostValid &&
+      sslCertificateAuthoritiesValid &&
       sslCertificateValid &&
       sslKeyValid &&
       sslKeySecretValid &&
@@ -226,6 +234,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   }, [
     nameInput,
     hostInput,
+    sslCertificateAuthoritiesInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -357,11 +366,26 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     validate,
   ]);
 
+  const authType = authTypeInput.value as AuthType;
+  const isAuthMissing =
+    (authType === 'username_password' &&
+      (!usernameInput.value || (!passwordInput.value && !passwordSecretInput.value))) ||
+    (authType === 'api_key' && !apiKeyInput.value && !apiKeySecretInput.value);
+
   return {
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || (downloadSource && !hasChanged) || isEditDisabled,
+    isDisabled:
+      isLoading ||
+      (downloadSource && !hasChanged) ||
+      isEditDisabled ||
+      !nameInput.value ||
+      !hostInput.value ||
+      isAuthMissing ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      (sslKeyInput.value ? sslKeyInput.props.isInvalid : sslKeySecretInput.props.isInvalid),
   };
 }
 
