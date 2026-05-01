@@ -104,6 +104,7 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
       executeFunctionOnStream(exceptionListItem);
       try {
         await finder.close();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (exception) {
         // This is just a pre-caution in case the finder does a throw we don't want to blow up
         // the response. We have seen this within e2e test containers but nothing happen in normal
@@ -118,6 +119,7 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
 
   try {
     await finder.close();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (exception) {
     // This is just a pre-caution in case the finder does a throw we don't want to blow up
     // the response. We have seen this within e2e test containers but nothing happen in normal
