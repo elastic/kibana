@@ -73,19 +73,26 @@ export interface InferenceFeatureResponse {
   };
 }
 
-export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {
-  metadata: {
-    heuristics?: {
-      properties?: string[];
-      status?: string;
-      release_date?: string;
-      end_of_life_date?: string;
-    } & Record<string, unknown>;
-    display?: {
-      name?: string;
-      model_creator?: string;
-    } & Record<string, unknown>;
+export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
+  service: 'elastic';
+  service_settings: { model_id: string };
+};
+
+export type EisInferenceEndpointMetadata = {
+  heuristics?: {
+    properties?: string[];
+    status?: string;
+    release_date?: string;
+    end_of_life_date?: string;
   } & Record<string, unknown>;
+  display?: {
+    name?: string;
+    model_creator?: string;
+  } & Record<string, unknown>;
+} & Record<string, unknown>;
+
+export type InferenceEndpointWithMetadata = EisInferenceEndpoint & {
+  metadata: EisInferenceEndpointMetadata;
 };
 
 export type InferenceEndpointWithDisplayNameMetadata = InferenceEndpointWithMetadata & {
