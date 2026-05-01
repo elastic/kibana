@@ -199,13 +199,26 @@ export function createRootWithCorePlugins(
     },
     server: { restrictInternalApis: true },
     // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
-    ...(cliArgs.oss === false
+    // In FIPS mode, createRootWithSettings forces oss=false (to load the security plugin) and deletes
+    // cliArgs.oss, so the check below must also cover getFips() === 1.
+    ...(cliArgs.oss === false || getFips() === 1
       ? {
           // reporting loads headless browser, that prevents nodejs process from exiting and causes test flakiness
           xpack: {
             reporting: {
               enabled: false,
             },
+          },
+        }
+      : {}),
+    // In FIPS mode, all enterprise plugins are loaded (oss=false), making Kibana startup significantly
+    // slower and causing data stream initialization to create lingering p-retry timers that can cross
+    // test boundaries and produce unhandled rejections. Skip eager initialization; data streams are
+    // still initialized on first use via DataStreamsService.start().initializeClient().
+    ...(getFips() === 1
+      ? {
+          dataStreams: {
+            migrations: { skip: true },
           },
         }
       : {}),
