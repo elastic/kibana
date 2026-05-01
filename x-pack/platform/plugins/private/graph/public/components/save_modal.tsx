@@ -24,6 +24,7 @@ export function SaveModal({
   contentClient,
   onSave,
   onClose,
+  lastSavedTitle,
   title,
   description,
   showCopyOnSave,
@@ -33,6 +34,7 @@ export function SaveModal({
   contentClient: ContentClient;
   onSave: (props: OnSaveGraphProps) => Promise<SaveResult>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   description: string;
   showCopyOnSave: boolean;
@@ -43,6 +45,7 @@ export function SaveModal({
   const [dataConsent, setDataConsent] = useState(false);
   return (
     <SavedObjectSaveModalWithSaveResult
+      lastSavedTitle={lastSavedTitle}
       hasLibraryItemWithTitle={async (titleToCheck: string) =>
         hasLibraryItemWithTitle(titleToCheck, contentClient)
       }

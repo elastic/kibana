@@ -58,6 +58,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
 
     const saveModal = (
       <SavedObjectSaveModalWithSaveResult
+        lastSavedTitle={''}
         hasLibraryItemWithTitle={hasLibraryItemWithTitle}
         onSave={onSave}
         onClose={() => resolve(undefined)}

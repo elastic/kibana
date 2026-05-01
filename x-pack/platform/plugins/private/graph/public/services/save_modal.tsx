@@ -66,6 +66,7 @@ export function openSaveModal({
 
   showSaveModal(
     <SaveModal
+      lastSavedTitle={workspace.id ? workspace.title : ''}
       contentClient={services.contentClient}
       savePolicy={savePolicy}
       hasData={hasData}

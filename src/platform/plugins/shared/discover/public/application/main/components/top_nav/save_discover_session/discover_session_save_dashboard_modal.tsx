@@ -126,6 +126,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
 
   return (
     <SavedObjectSaveModalDashboard
+      lastSavedTitle={sessionId ? title : ''}
       hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       canSaveByReference={true}
       customModalTitle={customModalTitle}
