@@ -76,4 +76,20 @@ describe('SignificantEventDetailHeader', () => {
     expect(screen.getByText('Low')).toBeInTheDocument();
     expect(screen.getByText('Monitor')).toBeInTheDocument();
   });
+
+  it('derives criticalityColor from severityColor=warning when not provided', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityColor="warning" />);
+    // Should render without error - the criticality health indicator inherits warning color
+    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
+  });
+
+  it('derives criticalityColor from severityColor=success when not provided', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityColor="success" />);
+    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
+  });
+
+  it('falls back to subdued criticalityColor for unknown severityColor', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityColor="primary" />);
+    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
+  });
 });

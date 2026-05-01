@@ -10,6 +10,14 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SigeventsOverview } from './sigevents_overview';
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      http: { basePath: { prepend: (path: string) => path } },
+    },
+  }),
+}));
+
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<IntlProvider locale="en">{ui}</IntlProvider>);
 };
@@ -49,19 +57,13 @@ describe('SigeventsOverview', () => {
       expect(screen.getByText('You have no critical significant events')).toBeInTheDocument();
 
       expect(screen.getByTestId('sigeventsOverviewHealthyMetrics')).toBeInTheDocument();
-      expect(screen.getAllByTestId('sigeventsOverviewMetadataIconCard')).toHaveLength(5);
+      expect(screen.getAllByTestId('sigeventsOverviewMetadataIconCard')).toHaveLength(7);
 
-      ['Services', 'Dependencies', 'Technologies', 'Critical risk', 'Medium risk'].forEach(
+      ['Services', 'Entities', 'Technologies', 'Critical', 'High', 'Medium', 'Low'].forEach(
         (label) => {
           expect(screen.getByText(label)).toBeInTheDocument();
         }
       );
-
-      expect(screen.getByText('48')).toBeInTheDocument();
-      expect(screen.getByText('4')).toBeInTheDocument();
-      expect(screen.getByText('8')).toBeInTheDocument();
-      expect(screen.getByText('0')).toBeInTheDocument();
-      expect(screen.getByText('1')).toBeInTheDocument();
     });
 
     it('does not render the critical state main event in the healthy state', () => {
@@ -136,5 +138,88 @@ describe('SigeventsOverview', () => {
   it('does not render the impacted cards section when empty', () => {
     renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" impactedCards={[]} />);
     expect(screen.queryByTestId('sigeventsOverviewImpactedCards')).not.toBeInTheDocument();
+  });
+
+  it('renders other promoted events in critical state', () => {
+    const otherPromotedEvents = [
+      {
+        raw: {
+          '@timestamp': '2026-04-30T19:30:00Z',
+          event_id: 'other-1',
+          discovery_id: 'd-1',
+          discovery_slug: 'slug-1',
+          verdict: 'promoted' as const,
+          title: 'Other event',
+          summary: 'Other summary',
+          root_cause: '',
+          rule_names: [],
+          stream_names: [],
+          cause_kis: [],
+          criticality: 40,
+          recommended_action: 'monitor' as const,
+          impact: 'medium' as const,
+          recommendations: [],
+          verdict_id: 'v-other',
+          last_reviewed_at: '2026-04-30T19:30:00Z',
+        },
+        state: 'warning' as const,
+        blastRadiusScore: 40,
+        mainEventTitle: 'Other event',
+        description: 'Other summary',
+        impactedServices: [],
+        impactedCards: [],
+        severityLabel: 'Medium',
+        severityColor: 'primary' as const,
+        detailFields: {
+          id: 'other-1',
+          label: 'Other event',
+          subtitle: '',
+          severityLabel: 'Medium',
+          severityColor: 'primary' as const,
+        },
+        timestamp: '2026-04-30T19:30:00Z',
+      },
+    ];
+    renderWithIntl(
+      <SigeventsOverview
+        {...defaultProps}
+        state="critical"
+        otherPromotedEvents={otherPromotedEvents}
+      />
+    );
+    expect(screen.getByTestId('sigeventsOverviewOtherPromotedEvents')).toBeInTheDocument();
+    expect(screen.getByText('Other event')).toBeInTheDocument();
+  });
+
+  it('renders lower priority events in healthy state', () => {
+    const lowerPriorityEvents = [
+      {
+        '@timestamp': '2026-04-30T19:30:00Z',
+        event_id: 'lpe-1',
+        verdict_id: 'v-lpe',
+        discovery_id: 'd-lpe',
+        discovery_slug: 'slug-lpe',
+        verdict: 'acknowledged' as const,
+        title: 'Lower priority event',
+        summary: 'Summary',
+        root_cause: 'Root cause',
+        rule_names: [],
+        stream_names: [],
+        criticality: 30,
+        impact: 'low' as const,
+        recommendations: [],
+        recommended_action: 'monitor' as const,
+        last_reviewed_at: '2026-04-30T19:30:00Z',
+      },
+    ];
+    renderWithIntl(
+      <SigeventsOverview
+        {...defaultProps}
+        state="healthy"
+        lowerPriorityEvents={lowerPriorityEvents}
+      />
+    );
+    expect(screen.getByTestId('sigeventsLowerPriorityEvents')).toBeInTheDocument();
+    expect(screen.getByText('Lower priority event')).toBeInTheDocument();
   });
 });

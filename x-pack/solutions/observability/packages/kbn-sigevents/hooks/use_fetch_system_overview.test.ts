@@ -207,4 +207,65 @@ describe('useFetchSystemOverview', () => {
     expect(result.current.data).toBeNull();
     (console.error as jest.Mock).mockRestore();
   });
+
+  it('skips unknown impact bucket keys without crashing', async () => {
+    mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
+      if (params.index === 'traces-*') {
+        return of({
+          rawResponse: {
+            aggregations: { services: { buckets: [] } },
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+          },
+        });
+      }
+      if (params.index === 'logs-*') {
+        return of({
+          rawResponse: {
+            aggregations: { services: { buckets: [] } },
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+          },
+        });
+      }
+      if (params.index === 'sigevents-events-ms' && params.size === 5) {
+        return of({
+          rawResponse: {
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+          },
+        });
+      }
+      if (params.index === 'sigevents-events-ms' && params.size === 0) {
+        return of({
+          rawResponse: {
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+            aggregations: {
+              by_impact: {
+                buckets: [
+                  {
+                    key: 'unknown_priority',
+                    doc_count: 5,
+                    by_verdict: { buckets: [{ key: 'promoted', doc_count: 5 }] },
+                  },
+                  {
+                    key: 'critical',
+                    doc_count: 2,
+                    by_verdict: { buckets: [{ key: 'promoted', doc_count: 2 }] },
+                  },
+                ],
+              },
+            },
+          },
+        });
+      }
+      return of({ rawResponse: { hits: { hits: [], total: { value: 0, relation: 'eq' } } } });
+    });
+
+    const { result } = renderHook(() => useFetchSystemOverview(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Unknown priority is skipped; critical gets counted
+    expect(result.current.data!.sigEventsByPriority.critical).toEqual({ open: 2, resolved: 0 });
+  });
 });
