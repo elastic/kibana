@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Subscription } from 'rxjs';
-import { hasBlockingError } from '@kbn/presentation-publishing';
+import { filter, map, switchMap, type Subscription } from 'rxjs';
+import { apiPublishesBlockingError } from '@kbn/presentation-publishing';
 import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from './kibana_services';
 
@@ -35,33 +35,43 @@ class DashboardUserActivitySession {
 
   constructor(api: DashboardApi) {
     this.api = api;
-    this.activitySubscription = api.userActivity$.subscribe((activity) => {
-      if (activity.start) {
-        if (activity.type === 'view') {
-          this.eventQueues.view.push({ start: activity.start });
-        } else {
-          this.eventQueues.refresh.push({
-            type: activity.refreshType,
-            start: activity.start,
-          });
-        }
-      } else {
-        const event = this.eventQueues[activity.type].shift();
-        if (!event) {
-          return;
-        }
-        if (activity.type === 'view') {
-          this.logUserActivity(activity.type, event.start, activity.end!);
-        } else {
-          const refreshStart = event as (typeof this.eventQueues)['refresh'][number];
-          this.logUserActivity(
-            `${activity.type}_${refreshStart.type}`,
-            refreshStart.start,
-            activity.end!
-          );
-        }
-      }
-    });
+    this.activitySubscription = api.userActivity$
+      .pipe(
+        map((activity) => {
+          if (activity.start) {
+            /** Push into the appropriate event queue */
+            if (activity.type === 'view') {
+              this.eventQueues.view.push({ start: activity.start });
+            } else {
+              this.eventQueues.refresh.push({
+                type: activity.refreshType,
+                start: activity.start,
+              });
+            }
+            return;
+          }
+          /** The event ended - return the activity so that it can be logged */
+          return activity;
+        }),
+        filter((activity) => activity !== undefined), // filter out activities that haven't ended
+        switchMap(async (activity) => {
+          const event = this.eventQueues[activity.type].shift();
+          if (!event) {
+            return;
+          }
+          if (activity.type === 'view') {
+            await this.logUserActivity(activity.type, event.start, activity.end!);
+          } else {
+            const refreshStart = event as (typeof this.eventQueues)['refresh'][number];
+            await this.logUserActivity(
+              `${activity.type}_${refreshStart.type}`,
+              refreshStart.start,
+              activity.end!
+            );
+          }
+        })
+      )
+      .subscribe();
     this.bindedVisibilityHandler = this.onVisibilityChange.bind(this);
     document.addEventListener('visibilitychange', this.bindedVisibilityHandler);
   }
@@ -84,8 +94,11 @@ class DashboardUserActivitySession {
       panel_count: Object.keys(this.api.children$.getValue()).length,
       errors: Object.entries(this.api.children$.getValue()).reduce(
         (prev: Array<{ panel_id: string; error: string }>, [id, child]) => {
-          if (hasBlockingError(child)) {
-            return [...prev, { panel_id: id, error: child.blockingError$.getValue()!.message }];
+          if (apiPublishesBlockingError(child)) {
+            const blockingError = child.blockingError$.getValue();
+            if (blockingError) {
+              return [...prev, { panel_id: id, error: blockingError.message }];
+            }
           }
           return prev;
         },
