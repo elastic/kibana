@@ -32,6 +32,27 @@ export interface ExportExceptionListsAndItemsReturn {
   exportDetails: ExportExceptionDetails;
 }
 
+/**
+ * Maximum number of saved objects (lists + items combined) that a single bulk
+ * export request will return. Requests that would exceed this limit fail with
+ * a 422 rather than silently truncating the export.
+ */
+export const EXPORT_SIZE_LIMIT = 10_000;
+
+/**
+ * Thrown when a bulk export request would return more saved objects than
+ * {@link EXPORT_SIZE_LIMIT}. Carries a `statusCode` of 422 so the route layer
+ * surfaces it as Unprocessable Entity via `transformError`.
+ */
+export class ExportSizeLimitError extends Error {
+  public readonly statusCode = 422;
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'ExportSizeLimitError';
+  }
+}
+
 export const exportExceptionListsAndItems = async ({
   namespaceType,
   includeExpiredExceptions,
@@ -59,10 +80,11 @@ export const exportExceptionListsAndItems = async ({
     ? `(${dataFilter}) AND ${detectionListsFilter}`
     : detectionListsFilter;
 
+  // Fetch one extra so we can distinguish "exactly at the limit" from "over".
   await findExceptionListPointInTimeFinder({
     executeFunctionOnStream: appendExceptionList,
     filter: listFilter,
-    maxSize: 10_000,
+    maxSize: EXPORT_SIZE_LIMIT + 1,
     namespaceType: [namespaceType],
     perPage: 1_000,
     savedObjectsClient,
@@ -72,6 +94,12 @@ export const exportExceptionListsAndItems = async ({
 
   if (exceptionLists.length === 0) {
     return null;
+  }
+
+  if (exceptionLists.length > EXPORT_SIZE_LIMIT) {
+    throw new ExportSizeLimitError(
+      `Cannot export more than ${EXPORT_SIZE_LIMIT} exception lists in a single request`
+    );
   }
 
   const exceptionItems: ExceptionListItemSchema[] = [];
@@ -90,17 +118,25 @@ export const exportExceptionListsAndItems = async ({
     }
   }
 
+  // Cap items at the remaining budget, again with +1 so we can detect overflow.
+  const itemsBudget = EXPORT_SIZE_LIMIT - exceptionLists.length;
   await findExceptionListsItemsPointInTimeFinder({
     executeFunctionOnStream: appendExceptionItem,
     filter,
     listIds,
-    maxSize: 10_000,
+    maxSize: itemsBudget + 1,
     namespaceTypes,
     perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
     sortField: 'exception-list.created_at',
     sortOrder: 'desc',
   });
+
+  if (exceptionLists.length + exceptionItems.length > EXPORT_SIZE_LIMIT) {
+    throw new ExportSizeLimitError(
+      `Cannot export more than ${EXPORT_SIZE_LIMIT} exception lists and items in a single request`
+    );
+  }
 
   const { exportData } = getExport([...exceptionLists, ...exceptionItems]);
 

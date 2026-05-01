@@ -15,7 +15,11 @@ import type {
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 
-import { exportExceptionListsAndItems } from './export_exception_lists_and_items';
+import {
+  EXPORT_SIZE_LIMIT,
+  ExportSizeLimitError,
+  exportExceptionListsAndItems,
+} from './export_exception_lists_and_items';
 import { findExceptionListsItemsPointInTimeFinder } from './find_exception_lists_items_point_in_time_finder';
 import { findExceptionListPointInTimeFinder } from './find_exception_list_point_in_time_finder';
 
@@ -165,12 +169,65 @@ describe('export_exception_lists_and_items', () => {
     });
 
     describe('when exception list count exceeds the default export size limit', () => {
-      it.todo('returns an error');
-      it.todo('does not retrieve exception list items');
+      const overflowingLists = Array.from({ length: EXPORT_SIZE_LIMIT + 1 }, () =>
+        getExceptionListSchemaMock()
+      );
+
+      it('returns an error', async () => {
+        mockListsFinder(overflowingLists);
+
+        await expect(exportExceptionListsAndItems(baseOptions)).rejects.toBeInstanceOf(
+          ExportSizeLimitError
+        );
+      });
+
+      it('returns an error with statusCode 422', async () => {
+        mockListsFinder(overflowingLists);
+
+        await expect(exportExceptionListsAndItems(baseOptions)).rejects.toMatchObject({
+          statusCode: 422,
+        });
+      });
+
+      it('does not retrieve exception list items', async () => {
+        mockListsFinder(overflowingLists);
+
+        await expect(exportExceptionListsAndItems(baseOptions)).rejects.toThrow(
+          ExportSizeLimitError
+        );
+
+        expect(findExceptionListsItemsPointInTimeFinder).not.toHaveBeenCalled();
+      });
     });
 
     describe('when exception list + items count exceeds the default export size limit', () => {
-      it.todo('returns an error');
+      it('returns an error', async () => {
+        mockListsFinder([getExceptionListSchemaMock()]);
+        // 1 list + EXPORT_SIZE_LIMIT items === LIMIT + 1 total saved objects.
+        mockItemsFinder(
+          Array.from({ length: EXPORT_SIZE_LIMIT }, () => getExceptionListItemSchemaMock())
+        );
+
+        await expect(exportExceptionListsAndItems(baseOptions)).rejects.toBeInstanceOf(
+          ExportSizeLimitError
+        );
+      });
+
+      it('does not return an error when the combined count equals the limit', async () => {
+        mockListsFinder([getExceptionListSchemaMock()]);
+        mockItemsFinder(
+          Array.from({ length: EXPORT_SIZE_LIMIT - 1 }, () => getExceptionListItemSchemaMock())
+        );
+
+        const result = await exportExceptionListsAndItems(baseOptions);
+
+        expect(result?.exportDetails).toEqual(
+          expect.objectContaining({
+            exported_exception_list_count: 1,
+            exported_exception_list_item_count: EXPORT_SIZE_LIMIT - 1,
+          })
+        );
+      });
     });
   });
 });
