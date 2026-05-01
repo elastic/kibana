@@ -55,6 +55,7 @@
             "lineNumber": 54,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -95,6 +96,7 @@
             "lineNumber": 129,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -135,6 +137,7 @@
             "lineNumber": 26,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsType",
             "trackAdoption": false,
             "isRequired": true
           }

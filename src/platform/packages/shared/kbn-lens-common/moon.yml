@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-common'
+  title: '@kbn/lens-common'
   description: Moon project for @kbn/lens-common
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-lens-common
+  sourceRoot: src/platform/packages/shared/kbn-lens-common
 dependsOn:
   - '@kbn/lens-formula-docs'
   - '@kbn/navigation-plugin'
@@ -62,11 +61,11 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/saved-objects-plugin'
   - '@kbn/i18n'
-  - '@kbn/chart-icons'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
+  - '@kbn/palettes'
 tags:
   - shared-common
   - package
@@ -79,16 +78,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

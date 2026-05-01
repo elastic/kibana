@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
-import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
-import type { RoutingStatus } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type { ScoutSpaceParallelFixture } from '../../scout_space';
+import {
+  type Condition,
+  type IngestUpsertRequest,
+  type RoutingStatus,
+  type StreamlangDSL,
+  type StreamsIngestGetResponse,
+  isClassicStreamDefinition,
+  isWiredStreamDefinition,
+} from './types';
 
 export interface StreamsApiService {
   enable: () => Promise<void>;
@@ -26,9 +30,18 @@ export interface StreamsApiService {
     condition: Condition,
     status?: RoutingStatus
   ) => Promise<void>;
-  getStreamDefinition: (streamName: string) => Promise<IngestStream.all.GetResponse>;
+  /** See `./types` JSDoc for casting to `@kbn/streams-schema` definition types in tests. */
+  getStreamDefinition: (streamName: string) => Promise<StreamsIngestGetResponse>;
+  /** Materialize backing data stream for deferred wired roots (e.g. `logs.otel`). */
+  restoreDataStream: (streamName: string) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
-  updateStream: (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => Promise<void>;
+  /** Update a stream's ingest settings and/or description. */
+  updateStream: (
+    streamName: string,
+    updateBody:
+      | { ingest: IngestUpsertRequest; description?: string }
+      | { ingest?: IngestUpsertRequest; description: string }
+  ) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
   clearStreamMappings: (streamName: string) => Promise<void>;
   clearStreamProcessors: (streamName: string) => Promise<void>;
@@ -92,7 +105,15 @@ export const getStreamsApiService = ({
           method: 'GET',
           path: `${basePath}/api/streams/${streamName}`,
         });
-        return response.data as IngestStream.all.GetResponse;
+        return response.data as StreamsIngestGetResponse;
+      });
+    },
+    restoreDataStream: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.restoreDataStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${basePath}/internal/streams/${streamName}/_restore_data_stream`,
+        });
       });
     },
     deleteStream: async (streamName: string) => {
@@ -103,31 +124,63 @@ export const getStreamsApiService = ({
         });
       });
     },
-    updateStream: async (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => {
+    updateStream: async (
+      streamName: string,
+      updateBody:
+        | { ingest: IngestUpsertRequest; description?: string }
+        | { ingest?: IngestUpsertRequest; description: string }
+    ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStream', async () => {
-        await kbnClient.request({
-          method: 'PUT',
-          path: `${basePath}/api/streams/${streamName}/_ingest`,
-          body: updateBody,
-        });
+        if (updateBody.description !== undefined) {
+          // description can only be set via the full upsert endpoint
+          const current = await service.getStreamDefinition(streamName);
+          // The PUT endpoint rejects `processing.updated_at` (read-only field returned by GET).
+          // Strip it before sending, whether using the current ingest or the caller's override.
+          const rawIngest = updateBody.ingest ?? current.stream.ingest;
+          const rawProcessing = rawIngest?.processing;
+          const ingestForPut = rawProcessing
+            ? {
+                ...rawIngest,
+                processing: omit(rawProcessing, 'updated_at'),
+              }
+            : rawIngest;
+          await kbnClient.request({
+            method: 'PUT',
+            path: `${basePath}/api/streams/${streamName}`,
+            body: {
+              stream: {
+                type: current.stream.type,
+                description: updateBody.description,
+                ingest: ingestForPut,
+              },
+              dashboards: current.stream.dashboards ?? [],
+              rules: current.stream.rules ?? [],
+              queries: current.stream.queries ?? [],
+            },
+          });
+        } else {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `${basePath}/api/streams/${streamName}/_ingest`,
+            body: { ingest: updateBody.ingest! },
+          });
+        }
       });
     },
     clearStreamChildren: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        if (WiredStream.Definition.is(definition.stream)) {
-          await Promise.all(
-            definition.stream.ingest.wired.routing.map((child) =>
-              service.deleteStream(child.destination)
-            )
-          );
+        if (isWiredStreamDefinition(definition.stream)) {
+          for (const child of definition.stream.ingest.wired.routing) {
+            await service.deleteStream(child.destination);
+          }
         }
       });
     },
     clearStreamMappings: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamMappings', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        if (WiredStream.Definition.is(definition.stream)) {
+        if (isWiredStreamDefinition(definition.stream)) {
           await service.updateStream(streamName, {
             ingest: {
               ...definition.stream.ingest,
@@ -138,7 +191,7 @@ export const getStreamsApiService = ({
               },
             },
           });
-        } else if (ClassicStream.Definition.is(definition.stream)) {
+        } else if (isClassicStreamDefinition(definition.stream)) {
           await service.updateStream(streamName, {
             ingest: {
               ...definition.stream.ingest,

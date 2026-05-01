@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -19,12 +19,26 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { DiscoverGrid } from '../../../../components/discover_grid';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 
+jest.mock('../../../../components/discover_grid', () => ({
+  ...jest.requireActual('../../../../components/discover_grid'),
+  DiscoverGrid: jest.fn(),
+}));
+
+jest.mock('../../../../components/discover_grid_flyout', () => ({
+  ...jest.requireActual('../../../../components/discover_grid_flyout'),
+  DiscoverGridFlyout: jest.fn(),
+}));
+
+const discoverGridMock = jest.mocked(DiscoverGrid);
+const discoverGridFlyoutMock = jest.mocked(DiscoverGridFlyout);
 const singleEsHit = esHitsMock.slice(0, 1);
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
@@ -66,26 +80,22 @@ async function mountComponent({
     );
   }
 
-  const stateContainer = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
-  ).stateContainer$.getValue()!;
-
   const testDocuments = {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   };
 
-  stateContainer.dataState.data$.documents$.next(testDocuments);
+  const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+
+  dataStateContainer.data$.documents$.next(testDocuments);
 
   // Prevent any further updates to documents$ from clearing test data
-  stateContainer.dataState.data$.documents$.next = jest.fn();
+  dataStateContainer.data$.documents$.next = jest.fn();
 
   const props = {
     viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
-    stateContainer,
     onFieldEdited: jest.fn(),
   };
 
@@ -99,6 +109,16 @@ async function mountComponent({
 describe('Discover documents layout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const discoverGrid = jest.requireActual('../../../../components/discover_grid');
+    const discoverGridFlyout = jest.requireActual('../../../../components/discover_grid_flyout');
+    jest
+      .mocked(DiscoverGrid)
+      .mockImplementation((props) => React.createElement(discoverGrid.DiscoverGrid, props));
+    jest
+      .mocked(DiscoverGridFlyout)
+      .mockImplementation((props) =>
+        React.createElement(discoverGridFlyout.DiscoverGridFlyout, props)
+      );
   });
 
   test('render loading when loading and no documents', async () => {
@@ -199,6 +219,117 @@ describe('Discover documents layout', () => {
     );
 
     expect(toolkit.getCurrentTab().appState.grid?.columns?.someField.width).toEqual(206);
+  });
+
+  describe('external doc view', () => {
+    beforeEach(() => {
+      jest
+        .mocked(DiscoverGrid)
+        .mockImplementation((props) => (
+          <div data-test-subj="discoverGridMock">{props.expandedDoc?.id ?? 'no-expanded-doc'}</div>
+        ));
+      jest
+        .mocked(DiscoverGridFlyout)
+        .mockImplementation((props) => (
+          <div data-test-subj="discoverGridFlyoutMock">{props.hit.id}</div>
+        ));
+    });
+
+    it('passes expanded doc state and metadata callback to the main grid when it owns the flyout', async () => {
+      const { toolkit } = await setup();
+      const tabId = toolkit.getCurrentTab().id;
+      const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId,
+          expandedDoc,
+        })
+      );
+
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+      });
+
+      const discoverGridProps = discoverGridMock.mock.lastCall?.[0]!;
+
+      expect(discoverGridProps.renderDocumentView).toBe('external');
+      expect(discoverGridProps.expandedDoc).toEqual(expandedDoc);
+      expect(discoverGridProps.setRenderDocumentViewMeta).toEqual(expect.any(Function));
+      expect(toolkit.getCurrentTab().expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
+      expect(screen.queryByTestId('discoverGridFlyoutMock')).not.toBeInTheDocument();
+    });
+
+    it('hides expanded state from the main grid and preserves the active owner through flyout navigation', async () => {
+      const { toolkit } = await setup();
+      const tabId = toolkit.getCurrentTab().id;
+      const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
+      const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMock);
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId,
+          expandedDoc,
+          expandedDocOwner: 'nested-grid',
+        })
+      );
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setRenderDocumentViewMeta({
+          tabId,
+          renderDocumentViewMeta: {
+            displayedRows: [expandedDoc, nextExpandedDoc],
+            displayedColumns: ['bytes'],
+          },
+        })
+      );
+
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+      });
+
+      const discoverGridProps = discoverGridMock.mock.lastCall?.[0]!;
+      expect(discoverGridProps.expandedDoc).toBeUndefined();
+
+      const unrelatedRenderDocumentViewMeta = {
+        displayedRows: [nextExpandedDoc],
+        displayedColumns: ['extension'],
+      };
+
+      expect(discoverGridProps.setRenderDocumentViewMeta).toEqual(expect.any(Function));
+
+      act(() => {
+        discoverGridProps.setRenderDocumentViewMeta?.(unrelatedRenderDocumentViewMeta);
+      });
+
+      expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
+      expect(toolkit.getCurrentTab().renderDocumentViewMeta).toEqual({
+        displayedRows: [expandedDoc, nextExpandedDoc],
+        displayedColumns: ['bytes'],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverGridFlyoutMock')).toBeVisible();
+      });
+
+      const flyoutProps = discoverGridFlyoutMock.mock.lastCall?.[0]!;
+      expect(flyoutProps.hit).toEqual(expandedDoc);
+      expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
+      expect(flyoutProps.columns).toEqual(['bytes']);
+
+      act(() => {
+        flyoutProps.setExpandedDoc(nextExpandedDoc);
+      });
+
+      await waitFor(() => {
+        expect(toolkit.getCurrentTab().expandedDoc).toEqual(nextExpandedDoc);
+        expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
+      });
+    });
   });
 
   describe('context awareness', () => {

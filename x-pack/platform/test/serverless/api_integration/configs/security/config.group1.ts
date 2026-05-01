@@ -17,18 +17,13 @@ export default createTestConfig({
     require.resolve('../../test_suites/elasticsearch_api'),
     require.resolve('../../test_suites/index_management'),
     require.resolve('../../test_suites/kql_telemetry'),
-    require.resolve('../../test_suites/management'),
     require.resolve('../../test_suites/platform_security'),
     require.resolve('../../test_suites/scripts_tests'),
     require.resolve('../../test_suites/search_oss'),
     require.resolve('../../test_suites/search_profiler'),
-    require.resolve('../../test_suites/search_xpack'),
-    require.resolve('../../test_suites/core'),
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/grok_debugger'),
     require.resolve('../../test_suites/painless_lab'),
-    require.resolve('../../test_suites/console'),
-    require.resolve('../../test_suites/saved_objects_management'),
     require.resolve('../../test_suites/telemetry'),
     require.resolve('../../test_suites/data_usage'),
     require.resolve('../../test_suites/favorites'),
@@ -47,7 +42,7 @@ export default createTestConfig({
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
-    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8089`,
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
@@ -55,8 +50,6 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
-    // Enables /internal/cloud_security_posture/graph API
-    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
   enableFleetDockerRegistry: false,
 });

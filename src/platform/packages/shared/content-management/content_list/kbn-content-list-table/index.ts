@@ -38,6 +38,16 @@ export {
   UpdatedAtCell,
   type UpdatedAtColumnProps,
   type UpdatedAtCellProps,
+  StarredColumn,
+  StarredCell,
+  StarButton,
+  type StarredColumnProps,
+  type StarredCellProps,
+  type StarButtonProps,
+  CreatedByColumn,
+  CreatedByCell,
+  type CreatedByColumnProps,
+  type CreatedByCellProps,
 } from './src/column';
 export type { ColumnNamespace, ColumnProps } from './src/column';
 
@@ -45,13 +55,12 @@ export type { ColumnNamespace, ColumnProps } from './src/column';
 export {
   EditAction,
   DeleteAction,
+  InspectAction,
   type EditActionProps,
   type DeleteActionProps,
+  type InspectActionProps,
 } from './src/action';
 export type { ActionNamespace, ActionProps } from './src/action';
 
 // Selection hook.
 export { useSelection, type UseSelectionReturn } from './src/hooks';
-
-// Empty state.
-export { EmptyState, type EmptyStateProps } from './src/empty_state';

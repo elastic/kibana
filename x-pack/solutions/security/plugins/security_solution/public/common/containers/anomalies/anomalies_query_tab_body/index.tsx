@@ -13,6 +13,7 @@ import { getAnomaliesFilterQuery } from './utils';
 import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { MatrixHistogram } from '../../../components/matrix_histogram';
+import { EaMlJobCallout } from '../../../../entity_analytics/components/ea_ml_job_callout';
 import { histogramConfigs } from './histogram_configs';
 
 const ID = 'anomaliesHistogramQuery';
@@ -30,6 +31,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   ip,
   hostName,
   userName,
+  identityFields,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
@@ -54,6 +56,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
 
   return (
     <>
+      <EaMlJobCallout />
       <MatrixHistogram
         endDate={endDate}
         filterQuery={mergedFilterQuery}
@@ -70,6 +73,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         ip={ip}
         hostName={hostName}
         userName={userName}
+        identityFields={identityFields}
       />
     </>
   );

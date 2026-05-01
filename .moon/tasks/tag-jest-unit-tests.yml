@@ -1,0 +1,22 @@
+$schema: https://moonrepo.dev/schemas/tasks.json
+
+inheritedBy:
+  tags:
+    - jest-unit-tests
+
+tasks:
+  jest:
+    command: node
+    args:
+      - scripts/jest.js
+      - '--passWithNoTests'
+      - '--config'
+      - '@files(jest-config)'
+    deps:
+      - '~:source'
+      - '~:source-upstream'
+    inputs:
+      - '@group(src)'
+    options:
+      mergeArgs: append
+      runFromWorkspaceRoot: true

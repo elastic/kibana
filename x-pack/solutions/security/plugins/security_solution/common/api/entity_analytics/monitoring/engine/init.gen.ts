@@ -15,8 +15,9 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { MonitoringEngineDescriptor } from '../common.gen';
 
+export const InitMonitoringEngineResponse = lazySchema(() => MonitoringEngineDescriptor);
 export type InitMonitoringEngineResponse = z.infer<typeof InitMonitoringEngineResponse>;
-export const InitMonitoringEngineResponse = MonitoringEngineDescriptor;

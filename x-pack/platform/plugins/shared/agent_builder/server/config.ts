@@ -10,6 +10,11 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  githubBaseUrl: schema.string({ defaultValue: 'https://github.com' }),
+  topSnippets: schema.object({
+    numSnippets: schema.number({ defaultValue: 2, min: 1, max: 10 }),
+    numWords: schema.number({ defaultValue: 750, min: 1, max: 5000 }),
+  }),
 });
 
 export type AgentBuilderConfig = TypeOf<typeof configSchema>;

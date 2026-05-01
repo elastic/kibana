@@ -18,11 +18,11 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { ExpandablePanels } from '@kbn/ml-common-types/locator';
 import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import type { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj
@@ -91,7 +91,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={toggleExpanded}
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 iconSide="left"
                 data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
               >

@@ -14,13 +14,18 @@ xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.uptime.enabled: false
 xpack.exploratoryView.enabled: false
-## Disable Workflows plugins in this tier
-workflowsManagement.enabled: false
-workflowsExecutionEngine.enabled: false
+
+### Workflows Management plugin is not available in this tier
+workflowsManagement.available: false
 
 xpack.features.overrides:
   ### Machine Learning feature privilege should be hidden
   ml.hidden: true
+  ### Inference Endpoints feature privilege should be hidden
+  searchInferenceEndpoints.hidden: true
+  ### Workflows Management feature should be hidden in this tier
+  workflowsManagement.hidden: true
+
 
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations

@@ -86,6 +86,7 @@
                 "lineNumber": 63,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KQLSyntaxErrorData",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -193,6 +194,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BooleanRelation",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -244,6 +246,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -318,6 +321,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterStateStore",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -465,6 +469,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterStateStore",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -704,6 +709,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsQueryConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -774,6 +780,7 @@
             "lineNumber": 48,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -799,6 +806,7 @@
             "lineNumber": 48,
             "columnNumber": 61,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBaseNoFields",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -893,6 +901,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -916,6 +925,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -939,6 +949,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FILTERS",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1000,6 +1011,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Serializable",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1045,6 +1057,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterStateStore",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1123,6 +1136,7 @@
             "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1140,6 +1154,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PhraseFilterValue",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1163,6 +1178,7 @@
             "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBaseNoFields",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1235,6 +1251,7 @@
             "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1276,6 +1293,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBaseNoFields",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1392,6 +1410,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "QueryStringFilterMeta",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1532,6 +1551,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsQueryFiltersConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1620,6 +1640,7 @@
             "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1643,6 +1664,7 @@
             "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RangeFilterParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1667,6 +1689,7 @@
             "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBaseNoFields",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1747,6 +1770,7 @@
             "lineNumber": 136,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1902,6 +1926,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterCompareOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1955,6 +1980,7 @@
             "lineNumber": 19,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "RangeFilter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2183,6 +2209,7 @@
             "lineNumber": 90,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2243,6 +2270,7 @@
             "lineNumber": 81,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2285,6 +2313,7 @@
             "lineNumber": 192,
             "columnNumber": 130,
             "deprecated": false,
+            "docsReferencedTypeName": "A",
             "trackAdoption": false
           }
         ],
@@ -2568,6 +2597,7 @@
             "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2623,6 +2653,7 @@
             "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsQueryFiltersConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2705,6 +2736,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2760,6 +2792,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsQueryFiltersConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3081,6 +3114,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3132,6 +3166,7 @@
             "lineNumber": 27,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "AggregateQuery",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3177,6 +3212,7 @@
             "lineNumber": 36,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "HasSubtype",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3222,6 +3258,7 @@
             "lineNumber": 27,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "HasSubtype",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3273,6 +3310,7 @@
             "lineNumber": 23,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "KueryNode",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3363,6 +3401,7 @@
             "lineNumber": 20,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "KueryNode",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3485,45 +3524,6 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
-        "id": "def-common.isCCSRemoteIndexName",
-        "type": "Function",
-        "tags": [],
-        "label": "isCCSRemoteIndexName",
-        "description": [
-          "\nCheck whether the index expression represents a remote index (CCS) or not.\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
-        ],
-        "signature": [
-          "(indexExpression: string) => boolean"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
-        "lineNumber": 40,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.isCCSRemoteIndexName.$1",
-            "type": "string",
-            "tags": [],
-            "label": "indexExpression",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
-            "lineNumber": 49,
-            "columnNumber": 38,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
         "id": "def-common.isCombinedFilter",
         "type": "Function",
         "tags": [],
@@ -3566,6 +3566,7 @@
             "lineNumber": 42,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3603,6 +3604,7 @@
             "lineNumber": 31,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "HasSubtype",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3640,6 +3642,7 @@
             "lineNumber": 22,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "HasSubtype",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3698,6 +3701,7 @@
             "lineNumber": 30,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3797,6 +3801,7 @@
             "lineNumber": 31,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3852,6 +3857,7 @@
             "lineNumber": 21,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3959,6 +3965,7 @@
             "lineNumber": 33,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3966,6 +3973,45 @@
         "returnComment": [
           "`true` if a filter is an `MatchAllFilter`"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isNonLocalIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "isNonLocalIndexName",
+        "description": [
+          "\nCheck whether the index expression represents a non-local index or not. This can happen in:\n- CCS for a remote cluster\n- CPS for a linked project\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
+        ],
+        "signature": [
+          "(indexExpression: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isNonLocalIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexExpression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
+            "lineNumber": 51,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -4155,6 +4201,7 @@
             "lineNumber": 53,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4215,6 +4262,7 @@
             "lineNumber": 33,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4275,6 +4323,7 @@
             "lineNumber": 31,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4329,6 +4378,7 @@
             "lineNumber": 98,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -4389,6 +4439,7 @@
             "lineNumber": 68,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4451,6 +4502,7 @@
             "lineNumber": 116,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4513,6 +4565,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4530,6 +4583,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5071,6 +5125,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterCompareOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -5131,6 +5186,7 @@
             "lineNumber": 99,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5172,6 +5228,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -5206,6 +5263,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TermQueryOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5245,6 +5303,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -5262,6 +5321,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5482,6 +5542,7 @@
             "lineNumber": 20,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Parameters",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5555,6 +5616,7 @@
             "lineNumber": 40,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5630,6 +5692,7 @@
             "lineNumber": 54,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5701,6 +5764,7 @@
             "lineNumber": 68,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5756,6 +5820,7 @@
             "lineNumber": 65,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "KueryNode",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5853,6 +5918,7 @@
             "lineNumber": 22,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterCompareOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5913,6 +5979,7 @@
             "lineNumber": 108,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5983,6 +6050,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -6024,6 +6092,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterMeta",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -8107,7 +8176,9 @@
             "type": "boolean",
             "tags": [],
             "label": "index",
-            "description": [],
+            "description": [
+              "\nInclude disabled, negate and store when comparing filters"
+            ],
             "signature": [
               "true"
             ],
@@ -8123,7 +8194,9 @@
             "type": "boolean",
             "tags": [],
             "label": "disabled",
-            "description": [],
+            "description": [
+              "\nInclude disabled, negate and store when comparing filters"
+            ],
             "signature": [
               "true"
             ],
@@ -8139,7 +8212,9 @@
             "type": "boolean",
             "tags": [],
             "label": "negate",
-            "description": [],
+            "description": [
+              "\nInclude disabled, negate and store when comparing filters"
+            ],
             "signature": [
               "true"
             ],
@@ -8155,7 +8230,9 @@
             "type": "boolean",
             "tags": [],
             "label": "group",
-            "description": [],
+            "description": [
+              "\nInclude disabled, negate and store when comparing filters"
+            ],
             "signature": [
               "true"
             ],
@@ -8171,7 +8248,9 @@
             "type": "boolean",
             "tags": [],
             "label": "state",
-            "description": [],
+            "description": [
+              "\nInclude disabled, negate and store when comparing filters"
+            ],
             "signature": [
               "true"
             ],
@@ -8187,7 +8266,9 @@
             "type": "boolean",
             "tags": [],
             "label": "alias",
-            "description": [],
+            "description": [
+              "\nInclude disabled, negate and store when comparing filters"
+            ],
             "signature": [
               "true"
             ],

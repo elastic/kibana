@@ -28,6 +28,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       // upload a file
       await common.setFileInputPath(fileInputPath);
       await testSubjects.click('uploadButton');
+
+      // hide the upload notification
+      await (await find.byCssSelector('[data-test-subj="toastCloseButton"]')).click();
     },
 
     async searchByFileName(fileName: string) {

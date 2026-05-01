@@ -97,7 +97,7 @@ export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalPr
           fill
           type="submit"
           form={modalFormId}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           isLoading={isLoading}
           isDisabled={!canSubmit}
         >

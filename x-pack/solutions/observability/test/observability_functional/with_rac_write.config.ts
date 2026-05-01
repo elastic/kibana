@@ -43,6 +43,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     // default to the xpack functional config
     ...xpackFunctionalConfig.getAll(),
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      rules: {
+        pathname: '/app/rules',
+      },
+    },
     servers,
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
@@ -91,6 +97,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'dateFormat:tz': 'UTC',
         'observability:enableLegacyUptimeApp': true,
+      },
+      globalDefaults: {
+        hideAnnouncements: true,
       },
     },
     testFiles: [resolve(__dirname, './apps/observability')],

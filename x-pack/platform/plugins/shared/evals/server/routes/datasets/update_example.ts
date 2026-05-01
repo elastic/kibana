@@ -14,10 +14,21 @@ import {
   buildRouteValidationWithZod,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
+import {
+  ENCRYPTION_NOT_CONFIGURED_MESSAGE,
+  RemoteDecryptionError,
+  forwardToRemoteKibana,
+  getDestinationFromRequest,
+} from '../../remote_kibana/forward_to_remote_kibana';
 import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerUpdateExampleRoute = ({ router, logger }: RouteDependencies) => {
+export const registerUpdateExampleRoute = ({
+  router,
+  logger,
+  canEncrypt,
+  getEncryptedSavedObjectsStart,
+}: RouteDependencies) => {
   router.versioned
     .put({
       path: EVALS_DATASET_EXAMPLE_URL,
@@ -39,6 +50,39 @@ export const registerUpdateExampleRoute = ({ router, logger }: RouteDependencies
       },
       async (context, request, response) => {
         try {
+          const destination = getDestinationFromRequest(request);
+          if (destination && destination !== 'local') {
+            if (!canEncrypt) {
+              return response.customError({
+                statusCode: 501,
+                body: { message: ENCRYPTION_NOT_CONFIGURED_MESSAGE },
+              });
+            }
+            const encryptedSavedObjects = await getEncryptedSavedObjectsStart();
+            const forwarded = await forwardToRemoteKibana({
+              encryptedSavedObjects,
+              remoteId: destination,
+              request,
+              method: 'PUT',
+              body: request.body,
+            });
+
+            if (forwarded.statusCode === 200) {
+              return response.ok({ body: forwarded.body });
+            }
+            if (forwarded.statusCode === 404) {
+              return response.notFound({ body: forwarded.body as any });
+            }
+            if (forwarded.statusCode === 409) {
+              return response.customError({ statusCode: 409, body: forwarded.body as any });
+            }
+
+            return response.customError({
+              statusCode: forwarded.statusCode,
+              body: forwarded.body as any,
+            });
+          }
+
           const { datasetId, exampleId } = request.params;
           const { input, output, metadata } = request.body;
           const coreContext = await context.core;
@@ -83,6 +127,14 @@ export const registerUpdateExampleRoute = ({ router, logger }: RouteDependencies
             },
           });
         } catch (error) {
+          if (error instanceof RemoteDecryptionError) {
+            logger.error(`Remote decryption failed: ${error.message}`);
+            return response.customError({
+              statusCode: 400,
+              body: { message: error.message },
+            });
+          }
+
           if (error instanceof ExampleAlreadyExistsError) {
             return response.customError({
               statusCode: 409,

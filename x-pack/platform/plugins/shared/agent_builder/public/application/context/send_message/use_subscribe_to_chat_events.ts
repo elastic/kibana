@@ -17,11 +17,16 @@ import {
   isToolProgressEvent,
   isToolResultEvent,
   isThinkingCompleteEvent,
+  isCompactionStartedEvent,
+  isCompactionCompletedEvent,
+  isBackgroundAgentCompleteEvent,
+  ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import { i18n } from '@kbn/i18n';
 import { finalize, type Observable, type Subscription } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import { useRef } from 'react';
@@ -59,17 +64,26 @@ export const useSubscribeToChatEvents = ({
         assistantMessage: event.data.message_content,
       });
     } else if (isToolProgressEvent(event)) {
+      const isInternalProgress = event.data.metadata?.internal === 'true';
       conversationActions.setToolCallProgress({
-        progress: { message: event.data.message },
+        progress: {
+          message: event.data.message,
+          metadata: event.data.metadata ?? {},
+        },
         toolCallId: event.data.tool_call_id,
       });
       // Individual tool progression message should also be displayed as reasoning
-      setAgentReasoning(event.data.message);
+      // (but skip internal progress messages)
+      if (!isInternalProgress) {
+        setAgentReasoning(event.data.message);
+      }
     } else if (isReasoningEvent(event)) {
       conversationActions.addReasoningStep({
         step: createReasoningStep({
           reasoning: event.data.reasoning,
           transient: event.data.transient,
+          tool_call_id: event.data.tool_call_id,
+          tool_call_group_id: event.data.tool_call_group_id,
         }),
       });
       setAgentReasoning(event.data.reasoning);
@@ -81,6 +95,7 @@ export const useSubscribeToChatEvents = ({
           tool_call_id: event.data.tool_call_id,
           tool_id: event.data.tool_id,
           tool_call_group_id: event.data.tool_call_group_id,
+          tool_origin: event.data.tool_origin,
         }),
       });
     } else if (isBrowserToolCallEvent(event)) {
@@ -122,11 +137,32 @@ export const useSubscribeToChatEvents = ({
         timeToFirstToken: event.data.time_to_first_token,
       });
     } else if (isPromptRequestEvent(event)) {
-      conversationActions.setPendingPrompt({
+      conversationActions.addPendingPrompt({
         prompt: event.data.prompt,
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input
       setIsResponseLoading(false);
+    } else if (isCompactionStartedEvent(event)) {
+      conversationActions.addCompactionStep({
+        tokenCountBefore: event.data.token_count_before,
+      });
+      setAgentReasoning(
+        i18n.translate('xpack.agentBuilder.chatEvents.compactionStarted', {
+          defaultMessage: 'Compacting conversation context',
+        })
+      );
+    } else if (isCompactionCompletedEvent(event)) {
+      conversationActions.setCompactionStepComplete({
+        tokenCountAfter: event.data.token_count_after,
+        summarizedRoundCount: event.data.summarized_round_count,
+      });
+    } else if (isBackgroundAgentCompleteEvent(event)) {
+      conversationActions.addBackgroundExecutionCompleteStep({
+        step: {
+          type: ConversationRoundStepType.backgroundAgentComplete,
+          ...event.data.execution,
+        },
+      });
     }
   };
 

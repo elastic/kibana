@@ -12,13 +12,16 @@ import type { RuleVersionSpecifier } from '../../rule_versions/rule_version_spec
 import type { BasicRuleInfo } from '../../basic_rule_info';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { FetchLatestAssetsOptions } from './methods/fetch_latest_assets';
 import { fetchLatestAssets } from './methods/fetch_latest_assets';
 import { fetchLatestVersions } from './methods/fetch_latest_versions';
 import { fetchAssetsByVersion } from './methods/fetch_assets_by_version';
 import { fetchTagsByVersion } from './methods/fetch_tags_by_version';
+import type { DeprecatedPrebuiltRuleAsset } from '../../../model/rule_assets/deprecated_prebuilt_rule_asset';
+import { fetchDeprecatedRules } from './methods/fetch_deprecated_rules';
 
 export interface IPrebuiltRuleAssetsClient {
-  fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
+  fetchLatestAssets: (options?: FetchLatestAssetsOptions) => Promise<PrebuiltRuleAsset[]>;
 
   fetchLatestVersions: (args?: {
     ruleIds?: string[];
@@ -29,15 +32,17 @@ export interface IPrebuiltRuleAssetsClient {
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
 
   fetchTagsByVersion(versions: RuleVersionSpecifier[]): Promise<string[]>;
+
+  fetchDeprecatedRules(ruleIds?: string[]): Promise<DeprecatedPrebuiltRuleAsset[]>;
 }
 
 export const createPrebuiltRuleAssetsClient = (
   savedObjectsClient: SavedObjectsClientContract
 ): IPrebuiltRuleAssetsClient => {
   return {
-    fetchLatestAssets: () => {
+    fetchLatestAssets: (options?: FetchLatestAssetsOptions) => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestAssets', async () => {
-        return fetchLatestAssets(savedObjectsClient);
+        return fetchLatestAssets(savedObjectsClient, options);
       });
     },
 
@@ -56,6 +61,12 @@ export const createPrebuiltRuleAssetsClient = (
     fetchTagsByVersion: (versions: RuleVersionSpecifier[]): Promise<string[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchTagsByVersion', async () => {
         return fetchTagsByVersion(savedObjectsClient, versions);
+      });
+    },
+
+    fetchDeprecatedRules: (ruleIds?: string[]): Promise<DeprecatedPrebuiltRuleAsset[]> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchDeprecatedRules', async () => {
+        return fetchDeprecatedRules(savedObjectsClient, ruleIds);
       });
     },
   };

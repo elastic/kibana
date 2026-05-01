@@ -24,9 +24,8 @@ import {
   getCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
-  getCasesTemplatesPath,
-  getCasesCreateTemplatePath,
-  getCasesEditTemplatePath,
+  getCasesConfigureCreateTemplatePath,
+  getCasesConfigureEditTemplatePath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
@@ -47,10 +46,6 @@ const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
   () => import('../templates_v2/pages/edit_template/page')
 );
 
-const AllCasesTemplatesLazy: React.FC = lazy(
-  () => import('../templates_v2/pages/all_templates_page')
-);
-
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
   ruleDetailsNavigation,
@@ -60,7 +55,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   refreshRef,
   timelineIntegration,
   renderAlertsTable,
-  renderEventsTable,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
@@ -95,6 +89,30 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           )}
         </Route>
 
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <CreateTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
+          </Route>
+        )}
+
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <EditTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
+          </Route>
+        )}
+
         <Route path={getCasesConfigurePath(basePath)}>
           {permissions.settings ? (
             <ConfigureCases />
@@ -102,30 +120,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
           )}
         </Route>
-
-        {isTemplatesEnabled && (
-          <Route exact path={getCasesTemplatesPath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <AllCasesTemplatesLazy />
-            </Suspense>
-          </Route>
-        )}
-
-        {isTemplatesEnabled && (
-          <Route exact path={getCasesCreateTemplatePath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <CreateTemplateLazy />
-            </Suspense>
-          </Route>
-        )}
-
-        {isTemplatesEnabled && (
-          <Route exact path={getCasesEditTemplatePath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <EditTemplateLazy />
-            </Suspense>
-          </Route>
-        )}
 
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
@@ -139,7 +133,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
               renderAlertsTable={renderAlertsTable}
-              renderEventsTable={renderEventsTable}
             />
           </Suspense>
         </Route>

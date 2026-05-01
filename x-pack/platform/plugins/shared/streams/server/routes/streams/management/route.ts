@@ -11,6 +11,7 @@ import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { forkStreamRequest } from '../../../oas_examples';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
@@ -19,8 +20,25 @@ export const forkStreamsRoute = createServerRoute({
     description: 'Forks a wired stream and creates a child stream',
     summary: 'Fork a stream',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              forkStream: { value: forkStreamRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The stream was forked successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -29,12 +47,13 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the parent stream to fork from.'),
     }),
     body: z.object({
       stream: z.object({ name: z.string() }),
       where: conditionSchema,
       status: routingStatus.optional(),
+      draft: z.boolean().optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
@@ -53,6 +72,7 @@ export const forkStreamsRoute = createServerRoute({
       where: params.body.where,
       name: params.body.stream.name,
       status: conditionStatus,
+      draft: params.body.draft,
     });
   },
 });
@@ -64,6 +84,7 @@ export const resyncStreamsRoute = createServerRoute({
     description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
     summary: 'Resync streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -122,7 +143,11 @@ export const getClassicStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
+    }
 
     const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
 

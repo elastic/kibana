@@ -6,7 +6,7 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import type { ConnectorItem } from '../../common/http_api/tools';
+import type { ConnectorItem, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
   return `${featureName} is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.`;
@@ -17,7 +17,27 @@ export const getTechnicalPreviewWarning = (featureName: string) => {
  */
 export const AGENT_SOCKET_TIMEOUT_MS = 15 * 60 * 1000;
 
-export const toConnectorItem = (connector: Connector): ConnectorItem => {
+/**
+ * Returns the headers needed for SSE streaming responses.
+ * On cloud, uses `application/octet-stream` to avoid proxy compression breaking chunked encoding.
+ */
+export const getSSEResponseHeaders = (isCloud: boolean): Record<string, string> => ({
+  // Cloud proxies compress text/* types, losing chunking capabilities needed for SSE
+  'Content-Type': isCloud ? 'application/octet-stream' : 'text/event-stream',
+  'Content-Encoding': 'identity',
+  'Cache-Control': 'no-cache',
+  Connection: 'keep-alive',
+  'Transfer-Encoding': 'chunked',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Accel-Buffering': 'no',
+});
+
+export const toConnectorItem = (
+  connector: Connector,
+  options?: {
+    oauthStatus?: OAuthStatus;
+  }
+): ConnectorItem => {
   return {
     id: connector.id,
     name: connector.name,
@@ -28,5 +48,7 @@ export const toConnectorItem = (connector: Connector): ConnectorItem => {
     isMissingSecrets: connector.isMissingSecrets,
     isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,
     config: connector.config,
+    authMode: connector.authMode,
+    oauthStatus: options?.oauthStatus,
   };
 };

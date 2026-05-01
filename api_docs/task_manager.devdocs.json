@@ -50,7 +50,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-        "lineNumber": 122,
+        "lineNumber": 128,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -66,7 +66,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-            "lineNumber": 154,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -83,9 +83,10 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                "lineNumber": 154,
+                "lineNumber": 164,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -103,7 +104,7 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-            "lineNumber": 166,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -142,7 +143,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-            "lineNumber": 177,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -169,9 +170,10 @@
                   ">"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                "lineNumber": 178,
+                "lineNumber": 192,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -186,9 +188,10 @@
                   "TaskManagerPluginsSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                "lineNumber": 179,
+                "lineNumber": 193,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TaskManagerPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -217,7 +220,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-            "lineNumber": 319,
+            "lineNumber": 338,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -233,9 +236,10 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                "lineNumber": 320,
+                "lineNumber": 339,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -250,9 +254,10 @@
                   "TaskManagerPluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                "lineNumber": 321,
+                "lineNumber": 340,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TaskManagerPluginsStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -270,7 +275,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-            "lineNumber": 481,
+            "lineNumber": 515,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -407,6 +412,7 @@
             "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -497,10 +503,12 @@
         "label": "runInvalidate",
         "description": [],
         "signature": [
-          "(opts: RunInvalidateOpts) => Promise<number>"
+          "(opts: RunInvalidateOpts) => Promise<",
+          "RunInvalidateResult",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/invalidate_api_keys/lib/run_invalidate.ts",
-        "lineNumber": 33,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -516,9 +524,10 @@
               "RunInvalidateOpts"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/invalidate_api_keys/lib/run_invalidate.ts",
-            "lineNumber": 33,
+            "lineNumber": 39,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "RunInvalidateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -556,6 +565,7 @@
             "lineNumber": 54,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -610,6 +620,7 @@
             "lineNumber": 36,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -708,7 +719,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-        "lineNumber": 409,
+        "lineNumber": 450,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -723,7 +734,7 @@
               "\nThe id of the Elastic document that stores this instance's data. This can\nbe passed by the caller when scheduling the task."
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 413,
+            "lineNumber": 454,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -741,7 +752,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 419,
+            "lineNumber": 460,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -769,7 +780,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 424,
+            "lineNumber": 465,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -788,7 +799,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 429,
+            "lineNumber": 470,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -806,7 +817,7 @@
               "Date"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 434,
+            "lineNumber": 475,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -821,7 +832,7 @@
               "\nThe number of unsuccessful attempts since the last successful run. This\nwill be zeroed out after a successful run."
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 440,
+            "lineNumber": 481,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -845,7 +856,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 446,
+            "lineNumber": 487,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -863,7 +874,7 @@
               "Date"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 451,
+            "lineNumber": 492,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -881,7 +892,7 @@
               "Date | null"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 457,
+            "lineNumber": 498,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -899,7 +910,7 @@
               "Date | null"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 464,
+            "lineNumber": 505,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -917,7 +928,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 470,
+            "lineNumber": 511,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -935,7 +946,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 480,
+            "lineNumber": 521,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -951,7 +962,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 488,
+            "lineNumber": 529,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1179,7 +1190,7 @@
           "\nThe run context is passed into a task's run function as its sole argument."
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-        "lineNumber": 51,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1203,7 +1214,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 55,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1222,7 +1233,7 @@
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 60,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1238,7 +1249,7 @@
               "AbortController"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 65,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1299,7 +1310,7 @@
         "label": "TaskInstance",
         "description": [],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-        "lineNumber": 270,
+        "lineNumber": 298,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1317,7 +1328,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 271,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1332,7 +1343,7 @@
               "\nThe task definition type whose run function will execute this instance."
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 278,
+            "lineNumber": 306,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1350,7 +1361,7 @@
               "Date | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 283,
+            "lineNumber": 311,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1368,7 +1379,7 @@
               "Date | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 289,
+            "lineNumber": 317,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1386,7 +1397,7 @@
               "Date | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 296,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1404,7 +1415,7 @@
               "Date | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 302,
+            "lineNumber": 330,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1437,7 +1448,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 309,
+            "lineNumber": 337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1455,7 +1466,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 316,
+            "lineNumber": 344,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1473,7 +1484,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 325,
+            "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1489,7 +1500,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 334,
+            "lineNumber": 362,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1507,7 +1518,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 336,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1525,7 +1536,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 341,
+            "lineNumber": 369,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1543,7 +1554,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 346,
+            "lineNumber": 374,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1561,7 +1572,7 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 352,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1579,7 +1590,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 357,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1595,7 +1606,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 365,
+            "lineNumber": 393,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1611,7 +1622,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 370,
+            "lineNumber": 398,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1623,13 +1634,31 @@
             "tags": [],
             "label": "apiKey",
             "description": [
-              "\nUsed to allow tasks to be scoped to a user via their API key"
+              "\nUsed to allow tasks to be scoped to a user via their ES API key"
             ],
             "signature": [
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 372,
+            "lineNumber": 400,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.uiamApiKey",
+            "type": "string",
+            "tags": [],
+            "label": "uiamApiKey",
+            "description": [
+              "\nUsed to allow tasks to be scoped to a user via their UIAM API key"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "lineNumber": 405,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1648,7 +1677,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 377,
+            "lineNumber": 410,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1671,7 +1700,32 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 385,
+            "lineNumber": 418,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.cost",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cost",
+            "description": [
+              "\nOptional cost for this task instance, overriding the task type's default cost.\nWhen set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').\nUsed by the task selector and capacity logic to limit concurrent work.\nUse getTaskCostFromInstance() to translate to the integer TaskCost."
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.InstanceTaskCost",
+                "text": "InstanceTaskCost"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "lineNumber": 420,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1689,7 +1743,7 @@
           "\nDefines a task which can be scheduled and run by the Kibana\ntask manager."
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-        "lineNumber": 46,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1707,7 +1761,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 51,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1725,7 +1779,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 55,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1750,7 +1804,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 62,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1775,7 +1829,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 68,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1793,7 +1847,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 72,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1829,7 +1883,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 77,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1852,9 +1906,10 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-                "lineNumber": 136,
+                "lineNumber": 163,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunContext",
                 "trackAdoption": false
               }
             ]
@@ -1872,7 +1927,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 83,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1890,7 +1945,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 88,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1914,7 +1969,7 @@
               "<any>; up: (state: Record<string, unknown>) => Record<string, unknown>; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 95,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1937,7 +1992,7 @@
               "<any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 103,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1956,6 +2011,22 @@
         "description": [],
         "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.InstanceTaskCost",
+        "type": "Enum",
+        "tags": [],
+        "label": "InstanceTaskCost",
+        "description": [
+          "\nString values for task cost as stored in the task schema (e.g. in saved objects).\nUse these when reading cost from task params or instance attributes."
+        ],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2011,7 +2082,7 @@
         "label": "TaskStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-        "lineNumber": 242,
+        "lineNumber": 269,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2035,6 +2106,23 @@
     "misc": [
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.EVENT_LOG_PROVIDER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_LOG_PROVIDER",
+        "description": [],
+        "signature": [
+          "\"taskManager\""
+        ],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskDefinitionRegistry",
         "type": "Type",
         "tags": [],
@@ -2054,7 +2142,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-        "lineNumber": 106,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2089,7 +2177,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-        "lineNumber": 135,
+        "lineNumber": 162,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2112,9 +2200,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
-            "lineNumber": 136,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunContext",
             "trackAdoption": false
           }
         ],
@@ -2122,6 +2211,48 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.EVENT_LOG_ACTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "EVENT_LOG_ACTIONS",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.EVENT_LOG_ACTIONS.taskRun",
+            "type": "string",
+            "tags": [],
+            "label": "taskRun",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/constants.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.EVENT_LOG_ACTIONS.taskCancel",
+            "type": "string",
+            "tags": [],
+            "label": "taskCancel",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/constants.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "taskManager",
         "id": "def-server.IdleTaskWithExpiredRunAt",
@@ -2401,7 +2532,7 @@
       "label": "TaskManagerSetupContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-      "lineNumber": 76,
+      "lineNumber": 80,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2416,7 +2547,7 @@
           "label": "index",
           "description": [],
           "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-          "lineNumber": 77,
+          "lineNumber": 81,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -2444,7 +2575,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-          "lineNumber": 81,
+          "lineNumber": 85,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2460,9 +2591,10 @@
                 "Middleware"
               ],
               "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-              "lineNumber": 81,
+              "lineNumber": 85,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "Middleware",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2490,7 +2622,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-          "lineNumber": 82,
+          "lineNumber": 86,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2514,9 +2646,10 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-              "lineNumber": 86,
+              "lineNumber": 90,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "TaskDefinitionRegistry",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2534,7 +2667,7 @@
             "(canEncrypt: boolean) => void"
           ],
           "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-          "lineNumber": 87,
+          "lineNumber": 91,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2550,9 +2683,48 @@
                 "boolean"
               ],
               "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-              "lineNumber": 87,
+              "lineNumber": 91,
               "columnNumber": 38,
               "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "taskManager",
+          "id": "def-server.TaskManagerSetupContract.registerTaskEventLogger",
+          "type": "Function",
+          "tags": [],
+          "label": "registerTaskEventLogger",
+          "description": [],
+          "signature": [
+            "(logger: ",
+            "TaskEventLogger",
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
+          "lineNumber": 92,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "taskManager",
+              "id": "def-server.TaskManagerSetupContract.registerTaskEventLogger.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "logger",
+              "description": [],
+              "signature": [
+                "TaskEventLogger"
+              ],
+              "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
+              "lineNumber": 92,
+              "columnNumber": 29,
+              "deprecated": false,
+              "docsReferencedTypeName": "TaskEventLogger",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2585,10 +2757,12 @@
         },
         ") => void; registerApiKeyInvalidateFn: (fn?: ",
         "ApiKeyInvalidationFn",
+        " | undefined) => void; registerUiamApiKeyInvalidateFn: (fn?: ",
+        "UiamApiKeyInvalidationFn",
         " | undefined) => void; }"
       ],
       "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-      "lineNumber": 90,
+      "lineNumber": 95,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

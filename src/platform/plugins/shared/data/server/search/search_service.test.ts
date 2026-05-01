@@ -151,35 +151,13 @@ describe('Search service', () => {
         expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'space' });
       });
 
-      it('calls elasticsearch.client.asScoped with request and projectRouting: "all" when opts.projectRouting is "all"', () => {
-        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
-        asScopedSpy.mockClear();
-
-        const request = {} as any;
-        searchPluginStart.asScoped(request, { projectRouting: 'all' });
-
-        expect(asScopedSpy).toHaveBeenCalledTimes(1);
-        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'all' });
-      });
-
-      it('calls elasticsearch.client.asScoped with request and projectRouting: "origin-only" when opts.projectRouting is "origin-only"', () => {
-        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
-        asScopedSpy.mockClear();
-
-        const request = {} as any;
-        searchPluginStart.asScoped(request, { projectRouting: 'origin-only' });
-
-        expect(asScopedSpy).toHaveBeenCalledTimes(1);
-        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'origin-only' });
-      });
-
       it('returns a scoped client that can search when called with opts', async () => {
         const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
         asScopedSpy.mockClear();
 
         const request = {} as any;
         const scopedClient = searchPluginStart.asScoped(request, {
-          projectRouting: 'origin-only',
+          projectRouting: 'space',
         });
 
         expect(scopedClient).toHaveProperty('search');
@@ -308,7 +286,7 @@ describe('Search service', () => {
 
         expect(mockSessionClient.trackId).toBeCalledTimes(1);
 
-        expect(mockSessionClient.trackId.mock.calls[0]).toEqual(['my_id', options]);
+        expect(mockSessionClient.trackId.mock.calls[0]).toEqual(['my_id', options, true]);
       });
 
       it('does not call `trackId` if search is already tracked', async () => {

@@ -131,12 +131,29 @@ const logExtractionRuntimeStateSchemaV3 = schema.object({
   lastExecutionTimestamp: schema.maybe(schema.string()),
 });
 
+const logExtractionRuntimeStateSchemaV4 = schema.object({
+  paginationTimestamp: schema.maybe(schema.string()),
+  paginationId: schema.maybe(schema.string()),
+  lastExecutionTimestamp: schema.maybe(schema.string()),
+  logsPageCursorStartTimestamp: schema.maybe(schema.string()),
+  logsPageCursorStartId: schema.maybe(schema.string()),
+  logsPageCursorEndTimestamp: schema.maybe(schema.string()),
+  logsPageCursorEndId: schema.maybe(schema.string()),
+});
+
 const engineDescriptorAttributesSchemaV3 = {
   ...engineDescriptorAttributesSchemaV1,
   logExtractionState: logExtractionRuntimeStateSchemaV3,
 };
 
 const engineDescriptorSchemaV3 = schema.object(engineDescriptorAttributesSchemaV3);
+
+const engineDescriptorAttributesSchemaV4 = {
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV4,
+};
+
+const engineDescriptorSchemaV4 = schema.object(engineDescriptorAttributesSchemaV4);
 
 const version1: SavedObjectsFullModelVersion = {
   changes: [],
@@ -193,36 +210,70 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
-// const version4: SavedObjectsFullModelVersion = {
-//   changes: [
-//     {
-//       type: 'data_removal' as const,
-//       removedAttributePaths: [
-//         'logExtractionState.filter',
-//         'logExtractionState.additionalIndexPattern',
-//         'logExtractionState.additionalIndexPatterns',
-//         'logExtractionState.fieldHistoryLength',
-//         'logExtractionState.lookbackPeriod',
-//         'logExtractionState.delay',
-//         'logExtractionState.docsLimit',
-//         'logExtractionState.timeout',
-//         'logExtractionState.frequency',
-//       ],
-//     },
-//   ],
-//   schemas: {
-//     create: engineDescriptorSchemaV3,
-//     forwardCompatibility: engineDescriptorSchemaV3.extends({}, { unknowns: 'ignore' }),
-//   },
-// };
+const version4: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV4,
+    forwardCompatibility: engineDescriptorSchemaV4.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const logExtractionRuntimeStateSchemaV5 = schema.object({
+  paginationTimestamp: schema.nullable(schema.string()),
+  paginationId: schema.nullable(schema.string()),
+  lastExecutionTimestamp: schema.nullable(schema.string()),
+  logsPageCursorStartTimestamp: schema.nullable(schema.string()),
+  logsPageCursorStartId: schema.nullable(schema.string()),
+  logsPageCursorEndTimestamp: schema.nullable(schema.string()),
+  logsPageCursorEndId: schema.nullable(schema.string()),
+});
+
+const engineDescriptorSchemaV5 = schema.object({
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV5,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+const version5: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill' as const,
+      backfillFn: (document) => {
+        const { logExtractionState, error } = document.attributes;
+        return {
+          attributes: {
+            logExtractionState: {
+              paginationTimestamp: logExtractionState?.paginationTimestamp ?? null,
+              paginationId: logExtractionState?.paginationId ?? null,
+              lastExecutionTimestamp: logExtractionState?.lastExecutionTimestamp ?? null,
+              logsPageCursorStartTimestamp:
+                logExtractionState?.logsPageCursorStartTimestamp ?? null,
+              logsPageCursorStartId: logExtractionState?.logsPageCursorStartId ?? null,
+              logsPageCursorEndTimestamp: logExtractionState?.logsPageCursorEndTimestamp ?? null,
+              logsPageCursorEndId: logExtractionState?.logsPageCursorEndId ?? null,
+            },
+            error: error ?? null,
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    create: engineDescriptorSchemaV5,
+    forwardCompatibility: engineDescriptorSchemaV5.extends({}, { unknowns: 'ignore' }),
+  },
+};
 
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
-  // we need to merge and then add the version4
-  // modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
   hiddenFromHttpApis: true,
 };

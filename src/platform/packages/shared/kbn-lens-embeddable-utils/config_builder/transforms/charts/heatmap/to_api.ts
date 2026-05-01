@@ -14,62 +14,75 @@ import {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
+
 import { DEFAULT_LAYER_ID } from '../../../constants';
-import { getDatasourceLayers, getSharedChartLensStateToAPI, stripUndefined } from '../utils';
-import type { HeatmapState } from '../../../schema';
-import { fromColorByValueLensStateToAPI } from '../../coloring';
+import {
+  getDatasourceLayers,
+  getLegendTruncateAfterLines,
+  getSharedChartLensStateToAPI,
+  getScaleTypeFromColumnType,
+  stripUndefined,
+} from '../utils';
+import type { HeatmapConfig } from '../../../schema';
+import { AUTO_COLOR, fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   generateApiLayer,
   isTextBasedLayer,
   operationFromColumn,
 } from '../../utils';
-import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
+import type { HeatmapConfigESQL, HeatmapConfigNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
+import { legendSizeCompat } from '../legend_sizes';
+import { axisLabelOrientationCompat } from '../common';
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 
-function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
+function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapConfig['legend'] {
   return {
-    visible: legend.isVisible,
-    position: legend.position,
-    ...stripUndefined<HeatmapState['legend']>({
-      truncate_after_lines: legend.maxLines,
-      size: legend.legendSize,
+    visibility: legend.isVisible ? 'visible' : 'hidden',
+    ...stripUndefined<HeatmapConfig['legend']>({
+      truncate_after_lines: getLegendTruncateAfterLines(legend),
+      size: legendSizeCompat.toAPI(legend.legendSize),
     }),
   };
 }
 
-function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | 'horizontal' {
-  return rotation === -45 ? 'angled' : rotation === -90 ? 'vertical' : 'horizontal';
-}
-
 function getGridConfigProps(
-  gridConfig: HeatmapVisualizationState['gridConfig']
-): HeatmapState['axes'] {
+  gridConfig: HeatmapVisualizationState['gridConfig'],
+  xAxisScale: XScaleSchemaType | undefined,
+  yAccessor: HeatmapVisualizationState['yAccessor']
+): HeatmapConfig['axis'] {
   return {
     x: {
       labels: {
         visible: gridConfig.isXAxisLabelVisible,
         ...(gridConfig.xAxisLabelRotation !== undefined && {
-          orientation: getOrientationFromRotation(gridConfig.xAxisLabelRotation),
+          orientation:
+            axisLabelOrientationCompat.toAPI(gridConfig.xAxisLabelRotation) ?? 'horizontal',
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
+      scale: xAxisScale ?? 'ordinal',
     },
-    y: {
-      labels: { visible: gridConfig.isYAxisLabelVisible },
-      title: {
-        value: gridConfig.yTitle,
-        visible: gridConfig.isYAxisTitleVisible,
-      },
-      ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
-    },
+    ...(yAccessor
+      ? {
+          y: {
+            labels: { visible: gridConfig.isYAxisLabelVisible },
+            title: {
+              text: gridConfig.yTitle,
+              visible: gridConfig.isYAxisTitleVisible,
+            },
+            ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -80,48 +93,56 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: Reference[],
   adhocReferences?: Reference[]
-): HeatmapState {
+): HeatmapConfig {
   const valueAccessor = visualization.valueAccessor;
   if (valueAccessor == null) {
     throw new Error('Value accessor is missing in the visualization state');
+  }
+
+  let xAxisScale: XScaleSchemaType | undefined;
+  if (isTextBasedLayer(layer) && visualization.xAccessor) {
+    const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
   }
 
   const sharedProps = {
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axes: getGridConfigProps(visualization.gridConfig),
-    cells: {
-      labels: { visible: visualization.gridConfig.isCellLabelVisible },
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale, visualization.yAccessor),
+    styling: {
+      cells: {
+        labels: { visible: visualization.gridConfig.isCellLabelVisible },
+      },
     },
-  } satisfies Partial<HeatmapState>;
+  } satisfies Partial<HeatmapConfig>;
 
   const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
-  } satisfies Partial<HeatmapState['metric']>;
+    color: visualization.palette
+      ? fromColorByValueLensStateToAPI(visualization.palette)
+      : AUTO_COLOR,
+  } satisfies Partial<HeatmapConfig['metric']>;
 
   if (isTextBasedLayer(layer)) {
     if (!visualization.xAccessor) {
       throw new Error('xAccessor is missing in the visualization state');
     }
 
-    const dataset = buildDatasetStateESQL(layer);
+    const dataSource = buildDataSourceStateESQL(layer);
 
     return {
       ...sharedProps,
-      dataset,
+      data_source: dataSource,
       metric: {
         ...getValueApiColumn(valueAccessor, layer),
         ...paletteProps,
       },
-      xAxis: getValueApiColumn(visualization.xAccessor, layer),
-      ...(visualization.yAccessor && { yAxis: getValueApiColumn(visualization.yAccessor, layer) }),
-    } satisfies HeatmapStateESQL;
+      x: getValueApiColumn(visualization.xAccessor, layer),
+      ...(visualization.yAccessor && { y: getValueApiColumn(visualization.yAccessor, layer) }),
+    } satisfies HeatmapConfigESQL;
   }
 
-  const dataset = buildDatasetStateNoESQL(
+  const dataSource = buildDataSourceStateNoESQL(
     layer,
     layerId,
     adHocDataViews,
@@ -131,17 +152,19 @@ function reverseBuildVisualizationState(
 
   return {
     ...sharedProps,
-    dataset,
+    data_source: dataSource,
     metric: {
       ...operationFromColumn(valueAccessor, layer),
       ...paletteProps,
     } as LensApiAllMetricOperations,
-    xAxis: operationFromColumn(visualization.xAccessor!, layer),
-    yAxis: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
-  } as HeatmapStateNoESQL;
+    x: operationFromColumn(visualization.xAccessor!, layer),
+    ...(visualization.yAccessor && {
+      y: operationFromColumn(visualization.yAccessor, layer),
+    }),
+  } as HeatmapConfigNoESQL;
 }
 
-export function fromLensStateToAPI(config: LensAttributes): HeatmapState {
+export function fromLensStateToAPI(config: LensAttributes): HeatmapConfig {
   const { state } = config;
   const visualization = state.visualization as HeatmapVisualizationState;
   const layers = getDatasourceLayers(state);
@@ -161,5 +184,5 @@ export function fromLensStateToAPI(config: LensAttributes): HeatmapState {
       config.references,
       config.state.internalReferences
     ),
-  } satisfies HeatmapState;
+  } satisfies HeatmapConfig;
 }

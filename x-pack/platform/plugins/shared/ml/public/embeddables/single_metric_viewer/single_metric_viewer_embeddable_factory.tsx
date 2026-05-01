@@ -6,12 +6,14 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
   initializeTimeRangeManager,
@@ -34,10 +36,10 @@ import { getServices } from './get_services';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
 import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
-import type { SingleMetricViewerEmbeddableState } from './types';
 
 export const getSingleMetricViewerEmbeddableFactory = (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+  usageCollection?: UsageCollectionSetup
 ) => {
   const factory: EmbeddableFactory<
     SingleMetricViewerEmbeddableState,
@@ -45,7 +47,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const services = await getServices(getStartServices);
+      const services = await getServices(getStartServices, usageCollection);
       const subscriptions = new Subscription();
       const titleManager = initializeTitleManager(initialState);
       const timeRangeManager = initializeTimeRangeManager(initialState);

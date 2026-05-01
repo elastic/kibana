@@ -14,6 +14,12 @@ import { ScoutTestTarget } from '@kbn/scout-info';
 
 jest.mock('../utils', () => ({
   execPromise: jest.fn(),
+  withKibanaBabelRegister: jest.fn((env = {}) => ({
+    ...env,
+    NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/babel-register/install']
+      .filter(Boolean)
+      .join(' '),
+  })),
 }));
 
 describe('getPlaywrightProject', () => {
@@ -46,7 +52,6 @@ describe('hasTestsInPlaywrightConfig', () => {
 
   beforeEach(() => {
     mockLog = {
-      debug: jest.fn(),
       info: jest.fn(),
       error: jest.fn(),
     } as unknown as ToolingLog;
@@ -72,8 +77,14 @@ describe('hasTestsInPlaywrightConfig', () => {
       'configPath/playwright.config.ts'
     );
 
-    expect(mockLog.debug).toHaveBeenCalledWith(
-      `scout: running 'SCOUT_REPORTER_ENABLED=false playwright test pwArgs --list'`
+    expect(execPromiseMock).toHaveBeenCalledWith(
+      'playwright test pwArgs --list',
+      expect.objectContaining({
+        env: expect.objectContaining({
+          SCOUT_REPORTER_ENABLED: 'false',
+          NODE_OPTIONS: expect.stringContaining('--require=@kbn/babel-register/install'),
+        }),
+      })
     );
     expect(mockLog.info).toHaveBeenCalledTimes(2);
     expect(mockLog.info).toHaveBeenNthCalledWith(1, 'scout: Validate Playwright config has tests');

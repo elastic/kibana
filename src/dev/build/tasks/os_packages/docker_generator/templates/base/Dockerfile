@@ -12,10 +12,15 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN microdnf install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip{{#tarZstd}} zstd{{/tarZstd}}
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add curl
+RUN for iter in 1 2 3 4 5; do \
+      apk --no-cache add curl gnutar{{#tarZstd}} zstd{{/tarZstd}} && break; \
+      echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
+      sleep $((iter * 10)); \
+      [ $iter -eq 5 ] && exit 1; \
+    done
 {{/wolfi}}
 
 {{#usePublicArtifact}}
@@ -27,14 +32,14 @@ RUN cd /tmp && \
   cd -
 {{/usePublicArtifact}}
 {{^usePublicArtifact}}
-COPY {{artifactTarball}} /tmp/kibana.tar.gz
+COPY {{artifactTarball}} /tmp/kibana.{{tarExt}}
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
   --strip-components=1 \
-  -zxf /tmp/kibana.tar.gz
+  {{#tarZstd}}-I zstd -xf{{/tarZstd}}{{^tarZstd}}-zxf{{/tarZstd}} /tmp/kibana.{{tarExt}}
 
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
@@ -92,8 +97,15 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
-# TODO: Remove pinned shadow version once Wolfi image is updated. Newer releases of shadow require glibc 2.43 which is not available in the current image SHA.
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow=4.19.3-r0 ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}}
+# Wolfi updated glibc from 2.42 to 2.43, which changed memory allocation behavior. This flag disables the new behavior.
+ENV GLIBC_TUNABLES=glibc.malloc.hugetlb=0
+
+RUN for iter in 1 2 3 4 5; do \
+      apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}} && break; \
+      echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
+      sleep $((iter * 10)); \
+      [ $iter -eq 5 ] && exit 1; \
+    done
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.

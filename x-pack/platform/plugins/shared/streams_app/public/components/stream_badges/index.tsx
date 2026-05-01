@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
 import {
-  isIlmLifecycle,
-  isErrorLifecycle,
-  isDslLifecycle,
+  Streams,
   getDiscoverEsqlQuery,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
 } from '@kbn/streams-schema';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -23,6 +23,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 import { truncateText } from '../../util/truncate_text';
 
@@ -54,7 +55,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          "Classic streams are based on existing data streams and don't support all Streams features like partitioning.",
+          "Classic streams are based on existing data streams and don't support all Streams features like ingest-time partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -64,7 +65,7 @@ export function ClassicStreamBadge() {
     >
       <EuiBadge
         color="hollow"
-        iconType="streamsClassic"
+        iconType="productStreamsClassic"
         iconSide="left"
         tabIndex={0}
         data-test-subj="classicStreamBadge"
@@ -81,7 +82,7 @@ export function WiredStreamBadge() {
   return (
     <EuiBadge
       color="hollow"
-      iconType="streamsWired"
+      iconType="productStreamsWired"
       iconSide="left"
       data-test-subj="wiredStreamBadge"
     >
@@ -215,26 +216,41 @@ export function LifecycleBadge({
   return <DataRetentionTooltip>{badge}</DataRetentionTooltip>;
 }
 
+interface DiscoverBadgeButtonBaseProps {
+  hasDataStream?: boolean;
+  spellOut?: boolean;
+}
+
+interface DiscoverBadgeButtonIngestProps extends DiscoverBadgeButtonBaseProps {
+  stream: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
+  indexMode: IndicesIndexMode;
+}
+
+interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
+  stream: Streams.QueryStream.Definition;
+  indexMode?: never;
+}
+
+type DiscoverBadgeButtonProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
+
 export function DiscoverBadgeButton({
   stream,
   hasDataStream = false,
   spellOut = false,
   indexMode,
-}: {
-  stream: Streams.all.Definition;
-  hasDataStream?: boolean;
-  spellOut?: boolean;
-  indexMode?: IndicesIndexMode;
-}) {
+}: DiscoverBadgeButtonProps) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
+  const isIngestStream = !Streams.QueryStream.Definition.is(stream);
+  const { features } = useStreamsPrivileges();
   const esqlQuery = getDiscoverEsqlQuery({
     definition: stream,
-    indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
+    indexMode: isIngestStream ? indexMode : undefined,
     includeMetadata: Streams.WiredStream.Definition.is(stream),
+    useViews: features.wiredStreamViews.enabled,
   });
   const useUrl = share.url.locators.useUrl;
 

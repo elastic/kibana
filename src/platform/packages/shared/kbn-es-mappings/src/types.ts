@@ -56,7 +56,9 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'date_nanos'
     | 'double'
     | 'long'
+    | 'flattened'
     | 'object'
+    | 'flattened'
   );
 
 type MappingPropertyObjectType = Required<ObjectMapping, 'type'>;
@@ -99,6 +101,8 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
             : string | number
           : T extends 'date_nanos'
           ? string
+          : T extends 'flattened'
+          ? Record<string, unknown>
           : T extends 'object'
           ? O['properties'][K] extends AnyMappingDefinition
             ? ToPrimitives<O['properties'][K]>

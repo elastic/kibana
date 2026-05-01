@@ -10,13 +10,8 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { getModelId } from '../../utils/get_model_id';
-import {
-  SERVICES_LABEL,
-  MODELS_LABEL,
-  TYPES_LABEL,
-  ENDPOINTS_LABEL,
-} from './endpoint_stats_translations';
 
 interface EndpointStatsProps {
   endpoints: InferenceInferenceEndpointInfo[];
@@ -46,13 +41,9 @@ const StatItem: React.FC<StatItemProps> = ({ label, count, testSubj }) => (
 
 export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   const stats = useMemo(() => {
-    const services = new Set<string>();
     const models = new Set<string>();
-    const types = new Set<string>();
 
     endpoints.forEach((endpoint) => {
-      services.add(endpoint.service);
-      types.add(endpoint.task_type);
       const modelId = getModelId(endpoint);
       if (modelId) {
         models.add(modelId);
@@ -60,22 +51,26 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
     });
 
     return {
-      servicesCount: services.size,
       modelsCount: models.size,
-      typesCount: types.size,
       endpointsCount: endpoints.length,
     };
   }, [endpoints]);
 
   const statItems: StatItemProps[] = [
-    { label: SERVICES_LABEL, count: stats.servicesCount, testSubj: 'endpointStatsServicesCount' },
-    { label: MODELS_LABEL, count: stats.modelsCount, testSubj: 'endpointStatsModelsCount' },
     {
-      label: ENDPOINTS_LABEL,
+      label: i18n.translate('xpack.searchInferenceEndpoints.endpointStats.modelsLabel', {
+        defaultMessage: 'Models:',
+      }),
+      count: stats.modelsCount,
+      testSubj: 'endpointStatsModelsCount',
+    },
+    {
+      label: i18n.translate('xpack.searchInferenceEndpoints.endpointStats.endpointsLabel', {
+        defaultMessage: 'Endpoints:',
+      }),
       count: stats.endpointsCount,
       testSubj: 'endpointStatsEndpointsCount',
     },
-    { label: TYPES_LABEL, count: stats.typesCount, testSubj: 'endpointStatsTypesCount' },
   ];
 
   return (

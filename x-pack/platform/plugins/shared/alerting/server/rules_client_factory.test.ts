@@ -98,6 +98,11 @@ describe('RulesClientFactory', () => {
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
+      changeTrackingService: {
+        log: jest.fn(),
+        logBulk: jest.fn(),
+        getHistory: jest.fn(),
+      },
       kibanaVersion: '7.10.0',
       authorization:
         alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
@@ -176,6 +181,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
+        changeTrackingService: rulesClientFactoryParams.changeTrackingService,
         getActionsClient: expect.any(Function),
         getEventLogClient: expect.any(Function),
         createAPIKey: expect.any(Function),
@@ -193,6 +199,27 @@ describe('RulesClientFactory', () => {
         backfillClient,
         uiSettings: rulesClientFactoryParams.uiSettings,
         shouldGrantUiam: false,
+      })
+    );
+  });
+
+  test('creates a rules client without changeTrackingService when omitted', async () => {
+    const factory = new RulesClientFactory();
+    const { changeTrackingService: _omit, ...paramsWithoutChangeTracking } =
+      rulesClientFactoryParams;
+    factory.initialize(paramsWithoutChangeTracking);
+    const request = mockRouter.createKibanaRequest();
+
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
+
+    await factory.create(request, savedObjectsService);
+
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        changeTrackingService: undefined,
       })
     );
   });
@@ -236,6 +263,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
+        changeTrackingService: rulesClientFactoryParams.changeTrackingService,
         createAPIKey: expect.any(Function),
         internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
         encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
@@ -421,7 +449,8 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test'
+      'Failed to create UIAM API key for alerting rule : test',
+      expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
       name: 'uiam-test',
@@ -463,7 +492,11 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: UIAM service unavailable'
+      'Failed to create UIAM API key for alerting rule : test: UIAM service unavailable',
+      expect.objectContaining({
+        tags: expect.any(Array),
+        error: expect.objectContaining({ stack_trace: uiamError.stack }),
+      })
     );
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
       name: 'uiam-test',
@@ -502,7 +535,8 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials'
+      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
+      expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });
@@ -543,7 +577,8 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials'
+      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
+      expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });

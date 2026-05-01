@@ -9,16 +9,28 @@
 
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
+import type { EuiBreakpointSize, EuiThemeComputed } from '@elastic/eui';
+import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import {
+  useContentListConfig,
   useContentListItems,
+  useContentListPagination,
   useDeleteConfirmation,
   type ContentListItem,
 } from '@kbn/content-list-provider';
-import { Column as BaseColumn, NameColumn, UpdatedAtColumn, ActionsColumn } from './column';
-import { Action as BaseAction, EditAction, DeleteAction } from './action';
+import {
+  Column as BaseColumn,
+  NameColumn,
+  UpdatedAtColumn,
+  ActionsColumn,
+  StarredColumn,
+  CreatedByColumn,
+} from './column';
+import { Action as BaseAction, EditAction, DeleteAction, InspectAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
-import { EmptyState } from './empty_state';
+import { TableSkeleton } from './skeleton/table_skeleton';
 
 /**
  * Props for ContentListTable component.
@@ -31,10 +43,28 @@ export interface ContentListTableProps {
   /** Compressed table style. */
   compressed?: boolean;
   /**
-   * Custom empty state component.
-   * If not provided, uses default empty state.
+   * Whether to enable horizontal scrolling when columns exceed the container width.
+   * Required for sticky columns (e.g. `Column.Actions` with `sticky: true`).
+   *
+   * @default true
    */
-  emptyState?: ReactNode;
+  scrollableInline?: boolean;
+  /**
+   * Named breakpoint below which the table collapses into responsive cards.
+   * Set to `false` to always render as a table, or `true` to always render cards.
+   *
+   * Content List defaults to `false` because the card layout does not support
+   * selection checkboxes, tag badges, star buttons, or action columns.
+   *
+   * @default false
+   */
+  responsiveBreakpoint?: EuiBreakpointSize | boolean;
+  /**
+   * Custom message to display when a search or filter returns zero results.
+   * When omitted, `EuiBasicTable` renders its built-in empty row. Has no
+   * effect when the whole list is empty; `<ContentList>` owns that state.
+   */
+  noItemsMessage?: ReactNode;
   /**
    * Column components as children.
    * If no children provided, defaults to Name column.
@@ -68,6 +98,41 @@ export interface ContentListTableProps {
  * @returns A stable row ID string.
  */
 export const getRowId = (id: string): string => `content-list-table-row-${id}`;
+
+/**
+ * Keep sticky cells (e.g. `Column.Actions` with `sticky: true`) in visual sync
+ * with the row's interactive backgrounds.
+ *
+ * EUI paints sticky cells with `--euiTableCellStickyBackgroundColor`
+ * (defaulting to `backgroundBasePlain`) so they occlude scrolled-over cells.
+ * That solid fill also overrides the row's hover/selected backgrounds, leaving
+ * the actions column out of the highlight. We update the CSS variable for each
+ * interactive row state so the sticky cell tracks the row's color.
+ *
+ * Hover uses `transparent` rather than the row token, because EUI's
+ * `tableRowBackgroundHover` (`primary100Alpha4`) is a 4% translucent overlay
+ * — applying it on both the row and the sticky cell stacks the alpha and
+ * darkens the cell. Letting the row's translucent fill bleed through keeps
+ * the colors in lockstep. (Hovering during horizontal scroll could briefly
+ * leak content under the cell, which is acceptable for a transient state.)
+ *
+ * Selected states use `tableRowBackgroundSelected` /
+ * `tableRowBackgroundSelectedHover` directly because those tokens are opaque
+ * (`primary10` / `primary20`) and don't suffer the layering problem.
+ */
+const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
+  .euiTableRow {
+    &:hover {
+      --euiTableCellStickyBackgroundColor: transparent;
+    }
+    &.euiTableRow-isSelected {
+      --euiTableCellStickyBackgroundColor: ${euiTheme.components.tableRowBackgroundSelected};
+      &:hover {
+        --euiTableCellStickyBackgroundColor: ${euiTheme.components.tableRowBackgroundSelectedHover};
+      }
+    }
+  }
+`;
 
 /**
  * ContentListTable - Table renderer for content listings.
@@ -112,40 +177,67 @@ const ContentListTableComponent = ({
   title,
   tableLayout = 'auto',
   compressed = false,
-  emptyState: customEmptyState,
+  scrollableInline = true,
+  responsiveBreakpoint = false,
+  noItemsMessage,
   children,
   filter,
   'data-test-subj': dataTestSubj = 'content-list-table',
 }: ContentListTableProps) => {
-  const { items: rawItems, isLoading: loading, error } = useContentListItems();
+  const { supports } = useContentListConfig();
+  const { euiTheme } = useEuiTheme();
+  const { items: rawItems, isLoading, isFetching, hasNoItems, error } = useContentListItems();
+  const { pageSize } = useContentListPagination();
   const items = useMemo(() => (filter ? rawItems.filter(filter) : rawItems), [rawItems, filter]);
 
   const { requestDelete, deleteModal } = useDeleteConfirmation();
 
-  const columns = useColumns(children, requestDelete);
+  const resolvedColumns = useColumns(children, requestDelete);
+  const basicTableColumns = useMemo(() => resolvedColumns.map((r) => r.column), [resolvedColumns]);
   const { sorting, onChange } = useSorting();
   const { selection } = useSelection();
 
-  const isTableEmpty = !loading && !error && items.length === 0;
+  const tableCss = useMemo(
+    () => [
+      cssStickyCellRowStateSync(euiTheme),
+      ...(supports.starred ? [cssFavoriteHoverWithinEuiTableRow(euiTheme)] : []),
+    ],
+    [euiTheme, supports.starred]
+  );
 
-  if (isTableEmpty) {
-    // TODO: Move this to the `ContentList` component, once it exists, as a part.
-    return <>{customEmptyState ?? <EmptyState />}</>;
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        columns={resolvedColumns}
+        hasSelection={!!selection}
+        rowCount={pageSize}
+        tableLayout={tableLayout}
+        compressed={compressed}
+      />
+    );
+  }
+
+  if (hasNoItems) {
+    return null;
   }
 
   return (
     <>
       <EuiBasicTable
         tableCaption={title}
-        columns={columns}
+        columns={basicTableColumns}
         compressed={compressed}
+        css={tableCss}
         error={error?.message}
         itemId={(item) => getRowId(item.id)}
         items={items}
-        loading={loading}
+        loading={isFetching}
+        noItemsMessage={noItemsMessage}
         onChange={onChange}
         sorting={sorting}
         selection={selection}
+        scrollableInline={scrollableInline}
+        responsiveBreakpoint={responsiveBreakpoint}
         tableLayout={tableLayout}
         data-test-subj={dataTestSubj}
       />
@@ -159,12 +251,15 @@ export const Column = Object.assign(BaseColumn, {
   Name: NameColumn,
   UpdatedAt: UpdatedAtColumn,
   Actions: ActionsColumn,
+  Starred: StarredColumn,
+  CreatedBy: CreatedByColumn,
 });
 
 // Create Action namespace with sub-components.
 export const Action = Object.assign(BaseAction, {
   Edit: EditAction,
   Delete: DeleteAction,
+  Inspect: InspectAction,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {

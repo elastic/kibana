@@ -55,6 +55,10 @@ export interface ICPSManager {
   getTotalProjectCount(): number;
   getProjectRouting$(): Observable<ProjectRouting | undefined>;
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
+  /**
+   * Returns an explicit override value when provided, regardless of picker access mode.
+   * Otherwise resolves routing based on current picker access and CPS state.
+   */
   getProjectRouting(overrideValue?: ProjectRouting): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
   updateDefaultProjectRouting(projectRouting?: ProjectRouting): void;

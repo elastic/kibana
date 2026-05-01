@@ -773,7 +773,7 @@
             "label": "days",
             "description": [],
             "signature": [
-              "(2 | 1 | 7 | 6 | 5 | 4 | 3)[]"
+              "(2 | 1 | 3 | 7 | 6 | 5 | 4)[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "lineNumber": 37,
@@ -2263,6 +2263,22 @@
           },
           {
             "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Rule.lastEnabledAt",
+            "type": "Object",
+            "tags": [],
+            "label": "lastEnabledAt",
+            "description": [],
+            "signature": [
+              "Date | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
             "id": "def-common.Rule.flapping",
             "type": "CompoundType",
             "tags": [],
@@ -2279,7 +2295,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 266,
+            "lineNumber": 267,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2302,7 +2318,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 267,
+            "lineNumber": 268,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4532,7 +4548,7 @@
         "label": "IsoWeekday",
         "description": [],
         "signature": [
-          "2 | 1 | 7 | 6 | 5 | 4 | 3"
+          "2 | 1 | 3 | 7 | 6 | 5 | 4"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "lineNumber": 24,
@@ -5309,7 +5325,7 @@
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 275,
+        "lineNumber": 276,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5791,7 +5807,7 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 270,
+        "lineNumber": 271,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5864,7 +5880,7 @@
         "label": "SummaryActionContextVariablesFlatten",
         "description": [],
         "signature": [
-          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
+          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
         "lineNumber": 98,

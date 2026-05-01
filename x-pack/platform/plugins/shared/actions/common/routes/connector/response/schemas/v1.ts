@@ -40,6 +40,13 @@ export const connectorResponseSchema = schema.object({
   is_connector_type_deprecated: schema.boolean({
     meta: { description: 'Indicates whether the connector type is deprecated.' },
   }),
+  auth_mode: schema.maybe(
+    schema.oneOf([schema.literal('shared'), schema.literal('per-user')], {
+      meta: {
+        description: 'The authentication mode used for the connector.',
+      },
+    })
+  ),
 });
 
 const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends({
@@ -178,6 +185,22 @@ export const connectorExecuteResponseSchema = schema.object({
       meta: {
         description:
           'When the status is error, identifies whether the error is a framework error or a user error.',
+      },
+    })
+  ),
+  error_name: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'When the status is error, identifies the error class name so consumers can branch on specific error types (e.g. ConnectorAuthorizationError).',
+      },
+    })
+  ),
+  error_meta: schema.maybe(
+    schema.recordOf(schema.string(), schema.any(), {
+      meta: {
+        description:
+          'When the status is error, carries structured metadata describing the failure (e.g. the auth method and reason for a ConnectorAuthorizationError).',
       },
     })
   ),

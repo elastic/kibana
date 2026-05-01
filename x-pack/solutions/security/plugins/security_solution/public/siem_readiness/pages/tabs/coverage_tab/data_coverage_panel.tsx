@@ -27,6 +27,7 @@ import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import { createIntegrationStatusMapFromPackages } from './create_integration_status_maps';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
@@ -104,6 +105,25 @@ export const DataCoveragePanel: React.FC = () => {
         key: pkg.name,
         checked: undefined,
       }));
+    },
+    [getIntegrations.data?.items]
+  );
+
+  // Create status map for integrations in a specific category
+  const getStatusMapForCategory = useCallback(
+    (category: string) => {
+      const filterValues = CATEGORY_TO_INTEGRATION_FILTER[category];
+      if (!filterValues || !getIntegrations.data?.items) {
+        return new Map();
+      }
+
+      const filteredPackages = getIntegrations.data.items.filter(
+        (pkg: SiemReadinessPackageInfo) => {
+          return pkg.categories?.some((cat: string) => filterValues.includes(cat));
+        }
+      );
+
+      return createIntegrationStatusMapFromPackages(filteredPackages);
     },
     [getIntegrations.data?.items]
   );
@@ -208,8 +228,15 @@ export const DataCoveragePanel: React.FC = () => {
       width: '220px',
       render: (row: CategoryCoverageData) => {
         const options = getIntegrationOptionsForCategory(row.category);
+        const statusMap = getStatusMapForCategory(row.category);
 
-        return <IntegrationSelectablePopover options={options} />;
+        return (
+          <IntegrationSelectablePopover
+            options={options}
+            statusMap={statusMap}
+            telemetrySource="data_coverage"
+          />
+        );
       },
     },
   ];
@@ -254,7 +281,7 @@ export const DataCoveragePanel: React.FC = () => {
                 <EuiButtonEmpty
                   iconSide="right"
                   size="s"
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={handleCreateCase}
                   data-test-subj="createNewCaseButton"
                 >

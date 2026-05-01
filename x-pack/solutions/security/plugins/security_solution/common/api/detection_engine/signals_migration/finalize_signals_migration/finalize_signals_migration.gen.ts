@@ -14,35 +14,41 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const MigrationFinalizationResult = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    completed: z.boolean(),
+    destinationIndex: z.string(),
+    status: z.enum(['success', 'failure', 'pending']),
+    sourceIndex: z.string(),
+    version: z.string(),
+    updated: z.string().datetime(),
+    error: z
+      .object({
+        message: z.string(),
+        status_code: z.number().int(),
+      })
+      .optional(),
+  })
+);
 export type MigrationFinalizationResult = z.infer<typeof MigrationFinalizationResult>;
-export const MigrationFinalizationResult = z.object({
-  id: z.string(),
-  completed: z.boolean(),
-  destinationIndex: z.string(),
-  status: z.enum(['success', 'failure', 'pending']),
-  sourceIndex: z.string(),
-  version: z.string(),
-  updated: z.string().datetime(),
-  error: z
-    .object({
-      message: z.string(),
-      status_code: z.number().int(),
-    })
-    .optional(),
-});
 
+export const FinalizeAlertsMigrationRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Array of `migration_id`s to finalize.
+     */
+    migration_ids: z.array(z.string()).min(1),
+  })
+);
 export type FinalizeAlertsMigrationRequestBody = z.infer<typeof FinalizeAlertsMigrationRequestBody>;
-export const FinalizeAlertsMigrationRequestBody = z.object({
-  /**
-   * Array of `migration_id`s to finalize.
-   */
-  migration_ids: z.array(z.string()).min(1),
-});
 export type FinalizeAlertsMigrationRequestBodyInput = z.input<
   typeof FinalizeAlertsMigrationRequestBody
 >;
 
+export const FinalizeAlertsMigrationResponse = lazySchema(() =>
+  z.array(MigrationFinalizationResult)
+);
 export type FinalizeAlertsMigrationResponse = z.infer<typeof FinalizeAlertsMigrationResponse>;
-export const FinalizeAlertsMigrationResponse = z.array(MigrationFinalizationResult);

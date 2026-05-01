@@ -276,6 +276,7 @@ describe('Exceptions List Api Client', () => {
         body: expect.any(FormData),
         query: {
           overwrite: false,
+          as_new_list: false,
         },
       });
     });

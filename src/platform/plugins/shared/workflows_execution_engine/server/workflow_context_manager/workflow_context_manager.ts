@@ -26,6 +26,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
+import { isSerializedError } from '../utils/errors';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -45,6 +46,9 @@ interface ScopeEntry {
   topFrame: NonNullable<ReturnType<WorkflowScopeStack['getCurrentScope']>>;
   stepExecution: EsWorkflowStepExecution | undefined;
 }
+
+type ContextPathSegment = string | number;
+type ContextPath = ContextPathSegment[];
 
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
@@ -144,7 +148,14 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const context = this.getContext();
+    return this.renderValueWithContext(obj, this.getRenderingContext(obj), additionalContext);
+  }
+
+  public renderValueWithContext<T>(
+    obj: T,
+    context: Record<string, unknown>,
+    additionalContext?: Record<string, unknown>
+  ): T {
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
@@ -218,6 +229,10 @@ export class WorkflowContextManager {
     return this.esClient;
   }
 
+  public getWorkflowSpaceId(): string {
+    return this.workflowExecutionState.getWorkflowExecution().spaceId;
+  }
+
   /**
    * Get the fake request from task manager for Kibana API authentication
    */
@@ -265,6 +280,147 @@ export class WorkflowContextManager {
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+  }
+
+  private getRenderingContext(value: unknown): StepContext {
+    if (!this.stackFramesAllowNarrowing()) {
+      return this.getContext();
+    }
+
+    const referencedVariableSegments = this.templateEngine.extractGlobalVariableSegments(value);
+    if (referencedVariableSegments === null) {
+      return this.getContext();
+    }
+
+    return this.getContextForVariableSegments(referencedVariableSegments);
+  }
+
+  // Active scopes (foreach/while/retry/if) bind new top-level identifiers and
+  // merge into steps[stepId] via enrichStepContextAccordingToStepScope, which
+  // doesn't compose with the partial steps map the narrowing path builds.
+  private stackFramesAllowNarrowing(): boolean {
+    return this.stackFrames.every((frame) =>
+      frame.nestedScopes.every((scope) => scope.nodeType === 'enter-timeout-zone')
+    );
+  }
+
+  private getContextForVariableSegments(referencedVariableSegments: ContextPath[]): StepContext {
+    const hasUnsupportedStepPath = referencedVariableSegments.some(
+      (path) => path[0] === 'steps' && typeof path[1] !== 'string'
+    );
+    if (hasUnsupportedStepPath) {
+      return this.getContext();
+    }
+
+    const referencedRoots = new Set(
+      referencedVariableSegments.flatMap((path) => (typeof path[0] === 'string' ? [path[0]] : []))
+    );
+
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
+      variables: referencedRoots.has('variables') ? this.getVariables() : {},
+    };
+
+    if (referencedRoots.has('steps')) {
+      this.populateReferencedStepPaths(stepContext, referencedVariableSegments);
+    }
+
+    this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
+    return stepContext;
+  }
+
+  private populateReferencedStepPaths(
+    stepContext: StepContext,
+    referencedVariableSegments: ContextPath[]
+  ): void {
+    const pathsByStepId = new Map<string, ContextPath[]>();
+
+    for (const path of referencedVariableSegments) {
+      if (path[0] === 'steps') {
+        const [, stepId, ...stepPath] = path;
+        if (typeof stepId !== 'string') {
+          return;
+        }
+
+        const existing = pathsByStepId.get(stepId);
+        if (existing) {
+          existing.push(stepPath);
+        } else {
+          pathsByStepId.set(stepId, [stepPath]);
+        }
+      }
+    }
+
+    for (const [stepId, requestedPaths] of pathsByStepId) {
+      const stepData = this.getStepData(stepId);
+      if (stepData) {
+        const mergedStepData = {
+          ...stepData.runStepResult,
+          ...(stepData.stepState ?? {}),
+        };
+        stepContext.steps[stepId] ??= {};
+        const partialStepData = stepContext.steps[stepId];
+        for (const requestedPath of requestedPaths) {
+          if (requestedPath.length === 0) {
+            Object.assign(partialStepData, mergedStepData);
+          } else {
+            const { pathExists, value } = this.readValueAtPath(mergedStepData, requestedPath);
+            if (pathExists) {
+              this.writeValueAtPath(partialStepData, requestedPath, value);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private readValueAtPath(
+    value: unknown,
+    propertyPath: ContextPath
+  ): { pathExists: boolean; value: unknown } {
+    let result = value;
+
+    for (const segment of propertyPath) {
+      if (result === null || result === undefined || typeof result !== 'object') {
+        return { pathExists: false, value: undefined };
+      }
+
+      const resultAsRecord = result as Record<string | number, unknown>;
+      if (!(segment in resultAsRecord)) {
+        return { pathExists: false, value: undefined };
+      }
+
+      result = resultAsRecord[segment];
+    }
+
+    return { pathExists: true, value: result };
+  }
+
+  private writeValueAtPath(
+    target: Record<string, unknown>,
+    propertyPath: ContextPath,
+    value: unknown
+  ): void {
+    let currentTarget: Record<string, unknown> = target;
+
+    for (const [index, segment] of propertyPath.entries()) {
+      const targetKey = String(segment);
+      const isLeaf = index === propertyPath.length - 1;
+
+      if (isLeaf) {
+        currentTarget[targetKey] = value;
+        return;
+      }
+
+      const existingValue = currentTarget[targetKey];
+      if (existingValue === null || typeof existingValue !== 'object') {
+        currentTarget[targetKey] = {};
+      }
+
+      currentTarget = currentTarget[targetKey] as Record<string, unknown>;
+    }
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
@@ -317,10 +473,10 @@ export class WorkflowContextManager {
     const executionId = this.workflowExecutionState.getWorkflowExecution().id;
     const scopeEntries: Array<ScopeEntry> = [];
     const foreachEntries: Array<ScopeEntry> = [];
+    const whileEntries: Array<ScopeEntry> = [];
 
     while (!scopeStack.isEmpty()) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const topFrame = scopeStack.getCurrentScope()!;
+      const topFrame = scopeStack.getCurrentScope();
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
         buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
@@ -328,6 +484,9 @@ export class WorkflowContextManager {
       scopeEntries.push({ topFrame, stepExecution });
       if (stepExecution?.stepType === 'foreach') {
         foreachEntries.push({ topFrame, stepExecution });
+      }
+      if (stepExecution?.stepType === 'while') {
+        whileEntries.push({ topFrame, stepExecution });
       }
     }
 
@@ -359,6 +518,24 @@ export class WorkflowContextManager {
       }
     }
 
+    // Build while context in outer-to-inner order so the last write is the
+    // innermost while scope — {{while.iteration}} resolves to the closest
+    // enclosing while loop.
+    for (const { stepExecution } of whileEntries.toReversed()) {
+      if (stepExecution) {
+        const whileCtx = this.buildWhileContext(stepExecution);
+        stepContext.while = whileCtx;
+        if (stepExecution.stepId && whileCtx) {
+          if (!stepContext.steps[stepExecution.stepId]) {
+            stepContext.steps[stepExecution.stepId] = {};
+          }
+          Object.assign(stepContext.steps[stepExecution.stepId], {
+            iteration: whileCtx.iteration,
+          });
+        }
+      }
+    }
+
     // Apply fallback scope error in original (innermost-first) order.
     for (const { topFrame, stepExecution } of scopeEntries) {
       if (topFrame.scopeId === 'fallback' && stepExecution) {
@@ -368,9 +545,9 @@ export class WorkflowContextManager {
         // Proper solution would be to have dynamic context object that would resolve properties on demand,
         // but it requires significant changes in the codebase.
         // So for now, we just set the error on the context when we are in fallback scope.
-        const stepContextGeneric = stepContext as Record<string, unknown>;
-        if (!stepContextGeneric.error) {
-          stepContextGeneric.error = stepExecution.state?.error;
+        const rawError = stepExecution.state?.error;
+        if (isSerializedError(rawError)) {
+          stepContext.error = rawError;
         }
       }
     }
@@ -404,6 +581,12 @@ export class WorkflowContextManager {
       index,
       total,
     };
+  }
+
+  private buildWhileContext(stepExecution: EsWorkflowStepExecution): StepContext['while'] {
+    const whileState = stepExecution.state ?? {};
+    const iteration = typeof whileState.iteration === 'number' ? whileState.iteration : 0;
+    return { iteration };
   }
 
   /**
@@ -456,8 +639,7 @@ export class WorkflowContextManager {
           output: unknown;
           error: SerializedError | undefined;
         };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        stepState: Record<string, any> | undefined;
+        stepState: Record<string, unknown> | undefined;
       }
     | undefined {
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);

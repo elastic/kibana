@@ -25,6 +25,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly config = this.ctx.getService('config');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
@@ -33,6 +34,8 @@ export class DiscoverPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -44,15 +47,14 @@ export class DiscoverPageObject extends FtrService {
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
-    await this.testSubjects.existOrFail('discoverNewButton');
-    await this.testSubjects.existOrFail('discoverOpenButton');
+    await this.retry.waitFor('discover app to be rendered', () =>
+      this.testSubjects.exists('discoverSavedSearchTitle', { allowHidden: true })
+    );
   }
 
   public async isOnDashboardsEditMode() {
-    const [newButton, openButton] = await Promise.all([
-      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
-      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
-    ]);
+    const newButton = await this.appMenu.menuItemExists('discoverNewButton');
+    const openButton = await this.appMenu.menuItemExists('discoverOpenButton');
 
     return !newButton && !openButton;
   }
@@ -152,6 +154,75 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async saveSearchToDashboard(
+    searchName: string,
+    dashboardOption: 'new' | { existing: string },
+    { saveAsNew, storeTimeRange }: { saveAsNew?: boolean; storeTimeRange?: boolean } = {}
+  ) {
+    if (saveAsNew) {
+      await this.clickSaveAsSearchButton();
+    } else {
+      await this.clickSaveSearchButton();
+    }
+
+    await this.retry.waitFor(
+      `saved search title is set to ${searchName} and save button is clickable`,
+      async () => {
+        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
+        await this.testSubjects.setValue('savedObjectTitle', searchName);
+        return (await saveButton.getAttribute('disabled')) !== 'true';
+      }
+    );
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
+    }
+
+    if (dashboardOption === 'new') {
+      await this.find.clickByCssSelector('#new-dashboard-option');
+    } else {
+      await this.find.clickByCssSelector('#existing-dashboard-option');
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.setValue('dashboard-picker-search', dashboardOption.existing);
+      await this.testSubjects.click(
+        `dashboard-picker-option-${dashboardOption.existing.replaceAll(' ', '-')}`
+      );
+    }
+
+    await this.clickConfirmSavedSearch();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async clickSaveDiscoverTableToDashboard(title: string, existing?: string) {
+    await this.testSubjects.click('saveDiscoverTableToDashboardButton');
+    await this.retry.waitFor('Save Discover session table modal', () =>
+      this.testSubjects.exists('savedObjectSaveModal')
+    );
+    await this.inputSavedSearchTitle(title);
+    if (!existing) {
+      await this.find.clickByCssSelector('#new-dashboard-option');
+    } else {
+      await this.find.clickByCssSelector('#existing-dashboard-option');
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.click(`dashboard-picker-option-${existing}`);
+    }
+    await this.clickConfirmSavedSearch();
+    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async inputSavedSearchTitle(searchName: string) {
     await this.testSubjects.setValue('savedObjectTitle', searchName);
   }
@@ -174,6 +245,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
+      timeout: this.defaultFindTimeout * 10,
+    });
+    // does not show "Cancel" button, so we can use it to determine that searching has finished
+    await this.testSubjects.missingOrFail('queryCancelButton', {
       timeout: this.defaultFindTimeout * 10,
     });
   }
@@ -223,15 +298,22 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
+        const currentName = await this.getCurrentQueryName();
+        return currentName === searchName;
+      });
+    }
   }
 
-  public async clickNewSearchButton() {
-    await this.testSubjects.click('discoverNewButton');
-    await this.testSubjects.moveMouseTo('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
+  public async clickNewSearchButton({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.appMenu.clickMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.testSubjects.moveMouseTo('dscHideSidebarButton'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -261,8 +343,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickLoadSavedSearchButton() {
-    await this.testSubjects.moveMouseTo('discoverOpenButton');
-    await this.testSubjects.click('discoverOpenButton');
+    await this.appMenu.clickMenuItem('discoverOpenButton');
   }
 
   public async hasUnsavedChangesIndicator() {
@@ -446,6 +527,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
+  public async isTableVisible() {
+    return await this.testSubjects.exists('discoverDocTable');
+  }
+
   public async toggleChartVisibility() {
     if (await this.isChartVisible()) {
       await this.testSubjects.click('dscHideHistogramButton');
@@ -463,6 +548,16 @@ export class DiscoverPageObject extends FtrService {
   public async closeHistogramPanel() {
     await this.testSubjects.click('dscHideHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async openTablePanel() {
+    await this.testSubjects.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  public async closeTablePanel() {
+    await this.testSubjects.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   public async getHistogramHeight() {
@@ -619,17 +714,13 @@ export class DiscoverPageObject extends FtrService {
 
   public async closeSidebar() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.testSubjects.click('unifiedFieldListSidebar__toggle-collapse');
-      await this.testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.click('dscHideSidebarButton');
       await this.testSubjects.missingOrFail('fieldList');
     });
   }
 
   public async isSidebarPanelOpen() {
-    return (
-      (await this.testSubjects.exists('fieldList')) &&
-      (await this.testSubjects.exists('unifiedFieldListSidebar__toggle-collapse'))
-    );
+    return await this.testSubjects.exists('fieldList');
   }
 
   public async getSidebarWidth() {
@@ -764,8 +855,7 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
-    // Find the selected tab and open its menu
+  private async clickSelectedTabMenuItem(menuItemTestSubj: string) {
     const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
     for (const tabElement of tabElements) {
       const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
@@ -775,20 +865,34 @@ export class DiscoverPageObject extends FtrService {
         );
         await menuButton.click();
         await this.retry.waitFor('tab menu to open', async () => {
-          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+          return await this.testSubjects.exists(menuItemTestSubj);
         });
-        await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
-        if (options?.discardModal) {
-          await this.testSubjects.exists('discover-esql-to-dataview-modal');
-          await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-          await this.retry.waitFor('the modal to close', async () => {
-            return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-          });
-        }
+        await this.testSubjects.click(menuItemTestSubj);
         return;
       }
+    }
+  }
+
+  public async openInspectorFromTabMenu() {
+    const isOpen = await this.testSubjects.exists('inspectorPanel');
+    if (isOpen) return;
+
+    await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_inspect');
+    await this.retry.waitFor('inspector panel to open', async () => {
+      return await this.testSubjects.exists('inspectorPanel');
+    });
+  }
+
+  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+    await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+    if (options?.discardModal) {
+      await this.testSubjects.exists('discover-esql-to-dataview-modal');
+      await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+      await this.retry.waitFor('the modal to close', async () => {
+        return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
+      });
     }
   }
 
@@ -1035,6 +1139,83 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async getCascadeLayoutVisibleRowIds() {
+    const container = await this.testSubjects.find('dataCascadeScrollContainer');
+    const ids = await this.browser.execute(
+      `
+      const container = arguments[0];
+      const containerRect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll('[data-row-type="root"]');
+      const visibleIds = [];
+      for (let i = 0; i < rows.length; i++) {
+        const rowRect = rows[i].getBoundingClientRect();
+        if (rowRect.top >= containerRect.bottom) break;
+        if (rowRect.bottom > containerRect.top) {
+          visibleIds.push(rows[i].id || '');
+        }
+      }
+      return visibleIds;
+      `,
+      container._webElement
+    );
+
+    if (!Array.isArray(ids)) {
+      throw new Error(`Expected cascade row ids to be an array but got ${typeof ids}`);
+    }
+
+    return ids as string[];
+  }
+
+  public async isCascadeLayoutRowExpanded(rowId: string) {
+    return await this.retry.try(async () => {
+      const row = await this.find.byCssSelector(`[id="${rowId}"]`);
+      return ((await row.getAttribute('aria-expanded')) ?? 'false') === 'true';
+    });
+  }
+
+  public async toggleCascadeLayoutRow(rowId: string) {
+    const isTargetRowExpanded = await this.isCascadeLayoutRowExpanded(rowId);
+    await this.retry.try(async () => {
+      const toggleButtons = await this.testSubjects.findAll(`toggle-row-${rowId}-button`);
+      const targetButton = toggleButtons[0];
+
+      if (!targetButton) {
+        throw new Error(`Toggle button for row ${rowId} not found`);
+      }
+
+      await targetButton.click();
+    });
+
+    if (isTargetRowExpanded) {
+      await this.retry.waitFor('row to be collapsed', async () => {
+        return !(await this.isCascadeLayoutRowExpanded(rowId));
+      });
+      // State persistence is throttled
+      await this.common.sleep(500);
+    } else {
+      await this.retry.waitFor('row to be expanded', async () => {
+        return await this.isCascadeLayoutRowExpanded(rowId);
+      });
+      await this.waitForDocTableLoadingComplete();
+    }
+  }
+
+  public async getCascadeLayoutScrollTop(): Promise<number> {
+    const el = await this.testSubjects.find('dataCascadeScrollContainer');
+    const scrollTop = await this.browser.execute('return arguments[0].scrollTop;', el._webElement);
+
+    if (typeof scrollTop !== 'number') {
+      throw new Error(`Expected cascade scrollTop to be a number but got ${typeof scrollTop}`);
+    }
+
+    return scrollTop;
+  }
+
+  public async scrollCascadeLayoutBy(delta: number): Promise<void> {
+    const el = await this.testSubjects.find('dataCascadeScrollContainer');
+    await this.browser.execute('arguments[0].scrollTop += arguments[1];', el._webElement, delta);
+  }
+
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
@@ -1109,4 +1290,54 @@ export class DiscoverPageObject extends FtrService {
   public setQueryMode(mode: string) {
     return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
+
+  /** Discover Embeddable helper methods   */
+
+  public async editEmbeddableInDiscover() {
+    await this.dashboardPanelActions.clickEdit();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');
+    await this.waitForDiscoverAppOnScreen();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async enterInlineEditing() {
+    const isAlreadyActive = await this.testSubjects.exists(
+      'discoverEmbeddableInlineEditSelectTabAction'
+    );
+    if (!isAlreadyActive) {
+      await this.dashboardPanelActions.clickPanelAction('embeddablePanelAction-editPanel');
+      await this.header.waitUntilLoadingHasFinished();
+    }
+  }
+
+  public async selectTabFromPopover(tabLabel: string) {
+    await this.testSubjects.click('discoverEmbeddableInlineEditSelectTabAction');
+    const popover = await this.testSubjects.find('discoverEmbeddableInlineEditSelectTabPopover');
+    await this.find.clickByButtonText(tabLabel, popover);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
+  }
+
+  public async selectEmbeddableTab(tabLabel: string) {
+    await this.retry.try(async () => {
+      await this.enterInlineEditing();
+      await this.selectTabFromPopover(tabLabel);
+
+      await this.testSubjects.click('discoverEmbeddableInlineEditApplyButton');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.dashboard.waitForRenderComplete();
+    });
+  }
+
+  /**
+   * Returns the ID of the first tab in the Discover session
+   * @returns The ID of the first tab in the Discover session
+   */
+  public async getFirstTabId() {
+    const tabEls = await this.testSubjects.findAll('*unifiedTabs_tab_');
+    return (await tabEls[0].getAttribute('data-test-subj'))?.replace('unifiedTabs_tab_', '');
+  }
+
+  /** Discover Embeddable helper methods end   */
 }

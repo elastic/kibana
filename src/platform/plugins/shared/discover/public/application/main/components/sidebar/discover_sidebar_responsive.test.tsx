@@ -8,7 +8,7 @@
  */
 
 import { render, screen, within, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import React from 'react';
@@ -19,7 +19,10 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverInternalStateMock,
+  type InternalStateMockToolkit,
+} from '../../../../__mocks__/discover_state.mock';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -28,14 +31,15 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 // There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
-const EXTENDED_TIMEOUT = 10_000;
+const EXTENDED_TIMEOUT = 60_000;
+jest.setTimeout(EXTENDED_TIMEOUT);
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
@@ -66,8 +70,7 @@ jest.mock('../../../../customizations', () => ({
 
 const mockGetRecommendedFieldsAccessor = jest.fn();
 
-jest.mock('../../../../context_awareness', () => ({
-  ...jest.requireActual('../../../../context_awareness'),
+jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
   useProfileAccessor: jest.fn((accessorId: string) => {
     if (accessorId === 'getRecommendedFields') {
       return mockGetRecommendedFieldsAccessor;
@@ -186,16 +189,21 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
   };
 }
 
-function getStateContainer({
+async function setupToolkit({
   query,
   fieldListUiState,
+  services,
 }: {
   query?: Query | AggregateQuery;
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
-}) {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+  services?: DiscoverServices;
+}): Promise<InternalStateMockToolkit> {
+  const toolkit = getDiscoverInternalStateMock({ services });
+  await toolkit.initializeTabs();
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.setAppState)({
       appState: {
         query: query ?? { query: '', language: 'lucene' },
         filters: [],
@@ -203,13 +211,13 @@ function getStateContainer({
     })
   );
   if (fieldListUiState) {
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setFieldListUiState)({
         fieldListUiState,
       })
     );
   }
-  return stateContainer;
+  return toolkit;
 }
 
 async function renderComponent(
@@ -220,8 +228,9 @@ async function renderComponent(
   } = {},
   services?: DiscoverServices
 ) {
-  const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
+  const toolkit = await setupToolkit({ ...appStateParams, services: mockedServices });
+
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
@@ -232,20 +241,24 @@ async function renderComponent(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.getCurrentTab().appState);
+    .mockImplementation(() => toolkit.getCurrentTab().appState);
 
-  const user = userEvent.setup();
+  // Set the current data view in runtime state
+  toolkit.internalState.dispatch(
+    internalStateActions.setDataView({
+      tabId: toolkit.getCurrentTab().id,
+      dataView: props.selectedDataView,
+    })
+  );
+
+  const user = userEvent.setup({
+    pointerEventsCheck: PointerEventsCheckLevel.Never,
+    skipHover: true,
+  });
   const result = render(
-    <DiscoverTestProvider
-      services={mockedServices}
-      stateContainer={stateContainer}
-      runtimeState={{
-        currentDataView: props.selectedDataView!,
-        adHocDataViews: [],
-      }}
-    >
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSidebarResponsive {...props} />
-    </DiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {
@@ -402,20 +415,16 @@ describe('discover responsive sidebar', function () {
     expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
   });
 
-  it(
-    'should allow adding breakdown field',
-    async function () {
-      const { user } = await renderComponent(props);
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-      await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
-      const addBreakdownButton = await screen.findByTestId(
-        'fieldPopoverHeader_addBreakdownField-extension'
-      );
-      await user.click(addBreakdownButton);
-      expect(props.onAddBreakdownField).toHaveBeenCalled();
-    },
-    EXTENDED_TIMEOUT
-  );
+  it('should allow adding breakdown field', async function () {
+    const { user } = await renderComponent(props);
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
+    const addBreakdownButton = await screen.findByTestId(
+      'fieldPopoverHeader_addBreakdownField-extension'
+    );
+    await user.click(addBreakdownButton);
+    expect(props.onAddBreakdownField).toHaveBeenCalled();
+  });
   it('should allow selecting fields', async function () {
     const { user } = await renderComponent(props);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
@@ -428,28 +437,20 @@ describe('discover responsive sidebar', function () {
     await user.click(within(selectedFields).getByTestId('fieldToggle-extension'));
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
-  it(
-    'should allow adding filters',
-    async function () {
-      const { user } = await renderComponent(props);
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-      await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
-      await user.click(await screen.findByTestId('plus-extension-gif'));
-      expect(props.onAddFilter).toHaveBeenCalled();
-    },
-    EXTENDED_TIMEOUT
-  );
-  it(
-    'should allow adding "exist" filter',
-    async function () {
-      const { user } = await renderComponent(props);
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-      await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
-      await user.click(await screen.findByTestId('discoverFieldListPanelAddExistFilter-extension'));
-      expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
-    },
-    EXTENDED_TIMEOUT
-  );
+  it('should allow adding filters', async function () {
+    const { user } = await renderComponent(props);
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
+    await user.click(await screen.findByTestId('plus-extension-gif'));
+    expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('should allow adding "exist" filter', async function () {
+    const { user } = await renderComponent(props);
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
+    await user.click(await screen.findByTestId('discoverFieldListPanelAddExistFilter-extension'));
+    expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
+  });
 
   it('should allow searching by string, and calcFieldCount should just be executed once', async function () {
     const { user } = await renderComponent(props);
@@ -470,28 +471,24 @@ describe('discover responsive sidebar', function () {
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
-  it(
-    'should allow filtering by field type',
-    async function () {
-      const { user } = await renderComponent(props);
+  it('should allow filtering by field type', async function () {
+    const { user } = await renderComponent(props);
 
-      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('3');
-      expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
-        '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
-      );
+    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('3');
+    expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
 
-      await user.click(screen.getByTestId('fieldListFiltersFieldTypeFilterToggle'));
-      await user.click(await screen.findByTestId('typeFilter-number'));
+    await user.click(screen.getByTestId('fieldListFiltersFieldTypeFilterToggle'));
+    await user.click(await screen.findByTestId('typeFilter-number'));
 
-      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('2');
-      expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
-        '1 popular field. 2 available fields. 1 empty field. 0 meta fields.'
-      );
+    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('2');
+    expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
+      '1 popular field. 2 available fields. 1 empty field. 0 meta fields.'
+    );
 
-      expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
-    },
-    EXTENDED_TIMEOUT
-  );
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  });
 
   it('should restore sidebar state after switching tabs', async function () {
     await renderComponent(props, {
@@ -653,148 +650,155 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
-  it(
-    'should render "Edit field" button',
-    async () => {
-      const services = createMockServices();
-      const { user } = await renderComponent(props, {}, services);
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-      await user.click(within(availableFields).getByTestId('field-bytes'));
-      const editFieldButton = await screen.findByTestId('discoverFieldListPanelEdit-bytes');
-      await user.click(editFieldButton);
-      expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
-    },
-    EXTENDED_TIMEOUT
-  );
+  it('should render "Edit field" button', async () => {
+    const services = createMockServices();
+    const { user } = await renderComponent(props, {}, services);
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    await user.click(within(availableFields).getByTestId('field-bytes'));
+    const editFieldButton = await screen.findByTestId('discoverFieldListPanelEdit-bytes');
+    await user.click(editFieldButton);
+    expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
+  });
 
-  it(
-    'should not render Add/Edit field buttons in viewer mode',
-    async () => {
-      const services = createMockServices();
-      services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
-      const { user } = await renderComponent(props, {}, services);
-      expect(screen.queryAllByTestId('dataView-add-field_btn')).toHaveLength(0);
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-      await user.click(within(availableFields).getByTestId('field-bytes'));
-      expect(screen.queryByTestId('discoverFieldListPanelEdit-bytes')).not.toBeInTheDocument();
-      expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
-    },
-    EXTENDED_TIMEOUT
-  );
+  it('should not render Add/Edit field buttons in viewer mode', async () => {
+    const services = createMockServices();
+    services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
+    const { user } = await renderComponent(props, {}, services);
+    expect(screen.queryAllByTestId('dataView-add-field_btn')).toHaveLength(0);
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    await user.click(within(availableFields).getByTestId('field-bytes'));
+    expect(screen.queryByTestId('discoverFieldListPanelEdit-bytes')).not.toBeInTheDocument();
+    expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
+  });
 
-  it(
-    'should render buttons in data view picker correctly',
-    async () => {
-      const services = createMockServices();
-      const propsWithPicker: TestWrapperProps = {
-        ...props,
-        fieldListVariant: 'button-and-flyout-always',
-        documents$: new BehaviorSubject({
-          fetchStatus: FetchStatus.UNINITIALIZED,
-        }) as DataDocuments$,
-      };
-      const { user } = await renderComponent(propsWithPicker, {}, services);
-      // open flyout
+  it('should render buttons in data view picker correctly', async () => {
+    const services = createMockServices();
+    const propsWithPicker: TestWrapperProps = {
+      ...props,
+      fieldListVariant: 'button-and-flyout-always',
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      }) as DataDocuments$,
+    };
+    const { user } = await renderComponent(propsWithPicker, {}, services);
+    // open flyout
+    await user.click(screen.getByTestId('discover-sidebar-fields-button'));
+
+    // open data view picker
+    await user.click(await screen.findByTestId('dataView-switch-link'));
+    expect(await screen.findByTestId('changeDataViewPopover')).toBeInTheDocument();
+
+    // check "Add a field"
+    expect(screen.getAllByTestId('indexPattern-add-field')).toHaveLength(1);
+
+    // click "Create a data view"
+    const createDataViewButton = screen.getByTestId('dataview-create-new');
+    await user.click(createDataViewButton);
+    expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
+  });
+
+  it('should not render buttons in data view picker when in viewer mode', async () => {
+    const services = createMockServices();
+    services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
+    services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
+    const propsWithPicker: TestWrapperProps = {
+      ...props,
+      fieldListVariant: 'button-and-flyout-always',
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      }) as DataDocuments$,
+    };
+    const { user } = await renderComponent(propsWithPicker, {}, services);
+    // open flyout
+    await user.click(screen.getByTestId('discover-sidebar-fields-button'));
+
+    // open data view picker
+    await user.click(await screen.findByTestId('dataView-switch-link'));
+    expect(await screen.findByTestId('changeDataViewPopover')).toBeInTheDocument();
+
+    // check that buttons are not present
+    expect(screen.queryAllByTestId('dataView-add-field')).toHaveLength(0);
+    expect(screen.queryAllByTestId('dataview-create-new')).toHaveLength(0);
+  });
+
+  describe('search bar customization', () => {
+    it('should not render CustomDataViewPicker', async () => {
+      mockUseCustomizations = false;
+      const { user } = await renderComponent(
+        {
+          ...props,
+          fieldListVariant: 'button-and-flyout-always',
+          documents$: new BehaviorSubject({
+            fetchStatus: FetchStatus.UNINITIALIZED,
+          }) as DataDocuments$,
+        },
+        {},
+        undefined
+      );
+
       await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
-      // open data view picker
-      await user.click(await screen.findByTestId('dataView-switch-link'));
-      expect(await screen.findByTestId('changeDataViewPopover')).toBeInTheDocument();
+      expect(screen.queryByTestId('custom-data-view-picker')).not.toBeInTheDocument();
+    });
 
-      // check "Add a field"
-      expect(screen.getAllByTestId('indexPattern-add-field')).toHaveLength(1);
+    it('should render CustomDataViewPicker', async () => {
+      mockUseCustomizations = true;
+      const { user } = await renderComponent(
+        {
+          ...props,
+          fieldListVariant: 'button-and-flyout-always',
+          documents$: new BehaviorSubject({
+            fetchStatus: FetchStatus.UNINITIALIZED,
+          }) as DataDocuments$,
+        },
+        {},
+        undefined
+      );
 
-      // click "Create a data view"
-      const createDataViewButton = screen.getByTestId('dataview-create-new');
-      await user.click(createDataViewButton);
-      expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
-    },
-    EXTENDED_TIMEOUT
-  );
-
-  it(
-    'should not render buttons in data view picker when in viewer mode',
-    async () => {
-      const services = createMockServices();
-      services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
-      services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
-      const propsWithPicker: TestWrapperProps = {
-        ...props,
-        fieldListVariant: 'button-and-flyout-always',
-        documents$: new BehaviorSubject({
-          fetchStatus: FetchStatus.UNINITIALIZED,
-        }) as DataDocuments$,
-      };
-      const { user } = await renderComponent(propsWithPicker, {}, services);
-      // open flyout
       await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
-      // open data view picker
-      await user.click(await screen.findByTestId('dataView-switch-link'));
-      expect(await screen.findByTestId('changeDataViewPopover')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-data-view-picker')).toBeInTheDocument();
+    });
 
-      // check that buttons are not present
-      expect(screen.queryAllByTestId('dataView-add-field')).toHaveLength(0);
-      expect(screen.queryAllByTestId('dataview-create-new')).toHaveLength(0);
-    },
-    EXTENDED_TIMEOUT
-  );
+    it('should sync sidebar toggle state', async function () {
+      const expandedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225127
-  describe.skip('search bar customization', () => {
-    it(
-      'should not render CustomDataViewPicker',
-      async () => {
-        mockUseCustomizations = false;
-        const { user } = await renderComponent(
-          {
-            ...props,
-            fieldListVariant: 'button-and-flyout-always',
-            documents$: new BehaviorSubject({
-              fetchStatus: FetchStatus.UNINITIALIZED,
-            }) as DataDocuments$,
+      const { result: expandedRender } = await renderComponent({
+        ...props,
+        sidebarToggleState$: expandedSidebarToggleState$,
+      });
+
+      await waitFor(() => {
+        expect(expandedSidebarToggleState$.value.isCollapsed).toBe(false);
+        expect(expandedSidebarToggleState$.value.toggle).toBeDefined();
+      });
+
+      expandedRender.unmount();
+
+      const collapsedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: () => {},
+      });
+
+      await renderComponent(
+        {
+          ...props,
+          sidebarToggleState$: collapsedSidebarToggleState$,
+        },
+        {
+          fieldListUiState: {
+            isCollapsed: true,
           },
-          {},
-          undefined
-        );
+        }
+      );
 
-        await user.click(screen.getByTestId('discover-sidebar-fields-button'));
-
-        expect(screen.queryByTestId('custom-data-view-picker')).not.toBeInTheDocument();
-      },
-      EXTENDED_TIMEOUT
-    );
-
-    it(
-      'should render CustomDataViewPicker',
-      async () => {
-        mockUseCustomizations = true;
-        const { user } = await renderComponent(
-          {
-            ...props,
-            fieldListVariant: 'button-and-flyout-always',
-            documents$: new BehaviorSubject({
-              fetchStatus: FetchStatus.UNINITIALIZED,
-            }) as DataDocuments$,
-          },
-          {},
-          undefined
-        );
-
-        await user.click(screen.getByTestId('discover-sidebar-fields-button'));
-
-        expect(await screen.findByTestId('custom-data-view-picker')).toBeInTheDocument();
-      },
-      EXTENDED_TIMEOUT
-    );
-
-    it('should allow to toggle sidebar', async function () {
-      const { user } = await renderComponent(props);
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-collapse'));
-      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-expand'));
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(collapsedSidebarToggleState$.value.isCollapsed).toBe(true);
+        expect(collapsedSidebarToggleState$.value.toggle).toBeDefined();
+      });
     });
   });
 
@@ -829,28 +833,24 @@ describe('discover responsive sidebar', function () {
       expect(mockAccessorFn).toHaveBeenCalled();
     });
 
-    it(
-      'should use fallback function when profile accessor returns fallback',
-      async () => {
-        mockGetRecommendedFieldsAccessor.mockImplementation((fallback) => {
-          expect(typeof fallback).toBe('function');
-          return fallback;
-        });
+    it('should use fallback function when profile accessor returns fallback', async () => {
+      mockGetRecommendedFieldsAccessor.mockImplementation((fallback) => {
+        expect(typeof fallback).toBe('function');
+        return fallback;
+      });
 
-        await renderComponent({
-          ...props,
-          documents$: new BehaviorSubject({
-            fetchStatus: FetchStatus.UNINITIALIZED,
-          }) as DataDocuments$,
-        });
+      await renderComponent({
+        ...props,
+        documents$: new BehaviorSubject({
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        }) as DataDocuments$,
+      });
 
-        expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
-        // Verify the fallback function was called with the expected structure
-        const fallbackCall = mockGetRecommendedFieldsAccessor.mock.calls[0];
-        expect(typeof fallbackCall[0]).toBe('function');
-        expect(fallbackCall[0]()).toEqual({ recommendedFields: [] });
-      },
-      EXTENDED_TIMEOUT
-    );
+      expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
+      // Verify the fallback function was called with the expected structure
+      const fallbackCall = mockGetRecommendedFieldsAccessor.mock.calls[0];
+      expect(typeof fallbackCall[0]).toBe('function');
+      expect(fallbackCall[0]()).toEqual({ recommendedFields: [] });
+    });
   });
 });

@@ -1,8 +1,1629 @@
 {
   "id": "@kbn/workflows-ui",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.WorkflowApi",
+        "type": "Class",
+        "tags": [],
+        "label": "WorkflowApi",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 60,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "getWorkflows",
+            "description": [],
+            "signature": [
+              "(params?: ",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowsSearchParams",
+                "text": "WorkflowsSearchParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowListDto",
+                "text": "WorkflowListDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getWorkflows.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows",
+                    "scope": "common",
+                    "docId": "kibKbnWorkflowsPluginApi",
+                    "section": "def-common.WorkflowsSearchParams",
+                    "text": "WorkflowsSearchParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 66,
+                "columnNumber": 22,
+                "deprecated": false,
+                "docsReferencedTypeName": "WorkflowsSearchParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "getWorkflow",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowDetailDto",
+                "text": "WorkflowDetailDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getWorkflow.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 73,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.createWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "createWorkflow",
+            "description": [],
+            "signature": [
+              "(params: { yaml: string; id?: string | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowDetailDto",
+                "text": "WorkflowDetailDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.createWorkflow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ yaml: string; id?: string | undefined; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 79,
+                "columnNumber": 24,
+                "deprecated": false,
+                "docsReferencedTypeName": "CreateWorkflowCommand",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.updateWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "updateWorkflow",
+            "description": [],
+            "signature": [
+              "(id: string, params: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.UpdateWorkflowParams",
+                "text": "UpdateWorkflowParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.UpdatedWorkflowResponseDto",
+                "text": "UpdatedWorkflowResponseDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.updateWorkflow.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 87,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.updateWorkflow.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.UpdateWorkflowParams",
+                    "text": "UpdateWorkflowParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 88,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "UpdateWorkflowParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.deleteWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteWorkflow",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.deleteWorkflow.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 96,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.bulkCreateWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkCreateWorkflows",
+            "description": [],
+            "signature": [
+              "({ workflows, overwrite, }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.BulkCreateWorkflowsParams",
+                "text": "BulkCreateWorkflowsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.BulkCreateWorkflowsResponse",
+                "text": "BulkCreateWorkflowsResponse"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.bulkCreateWorkflows.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    workflows,\n    overwrite,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.BulkCreateWorkflowsParams",
+                    "text": "BulkCreateWorkflowsParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 106,
+                "columnNumber": 29,
+                "deprecated": false,
+                "docsReferencedTypeName": "BulkCreateWorkflowsParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.bulkDeleteWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDeleteWorkflows",
+            "description": [],
+            "signature": [
+              "(ids: string[]) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.bulkDeleteWorkflows.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 117,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.mgetWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "mgetWorkflows",
+            "description": [],
+            "signature": [
+              "({ ids, source }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.MgetWorkflowsParams",
+                "text": "MgetWorkflowsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowMgetResponseDto",
+                "text": "WorkflowMgetResponseDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.mgetWorkflows.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ ids, source }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.MgetWorkflowsParams",
+                    "text": "MgetWorkflowsParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 124,
+                "columnNumber": 23,
+                "deprecated": false,
+                "docsReferencedTypeName": "MgetWorkflowsParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.cloneWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "cloneWorkflow",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowDetailDto",
+                "text": "WorkflowDetailDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.cloneWorkflow.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 135,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.validateWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "validateWorkflow",
+            "description": [],
+            "signature": [
+              "({ yaml }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.ValidateWorkflowParams",
+                "text": "ValidateWorkflowParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.ValidateWorkflowResponseDto",
+                "text": "ValidateWorkflowResponseDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.validateWorkflow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ yaml }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.ValidateWorkflowParams",
+                    "text": "ValidateWorkflowParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 141,
+                "columnNumber": 26,
+                "deprecated": false,
+                "docsReferencedTypeName": "ValidateWorkflowParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.exportWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "exportWorkflows",
+            "description": [],
+            "signature": [
+              "({ ids }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.ExportWorkflowsParams",
+                "text": "ExportWorkflowsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.ExportWorkflowsResponse",
+                "text": "ExportWorkflowsResponse"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.exportWorkflows.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ ids }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.ExportWorkflowsParams",
+                    "text": "ExportWorkflowsParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 148,
+                "columnNumber": 25,
+                "deprecated": false,
+                "docsReferencedTypeName": "ExportWorkflowsParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getStats",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowStatsDto",
+                "text": "WorkflowStatsDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getAggs",
+            "type": "Function",
+            "tags": [],
+            "label": "getAggs",
+            "description": [],
+            "signature": [
+              "({ fields }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.GetAggsParams",
+                "text": "GetAggsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowAggsDto",
+                "text": "WorkflowAggsDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getAggs.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ fields }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.GetAggsParams",
+                    "text": "GetAggsParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 161,
+                "columnNumber": 17,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetAggsParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getConnectors",
+            "type": "Function",
+            "tags": [],
+            "label": "getConnectors",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.GetAvailableConnectorsResponse",
+                "text": "GetAvailableConnectorsResponse"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "getSchema",
+            "description": [],
+            "signature": [
+              "({ loose }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.GetSchemaParams",
+                "text": "GetSchemaParams"
+              },
+              ") => Promise<",
+              "JSONSchema",
+              " | null>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getSchema.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ loose }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.GetSchemaParams",
+                    "text": "GetSchemaParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 174,
+                "columnNumber": 19,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetSchemaParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.runWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "runWorkflow",
+            "description": [],
+            "signature": [
+              "(id: string, { inputs, metadata }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.RunWorkflowOptions",
+                "text": "RunWorkflowOptions"
+              },
+              ") => Promise<{ workflowExecutionId: string; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.runWorkflow.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 186,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.runWorkflow.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ inputs, metadata }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.RunWorkflowOptions",
+                    "text": "RunWorkflowOptions"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 187,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "RunWorkflowOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.testWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "testWorkflow",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.TestWorkflowParams",
+                "text": "TestWorkflowParams"
+              },
+              ") => Promise<{ workflowExecutionId: string; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.testWorkflow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.TestWorkflowParams",
+                    "text": "TestWorkflowParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 195,
+                "columnNumber": 22,
+                "deprecated": false,
+                "docsReferencedTypeName": "TestWorkflowParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.testStep",
+            "type": "Function",
+            "tags": [],
+            "label": "testStep",
+            "description": [],
+            "signature": [
+              "(params: { workflowYaml: string; stepId: string; workflowId?: string | undefined; executionContext?: Record<string, unknown> | undefined; contextOverride?: Record<string, unknown> | undefined; }) => Promise<{ workflowExecutionId: string; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.testStep.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ workflowYaml: string; stepId: string; workflowId?: string | undefined; executionContext?: Record<string, unknown> | undefined; contextOverride?: Record<string, unknown> | undefined; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 202,
+                "columnNumber": 18,
+                "deprecated": false,
+                "docsReferencedTypeName": "RunStepCommand",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getWorkflowExecutions",
+            "type": "Function",
+            "tags": [],
+            "label": "getWorkflowExecutions",
+            "description": [],
+            "signature": [
+              "(workflowId: string, params?: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.GetWorkflowExecutionsParams",
+                "text": "GetWorkflowExecutionsParams"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionListDto",
+                "text": "WorkflowExecutionListDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getWorkflowExecutions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "workflowId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 210,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getWorkflowExecutions.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.GetWorkflowExecutionsParams",
+                    "text": "GetWorkflowExecutionsParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 211,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetWorkflowExecutionsParams",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getWorkflowStepExecutions",
+            "type": "Function",
+            "tags": [],
+            "label": "getWorkflowStepExecutions",
+            "description": [],
+            "signature": [
+              "(workflowId: string, params?: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.GetWorkflowStepExecutionsParams",
+                "text": "GetWorkflowStepExecutionsParams"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowStepExecutionListDto",
+                "text": "WorkflowStepExecutionListDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getWorkflowStepExecutions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "workflowId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 220,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getWorkflowStepExecutions.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.GetWorkflowStepExecutionsParams",
+                    "text": "GetWorkflowStepExecutionsParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 221,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetWorkflowStepExecutionsParams",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecution",
+            "description": [],
+            "signature": [
+              "(executionId: string, params?: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.GetExecutionParams",
+                "text": "GetExecutionParams"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionDto",
+                "text": "WorkflowExecutionDto"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 229,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 230,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getExecution.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.GetExecutionParams",
+                    "text": "GetExecutionParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 231,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetExecutionParams",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.cancelExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "cancelExecution",
+            "description": [],
+            "signature": [
+              "(executionId: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.cancelExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 239,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.cancelAllWorkflowExecutions",
+            "type": "Function",
+            "tags": [],
+            "label": "cancelAllWorkflowExecutions",
+            "description": [],
+            "signature": [
+              "(workflowId: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 245,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.cancelAllWorkflowExecutions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "workflowId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 245,
+                "columnNumber": 37,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getStepExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "getStepExecution",
+            "description": [],
+            "signature": [
+              "(executionId: string, stepExecutionId: string) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.EsWorkflowStepExecution",
+                "text": "EsWorkflowStepExecution"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getStepExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 252,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getStepExecution.$2",
+                "type": "string",
+                "tags": [],
+                "label": "stepExecutionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 253,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.resumeExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "resumeExecution",
+            "description": [],
+            "signature": [
+              "(executionId: string, { input }: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.ResumeExecutionParams",
+                "text": "ResumeExecutionParams"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 263,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.resumeExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 263,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.resumeExecution.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ input }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.ResumeExecutionParams",
+                    "text": "ResumeExecutionParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 263,
+                "columnNumber": 46,
+                "deprecated": false,
+                "docsReferencedTypeName": "ResumeExecutionParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getExecutionLogs",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionLogs",
+            "description": [],
+            "signature": [
+              "(executionId: string, params?: ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.GetExecutionLogsParams",
+                "text": "GetExecutionLogsParams"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.WorkflowExecutionLogsResponse",
+                "text": "WorkflowExecutionLogsResponse"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getExecutionLogs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 271,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getExecutionLogs.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-ui",
+                    "scope": "public",
+                    "docId": "kibKbnWorkflowsUiPluginApi",
+                    "section": "def-public.GetExecutionLogsParams",
+                    "text": "GetExecutionLogsParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 272,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetExecutionLogsParams",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getChildrenExecutions",
+            "type": "Function",
+            "tags": [],
+            "label": "getChildrenExecutions",
+            "description": [],
+            "signature": [
+              "(executionId: string) => Promise<",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.ChildWorkflowExecutionItem",
+                "text": "ChildWorkflowExecutionItem"
+              },
+              "[]>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 280,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-ui",
+                "id": "def-public.WorkflowApi.getChildrenExecutions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+                "lineNumber": 280,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowApi.getConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfig",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.WorkflowsConfig",
+                "text": "WorkflowsConfig"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
+            "lineNumber": 290,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.getIndexSelectionHandler",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexSelectionHandler",
+        "description": [],
+        "signature": [
+          "(services: ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.IndexSelectionHandlerServices",
+            "text": "IndexSelectionHandlerServices"
+          },
+          ", options?: ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.IndexSelectionHandlerOptions",
+            "text": "IndexSelectionHandlerOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.PropertySelectionHandler",
+            "text": "PropertySelectionHandler"
+          },
+          "<string, Record<string, unknown>, Record<string, unknown>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getIndexSelectionHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.IndexSelectionHandlerServices",
+                "text": "IndexSelectionHandlerServices"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "IndexSelectionHandlerServices",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getIndexSelectionHandler.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.IndexSelectionHandlerOptions",
+                "text": "IndexSelectionHandlerOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "IndexSelectionHandlerOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.getSelectedWorkflowDisabledError",
@@ -22,7 +1643,7 @@
           "[], selectedWorkflowId: string | undefined, errorMessage: string | undefined) => string | null"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-        "lineNumber": 94,
+        "lineNumber": 103,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,7 +1666,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 95,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -62,7 +1683,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 96,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -79,11 +1700,58 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 97,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.getWorkflowsCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "getWorkflowsCapabilities",
+        "description": [],
+        "signature": [
+          "(capabilities: ",
+          "Capabilities",
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.WorkflowsManagementCapabilities",
+            "text": "WorkflowsManagementCapabilities"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getWorkflowsCapabilities.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              "Capabilities"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -124,7 +1792,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-        "lineNumber": 60,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -147,7 +1815,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 61,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -164,7 +1832,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 62,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -187,87 +1855,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 63,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows-ui",
-        "id": "def-public.searchWorkflows",
-        "type": "Function",
-        "tags": [],
-        "label": "searchWorkflows",
-        "description": [],
-        "signature": [
-          "(http: ",
-          "HttpSetup",
-          ", params: ",
-          {
-            "pluginId": "@kbn/workflows",
-            "scope": "common",
-            "docId": "kibKbnWorkflowsPluginApi",
-            "section": "def-common.WorkflowsSearchParams",
-            "text": "WorkflowsSearchParams"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "@kbn/workflows",
-            "scope": "common",
-            "docId": "kibKbnWorkflowsPluginApi",
-            "section": "def-common.WorkflowListDto",
-            "text": "WorkflowListDto"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows-ui/src/services/search_workflows.ts",
-        "lineNumber": 13,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/workflows-ui",
-            "id": "def-public.searchWorkflows.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              "HttpSetup"
-            ],
-            "path": "src/platform/packages/shared/kbn-workflows-ui/src/services/search_workflows.ts",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/workflows-ui",
-            "id": "def-public.searchWorkflows.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/workflows",
-                "scope": "common",
-                "docId": "kibKbnWorkflowsPluginApi",
-                "section": "def-common.WorkflowsSearchParams",
-                "text": "WorkflowsSearchParams"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-workflows-ui/src/services/search_workflows.ts",
-            "lineNumber": 15,
-            "columnNumber": 3,
-            "deprecated": false,
+            "docsReferencedTypeName": "WorkflowSelectorConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -319,17 +1910,33 @@
         "tags": [],
         "label": "useRunWorkflow",
         "description": [
-          "\nRuns a workflow.\n\nSends `POST /api/workflows/{id}/run` with `{ inputs }`.\nCall with `{ id, inputs }`:\n- `id`: workflow ID to run\n- `inputs`: runtime input values consumed by the workflow\n"
+          "\nRuns a workflow.\n"
         ],
         "signature": [
           "<P extends object = {}>(options?: ",
           "UseMutationOptions",
-          "<z.infer<any>, HttpError, any, unknown> | undefined) => ",
+          "<{ workflowExecutionId: string; }, HttpError, ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.RunWorkflowOptions",
+            "text": "RunWorkflowOptions"
+          },
+          " & { id: string; } & P, unknown> | undefined) => ",
           "UseMutationResult",
-          "<z.infer<any>, HttpError, any, unknown>"
+          "<{ workflowExecutionId: string; }, HttpError, ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.RunWorkflowOptions",
+            "text": "RunWorkflowOptions"
+          },
+          " & { id: string; } & P, unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_run_workflow.ts",
-        "lineNumber": 40,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -343,12 +1950,21 @@
             "description": [],
             "signature": [
               "UseMutationOptions",
-              "<z.infer<any>, HttpError, any, unknown> | undefined"
+              "<{ workflowExecutionId: string; }, HttpError, ",
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.RunWorkflowOptions",
+                "text": "RunWorkflowOptions"
+              },
+              " & { id: string; } & P, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_run_workflow.ts",
-            "lineNumber": 41,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseMutationOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -363,7 +1979,7 @@
         "tags": [],
         "label": "useWorkflows",
         "description": [
-          "\nFetches a paginated/filterable list of workflows.\n\nSends `POST /api/workflows/search` with the provided search params.\n"
+          "\nFetches a paginated/filterable list of workflows.\n"
         ],
         "signature": [
           "(params: ",
@@ -387,7 +2003,7 @@
           ", unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -409,13 +2025,42 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows.ts",
-            "lineNumber": 25,
+            "lineNumber": 22,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowsSearchParams",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.useWorkflowsApi",
+        "type": "Function",
+        "tags": [],
+        "label": "useWorkflowsApi",
+        "description": [
+          "\nReturns a memoized `WorkflowApi` instance wired to the current Kibana HTTP service.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.WorkflowApi",
+            "text": "WorkflowApi"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/use_workflows_api.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -437,7 +2082,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 28,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -475,7 +2120,7 @@
           "({ selectedWorkflowId, onWorkflowChange, config, error, }: WorkflowSelectorProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_selector.tsx",
-        "lineNumber": 53,
+        "lineNumber": 59,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -491,7 +2136,7 @@
               "WorkflowSelectorProps"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_selector.tsx",
-            "lineNumber": 53,
+            "lineNumber": 59,
             "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
@@ -569,6 +2214,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -576,6 +2222,1254 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.BulkCreateWorkflowsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkCreateWorkflowsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.BulkCreateWorkflowsParams.workflows",
+            "type": "Array",
+            "tags": [],
+            "label": "workflows",
+            "description": [],
+            "signature": [
+              "{ yaml: string; id?: string | undefined; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.BulkCreateWorkflowsParams.overwrite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overwrite",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.BulkCreateWorkflowsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkCreateWorkflowsResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.BulkCreateWorkflowsResponse.created",
+            "type": "Array",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowDetailDto",
+                "text": "WorkflowDetailDto"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.BulkCreateWorkflowsResponse.failed",
+            "type": "Array",
+            "tags": [],
+            "label": "failed",
+            "description": [],
+            "signature": [
+              "{ index: number; id: string; error: string; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.CreateWorkflowParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateWorkflowParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.CreateWorkflowParams.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.ExportWorkflowsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExportWorkflowsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.ExportWorkflowsParams.ids",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.ExportWorkflowsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExportWorkflowsResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.ExportWorkflowsResponse.entries",
+            "type": "Array",
+            "tags": [],
+            "label": "entries",
+            "description": [],
+            "signature": [
+              "{ id: string; yaml: string; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.ExportWorkflowsResponse.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              "{ exportedCount: number; exportedAt: string; version: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.GetAggsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetAggsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetAggsParams.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.GetExecutionLogsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetExecutionLogsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionLogsParams.stepExecutionId",
+            "type": "string",
+            "tags": [],
+            "label": "stepExecutionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionLogsParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionLogsParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionLogsParams.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionLogsParams.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.GetExecutionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetExecutionParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionParams.includeInput",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeInput",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetExecutionParams.includeOutput",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeOutput",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.GetSchemaParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetSchemaParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetSchemaParams.loose",
+            "type": "boolean",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.GetWorkflowExecutionsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetWorkflowExecutionsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowExecutionsParams.statuses",
+            "type": "Array",
+            "tags": [],
+            "label": "statuses",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.ExecutionStatus",
+                "text": "ExecutionStatus"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowExecutionsParams.executionTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "executionTypes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.ExecutionType",
+                "text": "ExecutionType"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowExecutionsParams.executedBy",
+            "type": "Array",
+            "tags": [],
+            "label": "executedBy",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowExecutionsParams.omitStepRuns",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "omitStepRuns",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowExecutionsParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowExecutionsParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.GetWorkflowStepExecutionsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetWorkflowStepExecutionsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowStepExecutionsParams.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowStepExecutionsParams.includeInput",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeInput",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowStepExecutionsParams.includeOutput",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeOutput",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowStepExecutionsParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.GetWorkflowStepExecutionsParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.IndexSelectionHandlerOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSelectionHandlerOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerOptions.maxResults",
+            "type": "number",
+            "tags": [],
+            "label": "maxResults",
+            "description": [
+              "Maximum number of results to return from the search API. Defaults to 20."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerOptions.allowWildcard",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowWildcard",
+            "description": [
+              "Whether to allow wildcard patterns in the index selection handler. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerOptions.showAllIndices",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAllIndices",
+            "description": [
+              "Whether to show all indices, including hidden and internal ones. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.IndexSelectionHandlerServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSelectionHandlerServices",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerServices.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.MgetWorkflowsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "MgetWorkflowsParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.MgetWorkflowsParams.ids",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.MgetWorkflowsParams.source",
+            "type": "Array",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.ResumeExecutionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResumeExecutionParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.ResumeExecutionParams.input",
+            "type": "Object",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.RunWorkflowOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunWorkflowOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.RunWorkflowOptions.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.RunWorkflowOptions.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.TestWorkflowParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestWorkflowParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.TestWorkflowParams.workflowId",
+            "type": "string",
+            "tags": [],
+            "label": "workflowId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.TestWorkflowParams.workflowYaml",
+            "type": "string",
+            "tags": [],
+            "label": "workflowYaml",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.TestWorkflowParams.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.UpdateWorkflowParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateWorkflowParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.UpdateWorkflowParams.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.ValidateWorkflowParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidateWorkflowParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.ValidateWorkflowParams.yaml",
+            "type": "string",
+            "tags": [],
+            "label": "yaml",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.WorkflowExecutionLogEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowExecutionLogEntry",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"info\" | \"error\" | \"trace\" | \"debug\" | \"warn\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.stepName",
+            "type": "string",
+            "tags": [],
+            "label": "stepName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.connectorType",
+            "type": "string",
+            "tags": [],
+            "label": "connectorType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogEntry.additionalData",
+            "type": "Object",
+            "tags": [],
+            "label": "additionalData",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.WorkflowExecutionLogsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowExecutionLogsResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogsResponse.logs",
+            "type": "Array",
+            "tags": [],
+            "label": "logs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.WorkflowExecutionLogEntry",
+                "text": "WorkflowExecutionLogEntry"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogsResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogsResponse.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowExecutionLogsResponse.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.WorkflowOption",
@@ -772,6 +3666,35 @@
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
             "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.WorkflowsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowsConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowsConfig.eventDrivenExecutionEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "eventDrivenExecutionEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1018,6 +3941,86 @@
           },
           {
             "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowSelectorConfig.listView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "listView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowSelectorConfig.listViewMaxHeight",
+            "type": "number",
+            "tags": [],
+            "label": "listViewMaxHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowSelectorConfig.hideTopRowHeader",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTopRowHeader",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowSelectorConfig.hideViewWorkflowLink",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideViewWorkflowLink",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.WorkflowSelectorConfig.showSelectedInSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showSelectedInSearch",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
             "id": "def-public.WorkflowSelectorConfig.errorMessages",
             "type": "Object",
             "tags": [],
@@ -1027,7 +4030,7 @@
               "{ selectedWorkflowDisabled?: string | undefined; loadFailed?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
-            "lineNumber": 54,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1094,7 +4097,7 @@
           "\"canCreateWorkflow\" | \"canReadWorkflow\" | \"canUpdateWorkflow\" | \"canDeleteWorkflow\" | \"canExecuteWorkflow\" | \"canReadWorkflowExecution\" | \"canCancelWorkflowExecution\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1276,10 +4279,17 @@
         "label": "RunWorkflowParams",
         "description": [],
         "signature": [
-          "any"
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.RunWorkflowOptions",
+            "text": "RunWorkflowOptions"
+          },
+          " & { id: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_run_workflow.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1380,7 +4390,7 @@
           "{ canCreateWorkflow: boolean; canReadWorkflow: boolean; canUpdateWorkflow: boolean; canDeleteWorkflow: boolean; canExecuteWorkflow: boolean; canReadWorkflowExecution: boolean; canCancelWorkflowExecution: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

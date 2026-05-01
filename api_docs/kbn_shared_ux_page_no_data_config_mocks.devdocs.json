@@ -168,6 +168,7 @@
                 "lineNumber": 32,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -225,6 +226,7 @@
                 "lineNumber": 44,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "NoDataPageStorybookParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -274,7 +276,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ description: any; \"data-test-subj\": any; title: any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
+          "{ description: any; title: any; \"data-test-subj\": any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/mocks/src/storybook.ts",
         "lineNumber": 19,

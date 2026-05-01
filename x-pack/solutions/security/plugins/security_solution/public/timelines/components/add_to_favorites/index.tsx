@@ -60,7 +60,7 @@ export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(({ tim
 
   return (
     <EuiButtonIcon
-      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      iconType={isFavorite ? 'starFill' : 'star'}
       isSelected={isFavorite}
       disabled={isDisabled}
       aria-label={label}

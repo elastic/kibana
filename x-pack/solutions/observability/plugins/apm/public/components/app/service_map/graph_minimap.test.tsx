@@ -39,21 +39,7 @@ jest.mock('@xyflow/react', () => {
     ),
     Background: () => <div data-test-subj="react-flow-background" />,
     Controls: ({ children }: { children?: React.ReactNode }) => (
-      <div data-test-subj="react-flow-controls">{children}</div>
-    ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
+      <div data-test-subj="serviceMapControls">{children}</div>
     ),
     MiniMap: (props: Record<string, unknown>) => {
       mockMinimapProps = props;
@@ -92,7 +78,7 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
@@ -211,7 +197,7 @@ describe('ServiceMapGraph - MiniMap', () => {
 
     const reactFlow = screen.getByTestId('react-flow');
     const minimap = screen.getByTestId('serviceMapMinimap');
-    const controls = screen.getByTestId('react-flow-controls');
+    const controls = screen.getByTestId('serviceMapControls');
     const background = screen.getByTestId('react-flow-background');
 
     expect(reactFlow).toContainElement(minimap);

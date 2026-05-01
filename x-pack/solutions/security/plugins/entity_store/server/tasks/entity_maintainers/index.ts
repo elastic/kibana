@@ -8,20 +8,31 @@
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   EntityMaintainerTaskStatus,
-  type EntityMaintainerStatus,
-  type EntityMaintainerTaskMethod,
+  EntityMaintainerTelemetryEventType,
   type RegisterEntityMaintainerConfig,
 } from './types';
 import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
-import type { EntityStoreCoreSetup } from '../../types';
+import type {
+  EntityStoreCoreSetup,
+  EntityStoreStartContract,
+  EntityStoreStartPlugins,
+} from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
-import { CRUDClient } from '../../domain/crud';
+import type { TelemetryReporter } from '../../telemetry/events';
+import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
+import { executeMaintainerRun } from './execution';
 
-function getTaskType(id: string): string {
+/** Used when `RegisterEntityMaintainerConfig.minLicense` is omitted (minimum Kibana tier). */
+export const DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE: LicenseType = 'basic';
+/** Preserves current task manager default behavior when per-maintainer timeout is omitted. */
+export const DEFAULT_ENTITY_MAINTAINER_TIMEOUT = '5m';
+
+export function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
 }
 
@@ -36,6 +47,7 @@ export async function scheduleEntityMaintainerTask({
   interval,
   namespace,
   request,
+  enabled,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -43,6 +55,7 @@ export async function scheduleEntityMaintainerTask({
   interval: string;
   namespace: string;
   request: KibanaRequest;
+  enabled?: boolean;
 }): Promise<void> {
   logger.debug(`Scheduling entity maintainer task: ${id}`);
   await taskManager.ensureScheduled(
@@ -52,6 +65,7 @@ export async function scheduleEntityMaintainerTask({
       schedule: { interval },
       state: { namespace, taskStatus: EntityMaintainerTaskStatus.STARTED },
       params: {},
+      enabled: enabled ?? true,
     },
     { request }
   );
@@ -62,139 +76,80 @@ export function registerEntityMaintainerTask({
   logger,
   config,
   core,
+  analytics,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   config: RegisterEntityMaintainerConfig;
   core: EntityStoreCoreSetup;
+  analytics: TelemetryReporter;
 }): void {
   logger.debug(`Registering entity maintainer task: ${config.id}`);
   const { title } = TasksConfig[EntityStoreTaskType.enum.entityMaintainer];
-  const { run, interval, initialState, description, id, setup } = config;
+  const { run, interval, timeout, initialState, description, id, setup, minLicense } = config;
+  const effectiveMinLicense = minLicense ?? DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE;
+  const effectiveTimeout = timeout ?? DEFAULT_ENTITY_MAINTAINER_TIMEOUT;
   const type = getTaskType(id);
 
   void core
     .getStartServices()
-    .then(([start]) => {
-      entityMaintainersRegistry.register({
-        id,
-        interval,
-        description,
-      });
-
-      taskManager.registerTaskDefinitions({
-        [type]: {
-          title,
+    .then(
+      ([coreStart, plugins]: [CoreStart, EntityStoreStartPlugins, EntityStoreStartContract]) => {
+        entityMaintainersRegistry.register({
+          id,
+          interval,
           description,
-          createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
-            run: async () => {
-              const currentStatus = taskInstance.state;
+          minLicense: effectiveMinLicense,
+          run,
+          setup,
+          initialState,
+        });
 
-              if (!fakeRequest) {
-                logger.error(`No fake request found, skipping run`);
+        taskManager.registerTaskDefinitions({
+          [type]: {
+            title,
+            description,
+            timeout: effectiveTimeout,
+            createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+              run: async () => {
+                const status = taskInstance.state;
 
-                return {
-                  state: currentStatus,
-                };
-              }
+                if (!fakeRequest) {
+                  logger.error(`No fake request found, skipping run`);
+                  return { state: status };
+                }
 
-              if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
-                logger.debug(`Entity maintainer task is stopped, skipping run`);
-                return {
-                  state: currentStatus,
-                };
-              }
+                const result = await executeMaintainerRun({
+                  status,
+                  request: fakeRequest,
+                  taskId: taskInstance.id,
+                  taskAbortController: abortController,
+                  id,
+                  run,
+                  setup,
+                  initialState,
+                  effectiveMinLicense,
+                  type,
+                  coreStart,
+                  licensing: plugins.licensing,
+                  analytics,
+                  logger,
+                });
 
-              const maintainerStatus: EntityMaintainerStatus = {
-                metadata: {
-                  runs: currentStatus?.metadata?.runs || 0,
-                  lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
-                  lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
-                  namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace,
-                },
-                state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
-                taskStatus: currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
-              };
-
-              const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-              const crudClient = new CRUDClient({
-                logger,
-                esClient,
-                namespace: maintainerStatus.metadata.namespace,
-              });
-
-              return await runEntityMaintainerTask({
-                currentStatus: maintainerStatus,
-                fakeRequest,
-                logger: logger.get(taskInstance.id),
-                setup,
-                run,
-                abortController,
-                esClient,
-                crudClient,
-              });
-            },
-          }),
-        },
-      });
-    })
+                return result ?? { state: status };
+              },
+            }),
+          },
+        });
+      }
+    )
     .catch((err) => {
       logger.error(`Failed to register entity maintainer task: ${err?.message}`);
     });
-}
-
-async function runEntityMaintainerTask({
-  currentStatus,
-  fakeRequest,
-  logger,
-  setup,
-  run,
-  abortController,
-  esClient,
-  crudClient,
-}: {
-  currentStatus: EntityMaintainerStatus;
-  fakeRequest: KibanaRequest;
-  logger: Logger;
-  setup?: EntityMaintainerTaskMethod;
-  run: EntityMaintainerTaskMethod;
-  abortController: AbortController;
-  esClient: ElasticsearchClient;
-  crudClient: CRUDClient;
-}): Promise<{ state: EntityMaintainerStatus }> {
-  try {
-    const isFirstRun = currentStatus.metadata.runs === 0;
-    if (isFirstRun && setup) {
-      logger.debug(`First run, executing setup`);
-      currentStatus.state = await setup({
-        status: { ...currentStatus },
-        abortController,
-        logger,
-        fakeRequest,
-        esClient,
-        crudClient,
-      });
-    }
-    logger.debug(`Executing run`);
-    currentStatus.state = await run({
-      status: { ...currentStatus },
-      abortController,
-      logger,
-      fakeRequest,
-      esClient,
-      crudClient,
-    });
-    currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
-  } catch (err) {
-    currentStatus.metadata.lastErrorTimestamp = new Date().toISOString();
-    logger.debug(`Run failed - ${err?.message}`);
-  } finally {
-    currentStatus.metadata.runs++;
-  }
-
-  return {
-    state: currentStatus,
-  };
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    type: EntityMaintainerTelemetryEventType.REGISTER,
+  });
 }
 
 async function updateTaskStatus({
@@ -217,12 +172,14 @@ export async function stopEntityMaintainer({
   namespace,
   logger,
   request,
+  analytics,
 }: {
   taskManager: TaskManagerStartContract;
   id: string;
   namespace: string;
   logger: Logger;
   request: KibanaRequest;
+  analytics: TelemetryReporter;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await updateTaskStatus({
@@ -230,6 +187,11 @@ export async function stopEntityMaintainer({
     taskId,
     taskStatus: EntityMaintainerTaskStatus.STOPPED,
     request,
+  });
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    namespace,
+    type: EntityMaintainerTelemetryEventType.STOP,
   });
   logger.debug(`Stopped entity maintainer task: ${taskId}`);
 }
@@ -240,12 +202,14 @@ export async function startEntityMaintainer({
   namespace,
   logger,
   request,
+  analytics,
 }: {
   taskManager: TaskManagerStartContract;
   id: string;
   namespace: string;
   logger: Logger;
   request: KibanaRequest;
+  analytics: TelemetryReporter;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await updateTaskStatus({
@@ -253,6 +217,13 @@ export async function startEntityMaintainer({
     taskId,
     taskStatus: EntityMaintainerTaskStatus.STARTED,
     request,
+  });
+  const runSoon = false;
+  await taskManager.bulkEnable([taskId], runSoon, { request });
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    namespace,
+    type: EntityMaintainerTelemetryEventType.START,
   });
   logger.debug(`Start entity maintainer task: ${taskId}`);
 }
@@ -262,13 +233,20 @@ export async function removeEntityMaintainer({
   id,
   namespace,
   logger,
+  analytics,
 }: {
   taskManager: TaskManagerStartContract;
   id: string;
   namespace: string;
   logger: Logger;
+  analytics: TelemetryReporter;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await taskManager.removeIfExists(taskId);
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    namespace,
+    type: EntityMaintainerTelemetryEventType.DELETE,
+  });
   logger.debug(`Removed entity maintainer task: ${taskId}`);
 }

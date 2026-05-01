@@ -17,7 +17,8 @@ import type {
   LensSerializedAPIConfig,
 } from '@kbn/lens-common-2';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
-import { isTextBasedLanguage, stripInheritedContext, transformToApiConfig } from '../helper';
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
@@ -25,12 +26,12 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateState'
     | 'updateAttributes'
     | 'updateDataViews'
-    | 'updateSavedObjectId'
+    | 'updateRefId'
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedAPIConfig> &
+    Pick<HasSerializableState<LensSerializedAPIConfig>, 'serializeState'> &
     LegacyLensStateApi;
 } {
   return {
@@ -42,11 +43,11 @@ export function initializeIntegrations(getLatestState: GetStateType): {
       serializeState: (): LensSerializedAPIConfig => {
         const currentState = stripInheritedContext(getLatestState());
 
-        const { savedObjectId, attributes, ...state } = currentState;
-        if (savedObjectId) {
+        const { ref_id: refId, attributes, ...state } = currentState;
+        if (refId) {
           return {
             ...state,
-            savedObjectId,
+            ref_id: refId,
           } satisfies LensByRefSerializedAPIConfig;
         }
 
@@ -56,12 +57,12 @@ export function initializeIntegrations(getLatestState: GetStateType): {
       },
       getLegacySerializedState: (): LensSerializedState => {
         const currentState = getLatestState();
-        const { savedObjectId, attributes, ...state } = currentState;
+        const { ref_id: refId, attributes, ...state } = currentState;
 
-        if (savedObjectId) {
+        if (refId) {
           return {
             ...state,
-            savedObjectId,
+            ref_id: refId,
           };
         }
 

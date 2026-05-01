@@ -58,11 +58,12 @@ const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
           anchorPosition="downRight"
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          aria-label={i18n.VIEW_LABEL}
           button={
             <EuiButtonEmpty
               data-test-subj="viewSelectorButton"
               size="xs"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={togglePopover}
             >

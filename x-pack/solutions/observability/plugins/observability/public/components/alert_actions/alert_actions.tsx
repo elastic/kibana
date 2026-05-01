@@ -17,14 +17,14 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
+import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
-import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -107,13 +107,9 @@ export function AlertActions(
           {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
-          isAlertDetailsEnabled={true}
           resolveRulePagePath={(ruleId, currentPageId) =>
-            currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
-          }
-          resolveAlertPagePath={(alertId, currentPageId) =>
-            currentPageId !== ALERT_DETAILS_PAGE_ID
-              ? paths.observability.alertDetails(alertId)
+            currentPageId !== RULE_DETAILS_PAGE_ID
+              ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
               : null
           }
         />
@@ -148,7 +144,7 @@ export function AlertActions(
           >
             <EuiButtonIcon
               data-test-subj="expand-event"
-              iconType="expand"
+              iconType="maximize"
               onClick={onExpandEvent}
               size="s"
               color="text"
@@ -195,7 +191,7 @@ export function AlertActions(
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />

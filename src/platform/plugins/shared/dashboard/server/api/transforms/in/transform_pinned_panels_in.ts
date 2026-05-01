@@ -15,33 +15,35 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
 import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
-import { embeddableService, logger } from '../../../kibana_services';
+import { embeddableService } from '../../../kibana_services';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
+import { TransformPanelInError, TransformPanelsInError } from './transform_panels_in_error';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
-export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
-  pinnedPanels?: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
+  pinnedPanels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
   references: Reference[];
 } {
-  if (!pinnedPanels) return { references: [] };
+  const panelErrors: TransformPanelInError[] = [];
 
   let references: Reference[] = [];
   const updatedPinnedPanels = Object.fromEntries(
     pinnedPanels.map((controlState, index) => {
-      const { uid = uuidv4(), type } = controlState;
+      const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
       let transformedControlState = { ...controlState } as Partial<
         Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
       >;
+
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
           // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,
-            ...prefixReferencesFromPanel(uid, transformed.references ?? []),
+            ...prefixReferencesFromPanel(id, transformed.references ?? []),
           ];
           // update the reference names in the SO so that we can inject the references later
           const transformedState = transformed.state as Writable<LegacyStoredPinnedControlState>;
@@ -50,7 +52,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
               ...transformedControlState,
               config: {
                 ...transformedState,
-                dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
+                dataViewRefName: `${id}:${transformedState.dataViewRefName}`,
               },
             };
           }
@@ -60,16 +62,19 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
             config: controlState.config,
           };
         }
-      } catch (transformInError) {
-        // do not prevent save if transformIn throws
-        logger.warn(
-          `Unable to transform "${type}" embeddable state on save. Error: ${transformInError.message}`
+      } catch (e) {
+        panelErrors.push(
+          new TransformPanelInError(
+            `Transform error: ${e.message}`,
+            controlState.type,
+            controlState.config
+          )
         );
       }
 
       const { width, grow, config } = transformedControlState;
       return [
-        uid,
+        id,
         {
           order: index,
           type,
@@ -81,6 +86,12 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
     })
   );
 
+  if (panelErrors.length) {
+    throw new TransformPanelsInError(
+      `Unable to transform ${panelErrors.length} pinned panels`,
+      panelErrors
+    );
+  }
   return {
     pinnedPanels: updatedPinnedPanels,
     references,

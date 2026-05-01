@@ -53,19 +53,23 @@ export const epmRouteService = {
   getInfoPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-        '{pkgVersion?}',
+        '{pkgVersion}',
         pkgVersion
       );
-    } else {
-      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-        '/{pkgVersion?}',
-        ''
-      );
     }
+
+    return EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getStatsPath: (pkgName: string) => {
     return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
+  },
+
+  getDependenciesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DEPENDENCIES_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
   },
 
   getFilePath: (filePath: string) => {
@@ -75,13 +79,14 @@ export const epmRouteService = {
   getInstallPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
-        .replace('{pkgVersion?}', pkgVersion)
-        .replace(/\/$/, ''); // trim trailing slash
-    } else {
-      return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
-        .replace('/{pkgVersion?}', '')
+        .replace('{pkgVersion}', pkgVersion)
         .replace(/\/$/, ''); // trim trailing slash
     }
+
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN.replace(
+      '{pkgName}',
+      pkgName
+    ).replace(/\/$/, ''); // trim trailing slash
   },
 
   getBulkInstallPath: () => {
@@ -123,13 +128,14 @@ export const epmRouteService = {
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-        .replace('{pkgVersion?}', pkgVersion)
-        .replace(/\/$/, ''); // trim trailing slash
-    } else {
-      return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-        .replace('/{pkgVersion?}', '')
+        .replace('{pkgVersion}', pkgVersion)
         .replace(/\/$/, ''); // trim trailing slash
     }
+
+    return EPM_API_ROUTES.DELETE_WITHOUT_VERSION_PATTERN.replace('{pkgName}', pkgName).replace(
+      /\/$/,
+      ''
+    ); // trim trailing slash
   },
 
   getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
@@ -149,6 +155,10 @@ export const epmRouteService = {
       '{pkgVersion}',
       pkgVersion
     );
+  },
+
+  getReviewUpgradePath: (pkgName: string) => {
+    return EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
@@ -417,6 +427,7 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+  getBulkDeletePath: () => ENROLLMENT_API_KEY_ROUTES.BULK_DELETE_PATTERN,
 };
 
 export const uninstallTokensRouteService = {

@@ -104,9 +104,17 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'stats',
   },
+  ts_info: {
+    type: 'command',
+    name: 'ts_info',
+  },
   uri_parts: {
     type: 'command',
     name: 'uri_parts',
+  },
+  user_agent: {
+    type: 'command',
+    name: 'user_agent',
   },
   where: {
     type: 'command',
@@ -138,6 +146,8 @@ export enum EsqlCommandNames {
   SAMPLE = 'sample',
   SORT = 'sort',
   STATS = 'stats',
+  TS_INFO = 'ts_info',
   URI_PARTS = 'uri_parts',
+  USER_AGENT = 'user_agent',
   WHERE = 'where',
 }

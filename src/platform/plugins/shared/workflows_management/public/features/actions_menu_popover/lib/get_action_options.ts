@@ -12,7 +12,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
-import { getAllConnectors } from '../../../../common/schema';
+import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
@@ -30,7 +30,7 @@ export function getActionOptions(
         defaultMessage: 'Manual',
       }),
       description: i18n.translate('workflows.actionsMenu.manualDescription', {
-        defaultMessage: 'Manually start from the UI',
+        defaultMessage: 'Trigger - Manually start from the UI',
       }),
       iconType: 'play',
       iconColor: 'success',
@@ -41,7 +41,7 @@ export function getActionOptions(
         defaultMessage: 'Alert',
       }),
       description: i18n.translate('workflows.actionsMenu.alertDescription', {
-        defaultMessage: 'When an alert from rule is created',
+        defaultMessage: 'Trigger - When an alert from rule is created',
       }),
       iconType: 'bell',
       iconColor: euiTheme.colors.vis.euiColorVis6,
@@ -52,7 +52,7 @@ export function getActionOptions(
         defaultMessage: 'Schedule',
       }),
       description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-        defaultMessage: 'On a schedule (e.g. every 10 minutes)',
+        defaultMessage: 'Trigger - On a schedule (e.g. every 10 minutes)',
       }),
       iconType: 'clock',
       iconColor: euiTheme.colors.textParagraph,
@@ -66,6 +66,7 @@ export function getActionOptions(
       description: t.description ?? t.id,
       iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
       iconColor: euiTheme.colors.vis.euiColorVis6,
+      stability: 'tech_preview',
     }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -80,7 +81,19 @@ export function getActionOptions(
     options: [...builtInTriggerOptions, ...registeredTriggerOptions],
   };
 
-  const kibanaGroup: ActionOptionData = {
+  const kibanaCasesGroup: ActionGroup = {
+    iconType: 'briefcase',
+    id: 'kibana.cases',
+    label: i18n.translate('workflows.actionsMenu.kibanaCases', {
+      defaultMessage: 'Cases',
+    }),
+    description: i18n.translate('workflows.actionsMenu.kibanaCasesDescription', {
+      defaultMessage: 'Create and manage cases from your workflow',
+    }),
+    options: [],
+  };
+
+  const kibanaGroup: ActionGroup = {
     iconType: 'logoKibana',
     id: 'kibana',
     label: i18n.translate('workflows.actionsMenu.kibana', {
@@ -90,17 +103,7 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-  };
-  const httpRequest: ActionOptionData = {
-    iconType: 'globe',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
-    id: 'http',
-    label: i18n.translate('workflows.actionsMenu.http', {
-      defaultMessage: 'HTTP',
-    }),
-    description: i18n.translate('workflows.actionsMenu.httpDescription', {
-      defaultMessage: 'Make an generic HTTP request',
-    }),
+    nestedGroups: [kibanaCasesGroup],
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -171,12 +174,34 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'switch',
+        label: i18n.translate('workflows.actionsMenu.switch', {
+          defaultMessage: 'Switch',
+        }),
+        description: i18n.translate('workflows.actionsMenu.switchDescription', {
+          defaultMessage: 'Multi-way branching based on expression value matching',
+        }),
+        iconType: 'productStreamsWired',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
         id: 'foreach',
         label: i18n.translate('workflows.actionsMenu.foreach', {
           defaultMessage: 'Loop (foreach)',
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {
           defaultMessage: 'Iterate the action over a specified list',
+        }),
+        iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'while',
+        label: i18n.translate('workflows.actionsMenu.while', {
+          defaultMessage: 'While Loop',
+        }),
+        description: i18n.translate('workflows.actionsMenu.whileDescription', {
+          defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
         iconColor: euiTheme.colors.vis.euiColorVis0,
@@ -190,6 +215,17 @@ export function getActionOptions(
           defaultMessage: 'Pause for a specified amount of time before continuing',
         }),
         iconType: 'clock',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'waitForInput',
+        label: i18n.translate('workflows.actionsMenu.waitForInput', {
+          defaultMessage: 'Wait For Input',
+        }),
+        description: i18n.translate('workflows.actionsMenu.waitForInputDescription', {
+          defaultMessage: 'Pause execution until external input is provided (human-in-the-loop)',
+        }),
+        iconType: 'user',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       ...(['workflow.execute', 'workflow.executeAsync'] as const)
@@ -222,6 +258,7 @@ export function getActionOptions(
     [StepCategory.External]: externalGroup,
     [StepCategory.Ai]: aiGroup,
     [StepCategory.Kibana]: kibanaGroup,
+    [StepCategory.KibanaCases]: kibanaCasesGroup,
     [StepCategory.Data]: dataTransformationGroup,
     [StepCategory.FlowControl]: flowControlGroup,
   };
@@ -229,84 +266,113 @@ export function getActionOptions(
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
-    if (customStepDefinition) {
-      const group = stepGroups[customStepDefinition.category];
-      group.options.push({
-        id: customStepDefinition.id,
-        label: customStepDefinition.label,
-        description: customStepDefinition.description,
-        iconType: customStepDefinition.icon ?? group.iconType,
-        stability: connector.stability,
-      });
-    } else if (connector.type.startsWith('elasticsearch.')) {
-      elasticSearchGroup.options.push({
-        id: connector.type,
-        label: connector.description || connector.type,
-        description: connector.type,
-        iconType: 'logoElasticsearch',
-        stability: connector.stability,
-      });
-    } else if (connector.type.startsWith('kibana.')) {
-      kibanaGroup.options.push({
-        id: connector.type,
-        label: connector.summary || connector.description || connector.type,
-        description: connector.type,
-        iconType: 'logoKibana',
-        stability: connector.stability,
-      });
-    } else if (isDynamicConnector(connector)) {
-      const [baseType, subtype] = connector.type.split('.');
-      let groupOption = externalGroup;
-      if (subtype) {
-        let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
-        // create a group for the basetype if not yet exists
-        if (!connectorGroup) {
-          baseTypeInstancesCount[baseType] = 0;
-          const newConnectorGroup: ActionConnectorGroup = {
-            id: baseType,
-            label: baseType,
-            connectorType: baseType,
-            options: [],
-          };
-          connectorGroup = newConnectorGroup;
-          externalGroup.options.push(newConnectorGroup);
-        }
-        // We know connectorGroup is an ActionGroup because we either found it in options
-        // (which are ActionOptionData[]) or we just created it with the options property
-        if (isActionGroup(connectorGroup)) {
-          groupOption = connectorGroup;
-        }
-      }
-      const iconType = getStepIconType(connector.type);
-      baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
-      groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
-
-      // groupOption is always an ActionGroup here (either externalGroup or a validated connectorGroup)
-      if (isActionGroup(groupOption)) {
-        groupOption.options.push({
+    if (!isDeprecatedStepType(connector.type)) {
+      const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
+      if (customStepDefinition) {
+        const group = stepGroups[customStepDefinition.category];
+        group.options.push({
+          id: customStepDefinition.id,
+          label: customStepDefinition.label,
+          description: customStepDefinition.description,
+          iconType: customStepDefinition.icon ?? group.iconType,
+          stability: connector.stability,
+        });
+      } else if (connector.type.startsWith('elasticsearch.')) {
+        elasticSearchGroup.options.push({
           id: connector.type,
           label: connector.description || connector.type,
           description: connector.type,
-          connectorType: connector.type,
-          instancesLabel: getInstancesLabel(connector.instances?.length),
-          iconType,
+          iconType: 'logoElasticsearch',
           stability: connector.stability,
         });
+      } else if (connector.type.startsWith('kibana.')) {
+        kibanaGroup.options.push({
+          id: connector.type,
+          label: connector.summary || connector.description || connector.type,
+          description: connector.type,
+          iconType: 'logoKibana',
+          stability: connector.stability,
+        });
+      } else if (isDynamicConnector(connector)) {
+        const [baseType, subtype] = connector.type.split('.');
+        let groupOption = externalGroup;
+        if (subtype) {
+          let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
+          // create a group for the basetype if not yet exists
+          if (!connectorGroup) {
+            baseTypeInstancesCount[baseType] = 0;
+            const newConnectorGroup: ActionConnectorGroup = {
+              id: baseType,
+              label: baseType,
+              connectorType: baseType,
+              options: [],
+            };
+            connectorGroup = newConnectorGroup;
+            externalGroup.options.push(newConnectorGroup);
+          }
+          // We know connectorGroup is an ActionGroup because we either found it in options
+          // (which are ActionOptionData[]) or we just created it with the options property
+          if (isActionGroup(connectorGroup)) {
+            groupOption = connectorGroup;
+          }
+        }
+        const iconType = getStepIconType(connector.type);
+        baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
+        groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
+
+        // groupOption is always an ActionGroup here (either externalGroup or a validated connectorGroup)
+        if (isActionGroup(groupOption)) {
+          groupOption.options.push({
+            id: connector.type,
+            label: connector.description || connector.type,
+            description: connector.type,
+            connectorType: connector.type,
+            instancesLabel: getInstancesLabel(connector.instances?.length),
+            iconType,
+            stability: connector.stability,
+          });
+        }
       }
     }
   }
 
-  return [
+  for (const group of Object.values(stepGroups)) {
+    if (group.nestedGroups) {
+      for (const nestedGroup of group.nestedGroups) {
+        if (nestedGroup.options.length > 0) {
+          group.options.unshift(nestedGroup);
+        }
+      }
+    }
+  }
+
+  const topLevelOptions: ActionOptionData[] = [
     triggersGroup,
     elasticSearchGroup,
     kibanaGroup,
     aiGroup,
     dataTransformationGroup,
     externalGroup,
-    httpRequest,
     flowControlGroup,
   ];
+  assignActionPathIds(topLevelOptions);
+  return topLevelOptions;
+}
+
+/**
+ * Sets `pathIds` on every nested group so navigation works when a group is chosen from search
+ * (full ancestor chain, not only the clicked row's id).
+ */
+function assignActionPathIds(
+  options: ActionOptionData[],
+  parentPath: readonly string[] = []
+): void {
+  for (const opt of options) {
+    if ('options' in opt) {
+      opt.pathIds = [...parentPath, opt.id];
+      assignActionPathIds(opt.options, opt.pathIds);
+    }
+  }
 }
 
 export function flattenOptions(options: ActionOptionData[]): ActionOptionData[] {

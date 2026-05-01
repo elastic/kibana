@@ -18,6 +18,12 @@ import type {
   RegistryInput,
   NewPackagePolicyInput,
 } from '../../../../../../types';
+import { ExperimentalFeaturesService } from '../../../../../../services';
+import {
+  OTEL_COLLECTOR_INPUT_TYPE,
+  DATA_STREAM_TYPE_VAR_NAME,
+  USE_APM_VAR_NAME,
+} from '../../../../../../../../../common/constants';
 
 import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_policy_input_panel';
 
@@ -26,11 +32,15 @@ jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
     useAgentless: jest.fn(),
   };
 });
+
 const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
+
+const mockParse = () => ({});
 
 describe('shouldShowStreamsByDefault', () => {
   it('should return true if a datastreamId is provided and contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -48,6 +58,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but not contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -65,6 +76,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but the input is disabled', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -1146,6 +1158,369 @@ describe('PackagePolicyInputPanel', () => {
 
       await waitFor(() => {
         expect(renderResult.getByText('Processors')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('applyUseAPMVar for OTel input', () => {
+    const otelPackageInfo = {
+      name: 'my_otel',
+      version: '1.0.0',
+      type: 'input',
+      title: 'My OTel Package',
+      description: 'OTel package',
+      format_version: '3.0.0',
+      owner: { github: 'elastic/integrations', type: 'elastic' },
+      categories: ['custom'],
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 'OTel Template',
+          description: 'OTel',
+          input: OTEL_COLLECTOR_INPUT_TYPE,
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: false,
+          vars: [],
+        },
+      ],
+      data_streams: [],
+      assets: { kibana: {} },
+      status: 'installed',
+      release: 'ga',
+      latestVersion: '1.0.0',
+      keepPoliciesUpToDate: false,
+      installationInfo: {},
+    } as unknown as PackageInfo;
+
+    const otelPackageInput: RegistryInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      title: 'OTel Collector',
+      vars: [],
+      description: 'Collect telemetry',
+    };
+
+    const otelPackageInputStreams: RegistryStreamWithDataStream[] = [
+      {
+        input: OTEL_COLLECTOR_INPUT_TYPE,
+        title: 'OTel stream',
+        vars: [
+          {
+            name: 'dataset',
+            type: 'text',
+            title: 'Dataset name',
+            show_user: true,
+            multi: false,
+            required: true,
+          },
+        ],
+        description: 'OTel stream',
+        data_stream: {
+          title: 'OTel Data',
+          release: 'ga',
+          type: 'logs',
+          package: 'my_otel',
+          dataset: 'my_otel.data',
+          path: 'data',
+          elasticsearch: {},
+          ingest_pipeline: 'default',
+          streams: [],
+        },
+      },
+    ];
+
+    const otelInputValidationResults = {
+      streams: { 'my_otel.data': { vars: {} } },
+    };
+
+    let mockUpdateOtelInput: jest.Mock;
+
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+      } as any);
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+      mockUpdateOtelInput = jest.fn();
+    });
+
+    it('adds use_apm var by default when data_stream.type changes to traces', async () => {
+      const otelPolicyInput = {
+        id: 'input-1',
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        policy_template: 'otel_template',
+        enabled: true,
+        streams: [
+          {
+            id: 'otel-stream-1',
+            data_stream: { type: 'logs', dataset: 'my_otel.data' },
+            enabled: true,
+            vars: {
+              [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'logs' },
+            },
+          },
+        ],
+      } as NewPackagePolicyInput;
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={otelPackageInfo}
+          packageInput={otelPackageInput}
+          packageInputStreams={otelPackageInputStreams}
+          packagePolicyInput={otelPolicyInput}
+          updatePackagePolicyInput={mockUpdateOtelInput}
+          inputValidationResults={otelInputValidationResults}
+        />
+      );
+
+      const advancedToggle = await renderResult.findByTestId(
+        'advancedStreamOptionsToggle-otel-stream-1'
+      );
+      fireEvent.click(advancedToggle);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+
+      fireEvent.click(renderResult.getByRole('radio', { name: 'Traces' }));
+
+      await waitFor(() => {
+        expect(mockUpdateOtelInput).toHaveBeenCalledWith(
+          expect.objectContaining({
+            streams: expect.arrayContaining([
+              expect.objectContaining({
+                vars: expect.objectContaining({
+                  [USE_APM_VAR_NAME]: expect.objectContaining({ value: true }),
+                }),
+              }),
+            ]),
+          })
+        );
+      });
+    });
+
+    it('removes use_apm var when data_stream.type changes away from traces', async () => {
+      const otelPolicyInputWithTraces = {
+        id: 'input-1',
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        policy_template: 'otel_template',
+        enabled: true,
+        streams: [
+          {
+            id: 'otel-stream-1',
+            data_stream: { type: 'traces', dataset: 'my_otel.data' },
+            enabled: true,
+            vars: {
+              [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'traces' },
+              [USE_APM_VAR_NAME]: { type: 'bool', value: true },
+            },
+          },
+        ],
+      } as NewPackagePolicyInput;
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={otelPackageInfo}
+          packageInput={otelPackageInput}
+          packageInputStreams={otelPackageInputStreams}
+          packagePolicyInput={otelPolicyInputWithTraces}
+          updatePackagePolicyInput={mockUpdateOtelInput}
+          inputValidationResults={otelInputValidationResults}
+        />
+      );
+
+      const advancedToggle = await renderResult.findByTestId(
+        'advancedStreamOptionsToggle-otel-stream-1'
+      );
+      fireEvent.click(advancedToggle);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+
+      fireEvent.click(renderResult.getByRole('radio', { name: 'Logs' }));
+
+      await waitFor(() => {
+        const lastCall = mockUpdateOtelInput.mock.lastCall?.[0];
+        expect(lastCall?.streams?.[0]?.vars).not.toHaveProperty(USE_APM_VAR_NAME);
+      });
+    });
+
+    it('hoists the non-GA release badge up to the input header for input-type packages', async () => {
+      const betaOtelStreams: RegistryStreamWithDataStream[] = [
+        {
+          ...otelPackageInputStreams[0],
+          data_stream: {
+            ...otelPackageInputStreams[0].data_stream,
+            release: 'beta',
+          },
+        },
+      ];
+      const otelPolicyInput = {
+        id: 'input-1',
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        policy_template: 'otel_template',
+        enabled: true,
+        streams: [
+          {
+            id: 'otel-stream-1',
+            data_stream: { type: 'logs', dataset: 'my_otel.data' },
+            enabled: true,
+            vars: {},
+          },
+        ],
+      } as NewPackagePolicyInput;
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={otelPackageInfo}
+          packageInput={otelPackageInput}
+          packageInputStreams={betaOtelStreams}
+          packagePolicyInput={otelPolicyInput}
+          updatePackagePolicyInput={mockUpdateOtelInput}
+          inputValidationResults={otelInputValidationResults}
+        />
+      );
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Beta')).toBeInTheDocument();
+        // Stream-level toggle should not render for input-type packages,
+        // which is why the badge is hoisted up to the input header instead.
+        expect(renderResult.queryByTestId('streamOptions.switch')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Non-GA release badge hoisting', () => {
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+      } as any);
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+    });
+
+    const singleBetaStream: RegistryStreamWithDataStream[] = [
+      {
+        input: 'logfile',
+        title: 'Stream 1',
+        template_path: 'stream.yml.hbs',
+        vars: [
+          {
+            name: 'paths',
+            type: 'text',
+            title: 'Paths',
+            multi: false,
+            required: false,
+            show_user: true,
+          },
+        ],
+        description: 'Test stream',
+        data_stream: {
+          ...mockPackageInputStreams[0].data_stream,
+          release: 'beta',
+        },
+      },
+    ];
+
+    const singleStreamPolicyInput = {
+      ...packagePolicyInput,
+      streams: [packagePolicyInput.streams[0]],
+    } as NewPackagePolicyInput;
+
+    it('hoists the release badge to the input header when there is a single stream', async () => {
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={singleBetaStream}
+          packagePolicyInput={singleStreamPolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+        />
+      );
+      await waitFor(() => {
+        expect(renderResult.getByText('Beta')).toBeInTheDocument();
+        // Single-stream rows don't render their own toggle, so the badge
+        // would otherwise float alone - here we expect it at the input header.
+        expect(renderResult.queryByTestId('streamOptions.switch')).not.toBeInTheDocument();
+      });
+    });
+
+    it('renders the release badge at the stream row for multi-stream integrations', async () => {
+      const multiStreamsWithBeta: RegistryStreamWithDataStream[] = [
+        {
+          input: 'logfile',
+          title: 'Stream 1',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream 1',
+          data_stream: {
+            ...mockPackageInputStreams[0].data_stream,
+            release: 'beta',
+          },
+        },
+        {
+          input: 'logfile',
+          title: 'Stream 2',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream 2',
+          data_stream: {
+            ...mockPackageInputStreams[1].data_stream,
+          },
+        },
+      ];
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={multiStreamsWithBeta}
+          packagePolicyInput={packagePolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+        />
+      );
+      await waitFor(() => {
+        expect(renderResult.getByText('Beta')).toBeInTheDocument();
+        // Multi-stream integrations show per-stream toggles, so the badge
+        // stays at the stream row - no need to hoist.
+        expect(renderResult.getAllByTestId('streamOptions.switch').length).toBeGreaterThan(0);
       });
     });
   });

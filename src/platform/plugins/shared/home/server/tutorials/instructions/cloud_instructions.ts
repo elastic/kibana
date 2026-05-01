@@ -9,9 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const cloudPasswordAndResetLink = i18n.translate(
-  'home.tutorials.common.cloudInstructions.passwordAndResetLink',
-  {
+// These are exported as functions so the ICU message format is only parsed on first
+// use (inside a tutorial spec provider called on HTTP request) rather than at module
+// load time.
+
+export const cloudPasswordAndResetLink = () =>
+  i18n.translate('home.tutorials.common.cloudInstructions.passwordAndResetLink', {
     defaultMessage:
       'Where {passwordTemplate} is the password of the `elastic` user.' +
       `'{#config.cloud.profileUrl}'
@@ -21,12 +24,10 @@ export const cloudPasswordAndResetLink = i18n.translate(
 > **_Important:_**  Do not use the built-in `elastic` user to secure clients in a production environment. Instead set up \
 authorized users or API keys, and do not expose passwords in configuration files.',
     values: { passwordTemplate: '`<password>`' },
-  }
-);
+  });
 
-export const cloudServerlessApiKeyNote = i18n.translate(
-  'home.tutorials.common.cloudInstructions.serverlessApiKeyNote',
-  {
+export const cloudServerlessApiKeyNote = () =>
+  i18n.translate('home.tutorials.common.cloudInstructions.serverlessApiKeyNote', {
     defaultMessage:
       'Where {endpointUrlTemplate} is the Elasticsearch endpoint URL for your Serverless project \
 and {apiKeyTemplate} is an API key with the appropriate privileges. \
@@ -42,5 +43,4 @@ or username/password authentication. You must use the Elasticsearch endpoint URL
         'https://www.elastic.co/docs/solutions/elasticsearch-solution-project/search-connection-details#create-an-api-key-serverless',
       grantAccessUrl: 'https://www.elastic.co/docs/reference/beats/filebeat/beats-api-keys',
     },
-  }
-);
+  });

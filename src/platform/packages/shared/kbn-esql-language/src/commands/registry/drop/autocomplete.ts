@@ -10,13 +10,10 @@ import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
 import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
-import {
-  getLastNonWhitespaceChar,
-  handleFragment,
-  columnExists,
-} from '../../definitions/utils/autocomplete/helpers';
+import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -27,7 +24,7 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   if (
-    /\s/.test(innerText[innerText.length - 1]) &&
+    endsWithWhitespace(innerText) &&
     getLastNonWhitespaceChar(innerText) !== ',' &&
     !/drop\s+\S*$/i.test(innerText)
   ) {
@@ -38,33 +35,33 @@ export async function autocomplete(
     .filter(isColumn)
     .map((arg) => arg.name);
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
-
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // KEEP fie<suggest>
-      return fieldSuggestions.map((suggestion) => {
-        return withAutoSuggest({
-          ...suggestion,
-          text: suggestion.text,
-          rangeToReplace,
-        });
-      });
+  const completionSuggestions: ISuggestionItem[] = [
+    {
+      ...pipeCompleteItem,
+      text: ' | ',
+      preserveTypedPrefix: true,
+      requiresExistingColumnMatch: true,
     },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // KEEP field<suggest>
-      const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+  ];
 
-      return finalSuggestions.map<ISuggestionItem>((s) =>
-        withAutoSuggest({
-          ...s,
-          filterText: fragment,
-          text: fragment + s.text,
-          rangeToReplace,
-        })
-      );
-    }
-  );
+  if (fieldSuggestions.length > 0) {
+    completionSuggestions.push(
+      withAutoSuggest({
+        ...commaCompleteItem,
+        text: ', ',
+        preserveTypedPrefix: true,
+        requiresExistingColumnMatch: true,
+      })
+    );
+  }
+
+  return [
+    ...completionSuggestions,
+    ...fieldSuggestions.map((suggestion) =>
+      withAutoSuggest({
+        ...suggestion,
+        text: suggestion.text,
+      })
+    ),
+  ];
 }

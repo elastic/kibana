@@ -6,11 +6,15 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { useSelector, useStore } from 'react-redux';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+import { PanelRouter } from './panels';
+import { useKibana } from '../../common/lib/kibana';
+import type { NodeEventOnClick } from './panels/node_events_of_type';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
@@ -29,6 +33,9 @@ import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
 import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
+import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -56,10 +63,19 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
+      renderCellActions,
+      onAlertUpdated,
+      useLegacyExpandableFlyout = false,
     }: ResolverProps,
     refToForward
   ) {
+    const { services } = useKibana();
+    const { overlays } = services;
+    const store = useStore();
+    const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openPreviewPanel } = useExpandableFlyoutApi();
+
     useResolverQueryParamCleaner(resolverComponentInstanceID);
     /**
      * This is responsible for dispatching actions that include any external data.
@@ -120,16 +136,88 @@ export const ResolverWithoutProviders = React.memo(
       selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID])
     );
     const colorMap = useColors();
+    const handleAlertUpdated = useCallback(() => {
+      onAlertUpdated?.();
+    }, [onAlertUpdated]);
 
-    const openAnalyzerDetailsPanel = useCallback(() => {
-      openPreviewPanel({
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      });
-    }, [openPreviewPanel, resolverComponentInstanceID]);
+    const onShowEvent = useCallback<NodeEventOnClick>(
+      ({ documentId, indexName }) =>
+        () =>
+          overlays.openSystemFlyout(
+            flyoutProviders({
+              services,
+              store,
+              history,
+              children: (
+                <DocumentFlyoutWrapper
+                  documentId={documentId}
+                  indexName={indexName}
+                  renderCellActions={renderCellActions}
+                  onAlertUpdated={handleAlertUpdated}
+                />
+              ),
+            }),
+            {
+              ...defaultFlyoutProperties,
+              session: 'inherit',
+            }
+          ),
+      [
+        defaultFlyoutProperties,
+        handleAlertUpdated,
+        history,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
+    );
+
+    const onShowPanel = useCallback(() => {
+      const shouldUseSystemFlyout = !useLegacyExpandableFlyout;
+
+      if (shouldUseSystemFlyout) {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <EuiPanel>
+                <PanelRouter
+                  id={resolverComponentInstanceID}
+                  nodeEventOnClick={onShowEvent}
+                  renderCellActions={renderCellActions}
+                />
+              </EuiPanel>
+            ),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
+        );
+      } else {
+        openPreviewPanel({
+          id: DocumentDetailsAnalyzerPanelKey,
+          params: {
+            resolverComponentInstanceID,
+            banner: ANALYZER_PREVIEW_BANNER,
+          },
+        });
+      }
+    }, [
+      defaultFlyoutProperties,
+      history,
+      onShowEvent,
+      openPreviewPanel,
+      overlays,
+      renderCellActions,
+      resolverComponentInstanceID,
+      services,
+      store,
+      useLegacyExpandableFlyout,
+    ]);
 
     return (
       <StyledMapContainer
@@ -187,7 +275,7 @@ export const ResolverWithoutProviders = React.memo(
                     projectionMatrix={projectionMatrix}
                     node={treeNode}
                     timeAtRender={timeAtRender}
-                    onClick={openAnalyzerDetailsPanel}
+                    onClick={onShowPanel}
                   />
                 );
               })}
@@ -196,7 +284,7 @@ export const ResolverWithoutProviders = React.memo(
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls id={resolverComponentInstanceID} onShowPanel={openAnalyzerDetailsPanel} />
+        <GraphControls id={resolverComponentInstanceID} onShowPanel={onShowPanel} />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );

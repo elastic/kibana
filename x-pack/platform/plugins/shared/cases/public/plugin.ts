@@ -78,7 +78,6 @@ export class CasesUiPlugin
 
     registerInternalAttachments(
       externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry
     );
 
@@ -182,6 +181,9 @@ export class CasesUiPlugin
     );
 
     return {
+      config: {
+        templatesEnabled: config?.templates?.enabled ?? false,
+      },
       api: createClientAPI({ http: core.http }),
       ui: {
         getCases: (props) =>

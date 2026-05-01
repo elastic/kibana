@@ -128,6 +128,10 @@ export function FieldEditor({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.graph.fieldManager.fieldEditorPopoverAriaLabel', {
+        defaultMessage: 'Edit field {fieldName}',
+        values: { fieldName: initialField.name },
+      })}
       id={`graphFieldEditor-${initialField.name}`}
       anchorPosition="downCenter"
       ownFocus
@@ -192,7 +196,7 @@ export function FieldEditor({
                   : i18n.translate('xpack.graph.fieldManager.disableFieldLabel', {
                       defaultMessage: 'Disable field',
                     }),
-                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
+                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeSlash'} size="m" />,
                 onClick: toggleDisabledState,
                 toolTipContent: isDisabled
                   ? i18n.translate('xpack.graph.fieldManager.enableFieldTooltipContent', {

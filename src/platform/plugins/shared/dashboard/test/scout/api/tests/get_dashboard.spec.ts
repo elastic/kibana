@@ -43,10 +43,6 @@ apiTest.describe('dashboards - get', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.id).toBe(TEST_DASHBOARD_ID);
     expect(response.body.data.title).toBe('Requests');
-
-    // Does not return unsupported options from the saved object
-    expect(response.body.data.options).toBeUndefined();
-    expect(response.body.data.refresh_interval?.display).toBeUndefined();
   });
 
   apiTest('should return 404 with a non-existing dashboard', async ({ apiClient }) => {
@@ -59,5 +55,6 @@ apiTest.describe('dashboards - get', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.message).toBe('A dashboard with ID [does-not-exist] was not found.');
   });
 });

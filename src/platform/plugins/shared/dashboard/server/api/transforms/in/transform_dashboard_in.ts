@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
@@ -17,19 +18,15 @@ import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
 
 export const transformDashboardIn = (
-  dashboardState: DashboardState,
-  isDashboardAppRequest: boolean = false
-):
-  | {
-      attributes: DashboardSavedObjectAttributes;
-      references: SavedObjectReference[];
-      error: null;
-    }
-  | {
-      attributes: null;
-      references: null;
-      error: Error;
-    } => {
+  dashboardState: Partial<DashboardState>,
+  isDashboardAppRequest: boolean = false,
+  serverTiming?: RequestTiming
+): {
+  attributes: DashboardSavedObjectAttributes;
+  references: SavedObjectReference[];
+} => {
+  const timer = serverTiming?.start('transform-dashboard-in');
+
   try {
     const {
       pinned_panels,
@@ -63,16 +60,18 @@ export const transformDashboardIn = (
       query
     );
 
-    const { pinnedPanels, references: controlGroupReferences } =
-      transformPinnedPanelsIn(pinned_panels);
+    const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
+      pinned_panels ?? []
+    );
 
     const attributes = {
       description: '',
+      title: '',
       ...rest,
-      ...(pinnedPanels && {
+      ...(Object.keys(pinnedPanels).length && {
         pinned_panels: { panels: pinnedPanels },
       }),
-      optionsJSON: transformOptionsIn(options),
+      optionsJSON: transformOptionsIn(options ?? {}),
       panelsJSON,
       ...(refresh_interval && { refreshInterval: refresh_interval }),
       ...(sections?.length && { sections }),
@@ -91,9 +90,8 @@ export const transformDashboardIn = (
         ...controlGroupReferences,
         ...searchSourceReferences,
       ],
-      error: null,
     };
-  } catch (e) {
-    return { attributes: null, references: null, error: e };
+  } finally {
+    timer?.end();
   }
 };

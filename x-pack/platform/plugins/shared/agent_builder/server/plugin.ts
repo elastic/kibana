@@ -20,7 +20,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition } from './step_types';
+import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -31,7 +31,11 @@ import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
+import { createModelProviderFactory } from './services/execution/runner/model_provider';
+import { createSmlTools } from './services/tools/builtin/sml';
+import { createConnectorTools } from './services/tools/builtin/connectors';
+import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { registerInferenceFeatures } from './inference_features';
 
 export class AgentBuilderPlugin
   implements
@@ -43,16 +47,17 @@ export class AgentBuilderPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
-  private serviceManager = new ServiceManager();
+  private serviceManager: ServiceManager;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private startDeps?: AgentBuilderStartDependencies;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.serviceManager = new ServiceManager(this.config);
   }
 
   setup(
@@ -72,6 +77,8 @@ export class AgentBuilderPlugin
     } else {
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
+
+    registerInferenceFeatures({ searchInferenceEndpoints: setupDeps.searchInferenceEndpoints });
 
     // Register server-side EBT events for Agent Builder
     this.analyticsService = new AnalyticsService(
@@ -101,11 +108,25 @@ export class AgentBuilderPlugin
 
     registerFeatures({ features: setupDeps.features });
 
+    // Phantom capability: not a registered feature privilege. Used as an admin check
+    // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
+    coreSetup.capabilities.registerProvider(() => ({
+      agentBuilder: {
+        isAdmin: false,
+      },
+    }));
+
+    coreSetup.capabilities.registerSwitcher(
+      createAdminPrivilegeSwitcher(coreSetup.getStartServices, this.logger.get('capabilities')),
+      { capabilityPath: 'agentBuilder.*' }
+    );
+
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
     );
+    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -134,7 +155,32 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerSkillToolsLoaderHook(serviceSetups, {
+      analyticsService: this.analyticsService,
+      trackingService: this.trackingService,
+    });
+
+    const smlTools = createSmlTools({
+      getAgentContextLayer: () => {
+        if (!this.startDeps) {
+          throw new Error('Agent Context Layer not available — plugin has not started');
+        }
+        return this.startDeps.agentContextLayer;
+      },
+    });
+    smlTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
+    });
+
+    const connectorTools = createConnectorTools({
+      getActions: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions;
+      },
+    });
+    connectorTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
+    });
 
     return {
       tools: {
@@ -152,13 +198,23 @@ export class AgentBuilderPlugin
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
+      plugins: {
+        register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
+      },
+      topSnippets: this.config.topSnippets,
     };
   }
 
-  start(
-    { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags }: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
-  ): AgentBuilderPluginStart {
+  start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
+    this.startDeps = startDeps;
+    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
+    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+      coreStart;
+
+    this.cleanupLegacySmlTasks(taskManager).catch((error) => {
+      this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -173,9 +229,11 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      searchInferenceEndpoints,
     });
 
-    const { tools, agents, skills, runnerFactory, execution } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
+      startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -187,6 +245,8 @@ export class AgentBuilderPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      searchInferenceEndpoints,
+      logger: this.logger.get('model-provider'),
     });
 
     return {
@@ -201,16 +261,47 @@ export class AgentBuilderPlugin
       skills: {
         getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
-        unregister: skills.unregisterSkill.bind(skills),
+      },
+      plugins: {
+        getRegistry: ({ request }) => plugins.getRegistry({ request }),
       },
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
+        findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
         createModelProvider: modelProviderFactory,
       },
+      conversations: {
+        getScopedClient: async ({ request }) => {
+          const client = await conversations.getScopedClient({ request });
+          return {
+            get: client.get.bind(client),
+            list: client.list.bind(client),
+          };
+        },
+      },
     };
+  }
+
+  /**
+   * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
+   * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
+   */
+  private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
+    const logger = this.logger.get('sml-migration');
+    const legacyTaskIds = [
+      'agent_builder:sml_crawler:visualization',
+      'agent_builder:sml_crawler:connector',
+      'agent_builder:sml_crawler:dashboard',
+      'agent_builder:sml_crawler:workflow',
+    ];
+    try {
+      await taskManager.bulkRemove(legacyTaskIds);
+    } catch (error) {
+      logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
+    }
   }
 
   stop() {}

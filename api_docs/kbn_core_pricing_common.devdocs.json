@@ -72,6 +72,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TiersConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -91,6 +92,7 @@
                 "lineNumber": 32,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProductFeaturesRegistry",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -131,6 +133,7 @@
                 "lineNumber": 40,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TiersConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -171,6 +174,7 @@
                 "lineNumber": 73,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFeatureId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -253,6 +257,7 @@
                 "lineNumber": 30,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -341,6 +346,7 @@
                 "lineNumber": 51,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "PricingProductFeature",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -476,6 +482,7 @@
                 "lineNumber": 67,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFeatureId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -637,7 +644,15 @@
             "tags": [],
             "label": "isFeatureAvailable",
             "description": [
-              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying {@link IPricingTiersClient.isFeatureAvailable} implementation.\n"
+              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying ",
+              {
+                "pluginId": "@kbn/core-pricing-common",
+                "scope": "common",
+                "docId": "kibKbnCorePricingCommonPluginApi",
+                "section": "def-common.IPricingTiersClient.isFeatureAvailable",
+                "text": "IPricingTiersClient.isFeatureAvailable"
+              },
+              " implementation.\n"
             ],
             "signature": [
               "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
@@ -667,6 +682,7 @@
                 "lineNumber": 67,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFeatureId",
                 "trackAdoption": false
               }
             ]
@@ -697,7 +713,7 @@
               },
               {
                 "plugin": "@kbn/esql-editor",
-                "path": "src/platform/packages/private/kbn-esql-editor/src/use_esql_callbacks.ts"
+                "path": "src/platform/packages/private/kbn-esql-editor/src/hooks/use_esql_callbacks.ts"
               }
             ],
             "returnComment": [],
@@ -741,7 +757,7 @@
           "{ readonly products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; readonly enabled: boolean; }"
         ],
         "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
-        "lineNumber": 101,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

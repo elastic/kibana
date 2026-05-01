@@ -47,7 +47,7 @@ export interface Theme {
 export interface Services {
   openSystemFlyout(node: ReactNode, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
   notifyError: NotifyFn;
-  TagList?: FC<{ references: SavedObjectsReference[] }>;
+  TagList?: FC<{ tagIds: string[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
 }
 
@@ -133,11 +133,12 @@ export const ContentEditorKibanaProvider: FC<
   const { openSystemFlyout: coreOpenFlyout } = overlays;
 
   const TagList = useMemo(() => {
-    const Comp: Services['TagList'] = ({ references }) => {
+    const Comp: Services['TagList'] = ({ tagIds }) => {
       if (!savedObjectsTagging?.ui.components.TagList) {
         return null;
       }
       const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      const references = tagIds.map((id) => ({ type: 'tag', id, name: `tag-${id}` }));
       return <PluginTagList object={{ references }} />;
     };
 

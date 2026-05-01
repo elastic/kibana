@@ -59,6 +59,7 @@
             "lineNumber": 13,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -115,6 +116,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -179,6 +181,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -324,6 +327,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -744,6 +748,7 @@
             "lineNumber": 13,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -839,6 +844,7 @@
             "lineNumber": 14,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -897,6 +903,7 @@
             "lineNumber": 13,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -961,6 +968,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1025,6 +1033,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1089,6 +1098,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1220,6 +1230,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1312,6 +1323,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SyncStatus",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1363,6 +1375,7 @@
             "lineNumber": 51,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "FilteringPolicy",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1451,6 +1464,7 @@
             "lineNumber": 38,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "FilteringRuleRule",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1490,6 +1504,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1780,6 +1795,7 @@
             "lineNumber": 34,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchResponseError",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1819,6 +1835,7 @@
             "lineNumber": 57,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchResponseError",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1870,6 +1887,7 @@
             "lineNumber": 66,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "SyncStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1985,6 +2003,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2066,6 +2085,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2205,6 +2225,7 @@
             "lineNumber": 74,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "SyncJobType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2256,6 +2277,7 @@
             "lineNumber": 49,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "SyncStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2307,6 +2329,7 @@
             "lineNumber": 14,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "SyncStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2422,6 +2445,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2520,6 +2544,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2554,6 +2579,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2595,6 +2621,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2678,6 +2705,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2720,6 +2748,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2769,6 +2798,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2809,6 +2839,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SchedulingConfiguraton",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2850,6 +2881,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2925,6 +2957,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3008,6 +3041,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3048,6 +3082,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3095,6 +3130,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3167,6 +3203,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -6273,7 +6310,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"regex\" | \">\" | \"<\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
+              "\">\" | \"<\" | \"regex\" | \"contains\" | \"equals\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
             "lineNumber": 143,
@@ -7768,7 +7805,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; status: ",
+          "; language: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7776,7 +7813,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; language: string | null; pipeline?: ",
+          "; deleted: boolean | null; index_name: string | null; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7784,15 +7821,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; deleted: boolean | null; index_name: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorCustomScheduling",
-            "text": "ConnectorCustomScheduling"
-          },
-          "; filtering: ",
+          " | null | undefined; last_seen: string | null; filtering: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7800,7 +7829,15 @@
             "section": "def-common.FilteringConfig",
             "text": "FilteringConfig"
           },
-          "[]; is_native: boolean; last_access_control_sync_error: string | null; last_access_control_sync_scheduled_at: string | null; last_access_control_sync_status: ",
+          "[]; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorCustomScheduling",
+            "text": "ConnectorCustomScheduling"
+          },
+          "; is_native: boolean; last_access_control_sync_error: string | null; last_access_control_sync_scheduled_at: string | null; last_access_control_sync_status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7808,7 +7845,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          " | null; last_deleted_document_count: number | null; last_incremental_sync_scheduled_at: string | null; last_indexed_document_count: number | null; last_seen: string | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
+          " | null; last_deleted_document_count: number | null; last_incremental_sync_scheduled_at: string | null; last_indexed_document_count: number | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7958,7 +7995,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null; service_type: string | null; }; error: string | null; status: ",
+          " | null; service_type: string | null; }; error: string | null; created_at: string; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7966,7 +8003,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
+          "; metadata: Record<string, unknown>; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7974,7 +8011,7 @@
             "section": "def-common.SyncJobType",
             "text": "SyncJobType"
           },
-          "; started_at: string | null; completed_at: string | null; last_seen: string | null; cancelation_requested_at: string | null; canceled_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; total_document_count: number | null; trigger_method: ",
+          "; last_seen: string | null; started_at: string | null; completed_at: string | null; cancelation_requested_at: string | null; canceled_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; total_document_count: number | null; trigger_method: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -8211,7 +8248,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"regex\" | \">\" | \"<\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
+          "\">\" | \"<\" | \"regex\" | \"contains\" | \"equals\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
         "lineNumber": 118,

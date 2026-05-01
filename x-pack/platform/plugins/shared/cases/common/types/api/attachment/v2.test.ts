@@ -29,6 +29,7 @@ describe('Unified Attachments', () => {
       const v2Request = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'cases',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -55,6 +56,7 @@ describe('Unified Attachments', () => {
     it('accepts v2 unified attachment request with only attachmentId', () => {
       const v2Request = {
         type: 'lens',
+        owner: 'cases',
         attachmentId: 'attachment-123',
       };
 
@@ -69,6 +71,7 @@ describe('Unified Attachments', () => {
     it('accepts v2 unified attachment request with only data', () => {
       const v2Request = {
         type: 'user',
+        owner: 'cases',
         data: {
           content: {
             title: 'My comment',
@@ -87,6 +90,7 @@ describe('Unified Attachments', () => {
     it('rejects v2 unified attachment request with neither attachmentId nor data', () => {
       const v2Request = {
         type: 'lens',
+        owner: 'cases',
       };
 
       const query = AttachmentRequestRtV2.decode(v2Request);
@@ -118,6 +122,7 @@ describe('Unified Attachments', () => {
       const v2Request = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'cases',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -136,6 +141,7 @@ describe('Unified Attachments', () => {
         right: {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -212,6 +218,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-1',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'First Visualization',
@@ -221,6 +228,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-2',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'Second Visualization',
@@ -237,6 +245,24 @@ describe('Unified Attachments', () => {
       });
     });
 
+    it('accepts security.event reference payloads with attachmentId and metadata', () => {
+      const securityEventRequests = [
+        {
+          type: 'security.event',
+          attachmentId: 'doc-id',
+          owner: 'securitySolution',
+          metadata: { index: '.siem-signals-index' },
+        },
+      ];
+
+      const query = BulkCreateAttachmentsRequestRtV2.decode(securityEventRequests);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: securityEventRequests,
+      });
+    });
+
     it('accepts mixed array of v1 and v2 attachment requests', () => {
       const mixedRequests = [
         {
@@ -247,6 +273,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -280,6 +307,7 @@ describe('Unified Attachments', () => {
           data: {
             content: 'My comment',
           },
+          owner: 'cases',
           foo: 'bar',
         },
       ];
@@ -300,6 +328,7 @@ describe('Unified Attachments', () => {
             data: {
               content: 'My comment',
             },
+            owner: 'cases',
           },
         ],
       });

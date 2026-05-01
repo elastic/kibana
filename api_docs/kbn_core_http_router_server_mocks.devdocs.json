@@ -58,7 +58,7 @@
               "RouteConfig",
               "<unknown, unknown, unknown, any>, \"validate\" | \"options\"> & { options?: Pick<",
               "RouteConfigOptions",
-              "<any>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+              "<any>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
               "RouteAccess",
               "; security?: ",
               "RouteSecurity",
@@ -269,7 +269,7 @@
         "label": "mockRouter",
         "description": [],
         "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-        "lineNumber": 156,
+        "lineNumber": 160,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -286,7 +286,7 @@
               "RouterMock"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-            "lineNumber": 157,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -297,7 +297,7 @@
                 "id": "def-server.mockRouter.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ routerPath = '' }",
                 "description": [],
                 "signature": [
                   "{ routerPath?: string | undefined; }"
@@ -318,14 +318,14 @@
             "label": "createKibanaRequest",
             "description": [],
             "signature": [
-              "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
+              "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, routePath, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
               "RequestFixtureOptions",
               "<P, Q, B>) => ",
               "KibanaRequest",
               "<P, Q, B, any>"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-            "lineNumber": 158,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -336,16 +336,17 @@
                 "id": "def-server.mockRouter.createKibanaRequest.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  path = '/path',\n  headers = { accept: 'something/html' },\n  params = {},\n  body = {},\n  query = {},\n  method = 'get',\n  socket = new Socket(),\n  routeTags,\n  routeAuthRequired,\n  routePath,\n  validation = {},\n  kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },\n  kibanaRequestState = {\n    requestId: '123',\n    requestUuid: '123e4567-e89b-12d3-a456-426614174000',\n    startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),\n  },\n  auth = { isAuthenticated: true },\n}",
                 "description": [],
                 "signature": [
                   "RequestFixtureOptions",
                   "<P, Q, B>"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-                "lineNumber": 67,
+                "lineNumber": 69,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestFixtureOptions",
                 "trackAdoption": false
               }
             ]
@@ -363,7 +364,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-            "lineNumber": 159,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -374,13 +375,13 @@
                 "id": "def-server.mockRouter.createFakeKibanaRequest.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  headers = { accept: 'something/html' },\n}",
                 "description": [],
                 "signature": [
                   "{ headers?: Record<string, string> | undefined; }"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-                "lineNumber": 123,
+                "lineNumber": 127,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
@@ -400,7 +401,7 @@
               ">"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-            "lineNumber": 160,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

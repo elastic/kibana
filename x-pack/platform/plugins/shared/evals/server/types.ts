@@ -7,6 +7,8 @@
 
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 
 export type EvalsPluginSetup = Record<string, never>;
@@ -16,9 +18,12 @@ export interface EvalsPluginStart {
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+}
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;

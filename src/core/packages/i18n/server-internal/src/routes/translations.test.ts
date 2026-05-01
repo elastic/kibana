@@ -17,7 +17,7 @@ describe('registerTranslationsRoute', () => {
       router,
       locale: 'en',
       isDist: true,
-      translationHash: 'XXXX',
+      translationHashes: { en: 'XXXX' },
     });
     expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
@@ -26,23 +26,27 @@ describe('registerTranslationsRoute', () => {
         path: '/translations/{locale}.json',
         options: {
           access: 'public',
-          authRequired: false,
           excludeFromRateLimiter: true,
           httpResource: true,
         },
+        security: expect.objectContaining({
+          authc: expect.objectContaining({ enabled: false }),
+        }),
       }),
       expect.any(Function)
     );
     expect(router.get).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        path: '/translations/XXXX/{locale}.json',
+        path: '/translations/{translationHash}/{locale}.json',
         options: {
           access: 'public',
-          authRequired: false,
           excludeFromRateLimiter: true,
           httpResource: true,
         },
+        security: expect.objectContaining({
+          authc: expect.objectContaining({ enabled: false }),
+        }),
       }),
       expect.any(Function)
     );

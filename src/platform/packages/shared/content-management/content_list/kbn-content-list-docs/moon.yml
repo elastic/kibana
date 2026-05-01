@@ -4,25 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-list-docs'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-list-docs'
+  title: '@kbn/content-list-docs'
   description: Moon project for @kbn/content-list-docs
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
+  sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
 dependsOn:
+  - '@kbn/content-list'
   - '@kbn/content-list-provider'
-  - '@kbn/content-list-table'
-  - '@kbn/content-list-toolbar'
-  - '@kbn/content-list-footer'
   - '@kbn/content-list-mock-data'
+  - '@kbn/content-management-favorites-public'
+  - '@kbn/content-management-table-list-view-common'
+  - '@kbn/content-management-tags'
+  - '@kbn/content-list-page'
 tags:
   - shared-browser
   - package

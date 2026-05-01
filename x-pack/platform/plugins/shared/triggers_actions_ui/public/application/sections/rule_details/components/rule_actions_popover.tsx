@@ -101,12 +101,16 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleDetails.actionsPopoverAriaLabel',
+        { defaultMessage: 'Rule actions' }
+      )}
       button={
         <EuiButtonEmpty
           disabled={false}
           data-test-subj="ruleActionsButton"
           data-testid="ruleActionsButton"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.popoverButtonTitle',

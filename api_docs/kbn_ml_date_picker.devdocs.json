@@ -26,7 +26,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-        "lineNumber": 91,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -52,7 +52,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 91,
+            "lineNumber": 96,
             "columnNumber": 90,
             "deprecated": false,
             "trackAdoption": false,
@@ -189,7 +189,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/date_picker/src/services/time_field_range.ts",
-        "lineNumber": 47,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,9 +207,10 @@
               "GetTimeFieldRangeOptions"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/services/time_field_range.ts",
-            "lineNumber": 52,
+            "lineNumber": 56,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "GetTimeFieldRangeOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -247,7 +248,7 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
-        "lineNumber": 110,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -271,9 +272,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
-            "lineNumber": 116,
+            "lineNumber": 118,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "TimefilterContract",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -376,6 +378,7 @@
             "lineNumber": 41,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "UseTimefilterOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -447,7 +450,7 @@
           "\nDate Picker Dependencies to be passed on via `DatePickerContextProvider`."
         ],
         "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -471,7 +474,7 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -489,7 +492,7 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -507,7 +510,7 @@
               "NotificationsStart"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -525,7 +528,7 @@
               "UserProfileService"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -543,7 +546,7 @@
               "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -561,7 +564,7 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -579,7 +582,7 @@
               "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; readonly DATE_FORMAT: \"dateFormat\"; readonly DATEFORMAT_TZ: \"dateFormat:tz\"; }"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -597,7 +600,7 @@
               "I18nStart"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -615,7 +618,32 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-public.DatePickerDependencies.cps",
+            "type": "Object",
+            "tags": [],
+            "label": "cps",
+            "description": [
+              "\nCPS plugin for project routing"
+            ],
+            "signature": [
+              {
+                "pluginId": "cps",
+                "scope": "public",
+                "docId": "kibCpsPluginApi",
+                "section": "def-public.CPSPluginStart",
+                "text": "CPSPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1114,6 +1142,7 @@
                 "lineNumber": 70,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetTimeFieldRangeResponse",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1278,7 +1307,7 @@
           "\nReturn type for the `getTimeFilterRange` function."
         ],
         "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
-        "lineNumber": 96,
+        "lineNumber": 98,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1293,7 +1322,7 @@
               "\nFrom timestamp."
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
-            "lineNumber": 100,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1308,7 +1337,7 @@
               "\nTo timestamp."
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
-            "lineNumber": 104,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

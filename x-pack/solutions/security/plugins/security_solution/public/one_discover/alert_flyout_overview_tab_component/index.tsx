@@ -7,9 +7,13 @@
 
 import React, { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { EuiSpacer } from '@elastic/eui';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
+import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
 
 export interface AlertFlyoutOverviewTabProps {
   /**
@@ -20,37 +24,67 @@ export interface AlertFlyoutOverviewTabProps {
    * A promise that resolves to the services required to render the content of the overview tab in the alert details flyout.
    */
   servicesPromise: Promise<StartServices>;
+  /**
+   * A promise that resolves to a Security Solution redux store for flyout rendering.
+   */
+  storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
-export const AlertFlyoutOverviewTab = ({ hit, servicesPromise }: AlertFlyoutOverviewTabProps) => {
+export const AlertFlyoutOverviewTab = ({
+  hit,
+  servicesPromise,
+  storePromise,
+  onAlertUpdated,
+}: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
+  const [store, setStore] = useState<SecurityAppStore | null>(null);
 
   useEffect(() => {
     let isCanceled = false;
 
-    servicesPromise
-      .then((resolvedServices) => {
-        if (!isCanceled) {
-          setServices(resolvedServices);
+    Promise.all([servicesPromise, storePromise])
+      .then(([resolvedServices, resolvedStore]) => {
+        if (isCanceled) {
+          return;
         }
+
+        setServices(resolvedServices);
+        setStore(resolvedStore);
       })
       .catch(() => {
         if (!isCanceled) {
           setServices(null);
+          setStore(null);
         }
       });
 
     return () => {
       isCanceled = true;
     };
-  }, [servicesPromise]);
+  }, [servicesPromise, storePromise]);
 
-  if (!services) {
+  if (!services || !store) {
     return null;
   }
 
   return flyoutProviders({
     services,
-    children: <OverviewTab hit={hit} />,
+    store,
+    children: (
+      <>
+        <DataViewManagerBootstrap />
+        {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
+        <EuiSpacer size="m" />
+        <OverviewTab
+          hit={hit}
+          renderCellActions={noopCellActionRenderer}
+          onAlertUpdated={onAlertUpdated}
+        />
+      </>
+    ),
   });
 };

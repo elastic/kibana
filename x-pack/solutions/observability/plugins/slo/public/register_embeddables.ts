@@ -9,7 +9,8 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
+import type { AlertsEmbeddableState } from '../server/lib/embeddables/alerts_schema';
+import { SLO_ALERTS_EMBEDDABLE_ID } from '../common/embeddables/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
@@ -60,7 +61,7 @@ export const registerEmbeddables = async ({
       }
     );
 
-    plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
       const { getOverviewEmbeddableFactory } = await import(
         './embeddable/slo/overview/slo_embeddable_factory'
       );
@@ -82,15 +83,30 @@ export const registerEmbeddables = async ({
       }
     );
 
-    plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SLO_ALERTS_EMBEDDABLE_ID, async () => {
       const { getAlertsEmbeddableFactory } = await import(
         './embeddable/slo/alerts/slo_alerts_embeddable_factory'
       );
 
       return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
     });
+    plugins.embeddable.registerLegacyURLTransform(
+      SLO_ALERTS_EMBEDDABLE_ID,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await import(
+          '../common/embeddables/alerts/transforms/get_transform_out'
+        );
+        const transformOut = getTransformOut(transformDrilldownsOut);
+        return (
+          storedState: object,
+          panelReferences?: Reference[],
+          containerReferences?: Reference[],
+          id?: string
+        ) => transformOut(storedState as AlertsEmbeddableState, panelReferences);
+      }
+    );
 
-    plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SLO_ERROR_BUDGET_ID, async () => {
       const { getErrorBudgetEmbeddableFactory } = await import(
         './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
       );
@@ -101,7 +117,7 @@ export const registerEmbeddables = async ({
       });
     });
 
-    plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
       const { getBurnRateEmbeddableFactory } = await import(
         './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
       );

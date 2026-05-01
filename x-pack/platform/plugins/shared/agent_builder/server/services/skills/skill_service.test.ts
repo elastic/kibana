@@ -6,7 +6,7 @@
  */
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createSkillService } from './skill_service';
 
 jest.mock('@kbn/agent-builder-server/skills', () => {
@@ -17,7 +17,11 @@ jest.mock('@kbn/agent-builder-server/skills', () => {
   };
 });
 
-jest.mock('../runner/store/volumes/skills/utils', () => ({
+jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
+  isAllowedBuiltinSkill: jest.fn().mockReturnValue(true),
+}));
+
+jest.mock('../execution/runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
 
@@ -27,8 +31,10 @@ jest.mock('./persisted/client', () => ({
     get: jest.fn().mockRejectedValue(new Error('not found')),
     list: jest.fn().mockResolvedValue([]),
     create: jest.fn(),
+    bulkCreate: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    deleteByPluginId: jest.fn(),
   })),
 }));
 
@@ -46,10 +52,10 @@ const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): Sk
   ...overrides,
 });
 
-const createMockToolRegistry = (toolIds: string[] = []) =>
+const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
-  } as any);
+  } as unknown as ToolRegistry);
 
 describe('createSkillService', () => {
   beforeEach(() => {
@@ -63,6 +69,18 @@ describe('createSkillService', () => {
 
       const skill = createMockSkillDefinition();
       expect(() => registerSkill(skill)).not.toThrow();
+    });
+
+    it('throws when registering a skill id not in the allow-list', () => {
+      const { isAllowedBuiltinSkill } = jest.requireMock('@kbn/agent-builder-server/allow_lists');
+      isAllowedBuiltinSkill.mockReturnValueOnce(false);
+
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+
+      expect(() => registerSkill(createMockSkillDefinition({ id: 'unlisted-skill' }))).toThrow(
+        'Built-in skill with id "unlisted-skill" is not in the list of allowed built-in skills.'
+      );
     });
 
     it('throws when registering duplicate skill id', () => {
@@ -115,7 +133,17 @@ describe('createSkillService', () => {
   });
 
   describe('start().getRegistry', () => {
-    it('validates skills at start and returns a registry', async () => {
+    it('returns a registry that includes registered built-in skills', async () => {
+      const { createClient: mockCreateClient } = jest.requireMock('./persisted/client/client');
+      mockCreateClient.mockReturnValue({
+        has: jest.fn().mockResolvedValue(false),
+        get: jest.fn().mockRejectedValue(new Error('not found')),
+        list: jest.fn().mockResolvedValue([]),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      });
+
       const mockToolRegistry = createMockToolRegistry();
       const service = createSkillService();
       const { registerSkill } = service.setup();
@@ -123,149 +151,22 @@ describe('createSkillService', () => {
       const skill = createMockSkillDefinition({ id: 'builtin-1' });
       registerSkill(skill);
 
+      const mockSoClient = { get: jest.fn() } as any;
+      const mockUiSettings = {
+        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
+      } as any;
+      const mockSavedObjects = { getScopedClient: jest.fn().mockReturnValue(mockSoClient) } as any;
+
       const { getRegistry } = service.start({
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        uiSettings: mockUiSettings,
+        savedObjects: mockSavedObjects,
       });
 
       const registry = await getRegistry({ request: {} as any });
       expect(await registry.has('builtin-1')).toBe(true);
-      expect(validateSkillDefinition).toHaveBeenCalledWith(skill);
-    });
-  });
-
-  describe('start().registerSkill (dynamic)', () => {
-    it('registers a skill dynamically after start', async () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      service.setup();
-
-      const start = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      });
-
-      const skill = createMockSkillDefinition({ id: 'dynamic-1' });
-      await start.registerSkill(skill);
-
-      const registry = await start.getRegistry({ request: {} as any });
-      expect(await registry.has('dynamic-1')).toBe(true);
-      expect(validateSkillDefinition).toHaveBeenCalledWith(skill);
-    });
-
-    it('throws when registering duplicate skill id dynamically', async () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      const { registerSkill } = service.setup();
-
-      registerSkill(createMockSkillDefinition({ id: 'dup' }));
-
-      const start = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      });
-
-      await expect(
-        start.registerSkill(createMockSkillDefinition({ id: 'dup', name: 'other' as any }))
-      ).rejects.toThrow('Skill type with id dup already registered');
-    });
-
-    it('serializes concurrent registrations to prevent TOCTOU races', async () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      service.setup();
-
-      const start = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      });
-
-      const skillA = createMockSkillDefinition({ id: 'race-skill', name: 'race-a' as any });
-      const skillB = createMockSkillDefinition({ id: 'race-skill', name: 'race-b' as any });
-
-      const [resultA, resultB] = await Promise.allSettled([
-        start.registerSkill(skillA),
-        start.registerSkill(skillB),
-      ]);
-
-      const fulfilled = [resultA, resultB].filter((r) => r.status === 'fulfilled');
-      const rejected = [resultA, resultB].filter((r) => r.status === 'rejected');
-
-      expect(fulfilled).toHaveLength(1);
-      expect(rejected).toHaveLength(1);
-      expect((rejected[0] as PromiseRejectedResult).reason.message).toContain(
-        'Skill type with id race-skill already registered'
-      );
-    });
-  });
-
-  describe('start().unregisterSkill', () => {
-    it('unregisters a previously registered skill', async () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      const { registerSkill } = service.setup();
-      registerSkill(createMockSkillDefinition({ id: 'removable' }));
-
-      const start = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      });
-
-      const result = await start.unregisterSkill('removable');
-      expect(result).toBe(true);
-
-      const registry = await start.getRegistry({ request: {} as any });
-      expect(await registry.has('removable')).toBe(false);
-    });
-
-    it('returns false for non-existent skill', async () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      service.setup();
-
-      const start = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      });
-
-      const result = await start.unregisterSkill('non-existent');
-      expect(result).toBe(false);
-    });
-
-    it('frees the path so a skill with the same path can be re-registered', async () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      service.setup();
-
-      const start = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      });
-
-      const skill = createMockSkillDefinition({
-        id: 'skill-1',
-        name: 'my-skill' as any,
-        basePath: 'skills/platform' as any,
-      });
-      await start.registerSkill(skill);
-      await start.unregisterSkill('skill-1');
-
-      const newSkill = createMockSkillDefinition({
-        id: 'skill-2',
-        name: 'my-skill' as any,
-        basePath: 'skills/platform' as any,
-      });
-      await expect(start.registerSkill(newSkill)).resolves.not.toThrow();
-
-      const registry = await start.getRegistry({ request: {} as any });
-      expect(await registry.has('skill-2')).toBe(true);
     });
   });
 });

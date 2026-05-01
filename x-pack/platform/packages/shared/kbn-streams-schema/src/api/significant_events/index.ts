@@ -8,7 +8,8 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { EsqlQuery, StreamQuery } from '../../queries';
+import { z } from '@kbn/zod/v4';
+import { esqlQuerySchema, queryTypeSchema, type StreamQuery } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 
 /**
@@ -52,14 +53,40 @@ interface SignificantEventsGetResponse {
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'esql'
->;
+> & {
+  /**
+   * For STATS queries only: how many result rows the preview returned.
+   * With a single GROUP BY dimension this equals unique time buckets
+   * that breached the threshold. With multiple dimensions (`multi_group`)
+   * this is the total entity × bucket cells, not unique time buckets.
+   * Absent for match-type queries.
+   */
+  firing_count?: number;
+  /**
+   * True when the STATS preview hit the server-side row limit and the
+   * `firing_count` / sparkline data may be incomplete.
+   */
+  truncated?: boolean;
+  /**
+   * For STATS queries with multiple GROUP BY dimensions (beyond the
+   * temporal bucket): true means the sparkline sums firing cells across
+   * entity groups per bucket, so each y-value represents "how many
+   * entity × bucket cells breached" rather than unique events.
+   */
+  multi_group?: boolean;
+};
 
-interface GeneratedSignificantEventQuery {
-  title: string;
-  esql: EsqlQuery;
-  severity_score: number;
-  evidence?: string[];
-}
+export const generatedSignificantEventQuerySchema = z.object({
+  type: queryTypeSchema,
+  title: z.string(),
+  esql: esqlQuerySchema,
+  severity_score: z.number().min(0).max(100),
+  description: z.string(),
+  evidence: z.array(z.string()).optional(),
+  replaces: z.string().optional(),
+});
+
+type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;
 
 type SignificantEventsGenerateResponse = Observable<
   ServerSentEventBase<

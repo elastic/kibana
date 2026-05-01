@@ -4,24 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/feedback-components'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/feedback-components'
+  title: '@kbn/feedback-components'
   description: Moon project for @kbn/feedback-components
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/feedback-components
+  sourceRoot: src/platform/packages/shared/feedback-components
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
-  - '@kbn/feedback-registry'
 tags:
   - shared-browser
   - package
@@ -34,16 +32,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

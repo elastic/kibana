@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -17,6 +17,7 @@ jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
   useServiceSloContext: () => mockUseServiceSloContext(),
 }));
 
+const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
@@ -77,6 +78,7 @@ function setupMocks({
   mockUseApmPluginContext.mockReturnValue({
     core: {
       application: {
+        navigateToUrl: mockNavigateToUrl,
         capabilities: {
           slo: { read: canReadSlos },
           apm: {
@@ -111,6 +113,7 @@ function setupMocks({
 describe('ServiceHeaderBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNavigateToUrl.mockClear();
   });
 
   it('shows alerts badge when there are active alerts', () => {
@@ -122,12 +125,13 @@ describe('ServiceHeaderBadges', () => {
     expect(badge).toHaveTextContent('5');
   });
 
-  it('shows alerts badge with correct href', () => {
+  it('navigates to alerts tab via SPA when the alerts badge is clicked', () => {
     setupMocks({ alertsCount: 3 });
     renderBadges();
 
     const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-    expect(badge).toHaveAttribute('href', '/services/test-service/alerts');
+    fireEvent.click(badge);
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/services/test-service/alerts');
   });
 
   it('hides alerts badge when alertsCount is 0', () => {

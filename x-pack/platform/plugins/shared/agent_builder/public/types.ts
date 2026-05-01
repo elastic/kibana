@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
@@ -29,17 +30,17 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
-
 export interface ConversationSidebarRef {
   close(): void;
 }
 
 export interface OpenConversationSidebarReturn {
-  flyoutRef: ConversationSidebarRef;
+  chatRef: ConversationSidebarRef;
 }
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -47,12 +48,14 @@ export interface OpenConversationSidebarReturn {
 export interface ConfigSchema {}
 
 export interface AgentBuilderSetupDependencies {
+  actions: ActionsPublicPluginSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   management: ManagementSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
+  usageCollection?: UsageCollectionSetup;
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
@@ -102,25 +105,23 @@ export interface AgentBuilderPluginStart {
    * @example
    * ```tsx
    * // Open a new conversation with close handler
-   * const { flyoutRef } = plugins.agentBuilder.openConversationFlyout({
-   *   onClose: () => console.log('Sidebar closed')
+   * const { chatRef } = plugins.agentBuilder.openChat({
+   *   onClose: () => console.log('Chat closed')
    * });
    *
-   * // Programmatically close the sidebar
-   * flyoutRef.close();
+   * // Programmatically close the chat
+   * chatRef.close();
    * ```
    */
-  openConversationFlyout: (
-    options?: OpenConversationSidebarOptions
-  ) => OpenConversationSidebarReturn;
+  openChat: (options?: OpenConversationSidebarOptions) => OpenConversationSidebarReturn;
   /**
    * Toggles the conversation sidebar.
    *
    * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
-  toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
-  setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
-  clearConversationFlyoutActiveConfig: () => void;
+  toggleChat: (options?: OpenConversationSidebarOptions) => void;
+  setChatConfig: (config: EmbeddableConversationProps) => void;
+  clearChatConfig: () => void;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.
@@ -128,4 +129,28 @@ export interface AgentBuilderPluginStart {
    * @param attachment - The attachment to add
    */
   addAttachment: (attachment: AttachmentInput) => void;
+  /**
+   * Updates the origin of an attachment in a conversation.
+   * Use this after saving a by-value attachment to link it to its persistent store.
+   *
+   * @param conversationId - The conversation containing the attachment
+   * @param attachmentId - The ID of the attachment to update
+   * @param origin - Origin string for the attachment (e.g. saved object id); same value passed to `resolve` on the server
+   * @returns Promise resolving to the update result
+   *
+   * @example
+   * ```tsx
+   * // Link attachment to a saved object
+   * await plugins.agentBuilder.updateAttachmentOrigin(
+   *   conversationId,
+   *   attachmentId,
+   *   savedObjectId
+   * );
+   * ```
+   */
+  updateAttachmentOrigin: (
+    conversationId: string,
+    attachmentId: string,
+    origin: string
+  ) => Promise<UpdateOriginResponse>;
 }

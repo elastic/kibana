@@ -63,6 +63,7 @@
             "lineNumber": 29,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "SplitButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -114,6 +115,7 @@
             "lineNumber": 35,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "SplitButtonWithNotificationProps",
             "trackAdoption": false,
             "isRequired": true
           }

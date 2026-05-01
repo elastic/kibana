@@ -15,6 +15,7 @@ import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
+import { OtelAppender } from './otel/otel_appender';
 import { RewriteAppender } from './rewrite/rewrite_appender';
 import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 
@@ -27,6 +28,7 @@ import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
+  OtelAppender.configSchema,
   RewriteAppender.configSchema,
   RollingFileAppender.configSchema,
 ]);
@@ -46,6 +48,8 @@ export class Appenders {
         return new ConsoleAppender(Layouts.create(config.layout));
       case 'file':
         return new FileAppender(Layouts.create(config.layout), config.fileName);
+      case 'otel':
+        return new OtelAppender(config);
       case 'rewrite':
         return new RewriteAppender(config);
       case 'rolling-file':

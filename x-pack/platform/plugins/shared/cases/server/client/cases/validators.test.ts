@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CasesSearchRequest } from '../../../common/types/api';
@@ -14,7 +15,10 @@ import {
   validateCustomFieldTypesInRequest,
   validateRequiredCustomFields,
   validateSearchCasesCustomFields,
+  validateExtendedFieldsInRequest,
 } from './validators';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { TemplatesService } from '../../services/templates';
 
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
@@ -690,6 +694,186 @@ describe('validators', () => {
           customFields: customFieldsMax,
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Maximum 10 customFields are allowed."`);
+    });
+  });
+
+  describe('validateExtendedFieldsInRequest', () => {
+    const makeOriginalCase = (templateId?: string): CaseSavedObjectTransformed =>
+      ({
+        id: 'case-1',
+        attributes: {
+          template: templateId ? { id: templateId, version: 1 } : null,
+        },
+      } as unknown as CaseSavedObjectTransformed);
+
+    const makeTemplatesSO = (definition: object) => ({
+      id: 'so-id',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tpl-1',
+        name: 'Test Template',
+        owner: 'securitySolution',
+        definition: yaml.dump({ name: 'Test Template', fields: [], ...definition }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
+
+    const simpleTemplateSO = makeTemplatesSO({
+      fields: [{ control: 'INPUT_TEXT', name: 'summary', label: 'Summary', type: 'keyword' }],
+    });
+
+    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+
+    beforeEach(() => {
+      templatesService = {
+        getTemplate: jest.fn().mockResolvedValue(simpleTemplateSO),
+      };
+    });
+
+    it('returns without error when extended_fields is undefined', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: { id: 'case-1', version: '1' },
+          originalCase: makeOriginalCase('tpl-1'),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('throws when extended_fields is present but no template on request or original case', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
+          originalCase: makeOriginalCase(), // no template
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).rejects.toThrow('extended_fields require a template to be specified on the case');
+    });
+
+    it('throws when template not found', async () => {
+      templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'missing-tpl', version: 1 },
+            extended_fields: { summary_as_keyword: 'hi' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).rejects.toThrow('Template missing-tpl not found');
+    });
+
+    it('does not throw for valid extended_fields', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { summary_as_keyword: 'hello' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('throws with validation errors for invalid extended_fields', async () => {
+      const templateSOWithRequired = makeTemplatesSO({
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'summary',
+            label: 'Summary',
+            type: 'keyword',
+            validation: { required: true },
+          },
+        ],
+      });
+      templatesService.getTemplate.mockResolvedValue(templateSOWithRequired);
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: {},
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
+    });
+
+    it('throws when template definition is invalid YAML/schema', async () => {
+      templatesService.getTemplate.mockResolvedValue({
+        id: 'so-id',
+        type: 'cases-templates',
+        references: [],
+        attributes: {
+          templateId: 'tpl-1',
+          name: 'Bad Template',
+          owner: 'securitySolution',
+          definition: 'not: valid: yaml: [broken',
+          templateVersion: 1,
+          deletedAt: null,
+          isLatest: true,
+        },
+      });
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { summary_as_keyword: 'hi' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).rejects.toThrow('Template tpl-1 has an invalid definition');
+    });
+
+    it('throws when template is explicitly null and extended_fields are provided', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: null,
+            extended_fields: { summary_as_keyword: 'hi' },
+          },
+          originalCase: makeOriginalCase('tpl-from-original'),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).rejects.toThrow('extended_fields cannot be set when template is being cleared');
+
+      expect(templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+
+    it('uses template id from original case when not on update request', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            extended_fields: { summary_as_keyword: 'hello' },
+          },
+          originalCase: makeOriginalCase('tpl-from-original'),
+          templatesService: templatesService as unknown as TemplatesService,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original');
     });
   });
 });

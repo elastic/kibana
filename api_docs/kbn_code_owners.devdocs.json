@@ -32,7 +32,7 @@
           "(owner: string) => \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -50,7 +50,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -413,23 +413,9 @@
             "type": "Array",
             "tags": [],
             "label": "search",
-            "description": [],
-            "signature": [
-              "string[]"
+            "description": [
+              "\nArea mappings for code owners"
             ],
-            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 54,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/code-owners",
-            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.observability",
-            "type": "Array",
-            "tags": [],
-            "label": "observability",
-            "description": [],
             "signature": [
               "string[]"
             ],
@@ -441,16 +427,36 @@
           },
           {
             "parentPluginId": "@kbn/code-owners",
-            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.security",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.observability",
             "type": "Array",
             "tags": [],
-            "label": "security",
-            "description": [],
+            "label": "observability",
+            "description": [
+              "\nArea mappings for code owners"
+            ],
             "signature": [
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 71,
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.security",
+            "type": "Array",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "\nArea mappings for code owners"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -461,12 +467,14 @@
             "type": "Array",
             "tags": [],
             "label": "workplaceai",
-            "description": [],
+            "description": [
+              "\nArea mappings for code owners"
+            ],
             "signature": [
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

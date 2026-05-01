@@ -19,7 +19,7 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.endpointExceptions.pageAboutInfo', {
     defaultMessage:
-      'Endpoint exceptions prevent generating an alert by Defend integration on the host.',
+      'Endpoint exceptions prevent Elastic Defend from generating alerts on your hosts.',
   }),
   pageAddButtonTitle: i18n.translate(
     'xpack.securitySolution.endpointExceptions.pageAddButtonTitle',
@@ -28,37 +28,31 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpointExceptions.pageImportButtonTitle',
     {
-      defaultMessage: 'Import endpoint exception list',
+      defaultMessage: 'Import Endpoint exceptions',
     }
   ),
   pageExportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpointExceptions.pageExportButtonTitle',
     {
-      defaultMessage: 'Export endpoint exception list',
+      defaultMessage: 'Export Endpoint exceptions',
     }
   ),
   pageExportSuccessToastTitle: i18n.translate(
     'xpack.securitySolution.endpointExceptions.exportSuccessToastTitle',
     {
-      defaultMessage: 'Endpoint exception list exported successfully',
+      defaultMessage: 'Endpoint exceptions exported successfully',
     }
   ),
   pageExportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.endpointExceptions.exportErrorToastTitle',
     {
-      defaultMessage: 'Endpoint exception list export failed',
+      defaultMessage: 'Endpoint exceptions export failed',
     }
   ),
-  pageImportSuccessToastTitle: i18n.translate(
-    'xpack.securitySolution.endpointExceptions.pageImportSuccessToastTitle',
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Endpoint exception list imported successfully',
-    }
-  ),
-  pageImportErrorToastTitle: i18n.translate(
-    'xpack.securitySolution.endpointExceptions.pageImportErrorToastTitle',
-    {
-      defaultMessage: 'Endpoint exception list import failed',
+      defaultMessage: 'You can only import Endpoint exceptions here.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -133,7 +127,7 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.endpointExceptions.emptyStateInfo', {
     defaultMessage:
-      'Endpoint exceptions prevent generating an alert by Defend integration on the host.',
+      'Endpoint exceptions prevent Elastic Defend from generating alerts on your hosts.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.endpointExceptions.emptyStatePrimaryButtonLabel',
@@ -141,7 +135,7 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   ),
   emptyStateImportButtonLabel: i18n.translate(
     'xpack.securitySolution.endpointExceptions.emptyStateImportButtonLabel',
-    { defaultMessage: 'Import endpoint exception list' }
+    { defaultMessage: 'Import Endpoint exceptions' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.endpointExceptions.searchPlaceholderInfo',
@@ -155,7 +149,7 @@ export const ABOUT_ENDPOINT_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.endpointExceptions.aboutInfo',
   {
     defaultMessage:
-      'Endpoint exceptions prevent generating an alert by Defend integration on the host.',
+      'Endpoint exceptions prevent Elastic Defend from generating alerts on your hosts.',
   }
 );
 

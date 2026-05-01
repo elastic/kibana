@@ -6,33 +6,49 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { Condition } from '@kbn/streamlang';
+import { conditionToESQL } from '@kbn/streamlang';
+import { HASH_ALG } from '../../../common/domain/euid';
+import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
+import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+
 import {
-  getEuidEsqlEvaluation,
-  getEuidEsqlDocumentsContainsIdFilter,
-} from '../../../common/domain/euid/esql';
+  buildExtractionSourceClause,
+  buildLogPageProbeSourceClause,
+  buildFieldEvaluations,
+  buildSetFieldsByCondition,
+  type PaginationParams,
+  type PaginationFields,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  ENGINE_METADATA_UNTYPED_ID_FIELD,
+  ENGINE_METADATA_TYPE_FIELD,
+  MAIN_ENTITY_ID_FIELD,
+  ENTITY_NAME_FIELD,
+  ENTITY_TYPE_FIELD,
+  TIMESTAMP_FIELD,
+  aggregationStats,
+  fieldsToKeep,
+  extractPaginationParams,
+  buildPaginationSection,
+  hasFieldEvaluations,
+  mapPostAggFilterFieldsToRecentForEsql,
+} from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
-const HASH_ALG = 'MD5';
 
-export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
-  'entity.EngineMetadata.FirstSeenLogInPage';
-const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
-const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
+export const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
+  timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  finalIdField: ENGINE_METADATA_UNTYPED_ID_FIELD,
+  idFieldInQuery: recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+};
 
-const MAIN_ENTITY_ID_FIELD = 'entity.id';
-const ENTITY_NAME_FIELD = 'entity.name';
-const ENTITY_TYPE_FIELD = 'entity.type';
-const TIMESTAMP_FIELD = '@timestamp';
-
-const METADATA_FIELDS = ['_index'];
-
-const DEFAULT_FIELDS_TO_KEEP = [
+const FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
   MAIN_ENTITY_ID_FIELD,
   ENTITY_NAME_FIELD,
@@ -42,62 +58,17 @@ const DEFAULT_FIELDS_TO_KEEP = [
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 ];
 
-const CCS_FIELDS_TO_KEEP = [
-  TIMESTAMP_FIELD,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  // Keep it for debug visibility purposes
-  ENGINE_METADATA_UNTYPED_ID_FIELD,
-];
-
-const RECENT_DATA_PREFIX = 'recent';
-// Some fields have only src and we need to fallback to it.
-function recentData(dest: string) {
-  return `${RECENT_DATA_PREFIX}.${dest}`;
-}
-
-export interface PaginationParams {
-  timestampCursor: string;
-  idCursor: string;
-}
-
 interface LogsExtractionQueryParams {
-  // source of the query
   indexPatterns: string[];
-  // used to join and perform field retention strategy
   latestIndex: string;
-  // contains all the fields and id descriptions
   entityDefinition: EntityDefinition;
-  // limits amount of logs and entities processed
   docsLimit: number;
-
   fromDateISO: string;
-
   toDateISO: string;
-
   recoveryId?: string;
-
   pagination?: PaginationParams;
-}
-
-function buildExtractionSourceClause(params: {
-  indexPatterns: string[];
-  type: EntityType;
-  fromDateISO: string;
-  toDateISO: string;
-  recoveryId?: string;
-}): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId } = params;
-  return (
-    `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}` +
-    // Where clause captures the full window that we will process
-    // We are including timestamp boundaries to ensure we are not missing any logs
-    // that contain the same timestamp (e.g. pagination recovery)
-    `
-  | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
-      AND ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
-      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")`
-  );
+  logsPageCursorStart?: PaginationParams;
+  logsPageCursorEnd?: PaginationParams;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -105,10 +76,10 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
+  logsPageCursorStart?: PaginationParams;
 }): string {
   return (
-    buildExtractionSourceClause(params) +
+    buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
   );
@@ -116,135 +87,144 @@ export function buildRemainingLogsCountQuery(params: {
 
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
-  entityDefinition: { fields, type, entityTypeFallback },
+  entityDefinition,
   fromDateISO,
   toDateISO,
   docsLimit,
   latestIndex,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: LogsExtractionQueryParams): string {
-  return (
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId }) +
-    // Early construct the id (based on euid logic) so we can run stats per entity (equivalent to GROUP BY)
-    `
-  | EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
+  const { fields, type, entityTypeFallback } = entityDefinition;
+
+  const parts = [];
+
+  // FROM and WHERE
+  parts.push(
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
+  );
+
+  // Special evaluations for entity id
+  if (hasFieldEvaluations(entityDefinition)) {
+    parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
+  }
+
+  // Evaluation of the id without type so we can fallback to name
+  parts.push(
+    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
       withTypeId: false,
-    })}` +
-    // Perform the main aggregation of all the seen logs in the window, taking into consideration the
-    `
-  | STATS
+    })}`
+  );
+
+  // Main stats aggregation from incoming data
+  parts.push(`| STATS
     ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${aggregationStats(fields)}
-    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}` +
-    // early sort, paginate and limit so we perform data retention operations (LOOKUP JOIN) only on documents
-    // that are needed
-    `
-  | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )} ASC
-  ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
-  | LIMIT ${docsLimit}` +
-    // Concatenate the type of the entity and the id to perform the LOOKUP JOIN (otherwise ids won't match)
-    `
-  | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = CONCAT("${type}:", ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )})` +
-    // - Perform the LOOKUP JOIN to get the latest data for the entity
-    // - Merge the fields from latest with recent data (taking into consideration the retention strategy)
-    // - Perform the custom fields evaluation logic
-    // Obs: this not an aggregation.
-    `
-  | LOOKUP JOIN ${latestIndex}
-      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}
-  | EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)}
-  | EVAL ${customFieldEvalLogic(type, entityTypeFallback)}` +
-    // Rename the fields to the original names
-    `
-  | RENAME
+    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}`);
+
+  // If there is no post aggregation filter we can paginate before the lookup join
+  // and save some performance
+  if (!entityDefinition.postAggFilter) {
+    parts.push(
+      ...buildPaginationSection(
+        fromDateISO,
+        docsLimit,
+        MAIN_EXTRACTION_PAGINATION_FIELDS,
+        pagination,
+        recoveryId
+      )
+    );
+  }
+
+  // Builds the main entity id
+  parts.push(
+    `| EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = ${getMainEntityIdFromUntypedEsql(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)
+    )}`
+  );
+
+  // Lookup join to the latest index to perform data retention
+  parts.push(`| LOOKUP JOIN ${latestIndex}
+      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}`);
+
+  if (entityDefinition.postAggFilter) {
+    // If it has post aggregation filter, we filter it right after lookup join
+    parts.push(
+      buildPostAggFilter(
+        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
+      )
+    );
+    // then we can paginate after the post aggregation filter
+    parts.push(
+      ...buildPaginationSection(
+        fromDateISO,
+        docsLimit,
+        MAIN_EXTRACTION_PAGINATION_FIELDS,
+        pagination,
+        recoveryId
+      )
+    );
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
+      parts.push(
+        buildSetFieldsByCondition(entry, {
+          entityFields: fields,
+          useRecentDataPrefix: true,
+        })
+      );
+    }
+  }
+
+  // Perform the final merge of the fields between latest and recent data
+  // and some custom field evaluations, like type and name fallback
+  parts.push(`| EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
+              ${customFieldEvalLogic(type, entityTypeFallback)}`);
+
+  // Rename the fields to the final names
+  parts.push(`| RENAME
     ${recentData(MAIN_ENTITY_ID_FIELD)} AS ${MAIN_ENTITY_ID_FIELD},
-    ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}
-  | KEEP ${fieldsToKeep(fields)}`
-  );
+    ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}`);
+
+  // keep recent data fields
+  parts.push(`| KEEP ${fieldsToKeep(fields, FIELDS_TO_KEEP)}`);
+
+  // join everything together
+  return parts.join('\n');
 }
 
-export interface CcsLogsExtractionQueryParams {
-  indexPatterns: string[];
-  entityDefinition: EntityDefinition;
-  fromDateISO: string;
-  toDateISO: string;
-  docsLimit: number;
-  recoveryId?: string;
-  pagination?: PaginationParams;
+export function extractMainPaginationParams(
+  esqlResponse: ESQLSearchResponse,
+  maxDocs: number
+): PaginationParams | undefined {
+  return extractPaginationParams(esqlResponse, maxDocs, MAIN_EXTRACTION_PAGINATION_FIELDS);
 }
 
-/**
- * Builds ESQL for CCS-only extraction: same aggregation as main but no LOOKUP JOIN.
- * Writes partial entities to updates with @timestamp = nowISO so the next run intakes them.
- */
-export function buildCcsLogsExtractionEsqlQuery({
-  indexPatterns,
-  entityDefinition: { fields, type },
-  fromDateISO,
-  toDateISO,
-  docsLimit,
-  recoveryId,
-  pagination,
-}: CcsLogsExtractionQueryParams): string {
-  return (
-    `SET unmapped_fields="nullify";
-    ${buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })}` +
-    // Using the same structure as the main logs extraction re-use fields to perform the aggregation
-    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
-      withTypeId: true,
-    })}
-    | STATS
-      ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
-      ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} = MIN(${TIMESTAMP_FIELD}),
-      ${aggregationStats(fields, false)}
-      BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
-      | EVAL
-        ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = ${recentData(
-      ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD
-    )},
-        ${ENGINE_METADATA_UNTYPED_ID_FIELD} = ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
-    | SORT ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} ASC, ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )} ASC
-    ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
-    | KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}
-    | LIMIT ${docsLimit}`
-  );
-}
-
-function aggregationStats(fields: EntityField[], renameToRecent: boolean = true) {
-  return fields
-    .map((field) => {
-      const { retention, destination: dest, source } = field;
-      const finalDest = renameToRecent ? recentData(dest) : dest;
-      const castedSrc = castSrcType(field);
-      switch (retention.operation) {
-        case 'collect_values':
-          return `${finalDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
-        case 'prefer_newest_value':
-          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
-        case 'prefer_oldest_value':
-          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
-        default:
-          throw new Error('unknown field operation');
-      }
-    })
-    .join(',\n ');
-}
-
-function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
+function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
   return fields
     .map((field) => {
       const { retention, destination: dest } = field;
       const recentDest = recentData(dest);
       if (dest === idFieldName) {
-        return null; // id field should not be merged
+        return null;
       }
 
       switch (retention.operation) {
@@ -264,123 +244,34 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
     .join(',\n ');
 }
 
-function fieldsToKeep(
-  fields: EntityField[],
-  defaultFieldsToKeep: string[] = DEFAULT_FIELDS_TO_KEEP
-) {
-  return fields
-    .map(({ destination }) => destination)
-    .concat(defaultFieldsToKeep)
-    .join(',\n ');
-}
-
-function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
+function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string): string {
   const evals = [
-    // Bring recent timestamp back
     `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
-
-    // Fallback to the untyped id if the name is empty
     `${ENTITY_NAME_FIELD} = CASE(${esqlIsNotNullOrEmpty(
       ENTITY_NAME_FIELD
     )}, ${ENTITY_NAME_FIELD}, ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)})`,
-
-    // Save the engine type
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
-
-    // Hash the id to be used as the _id in the elasticsearch document
     `${HASHED_ID_FIELD} = HASH("${HASH_ALG}", ${recentData(MAIN_ENTITY_ID_FIELD)})`,
   ];
 
   if (entityTypeFallback) {
-    // If type doesn't exist, fallback to the entity type fallback
     evals.push(`${ENTITY_TYPE_FIELD} = COALESCE(${ENTITY_TYPE_FIELD}, "${entityTypeFallback}")`);
   }
 
   return evals.join(',\n ');
 }
 
-function castSrcType(field: EntityField) {
-  switch (field.mapping?.type) {
-    case 'keyword':
-      return `TO_STRING(${field.source})`;
-    case 'date':
-      return `TO_DATETIME(${field.source})`;
-    case 'boolean':
-      return `TO_BOOLEAN(${field.source})`;
-    case 'long':
-      return `TO_LONG(${field.source})`;
-    case 'integer':
-      return `TO_INTEGER(${field.source})`;
-    case 'float':
-      return `TO_DOUBLE(${field.source})`;
-    case 'ip':
-      return `TO_IP(${field.source})`;
-    // explicit no cast because it doesn't exist in ESQl
-    // and it's a breaking point
-    case 'scaled_float':
-      return `${field.source}`;
-    default:
-      return field.source;
+function getMainEntityIdFromUntypedEsql(
+  { identityField, type }: EntityDefinition,
+  untypedIdExpression: string
+): string {
+  if (identityField.skipTypePrepend) {
+    return untypedIdExpression;
   }
+  return `CONCAT("${type}:", ${untypedIdExpression})`;
 }
 
-function getPaginationWhereClause(
-  pagination?: PaginationParams,
-  paginationRecovery?: { fromDateISO: string; recoveryId: string }
-) {
-  if (!pagination && !paginationRecovery) {
-    return '';
-  }
-
-  if (paginationRecovery) {
-    return buildPaginationWhereClause({
-      timestampCursor: paginationRecovery.fromDateISO,
-      idCursor: paginationRecovery.recoveryId,
-    });
-  }
-
-  if (pagination) {
-    return buildPaginationWhereClause(pagination);
-  }
-}
-
-function buildPaginationWhereClause({ timestampCursor, idCursor }: PaginationParams) {
-  return `| WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${timestampCursor}") 
-            OR (${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} == TO_DATETIME("${timestampCursor}") 
-                AND ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} > "${idCursor}")`;
-}
-
-export function extractPaginationParams(
-  esqlResponse: ESQLSearchResponse,
-  maxDocs: number
-): PaginationParams | undefined {
-  const count = esqlResponse.values.length;
-  if (count === 0 || count < maxDocs) {
-    return undefined;
-  }
-
-  const columns = esqlResponse.columns;
-  const timestampFieldIdx = columns.findIndex(
-    ({ name }) => name === ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD
-  );
-  if (timestampFieldIdx === -1) {
-    throw new Error(
-      `${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} not found in esql response, internal logic error`
-    );
-  }
-
-  const idFieldIdx = columns.findIndex(({ name }) => name === ENGINE_METADATA_UNTYPED_ID_FIELD);
-  if (idFieldIdx === -1) {
-    throw new Error(
-      `${ENGINE_METADATA_UNTYPED_ID_FIELD} not found in esql response, internal logic error`
-    );
-  }
-
-  const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
-  const timestampCursor = lastResult[timestampFieldIdx] as string;
-  const idCursor = lastResult[idFieldIdx] as string;
-  return {
-    timestampCursor,
-    idCursor,
-  };
+/** ESQL WHERE clause fragment after LOOKUP JOIN when entity definition has postAggFilter; otherwise empty. */
+function buildPostAggFilter(postAggFilter: Condition): string {
+  return `| WHERE ${conditionToESQL(postAggFilter)} `;
 }

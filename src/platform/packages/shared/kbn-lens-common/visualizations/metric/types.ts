@@ -9,6 +9,7 @@
 
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { OptionalKeys } from 'utility-types';
 import type { CollapseFunction, LensLayerType } from '../types';
 
@@ -25,12 +26,10 @@ export type SecondaryTrend =
   | {
       type: 'dynamic';
       visuals: 'icon' | 'value' | 'both';
-      paletteId: string;
+      paletteId: KbnPaletteId;
       reversed: boolean;
       baselineValue: number | 'primary';
     };
-
-type TitleFontWeightString = Extract<TitleFontWeight, string>;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -62,8 +61,12 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  titleWeight?: TitleFontWeightString;
-  primaryPosition?: MetricStyle['valuePosition'];
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  titleWeight?: Extract<MetricStyle['titleWeight'], string>;
+  primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;
@@ -93,7 +96,6 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'iconAlign'
   | 'valueFontMode'
   | 'primaryPosition'
-  | 'titleWeight'
   | 'secondaryLabelPosition'
   | 'applyColorTo'
 >;
@@ -101,13 +103,11 @@ export type MetricStateOptinalsWithDefault = Pick<
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
 export type MetricLayoutWithDefault = Required<
-  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'titleWeight' | 'primaryAlign'>
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign'>
 > & {
   iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
-
-export type TitleFontWeight = MetricStyle['titleWeight'];
 
 export type IconPosition = MetricStyle['iconAlign'];
 

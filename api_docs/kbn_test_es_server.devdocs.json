@@ -1,0 +1,990 @@
+{
+  "id": "@kbn/test-es-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.cleanupElasticsearch",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanupElasticsearch",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/test-es-server",
+            "scope": "common",
+            "docId": "kibKbnTestEsServerPluginApi",
+            "section": "def-common.ICluster",
+            "text": "ICluster"
+          },
+          ", isServerless: boolean, logsDir: string | undefined, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.cleanupElasticsearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-es-server",
+                "scope": "common",
+                "docId": "kibKbnTestEsServerPluginApi",
+                "section": "def-common.ICluster",
+                "text": "ICluster"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ICluster",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.cleanupElasticsearch.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.cleanupElasticsearch.$3",
+            "type": "string",
+            "tags": [],
+            "label": "logsDir",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.cleanupElasticsearch.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.createEsClientForTesting",
+        "type": "Function",
+        "tags": [],
+        "label": "createEsClientForTesting",
+        "description": [],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "@kbn/test-es-server",
+            "scope": "common",
+            "docId": "kibKbnTestEsServerPluginApi",
+            "section": "def-common.EsClientForTestingOptions",
+            "text": "EsClientForTestingOptions"
+          },
+          ") => ",
+          "default"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.createEsClientForTesting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-es-server",
+                "scope": "common",
+                "docId": "kibKbnTestEsServerPluginApi",
+                "section": "def-common.EsClientForTestingOptions",
+                "text": "EsClientForTestingOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 31,
+            "columnNumber": 42,
+            "deprecated": false,
+            "docsReferencedTypeName": "EsClientForTestingOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.createTestEsCluster",
+        "type": "Function",
+        "tags": [],
+        "label": "createTestEsCluster",
+        "description": [],
+        "signature": [
+          "(options: Options) => ",
+          {
+            "pluginId": "@kbn/test-es-server",
+            "scope": "common",
+            "docId": "kibKbnTestEsServerPluginApi",
+            "section": "def-common.EsTestCluster",
+            "text": "EsTestCluster"
+          },
+          "<Options>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+        "lineNumber": 203,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.createTestEsCluster.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 205,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Options",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.CreateTestEsClusterOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateTestEsClusterOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.basePath",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.clusterName",
+            "type": "string",
+            "tags": [],
+            "label": "clusterName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.dataArchive",
+            "type": "string",
+            "tags": [],
+            "label": "dataArchive",
+            "description": [
+              "\nPath to data archive snapshot to run Elasticsearch with.\nTo prepare the snapshot:\n- run Elasticsearch server\n- index necessary data\n- stop Elasticsearch server\n- go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}\n- archive data folder: zip -r my_archive.zip data"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.esArgs",
+            "type": "Array",
+            "tags": [],
+            "label": "esArgs",
+            "description": [
+              "\nElasticsearch configuration options. These are key/value pairs formatted as:\n`['key.1=val1', 'key.2=val2']`"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.esVersion",
+            "type": "string",
+            "tags": [],
+            "label": "esVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.esFrom",
+            "type": "string",
+            "tags": [],
+            "label": "esFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.esServerlessOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "esServerlessOptions",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "ServerlessOptions",
+              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\" | \"uiamOAuth\"> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.esJavaOpts",
+            "type": "string",
+            "tags": [],
+            "label": "esJavaOpts",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.esStdoutLogLevel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esStdoutLogLevel",
+            "description": [
+              "\nControls how much of Elasticsearch stdout is forwarded to the `ToolingLog`.\n\nDefaults to `'warn'`."
+            ],
+            "signature": [
+              "\"info\" | \"error\" | \"all\" | \"warn\" | \"silent\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.license",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "license",
+            "description": [
+              "\nLicense to run your cluster under. Keep in mind that a `trial` license\nhas an expiration date. If you are using a `dataArchive` with your tests,\nyou'll likely need to use `basic` or `gold` to prevent the test from failing\nwhen the license expires."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es",
+                "scope": "common",
+                "docId": "kibKbnEsPluginApi",
+                "section": "def-common.ArtifactLicense",
+                "text": "ArtifactLicense"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.writeLogsToPath",
+            "type": "string",
+            "tags": [],
+            "label": "writeLogsToPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.nodes",
+            "type": "Array",
+            "tags": [],
+            "label": "nodes",
+            "description": [
+              "\nNode-specific configuration if you wish to run a multi-node\ncluster. One node will be added for each item in the array.\n\nIf this option is not provided, the config will default\nto a single-node cluster.\n"
+            ],
+            "signature": [
+              "TestEsClusterNodesOptions[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [
+              "\nPassword for the `elastic` user. This is set after the cluster has started.\n\nDefaults to `changeme`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.port",
+            "type": "number",
+            "tags": [],
+            "label": "port",
+            "description": [
+              "\nPort to run Elasticsearch on. If you configure a\nmulti-node cluster with the `nodes` option, this\nport will be incremented by one for each added node.\n"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.ssl",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ssl",
+            "description": [
+              "\nShould this ES cluster use SSL?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.transportPort",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "transportPort",
+            "description": [
+              "\nExplicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'\ndefaults to the transport port from `src/platform/packages/shared/kbn-test/src/es/es_test_config.ts`"
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.onEarlyExit",
+            "type": "Function",
+            "tags": [],
+            "label": "onEarlyExit",
+            "description": [
+              "\nReport to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing\nthis caller to react appropriately. If this is not passed then an uncatchable exception will be thrown"
+            ],
+            "signature": [
+              "((msg: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-es-server",
+                "id": "def-common.CreateTestEsClusterOptions.onEarlyExit.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+                "lineNumber": 167,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.serverless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serverless",
+            "description": [
+              "\nIs this a serverless project"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.clean",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "clean",
+            "description": [
+              "\nClean existing serverless object store data before startup.\n\nDefaults to `true` for backwards compatibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.files",
+            "type": "Array",
+            "tags": [],
+            "label": "files",
+            "description": [
+              "\nFiles to mount inside ES containers"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.secureFiles",
+            "type": "Array",
+            "tags": [],
+            "label": "secureFiles",
+            "description": [
+              "\nSecure settings files to add to the ES keystore via `elasticsearch-keystore add-file`.\nEach entry is a `setting_name=/path/to/file` string."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.EsClientForTestingOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsClientForTestingOptions",
+        "description": [
+          "options for creating es instances used in functional testing scenarios"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/test-es-server",
+            "scope": "common",
+            "docId": "kibKbnTestEsServerPluginApi",
+            "section": "def-common.EsClientForTestingOptions",
+            "text": "EsClientForTestingOptions"
+          },
+          " extends Omit<",
+          "ClientOptions",
+          ", \"nodes\" | \"node\" | \"tls\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.EsClientForTestingOptions.esUrl",
+            "type": "string",
+            "tags": [],
+            "label": "esUrl",
+            "description": [
+              "url of es instance"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.EsClientForTestingOptions.authOverride",
+            "type": "Object",
+            "tags": [],
+            "label": "authOverride",
+            "description": [
+              "overwrite the auth embedded in the url to use a different user in this client instance"
+            ],
+            "signature": [
+              "{ username: string; password: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.EsClientForTestingOptions.isCloud",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isCloud",
+            "description": [
+              "\nare we running tests against cloud? this is automatically determined\nby checking for the TEST_CLOUD environment variable but can be overriden\nfor special cases"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.ICluster",
+        "type": "Interface",
+        "tags": [],
+        "label": "ICluster",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.ports",
+            "type": "Array",
+            "tags": [],
+            "label": "ports",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.nodes",
+            "type": "Array",
+            "tags": [],
+            "label": "nodes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es",
+                "scope": "common",
+                "docId": "kibKbnEsPluginApi",
+                "section": "def-common.Cluster",
+                "text": "Cluster"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.getStartTimeout",
+            "type": "Function",
+            "tags": [],
+            "label": "getStartTimeout",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.cleanup",
+            "type": "Function",
+            "tags": [],
+            "label": "cleanup",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.getClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "default"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.ICluster.getHostUrls",
+            "type": "Function",
+            "tags": [],
+            "label": "getHostUrls",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.CI_PARALLEL_PROCESS_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "CI_PARALLEL_PROCESS_PREFIX",
+        "description": [
+          "\nA prefix string that is unique for each parallel CI process that\nis an empty string outside of CI, so it can be safely injected\ninto strings as a prefix"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/ci_parallel_process_prefix.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.EsTestCluster",
+        "type": "Type",
+        "tags": [],
+        "label": "EsTestCluster",
+        "description": [],
+        "signature": [
+          "Options[\"nodes\"] extends TestEsClusterNodesOptions[] ? ",
+          {
+            "pluginId": "@kbn/test-es-server",
+            "scope": "common",
+            "docId": "kibKbnTestEsServerPluginApi",
+            "section": "def-common.ICluster",
+            "text": "ICluster"
+          },
+          " : ",
+          {
+            "pluginId": "@kbn/test-es-server",
+            "scope": "common",
+            "docId": "kibKbnTestEsServerPluginApi",
+            "section": "def-common.ICluster",
+            "text": "ICluster"
+          },
+          " & { getUrl: () => string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/test-es-server",
+        "id": "def-common.esTestConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "esTestConfig",
+        "description": [],
+        "signature": [
+          "EsTestConfig"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/es_test_config.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

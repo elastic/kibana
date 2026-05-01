@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiFilterGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { FilterOptions } from '../../../types';
-import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter } from './multi_select_filter';
-import * as i18n from './translations';
+import type { MultiSelectFilterOption } from '../../filter/multi_select_filter';
+import { MultiSelectFilter } from '../../filter/multi_select_filter';
 
 interface Props {
   optionKeys: ServiceProviderKeys[];
@@ -41,13 +42,20 @@ export const ServiceProviderFilter: React.FC<Props> = ({
   }, [uniqueProviders]);
 
   return (
-    <MultiSelectFilter
-      buttonLabel={i18n.SERVICE_PROVIDER}
-      onChange={onSystemFilterChange}
-      options={filteredOptions}
-      renderOption={(option) => option.label}
-      selectedOptionKeys={optionKeys}
-      dataTestSubj="service-field-endpoints"
-    />
+    <EuiFilterGroup>
+      <MultiSelectFilter
+        buttonLabel={i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
+          defaultMessage: 'Service',
+        })}
+        ariaLabel={i18n.translate('xpack.searchInferenceEndpoints.serviceProvider.ariaLabel', {
+          defaultMessage: 'Service Provider Options',
+        })}
+        onChange={onSystemFilterChange}
+        options={filteredOptions}
+        renderOption={(option) => option.label}
+        selectedOptionKeys={optionKeys}
+        dataTestSubj="service-field-endpoints"
+      />
+    </EuiFilterGroup>
   );
 };

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/upgrade-assistant-pkg-server'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/upgrade-assistant-pkg-server'
+  title: '@kbn/upgrade-assistant-pkg-server'
   description: Moon project for @kbn/upgrade-assistant-pkg-server
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/upgrade-assistant/server
+  sourceRoot: x-pack/platform/packages/private/upgrade-assistant/server
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -33,16 +32,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

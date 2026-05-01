@@ -12,6 +12,7 @@ import { setVarStepDefinition } from './setvar_step';
 import { getExternalStepDefinition } from './external_step';
 import type { IExampleExternalService } from '../../common/external_service/types';
 
+const asyncFeatureFlagExample = () => Promise.resolve(true);
 export interface RegisterStepDefinitionsDependencies {
   externalService: IExampleExternalService;
 }
@@ -21,5 +22,11 @@ export const registerStepDefinitions = (
   deps: RegisterStepDefinitionsDependencies
 ) => {
   workflowsExtensions.registerStepDefinition(setVarStepDefinition);
-  workflowsExtensions.registerStepDefinition(getExternalStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(async () => {
+    const isFeatureFlagEnabled = await asyncFeatureFlagExample();
+    if (!isFeatureFlagEnabled) {
+      return undefined; // Skips step registration
+    }
+    return getExternalStepDefinition(deps);
+  });
 };

@@ -1,5 +1,5 @@
 {
-  "sha1": "4f9c5397c79665b6b81f78079be05098440cfb2f",
+  "sha1": "355f80ffb551acef4a742276ef8eb2cf2888cb5c",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -15,6 +15,102 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 36,
         "column": 16
+      }
+    },
+    {
+      "id": "dabc65f5da31ebe-fb23c5e0de6c6c5",
+      "title": "Hosts Page - Metadata Filter Add and remove metadata filter from host flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "dabc65f5da31ebe-a99c866d6ac97cd",
+      "title": "Hosts Page - Metadata Filter Adding a metadata filter hides other hosts from the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-3df745974a5aa43",
+      "title": "Hosts Page - Search Search using the Hosts page search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-fbaa70a0ae45105",
+      "title": "Hosts Page - Search Search using the flyout search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-e9c2121846875ba",
+      "title": "Hosts Page - Search Filter hosts using the Cloud Provider control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-1bc13daa71111e7",
+      "title": "Hosts Page - Search Filter hosts using the Operating System control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 96,
+        "column": 9
       }
     },
     {
@@ -363,7 +459,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 70,
+        "line": 66,
         "column": 9
       }
     },
@@ -379,7 +475,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 80,
+        "line": 76,
         "column": 9
       }
     },
@@ -395,7 +491,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 100,
+        "line": 96,
         "column": 9
       }
     },
@@ -411,7 +507,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 135,
+        "line": 129,
         "column": 9
       }
     },
@@ -427,7 +523,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 168,
+        "line": 162,
         "column": 9
       }
     },
@@ -443,7 +539,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 208,
+        "line": 202,
         "column": 9
       }
     },
@@ -610,7 +706,7 @@
     {
       "id": "f99b488a0e6019e-b6ddb921df7e2cd",
       "title": "Node Details: host without metrics Overview Tab - KPI tiles show N/A",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -619,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_without_metrics.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 27,
+        "column": 10
       }
     },
     {

@@ -12,7 +12,8 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 export const createManagementFooterItemsTree = (
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  showAlertingV2: boolean = false
 ): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
@@ -104,12 +105,27 @@ export const createManagementFooterItemsTree = (
             },
           ],
         },
+        ...(showAlertingV2
+          ? [
+              {
+                id: 'v2_alerting_preview',
+                title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
+                renderAs: 'panelOpener' as const,
+                children: [
+                  { link: 'management:rules' as const },
+                  { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
+                  { link: 'management:action_policies' as const },
+                ],
+              },
+            ]
+          : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           breadcrumbStatus: 'hidden',
           children: [
             {
-              link: 'management:triggersActions',
+              id: 'stackRules',
+              link: 'rules',
               breadcrumbStatus: 'hidden',
             },
             {
@@ -124,9 +140,16 @@ export const createManagementFooterItemsTree = (
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
+          ],
+        },
+        {
+          title: i18nStrings.projectPerformance.title,
+          breadcrumbStatus: 'hidden',
+          children: [
             {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
+              link: 'management:queryActivity',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
             },
           ],
         },
@@ -141,6 +164,14 @@ export const createManagementFooterItemsTree = (
           ],
         },
         {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
           children:
@@ -151,6 +182,10 @@ export const createManagementFooterItemsTree = (
                     breadcrumbStatus: 'hidden',
                   },
                   {
+                    link: 'management:evals',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
                     link: 'management:securityAiAssistantManagement',
                     breadcrumbStatus: 'hidden',
                   },
@@ -158,6 +193,10 @@ export const createManagementFooterItemsTree = (
               : [
                   {
                     link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
                     breadcrumbStatus: 'hidden',
                   },
                 ],

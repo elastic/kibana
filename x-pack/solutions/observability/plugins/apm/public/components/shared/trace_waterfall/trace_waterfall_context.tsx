@@ -9,7 +9,10 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
+import type {
+  IWaterfallGetRelatedErrorsHref,
+  WaterfallGetServiceBadgeHref,
+} from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
@@ -23,6 +26,8 @@ import {
   type AgentMark,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { getCriticalPath, type CriticalPathSegment } from './critical_path';
+
+export type TraceWaterfallScrollStrategy = 'parent' | 'window';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -42,17 +47,22 @@ export interface TraceWaterfallContextProps {
   showCriticalPathControl?: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
-  highlightedTraceId?: string;
-  scrollElement?: Element;
+  contextSpanIds?: string[];
+  selectedSpanId?: string;
+  scrollToContextOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   isEmbeddable: boolean;
   legends: IWaterfallLegend[];
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
   message?: string;
+  marks: Array<AgentMark | ErrorMark>;
   errorMarks: ErrorMark[];
   agentMarks: AgentMark[];
+  scrollElement?: Element;
+  scrollStrategy: TraceWaterfallScrollStrategy;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -76,8 +86,12 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
+  marks: [],
   errorMarks: [],
   agentMarks: [],
+  scrollElement: undefined,
+  scrollStrategy: 'window',
+  getServiceBadgeHref: undefined,
 });
 
 export interface OnNodeClickOptions {
@@ -96,10 +110,11 @@ interface Props {
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
-  highlightedTraceId?: string;
+  contextSpanIds?: string[];
+  scrollStrategy?: TraceWaterfallScrollStrategy;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
-  scrollElement?: Element;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
   showLegend: boolean;
@@ -112,6 +127,8 @@ interface Props {
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
   entryTransactionId?: string;
+  scrollToContextOnMount?: boolean;
+  scrollElement?: Element;
 }
 
 const MAX_DEPTH_OPEN_LIMIT = 2;
@@ -120,9 +137,11 @@ export function TraceWaterfallContextProvider({
   children,
   traceItems,
   showAccordion,
-  highlightedTraceId,
+  contextSpanIds,
+  scrollStrategy = 'window',
   onClick,
   onErrorClick,
+  getServiceBadgeHref,
   scrollElement,
   getRelatedErrorsHref,
   isEmbeddable,
@@ -136,6 +155,7 @@ export function TraceWaterfallContextProvider({
   defaultShowCriticalPath = false,
   onShowCriticalPathChange,
   entryTransactionId,
+  scrollToContextOnMount,
 }: Props) {
   const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
     useTraceWaterfall({
@@ -145,6 +165,16 @@ export function TraceWaterfallContextProvider({
       onErrorClick,
       entryTransactionId,
     });
+
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>();
+
+  const handleNodeClick = useCallback<OnNodeClick>(
+    (id, options) => {
+      setSelectedSpanId(id);
+      onClick?.(id, options);
+    },
+    [onClick]
+  );
 
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
   const isCriticalPathControlled = controlledValue !== undefined;
@@ -164,8 +194,12 @@ export function TraceWaterfallContextProvider({
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
   >(() => {
+    const ancestorIds = new Set(
+      contextSpanIds?.flatMap((id) => [...getAncestorIds(traceWaterfall, id)]) ?? []
+    );
+
     return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
-      acc[item.id] = item.depth < maxLevelOpen ? 'open' : 'closed';
+      acc[item.id] = item.depth < maxLevelOpen || ancestorIds.has(item.id) ? 'open' : 'closed';
       return acc;
     }, {});
   });
@@ -218,6 +252,11 @@ export function TraceWaterfallContextProvider({
     return filterMapByCriticalPath(fullTraceWaterfallMap, criticalPathSegmentsById);
   }, [criticalPathSegmentsById, fullTraceWaterfallMap, showCriticalPath]);
 
+  const marks = useMemo(
+    () => [...getAgentMarks(agentMarks), ...errorMarks],
+    [agentMarks, errorMarks]
+  );
+
   return (
     <TraceWaterfallContext.Provider
       value={{
@@ -236,10 +275,12 @@ export function TraceWaterfallContextProvider({
         showCriticalPath,
         setShowCriticalPath,
         showCriticalPathControl,
-        onClick,
+        onClick: onClick ? handleNodeClick : undefined,
         onErrorClick,
-        highlightedTraceId,
-        scrollElement,
+        getServiceBadgeHref,
+        contextSpanIds,
+        selectedSpanId,
+        scrollToContextOnMount,
         getRelatedErrorsHref,
         isEmbeddable,
         legends,
@@ -247,8 +288,11 @@ export function TraceWaterfallContextProvider({
         showLegend,
         serviceName,
         message,
+        marks,
         errorMarks,
         agentMarks: getAgentMarks(agentMarks),
+        scrollElement,
+        scrollStrategy,
       }}
     >
       {children}
@@ -286,4 +330,25 @@ export function filterMapByCriticalPath(
   }
 
   return result;
+}
+
+/**
+ * Returns the set of ancestor IDs for a given target item.
+ * Used to expand collapsed accordion nodes so the target becomes visible.
+ */
+export function getAncestorIds(items: TraceWaterfallItem[], targetId?: string): Set<string> {
+  if (!targetId) {
+    return new Set();
+  }
+
+  const itemById = new Map(items.map((item) => [item.id, item]));
+  const ancestors = new Set<string>();
+
+  let current = itemById.get(targetId);
+  while (current?.parentId) {
+    ancestors.add(current.parentId);
+    current = itemById.get(current.parentId);
+  }
+
+  return ancestors;
 }

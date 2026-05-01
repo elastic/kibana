@@ -53,7 +53,7 @@ export const NotesCount = React.memo<{
 }>(({ noteIds }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
-      <EuiIcon color="text" size="l" type="editorComment" />
+      <EuiIcon color="text" size="l" type="comment" />
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>

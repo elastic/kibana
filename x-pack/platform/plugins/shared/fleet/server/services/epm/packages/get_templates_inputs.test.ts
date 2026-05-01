@@ -221,6 +221,34 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     ]);
   });
 
+  it('uses getInputEffectiveName for template input id when name differs from type', async () => {
+    expect(
+      await templatePackagePolicyToFullInputStreams([
+        {
+          ...mockInput2,
+          name: 'custom-metrics',
+          type: 'test-metrics',
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'some-template-custom-metrics',
+        type: 'test-metrics',
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'metrics',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-metrics-foo',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('returns agent inputs without disabled streams', async () => {
     expect(
       await templatePackagePolicyToFullInputStreams([
