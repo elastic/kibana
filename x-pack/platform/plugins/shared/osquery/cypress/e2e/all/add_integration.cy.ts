@@ -77,7 +77,8 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
     }
   );
 
-  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/255381
+  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
@@ -106,7 +107,8 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-  describe('Add integration to policy', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/255381
+  describe.skip('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
     beforeEach(() => {
