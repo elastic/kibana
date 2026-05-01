@@ -78,6 +78,8 @@ class DashboardUserActivitySession {
         })
       )
       .subscribe();
+
+    /** Track visibility changes so that views can be started + ended when the user switches tabs */
     this.bindedVisibilityHandler = this.onVisibilityChange.bind(this);
     document.addEventListener('visibilitychange', this.bindedVisibilityHandler);
   }

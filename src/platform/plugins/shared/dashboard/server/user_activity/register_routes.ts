@@ -8,13 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { HttpServiceSetup } from '@kbn/core/server';
+import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { querySchema, storedFilterSchema, timeRangeSchema } from '@kbn/es-query-server';
+
 import { coreServices } from '../kibana_services';
 import { getUserActivityObject } from './user_actions';
 
-export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSetup }) {
-  const router = http.createRouter();
+export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerContext>) {
   router.post(
     {
       path: '/internal/dashboard/user_activity/{type}/{id}',
@@ -34,16 +34,12 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           tags: schema.arrayOf(schema.string()),
           meta: schema.maybe(
             schema.object({
-              time_range: schema.maybe(timeRangeSchema),
-              query: schema.maybe(querySchema),
-              filters: schema.maybe(
-                schema.arrayOf(storedFilterSchema, {
-                  maxSize: 100,
-                })
-              ),
-              panel_count: schema.maybe(schema.number()),
-              errors: schema.maybe(
-                schema.arrayOf(schema.object({ panel_id: schema.string(), error: schema.string() }))
+              time_range: timeRangeSchema,
+              query: querySchema,
+              filters: schema.arrayOf(storedFilterSchema),
+              panel_count: schema.number(),
+              errors: schema.arrayOf(
+                schema.object({ panel_id: schema.string(), error: schema.string() })
               ),
             })
           ),
@@ -57,13 +53,16 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
     },
     async (ctx, req, res) => {
       const user = (await ctx.core).security.authc.getCurrentUser();
+      let message;
+      if (req.params.type === 'refresh_auto') {
+        message = `Dashboard "${req.body.title}" (id: ${req.params.id}) was refreshed automatically.`;
+      } else {
+        message = `User ${user ? `"${user.username}"` : ''} ${
+          req.params.type === 'view' ? 'viewed' : 'manually refreshed'
+        } dashboard "${req.body.title}" (id: ${req.params.id}).`;
+      }
       coreServices.userActivity.trackUserAction({
-        message:
-          req.params.type === 'refresh_auto'
-            ? `Dashboard "${req.body.title}" (id: ${req.params.id}) was refreshed automatically.`
-            : `User ${user ? `"${user.username}"` : ''} ${
-                req.params.type === 'view' ? 'viewed' : 'manually refreshed'
-              } dashboard "${req.body.title}" (id: ${req.params.id}).`,
+        message,
         event: {
           action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_refresh',
           type: 'access',
@@ -72,11 +71,9 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           duration: (req.body.end - req.body.start) * 1000000, // convert to nanoseconds
         },
         object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
-        ...(req.body.meta
-          ? {
-              metadata: req.body.meta,
-            }
-          : {}),
+        ...(req.body.meta && {
+          metadata: req.body.meta,
+        }),
       });
       return res.ok();
     }

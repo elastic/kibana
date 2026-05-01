@@ -122,19 +122,17 @@ export async function loadDashboardApi({
       ?.startTime,
   });
 
-  if (savedObjectId) {
+  if (savedObjectId && !incomingEmbeddables?.length) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
-    api.userActivity$.next({ type: 'view', start: Date.now() });
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
-    if (!incomingEmbeddables?.length) {
-      const contentInsightsClient = new ContentInsightsClient(
-        { http: coreServices.http, logger },
-        { domainId: 'dashboard' }
-      );
-      contentInsightsClient.track(savedObjectId, 'viewed');
-    }
+    api.userActivity$.next({ type: 'view', start: Date.now() });
+    const contentInsightsClient = new ContentInsightsClient(
+      { http: coreServices.http, logger },
+      { domainId: 'dashboard' }
+    );
+    contentInsightsClient.track(savedObjectId, 'viewed');
   }
 
   return {
