@@ -13,13 +13,21 @@
           "\nBuilds a combined filter for ES|QL queries following the same pattern\nas the server-side route used to apply."
         ],
         "signature": [
-          "({\n  filter,\n  kuery,\n  start,\n  end,\n}: { filter?: ",
+          "({\n  filter,\n  kuery,\n  start,\n  end,\n  esQueryConfig,\n}: { filter?: ",
           "QueryDslQueryContainer",
-          "; kuery?: string | undefined; start?: number | undefined; end?: number | undefined; }) => ",
+          "; kuery?: string | undefined; start?: number | undefined; end?: number | undefined; esQueryConfig?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
+          " | undefined; }) => ",
           "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 73,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29,10 +37,10 @@
             "id": "def-public.buildEsqlFilter.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n}",
+            "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n  esQueryConfig,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 82,
+            "lineNumber": 90,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -176,7 +184,7 @@
                   " | undefined; } & { prefix?: undefined; type?: undefined; exists?: undefined; bool?: undefined; boosting?: undefined; common?: undefined; combined_fields?: undefined; constant_score?: undefined; dis_max?: undefined; distance_feature?: undefined; function_score?: undefined; fuzzy?: undefined; geo_bounding_box?: undefined; geo_distance?: undefined; geo_grid?: undefined; geo_polygon?: undefined; geo_shape?: undefined; has_child?: undefined; has_parent?: undefined; ids?: undefined; intervals?: undefined; knn?: undefined; match?: undefined; match_all?: undefined; match_bool_prefix?: undefined; match_none?: undefined; match_phrase?: undefined; match_phrase_prefix?: undefined; more_like_this?: undefined; multi_match?: undefined; nested?: undefined; parent_id?: undefined; percolate?: undefined; pinned?: undefined; query_string?: undefined; range?: undefined; rank_feature?: undefined; regexp?: undefined; rule?: undefined; script?: undefined; script_score?: undefined; semantic?: undefined; shape?: undefined; simple_query_string?: undefined; span_containing?: undefined; span_field_masking?: undefined; span_first?: undefined; span_multi?: undefined; span_near?: undefined; span_not?: undefined; span_or?: undefined; span_term?: undefined; span_within?: undefined; sparse_vector?: undefined; term?: undefined; terms?: undefined; terms_set?: undefined; text_expansion?: undefined; weighted_tokens?: undefined; wildcard?: undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 83,
+                "lineNumber": 91,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -192,7 +200,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 84,
+                "lineNumber": 92,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -208,7 +216,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 85,
+                "lineNumber": 93,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -224,7 +232,30 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 86,
+                "lineNumber": 94,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-public.buildEsqlFilter.$1.esQueryConfig",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "esQueryConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.EsQueryConfig",
+                    "text": "EsQueryConfig"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 95,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -248,7 +279,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -264,10 +295,18 @@
         "label": "isKqlQueryValid",
         "description": [],
         "signature": [
-          "(kql: string | undefined) => boolean"
+          "(kql: string | undefined, esQueryConfig: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
+          " | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 60,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -283,9 +322,34 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 60,
+            "lineNumber": 65,
             "columnNumber": 33,
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.isKqlQueryValid.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esQueryConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryConfig",
+                "text": "EsQueryConfig"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 65,
+            "columnNumber": 47,
+            "deprecated": false,
+            "docsReferencedTypeName": "EsQueryConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -301,12 +365,20 @@
         "label": "kqlQuery",
         "description": [],
         "signature": [
-          "(kql: string | undefined) => ",
+          "(kql: string | undefined, esQueryConfig: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
+          " | undefined) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -322,9 +394,34 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 33,
-            "columnNumber": 26,
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.kqlQuery.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esQueryConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryConfig",
+                "text": "EsQueryConfig"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "EsQueryConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -345,7 +442,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 42,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -361,7 +458,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 43,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -378,7 +475,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 44,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -395,7 +492,7 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 45,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3276,6 +3373,8 @@
             "; }, ",
             "node_modules/zod/v4/core/schemas",
             "$strip>; body: ",
+            "ZodIntersection",
+            "<",
             "ZodObject",
             "<{ id: ",
             "ZodString",
@@ -3351,7 +3450,15 @@
             "ZodUnknown",
             ">>; }, ",
             "node_modules/zod/v4/core/schemas",
-            "$strip>; }, ",
+            "$strip>, ",
+            "ZodObject",
+            "<{ uuid: ",
+            "ZodOptional",
+            "<",
+            "ZodString",
+            ">; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>>; }, ",
             "node_modules/zod/v4/core/schemas",
             "$strip>, ",
             "StreamsRouteHandlerResources",
@@ -4321,7 +4428,37 @@
             "StreamsRouteHandlerResources",
             ", ",
             "UnmanagedElasticsearchAssetDetails",
-            ", undefined>; \"GET /internal/streams/_resolve_index\": ",
+            ", undefined>; \"POST /internal/streams/_bulk_get_summaries\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/_bulk_get_summaries\", ",
+            "ZodObject",
+            "<{ body: ",
+            "ZodObject",
+            "<{ names: ",
+            "ZodArray",
+            "<",
+            "ZodString",
+            ">; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>, ",
+            "StreamsRouteHandlerResources",
+            ", { summaries: ",
+            {
+              "pluginId": "streams",
+              "scope": "common",
+              "docId": "kibStreamsPluginApi",
+              "section": "def-common.StreamSummary",
+              "text": "StreamSummary"
+            },
+            "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -7312,6 +7449,8 @@
           "; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>; body: ",
+          "ZodIntersection",
+          "<",
           "ZodObject",
           "<{ id: ",
           "ZodString",
@@ -7387,7 +7526,15 @@
           "ZodUnknown",
           ">>; }, ",
           "node_modules/zod/v4/core/schemas",
-          "$strip>; }, ",
+          "$strip>, ",
+          "ZodObject",
+          "<{ uuid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "StreamsRouteHandlerResources",
@@ -8357,7 +8504,37 @@
           "StreamsRouteHandlerResources",
           ", ",
           "UnmanagedElasticsearchAssetDetails",
-          ", undefined>; \"GET /internal/streams/_resolve_index\": ",
+          ", undefined>; \"POST /internal/streams/_bulk_get_summaries\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/_bulk_get_summaries\", ",
+          "ZodObject",
+          "<{ body: ",
+          "ZodObject",
+          "<{ names: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>, ",
+          "StreamsRouteHandlerResources",
+          ", { summaries: ",
+          {
+            "pluginId": "streams",
+            "scope": "common",
+            "docId": "kibStreamsPluginApi",
+            "section": "def-common.StreamSummary",
+            "text": "StreamSummary"
+          },
+          "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -8450,7 +8627,7 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 80,
+      "lineNumber": 78,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -8466,7 +8643,7 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 82,
+      "lineNumber": 80,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -8488,13 +8665,21 @@
           "\nBuilds a combined filter for ES|QL queries following the same pattern\nas the server-side route used to apply."
         ],
         "signature": [
-          "({\n  filter,\n  kuery,\n  start,\n  end,\n}: { filter?: ",
+          "({\n  filter,\n  kuery,\n  start,\n  end,\n  esQueryConfig,\n}: { filter?: ",
           "QueryDslQueryContainer",
-          "; kuery?: string | undefined; start?: number | undefined; end?: number | undefined; }) => ",
+          "; kuery?: string | undefined; start?: number | undefined; end?: number | undefined; esQueryConfig?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
+          " | undefined; }) => ",
           "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 73,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8504,10 +8689,10 @@
             "id": "def-common.buildEsqlFilter.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n}",
+            "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n  esQueryConfig,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 82,
+            "lineNumber": 90,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -8651,7 +8836,7 @@
                   " | undefined; } & { prefix?: undefined; type?: undefined; exists?: undefined; bool?: undefined; boosting?: undefined; common?: undefined; combined_fields?: undefined; constant_score?: undefined; dis_max?: undefined; distance_feature?: undefined; function_score?: undefined; fuzzy?: undefined; geo_bounding_box?: undefined; geo_distance?: undefined; geo_grid?: undefined; geo_polygon?: undefined; geo_shape?: undefined; has_child?: undefined; has_parent?: undefined; ids?: undefined; intervals?: undefined; knn?: undefined; match?: undefined; match_all?: undefined; match_bool_prefix?: undefined; match_none?: undefined; match_phrase?: undefined; match_phrase_prefix?: undefined; more_like_this?: undefined; multi_match?: undefined; nested?: undefined; parent_id?: undefined; percolate?: undefined; pinned?: undefined; query_string?: undefined; range?: undefined; rank_feature?: undefined; regexp?: undefined; rule?: undefined; script?: undefined; script_score?: undefined; semantic?: undefined; shape?: undefined; simple_query_string?: undefined; span_containing?: undefined; span_field_masking?: undefined; span_first?: undefined; span_multi?: undefined; span_near?: undefined; span_not?: undefined; span_or?: undefined; span_term?: undefined; span_within?: undefined; sparse_vector?: undefined; term?: undefined; terms?: undefined; terms_set?: undefined; text_expansion?: undefined; weighted_tokens?: undefined; wildcard?: undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 83,
+                "lineNumber": 91,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8667,7 +8852,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 84,
+                "lineNumber": 92,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8683,7 +8868,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 85,
+                "lineNumber": 93,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8699,7 +8884,30 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-                "lineNumber": 86,
+                "lineNumber": 94,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-common.buildEsqlFilter.$1.esQueryConfig",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "esQueryConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.EsQueryConfig",
+                    "text": "EsQueryConfig"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 95,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8723,7 +8931,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8936,10 +9144,18 @@
         "label": "isKqlQueryValid",
         "description": [],
         "signature": [
-          "(kql: string | undefined) => boolean"
+          "(kql: string | undefined, esQueryConfig: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
+          " | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 60,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8955,9 +9171,34 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 60,
+            "lineNumber": 65,
             "columnNumber": 33,
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.isKqlQueryValid.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esQueryConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryConfig",
+                "text": "EsQueryConfig"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 65,
+            "columnNumber": 47,
+            "deprecated": false,
+            "docsReferencedTypeName": "EsQueryConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -8973,12 +9214,20 @@
         "label": "kqlQuery",
         "description": [],
         "signature": [
-          "(kql: string | undefined) => ",
+          "(kql: string | undefined, esQueryConfig: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          },
+          " | undefined) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8994,9 +9243,34 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 33,
-            "columnNumber": 26,
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.kqlQuery.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esQueryConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryConfig",
+                "text": "EsQueryConfig"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "EsQueryConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -9017,7 +9291,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-        "lineNumber": 42,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9033,7 +9307,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 43,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9050,7 +9324,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 44,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9067,7 +9341,7 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
-            "lineNumber": 45,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9524,6 +9798,61 @@
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
             "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.StreamSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamSummary",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/stream_summary.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamSummary.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/stream_summary.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamSummary.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/stream_summary.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamSummary.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/stream_summary.ts",
+            "lineNumber": 11,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
