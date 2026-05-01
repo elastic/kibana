@@ -28,6 +28,9 @@ jest.mock('../hooks/use_create_maintenance_window', () => ({
 jest.mock('../hooks/use_update_maintenance_window', () => ({
   useUpdateMaintenanceWindow: jest.fn(),
 }));
+jest.mock('./episode_matcher_input', () => ({
+  EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
+}));
 
 const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { useKibana, useUiSetting } = jest.requireMock('../utils/kibana_react');
@@ -262,6 +265,23 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(
       screen.queryByTestId('maintenanceWindowMultipleSolutionsRemovedWarning')
     ).not.toBeInTheDocument();
+  });
+
+  it('blocks submit and shows error when episode toggle is on but query is empty', async () => {
+    const user = userEvent.setup({ delay: null });
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
+    await user.click(titleInput);
+    await user.paste('My window');
+
+    await user.click(await screen.findByTestId('episodeScopedQuerySwitch'));
+
+    await user.click(screen.getByTestId('create-submit'));
+
+    expect(await screen.findByText('Episode filter is required.')).toBeInTheDocument();
+    expect(createMutate).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
   });
 
   describe('confirmation modal for saving without filters', () => {

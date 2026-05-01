@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
@@ -117,6 +118,7 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
   const [episodeQuery, setEpisodeQuery] = useState<string>(
     initialValue?.scopeEpisodeQuery?.kql || ''
   );
+  const [episodeQueryErrors, setEpisodeQueryErrors] = useState<string[]>([]);
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
@@ -172,12 +174,17 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
   }, [isEpisodeQueryEnabled, episodeQuery]);
 
   const submitMaintenanceWindow: FormSubmitHandler<FormProps> = async (formData, isValid) => {
-    if (!isValid || scopedQueryErrors.length !== 0) {
+    if (!isValid || scopedQueryErrors.length !== 0 || episodeQueryErrors.length !== 0) {
       return;
     }
 
     if (isScopedQueryEnabled && !scopedQueryPayload) {
       setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE]);
+      return;
+    }
+
+    if (isEpisodeQueryEnabled && !scopeEpisodeQueryPayload) {
+      setEpisodeQueryErrors([i18n.CREATE_FORM_EPISODE_QUERY_EMPTY_ERROR_MESSAGE]);
       return;
     }
 
@@ -242,6 +249,11 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     setScopedQueryErrors((prev) => (prev.length ? [] : prev));
   };
 
+  const onEpisodeQueryToggle = (isEnabled: boolean) => {
+    setIsEpisodeQueryEnabled(isEnabled);
+    setEpisodeQueryErrors((prev) => (prev.length ? [] : prev));
+  };
+
   // Memoized so the prop identity stays stable across renders, allowing the
   // memoized `MaintenanceWindowScopedQuery` child to skip re-renders that are
   // unrelated to the search bar input.
@@ -249,6 +261,11 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     setScopedQueryErrors((prev) => (prev.length ? [] : prev));
     setQuery(newQuery);
   }, []);
+
+  const onEpisodeQueryChange = (newQuery: string) => {
+    setEpisodeQueryErrors((prev) => (prev.length ? [] : prev));
+    setEpisodeQuery(newQuery);
+  };
 
   const modalTitleId = useGeneratedHtmlId();
   const saveWithoutFiltersModalTitleId = useGeneratedHtmlId();
@@ -409,19 +426,25 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
             description={i18n.EPISODES_SCOPE_DESCRIPTION}
             switchLabel={i18n.EPISODES_SCOPE_TITLE}
             switchChecked={isEpisodeQueryEnabled}
-            onSwitchChange={setIsEpisodeQueryEnabled}
+            onSwitchChange={onEpisodeQueryToggle}
             switchDataTestSubj="episodeScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_EPISODES_SUBTITLE}
           >
             <UseField path="scopeEpisodeQuery">
               {() => (
-                <EpisodeMatcherInput
-                  value={episodeQuery}
-                  onChange={setEpisodeQuery}
+                <EuiFormRow
                   fullWidth
-                  data-test-subj="maintenanceWindowEpisodeDataFilterInput"
-                  placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
-                />
+                  isInvalid={episodeQueryErrors.length !== 0}
+                  error={episodeQueryErrors[0]}
+                >
+                  <EpisodeMatcherInput
+                    value={episodeQuery}
+                    onChange={onEpisodeQueryChange}
+                    fullWidth
+                    data-test-subj="maintenanceWindowEpisodeDataFilterInput"
+                    placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
+                  />
+                </EuiFormRow>
               )}
             </UseField>
           </ScopeSection>

@@ -203,6 +203,13 @@ export const CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const CREATE_FORM_EPISODE_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.episodeQuery.emptyErrorMessage',
+  {
+    defaultMessage: 'Episode filter is required.',
+  }
+);
+
 export const CREATE_FORM_RECURRING_SUMMARY_PREFIX = (summary: string) =>
   i18n.translate('xpack.maintenanceWindows.createForm.recurringSummaryPrefix', {
     defaultMessage: 'Repeats {summary}',
