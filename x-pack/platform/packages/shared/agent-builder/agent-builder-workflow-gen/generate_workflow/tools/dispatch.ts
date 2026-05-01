@@ -28,10 +28,12 @@ export const dispatchToolCall = async (
   deps: LookupDeps
 ): Promise<DispatchResult> => {
   switch (call.toolName as ToolName) {
+    // set whole yaml tool
     case TOOL_NAMES.setYaml: {
       const newYaml = call.args.yaml as string;
       return { yaml: newYaml, message: { success: true, data: { length: newYaml.length } } };
     }
+    // atomic edition tools
     case TOOL_NAMES.insertStep: {
       const result = insertStep(state.yaml, call.args.step, call.args.insertAfterStep);
       return result.success
@@ -61,6 +63,7 @@ export const dispatchToolCall = async (
         ? { yaml: result.yaml, message: { success: true } }
         : { message: { success: false, error: result.error } };
     }
+    // knowledge tools
     case TOOL_NAMES.getStepDefinitions: {
       const data = await lookupStepDefinitions(call.args, deps);
       return { message: { success: true, data } };

@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { ConnectorContractUnion } from '@kbn/workflows';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
   prefetchTriggerDefinitions,
 } from './prefetch';
 
-const buildExtensionsStub = (customSteps: BaseStepDefinition[] = []) =>
+const buildApi = (
+  overrides: Partial<{
+    getAvailableConnectors: jest.Mock;
+    getAllConnectors: jest.Mock;
+  }> = {}
+) =>
   ({
-    getAllStepDefinitions: jest.fn().mockReturnValue(customSteps),
-    getStepDefinition: jest.fn(),
-    hasStepDefinition: jest.fn(),
-    isReady: jest.fn().mockResolvedValue(undefined),
-    getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
-    getTriggerDefinition: jest.fn(),
-    getClient: jest.fn(),
+    getAvailableConnectors:
+      overrides.getAvailableConnectors ??
+      jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+    getAllConnectors: overrides.getAllConnectors ?? jest.fn().mockReturnValue([]),
   } as any);
 
 describe('prefetch helpers', () => {
   describe('prefetchConnectors', () => {
     it('returns compact summaries from a connectorTypes map with sub-actions', async () => {
-      const api = {
+      const api = buildApi({
         getAvailableConnectors: jest.fn().mockResolvedValue({
           connectorTypes: {
             '.slack': {
@@ -42,14 +44,9 @@ describe('prefetch helpers', () => {
           },
           totalConnectors: 2,
         }),
-      } as any;
-
-      const result = await prefetchConnectors({
-        api,
-        spaceId: 'default',
-        request: {} as any,
-        workflowsExtensions: buildExtensionsStub(),
       });
+
+      const result = await prefetchConnectors({ api, spaceId: 'default', request: {} as any });
 
       expect(result).toEqual([
         { id: 'slack-1', name: 'Eng Slack', actionTypeId: '.slack', stepTypes: ['slack'] },
@@ -66,10 +63,9 @@ describe('prefetch helpers', () => {
   describe('prefetchStepDefinitions', () => {
     it('returns id/label/description/category for built-ins and connector-derived steps', async () => {
       const result = await prefetchStepDefinitions({
-        api: { getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }) } as any,
+        api: buildApi(),
         spaceId: 'default',
         request: {} as any,
-        workflowsExtensions: buildExtensionsStub(),
       });
 
       expect(result.length).toBeGreaterThan(0);
@@ -86,10 +82,9 @@ describe('prefetch helpers', () => {
 
     it('excludes deprecated steps', async () => {
       const result = await prefetchStepDefinitions({
-        api: { getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }) } as any,
+        api: buildApi(),
         spaceId: 'default',
         request: {} as any,
-        workflowsExtensions: buildExtensionsStub(),
       });
 
       for (const def of result) {
@@ -97,35 +92,43 @@ describe('prefetch helpers', () => {
       }
     });
 
-    it('merges custom step definitions from workflowsExtensions', async () => {
+    it('includes connector contracts returned by api.getAllConnectors (e.g. elasticsearch.request)', async () => {
+      const esRequest = {
+        type: 'elasticsearch.request',
+        summary: 'Elasticsearch Request',
+        description: 'Make a generic request to an Elasticsearch API',
+        paramsSchema: {},
+        outputSchema: {},
+      } as unknown as ConnectorContractUnion;
+
       const customStep = {
-        id: 'agent_builder.run_agent',
-        label: 'Run Agent',
+        type: 'agent_builder.run_agent',
+        summary: 'Run Agent',
         description: 'Invokes an Agent Builder agent.',
-        category: 'ai',
-        inputSchema: {} as any,
-        outputSchema: {} as any,
-      } as unknown as BaseStepDefinition;
+        paramsSchema: {},
+        outputSchema: {},
+      } as unknown as ConnectorContractUnion;
+
+      const api = buildApi({
+        getAllConnectors: jest.fn().mockReturnValue([esRequest, customStep]),
+      });
 
       const result = await prefetchStepDefinitions({
-        api: {
-          getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
-        } as any,
+        api,
         spaceId: 'default',
         request: {} as any,
-        workflowsExtensions: buildExtensionsStub([customStep]),
       });
 
       const ids = result.map((d) => d.id);
+      expect(ids).toContain('elasticsearch.request');
       expect(ids).toContain('agent_builder.run_agent');
 
-      const entry = result.find((d) => d.id === 'agent_builder.run_agent');
+      const entry = result.find((d) => d.id === 'elasticsearch.request');
       expect(entry).toEqual(
         expect.objectContaining({
-          id: 'agent_builder.run_agent',
-          label: 'Run Agent',
-          description: 'Invokes an Agent Builder agent.',
-          category: 'ai',
+          id: 'elasticsearch.request',
+          label: 'Elasticsearch Request',
+          category: 'elasticsearch',
         })
       );
     });

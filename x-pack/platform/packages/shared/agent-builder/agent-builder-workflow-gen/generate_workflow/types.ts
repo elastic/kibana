@@ -11,7 +11,6 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 /**
  * Public options for {@link generateWorkflow}.
@@ -38,8 +37,6 @@ export interface GenerateWorkflowDeps {
   spaceId: string;
   /** Workflows-management API for connector and validation lookups. */
   workflowsApi: WorkflowsManagementApi;
-  /** Workflows-extensions start contract — exposes custom step / trigger registries. */
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 export type GenerateWorkflowParams = GenerateWorkflowOptions & GenerateWorkflowDeps;

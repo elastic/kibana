@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
 import {
   buildOutputSummary,
   buildStepParamsSummary,
@@ -56,5 +56,26 @@ export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAg
     ...(configParams && configParams.length > 0 ? { configParams } : {}),
     ...(outputSummary ? { outputSummary } : {}),
     examples: step.documentation?.examples,
+  };
+}
+
+export function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
+  const connectorId = connector.hasConnectorId || 'none';
+  const inputParams = buildStepParamsSummary(connector.paramsSchema);
+  const configParams = connector.configSchema
+    ? buildStepParamsSummary(connector.configSchema)
+    : undefined;
+  const outputSummary = buildOutputSummary(connector.outputSchema);
+
+  return {
+    id: connector.type,
+    label: connector.summary ?? connector.description ?? connector.type,
+    description: truncateDescription(connector.description),
+    category: categorizeConnectorType(connector.type),
+    connectorId,
+    ...(inputParams.length > 0 ? { inputParams } : {}),
+    ...(configParams && configParams.length > 0 ? { configParams } : {}),
+    ...(outputSummary ? { outputSummary } : {}),
+    examples: connector.examples?.snippet ? [connector.examples.snippet] : undefined,
   };
 }

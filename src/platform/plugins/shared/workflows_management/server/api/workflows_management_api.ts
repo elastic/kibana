@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
+  ConnectorContractUnion,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
@@ -32,6 +33,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { getAllConnectors as getAllSchemaConnectors } from '../../common/schema';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -640,6 +642,18 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request);
+  }
+
+  /**
+   * Returns the full list of connector contracts known to the workflow system —
+   * static internal connectors (`console`, `elasticsearch.request`,
+   * `kibana.request`), generated Elasticsearch and Kibana API contracts, and
+   * any step definitions registered via `workflowsExtensions`. Does NOT include
+   * the dynamic Kibana action-type connectors — those are surfaced via
+   * {@link getAvailableConnectors}.
+   */
+  public getAllConnectors(): ConnectorContractUnion[] {
+    return getAllSchemaConnectors();
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {

@@ -10,6 +10,7 @@ import {
   formatStepDefinitionsBlock,
   formatTriggersBlock,
 } from './format_prefetched';
+import { getWorkflowBaseDocumentation } from './workflow_docs';
 import type { PrefetchedContext } from '../types';
 
 export const createSystemPrompt = ({
@@ -18,13 +19,20 @@ export const createSystemPrompt = ({
 }: {
   prefetched: PrefetchedContext;
   additionalInstructions?: string;
-}): string => `You generate Elastic workflow YAML definitions from natural-language descriptions.
+}): string => {
+  return `You generate Elastic workflow YAML definitions from natural-language descriptions.
 
-You have access to a set of tools to (a) build the workflow YAML and (b) look up
-the full schema for any step type or trigger type when you need details beyond
-the compact summaries below.
+Your task is to examine the information provided by the user and generate a workflow YAML definition based on the provided information.
 
-## Available step types (compact summary)
+You have access to a set of tools to:
+(a) build the workflow YAML
+(b) look up the full schema for any step type or trigger type when you need details about them
+
+${getWorkflowBaseDocumentation()}
+
+# Available steps and connectors
+
+## Available step types
 
 ${formatStepDefinitionsBlock(prefetched.stepDefinitions)}
 
@@ -34,7 +42,7 @@ Use \`get_step_definitions\` to fetch more details:
 - for collapsed families shown above as \`<prefix>.*\`, pass \`search="<prefix>"\`
   to enumerate the sub-actions.
 
-## Available trigger types (compact summary)
+## Available trigger types
 
 ${formatTriggersBlock(prefetched.triggerDefinitions)}
 
@@ -59,6 +67,7 @@ ${formatConnectorsBlock(prefetched.connectors)}
   PagerDuty, etc.
 
 ${additionalInstructions ? `## Additional instructions\n\n${additionalInstructions}` : ''}`;
+};
 
 export const createUserPrompt = ({
   nlQuery,
@@ -66,14 +75,21 @@ export const createUserPrompt = ({
 }: {
   nlQuery: string;
   additionalContext?: string;
-}): string =>
-  `<user-query>\n${nlQuery}\n</user-query>${
-    additionalContext ? `\n\n<additional-context>\n${additionalContext}\n</additional-context>` : ''
-  }`;
+}): string => {
+  return `Generate a valid workflow definition based on the following information:
 
-export const createValidationFailureMessage = (errors: string[]): string =>
-  `The workflow YAML you produced failed validation with the following errors:
+<user-query>
+${nlQuery}
+</user-query>
+${
+  additionalContext ? `\n\n<additional-context>\n${additionalContext}\n</additional-context>` : ''
+}`;
+};
+
+export const createValidationFailureMessage = (errors: string[]): string => {
+  return `The workflow YAML you produced failed validation with the following errors:
 
 ${errors.map((e) => `- ${e}`).join('\n')}
 
 Fix the issues and update the workflow.`;
+};

@@ -6,17 +6,15 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions, builtInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
 interface DepsBase {
   api: WorkflowsManagementApi;
   spaceId: string;
   request: KibanaRequest;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 const toSummary = (s: BaseStepDefinition): StepDefinitionSummary => ({
@@ -24,6 +22,13 @@ const toSummary = (s: BaseStepDefinition): StepDefinitionSummary => ({
   label: s.label,
   description: s.description,
   category: s.category as string,
+});
+
+const toConnectorSummary = (c: ConnectorContractUnion): StepDefinitionSummary => ({
+  id: c.type,
+  label: c.summary ?? c.description ?? c.type,
+  description: c.description ?? undefined,
+  category: categorizeConnectorType(c.type),
 });
 
 export const prefetchConnectors = async ({
@@ -59,7 +64,6 @@ export const prefetchStepDefinitions = async ({
   api,
   spaceId,
   request,
-  workflowsExtensions,
 }: DepsBase): Promise<StepDefinitionSummary[]> => {
   const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
 
@@ -67,16 +71,26 @@ export const prefetchStepDefinitions = async ({
     .filter((s) => !s.deprecation)
     .map(toSummary);
 
-  // Custom step definitions registered via workflowsExtensions
-  // (e.g. agent_builder.run_agent, agent_builder.rerank).
-  await workflowsExtensions.isReady();
-  const customStepDefs = workflowsExtensions.getAllStepDefinitions();
-  const customSummaries: StepDefinitionSummary[] = customStepDefs
-    .filter((s) => !builtInIds.has(s.id) && !s.deprecation)
-    .map(toSummary);
+  // All connector contracts known to the workflow system: static internal
+  // connectors (`elasticsearch.request`, `kibana.request`, …), generated
+  // Elasticsearch / Kibana API contracts (`elasticsearch.indices.create`,
+  // `elasticsearch.search`, …), plus step definitions registered via
+  // `workflowsExtensions`. Already excludes built-in flow control / data.* /
+  // ai.* steps which come from `builtInStepDefinitions` above.
+  const allConnectors = api.getAllConnectors();
+  const allConnectorIds = new Set<string>();
+  const allConnectorSummaries: StepDefinitionSummary[] = [];
+  for (const c of allConnectors) {
+    if (builtInIds.has(c.type) || c.deprecation) continue;
+    allConnectorIds.add(c.type);
+    allConnectorSummaries.push(toConnectorSummary(c));
+  }
 
+  // Dynamic Kibana action-type connectors (slack, jira, inference.*, …).
+  // These are NOT in `getAllConnectors`; they're derived per-space from the
+  // user's configured action instances.
   const { connectorTypes } = await api.getAvailableConnectors(spaceId, request);
-  const connectorSummaries: StepDefinitionSummary[] = [];
+  const dynamicSummaries: StepDefinitionSummary[] = [];
 
   for (const [actionTypeId, info] of Object.entries(connectorTypes)) {
     if (info.enabled === false) continue;
@@ -88,8 +102,8 @@ export const prefetchStepDefinitions = async ({
         : [baseType];
 
     for (const stepType of stepTypes) {
-      if (builtInIds.has(stepType)) continue;
-      connectorSummaries.push({
+      if (builtInIds.has(stepType) || allConnectorIds.has(stepType)) continue;
+      dynamicSummaries.push({
         id: stepType,
         label: info.displayName ?? stepType,
         category: categorizeConnectorType(stepType),
@@ -97,7 +111,7 @@ export const prefetchStepDefinitions = async ({
     }
   }
 
-  return [...builtIns, ...customSummaries, ...connectorSummaries];
+  return [...builtIns, ...allConnectorSummaries, ...dynamicSummaries];
 };
 
 export const prefetchTriggerDefinitions = async (): Promise<TriggerDefinitionSummary[]> =>

@@ -14,10 +14,10 @@ import {
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   categorizeConnectorType,
   formatBuiltInStep,
+  formatConnectorStep,
   truncateDescription,
   type StepDefinitionForAgent,
 } from './lookup_helpers';
@@ -34,15 +34,12 @@ export interface LookupDeps {
   api: WorkflowsManagementApi;
   spaceId: string;
   request: KibanaRequest;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
-const buildConnectorStepEntries = async ({
-  api,
-  spaceId,
-  request,
-}: LookupDeps): Promise<StepDefinitionForAgent[]> => {
-  const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
+const buildDynamicConnectorStepEntries = async (
+  { api, spaceId, request }: LookupDeps,
+  knownIds: Set<string>
+): Promise<StepDefinitionForAgent[]> => {
   const { connectorTypes } = await api.getAvailableConnectors(spaceId, request);
 
   const out: StepDefinitionForAgent[] = [];
@@ -55,7 +52,7 @@ const buildConnectorStepEntries = async ({
         : [baseType];
 
     for (const stepType of stepTypes) {
-      if (builtInIds.has(stepType)) continue;
+      if (knownIds.has(stepType)) continue;
       out.push({
         id: stepType,
         label: info.displayName ?? stepType,
@@ -72,17 +69,20 @@ export const lookupStepDefinitions = async (
   args: { stepType?: string; search?: string },
   deps: LookupDeps
 ): Promise<unknown> => {
-  await deps.workflowsExtensions.isReady();
-
   const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
-  const customStepDefs = deps.workflowsExtensions
-    .getAllStepDefinitions()
-    .filter((s) => !builtInIds.has(s.id));
-
   const builtIns = builtInStepDefinitions.map(formatBuiltInStep);
-  const customs = customStepDefs.map(formatBuiltInStep);
-  const connectors = await buildConnectorStepEntries(deps);
-  const all = [...builtIns, ...customs, ...connectors];
+
+  const allConnectors = deps.api
+    .getAllConnectors()
+    .filter((c) => !builtInIds.has(c.type) && !c.deprecation);
+  const allConnectorEntries = allConnectors.map(formatConnectorStep);
+
+  const knownIds = new Set<string>(builtInIds);
+  for (const c of allConnectors) knownIds.add(c.type);
+
+  const dynamicEntries = await buildDynamicConnectorStepEntries(deps, knownIds);
+
+  const all = [...builtIns, ...allConnectorEntries, ...dynamicEntries];
 
   let filtered = all;
   if (args.stepType) {

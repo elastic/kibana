@@ -19,7 +19,6 @@
     "@kbn/zod",
     "@kbn/workflows",
     "@kbn/workflows-yaml",
-    "@kbn/workflows-management-plugin",
-    "@kbn/workflows-extensions"
+    "@kbn/workflows-management-plugin"
   ]
 }

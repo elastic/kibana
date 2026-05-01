@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
@@ -31,7 +30,6 @@ export interface CreateGraphArgs {
   request: KibanaRequest;
   spaceId: string;
   logger: Logger;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 export const createGenerateWorkflowGraph = ({
@@ -39,16 +37,15 @@ export const createGenerateWorkflowGraph = ({
   api,
   request,
   spaceId,
-  workflowsExtensions,
 }: CreateGraphArgs) => {
   const tools = buildBoundTools();
   const modelWithTools = model.chatModel.bindTools!(tools);
-  const dispatchDeps = { api, spaceId, request, workflowsExtensions };
+  const dispatchDeps = { api, spaceId, request };
 
   const prefetchNode = async (_state: StateType): Promise<Partial<StateType>> => {
     const [connectors, stepDefinitions, triggerDefinitions] = await Promise.all([
-      prefetchConnectors({ api, spaceId, request, workflowsExtensions }),
-      prefetchStepDefinitions({ api, spaceId, request, workflowsExtensions }),
+      prefetchConnectors({ api, spaceId, request }),
+      prefetchStepDefinitions({ api, spaceId, request }),
       prefetchTriggerDefinitions(),
     ]);
 
