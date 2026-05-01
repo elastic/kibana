@@ -97,7 +97,39 @@ describe('export_exception_lists_and_items', () => {
       );
     });
 
-    it.todo('does not include expired exceptions by default');
+    it('excludes expired exceptions when includeExpiredExceptions is false', async () => {
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({
+        ...baseOptions,
+        includeExpiredExceptions: false,
+      });
+
+      expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringMatching(
+            /exception-list\.attributes\.expire_time > "[^"]+" OR NOT exception-list\.attributes\.expire_time: \*/
+          ),
+        })
+      );
+    });
+
+    it('does not constrain item retrieval by expiration when includeExpiredExceptions is true', async () => {
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({
+        ...baseOptions,
+        includeExpiredExceptions: true,
+      });
+
+      expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: undefined,
+        })
+      );
+    });
 
     it('only includes shared detection-type exception lists', async () => {
       // The positive `type: detection` filter implicitly excludes both
