@@ -108,7 +108,7 @@ export function startQueryPerformanceTracking(
         const timeToData = now - (performanceState.lastLoadStartTime ?? now);
         const completeLoadDuration =
           (performanceState.creationEndTime ?? now) - (performanceState.creationStartTime ?? now);
-        // console.log({ timeToData, loadType, test: dashboard.refreshInterval$?.getValue() });
+
         if (loadType === 'dashboardSubsequentLoad') {
           dashboard.userActivity$.next({ type: 'refresh', end: Date.now() });
         }

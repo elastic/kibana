@@ -265,7 +265,7 @@ export class DashboardPlugin
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        performance.mark(DASHBOARD_DURATION_START_MARK, { detail: { date: Date.now() } });
+        performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const [{ mountApp }, { initializeDashboardApiServices }] = await Promise.all([
