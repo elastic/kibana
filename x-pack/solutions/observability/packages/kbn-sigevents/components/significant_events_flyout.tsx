@@ -39,6 +39,7 @@ export interface SignificantEvent {
   subtitle: string;
   severityLabel: string;
   severityColor: EuiBadgeProps['color'];
+  timestamp?: string;
 }
 
 export interface SignificantEventsFlyoutProps {
@@ -324,13 +325,21 @@ export function SignificantEventsFlyout({
               <h2 id={childFlyoutHeadingId}>{selectedEvent.label}</h2>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('xpack.observability.significantEventsFlyout.p.janLabel', {
-                  defaultMessage: 'Jan 18, 2025 @ 14:12:31',
-                })}
-              </p>
-            </EuiText>
+            {selectedEvent.timestamp && (
+              <EuiText size="s" color="subdued">
+                <p>
+                  {new Date(selectedEvent.timestamp).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                  })}
+                </p>
+              </EuiText>
+            )}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <SignificantEventDetailBody

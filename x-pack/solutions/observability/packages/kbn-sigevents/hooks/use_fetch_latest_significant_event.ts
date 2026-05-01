@@ -29,10 +29,17 @@ interface BlastRadiusItem {
 }
 
 interface CauseKiItem {
-  ki_id: string;
+  ki_id?: string;
   name: string;
   stream_name: string;
-  confirmed: boolean;
+  confirmed?: boolean;
+}
+
+interface DependencyEdge {
+  source: string;
+  target: string;
+  protocol: string;
+  exposure: 'exposed' | 'not_exposed';
 }
 
 interface SignificantEventDocument {
@@ -46,8 +53,9 @@ interface SignificantEventDocument {
   root_cause: string;
   rule_names: string[];
   stream_names: string[];
-  blast_radius: BlastRadiusItem[];
+  blast_radius?: BlastRadiusItem[];
   cause_kis: CauseKiItem[];
+  dependency_edges?: DependencyEdge[];
   criticality: number;
   recommended_action: 'escalate' | 'monitor' | 'resolve';
   impact: 'critical' | 'high' | 'medium' | 'low';
@@ -92,7 +100,8 @@ function mapImpactToSeverity(impact: SignificantEventDocument['impact']): {
 function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEventData {
   const severity = mapImpactToSeverity(doc.impact);
 
-  const confirmedServices = (doc.blast_radius ?? [])
+  // Prefer blast_radius (confirmed items) when available; fall back to dependency_edges
+  const confirmedBlastRadius = (doc.blast_radius ?? [])
     .filter((item) => item.confirmed)
     .map((item) => ({
       id: item.ki_id,
@@ -100,22 +109,52 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
       iconType: 'package' as const,
     }));
 
-  const impactedCards: ImpactedCardItem[] = [
-    ...(doc.cause_kis ?? [])
-      .filter((item) => item.confirmed)
-      .map((item) => ({
-        id: `cause-${item.ki_id}`,
-        label: 'Root Cause',
-        value: item.name,
-        iconType: 'warning' as const,
-      })),
-    ...confirmedServices.slice(0, 2).map((service) => ({
-      id: `service-${service.id}`,
-      label: 'Service',
-      value: service.label,
+  const edgeDerivedServices: ImpactedService[] = (doc.dependency_edges ?? []).reduce<
+    ImpactedService[]
+  >((acc, edge) => {
+    for (const name of [edge.source, edge.target]) {
+      if (name && !acc.some((s) => s.id === name)) {
+        acc.push({ id: name, label: name, iconType: 'package' as const });
+      }
+    }
+    return acc;
+  }, []);
+
+  const impactedServices =
+    confirmedBlastRadius.length > 0 ? confirmedBlastRadius : edgeDerivedServices;
+
+  // Build impacted cards from cause_kis (root cause) + exposed dependency edges
+  const causeCards: ImpactedCardItem[] = (doc.cause_kis ?? [])
+    .filter((item) => item.name)
+    .map((item) => ({
+      id: `cause-${item.ki_id ?? item.name}`,
+      label: 'Root Cause',
+      value: item.name,
+      iconType: 'warning' as const,
+    }));
+
+  const exposedEdgeCards: ImpactedCardItem[] = (doc.dependency_edges ?? [])
+    .filter((edge) => edge.exposure === 'exposed')
+    .map((edge) => ({
+      id: `exposed-${edge.source}`,
+      label: 'Impacted',
+      value: edge.source,
       iconType: 'package' as const,
-    })),
-  ];
+    }));
+
+  // If blast_radius was available, use the old card logic; otherwise use edges
+  const impactedCards: ImpactedCardItem[] =
+    confirmedBlastRadius.length > 0
+      ? [
+          ...causeCards,
+          ...confirmedBlastRadius.slice(0, 2).map((service) => ({
+            id: `service-${service.id}`,
+            label: 'Service',
+            value: service.label,
+            iconType: 'package' as const,
+          })),
+        ]
+      : [...causeCards, ...exposedEdgeCards];
 
   const detailFields: SignificantEventDetailFields = {
     id: doc.event_id,
@@ -131,7 +170,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     blastRadiusScore: doc.criticality ?? 0,
     mainEventTitle: doc.title ?? '',
     description: doc.summary || (doc.recommendations ?? [])[0] || '',
-    impactedServices: confirmedServices,
+    impactedServices,
     impactedCards,
     severityLabel: severity.label,
     severityColor: severity.color,

@@ -111,12 +111,12 @@ export const Act2SomethingIsWrong: Story = {
     severityLabel: mainPromotedEvent?.severityLabel ?? 'Critical',
     severityColor: mainPromotedEvent?.severityColor ?? 'danger',
     impactedServices: mainPromotedEvent?.impactedServices ?? [
-      { id: 'payment', label: 'payment', iconType: 'package' },
-      { id: 'checkout', label: 'checkout', iconType: 'package' },
+      { id: 'payment', label: 'payment', iconType: 'node' },
+      { id: 'checkout', label: 'checkout', iconType: 'node' },
     ],
     impactedCards: mainPromotedEvent?.impactedCards ?? [
-      { id: 'cause-payment', label: 'Cause', value: 'payment', iconType: 'package' },
-      { id: 'service-checkout', label: 'Service', value: 'checkout', iconType: 'package' },
+      { id: 'cause-payment', label: 'Cause', value: 'payment', iconType: 'node' },
+      { id: 'service-checkout', label: 'Service', value: 'checkout', iconType: 'node' },
     ],
     otherPromotedEvents: otherPromotedEventsData,
     lowerPriorityEvents: acknowledgedEvents,

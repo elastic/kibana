@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useId } from 'react';
 
 export interface RootCauseIllustrationProps {
   size?: number;
@@ -16,6 +16,7 @@ export function RootCauseIllustration({
   size = 48,
   'aria-hidden': ariaHidden = true,
 }: RootCauseIllustrationProps) {
+  const maskId = useId();
   return (
     <svg
       width={size}
@@ -27,7 +28,7 @@ export function RootCauseIllustration({
       data-test-subj="sigeventsOverviewRootCauseIllustration"
     >
       <mask
-        id="rootCauseIllustrationMask"
+        id={maskId}
         style={{ maskType: 'luminance' }}
         maskUnits="userSpaceOnUse"
         x="2"
@@ -37,7 +38,7 @@ export function RootCauseIllustration({
       >
         <path d="M48.8353 3.25H2.84375V48.8028H48.8353V3.25Z" fill="white" />
       </mask>
-      <g mask="url(#rootCauseIllustrationMask)">
+      <g mask={`url(#${maskId})`}>
         <path
           d="M27.8125 5.60938C16.4822 5.60938 7.29688 14.7947 7.29688 26.125C7.29688 37.4553 16.4822 46.6406 27.8125 46.6406C39.1428 46.6406 48.3281 37.4553 48.3281 26.125C48.3281 14.7947 39.1428 5.60938 27.8125 5.60938ZM27.8125 40.4656C19.8906 40.4656 13.4678 34.0428 13.4678 26.1209C13.4678 18.1991 19.8906 11.7763 27.8125 11.7763C35.7344 11.7763 42.1572 18.1991 42.1572 26.1209C42.1572 34.0428 35.7344 40.4656 27.8125 40.4656Z"
           fill="#153385"

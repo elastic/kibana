@@ -20,6 +20,7 @@ describe('SignificantEventsFlyout', () => {
       subtitle: 'logs · fleet-coordination',
       severityLabel: 'Critical',
       severityColor: 'danger' as const,
+      timestamp: '2025-01-18T14:12:31.000Z',
     },
     {
       id: '2',
@@ -27,6 +28,7 @@ describe('SignificantEventsFlyout', () => {
       subtitle: 'metrics · identity',
       severityLabel: 'High',
       severityColor: 'warning' as const,
+      timestamp: '2025-01-17T09:45:00.000Z',
     },
   ];
 

@@ -99,6 +99,21 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apmSynthtraceEsClient }) => {
+      // Restore any events that were demoted during tests
+      await safeUpdateByQuery(esClient, {
+        index: SIGEVENTS_EVENTS_INDEX,
+        refresh: true,
+        script: {
+          source: "ctx._source.verdict = 'promoted'",
+          lang: 'painless',
+        },
+        query: {
+          bool: {
+            must: [{ term: { 'verdict.keyword': 'demoted' } }],
+            must_not: [{ prefix: { 'event_id.keyword': 'scout-event-' } }],
+          },
+        },
+      });
       await safeDeleteByQuery(esClient, {
         index: SIGEVENTS_EVENTS_INDEX,
         refresh: true,
@@ -309,24 +324,6 @@ test.describe(
         await page.getByTestId('sigeventsViewAllKnowledgeIndicators').click();
         await page.waitForURL('**/app/streams/_discovery/knowledge_indicators');
         await expect(page).toHaveURL(/\/app\/streams\/_discovery\/knowledge_indicators/);
-      });
-
-      await test.step('restore promoted events', async () => {
-        // Restore any events that were demoted during this test
-        await safeUpdateByQuery(esClient, {
-          index: SIGEVENTS_EVENTS_INDEX,
-          refresh: true,
-          script: {
-            source: "ctx._source.verdict = 'promoted'",
-            lang: 'painless',
-          },
-          query: {
-            bool: {
-              must: [{ term: { 'verdict.keyword': 'demoted' } }],
-              must_not: [{ prefix: { 'event_id.keyword': 'scout-event-' } }],
-            },
-          },
-        });
       });
     });
 
