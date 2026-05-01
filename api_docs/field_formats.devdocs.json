@@ -1814,12 +1814,7 @@
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "dataViewFieldEditor",
-                "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/setup_environment.tsx"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "fieldFormats",
@@ -5190,12 +5185,7 @@
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "dataViewFieldEditor",
-                "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/setup_environment.tsx"
-              }
-            ],
+            "references": [],
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -6581,51 +6571,23 @@
         "references": [
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx"
-          },
-          {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/public/utils/format.ts"
-          },
-          {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/public/utils/format.ts"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/lib/create_field_formatter.ts"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/lib/create_field_formatter.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "@kbn/discover-utils",
