@@ -23,7 +23,7 @@ import type {
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
 import {
-  VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED,
+  VALUE_LIST_ELASTICSEARCH_TYPES_ALPHABETICAL,
   type ListSchema,
   type Type,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -32,7 +32,7 @@ import { useImportList } from '@kbn/securitysolution-list-hooks';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export const listFormOptions: EuiSelectOption[] = VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED.map(
+export const listFormOptions: EuiSelectOption[] = VALUE_LIST_ELASTICSEARCH_TYPES_ALPHABETICAL.map(
   (listType) => ({
     value: listType,
     text: i18n.getListTypeSelectOptionText(listType),

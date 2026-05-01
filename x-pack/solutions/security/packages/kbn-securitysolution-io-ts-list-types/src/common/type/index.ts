@@ -48,6 +48,39 @@ export type Type = keyof typeof valueListElasticsearchDataTypes;
 export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
 
 /**
+ * Whether the value-list items UI may offer sorting on the list item "value" column for this ES type.
+ * Disabled for analyzed text, binary blobs, and range fields where sort-by-value is not appropriate.
+ */
+const valueListItemValueSortableByType = {
+  binary: false,
+  boolean: true,
+  byte: true,
+  date: true,
+  date_nanos: true,
+  date_range: false,
+  double: true,
+  double_range: false,
+  float: true,
+  float_range: false,
+  geo_point: true,
+  geo_shape: true,
+  half_float: true,
+  integer: true,
+  integer_range: false,
+  ip: true,
+  ip_range: false,
+  keyword: true,
+  long: true,
+  long_range: false,
+  shape: true,
+  short: true,
+  text: false,
+} as const satisfies Record<Type, boolean>;
+
+export const isValueListItemValueSortable = (listType: Type): boolean =>
+  valueListItemValueSortableByType[listType];
+
+/**
  * Preferred ordering for UI pickers (common types first, then numeric, date, ranges, geo).
  * Compile-time check: every {@link Type} must appear exactly once.
  */
@@ -86,3 +119,11 @@ type AssertExhaustiveOrderedList = Exclude<Type, TypesOrdered> extends never
 // If this fails to typecheck, update VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED to match Type.
 const _valueListTypesOrderedIsExhaustive: AssertExhaustiveOrderedList = true;
 void _valueListTypesOrderedIsExhaustive;
+
+/**
+ * Alphabetical ordering of value list Elasticsearch types (e.g. value list import type dropdown).
+ * Derived from {@link VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED} so every {@link Type} is included once.
+ */
+export const VALUE_LIST_ELASTICSEARCH_TYPES_ALPHABETICAL: Type[] = [
+  ...VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED,
+].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));

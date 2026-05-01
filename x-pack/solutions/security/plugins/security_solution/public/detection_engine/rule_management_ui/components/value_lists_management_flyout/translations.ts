@@ -134,102 +134,111 @@ export const LIST_TYPES_RADIO_LABEL = i18n.translate(
   }
 );
 
-/** User-visible label for a value list type (matches Elasticsearch field type names). */
-export const getListTypeSelectOptionText = (listType: Type): string => {
-  switch (listType) {
-    case 'binary':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.binary', {
-        defaultMessage: 'binary',
-      });
-    case 'boolean':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.boolean', {
-        defaultMessage: 'boolean',
-      });
-    case 'byte':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.byte', {
-        defaultMessage: 'byte',
-      });
-    case 'date':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.date', {
-        defaultMessage: 'date',
-      });
-    case 'date_nanos':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.dateNanos', {
-        defaultMessage: 'date_nanos',
-      });
-    case 'date_range':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.dateRange', {
-        defaultMessage: 'date_range',
-      });
-    case 'double':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.double', {
-        defaultMessage: 'double',
-      });
-    case 'double_range':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.doubleRange', {
-        defaultMessage: 'double_range',
-      });
-    case 'float':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.float', {
-        defaultMessage: 'float',
-      });
-    case 'float_range':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.floatRange', {
-        defaultMessage: 'float_range',
-      });
-    case 'geo_point':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.geoPoint', {
-        defaultMessage: 'geo_point',
-      });
-    case 'geo_shape':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.geoShape', {
-        defaultMessage: 'geo_shape',
-      });
-    case 'half_float':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.halfFloat', {
-        defaultMessage: 'half_float',
-      });
-    case 'integer':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.integer', {
-        defaultMessage: 'integer',
-      });
-    case 'integer_range':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.integerRange', {
-        defaultMessage: 'integer_range',
-      });
-    case 'ip':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.ip', {
-        defaultMessage: 'ip',
-      });
-    case 'ip_range':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.ipRange', {
-        defaultMessage: 'ip_range',
-      });
-    case 'keyword':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.keyword', {
-        defaultMessage: 'keyword',
-      });
-    case 'long':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.long', {
-        defaultMessage: 'long',
-      });
-    case 'long_range':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.longRange', {
-        defaultMessage: 'long_range',
-      });
-    case 'shape':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.shape', {
-        defaultMessage: 'shape',
-      });
-    case 'short':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.short', {
-        defaultMessage: 'short',
-      });
-    case 'text':
-      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.text', {
-        defaultMessage: 'text',
-      });
+const valueListTypeDropDownOptionMessages = {
+  binary: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeBinaryDropDownOptionLabel',
+    defaultMessage: 'Binary',
+  },
+  boolean: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeBooleanDropDownOptionLabel',
+    defaultMessage: 'Boolean',
+  },
+  byte: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeByteDropDownOptionLabel',
+    defaultMessage: 'Byte',
+  },
+  date: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeDateDropDownOptionLabel',
+    defaultMessage: 'Date',
+  },
+  date_nanos: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeDateNanosDropDownOptionLabel',
+    defaultMessage: 'Date (nanoseconds)',
+  },
+  date_range: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeDateRangeDropDownOptionLabel',
+    defaultMessage: 'Date range',
+  },
+  double: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeDoubleDropDownOptionLabel',
+    defaultMessage: 'Double',
+  },
+  double_range: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeDoubleRangeDropDownOptionLabel',
+    defaultMessage: 'Double range',
+  },
+  float: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeFloatDropDownOptionLabel',
+    defaultMessage: 'Float',
+  },
+  float_range: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeFloatRangeDropDownOptionLabel',
+    defaultMessage: 'Float range',
+  },
+  geo_point: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeGeoPointDropDownOptionLabel',
+    defaultMessage: 'Geo point',
+  },
+  geo_shape: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeGeoShapeDropDownOptionLabel',
+    defaultMessage: 'Geo shape',
+  },
+  half_float: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeHalfFloatDropDownOptionLabel',
+    defaultMessage: 'Half float',
+  },
+  integer: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeIntegerDropDownOptionLabel',
+    defaultMessage: 'Integer',
+  },
+  integer_range: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeIntegerRangeDropDownOptionLabel',
+    defaultMessage: 'Integer range',
+  },
+  ip: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeIpDropDownOptionLabel',
+    defaultMessage: 'IP',
+  },
+  ip_range: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeIpRangeDropDownOptionLabel',
+    defaultMessage: 'IP range',
+  },
+  keyword: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeKeywordDropDownOptionLabel',
+    defaultMessage: 'Keyword',
+  },
+  long: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeLongDropDownOptionLabel',
+    defaultMessage: 'Long',
+  },
+  long_range: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeLongRangeDropDownOptionLabel',
+    defaultMessage: 'Long range',
+  },
+  shape: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeShapeDropDownOptionLabel',
+    defaultMessage: 'Shape',
+  },
+  short: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeShortDropDownOptionLabel',
+    defaultMessage: 'Short',
+  },
+  text: {
+    id: 'xpack.securitySolution.lists.valueListsForm.listTypeTextDropDownOptionLabel',
+    defaultMessage: 'Text',
+  },
+} as const satisfies Record<
+  Type,
+  {
+    id: string;
+    defaultMessage: string;
   }
+>;
+
+/** User-visible label for a value list type in the import type dropdown (Elasticsearch field types). */
+export const getListTypeSelectOptionText = (listType: Type): string => {
+  const { id, defaultMessage } = valueListTypeDropDownOptionMessages[listType];
+  return i18n.translate(id, { defaultMessage });
 };
 
 export const REFERENCE_MODAL_TITLE = i18n.translate(
