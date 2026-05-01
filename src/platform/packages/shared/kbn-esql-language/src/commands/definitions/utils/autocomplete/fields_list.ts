@@ -14,8 +14,13 @@ import {
   commaCompleteItem,
   assignCompletionItem,
 } from '../../../registry/complete_items';
-import type { Location } from '../../../registry/types';
-import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../../registry/types';
+import {
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
+  type Location,
+} from '../../../registry/types';
+import { ReplacementRangeStrategyKind } from '../../../../language/autocomplete/utils/prefix_range';
 import { getAssignmentExpressionRoot } from '../expressions';
 import { suggestForExpression } from './expressions';
 import { withAutoSuggest } from './helpers';
@@ -103,9 +108,8 @@ export async function suggestFieldsList(
       const commaSuggestion = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
 
       if (endsWithWhitespace(innerText)) {
-        commaSuggestion.rangeToReplace = {
-          start: innerText.length - 1,
-          end: innerText.length,
+        commaSuggestion.replacementRangeStrategy = {
+          kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
         };
       }
 

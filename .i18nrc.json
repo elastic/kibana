@@ -38,7 +38,6 @@
     ],
     "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
-    "presentationPanel": "src/platform/plugins/private/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "src/platform/packages/shared/kbn-es-query/src",
     "kbnGridLayout": "src/platform/packages/private/kbn-grid-layout",

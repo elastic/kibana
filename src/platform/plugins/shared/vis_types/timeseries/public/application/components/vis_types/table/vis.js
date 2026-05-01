@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createReactFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -26,7 +26,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { visStyles } from '../_vis_types';
 
 import {
-  createCachedFieldValueFormatter,
+  createCachedReactFieldValueFormatter,
   getFieldsForTerms,
   getMultiFieldLabel,
   MULTI_FIELD_VALUES_SEPARATOR,
@@ -88,10 +88,9 @@ class TableVis extends Component {
       rowDisplay = pivotIds
         .map((item, index) => {
           const value = [row.key ?? null].flat()[index];
-          const formatted = fieldValuesFormatter(item, value, 'html');
+          const formatted = fieldValuesFormatter(item, value);
 
-          // eslint-disable-next-line react/no-danger
-          return <span dangerouslySetInnerHTML={{ __html: formatted ?? value }} />;
+          return <span>{formatted ?? value}</span>;
         })
         .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
     }
@@ -120,10 +119,9 @@ class TableVis extends Component {
         );
         const formatter =
           column.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(
+            ? createReactFieldFormatter(
                 getMetricsField(column.metrics),
                 fieldFormatMap,
-                'html',
                 hasColorRules
               )
             : createTickFormatter(column.formatter, column.value_template, getConfig);
@@ -145,8 +143,7 @@ class TableVis extends Component {
             className="eui-textRight"
             style={style}
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <span dangerouslySetInnerHTML={{ __html: value }} />
+            <span>{value}</span>
             {trend}
           </td>
         );
@@ -257,11 +254,10 @@ class TableVis extends Component {
         type,
       })
     );
-    const fieldValuesFormatter = createCachedFieldValueFormatter(
+    const fieldValuesFormatter = createCachedReactFieldValueFormatter(
       indexPattern,
       fields,
       this.fieldFormatsService,
-      undefined,
       model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
