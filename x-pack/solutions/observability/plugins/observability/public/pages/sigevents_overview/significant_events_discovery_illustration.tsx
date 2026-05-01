@@ -24,11 +24,15 @@ export function SignificantEventsDiscoveryIllustration() {
         ? import('../../assets/significant_events_discovery_light.svg')
         : import('../../assets/significant_events_discovery_dark.svg');
 
-    dynamicImageImport.then((module) => {
-      if (isMounted) {
-        setImageSrc(module.default);
-      }
-    });
+    dynamicImageImport
+      .then((module) => {
+        if (isMounted) {
+          setImageSrc(module.default);
+        }
+      })
+      .catch(() => {
+        // Illustration is decorative; swallow load failures silently.
+      });
 
     return () => {
       isMounted = false;

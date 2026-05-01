@@ -65,8 +65,8 @@ describe('SnoozeActionButton', () => {
     await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
 
     expect(await screen.findByTestId('alertEpisodeSnoozeForm')).toBeInTheDocument();
-    expect(screen.getByLabelText('Snooze duration value')).toBeInTheDocument();
-    expect(screen.getByLabelText('Snooze duration unit')).toBeInTheDocument();
+    expect(screen.getByText('Snooze notifications')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
   });
 
   it('closes popover after clicking Apply', async () => {
@@ -113,7 +113,7 @@ describe('SnoozeActionButton', () => {
     expect(mutate).toHaveBeenCalledWith({
       groupHash: 'gh-1',
       actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-      body: { expiry: expect.any(String) },
+      body: {},
     });
   });
 });

@@ -790,7 +790,6 @@ src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
-src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/private/vis_default_editor @elastic/kibana-visualizations
 src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
@@ -1300,6 +1299,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/sec
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -2533,8 +2533,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/solutions/search/test/functional_search/ @elastic/search-kibana
 /x-pack/solutions/search/test/api_integration/apis/search_playground/ @elastic/search-kibana
-/x-pack/platform/test/api_integration/apis/search_inference_endpoints/ @elastic/search-kibana
-/x-pack/platform/test/serverless/api_integration/test_suites/search_inference_endpoints/ @elastic/search-kibana
 
 # workplaceai
 /x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts @elastic/search-kibana @elastic/appex-qa

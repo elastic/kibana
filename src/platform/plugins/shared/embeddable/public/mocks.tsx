@@ -143,9 +143,9 @@ export function mockDrilldownsManager(): DrilldownsManager {
   };
 }
 
-export async function mockInitializeDrilldownsManager(
+export function mockInitializeDrilldownsManager(
   embeddableUuid: string,
   state: SerializedDrilldowns
-): Promise<DrilldownsManager> {
+): DrilldownsManager {
   return mockDrilldownsManager();
 }

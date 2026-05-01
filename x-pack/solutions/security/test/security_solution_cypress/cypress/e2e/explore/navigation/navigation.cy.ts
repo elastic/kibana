@@ -69,6 +69,9 @@ import {
   RULES_COVERAGE_URL,
   OSQUERY_URL,
   HOSTS_URL,
+  ENDPOINT_EXCEPTIONS_URL,
+  HOST_ISOLATION_EXCEPTIONS_URL,
+  TRUSTED_DEVICES_URL,
   CLOUD_NATIVE_VULN_MGMT_URL,
   DATA_QUALITY_URL,
   KUBERNETES_URL,
@@ -282,14 +285,19 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     navigateFromHeaderTo(ARTIFACTS);
     cy.url().should('include', ADMINISTRATION_URL_PREFIX);
   });
-  it('artifact tab deep links still resolve', () => {
-    visit(TRUSTED_APPS_URL);
-    cy.url().should('include', TRUSTED_APPS_URL);
-    visit(EVENT_FILTERS_URL);
-    cy.url().should('include', EVENT_FILTERS_URL);
-    visit(BLOCKLIST_URL);
-    cy.url().should('include', BLOCKLIST_URL);
-  });
+  for (const [artifactName, artifactUrl] of [
+    ['trusted apps', TRUSTED_APPS_URL],
+    ['event filters', EVENT_FILTERS_URL],
+    ['blocklist', BLOCKLIST_URL],
+    ['endpoint exceptions', ENDPOINT_EXCEPTIONS_URL],
+    ['host isolation exceptions', HOST_ISOLATION_EXCEPTIONS_URL],
+    ['trusted devices', TRUSTED_DEVICES_URL],
+  ]) {
+    it(`${artifactName} deep links still resolve`, () => {
+      visit(artifactUrl);
+      cy.url().should('include', artifactUrl);
+    });
+  }
   it('navigates to the CSP Benchmarks page', () => {
     navigateFromHeaderTo(CSP_BENCHMARKS);
     cy.url().should('include', CSP_BENCHMARKS_URL);

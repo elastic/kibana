@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { screen } from '@elastic/eui/lib/test/rtl';
+import { MemoryRouter } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -17,77 +18,69 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { SigeventsOverviewPage } from './sigevents_overview';
 
-jest.mock('../../hooks/use_fetch_system_overview', () => ({
-  useFetchSystemOverview: () => ({
-    loading: false,
-    data: undefined,
-  }),
-}));
-
-jest.mock('../../hooks/use_fetch_latest_significant_event', () => ({
-  useFetchLatestSignificantEvent: () => ({
-    loading: false,
-    error: null,
-    data: {
-      raw: {},
-      state: 'critical',
-      blastRadiusScore: 90,
-      mainEventTitle: 'Test significant event',
-      description: 'Test description',
-      impactedServices: [],
-      impactedCards: [],
-      severityLabel: 'Critical',
-      severityColor: 'danger',
-      detailFields: {
-        id: 'test-event-id',
-        label: 'Test significant event',
-        subtitle: 'logs · checkout',
+jest.mock('@kbn/sigevents', () => {
+  const actual = jest.requireActual('@kbn/sigevents');
+  return {
+    ...actual,
+    useFetchSystemOverview: () => ({
+      loading: false,
+      data: undefined,
+    }),
+    useFetchLatestSignificantEvent: () => ({
+      loading: false,
+      error: null,
+      data: {
+        raw: {},
+        state: 'critical',
+        blastRadiusScore: 90,
+        mainEventTitle: 'Test significant event',
+        description: 'Test description',
+        impactedServices: [],
+        impactedCards: [],
         severityLabel: 'Critical',
         severityColor: 'danger',
+        detailFields: {
+          id: 'test-event-id',
+          label: 'Test significant event',
+          subtitle: 'logs · checkout',
+          severityLabel: 'Critical',
+          severityColor: 'danger',
+        },
       },
-    },
-    refetch: jest.fn(),
-  }),
-}));
-
-jest.mock('../../components/sigevents_overview', () => ({
-  SigeventsOverview: ({
-    onViewDetails,
-    onRemediate,
-  }: {
-    onViewDetails?: () => void;
-    onRemediate?: () => void;
-  }) => (
-    <div data-test-subj="sigeventsOverview">
-      <button data-test-subj="mockSigeventsViewDetailsButton" onClick={onViewDetails}>
-        View Details
-      </button>
-      <button data-test-subj="mockSigeventsRemediateButton" onClick={onRemediate}>
-        Remediate
-      </button>
-    </div>
-  ),
-}));
-
-jest.mock('../../components/sigevents_overview/significant_event_detail_body', () => ({
-  SignificantEventDetailBody: ({
-    event,
-    hideHeader,
-  }: {
-    event: { label: string };
-    hideHeader?: boolean;
-  }) => (
-    <div data-test-subj="mockSignificantEventDetailBody" data-hide-header={String(!!hideHeader)}>
-      {event.label}
-    </div>
-  ),
-}));
-
-jest.mock('../../components/sigevents_overview/significant_event_detail_header', () => ({
-  SignificantEventDetailHeader: ({ title }: { title: string }) => (
-    <div data-test-subj="sigeventsOverviewSignificantEventDetailHeader">{title}</div>
-  ),
-}));
+      refetch: jest.fn(),
+    }),
+    SigeventsOverview: ({
+      onViewDetails,
+      onRemediate,
+    }: {
+      onViewDetails?: () => void;
+      onRemediate?: () => void;
+    }) => (
+      <div data-test-subj="sigeventsOverview">
+        <button data-test-subj="mockSigeventsViewDetailsButton" onClick={onViewDetails}>
+          View Details
+        </button>
+        <button data-test-subj="mockSigeventsRemediateButton" onClick={onRemediate}>
+          Remediate
+        </button>
+      </div>
+    ),
+    SignificantEventDetailBody: ({
+      event,
+      hideHeader,
+    }: {
+      event: { label: string };
+      hideHeader?: boolean;
+    }) => (
+      <div data-test-subj="mockSignificantEventDetailBody" data-hide-header={String(!!hideHeader)}>
+        {event.label}
+      </div>
+    ),
+    SignificantEventDetailHeader: ({ title }: { title: string }) => (
+      <div data-test-subj="sigeventsOverviewSignificantEventDetailHeader">{title}</div>
+    ),
+  };
+});
 
 const mockCore = coreMock.createStart();
 
@@ -101,20 +94,22 @@ const defaultPluginContextValue = {
 
 function renderWithProviders(agentBuilder?: ReturnType<typeof agentBuilderMocks.createStart>) {
   return render(
-    <IntlProvider locale="en">
-      <EuiThemeProvider>
-        <KibanaContextProvider
-          services={{
-            ...mockCore,
-            agentBuilder,
-          }}
-        >
-          <PluginContext.Provider value={defaultPluginContextValue as any}>
-            <SigeventsOverviewPage />
-          </PluginContext.Provider>
-        </KibanaContextProvider>
-      </EuiThemeProvider>
-    </IntlProvider>
+    <MemoryRouter>
+      <IntlProvider locale="en">
+        <EuiThemeProvider>
+          <KibanaContextProvider
+            services={{
+              ...mockCore,
+              agentBuilder,
+            }}
+          >
+            <PluginContext.Provider value={defaultPluginContextValue as any}>
+              <SigeventsOverviewPage />
+            </PluginContext.Provider>
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </IntlProvider>
+    </MemoryRouter>
   );
 }
 
@@ -173,7 +168,7 @@ describe('SigeventsOverviewPage', () => {
       expect(MockEmbeddableConversation).toHaveBeenLastCalledWith(
         expect.objectContaining({
           initialMessage: expect.stringContaining('remediate'),
-          autoSendInitialMessage: false,
+          autoSendInitialMessage: true,
         }),
         expect.anything()
       );

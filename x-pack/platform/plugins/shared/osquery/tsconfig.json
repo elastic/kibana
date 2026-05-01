@@ -95,6 +95,9 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-chrome-browser",
     "@kbn/scout",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-security-server"
   ]
 }

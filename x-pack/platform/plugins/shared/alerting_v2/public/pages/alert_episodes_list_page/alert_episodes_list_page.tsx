@@ -205,9 +205,12 @@ export const AlertEpisodesListPage = () => {
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: episodeIds ?? [],
-    services,
+    expressions: services.expressions,
   });
-  const { data: groupActionsMap } = useFetchGroupActions({ groupHashes, services });
+  const { data: groupActionsMap } = useFetchGroupActions({
+    groupHashes,
+    expressions: services.expressions,
+  });
 
   const assigneeUids = useMemo(
     () => [

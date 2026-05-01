@@ -523,6 +523,8 @@ import type {
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
+  CreateSentinelRuleMigrationRulesRequestParamsInput,
+  CreateSentinelRuleMigrationRulesRequestBodyInput,
   DeleteRuleMigrationRequestParamsInput,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
@@ -1021,6 +1023,25 @@ For detailed information on Kibana actions and alerting, and additional API call
     return this.kbnClient
       .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Parses Microsoft Sentinel ARM template JSON export and adds rules to an existing migration
+   */
+  async createSentinelRuleMigrationRules(props: CreateSentinelRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateSentinelRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/sentinel/rules',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -3807,6 +3828,10 @@ export interface CreateRuleMigrationProps {
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
   body: CreateRuleMigrationRulesRequestBodyInput;
+}
+export interface CreateSentinelRuleMigrationRulesProps {
+  params: CreateSentinelRuleMigrationRulesRequestParamsInput;
+  body: CreateSentinelRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;

@@ -8,3 +8,24 @@
 import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
 
 export const decorators = [EuiThemeProviderDecorator];
+
+export const parameters = {
+  options: {
+    storySort: {
+      order: [
+        'app',
+        [
+          'SigeventsOverview',
+          [
+            'SigeventsOverview',
+            [
+              'Act 2: Something Is Wrong',
+              'Act 0: No Detection Workflows',
+              'Act 1: We Know Your System',
+            ],
+          ],
+        ],
+      ],
+    },
+  },
+};

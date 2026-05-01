@@ -16,3 +16,6 @@ export type {
 
 export { SnoozeDurationPicker } from './components/snooze_duration_picker';
 export type { SnoozeDurationPickerProps } from './components/snooze_duration_picker';
+
+export { QuickSnoozePopover } from './components/quick_snooze_popover';
+export type { QuickSnoozePopoverProps } from './components/quick_snooze_popover';

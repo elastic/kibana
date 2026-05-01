@@ -10,6 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../../../typings/**/*",
+    "test/fixtures/**/*",
     "test/scout/**/*"
   ],
   "kbn_references": [
@@ -155,6 +156,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
     "@kbn/shared-ux-ai-components",
+    "@kbn/sigevents"
   ],
   "exclude": ["target/**/*"]
 }

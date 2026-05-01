@@ -89,11 +89,6 @@ export {
   OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
 } from './product_features';
 
-export {
-  OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
-  OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT,
-} from './sigevents_feature_flag';
-
 // This label is used in multiple places across the observability plugins, so we export it from the common package
 // to avoid having to recreate it in multiple places and ensure consistency.
 export { NOT_AVAILABLE_LABEL } from './i18n';

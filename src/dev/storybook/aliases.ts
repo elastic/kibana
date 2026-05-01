@@ -67,6 +67,7 @@ export const storybookAliases = {
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
+  sigevents: 'x-pack/solutions/observability/packages/kbn-sigevents/.storybook',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',

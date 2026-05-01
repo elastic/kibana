@@ -12,7 +12,7 @@ import {
   ACTION_CREATE_ESQL_CONTROL,
   ACTION_CREATE_TIME_SLIDER,
 } from '@kbn/controls-constants';
-import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
+import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_PANEL_TRIGGER,

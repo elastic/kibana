@@ -99,7 +99,7 @@ export const NO_DATA_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription',
   {
     defaultMessage:
-      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and Risk Engine are enabled with data available.',
+      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and risk score maintainer are enabled with data available.',
   }
 );
 

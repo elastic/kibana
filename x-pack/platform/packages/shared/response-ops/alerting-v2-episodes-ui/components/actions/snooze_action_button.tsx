@@ -10,7 +10,7 @@ import { EuiPopover } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { AlertEpisodeSnoozeForm } from './snooze_form';
+import { QuickSnoozePopover } from '@kbn/response-ops-alert-snooze';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { EpisodeActionButton } from './episode_action_button';
 import * as i18n from './translations';
@@ -45,14 +45,14 @@ export function AlertEpisodeSnoozeActionButton({
   }, [createAlertAction, groupHash]);
 
   const handleApplySnooze = useCallback(
-    (expiry: string) => {
+    (expiry: string | null) => {
       if (!groupHash) {
         return;
       }
       createAlertAction({
         groupHash,
         actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        body: { expiry },
+        body: expiry === null ? {} : { expiry },
       });
       setIsPopoverOpen(false);
     },
@@ -97,10 +97,13 @@ export function AlertEpisodeSnoozeActionButton({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downLeft"
-      panelPaddingSize="m"
-      panelStyle={{ width: 320 }}
+      panelPaddingSize="none"
+      panelStyle={{ width: 400 }}
     >
-      <AlertEpisodeSnoozeForm onApplySnooze={handleApplySnooze} />
+      <QuickSnoozePopover
+        onApplySnooze={handleApplySnooze}
+        data-test-subj="alertEpisodeSnoozeForm"
+      />
     </EuiPopover>
   );
 }

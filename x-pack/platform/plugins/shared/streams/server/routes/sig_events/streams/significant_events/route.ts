@@ -169,14 +169,6 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString,
-      to: dateFromString,
-      sampleDocsSize: z
-        .number()
-        .optional()
-        .describe(
-          'Number of sample documents to use for generation from the current data of stream'
-        ),
     }),
   }),
   options: {

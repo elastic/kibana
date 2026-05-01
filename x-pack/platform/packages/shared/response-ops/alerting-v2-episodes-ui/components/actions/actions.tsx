@@ -81,7 +81,7 @@ export function AlertEpisodeActions({
     <EuiFlexGroup
       gutterSize="xs"
       wrap
-      responsive={true}
+      responsive={false}
       alignItems="center"
       justifyContent="flexEnd"
     >

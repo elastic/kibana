@@ -34,6 +34,8 @@ describe('AlertEpisodeStatusBadges', () => {
           lastDeactivateAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -52,6 +54,8 @@ describe('AlertEpisodeStatusBadges', () => {
           lastDeactivateAction: null,
           snoozeExpiry: '2035-06-15T14:30:00.000Z',
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -73,6 +77,8 @@ describe('AlertEpisodeStatusBadges', () => {
           lastDeactivateAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -90,6 +96,7 @@ describe('AlertEpisodeStatusBadges', () => {
           groupHash: '1',
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: null,
+          lastAckActor: null,
         }}
       />
     );
@@ -107,6 +114,7 @@ describe('AlertEpisodeStatusBadges', () => {
           groupHash: '1',
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: null,
+          lastAckActor: null,
         }}
       />
     );
@@ -125,6 +133,8 @@ describe('AlertEpisodeStatusBadges', () => {
           lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );

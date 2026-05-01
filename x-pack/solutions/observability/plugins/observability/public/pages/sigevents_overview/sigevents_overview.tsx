@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -20,14 +21,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
+import {
+  useFetchLatestSignificantEvent,
+  useFetchSystemOverview,
+  SigeventsOverview,
+  SignificantEventDetailBody,
+  SignificantEventDetailHeader,
+} from '@kbn/sigevents';
+import type { HealthyMetricCardItem } from '@kbn/sigevents';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
-import { useFetchLatestSignificantEvent } from '../../hooks/use_fetch_latest_significant_event';
-import { useFetchSystemOverview } from '../../hooks/use_fetch_system_overview';
-import { SigeventsOverview } from '../../components/sigevents_overview';
-import type { HealthyMetricCardItem } from '../../components/sigevents_overview';
-import { SignificantEventDetailBody } from '../../components/sigevents_overview/significant_event_detail_body';
-import { SignificantEventDetailHeader } from '../../components/sigevents_overview/significant_event_detail_header';
 
 const MAX_CONTENT_WIDTH = 900;
 
@@ -57,16 +60,78 @@ export function SigeventsOverviewPage() {
   const { services } = useKibana();
   const { agentBuilder } = services;
   const { euiTheme } = useEuiTheme();
+  const history = useHistory();
+  const location = useLocation();
 
-  const { loading, error, data: eventData } = useFetchLatestSignificantEvent();
-  const { loading: overviewLoading, data: overviewData } = useFetchSystemOverview();
+  // Strip time range params from the URL — this page does not use a time range
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const hasTimeParams =
+      params.has('rangeFrom') ||
+      params.has('rangeTo') ||
+      params.has('refreshInterval') ||
+      params.has('refreshPaused');
+    if (hasTimeParams) {
+      params.delete('rangeFrom');
+      params.delete('rangeTo');
+      params.delete('refreshInterval');
+      params.delete('refreshPaused');
+      history.replace({ ...location, search: params.toString() });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const { loading, error, data: eventData, otherPromotedEvents } = useFetchLatestSignificantEvent();
+  const {
+    loading: overviewLoading,
+    error: overviewError,
+    data: overviewData,
+  } = useFetchSystemOverview();
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
+  const returnFocusRef = useRef<Element | null>(null);
 
-  const openDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(true), []);
-  const closeDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(false), []);
+  const openDetailFlyout = useCallback(() => {
+    returnFocusRef.current = document.activeElement;
+    setIsDetailFlyoutOpen(true);
+  }, []);
+  const closeDetailFlyout = useCallback(() => {
+    setIsDetailFlyoutOpen(false);
+    requestAnimationFrame(() => {
+      (returnFocusRef.current as HTMLElement | null)?.focus();
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isDetailFlyoutOpen) {
+      return;
+    }
+
+    // Focus the close button inside the flyout once it renders
+    const timerId = setTimeout(() => {
+      const flyout = document.querySelector<HTMLElement>(
+        '[data-test-subj="obltSigeventsDetailFlyout"]'
+      );
+      const closeBtn = flyout?.querySelector<HTMLElement>(
+        '[data-test-subj="euiFlyoutCloseButton"]'
+      );
+      closeBtn?.focus();
+    }, 50);
+
+    // Handle Escape key to close the flyout
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDetailFlyout();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(timerId);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDetailFlyoutOpen, closeDetailFlyout]);
 
   const handleRemediate = useCallback(() => {
     const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
@@ -78,6 +143,21 @@ export function SigeventsOverviewPage() {
       })
     );
   }, [eventData?.mainEventTitle]);
+
+  const handleFlyoutRemediate = useCallback(() => {
+    handleRemediate();
+    closeDetailFlyout();
+  }, [handleRemediate, closeDetailFlyout]);
+
+  const handleRemediateEvent = useCallback((eventTitle: string) => {
+    setRemediationPrompt(
+      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
+        defaultMessage:
+          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
+        values: { eventTitle },
+      })
+    );
+  }, []);
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
@@ -124,7 +204,6 @@ export function SigeventsOverviewPage() {
     `;
 
     const serviceCount = overviewData.services.length;
-    const lowPriorityCount = overviewData.lowCount + overviewData.mediumCount;
 
     const getRiskCardStyling = (count: number) => {
       const hasValue = count > 0;
@@ -137,9 +216,9 @@ export function SigeventsOverviewPage() {
       };
     };
 
-    const criticalStyling = getRiskCardStyling(overviewData.criticalCount);
     const highStyling = getRiskCardStyling(overviewData.highCount);
-    const lowMedStyling = getRiskCardStyling(lowPriorityCount);
+    const mediumStyling = getRiskCardStyling(overviewData.mediumCount);
+    const lowStyling = getRiskCardStyling(overviewData.lowCount);
 
     return [
       {
@@ -163,16 +242,6 @@ export function SigeventsOverviewPage() {
         iconColor: euiTheme.colors.textParagraph,
       },
       {
-        id: 'criticalRisk',
-        label: i18n.translate('xpack.observability.sigeventsOverviewPage.critical', {
-          defaultMessage: 'Critical',
-        }),
-        value: <span css={criticalStyling.valueCss}>{overviewData.criticalCount}</span>,
-        iconType: 'radar',
-        iconBackground: criticalStyling.iconBackground,
-        iconColor: criticalStyling.iconColor,
-      },
-      {
         id: 'highRisk',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.high', {
           defaultMessage: 'High',
@@ -183,14 +252,24 @@ export function SigeventsOverviewPage() {
         iconColor: highStyling.iconColor,
       },
       {
-        id: 'lowerPriority',
-        label: i18n.translate('xpack.observability.sigeventsOverviewPage.lowMed', {
-          defaultMessage: 'Low / Med',
+        id: 'mediumRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.medium', {
+          defaultMessage: 'Medium',
         }),
-        value: <span css={lowMedStyling.valueCss}>{lowPriorityCount}</span>,
+        value: <span css={mediumStyling.valueCss}>{overviewData.mediumCount}</span>,
+        iconType: 'warning',
+        iconBackground: mediumStyling.iconBackground,
+        iconColor: mediumStyling.iconColor,
+      },
+      {
+        id: 'lowRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.low', {
+          defaultMessage: 'Low',
+        }),
+        value: <span css={lowStyling.valueCss}>{overviewData.lowCount}</span>,
         iconType: 'eye',
-        iconBackground: lowMedStyling.iconBackground,
-        iconColor: lowMedStyling.iconColor,
+        iconBackground: lowStyling.iconBackground,
+        iconColor: lowStyling.iconColor,
       },
     ];
   }, [overviewData, euiTheme]);
@@ -230,7 +309,7 @@ export function SigeventsOverviewPage() {
                     </h2>
                   }
                 />
-              ) : error ? (
+              ) : error || overviewError ? (
                 <EuiEmptyPrompt
                   iconType="warning"
                   color="danger"
@@ -241,11 +320,11 @@ export function SigeventsOverviewPage() {
                       })}
                     </h2>
                   }
-                  body={<p>{error.message}</p>}
+                  body={<p>{(error ?? overviewError)!.message}</p>}
                 />
               ) : eventData ? (
                 <SigeventsOverview
-                  state={eventData.state}
+                  state="critical"
                   blastRadiusScore={eventData.blastRadiusScore}
                   mainEventTitle={eventData.mainEventTitle}
                   mainEventDescription={eventData.description}
@@ -254,17 +333,20 @@ export function SigeventsOverviewPage() {
                   impactedServices={eventData.impactedServices}
                   impactedCards={eventData.impactedCards}
                   healthyMetrics={healthyMetrics}
-                  lowerPriorityVerdicts={overviewData?.verdicts}
+                  otherPromotedEvents={otherPromotedEvents}
+                  lowerPriorityEvents={overviewData?.acknowledgedEvents}
                   lastUpdatedLabel={lastUpdatedLabel}
                   onViewDetails={openDetailFlyout}
                   onRemediate={handleRemediate}
+                  onRemediateEvent={handleRemediateEvent}
                 />
               ) : (
                 <SigeventsOverview
                   state="healthy"
                   healthyMetrics={healthyMetrics}
-                  lowerPriorityVerdicts={overviewData?.verdicts}
+                  lowerPriorityEvents={overviewData?.acknowledgedEvents}
                   onViewDetails={openDetailFlyout}
+                  onRemediateEvent={handleRemediateEvent}
                 />
               )}
             </EuiFlexItem>
@@ -281,7 +363,7 @@ export function SigeventsOverviewPage() {
                   hideCloseButton
                   initialTitle="Systems overview"
                   initialMessage={remediationPrompt}
-                  autoSendInitialMessage={false}
+                  autoSendInitialMessage={!!remediationPrompt}
                   autoFocus={false}
                 />
               </EuiFlexItem>
@@ -310,7 +392,11 @@ export function SigeventsOverviewPage() {
             </div>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <SignificantEventDetailBody event={detailFields} hideHeader />
+            <SignificantEventDetailBody
+              event={detailFields}
+              hideHeader
+              onRemediate={handleFlyoutRemediate}
+            />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}
