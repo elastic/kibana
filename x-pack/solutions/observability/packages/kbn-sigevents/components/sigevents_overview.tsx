@@ -105,29 +105,23 @@ export function SigeventsOverview({
     color: ${euiTheme.colors.severity.success};
   `;
 
-  const accentValueCss = css`
-    font-size: ${euiTheme.size.base};
-    font-weight: ${euiTheme.font.weight.semiBold};
-    color: ${euiTheme.colors.textAccent};
-  `;
-
   const defaultHealthyMetrics: HealthyMetricCardItem[] = [
     {
       id: 'services',
       label: i18n.translate('xpack.observability.sigeventsOverview.healthy.services', {
         defaultMessage: 'Services',
       }),
-      value: <span css={bigValueCss}>48</span>,
-      iconType: 'package',
+      value: <span css={bigValueCss}>0</span>,
+      iconType: 'layers',
       iconBackground: euiTheme.colors.backgroundBaseSubdued,
       iconColor: euiTheme.colors.textParagraph,
     },
     {
-      id: 'dependencies',
-      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.dependencies', {
-        defaultMessage: 'Dependencies',
+      id: 'entities',
+      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.entities', {
+        defaultMessage: 'Entities',
       }),
-      value: <span css={bigValueCss}>4</span>,
+      value: <span css={bigValueCss}>0</span>,
       iconType: 'submodule',
       iconBackground: euiTheme.colors.backgroundBaseSubdued,
       iconColor: euiTheme.colors.textParagraph,
@@ -137,30 +131,50 @@ export function SigeventsOverview({
       label: i18n.translate('xpack.observability.sigeventsOverview.healthy.technologies', {
         defaultMessage: 'Technologies',
       }),
-      value: <span css={bigValueCss}>8</span>,
+      value: <span css={bigValueCss}>0</span>,
       iconType: 'desktop',
       iconBackground: euiTheme.colors.backgroundBaseSubdued,
       iconColor: euiTheme.colors.textParagraph,
     },
     {
-      id: 'criticalRisk',
-      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.criticalRisk', {
-        defaultMessage: 'Critical risk',
+      id: 'criticalSigEvents',
+      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.critical', {
+        defaultMessage: 'Critical',
       }),
       value: <span css={successValueCss}>0</span>,
-      iconType: 'minusInCircle',
+      iconType: 'checkInCircleFilled',
       iconBackground: euiTheme.colors.backgroundLightSuccess,
       iconColor: euiTheme.colors.severity.success,
     },
     {
-      id: 'mediumRisk',
-      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.mediumRisk', {
-        defaultMessage: 'Medium risk',
+      id: 'highSigEvents',
+      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.high', {
+        defaultMessage: 'High',
       }),
-      value: <span css={accentValueCss}>1</span>,
-      iconType: 'search',
-      iconBackground: euiTheme.colors.backgroundLightAccent,
-      iconColor: euiTheme.colors.textAccent,
+      value: <span css={successValueCss}>0</span>,
+      iconType: 'checkInCircleFilled',
+      iconBackground: euiTheme.colors.backgroundLightSuccess,
+      iconColor: euiTheme.colors.severity.success,
+    },
+    {
+      id: 'mediumSigEvents',
+      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.medium', {
+        defaultMessage: 'Medium',
+      }),
+      value: <span css={successValueCss}>0</span>,
+      iconType: 'checkInCircleFilled',
+      iconBackground: euiTheme.colors.backgroundLightSuccess,
+      iconColor: euiTheme.colors.severity.success,
+    },
+    {
+      id: 'lowSigEvents',
+      label: i18n.translate('xpack.observability.sigeventsOverview.healthy.low', {
+        defaultMessage: 'Low',
+      }),
+      value: <span css={successValueCss}>0</span>,
+      iconType: 'checkInCircleFilled',
+      iconBackground: euiTheme.colors.backgroundLightSuccess,
+      iconColor: euiTheme.colors.severity.success,
     },
   ];
 

@@ -39,6 +39,7 @@ export function MetadataIconCard({
 
   const panelCss = css`
     border-radius: 8px;
+    white-space: nowrap;
   `;
 
   if (hideIcon) {
@@ -68,7 +69,15 @@ export function MetadataIconCard({
       css={panelCss}
       data-test-subj="sigeventsOverviewMetadataIconCard"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiTitle size="xxxs">
+        <p>{title}</p>
+      </EuiTitle>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        css={css({ marginTop: euiTheme.size.xs })}
+      >
         <EuiFlexItem grow={false}>
           <EuiAvatar
             type="space"
@@ -80,13 +89,8 @@ export function MetadataIconCard({
             aria-hidden={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiTitle size="xxxs">
-            <p>{title}</p>
-          </EuiTitle>
-          <EuiText size="xs" css={css({ marginTop: euiTheme.size.xs })}>
-            {value}
-          </EuiText>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">{value}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
