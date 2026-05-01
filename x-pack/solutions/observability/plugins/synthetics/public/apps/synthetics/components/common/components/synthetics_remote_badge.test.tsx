@@ -15,18 +15,18 @@ describe('SyntheticsRemoteBadge', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders the remote cluster name as a badge', () => {
+  it('renders a "Remote" badge when remote is provided', () => {
     render(<SyntheticsRemoteBadge remote={{ remoteName: 'cluster-west' }} />);
     expect(screen.getByTestId('syntheticsRemoteBadge')).toBeInTheDocument();
-    expect(screen.getByText('cluster-west')).toBeInTheDocument();
+    expect(screen.getByText('Remote')).toBeInTheDocument();
   });
 
-  it('renders the remote cluster name when kibanaUrl is also provided', () => {
+  it('renders the badge with kibanaUrl provided', () => {
     render(
       <SyntheticsRemoteBadge
         remote={{ remoteName: 'cluster-east', kibanaUrl: 'https://east.kibana.example.com' }}
       />
     );
-    expect(screen.getByText('cluster-east')).toBeInTheDocument();
+    expect(screen.getByText('Remote')).toBeInTheDocument();
   });
 });

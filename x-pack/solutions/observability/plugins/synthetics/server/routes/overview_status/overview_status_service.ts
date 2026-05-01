@@ -39,6 +39,7 @@ interface LocationStatusEntry {
   // Additional fields from ping docs, used to build metadata for remote-only monitors
   monitorName?: string;
   monitorType?: string;
+  monitorIntervalSeconds?: number;
   configId?: string;
   tags?: string[];
   // The latest error reason for the most recent final summary on this
@@ -106,6 +107,7 @@ export class OverviewStatusService {
     const { spaceId, request } = this.routeContext;
     const params = request.query || {};
     const {
+      query,
       scopeStatusByLocation = true,
       tags,
       monitorTypes,
@@ -163,6 +165,16 @@ export class OverviewStatusService {
       ...getTermFilter('monitor.project.id', projects),
     ];
 
+    if (query) {
+      filters.push({
+        simple_query_string: {
+          query,
+          fields: ['monitor.name', 'tags', 'url.full', 'monitor.project.id'],
+          default_operator: 'OR',
+        },
+      });
+    }
+
     if (scopeStatusByLocation && !isEmpty(locationIds) && locationIds) {
       filters.push({
         terms: {
@@ -203,6 +215,7 @@ export class OverviewStatusService {
               { field: 'kibanaUrl' },
               { field: 'monitor.name' },
               { field: 'monitor.type' },
+              { field: 'monitor.interval' },
               { field: 'config_id' },
               { field: 'tags' },
             ]
@@ -361,6 +374,7 @@ export class OverviewStatusService {
           const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = ccsEnabled ? metrics?.['monitor.name'] : undefined;
           const monitorType = ccsEnabled ? metrics?.['monitor.type'] : undefined;
+          const monitorInterval = ccsEnabled ? metrics?.['monitor.interval'] : undefined;
           const configId = ccsEnabled ? metrics?.config_id : undefined;
           const tags = ccsEnabled ? metrics?.tags : undefined;
 
@@ -373,6 +387,7 @@ export class OverviewStatusService {
             ...(kibanaUrl ? { kibanaUrl: String(kibanaUrl) } : {}),
             ...(monitorName ? { monitorName: String(monitorName) } : {}),
             ...(monitorType ? { monitorType: String(monitorType) } : {}),
+            ...(monitorInterval != null ? { monitorIntervalSeconds: Number(monitorInterval) } : {}),
             ...(configId ? { configId: String(configId) } : {}),
             ...(tags ? { tags: Array.isArray(tags) ? tags.map(String) : [String(tags)] } : {}),
             error:
@@ -588,7 +603,9 @@ export class OverviewStatusService {
             configId,
             name: locData.monitorName || monitorId,
             type: locData.monitorType || 'unknown',
-            schedule: '',
+            schedule: locData.monitorIntervalSeconds
+              ? String(Math.round(locData.monitorIntervalSeconds / 60))
+              : '',
             tags: locData.tags ?? [],
             isEnabled: true,
             isStatusAlertEnabled: false,

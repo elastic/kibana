@@ -279,6 +279,41 @@ describe('Monitor management page — initial load API call counts', () => {
     expect(callsTo(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)).toHaveLength(1);
   });
 
+  it('fires `/overview_status` and `/synthetics/monitors` exactly once when URL contains a query filter', async () => {
+    // When the URL already contains filter params (e.g. ?query="Observability UI"),
+    // the URL-to-Redux sync must complete before the initial fetch fires, so only
+    // ONE request per endpoint is made (with the query param included).
+    const store = buildStore();
+    const history = createMemoryHistory({
+      initialEntries: ['/monitors?query=%22Observability%20UI%22'],
+    });
+
+    render(
+      <Provider store={store}>
+        <Router history={history}>
+          <SyntheticsRefreshContextProvider>
+            <ManagementHooksProbe />
+            <FiltersProbe />
+          </SyntheticsRefreshContextProvider>
+        </Router>
+      </Provider>
+    );
+
+    await act(async () => {
+      await flushTimers(100);
+    });
+
+    const overviewCalls = callsTo(SYNTHETICS_API_URLS.OVERVIEW_STATUS);
+    expect(overviewCalls).toHaveLength(1);
+    expect(overviewCalls[0].query).toEqual(
+      expect.objectContaining({ query: '"Observability UI"' })
+    );
+
+    const monitorCalls = callsTo(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS);
+    expect(monitorCalls).toHaveLength(1);
+    expect(monitorCalls[0].query).toEqual(expect.objectContaining({ query: '"Observability UI"' }));
+  });
+
   it('produces a duplicate fetch when `showFromAllSpaces` actually toggles (control)', async () => {
     // Counterpart to the test above: a *real* change to `showFromAllSpaces`
     // SHOULD trigger one extra fetch per slice. This guards against the

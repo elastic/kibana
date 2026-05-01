@@ -17,6 +17,7 @@ import {
   updateManagementPageStateAction,
 } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 
 export function useMonitorList() {
   const dispatch = useDispatch();
@@ -30,6 +31,9 @@ export function useMonitorList() {
 
   const paramsRef = useRef({ pageState, loaded });
   paramsRef.current = { pageState, loaded };
+
+  const { query: urlQuery } = useGetUrlParams();
+  const hasUnsyncedUrlQuery = Boolean(urlQuery) && urlQuery !== (pageState.query || '');
 
   const loadPage = useCallback(
     (state: MonitorListPageState) => {
@@ -50,16 +54,18 @@ export function useMonitorList() {
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      if (paramsRef.current.loaded) {
-        dispatch(quietFetchMonitorListAction(pageState));
-      } else {
-        dispatch(fetchMonitorListAction.get(pageState));
+      if (hasUnsyncedUrlQuery) {
+        return;
       }
-      return;
     }
-    if (!paramsRef.current.loaded) return;
-    dispatch(fetchMonitorListAction.get(pageState));
-  }, [dispatch, pageState]);
+
+    const { loaded: isLoaded } = paramsRef.current;
+    if (isLoaded) {
+      dispatch(quietFetchMonitorListAction(pageState));
+    } else {
+      dispatch(fetchMonitorListAction.get(pageState));
+    }
+  }, [dispatch, pageState, hasUnsyncedUrlQuery]);
 
   return {
     loading,

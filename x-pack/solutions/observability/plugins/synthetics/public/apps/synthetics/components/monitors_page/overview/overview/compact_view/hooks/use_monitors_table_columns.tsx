@@ -132,28 +132,29 @@ export const useMonitorsTableColumns = ({
         width: '25%',
         sortable: true,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
+          <EuiFlexGroup
+            direction="column"
+            alignItems="flexStart"
+            gutterSize="xs"
+            css={{ minWidth: 0 }}
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <MonitorTypeBadge
-                        monitorType={monitor.type}
-                        ariaLabel={getFilterForTypeMessage(monitor.type)}
-                        onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <SyntheticsRemoteBadge remote={monitor.remote} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <MonitorTypeBadge
+                    monitorType={monitor.type}
+                    ariaLabel={getFilterForTypeMessage(monitor.type)}
+                    onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
+                  <SyntheticsRemoteBadge remote={monitor.remote} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
                     {i18n.translate('xpack.synthetics.overview.compactView.scheduleInline', {
                       defaultMessage: 'Every {schedule}m',
                       values: { schedule: monitor.schedule },

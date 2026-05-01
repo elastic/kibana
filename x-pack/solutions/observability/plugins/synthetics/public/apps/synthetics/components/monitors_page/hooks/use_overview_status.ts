@@ -14,6 +14,7 @@ import {
   quietFetchOverviewStatusAction,
   selectOverviewStatus,
 } from '../../../state/overview_status';
+import { useGetUrlParams } from '../../../hooks';
 
 /**
  * Read-only hook — returns overview status data from the Redux store without
@@ -48,6 +49,9 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   const paramsRef = useRef({ pageState, scopeStatusByLocation, loaded });
   paramsRef.current = { pageState, scopeStatusByLocation, loaded };
 
+  const { query: urlQuery } = useGetUrlParams();
+  const hasUnsyncedUrlQuery = Boolean(urlQuery) && urlQuery !== (pageState.query || '');
+
   useEffect(() => {
     if (!isInitialMount.current) {
       const { pageState: ps, scopeStatusByLocation: scope } = paramsRef.current;
@@ -58,16 +62,21 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      if (paramsRef.current.loaded) {
-        dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-      } else {
-        dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+      if (hasUnsyncedUrlQuery) {
+        // URL query param hasn't been synced to Redux yet (the sync runs in
+        // a separate useEffect in useMonitorFiltersState). Skip this stale
+        // fetch — the sync will update pageState and re-trigger this effect.
+        return;
       }
-      return;
     }
-    if (!paramsRef.current.loaded) return;
-    dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-  }, [dispatch, pageState, scopeStatusByLocation]);
+
+    const { loaded: isLoaded } = paramsRef.current;
+    if (isLoaded) {
+      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+    } else {
+      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+    }
+  }, [dispatch, pageState, scopeStatusByLocation, hasUnsyncedUrlQuery]);
 
   return {
     status,

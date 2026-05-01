@@ -1482,6 +1482,89 @@ describe('current status route', () => {
       expect(remoteWildcard.wildcard._index).toBe('*:*');
     });
 
+    it('includes simple_query_string filter when query param is provided', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'id1', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { query: '"Observability UI"' } },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const queryFilter = filters.find((f: any) => f.simple_query_string);
+      expect(queryFilter).toBeDefined();
+      expect(queryFilter.simple_query_string.query).toBe('"Observability UI"');
+      expect(queryFilter.simple_query_string.fields).toEqual([
+        'monitor.name',
+        'tags',
+        'url.full',
+        'monitor.project.id',
+      ]);
+    });
+
+    it('does not include simple_query_string filter when query param is absent', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'id1', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const queryFilter = filters.find((f: any) => f.simple_query_string);
+      expect(queryFilter).toBeUndefined();
+    });
+
     it('includes meta.space_id filter when CCS is disabled', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 

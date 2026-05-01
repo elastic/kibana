@@ -15,26 +15,18 @@ export function SyntheticsRemoteBadge({ remote }: { remote?: RemoteMonitorInfo }
     return null;
   }
 
-  const tooltipContent = remote.kibanaUrl
-    ? i18n.translate('xpack.synthetics.remoteBadge.tooltipWithUrl', {
-        defaultMessage: 'Remote cluster: {remoteName} ({kibanaUrl})',
-        values: { remoteName: remote.remoteName, kibanaUrl: remote.kibanaUrl },
-      })
-    : i18n.translate('xpack.synthetics.remoteBadge.tooltip', {
-        defaultMessage: 'Remote cluster: {remoteName}',
-        values: { remoteName: remote.remoteName },
-      });
-
   return (
-    <EuiToolTip content={tooltipContent}>
+    <EuiToolTip content={remote.kibanaUrl || undefined} title={remote.remoteName}>
       <EuiBadge
-        color="hollow"
+        color="default"
         data-test-subj="syntheticsRemoteBadge"
         onMouseDown={(e: React.MouseEvent) => {
           e.stopPropagation();
         }}
       >
-        {remote.remoteName}
+        {i18n.translate('xpack.synthetics.remoteBadge.label', {
+          defaultMessage: 'Remote',
+        })}
       </EuiBadge>
     </EuiToolTip>
   );
