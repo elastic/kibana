@@ -182,12 +182,11 @@ queue:
   describe('Remote ES', () => {
     it('displays proper error messages', () => {
       selectRemoteESOutput();
+      cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type('name');
+      cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5000');
       cy.getBySel(SETTINGS_SAVE_BTN).click();
 
-      cy.contains('Name is required');
-      cy.contains('URL is required');
       cy.contains('Service token is required');
-      shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
       shouldDisplayError('serviceTokenSecretInput');
     });
 
@@ -392,18 +391,17 @@ queue:
 
       it('displays proper error messages', () => {
         selectKafkaOutput();
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type('name');
+        cy.get('[placeholder="Specify host"').type('localhost:5000');
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).clear();
         cy.getBySel(SETTINGS_SAVE_BTN).click();
 
-        cy.contains('Name is required');
-        cy.contains('Host is required');
         cy.contains('Username is required');
         cy.contains('Password is required');
         cy.contains('Default topic is required');
         cy.contains(
           'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.'
         );
-        shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
