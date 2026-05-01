@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/logging-mocks'
   - '@kbn/logging'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod

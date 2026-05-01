@@ -1648,7 +1648,7 @@
           "\"observability:streamsContinuousKiExtractionEnabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 154,
+        "lineNumber": 153,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1665,7 +1665,7 @@
           "\"observability:streamsContinuousKiExtractionExcludedStreamPatterns\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 158,
+        "lineNumber": 157,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1682,24 +1682,7 @@
           "\"observability:streamsContinuousKiExtractionIntervalHours\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 156,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS",
-        "description": [],
-        "signature": [
-          "\"observability:streamsEnableAttachments\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 149,
+        "lineNumber": 155,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1733,7 +1716,7 @@
           "\"observability:streamsEnableDraftStreams\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 153,
+        "lineNumber": 152,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1767,7 +1750,7 @@
           "\"observability:streamsEnableMemory\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 164,
+        "lineNumber": 163,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1784,7 +1767,7 @@
           "\"observability:streamsEnableOverviewPage\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 152,
+        "lineNumber": 151,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1852,7 +1835,7 @@
           "\"observability:streamsEnableWiredStreamViews\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 150,
+        "lineNumber": 149,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1869,7 +1852,7 @@
           "\"observability:streamsSigEventsIndexPatterns\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 160,
+        "lineNumber": 159,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1886,7 +1869,7 @@
           "\"observability:streamsSigEventsTuningConfig\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 162,
+        "lineNumber": 161,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
