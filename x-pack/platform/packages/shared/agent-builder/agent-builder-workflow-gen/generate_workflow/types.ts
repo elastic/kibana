@@ -118,6 +118,20 @@ export interface ToolResultAction {
   success: boolean;
   data?: unknown;
   error?: string;
+  /**
+   * Present when the tool mutated the workflow YAML. Captures the post-edit
+   * YAML state so the action log can be replayed and the LLM sees the
+   * resulting workflow in the next turn.
+   */
+  currentYaml?: string;
+  /**
+   * Present when the tool mutated the YAML and validation was run on the
+   * new state. The agent uses this to self-correct mid-loop.
+   */
+  validation?: {
+    valid: boolean;
+    errors: string[];
+  };
 }
 
 export interface ValidateAction {

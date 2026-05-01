@@ -31,12 +31,16 @@ export const toolResultAction = ({
   success,
   data,
   error,
+  currentYaml,
+  validation,
 }: {
   toolCallId: string;
   name: string;
   success: boolean;
   data?: unknown;
   error?: string;
+  currentYaml?: string;
+  validation?: { valid: boolean; errors: string[] };
 }): ToolResultAction => ({
   type: 'tool_result',
   toolCallId,
@@ -44,6 +48,8 @@ export const toolResultAction = ({
   success,
   ...(data !== undefined ? { data } : {}),
   ...(error !== undefined ? { error } : {}),
+  ...(currentYaml !== undefined ? { currentYaml } : {}),
+  ...(validation !== undefined ? { validation } : {}),
 });
 
 export const validateAction = ({
