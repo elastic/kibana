@@ -181,3 +181,17 @@ export const VALIDATION_WARNINGS = {
     }
   ),
 };
+
+export const AND_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.andButtonLabel',
+  {
+    defaultMessage: 'AND',
+  }
+);
+
+export const REMOVE_ENTRY_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.removeEntryAriaLabel',
+  {
+    defaultMessage: 'Remove entry',
+  }
+);

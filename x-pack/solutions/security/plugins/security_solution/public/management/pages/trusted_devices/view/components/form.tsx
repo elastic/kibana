@@ -8,18 +8,20 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiHorizontalRule,
+  EuiButton,
+  EuiButtonIcon,
   EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiSuperSelect,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   OperatingSystem,
@@ -44,6 +46,7 @@ import {
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
+import { AndOrBadge } from '../../../../../common/components/and_or_badge';
 import {
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
@@ -58,6 +61,8 @@ import {
   INPUT_ERRORS,
   VALIDATION_WARNINGS,
   OS_OPTIONS_PLACEHOLDER,
+  AND_BUTTON_LABEL,
+  REMOVE_ENTRY_ARIA_LABEL,
 } from '../translations';
 
 interface ValidationResult {
@@ -65,6 +70,16 @@ interface ValidationResult {
   errors: Record<string, string[]>;
   warnings: Record<string, string[]>;
 }
+
+type DeviceEntry = ExceptionListItemSchema['entries'][0];
+
+const defaultDeviceEntry = (): DeviceEntry =>
+  ({
+    field: TrustedDeviceConditionEntryField.DEVICE_ID,
+    operator: 'included' as const,
+    type: 'match' as const,
+    value: '',
+  } as const);
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
   {
@@ -83,6 +98,57 @@ const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
     value: [OperatingSystem.MAC],
   },
 ];
+
+const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
+  const allFields = [
+    {
+      value: TrustedDeviceConditionEntryField.DEVICE_ID,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.DEVICE_TYPE,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.HOST,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.MANUFACTURER,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.MANUFACTURER_ID,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.PRODUCT_ID,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.PRODUCT_NAME,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
+    },
+  ];
+
+  if (isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {
+    allFields.push({
+      value: TrustedDeviceConditionEntryField.USERNAME,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
+    });
+  }
+
+  return allFields;
+};
+
+const OPERATOR_OPTIONS = [
+  { value: 'is', inputDisplay: OPERATOR_TITLES.is },
+  { value: 'match', inputDisplay: OPERATOR_TITLES.matches },
+];
+
+const DEVICE_EVENTS_INDEX_NAMES = [DEVICE_EVENTS_INDEX_PATTERN];
+
+// DetailsSection ---------------------------------------------------------------
 
 const DetailsSection = memo<{
   mode: string;
@@ -172,15 +238,151 @@ const DetailsSection = memo<{
 );
 DetailsSection.displayName = 'DetailsSection';
 
+// ConditionEntryRow ------------------------------------------------------------
+
+interface ConditionEntryRowProps {
+  entry: DeviceEntry;
+  index: number;
+  selectedOs: OsTypeArray;
+  showLabels: boolean;
+  isRemoveDisabled: boolean;
+  onFieldChange: (index: number, value: string) => void;
+  onOperatorChange: (index: number, value: string) => void;
+  onValueChange: (index: number, options: Array<EuiComboBoxOptionOption<string>>) => void;
+  onValueBlur: (index: number) => void;
+  onRemove: (index: number) => void;
+  disabled: boolean;
+  indexExists: boolean;
+  getTestId: (suffix?: string) => string | undefined;
+}
+
+const ConditionEntryRow = memo<ConditionEntryRowProps>(
+  ({
+    entry,
+    index,
+    selectedOs,
+    showLabels,
+    isRemoveDisabled,
+    onFieldChange,
+    onOperatorChange,
+    onValueChange,
+    onValueBlur,
+    onRemove,
+    disabled,
+    indexExists,
+    getTestId,
+  }) => {
+    const availableFieldOptions = useMemo(() => getFieldOptionsForOs(selectedOs), [selectedOs]);
+
+    const suggestionsEnabled = !disabled && indexExists;
+
+    const { data: suggestions = [], isLoading: isLoadingSuggestions } =
+      useGetTrustedDeviceSuggestions({
+        field: entry.field || '',
+        enabled: suggestionsEnabled,
+      });
+
+    const showSuggestionsLoading = suggestionsEnabled && isLoadingSuggestions;
+
+    const handleFieldChange = useCallback(
+      (value: string) => onFieldChange(index, value),
+      [index, onFieldChange]
+    );
+
+    const handleOperatorChange = useCallback(
+      (value: string) => onOperatorChange(index, value),
+      [index, onOperatorChange]
+    );
+
+    const handleValueChange = useCallback(
+      (options: Array<EuiComboBoxOptionOption<string>>) => onValueChange(index, options),
+      [index, onValueChange]
+    );
+
+    const handleValueBlur = useCallback(() => onValueBlur(index), [index, onValueBlur]);
+
+    const handleRemove = useCallback(() => onRemove(index), [index, onRemove]);
+
+    return (
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow label={showLabels ? 'Field' : undefined}>
+            <EuiSuperSelect
+              options={availableFieldOptions}
+              valueOfSelected={entry.field || TrustedDeviceConditionEntryField.DEVICE_ID}
+              onChange={handleFieldChange}
+              data-test-subj={getTestId(`entry${index}fieldSelect`)}
+              disabled={disabled}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label={showLabels ? 'Operator' : undefined}>
+            <EuiSuperSelect
+              options={OPERATOR_OPTIONS}
+              valueOfSelected={entry.type === 'match' ? 'is' : 'match'}
+              onChange={handleOperatorChange}
+              data-test-subj={getTestId(`entry${index}operatorSelect`)}
+              disabled={disabled}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label={showLabels ? 'Value' : undefined}>
+            <EuiComboBox
+              placeholder="Enter or select value"
+              singleSelection={{ asPlainText: true }}
+              options={suggestions.map((suggestion, idx) => ({
+                label: suggestion,
+                key: `${suggestion}-${idx}`,
+              }))}
+              selectedOptions={
+                'value' in entry && entry.value ? [{ label: String(entry.value) }] : []
+              }
+              onChange={handleValueChange}
+              onBlur={handleValueBlur}
+              onCreateOption={(searchValue) => {
+                handleValueChange([{ label: searchValue }]);
+              }}
+              isLoading={showSuggestionsLoading}
+              data-test-subj={getTestId(`entry${index}valueField`)}
+              isDisabled={disabled}
+              isClearable={false}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* Unicode nbsp so the button aligns with other fields when labels are shown */}
+          <EuiFormRow label={showLabels ? '\u00A0' : undefined}>
+            <EuiButtonIcon
+              color="danger"
+              iconType="trash"
+              onClick={handleRemove}
+              isDisabled={isRemoveDisabled || disabled}
+              aria-label={REMOVE_ENTRY_ARIA_LABEL}
+              data-test-subj={getTestId(`entry${index}removeButton`)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+ConditionEntryRow.displayName = 'ConditionEntryRow';
+
+// ConditionsSection ------------------------------------------------------------
+
 const ConditionsSection = memo<{
   getTestId: (suffix?: string) => string | undefined;
   selectedOs: OsTypeArray;
   handleOsChange: (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>) => void;
-  currentEntry: ExceptionListItemSchema['entries'][0];
-  handleFieldChange: (value: string) => void;
-  handleOperatorChange: (value: string) => void;
-  handleValueChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
-  handleValueBlur: () => void;
+  entries: ExceptionListItemSchema['entries'];
+  onAddEntry: () => void;
+  onRemoveEntry: (index: number) => void;
+  onEntryFieldChange: (index: number, value: string) => void;
+  onEntryOperatorChange: (index: number, value: string) => void;
+  onEntryValueChange: (index: number, options: Array<EuiComboBoxOptionOption<string>>) => void;
+  onEntryValueBlur: (index: number) => void;
   disabled: boolean;
   visitedFields: Record<string, boolean>;
   validationResult: ValidationResult;
@@ -190,31 +392,18 @@ const ConditionsSection = memo<{
     getTestId,
     selectedOs,
     handleOsChange,
-    currentEntry,
-    handleFieldChange,
-    handleOperatorChange,
-    handleValueChange,
-    handleValueBlur,
+    entries,
+    onAddEntry,
+    onRemoveEntry,
+    onEntryFieldChange,
+    onEntryOperatorChange,
+    onEntryValueChange,
+    onEntryValueBlur,
     disabled,
     visitedFields,
     validationResult,
     indexExists,
   }) => {
-    // Get field options based on selected OS
-    const availableFieldOptions = useMemo(() => {
-      return getFieldOptionsForOs(selectedOs);
-    }, [selectedOs]);
-
-    const suggestionsEnabled = !disabled && indexExists;
-
-    const { data: suggestions = [], isLoading: isLoadingSuggestions } =
-      useGetTrustedDeviceSuggestions({
-        field: currentEntry.field || '',
-        enabled: suggestionsEnabled,
-      });
-
-    const showSuggestionsLoading = suggestionsEnabled && isLoadingSuggestions;
-
     return (
       <>
         <EuiTitle size="xs">
@@ -262,54 +451,45 @@ const ConditionsSection = memo<{
               : undefined
           }
         >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow label="Field">
-                <EuiSuperSelect
-                  options={availableFieldOptions}
-                  valueOfSelected={currentEntry.field || TrustedDeviceConditionEntryField.DEVICE_ID}
-                  onChange={handleFieldChange}
-                  data-test-subj={getTestId('fieldSelect')}
-                  disabled={disabled}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="Operator">
-                <EuiSuperSelect
-                  options={OPERATOR_OPTIONS}
-                  valueOfSelected={currentEntry.type === 'match' ? 'is' : 'match'}
-                  onChange={handleOperatorChange}
-                  data-test-subj={getTestId('operatorSelect')}
-                  disabled={disabled}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="Value">
-                <EuiComboBox
-                  placeholder="Enter or select value"
-                  singleSelection={{ asPlainText: true }}
-                  options={suggestions.map((suggestion, idx) => ({
-                    label: suggestion,
-                    key: `${suggestion}-${idx}`,
-                  }))}
-                  selectedOptions={
-                    'value' in currentEntry && currentEntry.value
-                      ? [{ label: String(currentEntry.value) }]
-                      : []
-                  }
-                  onChange={handleValueChange}
-                  onBlur={handleValueBlur}
-                  onCreateOption={(searchValue) => {
-                    handleValueChange([{ label: searchValue }]);
-                  }}
-                  isLoading={showSuggestionsLoading}
-                  data-test-subj={getTestId('valueField')}
+          <EuiFlexGroup gutterSize="xs" alignItems="flexStart">
+            {entries.length > 1 && (
+              <EuiFlexItem grow={false} data-test-subj={getTestId('andConnector')}>
+                <AndOrBadge type="and" includeAntennas />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={1}>
+              <div data-test-subj={getTestId('conditionEntries')}>
+                {entries.map((entry, index) => (
+                  <ConditionEntryRow
+                    key={index}
+                    entry={entry}
+                    index={index}
+                    selectedOs={selectedOs}
+                    showLabels={index === 0}
+                    isRemoveDisabled={entries.length <= 1}
+                    onFieldChange={onEntryFieldChange}
+                    onOperatorChange={onEntryOperatorChange}
+                    onValueChange={onEntryValueChange}
+                    onValueBlur={onEntryValueBlur}
+                    onRemove={onRemoveEntry}
+                    disabled={disabled}
+                    indexExists={indexExists}
+                    getTestId={getTestId}
+                  />
+                ))}
+              </div>
+              <EuiSpacer size="s" />
+              <div>
+                <EuiButton
+                  size="s"
+                  iconType="plusCircle"
+                  onClick={onAddEntry}
                   isDisabled={disabled}
-                  isClearable={false}
-                />
-              </EuiFormRow>
+                  data-test-subj={getTestId('AndButton')}
+                >
+                  {AND_BUTTON_LABEL}
+                </EuiButton>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
@@ -319,54 +499,7 @@ const ConditionsSection = memo<{
 );
 ConditionsSection.displayName = 'ConditionsSection';
 
-const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
-  const allFields = [
-    {
-      value: TrustedDeviceConditionEntryField.DEVICE_ID,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.DEVICE_TYPE,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.HOST,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.MANUFACTURER,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.MANUFACTURER_ID,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.PRODUCT_ID,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.PRODUCT_NAME,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
-    },
-  ];
-
-  if (isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {
-    allFields.push({
-      value: TrustedDeviceConditionEntryField.USERNAME,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
-    });
-  }
-
-  return allFields;
-};
-
-const OPERATOR_OPTIONS = [
-  { value: 'is', inputDisplay: OPERATOR_TITLES.is },
-  { value: 'match', inputDisplay: OPERATOR_TITLES.matches },
-];
-
-const DEVICE_EVENTS_INDEX_NAMES = [DEVICE_EVENTS_INDEX_PATTERN];
+// TrustedDevicesForm -----------------------------------------------------------
 
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
@@ -398,7 +531,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         item.os_types?.length === 1 &&
         item.os_types[0] === 'windows' &&
         !item.name?.trim() &&
-        !hasUserSelectedOs // Don't override if user has explicitly selected an OS
+        !hasUserSelectedOs
       ) {
         return { ...item, os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC] };
       }
@@ -438,30 +571,39 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           errors.os = [INPUT_ERRORS.osRequired];
         }
 
-        // Condition validation (backend schema: entries minSize: 1, value length > 0)
+        // Condition validation — all entries must have a non-empty value
         const hasOsSelected = (formData.os_types?.length ?? 0) > 0;
         const hasVisitedEntries = visitedFields.entries;
 
         if (hasOsSelected || hasVisitedEntries) {
-          const entry = formData.entries?.[0];
-
-          if (!formData.entries?.length || !entry) {
+          if (!formData.entries?.length) {
             errors.entries = [INPUT_ERRORS.entriesAtLeastOne];
-          } else if ('value' in entry) {
-            // Handle string values (matching backend schema: length > 0)
-            if (typeof entry.value === 'string') {
-              if (!entry.value.trim()) {
-                errors.entries = [INPUT_ERRORS.entryValueEmpty];
-              }
+          } else {
+            const entryErrors: string[] = [];
+            const entryWarnings: string[] = [];
 
-              // Wildcard validation for "match" operator
-              if (entry.type === 'wildcard' && entry.value.includes('**')) {
-                warnings.entries = [VALIDATION_WARNINGS.performanceWildcard];
+            for (const entry of formData.entries) {
+              if ('value' in entry) {
+                if (typeof entry.value === 'string') {
+                  if (!entry.value.trim()) {
+                    entryErrors.push(INPUT_ERRORS.entryValueEmpty);
+                    break;
+                  }
+                  if (entry.type === 'wildcard' && entry.value.includes('**')) {
+                    entryWarnings.push(VALIDATION_WARNINGS.performanceWildcard);
+                  }
+                } else if (Array.isArray(entry.value) && entry.value.length === 0) {
+                  entryErrors.push(INPUT_ERRORS.entryValueEmpty);
+                  break;
+                }
               }
             }
-            // Handle array values
-            else if (Array.isArray(entry.value) && (!entry.value || entry.value.length === 0)) {
-              errors.entries = [INPUT_ERRORS.entryValueEmpty];
+
+            if (entryErrors.length > 0) {
+              errors.entries = entryErrors;
+            }
+            if (entryWarnings.length > 0) {
+              warnings.entries = entryWarnings;
             }
           }
         }
@@ -496,7 +638,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleNameBlur = useCallback(
-      (event: React.FocusEvent<HTMLInputElement>) => {
+      (_event: React.FocusEvent<HTMLInputElement>) => {
         updateVisitedFields({ ...visitedFields, name: true });
       },
       [visitedFields, updateVisitedFields]
@@ -512,16 +654,14 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const handleOsChange = useCallback(
       (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>) => {
         const osTypes = selectedOptions[0]?.value || [];
-        const currentEntry = currentItem.entries?.[0];
+        const firstEntry = currentItem.entries?.[0];
 
-        // Mark that user has explicitly selected an OS
         setHasUserSelectedOs(true);
         setHasFormChanged(true);
 
-        let fieldToUse = currentEntry?.field || TrustedDeviceConditionEntryField.DEVICE_ID;
+        let fieldToUse = firstEntry?.field || TrustedDeviceConditionEntryField.DEVICE_ID;
         let shouldResetValue = false;
 
-        // If current field is USERNAME but USERNAME is not available for new OS selection, reset to DEVICE_ID
         if (
           fieldToUse === TrustedDeviceConditionEntryField.USERNAME &&
           !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)
@@ -540,8 +680,8 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
               type: 'match' as const,
               value: shouldResetValue
                 ? ''
-                : currentEntry && 'value' in currentEntry
-                ? String(currentEntry.value || '')
+                : firstEntry && 'value' in firstEntry
+                ? String(firstEntry.value || '')
                 : '',
             } as const,
           ],
@@ -556,16 +696,14 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       [currentItem, onChange, validateForm, updateVisitedFields, visitedFields]
     );
 
-    const updateConditionField = useCallback(
-      (updates: Record<string, string>) => {
-        const currentEntry = currentItem.entries?.[0] || {
-          field: TrustedDeviceConditionEntryField.DEVICE_ID,
-          operator: 'included',
-          type: 'match',
-          value: '',
-        };
-        const updatedEntry = { ...currentEntry, ...updates };
-        const updatedItem = { ...currentItem, entries: [updatedEntry] };
+    const updateEntryAtIndex = useCallback(
+      (index: number, updates: Record<string, string>) => {
+        const entries = currentItem.entries?.length
+          ? [...currentItem.entries]
+          : [defaultDeviceEntry()];
+        const currentEntry = entries[index] ?? defaultDeviceEntry();
+        entries[index] = { ...currentEntry, ...updates };
+        const updatedItem = { ...currentItem, entries };
         const validation = validateForm(updatedItem);
 
         setValidationResult(validation);
@@ -573,36 +711,62 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [currentItem, onChange, validateForm, setValidationResult]
+      [currentItem, onChange, validateForm]
     );
 
-    const handleFieldChange = useCallback(
-      (value: string) => {
-        updateConditionField({ field: value, value: '' });
+    const handleEntryFieldChange = useCallback(
+      (index: number, value: string) => {
+        updateEntryAtIndex(index, { field: value, value: '' });
         updateVisitedFields({ entries: false });
       },
-      [updateConditionField, updateVisitedFields]
+      [updateEntryAtIndex, updateVisitedFields]
     );
 
-    const handleOperatorChange = useCallback(
-      (value: string) => {
+    const handleEntryOperatorChange = useCallback(
+      (index: number, value: string) => {
         const type = value === 'is' ? 'match' : 'wildcard';
-        updateConditionField({ type });
+        updateEntryAtIndex(index, { type });
       },
-      [updateConditionField]
+      [updateEntryAtIndex]
     );
 
-    const handleValueChange = useCallback(
-      (options: Array<EuiComboBoxOptionOption<string>>) => {
+    const handleEntryValueChange = useCallback(
+      (index: number, options: Array<EuiComboBoxOptionOption<string>>) => {
         const value = options.length > 0 ? options[0].label : '';
-        updateConditionField({ value });
+        updateEntryAtIndex(index, { value });
       },
-      [updateConditionField]
+      [updateEntryAtIndex]
     );
 
-    const handleValueBlur = useCallback(() => {
-      updateVisitedFields({ ...visitedFields, entries: true });
-    }, [visitedFields, updateVisitedFields]);
+    const handleEntryValueBlur = useCallback(
+      (_index: number) => {
+        updateVisitedFields({ ...visitedFields, entries: true });
+      },
+      [visitedFields, updateVisitedFields]
+    );
+
+    const handleAddEntry = useCallback(() => {
+      const entries = [...(currentItem.entries ?? []), defaultDeviceEntry()];
+      const updatedItem = { ...currentItem, entries };
+      const validation = validateForm(updatedItem);
+
+      setValidationResult(validation);
+      setHasFormChanged(true);
+      onChange({ item: updatedItem, isValid: validation.isValid });
+    }, [currentItem, onChange, validateForm]);
+
+    const handleRemoveEntry = useCallback(
+      (index: number) => {
+        const entries = (currentItem.entries ?? []).filter((_, i) => i !== index);
+        const updatedItem = { ...currentItem, entries };
+        const validation = validateForm(updatedItem);
+
+        setValidationResult(validation);
+        setHasFormChanged(true);
+        onChange({ item: updatedItem, isValid: validation.isValid });
+      },
+      [currentItem, onChange, validateForm]
+    );
 
     const handlePolicyChange = useCallback<EffectedPolicySelectProps['onChange']>(
       (updatedItem) => {
@@ -620,17 +784,11 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         : [OperatingSystem.WINDOWS, OperatingSystem.MAC];
     }, [currentItem.os_types]);
 
-    const currentEntry = useMemo(() => {
-      const entry = currentItem.entries?.[0];
-      if (entry && 'value' in entry) {
-        return entry;
+    const currentEntries = useMemo((): ExceptionListItemSchema['entries'] => {
+      if (currentItem.entries?.length) {
+        return currentItem.entries;
       }
-      return {
-        field: TrustedDeviceConditionEntryField.DEVICE_ID,
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: '',
-      };
+      return [defaultDeviceEntry()];
     }, [currentItem.entries]);
 
     return (
@@ -662,11 +820,13 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           getTestId={getTestId}
           selectedOs={selectedOs}
           handleOsChange={handleOsChange}
-          currentEntry={currentEntry}
-          handleFieldChange={handleFieldChange}
-          handleOperatorChange={handleOperatorChange}
-          handleValueChange={handleValueChange}
-          handleValueBlur={handleValueBlur}
+          entries={currentEntries}
+          onAddEntry={handleAddEntry}
+          onRemoveEntry={handleRemoveEntry}
+          onEntryFieldChange={handleEntryFieldChange}
+          onEntryOperatorChange={handleEntryOperatorChange}
+          onEntryValueChange={handleEntryValueChange}
+          onEntryValueBlur={handleEntryValueBlur}
           disabled={disabled}
           visitedFields={visitedFields}
           validationResult={validationResult}
