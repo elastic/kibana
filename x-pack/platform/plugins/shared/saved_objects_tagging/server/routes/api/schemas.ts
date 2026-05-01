@@ -9,10 +9,38 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
+export const tagsListRequestQuerySchema = schema.object({
+  query: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
+      },
+    })
+  ),
+  page: schema.maybe(
+    schema.number({
+      min: 1,
+      meta: {
+        description: 'The page of results to return. Defaults to `1`.',
+      },
+    })
+  ),
+  per_page: schema.maybe(
+    schema.number({
+      min: 1,
+      max: 1000,
+      meta: {
+        description: 'The number of results to return per page. Defaults to `20`.',
+      },
+    })
+  ),
+});
+
 export const tagIdParamSchema = schema.object({
   id: schema.string({
     meta: {
-      description: 'The tag identifier, as returned by the create or list endpoints.',
+      description: 'The tag ID, as returned by the create or search endpoints.',
     },
   }),
 });
@@ -81,3 +109,4 @@ export const tagsListResponseBodySchema = schema.object(
 
 export type TagResponseItem = TypeOf<typeof tagResponseItemSchema>;
 export type TagsListResponseBody = TypeOf<typeof tagsListResponseBodySchema>;
+export type TagsListRequestQuery = TypeOf<typeof tagsListRequestQuerySchema>;

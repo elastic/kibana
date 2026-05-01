@@ -10,7 +10,7 @@ import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TagsPluginRouter } from '../../../types';
 import { handleRouteError } from '../error_handler';
 import { getRouteConfig } from '../get_route_config';
-import { tagsListResponseBodySchema } from '../schemas';
+import { tagsListRequestQuerySchema, tagsListResponseBodySchema } from '../schemas';
 import { list } from './list';
 
 export const registerListRoute = (router: TagsPluginRouter, usageCounter?: UsageCounter) => {
@@ -20,14 +20,17 @@ export const registerListRoute = (router: TagsPluginRouter, usageCounter?: Usage
     path: `${basePath}`,
     summary: 'List tags',
     ...routeConfig,
-    description: 'Returns all tags.',
+    description:
+      'Returns tags. By default (no query parameters), returns all tags. If `query`, `page`, or `per_page` are provided, results are filtered and/or paginated.',
   });
 
   listRoute.addVersion(
     {
       version: routeVersion,
       validate: {
-        request: {},
+        request: {
+          query: tagsListRequestQuerySchema,
+        },
         response: {
           200: {
             body: () => tagsListResponseBodySchema,
@@ -43,7 +46,7 @@ export const registerListRoute = (router: TagsPluginRouter, usageCounter?: Usage
       telemetryHandler(req, usageCounter, async () => {
         try {
           return res.ok({
-            body: await list(ctx),
+            body: await list(ctx, req.query),
           });
         } catch (e) {
           return handleRouteError(e as Error, res);
