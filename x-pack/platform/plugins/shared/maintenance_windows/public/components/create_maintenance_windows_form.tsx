@@ -392,6 +392,18 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
               )}
             </UseField>
           </ScopeSection>
+          {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
+            <EuiFlexItem>
+              <EuiCallOut
+                announceOnMount
+                data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
+                title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+                color="warning"
+              >
+                <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          ) : null}
           <ScopeSection
             title={i18n.EPISODES_SCOPE_TITLE}
             description={i18n.EPISODES_SCOPE_DESCRIPTION}
@@ -414,22 +426,8 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
             </UseField>
           </ScopeSection>
         </EuiFlexGroup>
-
-        {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="xl" />
-            <EuiCallOut
-              announceOnMount
-              data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
-              title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
-              color="warning"
-            >
-              <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="xl" />
       <EuiFlexGroup
         alignItems="center"
         justifyContent={isEditMode ? 'spaceBetween' : 'flexEnd'}
@@ -483,9 +481,9 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
           </EuiConfirmModal>
         )}
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
+              <EuiButtonEmpty onClick={onCancel} data-test-subj="cancelMaintenanceWindow">
                 {i18n.CANCEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
