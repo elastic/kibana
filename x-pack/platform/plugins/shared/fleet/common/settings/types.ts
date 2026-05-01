@@ -35,6 +35,4 @@ export interface SettingsConfig {
   }>;
   example_value?: string | number | boolean;
   type?: 'yaml';
-  /** Custom label for boolean checkbox (default: "Enable") */
-  checkboxLabel?: string;
 }
