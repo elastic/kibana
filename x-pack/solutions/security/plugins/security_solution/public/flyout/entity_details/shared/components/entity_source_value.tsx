@@ -116,7 +116,6 @@ export const TruncatedBadgeList = memo(
         gutterSize="xs"
         alignItems="center"
         responsive={false}
-        wrap
         data-test-subj={dataTestSubj}
       >
         {visible.map((value) => (
