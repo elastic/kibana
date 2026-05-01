@@ -58,6 +58,7 @@ import type { ElasticsearchError } from '../lib';
 import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import type { RulesSettingsService } from '../rules_settings';
 import type { MaintenanceWindowsService } from './maintenance_windows';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -77,6 +78,7 @@ export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
 export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
+  expiredSnoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
@@ -86,6 +88,7 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
   rule: SanitizedRule<Params>;
   validatedParams: Params;
   version: string | undefined;
+  snoozedInstances: RawRuleSnoozedInstance[];
 }
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {

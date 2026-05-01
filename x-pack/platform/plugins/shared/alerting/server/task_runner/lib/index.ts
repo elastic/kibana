@@ -13,3 +13,5 @@ export { clearExpiredSnoozes } from './clear_expired_snoozes';
 export { getSchedule } from './get_schedule';
 export { getState } from './get_state';
 export { getTaskRunError } from './get_task_run_error';
+export { evaluatePerAlertSnooze } from './evaluate_per_alert_snooze';
+export type { EvaluatePerAlertSnoozeResult } from './evaluate_per_alert_snooze';

@@ -121,6 +121,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     rule,
     validatedParams,
     version,
+    snoozedInstances: rawRule.snoozedInstances ?? [],
   };
 }
 

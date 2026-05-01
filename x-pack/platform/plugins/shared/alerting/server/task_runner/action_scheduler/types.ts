@@ -31,6 +31,7 @@ import type {
   AlertingEventLogger,
 } from '../../lib/alerting_event_logger/alerting_event_logger';
 import type { RuleTaskInstance, TaskRunnerContext } from '../types';
+import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 
 export type ActionSchedulerRule<Params extends RuleTypeParams> = Omit<
   SanitizedRule<Params>,
@@ -71,6 +72,7 @@ export interface ActionSchedulerOptions<
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
   priority?: TaskPriority;
+  snoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export type Executable<

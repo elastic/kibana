@@ -37,6 +37,7 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   indices: Record<string, string>;
@@ -164,6 +165,7 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  snoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface TrackedAlerts<

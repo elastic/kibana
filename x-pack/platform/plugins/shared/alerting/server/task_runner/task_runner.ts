@@ -33,6 +33,7 @@ import type {
   RuleExecutionStatus,
   RuleTypeRegistry,
 } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
@@ -70,6 +71,7 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
+  evaluatePerAlertSnooze,
 } from './lib';
 import {
   ErrorWithType,
@@ -139,6 +141,7 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null;
+  private snoozedInstances: RawRuleSnoozedInstance[] = [];
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
@@ -216,6 +219,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstances?: RawRuleSnoozedInstance[];
     }
   ) {
     const client = this.context.elasticsearch.client.asInternalUser;
@@ -276,6 +280,7 @@ export class TaskRunner<
     apiKey,
     uiamApiKey,
     validatedParams: params,
+    snoozedInstances,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
@@ -337,6 +342,7 @@ export class TaskRunner<
         executionId: this.executionId,
         logger: this.logger,
         maxAlerts: this.context.maxAlerts,
+        snoozedInstances,
         rule: {
           id: rule.id,
           name: rule.name,
@@ -416,6 +422,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
+      snoozedInstances,
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -436,6 +443,11 @@ export class TaskRunner<
           });
         }
       })
+    );
+
+    const { expiredInstances: expiredSnoozedInstances } = evaluatePerAlertSnooze(
+      snoozedInstances,
+      this.runDate
     );
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
@@ -475,6 +487,7 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      expiredSnoozedInstances,
     };
   }
 
@@ -685,6 +698,19 @@ export class TaskRunner<
         });
       }
 
+      const expiredSnoozedInstances = isOk(runRuleResult)
+        ? (runRuleResult.value.expiredSnoozedInstances ?? [])
+        : [];
+      const prunedSnoozedInstances =
+        expiredSnoozedInstances.length > 0
+          ? this.snoozedInstances.filter(
+              (instance) =>
+                !expiredSnoozedInstances.some(
+                  (expired) => expired.instanceId === instance.instanceId
+                )
+            )
+          : undefined;
+
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
         if (outcome === 'failure') {
@@ -703,6 +729,7 @@ export class TaskRunner<
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          ...(prunedSnoozedInstances !== undefined ? { snoozedInstances: prunedSnoozedInstances } : {}),
         });
       }
 
@@ -742,6 +769,7 @@ export class TaskRunner<
     let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
+      this.snoozedInstances = validatedRuleData.snoozedInstances;
 
       runRuleResult = asOk(
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))

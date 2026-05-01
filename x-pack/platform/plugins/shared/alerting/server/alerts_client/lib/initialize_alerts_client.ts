@@ -18,6 +18,7 @@ import type {
   RuleTypeParams,
   SanitizedRule,
 } from '../../types';
+import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import type { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
 
@@ -43,6 +44,7 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
   runTimestamp?: Date;
+  snoozedInstances?: RawRuleSnoozedInstance[];
   startedAt: Date | null;
   taskInstance: RuleTaskInstance;
 }
@@ -63,6 +65,7 @@ export const initializeAlertsClient = async <
   rule,
   ruleType,
   runTimestamp,
+  snoozedInstances,
   startedAt,
   taskInstance,
 }: InitializeAlertsClientOpts<Params>) => {
@@ -138,6 +141,7 @@ export const initializeAlertsClient = async <
     runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
+    snoozedInstances,
   });
 
   return alertsClient;
