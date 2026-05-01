@@ -339,7 +339,7 @@ export const alertFieldMap = {
   },
   [CPS_SCOPE_LINKED_PROJECTS]: {
     type: 'flattened',
-    array: false,
+    array: true,
     required: false,
   },
   // ignore_above: 1024 matches ECS definition to prevent composite mapping conflicts
