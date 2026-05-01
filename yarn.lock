@@ -6523,6 +6523,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-vectordb@link:src/platform/packages/shared/deeplinks/vectordb":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-workflows@link:src/platform/packages/shared/deeplinks/workflows":
   version "0.0.0"
   uid ""
@@ -9796,6 +9800,10 @@
   uid ""
 
 "@kbn/validate-oas@link:src/platform/packages/private/kbn-validate-oas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/vectordb-onboarding@link:x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding":
   version "0.0.0"
   uid ""
 

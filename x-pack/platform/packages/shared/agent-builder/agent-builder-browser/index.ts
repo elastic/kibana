@@ -28,6 +28,7 @@ export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   EmbeddableConversationProps,
+  PublicEmbeddableConversationProps,
   OpenConversationSidebarOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
