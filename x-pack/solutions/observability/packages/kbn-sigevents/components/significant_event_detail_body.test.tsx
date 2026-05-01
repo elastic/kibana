@@ -19,6 +19,40 @@ describe('SignificantEventDetailBody', () => {
     subtitle: 'logs · fleet-coordination',
     severityLabel: 'Critical',
     severityColor: 'danger' as const,
+    summary: 'Fleet server dependency chain is showing a single point of failure pattern.',
+    rootCause:
+      'The fleet coordination service has a single upstream dependency that is refusing connections.',
+    recommendations: [
+      'Verify fleet server upstream dependency health.',
+      'Check fleet coordination logs for connection errors.',
+    ],
+    recommendedAction: 'escalate' as const,
+    criticality: 85,
+    impact: 'critical',
+    ruleNames: ['Fleet dependency failures'],
+    streamNames: ['logs.otel'],
+    evidences: [
+      {
+        description: 'Matched fleet connection errors in logs.',
+        esqlQuery: 'FROM logs.otel | WHERE body.text : "fleet" | LIMIT 5',
+        result: 'found',
+        rowCount: 5,
+        collectedAt: '2026-01-01T00:00:00Z',
+        ruleName: 'Fleet dependency failures',
+        streamName: 'logs.otel',
+        confirmed: true,
+      },
+    ],
+    dependencyEdges: [
+      {
+        source: 'fleet-coordination',
+        target: 'fleet-server',
+        protocol: 'grpc',
+        exposure: 'exposed' as const,
+      },
+    ],
+    causeKis: [{ name: 'fleet-server', streamName: 'logs.otel' }],
+    timestamp: '2026-01-01T00:00:00Z',
   };
 
   const defaultProps = {
@@ -65,13 +99,11 @@ describe('SignificantEventDetailBody', () => {
     expect(screen.getByText('Recommended action')).toBeInTheDocument();
   });
 
-  it('renders the default values inside the metadata cards', () => {
+  it('renders the values derived from event data inside the metadata cards', () => {
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
     // Severity badge value (from event.severityLabel)
     expect(screen.getAllByText('Critical').length).toBeGreaterThan(0);
-    // Criticality + Impact default to "High"
-    expect(screen.getAllByText('High').length).toBeGreaterThanOrEqual(2);
-    // Recommended action default to "Escalate"
+    // Recommended action derived from recommendedAction field
     expect(screen.getAllByText('Escalate').length).toBeGreaterThan(0);
   });
 
@@ -83,20 +115,18 @@ describe('SignificantEventDetailBody', () => {
   it('renders the general information panel collapsed by default', () => {
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
     expect(screen.getByText('General information')).toBeInTheDocument();
-    // "Confidence" and "Impacting" only live inside the general info panel
-    expect(screen.queryByText('Confidence')).not.toBeInTheDocument();
+    // "Impacting" and "Stream" only live inside the general info panel
     expect(screen.queryByText('Impacting')).not.toBeInTheDocument();
-    expect(screen.queryByText('logs · fleet-coordination')).not.toBeInTheDocument();
+    expect(screen.queryByText('Stream')).not.toBeInTheDocument();
   });
 
   it('expands the general information panel when its toggle is clicked', () => {
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
 
-    fireEvent.click(screen.getByTestId('sigeventsOverviewInfoPanelToggle'));
+    fireEvent.click(screen.getAllByTestId('sigeventsOverviewInfoPanelToggle')[0]);
 
-    expect(screen.getByText('Confidence')).toBeInTheDocument();
     expect(screen.getByText('Impacting')).toBeInTheDocument();
-    expect(screen.getByText('logs · fleet-coordination')).toBeInTheDocument();
+    expect(screen.getByText('Stream')).toBeInTheDocument();
   });
 
   it('renders the recommendations plan panel', () => {
@@ -122,6 +152,8 @@ describe('SignificantEventDetailBody', () => {
       ...mockEvent,
       severityLabel: 'High',
       severityColor: 'warning' as const,
+      impact: 'high',
+      criticality: 60,
     };
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={warningEvent} />);
     expect(screen.getAllByText('High').length).toBeGreaterThan(0);
@@ -132,6 +164,8 @@ describe('SignificantEventDetailBody', () => {
       ...mockEvent,
       severityLabel: 'Low',
       severityColor: 'hollow' as const,
+      impact: 'low',
+      criticality: 20,
     };
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={unknownSeverityEvent} />);
     expect(screen.getAllByText('Low').length).toBeGreaterThan(0);

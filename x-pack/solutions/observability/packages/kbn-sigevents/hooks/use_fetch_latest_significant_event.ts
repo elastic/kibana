@@ -42,6 +42,17 @@ interface DependencyEdge {
   exposure: 'exposed' | 'not_exposed';
 }
 
+interface EvidenceDocument {
+  description: string;
+  esql_query: string;
+  result: string;
+  row_count: number;
+  collected_at: string;
+  rule_name: string;
+  stream_name: string;
+  confirmed?: boolean;
+}
+
 interface SignificantEventDocument {
   '@timestamp': string;
   event_id: string;
@@ -56,8 +67,9 @@ interface SignificantEventDocument {
   blast_radius?: BlastRadiusItem[];
   cause_kis: CauseKiItem[];
   dependency_edges?: DependencyEdge[];
+  evidences?: EvidenceDocument[];
   criticality: number;
-  recommended_action: 'escalate' | 'monitor' | 'resolve';
+  recommended_action: 'escalate' | 'monitor' | 'resolve' | 'investigate';
   impact: 'critical' | 'high' | 'medium' | 'low';
   recommendations: string[];
   verdict_id: string;
@@ -162,6 +174,35 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     subtitle: (doc.stream_names ?? []).join(' · '),
     severityLabel: severity.label,
     severityColor: severity.color,
+    summary: doc.summary ?? '',
+    rootCause: doc.root_cause ?? '',
+    recommendations: doc.recommendations ?? [],
+    recommendedAction: doc.recommended_action ?? 'monitor',
+    criticality: doc.criticality ?? 0,
+    impact: doc.impact ?? 'low',
+    ruleNames: doc.rule_names ?? [],
+    streamNames: doc.stream_names ?? [],
+    evidences: (doc.evidences ?? []).map((ev) => ({
+      description: ev.description,
+      esqlQuery: ev.esql_query,
+      result: ev.result,
+      rowCount: ev.row_count,
+      collectedAt: ev.collected_at,
+      ruleName: ev.rule_name,
+      streamName: ev.stream_name,
+      confirmed: ev.confirmed,
+    })),
+    dependencyEdges: (doc.dependency_edges ?? []).map((edge) => ({
+      source: edge.source,
+      target: edge.target,
+      protocol: edge.protocol,
+      exposure: edge.exposure,
+    })),
+    causeKis: (doc.cause_kis ?? []).map((ki) => ({
+      name: ki.name,
+      streamName: ki.stream_name,
+    })),
+    timestamp: doc['@timestamp'],
   };
 
   return {

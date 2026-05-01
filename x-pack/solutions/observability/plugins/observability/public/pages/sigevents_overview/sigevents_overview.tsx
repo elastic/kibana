@@ -53,6 +53,13 @@ const embeddableConversationWrapperStyles = css`
   [data-test-subj='agentBuilderEmbeddableConversation'] {
     background: transparent;
   }
+
+  /* Hide the lazy-load spinner so it doesn't cause layout shift */
+  > .euiFlexGroup {
+    .euiLoadingSpinner {
+      display: none;
+    }
+  }
 `;
 
 export function SigeventsOverviewPage() {
@@ -320,7 +327,7 @@ export function SigeventsOverviewPage() {
 
   return (
     <ObservabilityPageTemplate
-      isPageDataLoaded={!loading && !overviewLoading}
+      isPageDataLoaded={true}
       data-test-subj="obltSigeventsOverviewPageHeader"
       pageSectionProps={{
         grow: true,
@@ -343,16 +350,19 @@ export function SigeventsOverviewPage() {
           >
             <EuiFlexItem grow={false}>
               {loading || overviewLoading ? (
-                <EuiEmptyPrompt
-                  icon={<EuiLoadingSpinner size="xl" />}
-                  title={
-                    <h2>
-                      {i18n.translate('xpack.observability.sigeventsOverview.loadingTitle', {
-                        defaultMessage: 'Loading significant events...',
-                      })}
-                    </h2>
-                  }
-                />
+                <EuiFlexGroup
+                  direction="column"
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  css={css`
+                    padding: ${euiTheme.size.l};
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : error || overviewError ? (
                 <EuiEmptyPrompt
                   iconType="warning"
