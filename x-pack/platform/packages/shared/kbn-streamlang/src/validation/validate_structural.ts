@@ -89,7 +89,7 @@ export function validateStepsRecursively(
       // This covers the case where the processor is nested inside a parent condition block —
       // the Zod schema refinement only catches the processor's own 'where' property, not tree-level context.
       if (
-        (step.action === 'split' || step.action === 'convert') &&
+        (step.action === 'split' || step.action === 'convert' || step.action === 'user_agent') &&
         'from' in step &&
         (!('to' in step) || !step.to || step.to === step.from)
       ) {

@@ -763,25 +763,46 @@ export interface UserAgentProcessor extends ProcessorBaseWithWhere {
   ignore_missing?: boolean;
 }
 
-export const userAgentProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('user_agent'),
-  from: StreamlangSourceField.describe('The field containing the user agent string'),
-  to: z
-    .optional(StreamlangTargetField)
-    .describe('The field that will be filled with the user agent details'),
-  regex_file: z
-    .optional(NonEmptyString)
-    .describe(
-      'Custom regex file name containing the regular expressions for parsing the user agent string'
-    ),
-  properties: z
-    .optional(z.array(z.enum(userAgentProperties)))
-    .describe('Specific properties to extract (defaults to all)'),
-  extract_device_type: z
-    .optional(z.boolean())
-    .describe('Extracts device type from the user agent string'),
-  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
-}) satisfies z.Schema<UserAgentProcessor>;
+export const userAgentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('user_agent'),
+    from: StreamlangSourceField.describe('The field containing the user agent string'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('The field that will be filled with the user agent details'),
+    regex_file: z
+      .optional(NonEmptyString)
+      .describe(
+        'Custom regex file name containing the regular expressions for parsing the user agent string'
+      ),
+    properties: z
+      .optional(z.array(z.enum(userAgentProperties)))
+      .describe('Specific properties to extract (defaults to all)'),
+    extract_device_type: z
+      .optional(z.boolean())
+      .describe('Extracts device type from the user agent string'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .refine(
+    (obj) => {
+      const target = obj.to ?? obj.from;
+      return (
+        !obj.where ||
+        (obj.where && isAlwaysCondition(obj.where)) ||
+        (obj.where && Boolean(target) && obj.from !== target)
+      );
+    },
+    {
+      message:
+        'User agent processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  )
+  .describe(
+    'User agent processor - Extract browser, OS, and device details from a user agent string'
+  ) satisfies z.Schema<UserAgentProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor
