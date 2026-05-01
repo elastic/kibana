@@ -148,10 +148,10 @@ describe('agent_images', () => {
       expect(config).toEqual(
         expect.objectContaining({
           machineType: 'n2-standard-4',
-          diskType: 'hyperdisk-balanced',
           enableNestedVirtualization: true,
         })
       );
+      expect(config).not.toHaveProperty('diskType');
     });
 
     it('uses custom disk size when provided', () => {
@@ -166,11 +166,11 @@ describe('agent_images', () => {
       expect(config).toEqual(
         expect.objectContaining({
           machineType: 'c2-standard-8',
-          diskType: 'hyperdisk-balanced',
           provider: DEFAULT_AGENT_IMAGE_CONFIG.provider,
         })
       );
       expect(config).not.toHaveProperty('preemptible');
+      expect(config).not.toHaveProperty('diskType');
       expect(config).not.toHaveProperty('enableNestedVirtualization');
     });
   });
