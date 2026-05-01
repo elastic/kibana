@@ -60,6 +60,9 @@ To list or find existing workflows, use the SML (Semantic Metadata Layer) tools 
 - **${workflowTools.modifyProperty}**: Modify a top-level workflow property (requires existing attachment)
 - **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
 
+### Execution Tool
+- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts) return a preview. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested. Pass \`yaml\` parameter with inline YAML to execute a step before a workflow attachment exists (useful for index field discovery).
+
 ## Core Instructions
 
 ### Creating New Workflows
@@ -135,6 +138,7 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **\`with\`**: Contains the step's input parameters (listed as \`inputParams\` in tool results)
 - **Config params**: Step-level fields outside \`with\` (listed as \`configParams\` in tool results, e.g. \`condition\`/\`steps\`/\`else\` for \`if\`, \`foreach\`/\`steps\` for \`foreach\`)
 - **\`connector-id\`**: Required or optional depending on step type (shown in tool results)
+- Steps do NOT support a \`description\` property. The \`description\` in step definition results describes the step type — do not copy it into YAML.
 
 ### Step Types
 
@@ -208,16 +212,46 @@ Useful filters:
 - \`| url_encode\` - URL encode a string
 - \`| default: "value"\` - Provide default if nil
 
-### Self-Validation Before Proposing Changes
+### Discover Index Fields — Do NOT Guess
 
-When you generate or modify workflow YAML, you SHOULD validate it before proposing the change:
+Before writing any \`elasticsearch.search\` or \`elasticsearch.esql.query\` step, discover the actual field names and values by calling \`${workflowTools.executeStep}\` with inline \`yaml\`:
+\`\`\`
+${workflowTools.executeStep}({
+  stepName: "discover",
+  yaml: "version: '1'\\nname: tmp\\ntriggers:\\n  - type: manual\\nsteps:\\n  - name: discover\\n    type: elasticsearch.esql.query\\n    with:\\n      query: \\"FROM <index> | LIMIT 5\\""
+})
+\`\`\`
+Inspect the returned columns (names and types) and sample values. Then write your actual query using the real field names.
+Do NOT guess field names from conventions (e.g. \`@timestamp\`, \`service.name\`) — user indices use arbitrary field names.
 
-1. Generate the YAML you intend to propose
-2. Call \`${workflowTools.validateWorkflow}\` with the complete workflow YAML
-3. If validation returns errors: fix the issues and re-validate until valid
-4. If validation passes: present the result to the user
+### Validate and Execute Before Proposing
+
+After writing the workflow YAML:
+
+1. Call \`${workflowTools.validateWorkflow}\` — fix any errors and re-validate until valid
+2. **Call \`${workflowTools.executeStep}\` on every \`elasticsearch.search\` and \`elasticsearch.esql.query\` step** to verify the query returns real, non-empty results. Zero results means something is wrong — broaden the query (drop filters, widen time range) and investigate.
+3. Use the real output to verify that Liquid templates in downstream steps reference the correct field paths and column order.
+4. Only propose after both validation and execution confirm correctness.
+
+If a step references previous step outputs, provide \`contextOverride\` with mock data:
+\`{ "steps": { "previous_step": { "output": { "data": [...] } } } }\`
 
 Skip validation for trivial changes where the risk of errors is low.
+
+### Writing \`if\` Conditions
+
+The \`if\` step's \`condition\` uses KQL, not Liquid. KQL cannot evaluate Liquid filters like \`| size\` or complex expressions. To check computed values, use a \`data.set\` step first:
+\`\`\`yaml
+- name: set_count
+  type: data.set
+  with:
+    count: "{{ steps.query.output.values | size }}"
+- name: check
+  type: if
+  condition: "steps.set_count.output.count > 0"
+\`\`\`
+
+To test a condition with \`${workflowTools.executeStep}\`, temporarily add an \`if\` step with console children in both branches, execute it with \`contextOverride\` providing mock upstream outputs, and check which branch ran. Remove the test step afterwards.
 
 ### Fixing Validation Errors
 

@@ -78,6 +78,7 @@ import {
   LoadingIconPanel,
   MiniIcon,
   AddIntegrationButton,
+  AddIntegrationButtonDisabledReason,
   EditIntegrationButton,
 } from './components';
 import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
@@ -198,6 +199,31 @@ export function Detail() {
     'installationInfo' in packageInfo &&
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
+
+  const isViewingOldPackage =
+    packageInfo && semverLt(packageInfo.version, packageInfo.latestVersion);
+
+  const isViewingDifferentVersion =
+    isInstalled &&
+    packageInfo &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    packageInfo.version !== packageInfo.installationInfo.version;
+
+  const isViewingUnavailableVersion = Boolean(
+    isViewingDifferentVersion || (!isInstalled && isViewingOldPackage)
+  );
+
+  const addIntegrationDisabledReason: AddIntegrationButtonDisabledReason | undefined =
+    isViewingUnavailableVersion
+      ? isInstalled
+        ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
+        : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
+      : !userCanInstallPackages
+      ? missingSecurityConfiguration
+        ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
+        : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+      : undefined;
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -617,7 +643,7 @@ export function Detail() {
                           )}
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
-                              userCanInstallPackages={userCanInstallPackages}
+                              disabledReason={addIntegrationDisabledReason}
                               href={getHref('add_integration_to_policy', {
                                 pkgkey,
                                 ...(integration ? { integration } : {}),
@@ -625,7 +651,6 @@ export function Detail() {
                                   ? { agentPolicyId: agentPolicyIdFromContext }
                                   : {}),
                               })}
-                              missingSecurityConfiguration={missingSecurityConfiguration}
                               packageName={wrapTitleWithDeprecated({
                                 packageInfo,
                                 integrationInfo,
@@ -663,12 +688,11 @@ export function Detail() {
       isInstalled,
       isCustomPackage,
       handleEditIntegrationClick,
-      userCanInstallPackages,
+      addIntegrationDisabledReason,
       getHref,
       pkgkey,
       integration,
       agentPolicyIdFromContext,
-      missingSecurityConfiguration,
       integrationInfo,
       handleAddIntegrationPolicyClick,
       onVersionChange,

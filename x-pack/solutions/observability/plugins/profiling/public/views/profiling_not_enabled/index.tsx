@@ -12,7 +12,7 @@ import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_te
 
 export function ProfilingNotEnabledView() {
   return (
-    <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+    <ProfilingAppPageTemplate hideSearchBar>
       <EuiEmptyPrompt
         iconType="warning"
         iconColor="warning"
