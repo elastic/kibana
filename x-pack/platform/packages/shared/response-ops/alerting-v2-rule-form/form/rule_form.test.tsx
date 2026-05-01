@@ -330,8 +330,7 @@ describe('RuleForm', () => {
         'tags=["critical","team-rna"]'
       );
     });
-
-});
+  });
 
   describe('submission buttons', () => {
     it('does not show submission buttons by default', () => {
