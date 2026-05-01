@@ -73,6 +73,8 @@ export {
   getQuerySummary,
   getEsqlControls,
   getAllEsqlControls,
+  convertFiltersToESQLExpression,
+  injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
 } from './src';
 

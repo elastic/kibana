@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  type Filter,
+  type Query,
+  type TimeRange,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -13,7 +19,11 @@ import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { getEsqlControls } from '@kbn/esql-utils';
+import {
+  convertFiltersToESQLExpression,
+  getEsqlControls,
+  injectWhereClauseAfterSourceCommand,
+} from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -63,11 +73,9 @@ async function getDiscoverLocationParams({
     throw new Error('Underlying data is not ready');
   }
   const dataView = await dataViews.get(args.dataViewSpec.id!);
-  // we don't want to pass the DSL filters when navigating from an ES|SQL embeddable
-  let filtersToApply = embeddable.isTextBasedLanguage()
-    ? []
-    : [...(filters || []), ...args.filters];
+  let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
+  let queryToApply = args.query;
   // if the target data view is time based, attempt to split out a time range from the provided filters
   if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
     const { extractTimeRange } = await import('@kbn/es-query');
@@ -78,12 +86,29 @@ async function getDiscoverLocationParams({
     }
   }
 
+  if (embeddable.isTextBasedLanguage()) {
+    // Discover ES|QL mode can't accept DSL filters — convert what we can to a
+    // WHERE clause injected right after the source command (so the filter runs
+    // before any STATS/KEEP/DROP/RENAME), and drop any untranslatable ones.
+    if (filtersToApply.length && isOfAggregateQueryType(args.query)) {
+      const { esqlExpression } = convertFiltersToESQLExpression(filtersToApply);
+      if (esqlExpression) {
+        queryToApply = {
+          ...args.query,
+          esql: injectWhereClauseAfterSourceCommand(args.query.esql, esqlExpression),
+        };
+      }
+    }
+    filtersToApply = [];
+  }
+
   const presentationContainer = apiIsPresentationContainer(embeddable.parentApi)
     ? embeddable.parentApi
     : undefined;
 
   return {
     ...args,
+    query: queryToApply,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
     esqlControls: presentationContainer
