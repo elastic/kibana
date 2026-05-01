@@ -11,7 +11,7 @@
         "label": "useAssetDetailsRedirect",
         "description": [],
         "signature": [
-          "() => { getAssetDetailUrl: ({ entityType, entityId, search, preferredSchema, }: { entityType: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; preferredSchema?: \"ecs\" | \"semconv\" | undefined; }) => ",
+          "() => { getAssetDetailUrl: ({ entityType, entityId, search, preferredSchema, }: { entityType: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; preferredSchema?: \"ecs\" | \"semconv\" | undefined; }) => ",
           "RouterLinkProps",
           "; }"
         ],
@@ -833,7 +833,7 @@
         "label": "findInventoryFields",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
+          "(type: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "lineNumber": 61,
@@ -849,7 +849,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
             ],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "lineNumber": 61,
@@ -871,7 +871,7 @@
         "label": "findInventoryModel",
         "description": [],
         "signature": [
-          "<TType extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\">(type: TType) => { readonly host: ",
+          "<TType extends \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\">(type: TType) => { readonly host: ",
           "InventoryModel",
           "<\"host\", { cpuV2: ",
           "SchemaBasedAggregations",
@@ -4007,7 +4007,7 @@
         "label": "getFieldByType",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
+          "(type: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "lineNumber": 50,
@@ -4023,7 +4023,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
             ],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "lineNumber": 50,
@@ -4538,7 +4538,7 @@
         "label": "InventoryItemType",
         "description": [],
         "signature": [
-          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+          "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 52,

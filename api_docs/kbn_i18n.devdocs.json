@@ -18,8 +18,235 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.getAvailableLocales",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableLocales",
+        "description": [
+          "\nReturns the list of locales the current Kibana instance offers in the\nlanguage picker. Returns an empty array if `setAvailableLocales` has not\nbeen called or if the deployment has disabled the picker."
+        ],
+        "signature": [
+          "() => readonly ",
+          {
+            "pluginId": "@kbn/i18n",
+            "scope": "common",
+            "docId": "kibKbnI18nPluginApi",
+            "section": "def-common.AvailableLocale",
+            "text": "AvailableLocale"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 93,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.getLocaleLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "getLocaleLabel",
+        "description": [
+          "\nReturns the friendly label for a locale id, using `Intl.DisplayNames`\nin the **endonym** pattern: each locale is rendered in its own\nlanguage (`fr-FR` → `\"français\"`, `ja-JP` → `\"日本語\"`). This means a\nuser stuck in a language they cannot read still sees their preferred\nlanguage listed in a script they recognise.\n\nRegion is dropped before lookup so the label is the bare language\nname, following each language's own orthographic conventions (French\ndoes not capitalise language names; English and German do).\n\nFalls back to the locale id when `Intl.DisplayNames` is unavailable\n(e.g., minimal-ICU Node builds) or cannot resolve the locale."
+        ],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.getLocaleLabel.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 44,
+            "columnNumber": 32,
+            "deprecated": false,
+            "docsReferencedTypeName": "SupportedLocaleId",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.setAvailableLocales",
+        "type": "Function",
+        "tags": [],
+        "label": "setAvailableLocales",
+        "description": [
+          "\nSets the list of locales the current Kibana instance offers in the\nlanguage picker. Called once during browser bootstrap with the values\nthe server derived from `i18n.locales`. An empty list means the picker\nUI is disabled for this deployment."
+        ],
+        "signature": [
+          "(locales: readonly ",
+          {
+            "pluginId": "@kbn/i18n",
+            "scope": "common",
+            "docId": "kibKbnI18nPluginApi",
+            "section": "def-common.AvailableLocale",
+            "text": "AvailableLocale"
+          },
+          "[]) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 84,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.setAvailableLocales.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "locales",
+            "description": [],
+            "signature": [
+              "readonly ",
+              {
+                "pluginId": "@kbn/i18n",
+                "scope": "common",
+                "docId": "kibKbnI18nPluginApi",
+                "section": "def-common.AvailableLocale",
+                "text": "AvailableLocale"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 84,
+            "columnNumber": 37,
+            "deprecated": false,
+            "docsReferencedTypeName": "ReadonlyArray",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.toCanonicalLocaleId",
+        "type": "Function",
+        "tags": [],
+        "label": "toCanonicalLocaleId",
+        "description": [
+          "\nReturns the canonical-casing locale id matching the given locale string\nagainst the supplied list (or the bundled known-locale list when no\nlist is provided), or `\"en\"` if no match is found. The i18n engine\nlowercases locales internally (so `fr-FR` becomes `fr-fr`), but UI\noptions and persistence expect canonical casing (`fr-FR`)."
+        ],
+        "signature": [
+          "(locale: string, availableLocales?: readonly { id: string; }[]) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.toCanonicalLocaleId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.toCanonicalLocaleId.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "availableLocales",
+            "description": [],
+            "signature": [
+              "readonly { id: string; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ReadonlyArray",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.AvailableLocale",
+        "type": "Interface",
+        "tags": [],
+        "label": "AvailableLocale",
+        "description": [
+          "\nA locale that the running Kibana instance offers in the language picker."
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.AvailableLocale.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.AvailableLocale.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/i18n",
         "id": "def-common.TranslateArguments",
@@ -283,6 +510,25 @@
         ],
         "path": "src/platform/packages/shared/kbn-i18n/src/core/formats.ts",
         "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.SupportedLocaleId",
+        "type": "Type",
+        "tags": [],
+        "label": "SupportedLocaleId",
+        "description": [
+          "\nA supported locale code (e.g., `\"en\"`, `\"fr-FR\"`). Widened to `string` so\ndeployments can configure additional locales via `kibana.yml` (`i18n.locales`)\n— for instance, plugins shipping their own translation files."
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -829,6 +1075,25 @@
             "children": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.SUPPORTED_LOCALE_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_LOCALE_IDS",
+        "description": [
+          "\nDefault list of locale ids Kibana ships translations for. Used as the\ndefault value of `i18n.locales` in the config schema and as a fallback\nwhen there is no runtime configuration available (e.g., test fixtures,\nStorybook). It is **not** an authoritative runtime allow-list — admins\ncan curate or extend the list via `kibana.yml`."
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
