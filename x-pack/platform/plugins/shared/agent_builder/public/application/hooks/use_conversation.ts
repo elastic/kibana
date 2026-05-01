@@ -24,6 +24,7 @@ import {
   useSendMessageContext,
   useStreamRecord,
 } from '../context/send_message/send_message_context';
+import { useActiveSpaceId } from '../context/active_space_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
 
@@ -104,7 +105,8 @@ export const useConversationError = () => {
 };
 
 const useGetNewConversationAgentId = () => {
-  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const spaceId = useActiveSpaceId();
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
   const validateAgentId = useValidateAgentId();
 
   // Ensure we always return a string

@@ -236,7 +236,7 @@ export const KafkaSchema = {
       schema.literal(kafkaCompressionType.None),
     ])
   ),
-  compression_level: schema.maybe(schema.number()),
+  compression_level: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   client_id: schema.maybe(schema.string()),
   auth_type: schema.oneOf([
     schema.literal(kafkaAuthType.None),
