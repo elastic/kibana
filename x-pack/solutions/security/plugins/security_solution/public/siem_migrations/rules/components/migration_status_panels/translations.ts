@@ -41,6 +41,13 @@ export const RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR = i18n.translate(
   }
 );
 
+export const RULE_MIGRATION_READY_MISSING_RESOURCES_SENTINEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources.sentinel',
+  {
+    defaultMessage: 'You can also upload the missing watchlists for more accurate results.',
+  }
+);
+
 export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.result.description', {
     defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',

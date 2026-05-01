@@ -205,8 +205,8 @@ describe('actions column builder', () => {
       it('computes a default width from the action count when not specified', () => {
         const result = buildActionsColumn({}, defaultContext);
 
-        // 2 actions × 28px + 8px padding = 64px.
-        expect(result).toMatchObject({ width: '64px', minWidth: '64px' });
+        // `2 * 32` (icon-button width) + `1 * 4` (gap) + `2 * 8` (cell padding) = 84px.
+        expect(result).toMatchObject({ width: '84px', minWidth: '84px' });
       });
 
       it('sticks the actions column by default', () => {
