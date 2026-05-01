@@ -76,7 +76,6 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
   logsPageCursorStart?: PaginationParams;
 }): string {
   return (
@@ -109,7 +108,6 @@ export function buildLogsExtractionEsqlQuery({
       type,
       fromDateISO,
       toDateISO,
-      recoveryId,
       logsPageCursorStart,
       logsPageCursorEnd,
     })

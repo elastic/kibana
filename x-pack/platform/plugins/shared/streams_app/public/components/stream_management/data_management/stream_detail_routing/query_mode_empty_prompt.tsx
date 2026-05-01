@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { AssetImage } from '../../../asset_image';
 import {
   useStreamRoutingEvents,
@@ -17,9 +18,9 @@ import {
 
 export const QueryModeEmptyPrompt = () => {
   const { createQueryStream } = useStreamRoutingEvents();
-  const canManage = useStreamsRoutingSelector(
-    (snapshot) => snapshot.context.definition.privileges.manage
-  );
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const canManage = 'privileges' in definition ? definition.privileges.manage : true;
+  const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   return (
     <EuiFlexGroup
@@ -58,7 +59,9 @@ export const QueryModeEmptyPrompt = () => {
         <EuiToolTip
           position="bottom"
           content={
-            !canManage
+            isAtMaxNestingLevel
+              ? maxNestingLevelText
+              : !canManage
               ? i18n.translate('xpack.streams.queryModeEmptyPrompt.cannotCreateQueryStream', {
                   defaultMessage: "You don't have sufficient privileges to create query streams.",
                 })
@@ -69,7 +72,7 @@ export const QueryModeEmptyPrompt = () => {
             size="s"
             data-test-subj="streamsAppQueryModeCreateButton"
             onClick={createQueryStream}
-            disabled={!canManage}
+            disabled={!canManage || isAtMaxNestingLevel}
           >
             {createButtonText}
           </EuiButton>
@@ -91,3 +94,11 @@ const descriptionText = i18n.translate('xpack.streams.queryModeEmptyPrompt.descr
 const createButtonText = i18n.translate('xpack.streams.queryModeEmptyPrompt.createButton', {
   defaultMessage: 'Create query sub-stream',
 });
+
+const maxNestingLevelText = i18n.translate(
+  'xpack.streams.streamDetailRouting.rules.maxNestingLevel',
+  {
+    defaultMessage:
+      'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
+  }
+);

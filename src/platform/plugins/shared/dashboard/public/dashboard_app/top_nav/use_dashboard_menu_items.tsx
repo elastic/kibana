@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -14,6 +15,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type {
   AppMenuConfig,
   AppMenuItemType,
@@ -31,7 +33,6 @@ import { coreServices, shareService, dataService } from '../../services/kibana_s
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { useDashboardAddItems } from './add_menu/use_dashboard_add_items';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -157,7 +158,21 @@ export const useDashboardMenuItems = ({
     }
   }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
 
-  const addMenuItems = useDashboardAddItems({ dashboardApi });
+  const openAddPanelFlyout = useCallback(() => {
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: dashboardApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
+
+        return <AddPanelFlyout dashboardApi={dashboardApi} ariaLabelledBy={ariaLabelledBy} />;
+      },
+      flyoutProps: {
+        'data-test-subj': 'dashboardAddPanel',
+        triggerId: 'dashboardAddTopNavButton',
+      },
+    });
+  }, [dashboardApi]);
 
   const exportItems = useDashboardExportItems({
     dashboardApi,
@@ -337,8 +352,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardAddTopNavButton',
         htmlId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
-        popoverWidth: 200,
-        items: addMenuItems,
+        run: openAddPanelFlyout,
         order: 2,
       } as AppMenuItemType,
 
@@ -428,7 +442,7 @@ export const useDashboardMenuItems = ({
     appId,
     isQuickSaveButtonDisabled,
     hasUnsavedChanges,
-    addMenuItems,
+    openAddPanelFlyout,
     resetChangesMenuItem,
     exportItems,
     viewMode,

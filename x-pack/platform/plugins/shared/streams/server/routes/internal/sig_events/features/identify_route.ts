@@ -24,6 +24,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
+import { areFeaturesRecent } from '../../../../lib/sig_events/features/are_features_recent';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -111,7 +112,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const streamType = getStreamTypeFromDefinition(stream);
 
     try {
-      return await identifyInferredFeatures({
+      const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
         featureClient,
         soClient,
@@ -136,6 +137,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
+      return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
         `Inferred feature identification failed for stream [${streamName}]: ${
@@ -258,10 +260,46 @@ const identifyComputedFeaturesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
+// Route 3: Check features recency
+// ---------------------------------------------------------------------------
+
+const featuresRecencyRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/features/_recency',
+  options: {
+    access: 'internal',
+    summary: 'Check whether KI features for a stream were identified recently',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+    query: z.object({
+      thresholdHours: z.coerce.number().min(0),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const featureClient = await getFeatureClient();
+    return areFeaturesRecent({
+      featureClient,
+      streamName: params.path.streamName,
+      thresholdHours: params.query.thresholdHours,
+    });
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
 export const identifyFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...featuresRecencyRoute,
 };

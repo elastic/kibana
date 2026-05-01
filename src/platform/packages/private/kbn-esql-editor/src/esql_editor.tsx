@@ -30,6 +30,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import { DataSourceBrowser } from '@kbn/esql-resource-browser';
 import { FieldsBrowser } from '@kbn/esql-resource-browser';
+import { useStableCallback } from '@kbn/react-hooks';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -497,6 +498,11 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   useEsqlEditorActionsRegistration(editorActions);
 
+  // Stable proxies for callbacks captured by long-lived Monaco command closures
+  const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
+  const stableOnToggleVisor = useStableCallback(onToggleVisor);
+  const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -754,8 +760,12 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery, () =>
-                    onGenerateFromCommentRef.current()
+                  addEditorKeyBindings(
+                    editor,
+                    stableOnQuerySubmit,
+                    stableOnToggleVisor,
+                    stableOnPrettifyQuery,
+                    () => onGenerateFromCommentRef.current()
                   );
 
                   const ghostHintDisposables = setupGhostLineHint(editor);

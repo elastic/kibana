@@ -13,11 +13,14 @@ import { registerInternalRoutes } from '.';
 
 describe('Internal Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
-  let mockGetWorkflowExecutionEngine: jest.Mock;
-  let mockEngine: { isEventDrivenExecutionEnabled: jest.Mock };
   let mockApi: { disableAllWorkflows: jest.Mock };
+  let mockTriggerEventsIsEnabled: boolean;
 
   const mockContext = {
+    workflows: Promise.resolve({
+      isWorkflowsAvailable: true,
+      emitEvent: jest.fn(),
+    }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
@@ -31,10 +34,15 @@ describe('Internal Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    mockTriggerEventsIsEnabled = true;
 
-    mockEngine = { isEventDrivenExecutionEnabled: jest.fn() };
-    mockGetWorkflowExecutionEngine = jest.fn().mockResolvedValue(mockEngine);
     mockApi = { disableAllWorkflows: jest.fn() };
+
+    const mockWorkflowsService = {
+      getWorkflowsExecutionEngine: jest.fn().mockImplementation(async () => ({
+        triggerEvents: { isEnabled: mockTriggerEventsIsEnabled },
+      })),
+    };
 
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
@@ -60,16 +68,14 @@ describe('Internal Routes', () => {
       },
     } as unknown as jest.Mocked<IRouter>;
 
-    registerInternalRoutes(
-      {
-        router: mockRouter as any,
-        api: mockApi as any,
-        logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
-        spaces: { getSpaceId: jest.fn().mockReturnValue('default') } as any,
-        audit: {} as any,
-      },
-      mockGetWorkflowExecutionEngine
-    );
+    registerInternalRoutes({
+      router: mockRouter as any,
+      api: mockApi as any,
+      service: mockWorkflowsService as any,
+      logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
+      spaces: { getSpaceId: jest.fn().mockReturnValue('default') } as any,
+      audit: {} as any,
+    });
   });
 
   it('should register the config route handler', () => {
@@ -78,30 +84,26 @@ describe('Internal Routes', () => {
   });
 
   it('should return eventDrivenExecutionEnabled true when engine returns true', async () => {
-    mockEngine.isEventDrivenExecutionEnabled.mockReturnValue(true);
+    mockTriggerEventsIsEnabled = true;
 
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
 
     await routeHandlers[`GET:/internal/workflows/config`].handler(mockContext, request, response);
 
-    expect(mockGetWorkflowExecutionEngine).toHaveBeenCalledTimes(1);
-    expect(mockEngine.isEventDrivenExecutionEnabled).toHaveBeenCalledTimes(1);
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: true },
     });
   });
 
   it('should return eventDrivenExecutionEnabled false when engine returns false', async () => {
-    mockEngine.isEventDrivenExecutionEnabled.mockReturnValue(false);
+    mockTriggerEventsIsEnabled = false;
 
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
 
     await routeHandlers[`GET:/internal/workflows/config`].handler(mockContext, request, response);
 
-    expect(mockGetWorkflowExecutionEngine).toHaveBeenCalledTimes(1);
-    expect(mockEngine.isEventDrivenExecutionEnabled).toHaveBeenCalledTimes(1);
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: false },
     });
