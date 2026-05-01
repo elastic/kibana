@@ -34,12 +34,7 @@ interface RetryServiceLike {
 
 type MaintainerRoutesLike = Pick<
   ReturnType<typeof entityMaintainerRouteHelpersFactory>,
-  | 'getMaintainers'
-  | 'runMaintainer'
-  | 'runMaintainerSync'
-  | 'runRiskScoreNow'
-  | 'startMaintainer'
-  | 'stopMaintainer'
+  'getMaintainers' | 'runMaintainer' | 'runMaintainerSync' | 'startMaintainer' | 'stopMaintainer'
 >;
 
 interface EntityStoreUtilsLike {
@@ -367,12 +362,12 @@ export const riskScoreMaintainerScenarioFactory = ({
       dataViewPattern,
     });
 
-    // Always use the synchronous run_now route for the initial scoring pass.
-    // The maintainer task has a 1-hour interval, so Task Manager won't
-    // auto-run it within the test timeout. Using runSoon (runMaintainer) risks
-    // a version_conflict_engine_exception if it overlaps with a TM-initiated
-    // run from a stale runAt, permanently wedging the task.
-    await routes.runRiskScoreNow();
+    // Always use the synchronous maintainer run endpoint for the initial
+    // scoring pass. The maintainer task has a 1-hour interval, so Task
+    // Manager won't auto-run it within the test timeout. Using runSoon
+    // (runMaintainer) risks a version_conflict_engine_exception if it
+    // overlaps with a TM-initiated run from a stale runAt.
+    await routes.runMaintainerSync('risk-score');
 
     if (runMode === 'async') {
       // Start the maintainer so it's in "started" state for callers that need

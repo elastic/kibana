@@ -86,145 +86,18 @@ interface LoadedRunConfig {
   entityTypes: EntityType[];
 }
 
-/**
- * Idempotently ensures risk score resources (saved objects, data stream,
- * lookup index) exist for the given namespace. Safe to call on every run.
- */
-const ensureRiskScoreSetup = async ({
-  logger,
-  namespace,
+export const createRiskScoreMaintainer = ({
+  getStartServices,
+  entityAnalyticsConfig,
   kibanaVersion,
+  logger,
   auditLogger,
-  esClient,
-  soClient,
-}: {
-  logger: Logger;
-  namespace: string;
-  kibanaVersion: string;
-  auditLogger: AuditLogger | undefined;
-  esClient: InitializedRunContext['esClient'];
-  soClient: InitializedRunContext['soClient'];
-}): Promise<void> => {
-  const riskScoreDataClient = new RiskScoreDataClient({
-    logger,
-    kibanaVersion,
-    esClient,
-    namespace,
-    soClient,
-    auditLogger,
-  });
-  await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
-  await riskScoreDataClient.init();
-  await ensureLookupIndex({ esClient, namespace });
-};
-
-/**
- * Runs the risk score maintainer logic once, bypassing Task Manager.
- * Accepts the same deps used by the registered maintainer plus the minimal
- * context that Task Manager would normally provide (namespace, crudClient,
- * abortController).
- */
-export const runRiskScoreMaintainerOnce = async ({
-  deps,
-  namespace,
-  crudClient,
-  abortController,
-}: {
-  deps: RiskScoreMaintainerDeps;
-  namespace: string;
-  crudClient: Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['crudClient'];
-  abortController: AbortController;
-}): Promise<void> => {
-  const {
-    getStartServices,
-    entityAnalyticsConfig,
-    kibanaVersion,
-    logger,
-    auditLogger,
-    productFeaturesService,
+  productFeaturesService,
+  telemetry,
+}: RiskScoreMaintainerDeps): RiskScoreMaintainerConfig => {
+  const telemetryReporter = createRiskScoreMaintainerTelemetryReporter({
     telemetry,
-  } = deps;
-
-  const telemetryReporter = createRiskScoreMaintainerTelemetryReporter({ telemetry });
-
-  const runContext = await initializeRunContext({
-    getStartServices,
-    namespace,
-    logger,
-    kibanaVersion,
-    auditLogger,
   });
-
-  // Ensure setup has run (idempotent). When invoked via the sync run_now
-  // route the Task Manager setup phase may not have executed yet.
-  await ensureRiskScoreSetup({
-    logger,
-    namespace,
-    kibanaVersion,
-    auditLogger,
-    esClient: runContext.esClient,
-    soClient: runContext.soClient,
-  });
-
-  const canRun = await checkRunPrerequisites({
-    telemetryReporter,
-    productFeaturesService,
-    pluginsStart: runContext.pluginsStart,
-    namespace: runContext.namespace,
-    logger,
-  });
-  if (!canRun) {
-    return;
-  }
-
-  const runConfig = await loadRunConfiguration({
-    coreStart: runContext.coreStart,
-    soClient: runContext.soClient,
-    internalSoClient: runContext.internalSoClient,
-    esClient: runContext.esClient,
-    riskScoreDataClient: runContext.riskScoreDataClient,
-    namespace: runContext.namespace,
-    logger,
-    entityAnalyticsConfig,
-  });
-
-  const maintainerRunStartedAtMs = Date.now();
-  const metricsTracker = createRunMetricsTracker();
-  telemetryReporter.clearGlobalSkipReason();
-  for (const entityType of runConfig.entityTypes) {
-    if (abortController.signal.aborted) {
-      logger.info('Risk score maintainer run aborted before processing entity type');
-      break;
-    }
-    await executeEntityTypeRun({
-      entityType,
-      crudClient,
-      logger,
-      abortSignal: abortController.signal,
-      telemetryReporter,
-      metricsTracker,
-      runContext,
-      runConfig,
-    });
-  }
-
-  const maintainerRunDurationMs = Date.now() - maintainerRunStartedAtMs;
-  logger.info(
-    `Risk score maintainer run completed for namespace "${runContext.namespace}" in ${maintainerRunDurationMs}ms`
-  );
-  const maintainerTotals = metricsTracker.toAggregateSummary({
-    namespace: runContext.namespace,
-    durationMs: maintainerRunDurationMs,
-    entityTypesProcessed: runConfig.entityTypes.length,
-    idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
-  });
-  logger.info(`maintainer totals ${JSON.stringify(maintainerTotals)}`);
-};
-
-export const createRiskScoreMaintainer = (
-  deps: RiskScoreMaintainerDeps
-): RiskScoreMaintainerConfig => {
-  const { getStartServices, kibanaVersion, logger, auditLogger } = deps;
 
   return {
     setup: async ({ status }) => {
@@ -233,25 +106,83 @@ export const createRiskScoreMaintainer = (
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
-      logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-      await ensureRiskScoreSetup({
+      const riskScoreDataClient = new RiskScoreDataClient({
         logger,
-        namespace,
         kibanaVersion,
-        auditLogger,
         esClient,
+        namespace,
         soClient,
+        auditLogger,
       });
+
+      logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
+      await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
+      await riskScoreDataClient.init();
+      await ensureLookupIndex({ esClient, namespace });
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
     run: async ({ status, crudClient, abortController }) => {
-      await runRiskScoreMaintainerOnce({
-        deps,
+      const runContext = await initializeRunContext({
+        getStartServices,
         namespace: status.metadata.namespace,
-        crudClient,
-        abortController,
+        logger,
+        kibanaVersion,
+        auditLogger,
       });
+      const canRun = await checkRunPrerequisites({
+        telemetryReporter,
+        productFeaturesService,
+        pluginsStart: runContext.pluginsStart,
+        namespace: runContext.namespace,
+        logger,
+      });
+      if (!canRun) {
+        return status.state;
+      }
+
+      const runConfig = await loadRunConfiguration({
+        coreStart: runContext.coreStart,
+        soClient: runContext.soClient,
+        internalSoClient: runContext.internalSoClient,
+        esClient: runContext.esClient,
+        riskScoreDataClient: runContext.riskScoreDataClient,
+        namespace: runContext.namespace,
+        logger,
+        entityAnalyticsConfig,
+      });
+
+      const maintainerRunStartedAtMs = Date.now();
+      const metricsTracker = createRunMetricsTracker();
+      telemetryReporter.clearGlobalSkipReason();
+      for (const entityType of runConfig.entityTypes) {
+        if (abortController.signal.aborted) {
+          logger.info('Risk score maintainer run aborted before processing entity type');
+          break;
+        }
+        await executeEntityTypeRun({
+          entityType,
+          crudClient,
+          logger,
+          abortSignal: abortController.signal,
+          telemetryReporter,
+          metricsTracker,
+          runContext,
+          runConfig,
+        });
+      }
+
+      const maintainerRunDurationMs = Date.now() - maintainerRunStartedAtMs;
+      logger.info(
+        `Risk score maintainer run completed for namespace "${runContext.namespace}" in ${maintainerRunDurationMs}ms`
+      );
+      const maintainerTotals = metricsTracker.toAggregateSummary({
+        namespace: runContext.namespace,
+        durationMs: maintainerRunDurationMs,
+        entityTypesProcessed: runConfig.entityTypes.length,
+        idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+      });
+      logger.info(`maintainer totals ${JSON.stringify(maintainerTotals)}`);
       return status.state;
     },
   };

@@ -17,7 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const securitySolutionEnableExperimental: Array<keyof ExperimentalFeatures> = [
     'entityAnalyticsEntityStoreV2',
     'entityAnalyticsWatchlistEnabled',
-    'riskScoringSyncRunRouteEnabled',
   ];
 
   return {

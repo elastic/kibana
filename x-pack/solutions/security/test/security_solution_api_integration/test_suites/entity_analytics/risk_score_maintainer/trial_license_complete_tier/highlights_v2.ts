@@ -76,16 +76,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .delete({ index: RISK_SCORE_DATA_STREAM, ignore_unavailable: true })
         .catch(() => {});
 
-      // Install the entity store. installEntityStoreV2 stops the maintainer after
-      // install, so the data stream is not yet created. A single runRiskScoreNow()
-      // call triggers ensureRiskScoreSetup (creating the data stream, saved objects,
-      // and lookup index) and then early-exits without producing scores because no
-      // alerts exist yet.
+      // Install the entity store. installEntityStoreV2 stops the maintainer
+      // after install, so the data stream is not yet created. A single
+      // synchronous maintainer run creates risk score resources before we
+      // index direct test fixtures.
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
         waitForEntities: false,
       });
-      await maintainerRoutes.runRiskScoreNow();
+      await maintainerRoutes.runMaintainerSync('risk-score');
 
       // Index host and user entities directly into the entity store latest index
       const entityOperations = [

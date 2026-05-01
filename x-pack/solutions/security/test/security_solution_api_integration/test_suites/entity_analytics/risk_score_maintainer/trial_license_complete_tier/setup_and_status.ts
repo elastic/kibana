@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
           entityTypes: ['host'],
           waitForEntities: false,
         });
-        await maintainerRoutes.runRiskScoreNow();
+        await maintainerRoutes.runMaintainerSync('risk-score');
 
         const savedObjects = await listRiskEngineConfigs();
         expect(savedObjects.length).to.eql(1);
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
           entityTypes: ['host'],
           waitForEntities: false,
         });
-        await maintainerRoutes.runRiskScoreNow();
+        await maintainerRoutes.runMaintainerSync('risk-score');
 
         await checkAssets('default', maintainerRoutes);
       });
@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext) => {
           entityTypes: ['host'],
           waitForEntities: false,
         });
-        await maintainerRoutesCustomSpace.runRiskScoreNow();
+        await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
 
         await checkAssets(customSpaceName, maintainerRoutesCustomSpace);
       });

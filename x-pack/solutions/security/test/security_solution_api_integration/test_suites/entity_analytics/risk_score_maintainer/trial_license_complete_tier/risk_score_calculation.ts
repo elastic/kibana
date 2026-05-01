@@ -267,7 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // current run count as the baseline and trigger a fresh run — any
           // run that starts now will see both modifiers.
           await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-          await maintainerRoutes.runRiskScoreNow();
+          await maintainerRoutes.runMaintainerSync('risk-score');
 
           let risk: Record<string, unknown> = {};
           await retry.waitForWithTimeout(
@@ -364,7 +364,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreDoc({ es, retry, entityId: localUser.expectedEuid });
         await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-        await maintainerRoutes.runRiskScoreNow();
+        await maintainerRoutes.runMaintainerSync('risk-score');
         const score = await waitForRiskScoreForId({
           es,
           log,
@@ -392,7 +392,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreDoc({ es, retry, entityId: serviceEntity.expectedEuid });
         await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-        await maintainerRoutes.runRiskScoreNow();
+        await maintainerRoutes.runMaintainerSync('risk-score');
 
         let ecsDoc: Awaited<ReturnType<typeof readRiskScores>>[number] | undefined;
         await retry.waitForWithTimeout(
@@ -472,7 +472,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-          await maintainerRoutes.runRiskScoreNow();
+          await maintainerRoutes.runMaintainerSync('risk-score');
           const score = await waitForRiskScoreForId({
             es,
             log,
@@ -563,7 +563,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // Watchlist confirmed in entity store — trigger a fresh run.
           await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-          await maintainerRoutes.runRiskScoreNow();
+          await maintainerRoutes.runMaintainerSync('risk-score');
           await retry.waitForWithTimeout(
             `risk score with watchlist modifier for ${idpUser.expectedEuid}`,
             60_000,
@@ -628,7 +628,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteAllAlerts(supertest, log, es);
 
           await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-          await maintainerRoutes.runRiskScoreNow();
+          await maintainerRoutes.runMaintainerSync('risk-score');
           await waitForEntityScoreResetToZero({ es, retry, entityId: host.expectedEuid });
         });
 
@@ -667,7 +667,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteAllRules(supertest, log);
           await deleteAllAlerts(supertest, log, es);
           await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
-          await maintainerRoutes.runRiskScoreNow();
+          await maintainerRoutes.runMaintainerSync('risk-score');
 
           // The entity should NOT have been reset to zero — only positive scores should exist
           const scores = normalizeScores(await readRiskScores(es));

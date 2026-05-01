@@ -12,7 +12,6 @@ import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
 const securitySolutionEnableExperimental: Array<keyof ExperimentalFeatures> = [
   'entityAnalyticsEntityStoreV2',
   'entityAnalyticsWatchlistEnabled',
-  'riskScoringSyncRunRouteEnabled',
 ];
 
 export default createTestConfig({
