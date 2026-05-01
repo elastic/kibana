@@ -134,6 +134,25 @@ describe('HttpResources service', () => {
               }
             );
           });
+
+          it('merges Set-Cookie from rendering with caller-provided headers', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCoreApp({ headers: { 'x-extra': 'yes' } });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            expect(responseFactory.ok).toHaveBeenCalledWith(
+              expect.objectContaining({
+                headers: expect.objectContaining({
+                  'set-cookie': expect.stringContaining('KBN_LOCALE='),
+                  'x-extra': 'yes',
+                }),
+              })
+            );
+          });
         });
 
         describe('renderAnonymousCoreApp', () => {

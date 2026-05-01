@@ -114,26 +114,26 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { body, headers: renderHeaders } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
           body,
-          headers: options.headers,
+          headers: { ...renderHeaders, ...options.headers },
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { body, headers: renderHeaders } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
           body,
-          headers: options.headers,
+          headers: { ...renderHeaders, ...options.headers },
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {

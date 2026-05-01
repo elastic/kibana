@@ -95,7 +95,7 @@ function renderTestCases(
 
     it('renders "core" page', async () => {
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -109,7 +109,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(
+      const { body: content } = await render(
         createKibanaRequest({ auth: { isAuthenticated: false } }),
         uiSettings
       );
@@ -123,7 +123,7 @@ function renderTestCases(
       const [render, deps] = await getRender();
       deps.http.basePath.get.mockReturnValueOnce('');
 
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -134,7 +134,7 @@ function renderTestCases(
       const userSettings = { 'theme:darkMode': { userValue: true } };
       uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -152,7 +152,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light');
@@ -167,7 +167,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       expect(dom('meta[name="color-scheme"]').attr('content')).toBe('dark');
@@ -182,7 +182,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light dark');
@@ -192,7 +192,7 @@ function renderTestCases(
       const userSettings = { 'foo:bar': { userValue: true } };
       uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -206,7 +206,7 @@ function renderTestCases(
       const userSettings = { 'theme:darkMode': { userValue: true } };
       uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
       });
       const dom = load(content);
@@ -220,7 +220,7 @@ function renderTestCases(
       const userSettings = { 'foo:bar': { userValue: true } };
       uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
       });
       const dom = load(content);
@@ -305,7 +305,7 @@ function renderTestCases(
         () => 'http://foo.bar:1773'
       );
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -319,7 +319,7 @@ function renderTestCases(
         'my-overridden-flag': 1234,
       });
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -332,7 +332,7 @@ function renderTestCases(
         'my-initial-flag': 1234,
       });
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -348,7 +348,7 @@ function renderTestCases(
       };
       getBrowserLoggingConfigMock.mockReturnValue(loggingConfig);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -363,7 +363,7 @@ function renderTestCases(
       const request = createKibanaRequest();
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
 
@@ -384,7 +384,7 @@ function renderTestCases(
       (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
       (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(true);
 
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -402,7 +402,7 @@ function renderTestCases(
       (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
       (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(false);
 
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -703,7 +703,7 @@ describe('RenderingService', () => {
 
       getIsThemeBundledMock.mockImplementation((name) => name === 'borealis');
 
-      const renderResult = await render(createKibanaRequest(), uiSettings);
+      const { body: renderResult } = await render(createKibanaRequest(), uiSettings);
       expect(getIsThemeBundledMock).toHaveBeenCalledWith('borealis');
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
     });
@@ -730,7 +730,7 @@ describe('RenderingService', () => {
 
       getIsThemeBundledMock.mockReturnValue(false);
 
-      const renderResult = await render(createKibanaRequest(), uiSettings);
+      const { body: renderResult } = await render(createKibanaRequest(), uiSettings);
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
     });
   });

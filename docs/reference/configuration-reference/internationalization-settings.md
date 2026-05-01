@@ -30,8 +30,34 @@ When a user sets a preferred language, it is stored in their user profile and ta
 
 {{kib}} resolves the display language using the following priority chain:
 
-1. **User profile setting** — The language selected by the user in their profile or the user menu (must be one of `i18n.locales`).
-2. **`i18n.defaultLocale` config** — The server-wide default set in `kibana.yml`.
+1. **User profile setting** — The language selected by the user in their
+   profile or the user menu (must be one of `i18n.locales`).
+2. **`KBN_LOCALE` cookie** — The most recently rendered locale on this
+   browser. {{kib}} writes this cookie on every rendered response, so it
+   tracks profile changes automatically. The cookie is the fallback used
+   on surfaces where the profile isn't available — login pages, error
+   pages, and any browsing the user does after signing out. Only used
+   when the cookie value matches a locale {{kib}} can serve.
+3. **`Accept-Language` header** {applies_to}`serverless: ga` — On
+   serverless deployments, {{kib}} consults the browser's
+   `Accept-Language` preferences when neither the profile setting nor
+   the cookie produces a match. The first weighted preference that's an
+   exact match (region included) for an entry in `i18n.locales` wins.
+   This step is skipped on traditional/self-managed deployments to keep
+   existing users' language stable across upgrades.
+4. **`i18n.defaultLocale` config** — The server-wide default set in `kibana.yml`.
+
+#### About the `KBN_LOCALE` cookie
+
+{{kib}} sets a `KBN_LOCALE` cookie on every rendered response containing
+the resolved locale id (e.g. `KBN_LOCALE=ja-JP`). Attributes:
+
+- Path scoped to the {{kib}} `serverBasePath`.
+- `SameSite=Lax`, `Max-Age` of one year, and `Secure` when the response is over HTTPS.
+- Not `HttpOnly`. The value is a preference, not a secret.
+
+Privacy posture: `KBN_LOCALE` is a strictly-necessary preference cookie.
+It does not track the user, store identity, or enable cross-site activity.
 
 ## Example configurations
 
