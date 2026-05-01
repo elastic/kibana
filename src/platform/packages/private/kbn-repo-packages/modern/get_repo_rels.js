@@ -17,7 +17,7 @@ const execAsync = promisify(ChildProcess.execFile);
 /**
  * @param {string} repoRoot
  * @param {string} output
- * @returns {Set<string>}
+ * @returns {Iterable<string>}
  */
 function parseLsFilesOutput(repoRoot, output) {
   const files = new Set();
