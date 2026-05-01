@@ -106,7 +106,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     .map((item) => ({
       id: item.ki_id,
       label: item.name,
-      iconType: 'package' as const,
+      iconType: 'node' as const,
     }));
 
   const edgeDerivedServices: ImpactedService[] = (doc.dependency_edges ?? []).reduce<
@@ -114,7 +114,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
   >((acc, edge) => {
     for (const name of [edge.source, edge.target]) {
       if (name && !acc.some((s) => s.id === name)) {
-        acc.push({ id: name, label: name, iconType: 'package' as const });
+        acc.push({ id: name, label: name, iconType: 'node' as const });
       }
     }
     return acc;
@@ -130,7 +130,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
       id: `cause-${item.ki_id ?? item.name}`,
       label: 'Root Cause',
       value: item.name,
-      iconType: 'warning' as const,
+      iconType: 'crosshairs' as const,
     }));
 
   const exposedEdgeCards: ImpactedCardItem[] = (doc.dependency_edges ?? [])
@@ -139,7 +139,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
       id: `exposed-${edge.source}`,
       label: 'Impacted',
       value: edge.source,
-      iconType: 'package' as const,
+      iconType: 'dot' as const,
     }));
 
   // If blast_radius was available, use the old card logic; otherwise use edges
@@ -151,7 +151,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
             id: `service-${service.id}`,
             label: 'Service',
             value: service.label,
-            iconType: 'package' as const,
+            iconType: 'node' as const,
           })),
         ]
       : [...causeCards, ...exposedEdgeCards];

@@ -208,4 +208,77 @@ describe('useFetchLatestSignificantEvent', () => {
       value: 'checkout',
     });
   });
+
+  it('maps low impact to healthy state', async () => {
+    const lowDoc = {
+      ...promotedDocs[0],
+      impact: 'low',
+      criticality: 10,
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: lowDoc }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.state).toBe('healthy');
+    expect(result.current.data!.severityLabel).toBe('Low');
+    expect(result.current.data!.severityColor).toBe('subdued');
+  });
+
+  it('maps unknown impact to healthy/unknown state', async () => {
+    const unknownDoc = {
+      ...promotedDocs[0],
+      impact: 'something_else',
+      criticality: 5,
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: unknownDoc }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.state).toBe('healthy');
+    expect(result.current.data!.severityLabel).toBe('Unknown');
+    expect(result.current.data!.severityColor).toBe('subdued');
+  });
+
+  it('uses summary as description, falling back to first recommendation', async () => {
+    const docNoSummary = {
+      ...promotedDocs[0],
+      summary: '',
+      recommendations: ['Use this recommendation'],
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: docNoSummary }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.description).toBe('Use this recommendation');
+  });
 });

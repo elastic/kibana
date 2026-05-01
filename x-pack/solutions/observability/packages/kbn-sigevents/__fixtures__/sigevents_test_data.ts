@@ -386,7 +386,7 @@ export const makePromotedEventsData = (timestamp: string): LatestSignificantEven
     >((acc, edge) => {
       for (const name of [edge.source, edge.target]) {
         if (name && !acc.some((s) => s.id === name)) {
-          acc.push({ id: name, label: name, iconType: 'package' });
+          acc.push({ id: name, label: name, iconType: 'node' });
         }
       }
       return acc;
@@ -396,7 +396,7 @@ export const makePromotedEventsData = (timestamp: string): LatestSignificantEven
       id: `cause-${ki.name}`,
       label: 'Root Cause',
       value: ki.name,
-      iconType: 'warning' as const,
+      iconType: 'crosshairs' as const,
     }));
 
     const exposedEdgeCards = edges
@@ -405,7 +405,7 @@ export const makePromotedEventsData = (timestamp: string): LatestSignificantEven
         id: `exposed-${edge.source}`,
         label: 'Impacted',
         value: edge.source,
-        iconType: 'package' as const,
+        iconType: 'dot' as const,
       }));
 
     return {
