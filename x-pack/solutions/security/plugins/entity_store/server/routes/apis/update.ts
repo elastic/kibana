@@ -16,16 +16,31 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
 
-const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
-  /**
-   * Optional partial update to the Knowledge Indicators config. Omitting
-   * the field leaves the persisted config untouched; supplying it merges
-   * the provided keys onto the persisted block (read-modify-write is
-   * performed by `EntityStoreGlobalStateClient.updateKnowledgeIndicatorsConfig`).
-   */
-  knowledgeIndicators: KnowledgeIndicatorsUpdateParams.optional(),
-});
+const bodySchema = z
+  .object({
+    /**
+     * Optional partial update to the log-extraction config. Omitting the
+     * field leaves the persisted config untouched; supplying it merges
+     * the provided keys onto the persisted block (read-modify-write is
+     * performed by `LogsExtractionClient.updateConfig`).
+     */
+    logExtraction: LogExtractionUpdadeSchema.optional(),
+    /**
+     * Optional partial update to the Knowledge Indicators config. Omitting
+     * the field leaves the persisted config untouched; supplying it merges
+     * the provided keys onto the persisted block (read-modify-write is
+     * performed by `EntityStoreGlobalStateClient.updateKnowledgeIndicatorsConfig`).
+     */
+    knowledgeIndicators: KnowledgeIndicatorsUpdateParams.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.logExtraction === undefined && data.knowledgeIndicators === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'must supply at least one of `logExtraction` or `knowledgeIndicators`',
+      });
+    }
+  });
 
 export function registerUpdate(router: EntityStorePluginRouter) {
   router.versioned
@@ -59,12 +74,15 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         logger.debug('Update api called');
 
         try {
-          await logsExtractionClient.updateConfig(req.body.logExtraction);
-          // KI config update is independent of log-extraction config and
-          // is only performed when the caller actually supplies the block.
-          // Keeping it as a separate write means a callsite that only
-          // wants to retune log extraction does not pay any cost on the
-          // KI block (no read, no write, no schema parse).
+          // Each block is independent of the other and is only written when
+          // the caller actually supplies it. Keeping the writes separate
+          // means a callsite that only wants to retune one of the two pays
+          // no cost on the other (no read, no write, no schema parse). The
+          // body schema's `superRefine` already rejects requests that omit
+          // both, so we never reach this point with nothing to do.
+          if (req.body.logExtraction !== undefined) {
+            await logsExtractionClient.updateConfig(req.body.logExtraction);
+          }
           if (req.body.knowledgeIndicators !== undefined) {
             await globalStateClient.updateKnowledgeIndicatorsConfig(req.body.knowledgeIndicators);
           }

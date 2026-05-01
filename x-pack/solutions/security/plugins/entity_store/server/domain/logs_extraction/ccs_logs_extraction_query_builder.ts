@@ -63,18 +63,22 @@ export function buildCcsLogsExtractionEsqlQuery({
   logsPageCursorStart,
   logsPageCursorEnd,
 }: CcsLogsExtractionQueryParams): string {
-  const { fields, type } = entityDefinition;
+  const { fields, type, identityField } = entityDefinition;
 
   const parts = [];
 
   // Because we don't have updates on remote clusters, we need to nullify the unmapped fields
   parts.push(`SET unmapped_fields="nullify";`);
 
-  // FROM and WHERE
+  // FROM and WHERE.
+  // `identityField` comes from the passed-in definition (not the registry) so that
+  // stream-derived (KI) definitions riding `type: 'generic'` produce a filter that
+  // matches their source indices rather than the registry's `entity.id` assumption.
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
       type,
+      identityField,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,
@@ -93,8 +97,8 @@ export function buildCcsLogsExtractionEsqlQuery({
     }
   }
 
-  // Builds the id
-  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}`);
+  // Builds the id using the definition's own identity (see comment above).
+  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type, { identityField })}`);
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS

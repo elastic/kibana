@@ -19,6 +19,7 @@ import {
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
+  EntityIdentity,
   FieldValueSchema,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
@@ -64,6 +65,15 @@ export interface PaginationFields {
 export interface LogPageProbeSourceClauseParams {
   indexPatterns: string[];
   type: EntityType;
+  /**
+   * Optional override for the identity field used to build the "document contains an id"
+   * ESQL filter. When omitted the registry definition for `type` is used, which is correct
+   * for static built-in types. Stream-derived (KI) definitions ride `type: 'generic'` but
+   * identify documents by a custom grouping field, so they MUST pass their own
+   * `identityField` here; otherwise the probe query will reference `entity.id` and fail
+   * against arbitrary stream indices.
+   */
+  identityField?: EntityIdentity;
   fromDateISO: string;
   toDateISO: string;
   /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
@@ -76,7 +86,8 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
+  const { indexPatterns, type, identityField, fromDateISO, toDateISO, logsPageCursorStart } =
+    params;
 
   // Always use >= for the time-window start. When logsPageCursorStart is set its compound filter
   // (@timestamp > T OR (@timestamp = T AND _id > id)) owns the exclusive lower bound. Using >
@@ -87,7 +98,7 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-      AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
+      AND (${getEuidEsqlDocumentsContainsIdFilter(type, identityField)})`;
 
   if (!logsPageCursorStart) {
     return baseWhere;

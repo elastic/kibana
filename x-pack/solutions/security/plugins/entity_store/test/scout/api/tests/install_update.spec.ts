@@ -117,30 +117,47 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     expect(update.statusCode).toBe(404);
   });
 
-  apiTest('logExtraction is mandatory on update', async ({ apiClient, kbnClient }) => {
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
+  apiTest(
+    'Update rejects empty body but accepts either block on its own',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
 
-    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
 
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(update.statusCode).toBe(400);
+      const emptyUpdate = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+      expect(emptyUpdate.statusCode).toBe(400);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-  });
+      const logExtractionOnly = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { delay: '5m' } },
+      });
+      expect(logExtractionOnly.statusCode).toBe(200);
+
+      const knowledgeIndicatorsOnly = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { knowledgeIndicators: { entityMinConfidence: 50 } },
+      });
+      expect(knowledgeIndicatorsOnly.statusCode).toBe(200);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
 
   apiTest(
     'Update should change installed logExtraction params',

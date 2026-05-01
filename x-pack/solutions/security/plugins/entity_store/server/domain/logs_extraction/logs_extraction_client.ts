@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/se
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type {
+  EntityIdentity,
   EntityType,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
@@ -400,6 +401,7 @@ export class LogsExtractionClient {
         const probePromise = this.runLogPaginationCursorProbeForNextPage({
           indexPatterns,
           type,
+          identityField: entityDefinition.identityField,
           fromDateISO,
           toDateISO,
           logsPageCursorStart,
@@ -465,6 +467,7 @@ export class LogsExtractionClient {
   private async runLogPaginationCursorProbeForNextPage({
     indexPatterns,
     type,
+    identityField,
     fromDateISO,
     toDateISO,
     logsPageCursorStart,
@@ -473,6 +476,7 @@ export class LogsExtractionClient {
   }: {
     indexPatterns: string[];
     type: EntityType;
+    identityField: EntityIdentity;
     fromDateISO: string;
     toDateISO: string;
     logsPageCursorStart: PaginationParams | undefined;
@@ -482,6 +486,7 @@ export class LogsExtractionClient {
     const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
       indexPatterns,
       type,
+      identityField,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,

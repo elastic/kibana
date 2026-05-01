@@ -14,6 +14,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
   EntityType,
+  type EntityIdentity,
   type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import {
@@ -225,6 +226,7 @@ export class CcsLogsExtractionClient {
       const logPaginationCursor = await this.runProbe({
         remoteIndexPatterns,
         type,
+        identityField: entityDefinition.identityField,
         fromDateISO: effectiveFromDateISO,
         toDateISO,
         sliceStart,
@@ -284,6 +286,7 @@ export class CcsLogsExtractionClient {
   private async runProbe({
     remoteIndexPatterns,
     type,
+    identityField,
     fromDateISO,
     toDateISO,
     sliceStart,
@@ -292,6 +295,7 @@ export class CcsLogsExtractionClient {
   }: {
     remoteIndexPatterns: string[];
     type: EntityType;
+    identityField: EntityIdentity;
     fromDateISO: string;
     toDateISO: string;
     sliceStart: PaginationParams | undefined;
@@ -303,6 +307,7 @@ export class CcsLogsExtractionClient {
       buildLogPaginationCursorProbeEsql({
         indexPatterns: remoteIndexPatterns,
         type,
+        identityField,
         fromDateISO,
         toDateISO,
         logsPageCursorStart: sliceStart,
