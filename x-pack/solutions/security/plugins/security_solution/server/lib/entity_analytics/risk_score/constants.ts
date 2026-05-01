@@ -59,3 +59,12 @@ export const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
  * avoid search_phase_execution_exception on any index configuration.
  */
 export const MAX_ENTITY_SEARCH_PAGE_SIZE = 1_000;
+
+/**
+ * Maximum number of resolution target IDs paginated per resolution scoring page.
+ * Aligns with MAX_ENTITY_SEARCH_PAGE_SIZE so the resulting ES|QL `IN (...)` clause
+ * stays well below the default `esql.query_string.size.limit` (1MB).
+ * Bounding this does not affect scoring output: STATS BY resolution_target_id
+ * yields one row per ID, so the in-query LIMIT never truncates.
+ */
+export const MAX_RESOLUTION_TARGETS_PER_PAGE = 1_000;

@@ -41,10 +41,11 @@ import type { MaintainerErrorKind } from './telemetry_reporter';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
 import { fetchWatchlistConfigs } from './utils/fetch_watchlist_configs';
 import { withLogContext } from './utils/with_log_context';
-import { ensureLookupIndex } from './lookup/lookup_index';
+import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
+import { buildLookupIndex } from './steps/build_lookup_index';
 
 export interface RiskScoreMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -118,7 +119,15 @@ export const createRiskScoreMaintainer = ({
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
       await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
       await riskScoreDataClient.init();
-      await ensureLookupIndex({ esClient, namespace });
+      try {
+        await ensureLookupIndex({ esClient, namespace });
+      } catch (error) {
+        logger.error(
+          `There was an error upgrading the lookup index mapping. Continuing with maintainer setup. ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
@@ -152,9 +161,37 @@ export const createRiskScoreMaintainer = ({
         entityAnalyticsConfig,
       });
 
+      const calculationRunId = uuidv4();
+      const runNow = new Date().toISOString();
       const maintainerRunStartedAtMs = Date.now();
       const metricsTracker = createRunMetricsTracker();
       telemetryReporter.clearGlobalSkipReason();
+      const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
+        namespace: runContext.namespace,
+        idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+      });
+      try {
+        const phase0Summary = await buildLookupIndex({
+          esClient: runContext.esClient,
+          crudClient,
+          logger,
+          lookupIndex: runContext.lookupIndex,
+          entityTypes: runConfig.entityTypes,
+          calculationRunId,
+          now: runNow,
+          abortSignal: abortController.signal,
+        });
+        phase0LookupStage.success({
+          lookupRowsWritten: phase0Summary.lookupRowsWritten,
+          entitiesIterated: phase0Summary.entitiesIterated,
+          pagesProcessed: phase0Summary.pagesProcessed,
+          bulkBatches: phase0Summary.bulkBatches,
+          lookupRowsFailed: phase0Summary.lookupRowsFailed,
+        });
+      } catch (error) {
+        phase0LookupStage.error({ errorKind: 'unexpected' });
+        throw error;
+      }
       for (const entityType of runConfig.entityTypes) {
         if (abortController.signal.aborted) {
           logger.info('Risk score maintainer run aborted before processing entity type');
@@ -169,6 +206,8 @@ export const createRiskScoreMaintainer = ({
           metricsTracker,
           runContext,
           runConfig,
+          calculationRunId,
+          runNow,
         });
       }
 
@@ -217,7 +256,17 @@ const initializeRunContext = async ({
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
   await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
   await riskScoreDataClient.init();
-  const lookupIndex = await ensureLookupIndex({ esClient, namespace });
+  let lookupIndex: string;
+  try {
+    lookupIndex = await ensureLookupIndex({ esClient, namespace });
+  } catch (error) {
+    logger.error(
+      `There was an error upgrading the lookup index mapping. Continuing with maintainer run. ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    lookupIndex = getLookupIndexName(namespace);
+  }
 
   return {
     namespace,
@@ -325,6 +374,8 @@ const executeEntityTypeRun = async ({
   metricsTracker,
   runContext,
   runConfig,
+  calculationRunId,
+  runNow,
 }: {
   entityType: EntityType;
   crudClient: Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['crudClient'];
@@ -334,10 +385,10 @@ const executeEntityTypeRun = async ({
   metricsTracker: RunMetricsTracker;
   runContext: InitializedRunContext;
   runConfig: LoadedRunConfig;
+  calculationRunId: string;
+  runNow: string;
 }) => {
   const entityRunStartedAtMs = Date.now();
-  const calculationRunId = uuidv4();
-  const runNow = new Date().toISOString();
   const runTag = toRunTag(calculationRunId);
   const runLogger = withLogContext(logger, `[risk_score_maintainer][${entityType}][run:${runTag}]`);
   let runStatus: 'success' | 'error' | 'aborted' = 'success';
@@ -373,7 +424,6 @@ const executeEntityTypeRun = async ({
   // Stage 1: score base entity risk and update lookup docs.
   const alertFilters = buildAlertFilters(runConfig.configuration, entityType, runLogger);
   const baseStage = runTelemetry.startBaseStage();
-  const lookupStage = runTelemetry.startLookupSyncStage();
 
   try {
     const baseSummary = await scoreBaseEntities({
@@ -382,7 +432,6 @@ const executeEntityTypeRun = async ({
       crudClient,
       entityType,
       esClient: runContext.esClient,
-      lookupIndex: runContext.lookupIndex,
       logger: runLogger,
       now: runNow,
       calculationRunId,
@@ -398,12 +447,6 @@ const executeEntityTypeRun = async ({
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
       scoresWritten: baseSummary.scoresWritten,
-      deferToPhase2Count: baseSummary.deferToPhase2Count,
-      notInStoreCount: baseSummary.notInStoreCount,
-    });
-    lookupStage.success({
-      lookupDocsUpserted: baseSummary.lookupDocsUpserted,
-      lookupDocsDeleted: baseSummary.lookupDocsDeleted,
     });
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);
@@ -411,7 +454,6 @@ const executeEntityTypeRun = async ({
     runErrorKind = 'unexpected';
     runLogger.error(`base scoring failed: ${errorMessage}`);
     baseStage.error({ errorKind: 'unexpected' });
-    lookupStage.error({ errorKind: 'unexpected' });
     runTelemetry.errorSummary({ errorKind: 'unexpected' });
     throw error;
   }
@@ -419,16 +461,6 @@ const executeEntityTypeRun = async ({
   checkAbortBetweenStages();
 
   if (!skipRemainingStages) {
-    if (runMetrics.lookupDocsUpserted > 0 || runMetrics.lookupDocsDeleted > 0) {
-      // Refresh so stage 2 can read the latest lookup docs. Deletes (e.g.
-      // after an entity resolution unlink) must also be visible before the
-      // resolution scoring LOOKUP JOIN runs.
-      await runContext.esClient.indices.refresh({ index: runContext.lookupIndex });
-      runLogger.debug(
-        `refreshed lookup index after ${runMetrics.lookupDocsUpserted} upserts, ${runMetrics.lookupDocsDeleted} deletes`
-      );
-    }
-
     // Stage 2: score resolution targets (group scores).
     const resolutionStage = runTelemetry.startResolutionStage();
     try {
@@ -524,6 +556,7 @@ const executeEntityTypeRun = async ({
         esClient: runContext.esClient,
         index: runContext.lookupIndex,
         riskWindowStart,
+        calculationRunId,
       });
       metricsTracker.recordPrune(runMetrics, prunedDocs);
       if (prunedDocs > 0) {

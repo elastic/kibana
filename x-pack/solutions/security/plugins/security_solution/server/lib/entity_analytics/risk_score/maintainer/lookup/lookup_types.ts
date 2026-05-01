@@ -10,5 +10,9 @@ export interface LookupDocument {
   resolution_target_id: string | null;
   propagation_target_id: string[] | null;
   relationship_type: string;
+  calculation_run_id: string;
   '@timestamp': string;
 }
+
+export const RESOLUTION_RELATIONSHIP_TYPE = 'entity.relationships.resolution.resolved_to';
+export const SELF_RELATIONSHIP_TYPE = 'self';

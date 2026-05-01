@@ -10,16 +10,6 @@
 import type { AssetCriticalityLevel } from '@kbn/entity-store/common';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 
-/** Output of entity categorization for write routing decisions. */
-export interface CategorizedEntities {
-  /** Entities missing in Entity Store. */
-  not_in_store: EntityRiskScoreRecord[];
-  /** Scores safe to persist immediately. */
-  write_now: EntityRiskScoreRecord[];
-  /** Scores reserved for deferred handling. */
-  defer_to_phase_2: EntityRiskScoreRecord[];
-}
-
 /** Minimal entity fields required for modifier application. */
 export interface RiskScoreModifierEntity {
   entity?: {

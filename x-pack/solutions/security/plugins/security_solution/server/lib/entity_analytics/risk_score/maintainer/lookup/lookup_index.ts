@@ -15,8 +15,43 @@ const LOOKUP_INDEX_MAPPING: MappingTypeMapping = {
     resolution_target_id: { type: 'keyword' },
     propagation_target_id: { type: 'keyword' },
     relationship_type: { type: 'keyword' },
+    calculation_run_id: { type: 'keyword' },
     '@timestamp': { type: 'date' },
   },
+};
+
+const getCalculationRunIdMappingType = async ({
+  esClient,
+  index,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<string | undefined> => {
+  const mappingResponse = await esClient.indices.getMapping({ index });
+  const properties = mappingResponse[index]?.mappings?.properties as
+    | Record<string, { type?: string }>
+    | undefined;
+  return properties?.calculation_run_id?.type;
+};
+
+export const upgradeLookupIndexMappingIfNeeded = async ({
+  esClient,
+  index,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<void> => {
+  const calculationRunIdType = await getCalculationRunIdMappingType({ esClient, index });
+  if (calculationRunIdType === 'keyword') {
+    return;
+  }
+
+  await esClient.indices.putMapping({
+    index,
+    properties: {
+      calculation_run_id: { type: 'keyword' },
+    },
+  });
 };
 
 export const getLookupIndexName = (namespace: string): string =>
@@ -47,6 +82,8 @@ export const ensureLookupIndex = async ({
         throw error;
       }
     }
+  } else {
+    await upgradeLookupIndexMappingIfNeeded({ esClient, index: lookupIndex });
   }
 
   return lookupIndex;

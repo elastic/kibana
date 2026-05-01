@@ -45,6 +45,9 @@ type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
 >;
 
+const escapeEsqlStringLiteral = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
 export const calculateScoresWithESQL = async (
   params: {
     assetCriticalityService: AssetCriticalityService;
@@ -560,6 +563,60 @@ export const getBaseScoreESQL = (
   return query;
 };
 
+export const getBaseScoreESQLByIds = (
+  entityType: EntityType,
+  entityIds: string[],
+  sampleSize: number,
+  pageSize: number,
+  index: string
+): string => {
+  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
+  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+
+  if (entityIds.length === 0) {
+    throw new Error('At least one entity ID must be provided for ID-based base scoring');
+  }
+
+  const invalid = entityIds.find((id) => /[\u0000\u2028\u2029]/.test(id));
+  if (invalid !== undefined) {
+    throw new Error(
+      'Entity ID contains an unsupported control character and cannot be safely interpolated into ES|QL'
+    );
+  }
+
+  const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+
+  const query = /* esql */ `
+  FROM ${index} METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${fieldEvalsClause}
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | WHERE entity_id IN (${idsClause})
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc")
+        BY entity_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+
+  return query;
+};
+
 export const getResolutionCompositeQuery = (
   index: string,
   pageSize: number,
@@ -567,7 +624,11 @@ export const getResolutionCompositeQuery = (
 ) => ({
   index,
   size: 0,
-  query: { exists: { field: 'resolution_target_id' } },
+  query: {
+    term: {
+      relationship_type: 'entity.relationships.resolution.resolved_to',
+    },
+  },
   aggs: {
     by_resolution_target: {
       composite: {
@@ -616,6 +677,64 @@ export const getResolutionScoreESQL = (
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
     | LOOKUP JOIN ${lookupIndex} ON entity_id
     | WHERE resolution_target_id IS NOT NULL AND (${rangeClause})
+    | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc"),
+        contributing_entities_raw = VALUES(entity_with_rel)
+        BY resolution_target_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+
+  return query;
+};
+
+export const getResolutionScoreESQLByIds = (
+  entityType: EntityType,
+  resolutionTargetIds: string[],
+  sampleSize: number,
+  pageSize: number,
+  alertsIndex: string,
+  lookupIndex: string
+): string => {
+  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
+  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+
+  if (resolutionTargetIds.length === 0) {
+    throw new Error('At least one resolution target ID must be provided for resolution scoring');
+  }
+
+  const invalid = resolutionTargetIds.find((id) => /[\u0000\u2028\u2029]/.test(id));
+  if (invalid !== undefined) {
+    throw new Error(
+      'Entity ID contains an unsupported control character and cannot be safely interpolated into ES|QL'
+    );
+  }
+
+  const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+
+  const query = /* esql */ `
+  FROM ${alertsIndex} METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${fieldEvalsClause}
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    | EVAL entity_id = ${euidEval},
+          rule_name_b64 = TO_BASE64(rule_name),
+          category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | WHERE resolution_target_id IN (${idsClause})
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
     | STATS
         alert_count = count(risk_score),

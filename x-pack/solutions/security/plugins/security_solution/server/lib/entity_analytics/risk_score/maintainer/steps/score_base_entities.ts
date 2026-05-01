@@ -11,18 +11,12 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
-import {
-  getEuidCompositeQuery,
-  getBaseScoreESQL,
-  type EuidCompositeAggregation,
-} from '../../calculate_esql_risk_scores';
+import { getBaseScoreESQLByIds } from '../../calculate_esql_risk_scores';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
-import type { ScoredEntityPage, StepResult } from './pipeline_types';
-import { categorizePhase1Entities } from './categorize_phase1_entities';
-import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
+import type { ScoredEntityPage, StepResult, RiskScoreModifierEntity } from './pipeline_types';
+import { normalizeModifierEntity } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
-import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
@@ -44,27 +38,10 @@ interface ScoreBaseEntitiesParams {
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
-  lookupIndex: string;
   abortSignal?: AbortSignal;
 }
 
-export interface Phase1BaseScoringSummary extends StepResult {
-  writeNowCount: number;
-  deferToPhase2Count: number;
-  notInStoreCount: number;
-  lookupDocsUpserted: number;
-  lookupDocsDeleted: number;
-}
-
-interface EuidPageBounds {
-  lower: string | undefined;
-  upper: string;
-}
-
-interface EuidPageResult {
-  upperBound: string;
-  afterKey: Record<string, string> | undefined;
-}
+export type Phase1BaseScoringSummary = StepResult;
 
 /**
  * Computes base risk scores for one entity type and streams paginated results.
@@ -86,181 +63,103 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
-  let afterKey: Record<string, string> | undefined;
-  let previousPageUpperBound: string | undefined;
+  let searchAfter: Array<string | number> | undefined;
+  let previousSearchAfter: Array<string | number> | undefined;
 
   do {
     if (abortSignal?.aborted) {
       logger.info('Base scoring aborted between pages');
       return;
     }
-    // Per page: find this page's start/end IDs for scoring, then apply entity modifiers.
-    const pageResult = await fetchNextEuidPage({
-      esClient,
-      entityType,
-      alertFilters,
-      alertsIndex,
-      pageSize,
-      afterKey,
+    const { entities, nextSearchAfter } = await crudClient.listEntities({
+      filter: { terms: { 'entity.EngineMetadata.Type': [entityType] } },
+      size: Math.min(pageSize, MAX_ENTITY_SEARCH_PAGE_SIZE),
+      searchAfter,
+      source: [
+        'entity.id',
+        'entity.attributes.watchlists',
+        'entity.relationships.resolution.resolved_to',
+        'asset.criticality',
+      ],
     });
-    if (!pageResult) break;
-
-    afterKey = pageResult.afterKey;
-    const scores = await scorePageFromAlerts({
-      esClient,
-      entityType,
-      bounds: { lower: previousPageUpperBound, upper: pageResult.upperBound },
-      sampleSize,
-      pageSize,
-      alertsIndex,
-      alertFilters,
-    });
-    previousPageUpperBound = pageResult.upperBound;
-
-    if (scores.length > 0) {
-      yield await enrichWithModifiers({
-        crudClient,
-        logger,
-        scores,
-        now,
-        entityType,
-        calculationRunId,
-        watchlistConfigs,
-      });
+    searchAfter = nextSearchAfter;
+    if (
+      searchAfter !== undefined &&
+      previousSearchAfter !== undefined &&
+      JSON.stringify(searchAfter) === JSON.stringify(previousSearchAfter)
+    ) {
+      logger.error(
+        'listEntities returned the same searchAfter cursor twice; aborting pagination to prevent infinite loop'
+      );
+      break;
     }
-  } while (afterKey !== undefined);
+    previousSearchAfter = searchAfter;
+
+    const entityIds = entities
+      .map((entity) => entity.entity?.id)
+      .filter((id): id is string => typeof id === 'string');
+
+    if (entityIds.length > 0) {
+      const scores = await scorePageByIds({
+        esClient,
+        entityType,
+        entityIds,
+        sampleSize,
+        pageSize,
+        alertsIndex,
+        alertFilters,
+      });
+
+      if (scores.length > 0) {
+        const entityMap = buildEntityMapFromListResult(entities);
+        yield applyBaseScoreModifiers({
+          scores,
+          entities: entityMap,
+          now,
+          entityType,
+          calculationRunId,
+          watchlistConfigs,
+        });
+      }
+    }
+  } while (searchAfter !== undefined);
 };
 
 export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
-  lookupIndex,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
-  // Persist using categorized write groups to keep routing explicit.
-  let writeNowCount = 0;
-  let deferToPhase2Count = 0;
-  let notInStoreCount = 0;
   let pagesProcessed = 0;
   let scoresWritten = 0;
-  let lookupDocsUpserted = 0;
-  let lookupDocsDeleted = 0;
 
   for await (const page of calculateBaseEntityScores(params)) {
-    // Per page: split docs by write path, sync lookup docs, then write scores.
     pagesProcessed += 1;
-    const categorized = categorizePhase1Entities(page);
-    const resolutionTargetIds = await findResolutionTargetIdsForPage({
-      page,
-      crudClient: params.crudClient,
-      logger: params.logger,
-    });
-    const lookupSyncResult = await syncLookupIndexForCategorizedPage({
-      esClient: params.esClient,
-      index: lookupIndex,
-      page,
-      categorized,
-      now: params.now,
-      resolutionTargetIds,
-    });
-
-    writeNowCount += categorized.write_now.length;
-    deferToPhase2Count += categorized.defer_to_phase_2.length;
-    notInStoreCount += categorized.not_in_store.length;
-    lookupDocsUpserted += lookupSyncResult.upserted;
-    lookupDocsDeleted += lookupSyncResult.deleted;
-
-    params.logger.debug(
-      `[page:${pagesProcessed}] categorization: write_now=${categorized.write_now.length}, defer_to_phase_2=${categorized.defer_to_phase_2.length}, not_in_store=${categorized.not_in_store.length}`
-    );
-    params.logger.debug(
-      `[page:${pagesProcessed}] lookup sync: upserts=${lookupSyncResult.upserted}, deletes=${lookupSyncResult.deleted}`
-    );
-
-    // Keep dual-write semantics from phase 1 categorization:
-    // `defer_to_phase_2` remains persisted to the risk index for continuity.
-    const riskIndexWrites = [...categorized.write_now, ...categorized.defer_to_phase_2];
     scoresWritten += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
-      scores: riskIndexWrites,
+      scores: page.scores,
       logger: params.logger,
     });
     await persistScoresToEntityStore({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
-      scores: riskIndexWrites,
+      scores: page.scores,
       enabled: idBasedRiskScoringEnabled,
     });
-
-    if (categorized.not_in_store.length > 0) {
-      params.logger.debug(
-        `[page:${pagesProcessed}] skipped writes for ${categorized.not_in_store.length} not_in_store entities`
-      );
-    }
   }
-
-  params.logger.debug(
-    `categorization totals: pages=${pagesProcessed}, write_now=${writeNowCount}, defer_to_phase_2=${deferToPhase2Count}, not_in_store=${notInStoreCount}`
-  );
-  params.logger.debug(
-    `lookup sync totals: upserts=${lookupDocsUpserted}, deletes=${lookupDocsDeleted}`
-  );
 
   return {
     pagesProcessed,
-    writeNowCount,
-    deferToPhase2Count,
-    notInStoreCount,
     scoresWritten,
-    lookupDocsUpserted,
-    lookupDocsDeleted,
   };
 };
 
-const fetchNextEuidPage = async ({
+const scorePageByIds = async ({
   esClient,
   entityType,
-  alertFilters,
-  alertsIndex,
-  pageSize,
-  afterKey,
-}: {
-  esClient: ElasticsearchClient;
-  entityType: EntityType;
-  alertFilters: QueryDslQueryContainer[];
-  alertsIndex: string;
-  pageSize: number;
-  afterKey: Record<string, string> | undefined;
-}): Promise<EuidPageResult | null> => {
-  // Composite paging gives stable ID boundaries for each score query.
-  const compositeResponse = await esClient.search(
-    getEuidCompositeQuery(entityType, alertFilters, {
-      index: alertsIndex,
-      pageSize,
-      afterKey,
-    })
-  );
-
-  const compositeAgg = (
-    compositeResponse.aggregations as { by_entity_id?: EuidCompositeAggregation } | undefined
-  )?.by_entity_id;
-  const buckets = compositeAgg?.buckets ?? [];
-  if (buckets.length === 0) {
-    return null;
-  }
-
-  return {
-    upperBound: buckets[buckets.length - 1].key.entity_id,
-    afterKey: compositeAgg?.after_key,
-  };
-};
-
-const scorePageFromAlerts = async ({
-  esClient,
-  entityType,
-  bounds,
+  entityIds,
   sampleSize,
   pageSize,
   alertsIndex,
@@ -268,13 +167,13 @@ const scorePageFromAlerts = async ({
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
-  bounds: EuidPageBounds;
+  entityIds: string[];
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
   alertFilters: QueryDslQueryContainer[];
 }) => {
-  const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
+  const query = getBaseScoreESQLByIds(entityType, entityIds, sampleSize, pageSize, alertsIndex);
   const esqlResponse = await esClient.esql.query({
     query,
     filter: { bool: { filter: alertFilters } },
@@ -283,32 +182,41 @@ const scorePageFromAlerts = async ({
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };
 
-const enrichWithModifiers = async ({
-  crudClient,
-  logger,
+const buildEntityMapFromListResult = (
+  entities: Array<{
+    entity?: {
+      id?: string;
+      attributes?: { watchlists?: unknown };
+      relationships?: { resolution?: { resolved_to?: unknown } };
+    };
+    asset?: RiskScoreModifierEntity['asset'] | null;
+  }>
+): Map<string, RiskScoreModifierEntity> => {
+  const entityMap = new Map<string, RiskScoreModifierEntity>();
+  for (const entity of entities) {
+    const normalized = normalizeModifierEntity(entity);
+    if (normalized?.entity?.id) {
+      entityMap.set(normalized.entity.id, normalized);
+    }
+  }
+  return entityMap;
+};
+
+const applyBaseScoreModifiers = ({
   scores,
+  entities,
   now,
   entityType,
   calculationRunId,
   watchlistConfigs,
 }: {
-  crudClient: EntityUpdateClient;
-  logger: ScopedLogger;
   scores: ReturnType<ReturnType<typeof parseEsqlBaseScoreRow>>[];
+  entities: Map<string, RiskScoreModifierEntity>;
   now: string;
   entityType: EntityType;
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
-}): Promise<ScoredEntityPage> => {
-  const euidValues = scores.map((score) => score.entity_id);
-  const entityMap = await fetchEntitiesByIds({
-    crudClient,
-    entityIds: euidValues,
-    logger,
-    errorContext:
-      'Error fetching entities for modifier application. Scoring will proceed without modifiers',
-  });
-
+}): ScoredEntityPage => {
   const finalScores = applyScoreModifiersFromEntities({
     now,
     identifierType: entityType,
@@ -319,73 +227,9 @@ const enrichWithModifiers = async ({
       scores,
       identifierField: 'entity.id',
     },
-    entities: entityMap,
+    entities,
     watchlistConfigs,
   });
 
-  return { entityIds: euidValues, scores: finalScores, entities: entityMap };
-};
-
-/**
- * Temporary phase-1 backfill for lookup self-rows.
- *
- * Why this exists:
- * - Some scored entities are resolution targets and do not have
- *   `entity.relationships.resolution.resolved_to` on their own document.
- * - Without explicitly detecting those targets, lookup sync can miss the
- *   target self-row and phase 2 cannot discover/score the group when only the
- *   target has alerts.
- *
- * Fixes behavior reported in https://github.com/elastic/security-team/issues/16838
- *
- * Remove this helper once https://github.com/elastic/security-team/issues/16839 implemented
- */
-const findResolutionTargetIdsForPage = async ({
-  page,
-  crudClient,
-  logger,
-}: {
-  page: ScoredEntityPage;
-  crudClient: EntityUpdateClient;
-  logger: ScopedLogger;
-}): Promise<string[]> => {
-  const candidateTargetIds = page.entityIds.filter((id) => {
-    const entity = page.entities.get(id);
-    return entity && !entity.entity?.relationships?.resolution?.resolved_to;
-  });
-
-  if (candidateTargetIds.length === 0) {
-    return [];
-  }
-
-  const candidateSet = new Set(candidateTargetIds);
-  const confirmedTargetIds = new Set<string>();
-
-  try {
-    let searchAfter: Array<string | number> | undefined;
-    do {
-      const { entities, nextSearchAfter } = await crudClient.listEntities({
-        filter: {
-          terms: { 'entity.relationships.resolution.resolved_to': candidateTargetIds },
-        },
-        size: MAX_ENTITY_SEARCH_PAGE_SIZE,
-        searchAfter,
-        source: ['entity.relationships.resolution.resolved_to'],
-      });
-      for (const entity of entities) {
-        const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
-        if (typeof resolvedTo === 'string' && candidateSet.has(resolvedTo)) {
-          confirmedTargetIds.add(resolvedTo);
-        }
-      }
-      searchAfter = nextSearchAfter;
-    } while (searchAfter !== undefined);
-  } catch (error) {
-    logger.warn(
-      `Error checking resolution targets for lookup sync. Continuing without additional target self-rows: ${error}`
-    );
-    return [];
-  }
-
-  return [...confirmedTargetIds];
+  return { entityIds: scores.map((score) => score.entity_id), scores: finalScores, entities };
 };

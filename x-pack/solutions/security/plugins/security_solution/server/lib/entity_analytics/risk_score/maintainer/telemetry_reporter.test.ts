@@ -19,7 +19,7 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
     jest.clearAllMocks();
   });
 
-  it('reports run completion with resolution and lookup counters', () => {
+  it('reports run completion with resolution and prune counters', () => {
     const reporter = createRiskScoreMaintainerTelemetryReporter({
       telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
     });
@@ -36,10 +36,6 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
       scoresWrittenResolution: 2,
       scoresWrittenResetToZero: 1,
       pagesProcessed: 4,
-      deferToPhase2Count: 5,
-      notInStoreCount: 6,
-      lookupDocsUpserted: 7,
-      lookupDocsDeleted: 8,
       lookupPrunedDocs: 9,
     });
 
@@ -53,27 +49,32 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
         scoresWrittenBase: 3,
         scoresWrittenResolution: 2,
         scoresWrittenResetToZero: 1,
-        lookupDocsUpserted: 7,
-        lookupDocsDeleted: 8,
         lookupPrunedDocs: 9,
       })
     );
   });
 
-  it('reports lookup sync success and resolution skipped stages', () => {
+  it('reports phase0 lookup build success and resolution skipped stages', () => {
     const reporter = createRiskScoreMaintainerTelemetryReporter({
       telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
     });
 
+    reporter
+      .startPhase0LookupBuildStage({
+        namespace: 'default',
+        idBasedRiskScoringEnabled: false,
+      })
+      .success({
+        entitiesIterated: 3,
+        lookupRowsWritten: 2,
+        pagesProcessed: 2,
+        bulkBatches: 2,
+        lookupRowsFailed: 0,
+      });
     const runTelemetry = reporter.forRun({
       namespace: 'default',
       entityType: 'user',
       idBasedRiskScoringEnabled: false,
-    });
-
-    runTelemetry.startLookupSyncStage().success({
-      lookupDocsUpserted: 2,
-      lookupDocsDeleted: 1,
     });
     runTelemetry.startResolutionStage().skipped('lookup_empty');
 
@@ -82,11 +83,14 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
       RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType,
       expect.objectContaining({
         namespace: 'default',
-        entityType: 'user',
-        stage: 'phase1_lookup_sync',
+        entityType: 'all',
+        stage: 'phase0_lookup_build',
         status: 'success',
-        lookupDocsUpserted: 2,
-        lookupDocsDeleted: 1,
+        entitiesIterated: 3,
+        lookupRowsWritten: 2,
+        pagesProcessed: 2,
+        bulkBatches: 2,
+        lookupRowsFailed: 0,
         durationMs: expect.any(Number),
       })
     );
@@ -128,8 +132,6 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
         status: 'skipped',
         skipReason: 'feature_disabled',
         scoresWrittenResolution: 0,
-        lookupDocsUpserted: 0,
-        lookupDocsDeleted: 0,
         lookupPrunedDocs: 0,
       })
     );

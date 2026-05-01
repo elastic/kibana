@@ -35,7 +35,7 @@ const normalizeWatchlists = (value: unknown): string[] => {
   return [];
 };
 
-const normalizeModifierEntity = (
+export const normalizeModifierEntity = (
   entity: NormalizedModifierEntitySource | undefined
 ): RiskScoreModifierEntity | undefined => {
   if (!entity) {

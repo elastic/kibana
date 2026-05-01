@@ -330,8 +330,8 @@ export type RiskScoreMaintainerErrorKind =
   | 'entity_fetch_failed'
   | 'unexpected';
 export type RiskScoreMaintainerStage =
+  | 'phase0_lookup_build'
   | 'phase1_base_scoring'
-  | 'phase1_lookup_sync'
   | 'phase2_resolution_scoring'
   | 'reset_to_zero';
 
@@ -347,10 +347,6 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   scoresWrittenResolution: number;
   scoresWrittenResetToZero: number;
   pagesProcessed: number;
-  deferToPhase2Count: number;
-  notInStoreCount: number;
-  lookupDocsUpserted: number;
-  lookupDocsDeleted: number;
   lookupPrunedDocs: number;
   idBasedRiskScoringEnabled: boolean;
 }> = {
@@ -385,22 +381,6 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: { description: 'Number of base-scoring pages processed' },
     },
-    deferToPhase2Count: {
-      type: 'long',
-      _meta: { description: 'Entities classified as defer_to_phase_2' },
-    },
-    notInStoreCount: {
-      type: 'long',
-      _meta: { description: 'Entities classified as not_in_store' },
-    },
-    lookupDocsUpserted: {
-      type: 'long',
-      _meta: { description: 'Lookup docs upserted during phase-1 lookup synchronization' },
-    },
-    lookupDocsDeleted: {
-      type: 'long',
-      _meta: { description: 'Lookup docs deleted during phase-1 lookup synchronization' },
-    },
     lookupPrunedDocs: {
       type: 'long',
       _meta: { description: 'Lookup docs pruned after reset-to-zero cleanup' },
@@ -426,6 +406,10 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
   notInStoreCount?: number;
   lookupDocsUpserted?: number;
   lookupDocsDeleted?: number;
+  entitiesIterated?: number;
+  lookupRowsWritten?: number;
+  bulkBatches?: number;
+  lookupRowsFailed?: number;
   resetBatchLimitHit?: boolean;
   idBasedRiskScoringEnabled: boolean;
 }> = {
@@ -467,6 +451,22 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
     lookupDocsDeleted: {
       type: 'long',
       _meta: { optional: true, description: 'Lookup docs deleted in this stage' },
+    },
+    entitiesIterated: {
+      type: 'long',
+      _meta: { optional: true, description: 'Entity-store entities iterated during lookup build' },
+    },
+    lookupRowsWritten: {
+      type: 'long',
+      _meta: { optional: true, description: 'Lookup rows written during lookup build' },
+    },
+    bulkBatches: {
+      type: 'long',
+      _meta: { optional: true, description: 'Bulk batches issued during Phase 0 lookup build' },
+    },
+    lookupRowsFailed: {
+      type: 'long',
+      _meta: { optional: true, description: 'Bulk items that failed during Phase 0 lookup build' },
     },
     resetBatchLimitHit: {
       type: 'boolean',

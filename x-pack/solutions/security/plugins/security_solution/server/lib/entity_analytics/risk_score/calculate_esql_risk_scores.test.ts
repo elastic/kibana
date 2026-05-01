@@ -9,8 +9,10 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
+  getBaseScoreESQLByIds,
   getESQL,
   getResolutionCompositeQuery,
+  getResolutionScoreESQLByIds,
   getResolutionScoreESQL,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
@@ -35,7 +37,11 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toEqual({
         index: '.entity_analytics.risk_score.lookup-default',
         size: 0,
-        query: { exists: { field: 'resolution_target_id' } },
+        query: {
+          term: {
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+        },
         aggs: {
           by_resolution_target: {
             composite: {
@@ -65,6 +71,148 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
       expect(query).toContain('resolution_target_id > "user:a"');
       expect(query).toContain('resolution_target_id <= "user:z"');
+    });
+
+    it('builds resolution ESQL query for explicit resolution target ids', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a', 'user:target-z'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
+      );
+      expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
+      expect(query).toContain('BY resolution_target_id');
+      expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+    });
+
+    it('escapes quote characters in base ID list', () => {
+      const query = getBaseScoreESQLByIds(
+        EntityType.user,
+        ['user:with"quote@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('"user:with\\"quote@okta"');
+    });
+
+    it('escapes backslash characters in base ID list', () => {
+      const query = getBaseScoreESQLByIds(
+        EntityType.user,
+        ['user:with\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('"user:with\\\\slash@okta"');
+    });
+
+    it('escapes quote and backslash characters in base ID list', () => {
+      const query = getBaseScoreESQLByIds(
+        EntityType.user,
+        ['user:plain@acme.com@okta', 'user:with"quote\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('"user:plain@acme.com@okta"');
+      expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
+    });
+
+    it('escapes quote characters in resolution target ID list', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:with"quote@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('"user:with\\"quote@okta"');
+    });
+
+    it('escapes backslash characters in resolution target ID list', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:with\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('"user:with\\\\slash@okta"');
+    });
+
+    it('escapes quote and backslash characters in resolution target ID list', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a', 'user:with"quote\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('"user:target-a"');
+      expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
+    });
+
+    it('throws when base ID list contains unsupported control character', () => {
+      expect(() =>
+        getBaseScoreESQLByIds(
+          EntityType.user,
+          ['user:good@okta', 'user:bad\u0000@okta'],
+          5000,
+          1000,
+          '.alerts-security.alerts-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('throws when resolution target ID list contains unsupported control character', () => {
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:good@okta', 'user:bad\u0000@okta'],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('keeps ordinary EUID ids unchanged in both ID-list builders', () => {
+      const euid = 'user:jane@acme.com@okta';
+      const baseQuery = getBaseScoreESQLByIds(
+        EntityType.user,
+        [euid],
+        5000,
+        1000,
+        '.alerts-security.alerts-default'
+      );
+      const resolutionQuery = getResolutionScoreESQLByIds(
+        EntityType.user,
+        [euid],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(baseQuery).toContain(`"${euid}"`);
+      expect(resolutionQuery).toContain(`"${euid}"`);
     });
   });
 
