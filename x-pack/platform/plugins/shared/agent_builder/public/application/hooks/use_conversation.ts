@@ -5,27 +5,45 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  ConversationRoundStatus,
+  type Conversation,
+} from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
 import { createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { useIsSendingMessage } from './use_is_sending_message';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { storageKeys } from '../storage_keys';
-import { useSendMessage } from '../context/send_message/send_message_context';
+import {
+  useSendMessageContext,
+  useStreamRecord,
+} from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
+  const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const isSendingMessage = useIsSendingMessage();
+  const { activeStream } = useSendMessageContext();
+
+  // Disable the query when this conversation is being written to by a stream, OR when
+  // its cached state shows a HITL pause. The cache is authoritative in both states; a
+  // refetch would race with optimistic chunks (streaming) or with the resume mutation
+  // about to fire (HITL). Reading the round status from the cache rather than relying
+  // on mutation timing makes the handoff between send and resume safe.
+  const isAwaitingPrompt =
+    queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
+    ConversationRoundStatus.awaitingPrompt;
+
+  const isThisConversationStreaming = activeStream?.conversationId === conversationId;
 
   const {
     data: conversation,
@@ -36,10 +54,7 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    // Disable query when there's no conversationId yet (entry "new" state) or while a message is
-    // streaming (a refetch would overwrite optimistic updates). When the mutation finishes,
-    // `onSettled` invalidates this query and the gate flips open, triggering the GET.
-    enabled: Boolean(conversationId) && !isSendingMessage,
+    enabled: Boolean(conversationId) && !isThisConversationStreaming && !isAwaitingPrompt,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -53,6 +68,9 @@ export const useConversation = () => {
       }
       return failureCount < 3;
     },
+    // Refetching an errored query (no cached success) resets status `error` → `loading`,
+    // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
+    retryOnMount: false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
@@ -127,7 +145,8 @@ export const useConversationTitle = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const { pendingMessage, error, errorSteps } = useSendMessage();
+  const conversationId = useConversationId();
+  const { pendingMessage, error, errorSteps } = useStreamRecord(conversationId);
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
