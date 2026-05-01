@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
-import type { FormValues, StateTransition } from '../types';
+import type { FormValues, RecoveryPolicy, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
@@ -36,6 +36,29 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   });
 
   return parsedArtifacts.length ? parsedArtifacts : undefined;
+};
+
+const serializeStateTransition = (
+  st?: StateTransition
+): { state_transition: Record<string, unknown> } | {} => {
+  if (!st) return {};
+  const out: Record<string, unknown> = {};
+  if (st.pendingCount != null) out.pending_count = st.pendingCount;
+  if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
+  if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
+  if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
+  return Object.keys(out).length ? { state_transition: out } : {};
+};
+
+const serializeRecoveryPolicy = (
+  rp?: RecoveryPolicy
+): { recovery_policy: Record<string, unknown> } | {} => {
+  if (!rp) return {};
+  const out: Record<string, unknown> = { type: rp.type };
+  if (rp.type === 'query' && rp.query?.base) {
+    out.query = { base: rp.query.base };
+  }
+  return { recovery_policy: out };
 };
 
 /**
@@ -66,6 +89,8 @@ export const formValuesToYamlObject = (values: FormValues): Record<string, unkno
     },
   },
   ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
+  ...serializeStateTransition(values.stateTransition),
+  ...serializeRecoveryPolicy(values.recoveryPolicy),
   ...(values.artifacts?.length && { artifacts: values.artifacts }),
 });
 
@@ -120,6 +145,28 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
           typeof stateTransitionObj.recovering_timeframe === 'string'
             ? stateTransitionObj.recovering_timeframe
             : null,
+      }
+    : undefined;
+
+  const recoveryPolicyObj = obj.recovery_policy as Record<string, unknown> | undefined;
+  const recoveryPolicy: RecoveryPolicy | undefined = recoveryPolicyObj
+    ? {
+        type:
+          recoveryPolicyObj.type === 'query' || recoveryPolicyObj.type === 'no_breach'
+            ? recoveryPolicyObj.type
+            : 'no_breach',
+        ...(recoveryPolicyObj.type === 'query' &&
+        recoveryPolicyObj.query &&
+        typeof recoveryPolicyObj.query === 'object'
+          ? {
+              query: {
+                base:
+                  typeof (recoveryPolicyObj.query as Record<string, unknown>).base === 'string'
+                    ? ((recoveryPolicyObj.query as Record<string, unknown>).base as string)
+                    : undefined,
+              },
+            }
+          : {}),
       }
     : undefined;
 
@@ -188,6 +235,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
+      recoveryPolicy: recoveryPolicy ?? { type: 'no_breach' },
       stateTransition,
       stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
       stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
