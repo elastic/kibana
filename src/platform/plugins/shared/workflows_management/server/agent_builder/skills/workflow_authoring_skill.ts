@@ -60,8 +60,10 @@ To list or find existing workflows, use the SML (Semantic Metadata Layer) tools 
 - **${workflowTools.modifyProperty}**: Modify a top-level workflow property (requires existing attachment)
 - **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
 
-### Execution Tool
+### Execution + Lifecycle Tools (cross-surface — usable from in-Kibana chat AND external MCP clients)
 - **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts) return a preview. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested. Pass \`yaml\` parameter with inline YAML to execute a step before a workflow attachment exists (useful for index field discovery).
+- **${workflowTools.deployWorkflow}**: Persist a workflow YAML. Pass \`id\` to upsert (update if it exists, create otherwise) or omit \`id\` to create with a server-generated ID. Validates server-side first; never writes invalid YAML.
+- **${workflowTools.runWorkflow}**: Execute a workflow end-to-end and get back a \`workflowExecutionId\`. Pass \`workflowId\` to run a deployed workflow, or \`yaml\` to run an unsaved draft as a test. Use \`${platformCoreTools.getWorkflowExecutionStatus}\` afterwards to follow the run.
 
 ## Core Instructions
 

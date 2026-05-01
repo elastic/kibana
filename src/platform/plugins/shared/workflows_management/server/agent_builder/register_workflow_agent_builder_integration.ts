@@ -11,10 +11,12 @@ import type { Logger } from '@kbn/core/server';
 import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
 import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
+import { registerDeployWorkflowTool } from './tools/deploy_workflow_tool';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
+import { registerRunWorkflowTool } from './tools/run_workflow_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
@@ -42,6 +44,8 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetTriggerDefinitionsTool(agentBuilder);
   registerGetConnectorsTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
+  registerDeployWorkflowTool(agentBuilder, api);
+  registerRunWorkflowTool(agentBuilder, api);
 
   registerWorkflowExecuteStepTool(agentBuilder, api);
   registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
