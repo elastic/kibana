@@ -171,10 +171,23 @@ export interface DependencyChainMapProps {
   causeKis: CauseKiItem[];
 }
 
+/**
+ * Checks whether a cause_ki name refers to the same service as an edge node name.
+ * Handles cases like "payment" vs "payment-service" or "payment-svc".
+ */
+function isSameEntity(edgeNodeName: string, causeKiName: string): boolean {
+  if (edgeNodeName === causeKiName) return true;
+  const edgeLower = edgeNodeName.toLowerCase();
+  const causeLower = causeKiName.toLowerCase();
+  // "payment-service" starts with "payment"
+  if (causeLower.startsWith(edgeLower + '-') || causeLower.startsWith(edgeLower + '_')) return true;
+  // "payment" starts with "pay" — but only match when edge name is a full segment
+  if (edgeLower.startsWith(causeLower + '-') || edgeLower.startsWith(causeLower + '_')) return true;
+  return false;
+}
+
 export function DependencyChainMap({ dependencyEdges, causeKis }: DependencyChainMapProps) {
   const { euiTheme, colorMode } = useEuiTheme();
-
-  const causeNames = useMemo(() => new Set(causeKis.map((ki) => ki.name)), [causeKis]);
 
   const exposedSources = useMemo(
     () => new Set(dependencyEdges.filter((e) => e.exposure === 'exposed').map((e) => e.source)),
@@ -183,6 +196,29 @@ export function DependencyChainMap({ dependencyEdges, causeKis }: DependencyChai
 
   const { nodes, edges } = useMemo(() => {
     const nodesMap = new Map<string, ServiceFlowNode>();
+
+    // Collect all node names from edges first
+    const edgeNodeNames = new Set<string>();
+    for (const edge of dependencyEdges) {
+      edgeNodeNames.add(edge.source);
+      edgeNodeNames.add(edge.target);
+    }
+
+    // Build a mapping from cause_ki names to their matching edge node (or themselves)
+    const causeMatchedNodes = new Set<string>();
+    for (const ki of causeKis) {
+      if (edgeNodeNames.has(ki.name)) {
+        causeMatchedNodes.add(ki.name);
+      } else {
+        // Try fuzzy match: "payment-service" should match "payment"
+        for (const edgeName of edgeNodeNames) {
+          if (isSameEntity(edgeName, ki.name)) {
+            causeMatchedNodes.add(edgeName);
+            break;
+          }
+        }
+      }
+    }
 
     for (const edge of dependencyEdges) {
       for (const name of [edge.source, edge.target]) {
@@ -193,7 +229,7 @@ export function DependencyChainMap({ dependencyEdges, causeKis }: DependencyChai
             position: { x: 0, y: 0 },
             data: {
               label: name,
-              isCause: causeNames.has(name),
+              isCause: causeMatchedNodes.has(name),
               isExposed: exposedSources.has(name),
             },
           });
@@ -201,9 +237,11 @@ export function DependencyChainMap({ dependencyEdges, causeKis }: DependencyChai
       }
     }
 
-    // Add cause nodes not already present from edges
+    // Add cause nodes only if they have NO match in edges at all
     for (const ki of causeKis) {
-      if (!nodesMap.has(ki.name)) {
+      const hasExactMatch = edgeNodeNames.has(ki.name);
+      const hasFuzzyMatch = [...edgeNodeNames].some((n) => isSameEntity(n, ki.name));
+      if (!hasExactMatch && !hasFuzzyMatch) {
         nodesMap.set(ki.name, {
           id: ki.name,
           type: 'service',
@@ -237,7 +275,7 @@ export function DependencyChainMap({ dependencyEdges, causeKis }: DependencyChai
     const layoutedNodes = applyLayout(rawNodes, flowEdges);
 
     return { nodes: layoutedNodes, edges: flowEdges };
-  }, [dependencyEdges, causeKis, causeNames, exposedSources, euiTheme]);
+  }, [dependencyEdges, causeKis, exposedSources, euiTheme]);
 
   // Compute height based on the number of rows
   const graphHeight = useMemo(() => {
@@ -254,12 +292,14 @@ export function DependencyChainMap({ dependencyEdges, causeKis }: DependencyChai
         css={css`
           width: 100%;
           height: ${graphHeight}px;
-          border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-          border-radius: ${euiTheme.border.radius.medium};
 
           .react-flow__node,
           .react-flow__node * {
             cursor: default !important;
+          }
+
+          .react-flow {
+            background: transparent !important;
           }
         `}
         data-test-subj="sigeventsDependencyChainMap"
