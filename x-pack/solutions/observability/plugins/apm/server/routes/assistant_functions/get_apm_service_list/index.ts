@@ -7,11 +7,12 @@
 
 import datemath from '@elastic/datemath';
 import type { Logger } from '@kbn/core/server';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { RollupInterval } from '../../../../common/rollup';
 import { ApmDocumentType } from '../../../../common/document_type';
+import { getSeverity } from '../../../../common/anomaly_detection';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServicesItems } from '../../services/get_services/get_services_items';
@@ -22,7 +23,7 @@ export interface ApmServicesListItem {
   'agent.name'?: string;
   'transaction.type'?: string;
   alertsCount: number;
-  healthStatus: ServiceHealthStatus;
+  anomalyScore?: number;
   'service.environment'?: string[];
 }
 
@@ -36,7 +37,7 @@ export async function getApmServiceList({
 }: {
   arguments: {
     serviceEnvironment?: string | undefined;
-    healthStatus?: ServiceHealthStatus[] | undefined;
+    mlSeverities?: ML_ANOMALY_SEVERITY[] | undefined;
     start: string;
     end: string;
   };
@@ -46,7 +47,7 @@ export async function getApmServiceList({
   logger: Logger;
   randomSampler: RandomSampler;
 }): Promise<ApmServicesListItem[]> {
-  const { healthStatus } = args;
+  const { mlSeverities } = args;
 
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
@@ -72,14 +73,16 @@ export async function getApmServiceList({
       'service.name': item.serviceName,
       'agent.name': item.agentName,
       alertsCount: item.alertsCount ?? 0,
-      healthStatus: item.healthStatus ?? ServiceHealthStatus.unknown,
+      anomalyScore: item.anomalyScore,
       'service.environment': item.environments,
       'transaction.type': item.transactionType,
     };
   });
 
-  if (healthStatus && healthStatus.length) {
-    mappedItems = mappedItems.filter((item): boolean => healthStatus.includes(item.healthStatus));
+  if (mlSeverities && mlSeverities.length) {
+    mappedItems = mappedItems.filter((item) =>
+      mlSeverities.includes(getSeverity(item.anomalyScore))
+    );
   }
 
   return mappedItems;

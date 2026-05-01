@@ -11,8 +11,6 @@ import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import type { Transaction } from '@kbn/apm-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
-
 interface TimeseriesChangePoint {
   change_point?: number | undefined;
   r_value?: number | undefined;
@@ -78,7 +76,7 @@ export interface ServicesItemsItem {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
+  anomalyScore?: number;
   alertsCount?: number;
 }
 

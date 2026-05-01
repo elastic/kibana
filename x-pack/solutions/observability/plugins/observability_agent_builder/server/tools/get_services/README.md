@@ -15,7 +15,7 @@ Each service in the response includes a `sources` array indicating which data so
 ## Filters
 
 - **kqlFilter**: KQL filter to narrow down services (e.g., `service.environment: "production"`, `host.name: "web-server-01"`)
-- **healthStatus**: Filter by health status (`healthy`, `warning`, `critical`, `unknown`). Note: This filter only applies to APM services. Services found only in logs or metrics will not have health status information and will be excluded when this filter is used.
+- **healthStatus**: Filter APM services by legacy health buckets (`healthy`, `warning`, `critical`, `unknown`). Each service’s bucket is derived from its ML anomaly score in the time range (same mapping as APM). Services found only in logs or metrics have no anomaly score and match `unknown` when included; when this filter is set, log/metrics-only services are excluded from the merged list.
 
 ## Example
 

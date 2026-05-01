@@ -7,6 +7,8 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
 import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServicesItemsItem } from '../../data_registry/data_registry_types';
@@ -25,6 +27,33 @@ interface ServiceFromIndex {
 }
 
 const MAX_SERVICES_FROM_INDICES = 500;
+
+/**
+ * Note: `healthStatus` is only a **tool input** (see `tool.ts` schema), not a field on
+ * `ServicesItemsItem`. APM no longer returns `healthStatus` on merged service rows; it exposes
+ * `anomalyScore` instead. We keep the optional `healthStatus` filter so existing agents, prompts,
+ * and API tests can still pass the same four buckets; matching is done by mapping
+ * `anomalyScore` → ML severity → the same legacy buckets this filter always implied.
+ */
+type ServiceHealthBucket = 'healthy' | 'warning' | 'critical' | 'unknown';
+
+function getHealthBucketFromAnomalyScore(anomalyScore: number | undefined): ServiceHealthBucket {
+  const severity =
+    anomalyScore === undefined ? ML_ANOMALY_SEVERITY.UNKNOWN : getSeverityType(anomalyScore);
+  switch (severity) {
+    case ML_ANOMALY_SEVERITY.CRITICAL:
+    case ML_ANOMALY_SEVERITY.MAJOR:
+      return 'critical';
+    case ML_ANOMALY_SEVERITY.MINOR:
+    case ML_ANOMALY_SEVERITY.WARNING:
+      return 'warning';
+    case ML_ANOMALY_SEVERITY.LOW:
+      return 'healthy';
+    case ML_ANOMALY_SEVERITY.UNKNOWN:
+    default:
+      return 'unknown';
+  }
+}
 
 async function getServicesFromLogsAndMetricsIndices({
   esClient,
@@ -174,10 +203,13 @@ export async function getToolHandler({
 
   const apmServices = apmResponse?.items ?? [];
 
-  // Filter APM services by health status (if provided) and convert latency to milliseconds
+  // Optional `healthStatus` tool filter (see file-level note): derive bucket from `anomalyScore`, then normalize latency
   const normalizedApmServices = apmServices.flatMap((service) => {
-    if (healthStatus && !healthStatus.includes(service.healthStatus ?? 'unknown')) {
-      return [];
+    if (healthStatus && healthStatus.length) {
+      const bucket = getHealthBucketFromAnomalyScore(service.anomalyScore);
+      if (!healthStatus.includes(bucket)) {
+        return [];
+      }
     }
 
     return [
@@ -189,7 +221,7 @@ export async function getToolHandler({
   });
 
   // Merge all services from different sources
-  // When filtering by health status, exclude logs/metrics-only services since they don't have health data
+  // When the `healthStatus` tool filter is set, omit logs/metrics-only services (no `anomalyScore` to evaluate)
   const services = mergeServices({
     apmServices: normalizedApmServices,
     logsAndMetricsServices: healthStatus ? [] : logsAndMetricsServices,

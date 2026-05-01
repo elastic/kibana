@@ -39,7 +39,7 @@ const END = 'now';
 interface ServiceResult {
   serviceName: string;
   environments?: string[];
-  healthStatus?: string;
+  anomalyScore?: number;
   latency?: number;
   throughput?: number;
   transactionErrorRate?: number;
