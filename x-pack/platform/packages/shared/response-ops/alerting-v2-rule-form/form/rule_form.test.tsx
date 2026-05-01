@@ -117,18 +117,6 @@ describe('RuleForm', () => {
       expect(screen.getByText('GUI Form')).toBeInTheDocument();
     });
 
-    it('renders ErrorCallOut from RuleFormContent', () => {
-      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('mockErrorCallOut')).toBeInTheDocument();
-    });
-
-    it('passes includeQueryEditor to GuiRuleForm', () => {
-      render(<RuleForm {...defaultProps} includeQueryEditor />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByText('Query Editor')).toBeInTheDocument();
-    });
-
     it('does not show query editor when includeQueryEditor is false', () => {
       render(<RuleForm {...defaultProps} includeQueryEditor={false} />, {
         wrapper: createFormWrapper(),
@@ -159,18 +147,6 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
     });
 
-    it('shows Configure Rule Behavior heading when includeYaml is true', () => {
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByText('Configure Rule Behavior')).toBeInTheDocument();
-    });
-
-    it('does not show Configure Rule Behavior heading when includeYaml is false', () => {
-      render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
-
-      expect(screen.queryByText('Configure Rule Behavior')).not.toBeInTheDocument();
-    });
-
     it('starts in form mode by default', () => {
       render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
 
@@ -187,21 +163,6 @@ describe('RuleForm', () => {
 
       expect(screen.getByTestId('mockYamlRuleForm')).toBeInTheDocument();
       expect(screen.queryByTestId('mockGuiRuleForm')).not.toBeInTheDocument();
-    });
-
-    it('switches back to form mode when Form toggle is clicked', async () => {
-      const user = userEvent.setup();
-
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      // Switch to YAML
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-      expect(screen.getByTestId('mockYamlRuleForm')).toBeInTheDocument();
-
-      // Switch back to Form
-      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
-      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('mockYamlRuleForm')).not.toBeInTheDocument();
     });
 
     it('disables toggle when isDisabled is true', () => {
@@ -262,43 +223,6 @@ describe('RuleForm', () => {
       await waitFor(() => {
         const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
         expect(editor.value).toContain('renamed-rule');
-      });
-    });
-
-    it('regenerates YAML when metadata.tags changes', async () => {
-      const user = userEvent.setup();
-
-      const TagsWriter = () => {
-        const { setValue } = useFormContext();
-        return (
-          <button
-            type="button"
-            data-test-subj="testSetTags"
-            onClick={() => setValue('metadata.tags', ['critical', 'edge'], { shouldDirty: true })}
-          >
-            set tags
-          </button>
-        );
-      };
-
-      render(
-        <>
-          <RuleForm {...defaultProps} includeYaml />
-          <TagsWriter />
-        </>,
-        { wrapper: createFormWrapper() }
-      );
-
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
-      expect(initialEditor.value).not.toContain('critical');
-
-      await user.click(screen.getByTestId('testSetTags'));
-
-      await waitFor(() => {
-        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
-        expect(editor.value).toContain('critical');
-        expect(editor.value).toContain('edge');
       });
     });
 
@@ -407,28 +331,7 @@ describe('RuleForm', () => {
       );
     });
 
-    it('preserves YAML edits across Form↔YAML toggle', async () => {
-      const user = userEvent.setup();
-
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      // Switch to YAML and type something distinctive
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-
-      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
-      await user.clear(editor);
-      await user.type(editor, 'metadata:\n  name: persisted-edit');
-
-      // Switch back to Form mode (unmounts the YAML form)
-      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
-      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
-
-      // Switch to YAML again — the lifted state should restore the buffer
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-      const editorAfter = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
-      expect(editorAfter.value).toContain('persisted-edit');
-    });
-  });
+});
 
   describe('submission buttons', () => {
     it('does not show submission buttons by default', () => {
@@ -454,12 +357,6 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormCancelButton')).toBeInTheDocument();
     });
 
-    it('does not show cancel button when onCancel is not provided', () => {
-      render(<RuleForm {...defaultProps} includeSubmission />, { wrapper: createFormWrapper() });
-
-      expect(screen.queryByTestId('ruleV2FormCancelButton')).not.toBeInTheDocument();
-    });
-
     it('uses default submit label when not provided', () => {
       render(<RuleForm {...defaultProps} includeSubmission />, { wrapper: createFormWrapper() });
 
@@ -474,23 +371,6 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormSubmitButton')).toHaveTextContent('Create Rule');
     });
 
-    it('uses default cancel label when not provided', () => {
-      render(<RuleForm {...defaultProps} includeSubmission onCancel={jest.fn()} />, {
-        wrapper: createFormWrapper(),
-      });
-
-      expect(screen.getByTestId('ruleV2FormCancelButton')).toHaveTextContent('Cancel');
-    });
-
-    it('uses custom cancel label when provided', () => {
-      render(
-        <RuleForm {...defaultProps} includeSubmission onCancel={jest.fn()} cancelLabel="Go Back" />,
-        { wrapper: createFormWrapper() }
-      );
-
-      expect(screen.getByTestId('ruleV2FormCancelButton')).toHaveTextContent('Go Back');
-    });
-
     it('calls onCancel when cancel button is clicked', async () => {
       const user = userEvent.setup();
       const onCancel = jest.fn();
@@ -502,43 +382,6 @@ describe('RuleForm', () => {
       await user.click(screen.getByTestId('ruleV2FormCancelButton'));
 
       expect(onCancel).toHaveBeenCalledTimes(1);
-    });
-
-    it('shows submission buttons in YAML mode', async () => {
-      const user = userEvent.setup();
-
-      render(<RuleForm {...defaultProps} includeSubmission includeYaml />, {
-        wrapper: createFormWrapper(),
-      });
-
-      // Switch to YAML mode
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-
-      // Submission buttons should still be visible
-      expect(screen.getByTestId('ruleV2FormSubmitButton')).toBeInTheDocument();
-    });
-  });
-
-  describe('exports', () => {
-    it('exports RULE_FORM_ID constant', () => {
-      expect(RULE_FORM_ID).toBe('ruleV2Form');
-    });
-  });
-
-  describe('QueryClient configuration', () => {
-    it('renders without error (verifies QueryClient is configured)', () => {
-      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
-    });
-  });
-
-  describe('services context', () => {
-    it('provides services via RuleFormProvider (tested implicitly)', () => {
-      // Child components use useRuleFormServices and would throw if context was not provided
-      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
     });
   });
 

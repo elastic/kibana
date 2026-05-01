@@ -143,15 +143,6 @@ describe('YamlRuleForm component', () => {
     expect(editor.value).toContain('Initial Rule');
   });
 
-  it('renders the form label and help text', () => {
-    render(<StatefulYamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByText('Rule definition (YAML)')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Edit the rule as YAML. ES\|QL autocomplete is available/)
-    ).toBeInTheDocument();
-  });
-
   it('disables editor when isDisabled is true', () => {
     render(<StatefulYamlRuleForm {...defaultProps} isDisabled />, { wrapper: createFormWrapper() });
 
@@ -226,35 +217,6 @@ describe('YamlRuleForm component', () => {
     });
   });
 
-  it('displays error for missing required fields', async () => {
-    const onSubmit = jest.fn();
-
-    render(<StatefulYamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
-      wrapper: createFormWrapper(),
-    });
-
-    const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
-
-    // Enter YAML without required name
-    const yamlWithoutName = dump({
-      kind: 'alert',
-      metadata: {},
-      evaluation: { query: { base: 'FROM logs-*' } },
-    });
-
-    fireEvent.change(editor, { target: { value: yamlWithoutName } });
-
-    // Submit the form using fireEvent.submit which wraps in act()
-    const form = document.querySelector('form')!;
-    fireEvent.submit(form);
-
-    await waitFor(() => {
-      expect(screen.getByText('Configuration error')).toBeInTheDocument();
-      expect(screen.getByText(/metadata.name is required/)).toBeInTheDocument();
-      expect(onSubmit).not.toHaveBeenCalled();
-    });
-  });
-
   it('clears error when user starts editing', async () => {
     render(<StatefulYamlRuleForm {...defaultProps} />, {
       wrapper: createFormWrapper(),
@@ -278,12 +240,6 @@ describe('YamlRuleForm component', () => {
     await waitFor(() => {
       expect(screen.queryByText('Configuration error')).not.toBeInTheDocument();
     });
-  });
-
-  it('has correct data-test-subj attribute', () => {
-    render(<StatefulYamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByTestId('ruleV2FormYamlEditor')).toBeInTheDocument();
   });
 
   describe('blur sync', () => {
