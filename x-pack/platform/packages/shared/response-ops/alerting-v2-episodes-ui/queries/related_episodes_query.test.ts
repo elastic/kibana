@@ -5,26 +5,49 @@
  * 2.0.
  */
 
-import { buildRelatedAlertEpisodesEsqlQuery } from './related_episodes_query';
+import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
+import {
+  buildRelatedBaseQuery,
+  finishRelatedEpisodesQuery,
+  RELATED_EPISODE_FIELDS,
+} from './related_episodes_query';
 
-describe('buildRelatedAlertEpisodesEsqlQuery', () => {
-  it('filters by rule and excludes an episode and applies a fixed page size', () => {
-    const queryString = buildRelatedAlertEpisodesEsqlQuery('rule-a', 'episode-b').print('basic');
+describe('buildRelatedBaseQuery', () => {
+  it('selects from the alert events stream, filters by rule and excludes an episode', () => {
+    const queryString = buildRelatedBaseQuery('rule-a', 'episode-b').print('basic');
 
+    expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);
+    expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain('rule.id');
     expect(queryString).toContain('rule-a');
     expect(queryString).toContain('episode.id');
     expect(queryString).toContain('episode-b');
     expect(queryString).toMatch(/!=/);
-    expect(queryString).toContain('LIMIT 5');
   });
 
   it('escapes quotes in ids', () => {
-    const queryString = buildRelatedAlertEpisodesEsqlQuery('a"b', 'c"d').print('basic');
+    const queryString = buildRelatedBaseQuery('a"b', 'c"d').print('basic');
 
     expect(queryString).toContain('rule.id');
     expect(queryString).toContain('episode.id');
     expect(queryString).toContain(String.raw`a\"b`);
     expect(queryString).toContain(String.raw`c\"d`);
+  });
+});
+
+describe('finishRelatedEpisodesQuery', () => {
+  it('adds episode aggregation, sort, fixed limit, and keep columns', () => {
+    const queryString = finishRelatedEpisodesQuery(
+      buildRelatedBaseQuery('rule-a', 'episode-b')
+    ).print('basic');
+
+    expect(queryString).toContain('MIN(@timestamp)');
+    expect(queryString).toContain('MAX(@timestamp)');
+    expect(queryString).toContain(TIME_FIELD);
+    expect(queryString).toMatch(/sort.*desc/i);
+    expect(queryString).toContain('LIMIT 5');
+    for (const field of RELATED_EPISODE_FIELDS) {
+      expect(queryString).toContain(field);
+    }
   });
 });

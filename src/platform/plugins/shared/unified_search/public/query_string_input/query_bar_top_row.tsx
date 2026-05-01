@@ -827,7 +827,6 @@ export const QueryBarTopRow = React.memo(
               onChange={onDateRangeChange}
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
-              isLoading={props.isLoading}
               disabled={props.isDisabled || noTimeFieldNameDisabled}
               width="auto"
               compressed

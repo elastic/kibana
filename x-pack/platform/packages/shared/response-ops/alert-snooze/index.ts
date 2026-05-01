@@ -20,6 +20,12 @@ export type { SnoozeDurationPickerProps } from './components/snooze_duration_pic
 export { QuickSnoozePopover } from './components/quick_snooze_popover';
 export type { QuickSnoozePopoverProps } from './components/quick_snooze_popover';
 
+export {
+  PANEL_TITLE,
+  QUICK_SNOOZE_POPOVER_SUBTITLE,
+  QUICK_SNOOZE_POPOVER_APPLY,
+} from './components/translations';
+
 export { ConditionalSnoozePanel } from './components/conditional_snooze_panel';
 export type {
   ConditionalSnoozePanelProps,
