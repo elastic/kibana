@@ -14,24 +14,21 @@ const formatConnectors = (connectors: PrefetchedContext['connectors']): string =
     : connectors
         .map(
           (c) =>
-            `- id="${c.id}" name="${c.name}" actionTypeId="${c.actionTypeId}" stepTypes=[${c.stepTypes.join(
-              ', '
-            )}]`
+            `- id="${c.id}" name="${c.name}" actionTypeId="${
+              c.actionTypeId
+            }" stepTypes=[${c.stepTypes.join(', ')}]`
         )
         .join('\n');
 
 const formatStepDefinitions = (defs: PrefetchedContext['stepDefinitions']): string =>
   defs
     .map(
-      (d) =>
-        `- ${d.id} (${d.category}) — ${d.label}${d.description ? `: ${d.description}` : ''}`
+      (d) => `- ${d.id} (${d.category}) — ${d.label}${d.description ? `: ${d.description}` : ''}`
     )
     .join('\n');
 
 const formatTriggerDefinitions = (defs: PrefetchedContext['triggerDefinitions']): string =>
-  defs
-    .map((d) => `- ${d.id} — ${d.label}${d.description ? `: ${d.description}` : ''}`)
-    .join('\n');
+  defs.map((d) => `- ${d.id} — ${d.label}${d.description ? `: ${d.description}` : ''}`).join('\n');
 
 export const createSystemPrompt = ({
   prefetched,

@@ -6,13 +6,8 @@
  */
 
 import { StateGraph } from '@langchain/langgraph';
-import {
-  AIMessage,
-  HumanMessage,
-  SystemMessage,
-  ToolMessage,
-  isAIMessage,
-} from '@langchain/core/messages';
+import type { AIMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage, ToolMessage, isAIMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -26,11 +21,7 @@ import { StateAnnotation, type StateType } from './state';
 import { buildBoundTools } from './tools/schemas';
 import { dispatchToolCall } from './tools/dispatch';
 import { validateGeneratedYaml } from './validate';
-import {
-  createSystemPrompt,
-  createUserPrompt,
-  createValidationFailureMessage,
-} from './prompts';
+import { createSystemPrompt, createUserPrompt, createValidationFailureMessage } from './prompts';
 import type { Action } from './types';
 
 export interface CreateGraphArgs {
@@ -41,12 +32,7 @@ export interface CreateGraphArgs {
   logger: Logger;
 }
 
-export const createGenerateWorkflowGraph = ({
-  model,
-  api,
-  request,
-  spaceId,
-}: CreateGraphArgs) => {
+export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: CreateGraphArgs) => {
   const tools = buildBoundTools();
   const modelWithTools = model.chatModel.bindTools!(tools);
   const dispatchDeps = { api, spaceId, request };
@@ -150,8 +136,12 @@ export const createGenerateWorkflowGraph = ({
   };
 
   const branchAfterValidate = (state: StateType): 'agent' | 'finalize' => {
-    if (state.validation?.valid) return 'finalize';
-    if (state.validationAttempts >= state.maxRetries) return 'finalize';
+    if (state.validation?.valid) {
+      return 'finalize';
+    }
+    if (state.validationAttempts >= state.maxRetries) {
+      return 'finalize';
+    }
     return 'agent';
   };
 

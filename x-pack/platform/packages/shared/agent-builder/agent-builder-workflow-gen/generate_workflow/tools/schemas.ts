@@ -60,10 +60,7 @@ export const deleteStepSchema = z.object({
 });
 
 export const getStepDefinitionsSchema = z.object({
-  stepType: z
-    .string()
-    .optional()
-    .describe('Exact step type id to fetch the full schema for'),
+  stepType: z.string().optional().describe('Exact step type id to fetch the full schema for'),
   search: z.string().optional().describe('Keyword to filter step types'),
 });
 
@@ -105,8 +102,7 @@ export const buildBoundTools = (): StructuredToolInterface[] => [
   }),
   tool(NEVER_CALLED, {
     name: TOOL_NAMES.getStepDefinitions,
-    description:
-      'Fetch the full schema for one or more step types (input/config params, examples)',
+    description: 'Fetch the full schema for one or more step types (input/config params, examples)',
     schema: getStepDefinitionsSchema,
   }),
   tool(NEVER_CALLED, {
