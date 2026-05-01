@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSummary } from './types';
+import type { ConnectorSummary, StepDefinitionSummary } from './types';
 
 /* ---------------- Connectors ---------------- */
 
@@ -48,4 +48,22 @@ export const formatConnectorsBlock = (connectors: ConnectorSummary[]): string =>
       ].join('\n')
     )
     .join('\n\n');
+};
+
+/* ---------------- Step entry ---------------- */
+
+const normalize = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+export const formatStepEntry = (s: StepDefinitionSummary): string => {
+  const labelIsRedundant = normalize(s.label) === normalize(s.id);
+  const description = s.description && s.description !== s.label ? s.description : undefined;
+
+  let line = `- ${s.id}`;
+  if (!labelIsRedundant) {
+    line += ` (${s.label})`;
+  }
+  if (description) {
+    line += ` — ${description}`;
+  }
+  return line;
 };

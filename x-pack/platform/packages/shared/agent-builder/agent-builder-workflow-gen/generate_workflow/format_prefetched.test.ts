@@ -8,8 +8,9 @@
 import {
   groupConnectorsByActionType,
   formatConnectorsBlock,
+  formatStepEntry,
 } from './format_prefetched';
-import type { ConnectorSummary } from './types';
+import type { ConnectorSummary, StepDefinitionSummary } from './types';
 
 describe('groupConnectorsByActionType', () => {
   it('groups instances and collapses identical stepTypes per actionTypeId', () => {
@@ -95,5 +96,48 @@ describe('formatConnectorsBlock', () => {
         '  - slack-1 (Eng)',
       ].join('\n')
     );
+  });
+});
+
+const step = (over: Partial<StepDefinitionSummary> = {}): StepDefinitionSummary => ({
+  id: 'console',
+  label: 'Console',
+  description: 'Log a message',
+  category: 'kibana',
+  ...over,
+});
+
+describe('formatStepEntry', () => {
+  it('drops the label when it is a Title-cased version of the id', () => {
+    expect(formatStepEntry(step({ id: 'console', label: 'Console', description: 'Log a message' })))
+      .toBe('- console — Log a message');
+  });
+
+  it('keeps the label when it differs from the id', () => {
+    expect(
+      formatStepEntry(
+        step({ id: 'data.set', label: 'Set Variables', description: 'Set workflow variables' })
+      )
+    ).toBe('- data.set (Set Variables) — Set workflow variables');
+  });
+
+  it('omits the description when it equals the label', () => {
+    // Label "Send Slack" differs from id "slack.send" (different words → label is kept).
+    // Description "Send Slack" equals the label, so the description is dropped.
+    expect(
+      formatStepEntry(
+        step({ id: 'slack.send', label: 'Send Slack', description: 'Send Slack' })
+      )
+    ).toBe('- slack.send (Send Slack)');
+  });
+
+  it('renders id-only when label is redundant and description is missing', () => {
+    expect(formatStepEntry(step({ id: 'email', label: 'Email', description: undefined })))
+      .toBe('- email');
+  });
+
+  it('handles the slack_api edge case (id with underscore vs label "Slack API")', () => {
+    expect(formatStepEntry(step({ id: 'slack_api', label: 'Slack API', description: undefined })))
+      .toBe('- slack_api');
   });
 });
