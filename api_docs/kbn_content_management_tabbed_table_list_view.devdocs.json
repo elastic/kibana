@@ -33,6 +33,7 @@
             "lineNumber": 44,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "TabbedTableListViewProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -136,6 +137,7 @@
                 "lineNumber": 30,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TableListTabParentProps",
                 "trackAdoption": false,
                 "isRequired": true
               }

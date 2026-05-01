@@ -8,7 +8,7 @@
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { SloStatus } from '../../../../common/service_inventory';
-import type { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type {
   ServiceMapEdge as ServiceMapEdgeType,
   ServiceMapNode,
@@ -74,8 +74,8 @@ function serviceMatchesFilters(data: ServiceNodeData, filters: ServiceMapViewFil
   }
 
   if (filters.anomalyStatusFilter.length > 0) {
-    const health = data.serviceAnomalyStats?.healthStatus ?? 'unknown';
-    if (!filters.anomalyStatusFilter.includes(health as ServiceHealthStatus)) {
+    const health = data.serviceAnomalyStats?.healthStatus ?? ServiceHealthStatus.unknown;
+    if (!filters.anomalyStatusFilter.includes(health)) {
       return false;
     }
   }

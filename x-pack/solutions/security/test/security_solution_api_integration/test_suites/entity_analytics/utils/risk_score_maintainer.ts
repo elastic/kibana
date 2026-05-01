@@ -37,7 +37,7 @@ interface RetryServiceLike {
 
 type MaintainerRoutesLike = Pick<
   ReturnType<typeof entityMaintainerRouteHelpersFactory>,
-  'getMaintainers' | 'runMaintainer' | 'runMaintainerSync' | 'startMaintainer'
+  'getMaintainers' | 'runMaintainer' | 'runMaintainerSync' | 'startMaintainer' | 'stopMaintainer'
 >;
 
 interface EntityStoreUtilsLike {
@@ -362,14 +362,15 @@ export const riskScoreMaintainerScenarioFactory = ({
     await entityStoreUtils.installEntityStoreV2({
       entityTypes,
       dataViewPattern,
-      maintainerAutoStart: runMode === 'sync' ? false : undefined,
+      maintainerAutoStart: false,
     });
+    await routes.stopMaintainer('risk-score');
+
     if (runMode === 'sync') {
       await routes.runMaintainerSync('risk-score');
       return;
     }
 
-    // init can create tasks with autoStart: false; enable Task Manager before waiting for a run.
     await routes.startMaintainer('risk-score');
     await waitForMaintainerRun({ retry, routes, minRuns, timeoutMs });
   };

@@ -40,3 +40,4 @@ export * from './specs/sharepoint_server/sharepoint_server';
 export * from './specs/microsoft_teams/microsoft_teams';
 export * from './specs/tavily/tavily';
 export * from './specs/pagerduty/pagerduty';
+export * from './specs/snowflake/snowflake';

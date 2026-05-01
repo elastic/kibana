@@ -7,6 +7,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
+import * as rt from 'io-ts';
+import { isRight } from 'fp-ts/Either';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type {
   AttachmentType,
@@ -105,6 +107,15 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
   };
 };
 
+const CommentDataRt = rt.strict({ data: rt.strict({ content: rt.string }) });
+
+const commentSchemaValidator = (attachment: unknown): void => {
+  const result = CommentDataRt.decode(attachment);
+  if (!isRight(result)) {
+    throw new Error('Invalid comment attachment data: expected { content: string }');
+  }
+};
+
 /**
  * Returns the comment (user) attachment type for registration with the unified registry.
  * Renders comment body via CommentChildren and uses CommentTimelineAvatar.
@@ -115,4 +126,5 @@ export const getCommentAttachmentType = (): AttachmentType<UnifiedValueAttachmen
   displayName: COMMENT,
   getAttachmentViewObject: (props) => getCommentAttachmentViewObject(props),
   getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
+  schemaValidator: commentSchemaValidator,
 });

@@ -11,6 +11,16 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { Timestamp } from './timestamp';
 import { TestProviders } from '../../../common/mock';
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiText: ({ size, children }: { size?: string; children?: React.ReactNode }) => (
+      <div data-euitext-size={size}>{children}</div>
+    ),
+  };
+});
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -58,6 +68,30 @@ describe('<Timestamp />', () => {
     );
 
     expect(getByText('test')).toBeInTheDocument();
+  });
+
+  it('should use size "s" by default', () => {
+    const hit = createMockHit({ '@timestamp': '2024-01-15T10:30:00.000Z' });
+
+    const { container } = render(
+      <TestProviders>
+        <Timestamp hit={hit} />
+      </TestProviders>
+    );
+
+    expect(container.querySelector('[data-euitext-size="s"]')).toBeInTheDocument();
+  });
+
+  it('should use the provided size prop', () => {
+    const hit = createMockHit({ '@timestamp': '2024-01-15T10:30:00.000Z' });
+
+    const { container } = render(
+      <TestProviders>
+        <Timestamp hit={hit} size="xs" />
+      </TestProviders>
+    );
+
+    expect(container.querySelector('[data-euitext-size="xs"]')).toBeInTheDocument();
   });
 
   it('should not render children when timestamp is absent', () => {

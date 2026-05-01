@@ -10,8 +10,8 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
-import { DEFAULT_MODEL_SAVE_SUCCESS, DEFAULT_MODEL_SAVE_ERROR } from '../../common/translations';
 import { useKibana } from './use_kibana';
 
 export interface DefaultModelSettingsState {
@@ -31,26 +31,26 @@ export interface UseDefaultModelSettingsReturn {
 
 export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   const { services } = useKibana();
-  const uiSettings = services.uiSettings;
+  const settingsClient = services.settings.client;
   const notifications = services.notifications;
 
   const getSavedState = useCallback((): DefaultModelSettingsState => {
-    const defaultModelId = uiSettings.get<string>(
+    const defaultModelId = settingsClient.get<string>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
       NO_DEFAULT_MODEL
     );
-    const disallowOtherModels = uiSettings.get<boolean>(
+    const disallowOtherModels = settingsClient.get<boolean>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
       false
     );
     return { defaultModelId, disallowOtherModels };
-  }, [uiSettings]);
+  }, [settingsClient]);
 
   const [savedState, setSavedState] = useState<DefaultModelSettingsState>(getSavedState);
   const [state, setState] = useState<DefaultModelSettingsState>(getSavedState);
 
   useEffect(() => {
-    const subscription = uiSettings.getUpdate$().subscribe(({ key }) => {
+    const subscription = settingsClient.getUpdate$().subscribe(({ key }) => {
       if (
         key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR ||
         key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
@@ -60,7 +60,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       }
     });
     return () => subscription.unsubscribe();
-  }, [uiSettings, getSavedState]);
+  }, [settingsClient, getSavedState]);
 
   const isDirty = useMemo(
     () =>
@@ -82,10 +82,10 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   const save = useCallback(async () => {
     try {
       if (state.defaultModelId !== savedState.defaultModelId) {
-        await uiSettings.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, state.defaultModelId);
+        await settingsClient.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, state.defaultModelId);
       }
       if (state.disallowOtherModels !== savedState.disallowOtherModels) {
-        await uiSettings.set(
+        await settingsClient.set(
           GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
           state.disallowOtherModels
         );
@@ -93,14 +93,20 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       const newSaved = getSavedState();
       setSavedState(newSaved);
       setState(newSaved);
-      notifications.toasts.addSuccess({ title: DEFAULT_MODEL_SAVE_SUCCESS });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess', {
+          defaultMessage: 'Default model settings saved',
+        }),
+      });
     } catch (e) {
       notifications.toasts.addDanger({
-        title: DEFAULT_MODEL_SAVE_ERROR,
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveError', {
+          defaultMessage: 'Failed to save default model settings',
+        }),
         text: (e as Error)?.message ?? 'Unknown error',
       });
     }
-  }, [state, savedState, uiSettings, getSavedState, notifications]);
+  }, [state, savedState, settingsClient, getSavedState, notifications]);
 
   const reset = useCallback(() => {
     setState(savedState);

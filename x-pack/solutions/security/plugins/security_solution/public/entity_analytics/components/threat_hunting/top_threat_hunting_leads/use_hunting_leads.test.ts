@@ -74,7 +74,7 @@ describe('useHuntingLeads', () => {
       }
     );
 
-    renderHook(() => useHuntingLeads());
+    renderHook(() => useHuntingLeads('test-connector-id'));
 
     expect(capturedQueryFn).toBeDefined();
     const mockSignal = new AbortController().signal;
@@ -101,7 +101,7 @@ describe('useHuntingLeads', () => {
       refetch: jest.fn(),
     });
 
-    const { result } = renderHook(() => useHuntingLeads());
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
 
     expect(result.current.leads).toEqual([]);
     expect(result.current.totalCount).toBe(0);
@@ -133,7 +133,7 @@ describe('useHuntingLeads', () => {
       refetch: jest.fn(),
     });
 
-    const { result } = renderHook(() => useHuntingLeads());
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
 
     expect(result.current.leads).toHaveLength(1);
     expect(result.current.leads[0]).toEqual({
@@ -161,7 +161,7 @@ describe('useHuntingLeads', () => {
       isLoading: false,
     });
 
-    const { result } = renderHook(() => useHuntingLeads());
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
 
     act(() => {
       result.current.generate();
@@ -177,7 +177,7 @@ describe('useHuntingLeads', () => {
       refetch: jest.fn(),
     });
 
-    const { result } = renderHook(() => useHuntingLeads());
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
 
     expect(result.current.isLoading).toBe(true);
   });
@@ -188,7 +188,7 @@ describe('useHuntingLeads', () => {
       isLoading: true,
     });
 
-    const { result } = renderHook(() => useHuntingLeads());
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
 
     expect(result.current.isGenerating).toBe(true);
   });

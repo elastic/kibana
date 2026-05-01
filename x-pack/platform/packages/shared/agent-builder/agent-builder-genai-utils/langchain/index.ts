@@ -20,6 +20,7 @@ export {
   createToolResultEvent,
   createThinkingCompleteEvent,
   createPromptRequestEvent,
+  createBackgroundAgentCompleteEvent,
 } from './graph_events';
 export {
   extractTextContent,

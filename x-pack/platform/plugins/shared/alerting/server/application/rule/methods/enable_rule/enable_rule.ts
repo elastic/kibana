@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { RawRule, IntervalSchedule } from '../../../../types';
@@ -12,7 +13,10 @@ import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { addMissingUiamKeyTagIfNeeded } from '../../../../rules_client/common';
+import {
+  addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
+} from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
@@ -162,7 +166,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     );
 
     const updateAttributes = updateMeta(context, {
-      ...attributes,
+      ...(existingApiKey ? attributes : omit(attributes, API_KEY_ATTRIBUTES_TO_STRIP)),
       ...apiKeyAttributes,
       tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {

@@ -14,268 +14,306 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { User, NonEmptyString } from '../../common_attributes.gen';
 
 /**
  * Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval.
  */
-export type InputSchema = z.infer<typeof InputSchema>;
-export const InputSchema = z.array(
-  z.object({
-    /**
-     * Name of the field.
-     */
-    fieldName: z.string(),
-    /**
-     * Type of the field.
-     */
-    fieldType: z.string(),
-    /**
-     * Description of the field.
-     */
-    description: z.string(),
-  })
+export const InputSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      /**
+       * Name of the field.
+       */
+      fieldName: z.string(),
+      /**
+       * Type of the field.
+       */
+      fieldType: z.string(),
+      /**
+       * Description of the field.
+       */
+      description: z.string(),
+    })
+  )
 );
+export type InputSchema = z.infer<typeof InputSchema>;
 
+export const KnowledgeBaseEntryErrorSchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * HTTP status code of the error.
+       */
+      statusCode: z.number(),
+      /**
+       * Error type or category.
+       */
+      error: z.string(),
+      /**
+       * Detailed error message.
+       */
+      message: z.string(),
+    })
+    .strict()
+);
 export type KnowledgeBaseEntryErrorSchema = z.infer<typeof KnowledgeBaseEntryErrorSchema>;
-export const KnowledgeBaseEntryErrorSchema = z
-  .object({
-    /**
-     * HTTP status code of the error.
-     */
-    statusCode: z.number(),
-    /**
-     * Error type or category.
-     */
-    error: z.string(),
-    /**
-     * Detailed error message.
-     */
-    message: z.string(),
-  })
-  .strict();
 
 /**
  * Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
  */
+export const KnowledgeBaseResource = lazySchema(() =>
+  z.enum(['security_labs', 'defend_insights', 'user'])
+);
 export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
-export const KnowledgeBaseResource = z.enum(['security_labs', 'defend_insights', 'user']);
 export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
 export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
 
 /**
  * Metadata about a Knowledge Base Entry.
  */
+export const Metadata = lazySchema(() =>
+  z.object({
+    kbResource: KnowledgeBaseResource,
+    /**
+     * Source document name or filepath.
+     */
+    source: z.string(),
+    /**
+     * Whether this resource should always be included.
+     */
+    required: z.boolean(),
+  })
+);
 export type Metadata = z.infer<typeof Metadata>;
-export const Metadata = z.object({
-  kbResource: KnowledgeBaseResource,
-  /**
-   * Source document name or filepath.
-   */
-  source: z.string(),
-  /**
-   * Whether this resource should always be included.
-   */
-  required: z.boolean(),
-});
 
 /**
  * Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings.
  */
+export const Vector = lazySchema(() =>
+  z.object({
+    /**
+     * ID of the model used to create the embeddings.
+     */
+    modelId: z.string(),
+    /**
+     * Tokens with their corresponding values.
+     */
+    tokens: z.object({}).catchall(z.number()),
+  })
+);
 export type Vector = z.infer<typeof Vector>;
-export const Vector = z.object({
-  /**
-   * ID of the model used to create the embeddings.
-   */
-  modelId: z.string(),
-  /**
-   * Tokens with their corresponding values.
-   */
-  tokens: z.object({}).catchall(z.number()),
-});
 
+export const BaseRequiredFields = lazySchema(() =>
+  z.object({
+    /**
+     * Name of the Knowledge Base Entry.
+     */
+    name: z.string(),
+  })
+);
 export type BaseRequiredFields = z.infer<typeof BaseRequiredFields>;
-export const BaseRequiredFields = z.object({
-  /**
-   * Name of the Knowledge Base Entry.
-   */
-  name: z.string(),
-});
 
+export const BaseDefaultableFields = lazySchema(() =>
+  z.object({
+    /**
+     * Kibana Space, defaults to 'default' space.
+     */
+    namespace: z.string().optional(),
+    /**
+     * Whether this Knowledge Base Entry is global, defaults to false.
+     */
+    global: z.boolean().optional(),
+    /**
+     * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+     */
+    users: z.array(User).optional(),
+  })
+);
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
-export const BaseDefaultableFields = z.object({
-  /**
-   * Kibana Space, defaults to 'default' space.
-   */
-  namespace: z.string().optional(),
-  /**
-   * Whether this Knowledge Base Entry is global, defaults to false.
-   */
-  global: z.boolean().optional(),
-  /**
-   * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
-   */
-  users: z.array(User).optional(),
-});
 
+export const BaseCreateProps = lazySchema(() => BaseRequiredFields.merge(BaseDefaultableFields));
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
-export const BaseCreateProps = BaseRequiredFields.merge(BaseDefaultableFields);
 
+export const BaseUpdateProps = lazySchema(() =>
+  BaseCreateProps.partial().merge(
+    z.object({
+      id: NonEmptyString,
+    })
+  )
+);
 export type BaseUpdateProps = z.infer<typeof BaseUpdateProps>;
-export const BaseUpdateProps = BaseCreateProps.partial().merge(
+
+export const BaseResponseProps = lazySchema(() =>
+  BaseRequiredFields.merge(BaseDefaultableFields.required())
+);
+export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
+
+export const ResponseFields = lazySchema(() =>
+  z.object({
+    id: NonEmptyString,
+    /**
+     * Time the Knowledge Base Entry was created.
+     */
+    createdAt: z.string(),
+    /**
+     * User who created the Knowledge Base Entry.
+     */
+    createdBy: z.string(),
+    /**
+     * Time the Knowledge Base Entry was last updated.
+     */
+    updatedAt: z.string(),
+    /**
+     * User who last updated the Knowledge Base Entry.
+     */
+    updatedBy: z.string(),
+  })
+);
+export type ResponseFields = z.infer<typeof ResponseFields>;
+
+export const DeleteResponseFields = lazySchema(() =>
   z.object({
     id: NonEmptyString,
   })
 );
-
-export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
-export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required());
-
-export type ResponseFields = z.infer<typeof ResponseFields>;
-export const ResponseFields = z.object({
-  id: NonEmptyString,
-  /**
-   * Time the Knowledge Base Entry was created.
-   */
-  createdAt: z.string(),
-  /**
-   * User who created the Knowledge Base Entry.
-   */
-  createdBy: z.string(),
-  /**
-   * Time the Knowledge Base Entry was last updated.
-   */
-  updatedAt: z.string(),
-  /**
-   * User who last updated the Knowledge Base Entry.
-   */
-  updatedBy: z.string(),
-});
-
 export type DeleteResponseFields = z.infer<typeof DeleteResponseFields>;
-export const DeleteResponseFields = z.object({
-  id: NonEmptyString,
-});
 
+export const SharedResponseProps = lazySchema(() => BaseResponseProps.merge(ResponseFields));
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
-export const SharedResponseProps = BaseResponseProps.merge(ResponseFields);
 
+export const DocumentEntryType = lazySchema(() => z.literal('document'));
 export type DocumentEntryType = z.infer<typeof DocumentEntryType>;
-export const DocumentEntryType = z.literal('document');
 
+export const DocumentEntryRequiredFields = lazySchema(() =>
+  z.object({
+    /**
+     * Entry type.
+     */
+    type: z.literal('document'),
+    kbResource: KnowledgeBaseResource,
+    /**
+     * Source document name or filepath.
+     */
+    source: z.string(),
+    /**
+     * Knowledge Base Entry content.
+     */
+    text: z.string(),
+  })
+);
 export type DocumentEntryRequiredFields = z.infer<typeof DocumentEntryRequiredFields>;
-export const DocumentEntryRequiredFields = z.object({
-  /**
-   * Entry type.
-   */
-  type: z.literal('document'),
-  kbResource: KnowledgeBaseResource,
-  /**
-   * Source document name or filepath.
-   */
-  source: z.string(),
-  /**
-   * Knowledge Base Entry content.
-   */
-  text: z.string(),
-});
 
+export const DocumentEntryOptionalFields = lazySchema(() =>
+  z.object({
+    /**
+     * Whether this resource should always be included, defaults to false.
+     */
+    required: z.boolean().optional(),
+    vector: Vector.optional(),
+  })
+);
 export type DocumentEntryOptionalFields = z.infer<typeof DocumentEntryOptionalFields>;
-export const DocumentEntryOptionalFields = z.object({
-  /**
-   * Whether this resource should always be included, defaults to false.
-   */
-  required: z.boolean().optional(),
-  vector: Vector.optional(),
-});
 
+export const DocumentEntryCreateFields = lazySchema(() =>
+  BaseCreateProps.merge(DocumentEntryRequiredFields).merge(DocumentEntryOptionalFields)
+);
 export type DocumentEntryCreateFields = z.infer<typeof DocumentEntryCreateFields>;
-export const DocumentEntryCreateFields = BaseCreateProps.merge(DocumentEntryRequiredFields).merge(
-  DocumentEntryOptionalFields
-);
 
+export const DocumentEntryUpdateFields = lazySchema(() =>
+  BaseUpdateProps.merge(DocumentEntryCreateFields)
+);
 export type DocumentEntryUpdateFields = z.infer<typeof DocumentEntryUpdateFields>;
-export const DocumentEntryUpdateFields = BaseUpdateProps.merge(DocumentEntryCreateFields);
 
-export type DocumentEntryResponseFields = z.infer<typeof DocumentEntryResponseFields>;
-export const DocumentEntryResponseFields = DocumentEntryRequiredFields.merge(
-  DocumentEntryOptionalFields
+export const DocumentEntryResponseFields = lazySchema(() =>
+  DocumentEntryRequiredFields.merge(DocumentEntryOptionalFields)
 );
+export type DocumentEntryResponseFields = z.infer<typeof DocumentEntryResponseFields>;
 
+export const DocumentEntry = lazySchema(() =>
+  SharedResponseProps.merge(DocumentEntryResponseFields)
+);
 export type DocumentEntry = z.infer<typeof DocumentEntry>;
-export const DocumentEntry = SharedResponseProps.merge(DocumentEntryResponseFields);
 
+export const IndexEntryType = lazySchema(() => z.literal('index'));
 export type IndexEntryType = z.infer<typeof IndexEntryType>;
-export const IndexEntryType = z.literal('index');
 
+export const IndexEntryRequiredFields = lazySchema(() =>
+  z.object({
+    /**
+     * Entry type.
+     */
+    type: z.literal('index'),
+    /**
+     * Index or Data Stream to query for Knowledge Base content.
+     */
+    index: z.string(),
+    /**
+     * Field to query for Knowledge Base content.
+     */
+    field: z.string(),
+    /**
+     * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
+     */
+    description: z.string(),
+    /**
+     * Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
+     */
+    queryDescription: z.string(),
+  })
+);
 export type IndexEntryRequiredFields = z.infer<typeof IndexEntryRequiredFields>;
-export const IndexEntryRequiredFields = z.object({
-  /**
-   * Entry type.
-   */
-  type: z.literal('index'),
-  /**
-   * Index or Data Stream to query for Knowledge Base content.
-   */
-  index: z.string(),
-  /**
-   * Field to query for Knowledge Base content.
-   */
-  field: z.string(),
-  /**
-   * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
-   */
-  description: z.string(),
-  /**
-   * Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
-   */
-  queryDescription: z.string(),
-});
 
+export const IndexEntryOptionalFields = lazySchema(() =>
+  z.object({
+    inputSchema: InputSchema.optional(),
+    /**
+     * Fields to extract from the query result, defaults to all fields if not provided or empty.
+     */
+    outputFields: z.array(z.string()).optional(),
+  })
+);
 export type IndexEntryOptionalFields = z.infer<typeof IndexEntryOptionalFields>;
-export const IndexEntryOptionalFields = z.object({
-  inputSchema: InputSchema.optional(),
-  /**
-   * Fields to extract from the query result, defaults to all fields if not provided or empty.
-   */
-  outputFields: z.array(z.string()).optional(),
-});
 
+export const IndexEntryCreateFields = lazySchema(() =>
+  BaseCreateProps.merge(IndexEntryRequiredFields).merge(IndexEntryOptionalFields)
+);
 export type IndexEntryCreateFields = z.infer<typeof IndexEntryCreateFields>;
-export const IndexEntryCreateFields =
-  BaseCreateProps.merge(IndexEntryRequiredFields).merge(IndexEntryOptionalFields);
 
+export const IndexEntryUpdateFields = lazySchema(() =>
+  BaseUpdateProps.merge(IndexEntryCreateFields)
+);
 export type IndexEntryUpdateFields = z.infer<typeof IndexEntryUpdateFields>;
-export const IndexEntryUpdateFields = BaseUpdateProps.merge(IndexEntryCreateFields);
 
+export const IndexEntryResponseFields = lazySchema(() =>
+  IndexEntryRequiredFields.merge(IndexEntryOptionalFields)
+);
 export type IndexEntryResponseFields = z.infer<typeof IndexEntryResponseFields>;
-export const IndexEntryResponseFields = IndexEntryRequiredFields.merge(IndexEntryOptionalFields);
 
+export const IndexEntry = lazySchema(() => SharedResponseProps.merge(IndexEntryResponseFields));
 export type IndexEntry = z.infer<typeof IndexEntry>;
-export const IndexEntry = SharedResponseProps.merge(IndexEntryResponseFields);
 
+export const KnowledgeBaseEntryCreateProps = lazySchema(() =>
+  z.discriminatedUnion('type', [DocumentEntryCreateFields, IndexEntryCreateFields])
+);
 export type KnowledgeBaseEntryCreateProps = z.infer<typeof KnowledgeBaseEntryCreateProps>;
-export const KnowledgeBaseEntryCreateProps = z.discriminatedUnion('type', [
-  DocumentEntryCreateFields,
-  IndexEntryCreateFields,
-]);
 
+export const KnowledgeBaseEntryUpdateProps = lazySchema(() =>
+  z.discriminatedUnion('type', [DocumentEntryUpdateFields, IndexEntryUpdateFields])
+);
 export type KnowledgeBaseEntryUpdateProps = z.infer<typeof KnowledgeBaseEntryUpdateProps>;
-export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
-  DocumentEntryUpdateFields,
-  IndexEntryUpdateFields,
-]);
 
+export const KnowledgeBaseEntryUpdateRouteProps = lazySchema(() =>
+  z.discriminatedUnion('type', [DocumentEntryCreateFields, IndexEntryCreateFields])
+);
 export type KnowledgeBaseEntryUpdateRouteProps = z.infer<typeof KnowledgeBaseEntryUpdateRouteProps>;
-export const KnowledgeBaseEntryUpdateRouteProps = z.discriminatedUnion('type', [
-  DocumentEntryCreateFields,
-  IndexEntryCreateFields,
-]);
 
+export const KnowledgeBaseEntryResponse = lazySchema(() =>
+  z.discriminatedUnion('type', [DocumentEntry, IndexEntry])
+);
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
-export const KnowledgeBaseEntryResponse = z.discriminatedUnion('type', [DocumentEntry, IndexEntry]);
 
+export const KnowledgeBaseEntryDeleteResponse = lazySchema(() => DeleteResponseFields);
 export type KnowledgeBaseEntryDeleteResponse = z.infer<typeof KnowledgeBaseEntryDeleteResponse>;
-export const KnowledgeBaseEntryDeleteResponse = DeleteResponseFields;

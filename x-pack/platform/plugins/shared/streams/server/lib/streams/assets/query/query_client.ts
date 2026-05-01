@@ -52,7 +52,8 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { parseError } from '../../errors/parse_error';
+import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
+import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import { computeRuleId } from './helpers/query';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -208,14 +209,14 @@ export type StoredQueryLink = QueryLinkStorageFields & {
   [STREAM_NAME]: string;
 };
 
-interface QueryBulkIndexOperation {
+interface QueryStorageBulkIndexOperation {
   index: { asset: QueryLinkRequest };
 }
-interface QueryBulkDeleteOperation {
+interface QueryStorageBulkDeleteOperation {
   delete: { asset: QueryUnlinkRequest };
 }
 
-export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
+type QueryStorageBulkOperation = QueryStorageBulkIndexOperation | QueryStorageBulkDeleteOperation;
 
 function fromStorage(link: StoredQueryLink): QueryLink {
   const esql = link[QUERY_ESQL_QUERY];
@@ -275,11 +276,12 @@ export function buildSearchEmbeddingText(
 function toStorage(
   definition: Streams.all.Definition,
   request: QueryLinkRequest,
-  inferenceAvailable: boolean
+  includeEmbedding: boolean
 ): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
   const derivedType = deriveQueryType(query.esql.query);
+  const embeddingText = buildSearchEmbeddingText(query, definition.name);
   return {
     ...rest,
     [STREAM_NAME]: definition.name,
@@ -291,9 +293,7 @@ function toStorage(
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
-    ...(inferenceAvailable
-      ? { [QUERY_SEARCH_EMBEDDING]: buildSearchEmbeddingText(query, definition.name) }
-      : {}),
+    ...(includeEmbedding && embeddingText ? { [QUERY_SEARCH_EMBEDDING]: embeddingText } : {}),
   } as StoredQueryLink;
 }
 
@@ -326,6 +326,16 @@ function toQueryLinkFromQuery({
   };
 }
 
+/** Operations accepted by {@link QueryClient.bulk} (stream queries + id deletes). */
+export interface QueryClientBulkOperation {
+  index?: StreamQuery;
+  delete?: { id: string };
+}
+/** Index-only bulk operation for {@link QueryClient.bulk}. */
+export interface QueryClientBulkIndexOperation {
+  index: StreamQuery;
+}
+
 export class QueryClient {
   constructor(
     private readonly dependencies: {
@@ -335,7 +345,6 @@ export class QueryClient {
       logger: Logger;
     },
     private readonly isSignificantEventsEnabled: boolean = false,
-    private readonly inferenceAvailable: boolean = false,
     private readonly config: Pick<
       SigEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant'
@@ -372,7 +381,7 @@ export class QueryClient {
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
     const queryLinksDeleted = existingQueryLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
 
-    const operations: QueryBulkOperation[] = [
+    const operations: QueryStorageBulkOperation[] = [
       ...queryLinksDeleted.map((asset) => ({ delete: { asset } })),
       ...nextQueryLinks.map((asset) => ({ index: { asset } })),
     ];
@@ -462,37 +471,44 @@ export class QueryClient {
   }
 
   /**
-   * Returns all unbacked query links for a stream, including STATS.
-   * Callers (e.g. {@link promoteQueries}) are responsible for filtering
-   * STATS queries and reporting skipped counts to the client.
+   * Returns the raw unbacked set for a stream, including STATS. Used by
+   * {@link promoteQueries} to count STATS it must skip. For the promotable
+   * set (STATS excluded), use {@link getPromotableUnbackedQueries}.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
     return this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
   }
 
   /**
-   * Returns the count of all query links across streams that do not have a backing Kibana rule.
-   *
-   * Pre-migration docs lacking QUERY_TYPE are safe here: STATS queries were
-   * introduced alongside the type field, so any doc without it is a match query.
-   * syncQueries backfills the type for all docs it touches.
+   * Shared bool-query shape for the promotable-unbacked set: `rule_backed=false`
+   * AND `type != STATS`, with optional severity floor. Keeps
+   * {@link countPromotableUnbackedQueries} and {@link getPromotableUnbackedQueries}
+   * structurally aligned so the UI callout count and the Promote-All set
+   * can't diverge.
    */
-  async getUnbackedQueriesCount(filters?: { minSeverityScore?: number }): Promise<number> {
-    const filter = [
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
-    ];
+  private promotableUnbackedBoolQuery(filters?: { minSeverityScore?: number }) {
+    return {
+      filter: [
+        ...termQuery(ASSET_TYPE, 'query'),
+        ...termQuery(RULE_BACKED, false),
+        ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
+      ],
+      must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
+    };
+  }
 
+  /**
+   * Counts queries promotable to rules — unbacked AND non-STATS. Pairs with
+   * {@link getPromotableUnbackedQueries}.
+   *
+   * Pre-migration docs lacking QUERY_TYPE are safe: STATS were introduced
+   * alongside the type field, so any doc without it is a match query.
+   */
+  async countPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<number> {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 0,
       track_total_hits: true,
-      query: {
-        bool: {
-          filter,
-          must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
-        },
-      },
+      query: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
     const total = assetsResponse.hits.total;
@@ -500,13 +516,76 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links across streams that do not have a backing Kibana rule.
+   * Returns all unbacked, non-STATS queries across streams — the list whose
+   * size is {@link countPromotableUnbackedQueries}.
    */
-  async getAllUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
-    return this.getQueryLinks([], {
-      ruleUnbacked: 'only',
-      minSeverityScore: filters?.minSeverityScore,
+  async getPromotableUnbackedQueries(filters?: {
+    minSeverityScore?: number;
+  }): Promise<QueryLink[]> {
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: SEARCH_SIZE_LIMIT,
+      track_total_hits: false,
+      query: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
+
+    return mapSearchHits(assetsResponse);
+  }
+
+  /**
+   * Promotes the promotable-unbacked set (filtered by `queryIds` if provided)
+   * to rule-backed status, grouped by stream.
+   *
+   * Non-obvious behavior:
+   * - `queryIds` referring to STATS/backed/missing queries are silently
+   *   dropped, so `skipped_stats` is reliably `0` from this entry point.
+   * - `streamDefinitions` is injected because `streamsClient` is not a
+   *   `QueryClient` dependency; callers build it from `listStreams()`.
+   */
+  async promoteUnbackedQueries({
+    queryIds,
+    minSeverityScore,
+    streamDefinitions,
+  }: {
+    queryIds?: string[];
+    minSeverityScore?: number;
+    streamDefinitions: Map<string, Streams.all.Definition>;
+  }): Promise<{ promoted: number; skipped_stats: number }> {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping promoteUnbackedQueries because significant events feature is disabled.`
+      );
+      return { promoted: 0, skipped_stats: 0 };
+    }
+
+    const candidates = await this.getPromotableUnbackedQueries({ minSeverityScore });
+
+    let toPromote = candidates;
+    if (queryIds && queryIds.length > 0) {
+      const requestedIds = new Set(queryIds);
+      toPromote = candidates.filter((link) => requestedIds.has(link.query.id));
+    }
+
+    const byStream = new Map<string, string[]>();
+    for (const link of toPromote) {
+      const group = byStream.get(link.stream_name) ?? [];
+      group.push(link.query.id);
+      byStream.set(link.stream_name, group);
+    }
+
+    let promoted = 0;
+    let skippedStats = 0;
+    for (const [streamName, ids] of byStream) {
+      const definition = streamDefinitions.get(streamName);
+      if (!definition) {
+        this.dependencies.logger.warn(`Skipping promotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await this.promoteQueries(definition, ids);
+      promoted += result.promoted;
+      skippedStats += result.skipped_stats;
+    }
+
+    return { promoted, skipped_stats: skippedStats };
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -536,36 +615,11 @@ export class QueryClient {
     filters?: QueryLinkFilters,
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
-    const effectiveMode = this.resolveSearchMode(searchMode);
-
-    try {
-      return await this.executeFindQueries(effectiveMode, streamNames, query, filters);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !searchMode) {
-        const { message } = parseError(error);
-        this.dependencies.logger.warn(
-          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
-        );
-        return await this.executeFindQueries('keyword', streamNames, query, filters);
-      }
-      throw error;
-    }
-  }
-
-  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
-    if (searchMode) {
-      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
-        this.dependencies.logger.debug(
-          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
-        );
-        return 'keyword';
-      }
-      return searchMode;
-    }
-    return this.inferenceAvailable ? 'hybrid' : 'keyword';
+    return searchWithKeywordFallback(
+      this.dependencies.logger,
+      { searchMode, label: 'Query', streamNames },
+      (mode) => this.executeFindQueries(mode, streamNames, query, filters)
+    );
   }
 
   private async executeFindQueries(
@@ -613,11 +667,22 @@ export class QueryClient {
       size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       retriever: {
-        standard: {
-          query: {
-            match: { [QUERY_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [QUERY_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: SEARCH_SIZE_LIMIT,
           min_score: this.config.semantic_min_score,
         },
       },
@@ -645,11 +710,21 @@ export class QueryClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [QUERY_SEARCH_EMBEDDING]: query },
-                },
-                // See config.semantic_min_score for rationale.
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [QUERY_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: SEARCH_SIZE_LIMIT,
                 min_score: this.config.semantic_min_score,
               },
             },
@@ -670,28 +745,33 @@ export class QueryClient {
     return mapSearchHits(assetsResponse);
   }
 
-  private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
-    return await this.dependencies.storageClient.bulk({
-      operations: operations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(definition, operation.index.asset, this.inferenceAvailable);
+  private async bulkStorage(
+    definition: Streams.all.Definition,
+    operations: QueryStorageBulkOperation[]
+  ) {
+    return await bulkWithInferenceFallback(this.dependencies.logger, ({ includeEmbedding }) =>
+      this.dependencies.storageClient.bulk({
+        operations: operations.map((operation) => {
+          if ('index' in operation) {
+            const document = toStorage(definition, operation.index.asset, includeEmbedding);
+            return {
+              index: {
+                document,
+                _id: document[ASSET_UUID],
+              },
+            };
+          }
+
+          const id = getQueryLinkUuid(definition.name, operation.delete.asset);
           return {
-            index: {
-              document,
-              _id: document[ASSET_UUID],
+            delete: {
+              _id: id,
             },
           };
-        }
-
-        const id = getQueryLinkUuid(definition.name, operation.delete.asset);
-        return {
-          delete: {
-            _id: id,
-          },
-        };
-      }),
-      throwOnFail: true,
-    });
+        }),
+        throwOnFail: true,
+      })
+    );
   }
 
   async getAssets(name: string): Promise<Query[]> {
@@ -876,7 +956,7 @@ export class QueryClient {
 
   public async bulk(
     definition: Streams.all.Definition,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
+    operations: QueryClientBulkOperation[],
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;

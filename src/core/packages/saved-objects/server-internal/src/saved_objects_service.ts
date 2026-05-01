@@ -15,7 +15,7 @@ import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   ElasticsearchClient,
@@ -158,7 +158,6 @@ export class SavedObjectsService
 
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -173,7 +172,6 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
       isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
       docLinks,
@@ -336,7 +334,8 @@ export class SavedObjectsService
     const createRepository = (
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = [],
-      extensions?: SavedObjectsExtensions
+      extensions?: SavedObjectsExtensions,
+      serverTiming?: RequestTiming
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -345,20 +344,28 @@ export class SavedObjectsService
         esClient,
         this.logger.get('repository'),
         includedHiddenTypes,
-        extensions
+        extensions,
+        serverTiming
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (
         includedHiddenTypes?: string[],
-        extensions?: SavedObjectsExtensions | undefined
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+        extensions?: SavedObjectsExtensions | undefined,
+        serverTiming?: RequestTiming
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions, serverTiming),
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
-      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
+      ) =>
+        createRepository(
+          client.asScoped(req).asCurrentUser,
+          includedHiddenTypes,
+          extensions,
+          req.serverTiming
+        ),
     };
 
     const clientProvider = new SavedObjectsClientProvider({

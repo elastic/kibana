@@ -33,7 +33,9 @@ export const upgradePrebuiltRules = async (
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,
       executor: async (rule) => {
-        return detectionRulesClient.upgradePrebuiltRule({ ruleAsset: rule });
+        return detectionRulesClient.upgradePrebuiltRule({
+          ruleAsset: rule,
+        });
       },
     });
     logger.debug(

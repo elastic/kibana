@@ -26,7 +26,23 @@
         "tags": [],
         "label": "addDeterministicCustomIdentifiers",
         "description": [
-          "\nAdds deterministic `customIdentifier` values on every step. Input must be a pure\n{@link StreamlangDSL}; use {@link addDeterministicCustomIdentifiersFromIngestProcessing} for\n`ingest.processing` values that include `updated_at`."
+          "\nAdds deterministic `customIdentifier` values on every step. Input must be a pure\n",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          "; use ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.addDeterministicCustomIdentifiersFromIngestProcessing",
+            "text": "addDeterministicCustomIdentifiersFromIngestProcessing"
+          },
+          " for\n`ingest.processing` values that include `updated_at`."
         ],
         "signature": [
           "(dsl: ",
@@ -72,6 +88,7 @@
             "lineNumber": 68,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -86,7 +103,15 @@
         "tags": [],
         "label": "addDeterministicCustomIdentifiersFromIngestProcessing",
         "description": [
-          "\nSame as {@link addDeterministicCustomIdentifiers} after normalizing ingest `processing`."
+          "\nSame as ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.addDeterministicCustomIdentifiers",
+            "text": "addDeterministicCustomIdentifiers"
+          },
+          " after normalizing ingest `processing`."
         ],
         "signature": [
           "(processing: ",
@@ -132,6 +157,7 @@
             "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSLWithUpdatedAt",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -173,6 +199,7 @@
             "lineNumber": 111,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangStep",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -334,6 +361,7 @@
             "lineNumber": 269,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -357,6 +385,7 @@
             "lineNumber": 270,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -427,6 +456,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -451,6 +481,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -465,7 +496,15 @@
         "tags": [],
         "label": "combineConditionsForElseBranch",
         "description": [
-          "\nEffective `where` for steps in the else branch of a condition block: the\ninherited parent scope combined with NOT(block predicate), where\n`blockPredicate` is the condition object with `steps` / `else` stripped.\n\nShared by {@link flattenSteps} and simulation noop injection so transpilation\nand simulation stay aligned."
+          "\nEffective `where` for steps in the else branch of a condition block: the\ninherited parent scope combined with NOT(block predicate), where\n`blockPredicate` is the condition object with `steps` / `else` stripped.\n\nShared by ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.flattenSteps",
+            "text": "flattenSteps"
+          },
+          " and simulation noop injection so transpilation\nand simulation stay aligned."
         ],
         "signature": [
           "(parentCondition: ",
@@ -544,6 +583,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -612,6 +652,7 @@
             "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -682,6 +723,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -735,6 +777,7 @@
             "lineNumber": 32,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -787,6 +830,7 @@
             "lineNumber": 45,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -838,6 +882,7 @@
             "lineNumber": 294,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -893,6 +938,7 @@
             "lineNumber": 338,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -966,6 +1012,7 @@
             "lineNumber": 81,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1017,6 +1064,7 @@
             "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1051,6 +1099,7 @@
             "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldVarMap",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1110,6 +1159,7 @@
             "lineNumber": 18,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1164,6 +1214,7 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1411,6 +1462,7 @@
             "lineNumber": 43,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ShorthandBinaryFilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1462,6 +1514,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ShorthandBinaryFilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1529,6 +1582,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ShorthandBinaryFilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1580,6 +1634,7 @@
             "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1654,6 +1709,7 @@
             "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OperatorKeys",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1713,6 +1769,7 @@
             "lineNumber": 76,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1780,6 +1837,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1862,6 +1920,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1984,6 +2043,7 @@
             "lineNumber": 64,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "MathFunctionDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2039,6 +2099,7 @@
             "lineNumber": 297,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2080,6 +2141,7 @@
             "lineNumber": 888,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TProcessorDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2131,6 +2193,7 @@
             "lineNumber": 58,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ShorthandUnaryFilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2182,6 +2245,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ShorthandUnaryFilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2233,6 +2297,7 @@
             "lineNumber": 53,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ShorthandUnaryFilterCondition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2280,6 +2345,7 @@
             "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBlock",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2318,6 +2384,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2354,6 +2421,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2442,6 +2510,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2478,6 +2547,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2612,6 +2682,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2648,6 +2719,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2684,6 +2756,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2720,6 +2793,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2769,6 +2843,7 @@
             "lineNumber": 113,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Condition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2807,6 +2882,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2886,6 +2962,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2922,6 +2999,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2958,6 +3036,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2994,6 +3073,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3030,6 +3110,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3066,6 +3147,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3102,6 +3184,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3114,7 +3197,15 @@
         "tags": [],
         "label": "streamlangDSLFromIngestProcessing",
         "description": [
-          "\nDrops ingest-only fields and returns a plain {@link StreamlangDSL} (`steps` only)."
+          "\nDrops ingest-only fields and returns a plain ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          " (`steps` only)."
         ],
         "signature": [
           "(processing: ",
@@ -3160,6 +3251,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSLWithUpdatedAt",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3220,6 +3312,7 @@
             "lineNumber": 21,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3277,6 +3370,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3295,6 +3389,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IngestPipelineTranspilationOptions",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -3313,6 +3408,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangResolverOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3370,6 +3466,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3387,6 +3484,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLTranspilationOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3405,6 +3503,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangResolverOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3519,6 +3618,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3544,6 +3644,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangValidationOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3597,6 +3698,7 @@
             "lineNumber": 11,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8773,7 +8875,15 @@
         "tags": [],
         "label": "StreamlangDSLWithUpdatedAt",
         "description": [
-          "\nStreamlang as stored on stream `ingest.processing`: the DSL plus the server-managed\n`updated_at` cursor. Use {@link StreamlangDSL} anywhere you need the pipeline document only\n(YAML, simulation body, DeepStrict validation)."
+          "\nStreamlang as stored on stream `ingest.processing`: the DSL plus the server-managed\n`updated_at` cursor. Use ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          " anywhere you need the pipeline document only\n(YAML, simulation body, DeepStrict validation)."
         ],
         "signature": [
           {
@@ -9317,7 +9427,9 @@
             "type": "Object",
             "tags": [],
             "label": "grok",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 29,
             "columnNumber": 3,
@@ -9403,7 +9515,9 @@
             "type": "Object",
             "tags": [],
             "label": "dissect",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 74,
             "columnNumber": 3,
@@ -9489,7 +9603,9 @@
             "type": "Object",
             "tags": [],
             "label": "set",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 119,
             "columnNumber": 3,
@@ -9559,7 +9675,9 @@
             "type": "Object",
             "tags": [],
             "label": "rename",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 151,
             "columnNumber": 3,
@@ -9629,7 +9747,9 @@
             "type": "Object",
             "tags": [],
             "label": "date",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 183,
             "columnNumber": 3,
@@ -9715,7 +9835,9 @@
             "type": "Object",
             "tags": [],
             "label": "append",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 227,
             "columnNumber": 3,
@@ -9785,7 +9907,9 @@
             "type": "Object",
             "tags": [],
             "label": "convert",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 262,
             "columnNumber": 3,
@@ -9871,7 +9995,9 @@
             "type": "Object",
             "tags": [],
             "label": "remove_by_prefix",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 299,
             "columnNumber": 3,
@@ -9957,7 +10083,9 @@
             "type": "Object",
             "tags": [],
             "label": "remove",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 339,
             "columnNumber": 3,
@@ -9998,7 +10126,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 346,
+                "lineNumber": 347,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10014,7 +10142,23 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 350,
+                "lineNumber": 351,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.remove.tips",
+                "type": "Array",
+                "tags": [],
+                "label": "tips",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 370,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10027,9 +10171,11 @@
             "type": "Object",
             "tags": [],
             "label": "drop_document",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 368,
+            "lineNumber": 378,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10042,7 +10188,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 369,
+                "lineNumber": 379,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10055,7 +10201,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 372,
+                "lineNumber": 382,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10068,7 +10214,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 375,
+                "lineNumber": 385,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10084,7 +10230,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 378,
+                "lineNumber": 389,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10100,7 +10246,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 406,
+                "lineNumber": 417,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10113,9 +10259,11 @@
             "type": "Object",
             "tags": [],
             "label": "replace",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 413,
+            "lineNumber": 428,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10128,7 +10276,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 414,
+                "lineNumber": 429,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10141,7 +10289,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 417,
+                "lineNumber": 432,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10154,7 +10302,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 420,
+                "lineNumber": 435,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10170,7 +10318,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 424,
+                "lineNumber": 439,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10186,7 +10334,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 444,
+                "lineNumber": 459,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10199,9 +10347,11 @@
             "type": "Object",
             "tags": [],
             "label": "redact",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 454,
+            "lineNumber": 469,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10214,7 +10364,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 455,
+                "lineNumber": 470,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10227,7 +10377,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 458,
+                "lineNumber": 473,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10240,7 +10390,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 462,
+                "lineNumber": 477,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10256,7 +10406,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 466,
+                "lineNumber": 481,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10272,7 +10422,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 501,
+                "lineNumber": 516,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10285,9 +10435,11 @@
             "type": "Object",
             "tags": [],
             "label": "math",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 515,
+            "lineNumber": 530,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10300,7 +10452,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 516,
+                "lineNumber": 531,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10313,7 +10465,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 519,
+                "lineNumber": 534,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10326,7 +10478,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 522,
+                "lineNumber": 537,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10342,7 +10494,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 526,
+                "lineNumber": 541,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10358,7 +10510,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 544,
+                "lineNumber": 559,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10371,9 +10523,11 @@
             "type": "Object",
             "tags": [],
             "label": "uppercase",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 559,
+            "lineNumber": 574,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10386,7 +10540,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 560,
+                "lineNumber": 575,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10399,7 +10553,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 563,
+                "lineNumber": 578,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10412,7 +10566,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 566,
+                "lineNumber": 581,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10428,7 +10582,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 569,
+                "lineNumber": 584,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10444,7 +10598,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 579,
+                "lineNumber": 594,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10457,9 +10611,11 @@
             "type": "Object",
             "tags": [],
             "label": "lowercase",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 586,
+            "lineNumber": 601,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10472,7 +10628,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 587,
+                "lineNumber": 602,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10485,7 +10641,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 590,
+                "lineNumber": 605,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10498,7 +10654,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 593,
+                "lineNumber": 608,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10514,7 +10670,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 596,
+                "lineNumber": 611,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10530,7 +10686,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 606,
+                "lineNumber": 621,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10543,9 +10699,11 @@
             "type": "Object",
             "tags": [],
             "label": "trim",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 613,
+            "lineNumber": 628,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10558,7 +10716,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 614,
+                "lineNumber": 629,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10571,7 +10729,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 617,
+                "lineNumber": 632,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10584,7 +10742,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 620,
+                "lineNumber": 635,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10600,7 +10758,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 623,
+                "lineNumber": 638,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10616,7 +10774,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 633,
+                "lineNumber": 648,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10629,9 +10787,11 @@
             "type": "Object",
             "tags": [],
             "label": "join",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 640,
+            "lineNumber": 655,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10644,7 +10804,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 641,
+                "lineNumber": 656,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10657,7 +10817,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 644,
+                "lineNumber": 659,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10670,7 +10830,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 647,
+                "lineNumber": 662,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10686,7 +10846,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 651,
+                "lineNumber": 666,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10702,7 +10862,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 662,
+                "lineNumber": 677,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10715,9 +10875,11 @@
             "type": "Object",
             "tags": [],
             "label": "split",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 670,
+            "lineNumber": 685,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10730,7 +10892,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 671,
+                "lineNumber": 686,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10743,7 +10905,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 674,
+                "lineNumber": 689,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10756,7 +10918,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 677,
+                "lineNumber": 692,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10772,7 +10934,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 681,
+                "lineNumber": 696,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10788,7 +10950,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 700,
+                "lineNumber": 715,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10801,9 +10963,11 @@
             "type": "Object",
             "tags": [],
             "label": "sort",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 712,
+            "lineNumber": 727,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10816,7 +10980,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 713,
+                "lineNumber": 728,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10829,7 +10993,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 716,
+                "lineNumber": 731,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10842,7 +11006,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 719,
+                "lineNumber": 734,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10858,7 +11022,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 723,
+                "lineNumber": 738,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10874,7 +11038,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 741,
+                "lineNumber": 756,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10887,9 +11051,11 @@
             "type": "Object",
             "tags": [],
             "label": "concat",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 752,
+            "lineNumber": 767,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10902,7 +11068,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 753,
+                "lineNumber": 768,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10915,7 +11081,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 756,
+                "lineNumber": 771,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10928,7 +11094,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 759,
+                "lineNumber": 774,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10944,7 +11110,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 763,
+                "lineNumber": 778,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10957,9 +11123,11 @@
             "type": "Object",
             "tags": [],
             "label": "network_direction",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 781,
+            "lineNumber": 796,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10972,7 +11140,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 782,
+                "lineNumber": 797,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10985,7 +11153,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 785,
+                "lineNumber": 800,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10998,7 +11166,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 789,
+                "lineNumber": 804,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11014,7 +11182,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 793,
+                "lineNumber": 808,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11027,9 +11195,11 @@
             "type": "Object",
             "tags": [],
             "label": "json_extract",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 811,
+            "lineNumber": 826,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11042,7 +11212,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 812,
+                "lineNumber": 827,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11055,7 +11225,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 815,
+                "lineNumber": 830,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11068,7 +11238,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 818,
+                "lineNumber": 833,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11084,7 +11254,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 822,
+                "lineNumber": 837,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11100,7 +11270,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 846,
+                "lineNumber": 861,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11113,9 +11283,11 @@
             "type": "Object",
             "tags": [],
             "label": "enrich",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 857,
+            "lineNumber": 872,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11128,7 +11300,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 858,
+                "lineNumber": 873,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11141,7 +11313,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 861,
+                "lineNumber": 876,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11154,7 +11326,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 864,
+                "lineNumber": 879,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11170,7 +11342,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 867,
+                "lineNumber": 882,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11186,7 +11358,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 877,
+                "lineNumber": 892,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11199,9 +11371,11 @@
             "type": "Object",
             "tags": [],
             "label": "manual_ingest_pipeline",
-            "description": [],
+            "description": [
+              "\nMetadata for all processor actions. This map is strongly typed to ensure\nevery ProcessorType has a corresponding entry."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-            "lineNumber": 884,
+            "lineNumber": 899,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11214,7 +11388,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 885,
+                "lineNumber": 900,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11227,7 +11401,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 888,
+                "lineNumber": 903,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11240,7 +11414,7 @@
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 894,
+                "lineNumber": 909,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11256,7 +11430,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 898,
+                "lineNumber": 913,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11272,7 +11446,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 925,
+                "lineNumber": 940,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12008,7 +12182,9 @@
             "type": "string",
             "tags": [],
             "label": "non_namespaced_field",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 14,
             "columnNumber": 3,
@@ -12021,7 +12197,9 @@
             "type": "string",
             "tags": [],
             "label": "reserved_field",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 17,
             "columnNumber": 3,
@@ -12034,7 +12212,9 @@
             "type": "string",
             "tags": [],
             "label": "type_mismatch",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 20,
             "columnNumber": 3,
@@ -12047,7 +12227,9 @@
             "type": "string",
             "tags": [],
             "label": "mixed_type",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 23,
             "columnNumber": 3,
@@ -12060,7 +12242,9 @@
             "type": "string",
             "tags": [],
             "label": "invalid_value",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 26,
             "columnNumber": 3,
@@ -12073,7 +12257,9 @@
             "type": "string",
             "tags": [],
             "label": "invalid_field_name",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 29,
             "columnNumber": 3,
@@ -12086,7 +12272,9 @@
             "type": "string",
             "tags": [],
             "label": "forbidden_processor",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 32,
             "columnNumber": 3,
@@ -12099,7 +12287,9 @@
             "type": "string",
             "tags": [],
             "label": "invalid_processor_placement",
-            "description": [],
+            "description": [
+              "\nHuman-readable labels for validation error types"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/constants.ts",
             "lineNumber": 35,
             "columnNumber": 3,

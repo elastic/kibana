@@ -102,6 +102,8 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     settings: {
       client: {
         get: jest.fn(),
+        get$: jest.fn().mockReturnValue(of(undefined)),
+        getUpdate$: jest.fn().mockReturnValue(of()),
       },
     } as unknown as SettingsStart,
   };

@@ -39,6 +39,14 @@ interface RetryServiceLike {
   ) => Promise<void>;
 }
 
+const isMaintainerStarted = (maintainer?: {
+  taskStatus?: string;
+  runs?: number;
+}): maintainer is { taskStatus: string; runs: number } =>
+  maintainer != null &&
+  maintainer.taskStatus != null &&
+  maintainer.taskStatus.toLowerCase() === 'started';
+
 const isMaintainerAlreadyRunningError = (error: unknown): boolean => {
   if (!(error instanceof Error)) {
     return false;
@@ -152,20 +160,25 @@ export const waitForMaintainerRun = async ({
   timeoutMs?: number;
   triggerRun?: boolean;
 }): Promise<void> => {
-  // Wait for the runs count to stabilise across two consecutive polls so the
-  // task is idle before we capture the baseline and trigger a new run.
-  // This prevents race conditions where runSoon silently swallows a 409 conflict
-  // if the task is already running.
+  // Wait until the maintainer task exists, is started, and its runs count has
+  // stabilised across two consecutive polls before we capture the baseline and
+  // trigger a new run. This prevents a race where `start` has not yet fully
+  // enabled the task or `runSoon` overlaps with an in-flight execution.
   let lastSeenRuns = -1;
   await retry.waitForWithTimeout(
-    `Entity maintainer "${maintainerId}" to settle before run`,
+    `Entity maintainer "${maintainerId}" to start and settle before run`,
     30_000,
     async () => {
       const response = await routes.getMaintainers(200, [maintainerId]);
       const maintainer = response.body.maintainers.find(
-        (m: { id: string; runs: number }) => m.id === maintainerId
+        (m: { id: string; runs: number; taskStatus: string }) => m.id === maintainerId
       );
-      const runs = maintainer?.runs ?? 0;
+      if (!isMaintainerStarted(maintainer)) {
+        // `start` is async from the test's perspective, so don't trigger yet.
+        lastSeenRuns = -1;
+        return false;
+      }
+      const runs = maintainer.runs;
       if (runs === lastSeenRuns) return true;
       lastSeenRuns = runs;
       return false;

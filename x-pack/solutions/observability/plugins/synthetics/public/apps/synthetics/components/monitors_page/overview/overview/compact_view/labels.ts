@@ -15,14 +15,6 @@ export const NAME = i18n.translate('xpack.synthetics.overview.compactView.monito
   defaultMessage: 'Name',
 });
 
-export const URL = i18n.translate('xpack.synthetics.overview.compactView.monitorUrl', {
-  defaultMessage: 'Url',
-});
-
-export const NO_URL = i18n.translate('xpack.synthetics.overview.compactView.noUrl', {
-  defaultMessage: '--',
-});
-
 export const LOCATIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorLocations', {
   defaultMessage: 'Locations',
 });
@@ -45,3 +37,11 @@ export const MONITOR_HISTORY = i18n.translate(
     defaultMessage: 'Downtime history',
   }
 );
+
+export const LATEST_ERROR = i18n.translate('xpack.synthetics.overview.compactView.latestError', {
+  defaultMessage: 'Latest error',
+});
+
+export const NO_ERROR = i18n.translate('xpack.synthetics.overview.compactView.noError', {
+  defaultMessage: '—',
+});

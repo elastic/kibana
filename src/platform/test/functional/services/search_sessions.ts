@@ -77,6 +77,39 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+  public async openCompletedSearchFromToast() {
+    await this.retry.try(async () => {
+      const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
+      if (!link) throw new Error('Background search completed toast link not found');
+      await link.click();
+    });
+    // After clicking the link, the toast is no longer needed
+    await this.dismissSuccessToast();
+  }
+
+  private async dismissSuccessToast() {
+    const successToast = await this.getSuccessToast();
+    if (!successToast) return;
+    const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+    await closeBtn.click();
+
+    await this.retry.waitFor('success toast to be dismissed', async () => {
+      const _successToast = await this.getSuccessToast();
+      return !_successToast;
+    });
+  }
+
+  private async getSuccessToast() {
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (text.includes('Background search completed')) {
+        return toast;
+      }
+    }
+    return null;
+  }
+
   public async openFlyoutFromToast() {
     await this.expectSearchSavedToast();
     await this.testSubjects.click('backgroundSearchToastLink');
@@ -107,6 +140,33 @@ export class SearchSessionsService extends FtrService {
 
   public async expectManagementTable() {
     await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
+  }
+
+  public async expectNoErrorsOrWarnings() {
+    expect(await this.hasErrorsOrWarnings()).to.be(false);
+  }
+
+  private async hasErrorsOrWarnings() {
+    const messages = [
+      // Warnings
+      'Your background search is still running',
+      // Errors
+      'Timed out',
+      'Search Error',
+      'Cannot retrieve search results',
+      'Unable to connect to the Kibana server',
+      'Failed to edit name of the background search',
+      'Failed to fetch background search info',
+    ];
+
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (messages.some((message) => text.includes(message))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /*

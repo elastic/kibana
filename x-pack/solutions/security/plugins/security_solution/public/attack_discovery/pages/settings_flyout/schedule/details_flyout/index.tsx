@@ -111,6 +111,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           experimentalDataView
         );
         await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
+        setHasUnsavedChanges(false);
         setIsEditing(false);
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here

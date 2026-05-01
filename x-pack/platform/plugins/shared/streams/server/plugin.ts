@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   Logger,
   Plugin,
-  PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
@@ -27,7 +26,6 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
-import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -75,17 +73,11 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
-import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginStart {}
-
-export const config: PluginConfigDescriptor<StreamsConfig> = {
-  schema: configSchema,
-  exposeToBrowser: exposeToBrowserConfig,
-};
 
 export class StreamsPlugin
   implements
@@ -149,14 +141,12 @@ export class StreamsPlugin
       this.logger.get('inference-features')
     );
 
-    const inferenceResolver = createInferenceResolver(this.logger);
-
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, inferenceResolver, this.logger);
+    const featureService = new FeatureService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, inferenceResolver, this.logger);
+    const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
@@ -252,12 +242,15 @@ export class StreamsPlugin
       };
     };
 
+    const telemetryClient = this.ebtTelemetryService.getClient();
+
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
         getScopedClients,
         server: this.server,
         logger: this.logger,
+        telemetry: telemetryClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -285,8 +278,6 @@ export class StreamsPlugin
         plugins.workflowsManagement.management
       );
     }
-
-    const telemetryClient = this.ebtTelemetryService.getClient();
 
     taskService.registerTasks({
       getScopedClients,
@@ -429,11 +420,7 @@ export class StreamsPlugin
             const attachmentClient = await attachmentService.getClient({ soClient, rulesClient });
 
             // featureClient and queryClient are not needed for enableStreams()
-            // and bulkUpsert() during preconfiguration. Avoid creating them here
-            // because their initialization probes ELSER inference endpoints via
-            // the inference API, which triggers lazy model deployment in
-            // Elasticsearch — an unwanted side effect during startup that can
-            // interfere with ML tests and waste cluster resources.
+            // and bulkUpsert() during preconfiguration, so we don't create them here.
             const streamsClient = await streamsService.getClient({
               attachmentClient,
               esClient,

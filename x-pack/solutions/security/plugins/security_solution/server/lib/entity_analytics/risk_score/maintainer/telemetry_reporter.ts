@@ -231,7 +231,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
         });
       },
       completionSummary: (input: {
-        runStatus: 'success' | 'error';
+        runStatus: 'success' | 'error' | 'aborted';
         runErrorKind?: MaintainerErrorKind;
         scoresWrittenBase: number;
         scoresWrittenResolution: number;

@@ -46,6 +46,7 @@ import { DocViewerExtensionActionsProvider } from '../../../../hooks/use_doc_vie
 export type OverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
     indexes: ObservabilityIndexes;
+    profileId: string;
     showWaterfall?: boolean;
     showActions?: boolean;
     docViewActions?: DocViewActions;
@@ -66,6 +67,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       onRemoveColumn,
       columns,
       indexes,
+      profileId,
       showWaterfall = true,
       dataView,
       decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
@@ -112,7 +114,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
     );
 
     return (
-      <DataSourcesProvider indexes={indexes}>
+      <DataSourcesProvider indexes={indexes} profileId={profileId}>
         <DocViewerExtensionActionsProvider actions={docViewActions}>
           <TraceRootSpanProvider traceId={traceId}>
             <div

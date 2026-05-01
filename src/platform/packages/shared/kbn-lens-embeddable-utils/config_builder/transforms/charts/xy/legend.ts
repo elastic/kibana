@@ -9,7 +9,7 @@
 
 import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYState } from '../../../schema';
+import type { XYConfig } from '../../../schema';
 import { legendSizeCompat } from '../legend_sizes';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import type {
@@ -45,7 +45,7 @@ const legendStatisticCompat = getReversibleMappings<LegendStatistic, XYLegendVal
 
 const DEFAULT_LEGEND_POSITON = 'right';
 
-function extractAlignment(legend: XYState['legend']):
+function extractAlignment(legend: XYConfig['legend']):
   | {
       verticalAlignment: 'top' | 'bottom' | undefined;
       horizontalAlignment: 'left' | 'right' | undefined;
@@ -61,7 +61,7 @@ function extractAlignment(legend: XYState['legend']):
   return {};
 }
 
-function isOutsideListLegendLayout(legend: XYState['legend']) {
+function isOutsideListLegendLayout(legend: XYConfig['legend']) {
   return Boolean(
     legend &&
       legend.placement !== 'inside' &&
@@ -79,7 +79,7 @@ function isOutsideListLegendLayoutState(legend: XYVisualizationState['legend']) 
   );
 }
 
-function getLegendTruncation(legend: XYState['legend']):
+function getLegendTruncation(legend: XYConfig['legend']):
   | {
       max_lines?: number;
       enabled?: boolean;
@@ -90,11 +90,27 @@ function getLegendTruncation(legend: XYState['legend']):
     : undefined;
 }
 
-function getOutsideLegendSize(legend: XYState['legend']): LegendSizeType | undefined {
+function getOutsideLegendSize(legend: XYConfig['legend']): LegendSizeType | undefined {
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
-export function convertLegendToStateFormat(legend: XYState['legend']): {
+function convertSeriesHeaderFromAPI(
+  legend?: XYConfig['legend']
+): Partial<Pick<XYVisualizationState['legend'], 'title' | 'isTitleVisible'>> {
+  const seriesHeader = legend && 'series_header' in legend ? legend.series_header : undefined;
+  if (!seriesHeader) return {};
+
+  const { text, visible } = seriesHeader;
+  if (visible === false) {
+    return { isTitleVisible: false, title: undefined };
+  }
+  if (text != null && text !== '') {
+    return { isTitleVisible: true, title: text };
+  }
+  return { isTitleVisible: true, title: undefined };
+}
+
+export function convertLegendToStateFormat(legend: XYConfig['legend']): {
   legend: XYVisualizationState['legend'];
 } {
   const isListLegendLayout = isOutsideListLegendLayout(legend);
@@ -104,6 +120,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
   const outsideLegendSize = getOutsideLegendSize(legend);
 
   const newStateLegend: XYVisualizationState['legend'] = {
+    ...convertSeriesHeaderFromAPI(legend),
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
     shouldTruncate: truncateEnabled,
     ...(legend?.statistics
@@ -221,9 +238,25 @@ function getApiLegendTruncate(
   };
 }
 
+function convertSeriesHeaderToAPIFormat(legend: XYVisualizationState['legend']): {
+  series_header?: { text?: string; visible?: boolean };
+} {
+  const { title, isTitleVisible } = legend;
+  if (isTitleVisible === false) {
+    return { series_header: stripUndefined({ visible: false, text: undefined }) };
+  }
+  if (title != null && title !== '') {
+    return { series_header: stripUndefined({ visible: true, text: title }) };
+  }
+  if (isTitleVisible === true) {
+    return { series_header: stripUndefined({ visible: true, text: undefined }) };
+  }
+  return {};
+}
+
 export function convertLegendToAPIFormat(
   legend: XYVisualizationState['legend']
-): Pick<XYState, 'legend'> | {} {
+): Pick<XYConfig, 'legend'> | {} {
   const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible';
   const statistics = legend.legendStats?.length
     ? legend.legendStats.map((stat) => legendStatisticCompat.toAPI(stat))
@@ -233,6 +266,7 @@ export function convertLegendToAPIFormat(
     legend: stripUndefined({
       visibility,
       statistics,
+      ...convertSeriesHeaderToAPIFormat(legend),
       ...getLegendAlignment(legend),
       ...getLegendLayout(legend),
     }),

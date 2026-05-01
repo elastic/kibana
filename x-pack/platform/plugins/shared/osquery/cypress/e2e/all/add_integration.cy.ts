@@ -9,7 +9,9 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
+  FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   formFieldInputSelector,
+  SAVE_PACK_BUTTON,
   SAVED_QUERY_DROPDOWN_SELECT,
   TABLE_ROWS,
 } from '../../screens/packs';
@@ -18,6 +20,7 @@ import {
   cleanupAgentPolicy,
   cleanupSavedQuery,
   loadSavedQuery,
+  savedQueryFixture,
 } from '../../tasks/api_fixtures';
 import {
   createOldOsqueryPath,
@@ -152,8 +155,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/255381
-  describe.skip('Upgrade policy with existing packs', () => {
+  describe('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
     const [policyName, integrationName, packName] = generateRandomStringName(3);
     let policyId: string;
@@ -178,6 +180,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       addCustomIntegration(integrationName, policyName);
       cy.getBySel('integrationPolicyUpgradeBtn');
       cy.get(`[title="${policyName}"]`).click();
+      closeFleetTourIfVisible();
       cy.get(`[title="${integrationName}"]`)
         .parents('tr')
         .within(() => {
@@ -201,21 +204,26 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(ADD_QUERY_BUTTON).click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
-      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('{downArrow}{enter}');
-      cy.contains(/^Save$/).click();
-      cy.contains(/^Save pack$/).click();
+      // `useSavedQueries` resolves independently of LIVE_QUERY_EDITOR; wait for
+      // the fixture option to render before selecting so {enter} can't no-op on
+      // a slow MKI fetch and leave the flyout open over `save-pack-button`.
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click();
+      cy.contains('[role="option"]', savedQueryFixture.id).click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).should('not.exist');
+      cy.getBySel(SAVE_PACK_BUTTON).click();
       cy.contains(`Successfully created "${packName}" pack`).click();
       cy.visit('app/fleet/policies');
       closeFleetTourIfVisible();
       cy.get(`[title="${policyName}"]`).click();
       closeFleetTourIfVisible();
       cy.getBySel('integrationPolicyUpgradeBtn').click();
-      cy.contains(/^Advanced$/).click();
-      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
+      cy.contains(/^Osquery config$/).click();
+      cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
-      cy.contains(/^Advanced$/).click();
-      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
+      cy.contains(/^Osquery config$/).click();
+      cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
       cy.get(`[title="${integrationName}"]`)

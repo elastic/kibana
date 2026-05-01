@@ -42,6 +42,7 @@ describe('useAssigneesAction', () => {
         "data-test-subj": "cases-bulk-action-assignees",
         "disabled": false,
         "icon": <EuiIcon
+          aria-hidden={true}
           size="m"
           type="user"
         />,

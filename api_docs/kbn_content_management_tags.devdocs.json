@@ -10,7 +10,15 @@
         "tags": [],
         "label": "ContentManagementTagsKibanaProvider",
         "description": [
-          "\nKibana-integrated context provider for content management tags services.\n\nThis provider adapts Kibana's saved objects tagging plugin API to the content management\ntags interface. It automatically handles tag list retrieval, search query parsing with\nEUI Query syntax support, and error reporting via toast notifications.\n\nUse this provider in Kibana plugins that need tag functionality. For standalone usage\nwithout Kibana dependencies, use {@link ContentManagementTagsProvider} instead.\n"
+          "\nKibana-integrated context provider for content management tags services.\n\nThis provider adapts Kibana's saved objects tagging plugin API to the content management\ntags interface. It automatically handles tag list retrieval, search query parsing with\nEUI Query syntax support, and error reporting via toast notifications.\n\nUse this provider in Kibana plugins that need tag functionality. For standalone usage\nwithout Kibana dependencies, use ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsProvider",
+            "text": "ContentManagementTagsProvider"
+          },
+          " instead.\n"
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
@@ -51,6 +59,7 @@
             "lineNumber": 238,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "PropsWithChildren",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -65,7 +74,15 @@
         "tags": [],
         "label": "ContentManagementTagsProvider",
         "description": [
-          "\nContext provider for content management tags services.\n\nUse this provider when you want to supply custom tag services directly,\nwithout integrating with Kibana's saved objects tagging plugin.\n\nFor Kibana plugin integration, use {@link ContentManagementTagsKibanaProvider} instead.\n"
+          "\nContext provider for content management tags services.\n\nUse this provider when you want to supply custom tag services directly,\nwithout integrating with Kibana's saved objects tagging plugin.\n\nFor Kibana plugin integration, use ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsKibanaProvider",
+            "text": "ContentManagementTagsKibanaProvider"
+          },
+          " instead.\n"
         ],
         "signature": [
           "(props: React.PropsWithChildren<Services>) => React.JSX.Element"
@@ -90,6 +107,7 @@
             "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PropsWithChildren",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -143,6 +161,7 @@
             "lineNumber": 61,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "TagBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -157,7 +176,47 @@
         "tags": [],
         "label": "TagList",
         "description": [
-          "\nConnected component that renders a list of tags by resolving tag IDs to tag objects.\n\nThis component uses the {@link useTagServices | useServices} hook to access the tag list\nfrom context and resolves the provided tag IDs to full {@link Tag} objects. The resolved\ntags are then rendered using {@link TagListComponent}.\n\nMust be used within a {@link ContentManagementTagsProvider} or {@link ContentManagementTagsKibanaProvider}.\nIf no provider is present, the component renders nothing.\n"
+          "\nConnected component that renders a list of tags by resolving tag IDs to tag objects.\n\nThis component uses the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.useTagServices",
+            "text": "useServices"
+          },
+          " hook to access the tag list\nfrom context and resolves the provided tag IDs to full ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.Tag",
+            "text": "Tag"
+          },
+          " objects. The resolved\ntags are then rendered using ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagListComponent",
+            "text": "TagListComponent"
+          },
+          ".\n\nMust be used within a ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsProvider",
+            "text": "ContentManagementTagsProvider"
+          },
+          " or ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsKibanaProvider",
+            "text": "ContentManagementTagsKibanaProvider"
+          },
+          ".\nIf no provider is present, the component renders nothing.\n"
         ],
         "signature": [
           "(props: ",
@@ -196,12 +255,21 @@
             "lineNumber": 46,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "TagListProps",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "The rendered tag list, or an empty {@link TagListComponent } if services are unavailable."
+          "The rendered tag list, or an empty ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagListComponent",
+            "text": "TagListComponent"
+          },
+          " if services are unavailable."
         ],
         "initialIsOpen": false
       },
@@ -212,7 +280,23 @@
         "tags": [],
         "label": "TagListComponent",
         "description": [
-          "\nPure component that renders a horizontal list of tag badges.\n\nThis is a presentational component that accepts pre-resolved tag objects.\nFor a connected version that resolves tag IDs via context, use {@link TagList}.\n\nThe tags are rendered as {@link TagBadge} components in a flexbox layout\nwith wrapping enabled for responsive display.\n"
+          "\nPure component that renders a horizontal list of tag badges.\n\nThis is a presentational component that accepts pre-resolved tag objects.\nFor a connected version that resolves tag IDs via context, use ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagList",
+            "text": "TagList"
+          },
+          ".\n\nThe tags are rendered as ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagBadge",
+            "text": "TagBadge"
+          },
+          " components in a flexbox layout\nwith wrapping enabled for responsive display.\n"
         ],
         "signature": [
           "(props: ",
@@ -251,6 +335,7 @@
             "lineNumber": 49,
             "columnNumber": 61,
             "deprecated": false,
+            "docsReferencedTypeName": "TagListComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -337,6 +422,7 @@
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseTagsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -355,7 +441,15 @@
         "tags": [],
         "label": "ContentManagementTagsKibanaDependencies",
         "description": [
-          "\nDependencies required from Kibana plugins to enable content management tags functionality.\n\nThis interface defines the contract between the content management tags package and\nthe Kibana plugin ecosystem. Consumers should provide these dependencies when using\n{@link ContentManagementTagsKibanaProvider}.\n"
+          "\nDependencies required from Kibana plugins to enable content management tags functionality.\n\nThis interface defines the contract between the content management tags package and\nthe Kibana plugin ecosystem. Consumers should provide these dependencies when using\n",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsKibanaProvider",
+            "text": "ContentManagementTagsKibanaProvider"
+          },
+          ".\n"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
         "lineNumber": 47,
@@ -584,7 +678,15 @@
         "tags": [],
         "label": "TagBadgeProps",
         "description": [
-          "\nProps for the {@link TagBadge} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagBadge",
+            "text": "TagBadge"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
         "lineNumber": 17,
@@ -664,6 +766,7 @@
                 "lineNumber": 29,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -699,7 +802,15 @@
         "tags": [],
         "label": "TagListComponentProps",
         "description": [
-          "\nProps for the {@link TagListComponent}."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagListComponent",
+            "text": "TagListComponent"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
         "lineNumber": 16,
@@ -739,7 +850,15 @@
             "tags": [],
             "label": "onClick",
             "description": [
-              "\nOptional click handler passed to each {@link TagBadge}. Called with the clicked tag and modifier key state."
+              "\nOptional click handler passed to each ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.TagBadge",
+                "text": "TagBadge"
+              },
+              ". Called with the clicked tag and modifier key state."
             ],
             "signature": [
               "((tag: ",
@@ -780,6 +899,7 @@
                 "lineNumber": 27,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -815,7 +935,15 @@
         "tags": [],
         "label": "TagListProps",
         "description": [
-          "\nProps for the {@link TagList} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagList",
+            "text": "TagList"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -869,7 +997,15 @@
         "tags": [],
         "label": "UseTagsParams",
         "description": [
-          "\nParameters for the {@link useTags} hook.\n"
+          "\nParameters for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.useTags",
+            "text": "useTags"
+          },
+          " hook.\n"
         ],
         "signature": [
           {
@@ -941,6 +1077,7 @@
                 "lineNumber": 26,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -975,7 +1112,15 @@
         "tags": [],
         "label": "UseTagsReturn",
         "description": [
-          "\nReturn value from the {@link useTags} hook."
+          "\nReturn value from the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.useTags",
+            "text": "useTags"
+          },
+          " hook."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
         "lineNumber": 31,
@@ -1031,6 +1176,7 @@
                 "lineNumber": 39,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1085,6 +1231,7 @@
                 "lineNumber": 44,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1142,7 +1289,15 @@
         "tags": [],
         "label": "ContentManagementTagsServices",
         "description": [
-          "\nPublic type alias for the content management tags services interface.\n\nUse this type when implementing custom service providers or when type-checking\nservice objects passed to {@link ContentManagementTagsProvider}."
+          "\nPublic type alias for the content management tags services interface.\n\nUse this type when implementing custom service providers or when type-checking\nservice objects passed to ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsProvider",
+            "text": "ContentManagementTagsProvider"
+          },
+          "."
         ],
         "signature": [
           "Services"

@@ -173,6 +173,7 @@
                 "lineNumber": 58,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityLogsAIAssistantFeatureRenderDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -293,6 +294,7 @@
                 "lineNumber": 66,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityLogsAiInsightFeatureRenderDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -413,6 +415,7 @@
                 "lineNumber": 49,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityStreamsFeatureRenderDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -463,6 +466,7 @@
                 "lineNumber": 50,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityStreamsFeatureRenderDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -609,6 +613,7 @@
                 "lineNumber": 125,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "SecuritySolutionAlertFlyoutRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -874,6 +879,7 @@
                 "lineNumber": 15,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Feature",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -910,6 +916,7 @@
                 "lineNumber": 25,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Id",
                 "trackAdoption": false,
                 "isRequired": true
               }

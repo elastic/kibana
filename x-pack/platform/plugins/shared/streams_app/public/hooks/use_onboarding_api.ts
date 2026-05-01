@@ -11,10 +11,6 @@ import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
-export interface UseOnboardingApiOptions {
-  saveQueries?: boolean;
-}
-
 export interface ScheduleOnboardingOptions {
   steps?: OnboardingStep[];
   connectors?: {
@@ -23,7 +19,7 @@ export interface ScheduleOnboardingOptions {
   };
 }
 
-export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions = {}) {
+export function useOnboardingApi() {
   const {
     dependencies: {
       start: {
@@ -45,7 +41,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'schedule' as const,
                 from,
@@ -64,7 +59,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
             },
           }
         );
@@ -76,7 +70,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'cancel' as const,
               },
@@ -91,7 +84,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'acknowledge' as const,
               },
@@ -100,6 +92,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
         );
       },
     }),
-    [saveQueries, signal, streamsRepositoryClient]
+    [signal, streamsRepositoryClient]
   );
 }
