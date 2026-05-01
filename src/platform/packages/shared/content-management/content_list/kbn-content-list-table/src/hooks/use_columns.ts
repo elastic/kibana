@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { useEuiTheme, type EuiBasicTableColumn } from '@elastic/eui';
 import { useContentListConfig, type ContentListItem } from '@kbn/content-list-provider';
 import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../column/types';
@@ -100,6 +100,7 @@ export const useColumns = (
   onDelete?: (items: ContentListItem[]) => void
 ): ResolvedColumn[] => {
   const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
+  const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
     const parts = parseColumnParts(children);
@@ -109,6 +110,7 @@ export const useColumns = (
       entityName: labels.entity,
       supports,
       actions: { onDelete },
+      euiTheme,
     };
 
     const resolved: ResolvedColumn[] = [];
@@ -133,5 +135,5 @@ export const useColumns = (
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete, euiTheme]);
 };

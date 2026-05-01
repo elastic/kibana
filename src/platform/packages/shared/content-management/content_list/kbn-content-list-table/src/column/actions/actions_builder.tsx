@@ -26,6 +26,32 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
 );
 
 /**
+ * EUI renders row actions as `EuiButtonIcon` `size="s"`, which `euiButtonSizeMap`
+ * sets to `euiTheme.size.xl` (32px) with an `euiTheme.size.xs` (4px) gap between
+ * icons. The cell content adds `euiTheme.size.s` (8px) of padding on each side.
+ * The cell also has `flex-wrap: wrap` applied (see EUI's `_table_cell_content.styles`),
+ * so any width shortfall causes icons to stack vertically. The formula below
+ * sizes the column to fit `N` icons inline plus padding:
+ * `xl * N + xs * (N - 1) + s * 2`, which works out to `36N + 12` at the default
+ * theme scale.
+ *
+ * Falls back to the static formula when the theme is not threaded through
+ * context (e.g. unit tests that construct contexts inline).
+ */
+const getActionsColumnDefaultWidth = (
+  count: number,
+  euiTheme: ColumnBuilderContext['euiTheme']
+): string => {
+  if (!euiTheme) {
+    return `${count * 36 + 12}px`;
+  }
+  const iconWidth = parseInt(euiTheme.size.xl, 10);
+  const iconGap = parseInt(euiTheme.size.xs, 10);
+  const cellPadding = parseInt(euiTheme.size.s, 10);
+  return `${count * iconWidth + (count - 1) * iconGap + cellPadding * 2}px`;
+};
+
+/**
  * Props for the `Column.Actions` preset component.
  *
  * These are the declarative attributes consumers pass in JSX. The actions builder
@@ -144,16 +170,7 @@ export const buildActionsColumn = (
     return undefined;
   }
 
-  // EUI renders row actions as `EuiButtonIcon` `size="s"`, which `euiButtonSizeMap`
-  // sets to `euiTheme.size.xl` (32px) with an `euiTheme.size.xs` (4px) gap between
-  // icons. The cell content adds `euiTheme.size.s` (8px) of padding on each side.
-  // The cell also has `flex-wrap: wrap` applied (see EUI's `_table_cell_content.styles`),
-  // so any width shortfall causes icons to stack vertically. The formula below
-  // sizes the column to fit `N` icons inline plus padding:
-  // `32 * N + 4 * (N - 1) + 16 = 36N + 12`.
-  // We derive the constant statically because `euiButtonSizeMap` requires a live
-  // EUI theme context.
-  const defaultWidth = `${actions.length * 36 + 12}px`;
+  const defaultWidth = getActionsColumnDefaultWidth(actions.length, context.euiTheme);
 
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
@@ -198,10 +215,6 @@ export const buildActionsColumn = (
  * </ContentListTable>
  * ```
  */
-/** Fixed icon-button dimensions for the actions-column skeleton. Matches
- *  the rough visual footprint of an `EuiButtonIcon` in an EUI table row. */
-const SKELETON_ICON_SIZE = 20;
-
 /**
  * Build the skeleton for `Column.Actions` — a right-aligned row of small
  * rectangles, one per configured action.
@@ -227,17 +240,17 @@ const buildActionsColumnSkeleton = (
   // the most common shape and close enough that the swap is not jarring.
   const count = actionParts.length > 0 ? actionParts.length : 2;
 
+  // Match the rendered footprint of an `EuiButtonIcon size="s"` icon glyph
+  // (~`euiTheme.size.l`, 24px). Falls back to a static value when no theme
+  // is threaded through context (e.g. unit tests).
+  const iconSize = context.euiTheme?.size.l ?? 20;
+
   return {
     node: (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center" responsive={false}>
         {Array.from({ length: count }, (_unused, idx) => (
           <EuiFlexItem key={idx} grow={false}>
-            <EuiSkeletonRectangle
-              isLoading
-              width={SKELETON_ICON_SIZE}
-              height={SKELETON_ICON_SIZE}
-              borderRadius="s"
-            />
+            <EuiSkeletonRectangle isLoading width={iconSize} height={iconSize} borderRadius="s" />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

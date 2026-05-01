@@ -8,25 +8,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
-
-/**
- * Matches the effective height of EUI's default search-bar input and filter
- * buttons so the skeleton occupies the same vertical space as the real
- * toolbar.
- */
-const TOOLBAR_ROW_HEIGHT = 40;
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle, useEuiTheme } from '@elastic/eui';
 
 /**
  * Approximate width of a filter button. EUI filter buttons size to content,
  * so an exact width isn't possible without rendering real labels — this is
  * visually close enough that the swap to the real toolbar doesn't shift
- * horizontally.
+ * horizontally. Off-scale relative to `euiTheme.size`, so kept as a literal.
  */
 const FILTER_BUTTON_WIDTH = 100;
-
-/** Width of the selection checkbox placeholder. */
-const SELECTION_CHECKBOX_WIDTH = 32;
 
 /**
  * Props for {@link ToolbarSkeleton}.
@@ -53,6 +43,13 @@ export const ToolbarSkeleton = ({
   hasSelection,
   'data-test-subj': dataTestSubj = 'contentListToolbar-skeleton',
 }: ToolbarSkeletonProps) => {
+  const { euiTheme } = useEuiTheme();
+  // Row height matches the rendered height of EUI's search-bar input and
+  // filter buttons (`euiTheme.size.xxl`), and the selection checkbox occupies
+  // the same `euiTheme.size.xl` width as the real `EuiCheckbox` cell.
+  const rowHeight = euiTheme.size.xxl;
+  const selectionCheckboxWidth = euiTheme.size.xl;
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -64,21 +61,21 @@ export const ToolbarSkeleton = ({
         <EuiFlexItem grow={false}>
           <EuiSkeletonRectangle
             isLoading
-            width={SELECTION_CHECKBOX_WIDTH}
-            height={TOOLBAR_ROW_HEIGHT}
+            width={selectionCheckboxWidth}
+            height={rowHeight}
             borderRadius="s"
           />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiSkeletonRectangle isLoading width="100%" height={TOOLBAR_ROW_HEIGHT} borderRadius="s" />
+        <EuiSkeletonRectangle isLoading width="100%" height={rowHeight} borderRadius="s" />
       </EuiFlexItem>
       {Array.from({ length: filterCount }, (_unused, idx) => (
         <EuiFlexItem key={idx} grow={false}>
           <EuiSkeletonRectangle
             isLoading
             width={FILTER_BUTTON_WIDTH}
-            height={TOOLBAR_ROW_HEIGHT}
+            height={rowHeight}
             borderRadius="s"
           />
         </EuiFlexItem>

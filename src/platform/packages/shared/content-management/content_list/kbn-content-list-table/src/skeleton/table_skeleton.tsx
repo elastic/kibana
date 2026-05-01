@@ -18,12 +18,20 @@ import {
 import { isCustomSkeletonNode, type SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ResolvedColumn } from '../hooks/use_columns';
 
-/** Width of the selection checkbox column. */
-const CHECKBOX_COLUMN_WIDTH = 32;
-
+/**
+ * Approximate body-row placeholder height. A real EUI body cell is
+ * `2 × euiTheme.border.width.thin` + `2 × euiTheme.size.s` (or `xs` when
+ * compressed) + `euiFontSize('m').lineHeight` — no single theme token covers
+ * that sum, so this is a tuned visual fit rather than a derived value.
+ */
 const CELL_HEIGHT = 28;
+
+/**
+ * Approximate header-row placeholder height. Sized for visual prominence
+ * over `CELL_HEIGHT` rather than to match the rendered EUI header height.
+ */
 const HEADER_HEIGHT = 36;
-const DEFAULT_RECTANGLE_HEIGHT = 16;
+
 export const MAX_SKELETON_ROW_COUNT = 20;
 
 const renderSkeletonCell = (output: SkeletonOutput): React.ReactNode => {
@@ -48,11 +56,21 @@ const renderSkeletonCell = (output: SkeletonOutput): React.ReactNode => {
   }
 
   // Rectangle is the default.
+  return <RectangleCell width={output.width ?? '100%'} height={output.height} />;
+};
+
+/**
+ * Wraps `EuiSkeletonRectangle` so the default rectangle height can be sourced
+ * from `euiTheme.size.base` (16px) at render time instead of a hard-coded
+ * pixel value.
+ */
+const RectangleCell = ({ width, height }: { width: string | number; height?: string | number }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiSkeletonRectangle
       isLoading
-      width={output.width ?? '100%'}
-      height={output.height ?? DEFAULT_RECTANGLE_HEIGHT}
+      width={width}
+      height={height ?? euiTheme.size.base}
       borderRadius="s"
     />
   );
@@ -113,15 +131,19 @@ export const TableSkeleton = ({
   );
   const rows = Array.from({ length: clampedRowCount }, (_unused, rowIdx) => rowIdx);
 
+  // Width of the selection checkbox column matches `euiTheme.size.xl` (32px),
+  // which is the rendered width of the EUI checkbox cell.
+  const checkboxColumnWidth = euiTheme.size.xl;
+
   return (
     <table css={tableCss} style={{ tableLayout }} data-test-subj={dataTestSubj} aria-hidden="true">
       <thead>
         <tr>
           {hasSelection && (
-            <th css={headerCellCss} style={{ width: `${CHECKBOX_COLUMN_WIDTH}px` }}>
+            <th css={headerCellCss} style={{ width: checkboxColumnWidth }}>
               <EuiSkeletonRectangle
                 isLoading
-                width={`${CHECKBOX_COLUMN_WIDTH}px`}
+                width={checkboxColumnWidth}
                 height={HEADER_HEIGHT}
                 borderRadius="s"
               />
@@ -154,10 +176,10 @@ export const TableSkeleton = ({
         {rows.map((rowIdx) => (
           <tr key={rowIdx} data-test-subj={`${dataTestSubj}-row`}>
             {hasSelection && (
-              <td css={bodyCellCss} style={{ width: CHECKBOX_COLUMN_WIDTH }}>
+              <td css={bodyCellCss} style={{ width: checkboxColumnWidth }}>
                 <EuiSkeletonRectangle
                   isLoading
-                  width={CHECKBOX_COLUMN_WIDTH}
+                  width={checkboxColumnWidth}
                   height={CELL_HEIGHT}
                   borderRadius="s"
                 />
