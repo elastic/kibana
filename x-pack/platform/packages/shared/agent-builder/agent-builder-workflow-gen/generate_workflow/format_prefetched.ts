@@ -116,3 +116,82 @@ export const collapseSubActionFamilies = (
 
   return { enumerated, collapsed };
 };
+
+/* ---------------- Section bucketing ---------------- */
+
+export interface StepSection {
+  title: string;
+  steps: StepDefinitionSummary[];
+}
+
+const SECTION_ORDER = [
+  'Control flow',
+  'Data manipulation',
+  'AI',
+  'Cases',
+  'Elasticsearch',
+  'Logging / Diagnostics',
+  'Other Kibana built-ins',
+  'Connector steps',
+] as const;
+
+const sectionOf = (s: StepDefinitionSummary): (typeof SECTION_ORDER)[number] => {
+  if (s.id === 'console') return 'Logging / Diagnostics';
+  switch (s.category) {
+    case 'flowControl':
+      return 'Control flow';
+    case 'data':
+      return 'Data manipulation';
+    case 'ai':
+      return 'AI';
+    case 'kibana.cases':
+      return 'Cases';
+    case 'elasticsearch':
+      return 'Elasticsearch';
+    case 'kibana':
+      return 'Other Kibana built-ins';
+    default:
+      return 'Connector steps';
+  }
+};
+
+export const bucketStepsBySection = (steps: StepDefinitionSummary[]): StepSection[] => {
+  const buckets = new Map<string, StepDefinitionSummary[]>();
+  for (const s of steps) {
+    const key = sectionOf(s);
+    const arr = buckets.get(key);
+    if (arr) {
+      arr.push(s);
+    } else {
+      buckets.set(key, [s]);
+    }
+  }
+  return SECTION_ORDER.filter((title) => buckets.has(title)).map((title) => ({
+    title,
+    steps: buckets.get(title)!,
+  }));
+};
+
+export const formatStepDefinitionsBlock = (
+  steps: StepDefinitionSummary[],
+  options: { collapseThreshold?: number } = {}
+): string => {
+  const collapseThreshold = options.collapseThreshold ?? 5;
+  const sections = bucketStepsBySection(steps);
+
+  return sections
+    .map((section) => {
+      const { enumerated, collapsed } = collapseSubActionFamilies(
+        section.steps,
+        collapseThreshold
+      );
+      const lines: string[] = [`### ${section.title}`, ...enumerated.map(formatStepEntry)];
+      for (const fam of collapsed) {
+        lines.push(
+          `- ${fam.prefix}.* (${fam.count} actions — call get_step_definitions with search="${fam.prefix}" for details)`
+        );
+      }
+      return lines.join('\n');
+    })
+    .join('\n\n');
+};

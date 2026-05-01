@@ -10,6 +10,8 @@ import {
   formatConnectorsBlock,
   formatStepEntry,
   collapseSubActionFamilies,
+  bucketStepsBySection,
+  formatStepDefinitionsBlock,
 } from './format_prefetched';
 import type { ConnectorSummary, StepDefinitionSummary } from './types';
 
@@ -176,5 +178,63 @@ describe('collapseSubActionFamilies', () => {
       'slack',
       'console',
     ]);
+  });
+});
+
+describe('bucketStepsBySection', () => {
+  const sample: StepDefinitionSummary[] = [
+    { id: 'if', label: 'If', description: 'Conditional', category: 'flowControl' },
+    { id: 'foreach', label: 'Loop', description: 'Loop', category: 'flowControl' },
+    { id: 'data.set', label: 'Set Variables', description: 'Set vars', category: 'data' },
+    { id: 'ai.prompt', label: 'AI Prompt', description: 'Prompt', category: 'ai' },
+    { id: 'cases.createCase', label: 'Create case', description: 'Create', category: 'kibana.cases' },
+    { id: 'console', label: 'Console', description: 'Log', category: 'kibana' },
+    { id: 'slack', label: 'Slack', description: 'Slack', category: 'external' },
+    { id: 'github.foo', label: 'GitHub', description: 'GH', category: 'external' },
+  ];
+
+  it('returns sections in priority order, omitting empty ones', () => {
+    const sections = bucketStepsBySection(sample).map((s) => s.title);
+    expect(sections).toEqual([
+      'Control flow',
+      'Data manipulation',
+      'AI',
+      'Cases',
+      'Logging / Diagnostics',
+      'Connector steps',
+    ]);
+  });
+
+  it('drops empty sections', () => {
+    const noControl = sample.filter((s) => s.category !== 'flowControl');
+    const sections = bucketStepsBySection(noControl).map((s) => s.title);
+    expect(sections).not.toContain('Control flow');
+  });
+});
+
+describe('formatStepDefinitionsBlock', () => {
+  it('renders sections with headers, applies entry formatting and family collapse', () => {
+    const githubIds = Array.from({ length: 8 }).map((_, i) => `github.x${i}`);
+    const steps: StepDefinitionSummary[] = [
+      { id: 'if', label: 'If', description: 'Conditional', category: 'flowControl' },
+      { id: 'data.set', label: 'Set Variables', description: 'Set vars', category: 'data' },
+      { id: 'console', label: 'Console', description: 'Log', category: 'kibana' },
+      { id: 'slack', label: 'Slack', description: undefined, category: 'external' },
+      ...githubIds.map((id) => ({ id, label: id, category: 'external' as const })),
+    ];
+
+    const out = formatStepDefinitionsBlock(steps);
+
+    expect(out).toContain('### Control flow');
+    expect(out).toContain('- if — Conditional');
+    expect(out).toContain('### Data manipulation');
+    expect(out).toContain('- data.set (Set Variables) — Set vars');
+    expect(out).toContain('### Logging / Diagnostics');
+    expect(out).toContain('- console — Log');
+    expect(out).toContain('### Connector steps');
+    expect(out).toContain('- slack');
+    // github.* family collapses (8 > 5):
+    expect(out).toMatch(/github\.\* \(8 actions/);
+    expect(out).not.toMatch(/github\.x0/);
   });
 });
