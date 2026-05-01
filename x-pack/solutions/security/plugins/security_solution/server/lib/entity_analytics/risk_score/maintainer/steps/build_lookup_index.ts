@@ -110,10 +110,17 @@ const toBulkIndexOperations = (
 ): Array<BulkOperationContainer | LookupDocument> => {
   const byEntityId = new Map<string, LookupDocument>();
   for (const doc of docs) {
-    // First write wins: alias rows (specific) take precedence over
-    // self-rows (defaulted) when both are produced for the same entity_id
-    // within a single page.
-    if (!byEntityId.has(doc.entity_id)) {
+    // Alias rows (specific) take precedence over self-rows (defaulted) when
+    // both are produced for the same entity_id within a single page. Doing
+    // this by relationship_type rather than insertion order keeps the
+    // outcome stable when a resolution chain (A→B, B→C) puts B's eager
+    // self-row ahead of B's own alias row in the doc list.
+    const existing = byEntityId.get(doc.entity_id);
+    if (
+      existing === undefined ||
+      (existing.relationship_type === SELF_RELATIONSHIP_TYPE &&
+        doc.relationship_type !== SELF_RELATIONSHIP_TYPE)
+    ) {
       byEntityId.set(doc.entity_id, doc);
     }
   }
