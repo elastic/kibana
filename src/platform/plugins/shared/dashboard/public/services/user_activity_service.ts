@@ -59,15 +59,19 @@ class DashboardUserActivitySession {
           if (!event) {
             return;
           }
-          if (activity.type === 'view') {
-            await this.logUserActivity(activity.type, event.start, activity.end!);
-          } else {
-            const refreshStart = event as (typeof this.eventQueues)['refresh'][number];
-            await this.logUserActivity(
-              `${activity.type}_${refreshStart.type}`,
-              refreshStart.start,
-              activity.end!
-            );
+          try {
+            if (activity.type === 'view') {
+              await this.logUserActivity(activity.type, event.start, activity.end!);
+            } else {
+              const refreshStart = event as (typeof this.eventQueues)['refresh'][number];
+              await this.logUserActivity(
+                `${activity.type}_${refreshStart.type}`,
+                refreshStart.start,
+                activity.end!
+              );
+            }
+          } catch (e) {
+            // if an error is thrown when logging, do nothing; no need to surface this
           }
         })
       )
