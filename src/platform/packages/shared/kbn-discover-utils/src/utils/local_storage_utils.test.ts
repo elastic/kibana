@@ -12,11 +12,14 @@ import {
   CHART_HIDDEN_KEY,
   getBreakdownField,
   getChartHidden,
+  getTableHidden,
   getTopPanelHeight,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
   HISTOGRAM_HEIGHT_KEY,
+  TABLE_HIDDEN_KEY,
   setBreakdownField,
   setChartHidden,
+  setTableHidden,
   setTopPanelHeight,
 } from './local_storage_utils';
 
@@ -27,6 +30,8 @@ describe('local storage utils', () => {
       switch (key) {
         case `${localStorageKeyPrefix}:${CHART_HIDDEN_KEY}`:
           return true;
+        case `${localStorageKeyPrefix}:${TABLE_HIDDEN_KEY}`:
+          return false;
         case `${localStorageKeyPrefix}:${HISTOGRAM_HEIGHT_KEY}`:
           return 100;
         case `${localStorageKeyPrefix}:${HISTOGRAM_BREAKDOWN_FIELD_KEY}`:
@@ -44,6 +49,10 @@ describe('local storage utils', () => {
     expect(mockStorage.get).toHaveBeenLastCalledWith(
       `${localStorageKeyPrefix}:${CHART_HIDDEN_KEY}`
     );
+    expect(getTableHidden(storage, localStorageKeyPrefix)).toEqual(false);
+    expect(mockStorage.get).toHaveBeenLastCalledWith(
+      `${localStorageKeyPrefix}:${TABLE_HIDDEN_KEY}`
+    );
     expect(getTopPanelHeight(storage, localStorageKeyPrefix)).toEqual(100);
     expect(mockStorage.get).toHaveBeenLastCalledWith(
       `${localStorageKeyPrefix}:${HISTOGRAM_HEIGHT_KEY}`
@@ -59,6 +68,11 @@ describe('local storage utils', () => {
     expect(mockStorage.set).toHaveBeenLastCalledWith(
       `${localStorageKeyPrefix}:${CHART_HIDDEN_KEY}`,
       false
+    );
+    setTableHidden(storage, localStorageKeyPrefix, true);
+    expect(mockStorage.set).toHaveBeenLastCalledWith(
+      `${localStorageKeyPrefix}:${TABLE_HIDDEN_KEY}`,
+      true
     );
     setTopPanelHeight(storage, localStorageKeyPrefix, 200);
     expect(mockStorage.set).toHaveBeenLastCalledWith(

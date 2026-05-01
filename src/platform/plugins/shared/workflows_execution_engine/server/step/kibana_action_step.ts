@@ -35,6 +35,19 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
   [key: string]: any;
 };
 
+/**
+ * Describes a single field in a multipart/form-data upload.
+ * Used by the `form_data` param of `kibana.request` steps.
+ */
+interface FormDataFieldSpec {
+  /** The field value / file content (string). */
+  content: string;
+  /** Optional filename hint (e.g. "export.ndjson"). */
+  filename?: string;
+  /** MIME type of the field value (e.g. "application/ndjson"). */
+  content_type?: string;
+}
+
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: KibanaGraphNode,
@@ -86,18 +99,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         },
       });
 
-      // Get Kibana base URL (respecting force flags) and authentication
+      // Get Kibana base URL (respecting force flags)
       const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
-      const authHeaders = this.getAuthHeaders();
 
       // Generic approach like Dev Console - just forward the request to Kibana
-      const result = await this.executeKibanaRequest(
-        kibanaUrl,
-        authHeaders,
-        stepType,
-        httpParams,
-        debug
-      );
+      const result = await this.executeKibanaRequest(kibanaUrl, stepType, httpParams, debug);
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'success' },
@@ -142,7 +148,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
   private getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       'kbn-xsrf': 'true',
     };
 
@@ -152,7 +157,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       // Use API key from fakeRequest if available
       headers.Authorization = fakeRequest.headers.authorization.toString();
     } else {
-      // error
       throw new Error('No authentication headers found');
     }
     return headers;
@@ -160,7 +164,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
   private async executeKibanaRequest(
     kibanaUrl: string,
-    authHeaders: Record<string, string>,
     stepType: string,
     params: any,
     debug: boolean = false
@@ -176,14 +179,42 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       method: string;
       path: string;
       body?: any;
+      formData?: Record<string, FormDataFieldSpec>;
       query?: any;
       headers?: Record<string, string>;
     };
 
+    if (cleanParams.body && cleanParams.form_data) {
+      throw new Error(
+        'Cannot set both body and form_data — they are mutually exclusive. ' +
+          'Use body for JSON requests, or form_data for multipart/form-data uploads.'
+      );
+    }
+
+    const authHeaders = this.getAuthHeaders();
+    const jsonContentType = { 'Content-Type': 'application/json' };
+
     if (cleanParams.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
-      requestConfig = { method, path, body, query, headers: { ...authHeaders, ...customHeaders } };
+      requestConfig = {
+        method,
+        path,
+        body,
+        query,
+        headers: { ...authHeaders, ...jsonContentType, ...customHeaders },
+      };
+    } else if (cleanParams.form_data) {
+      // form_data mode: POST multipart/form-data (e.g. saved objects import).
+      // Content-Type is intentionally omitted — fetch sets it automatically with the multipart boundary.
+      const { form_data, method = 'POST', path, query, headers: customHeaders } = cleanParams;
+      requestConfig = {
+        method,
+        path,
+        formData: form_data as Record<string, FormDataFieldSpec>,
+        query,
+        headers: { ...authHeaders, ...(customHeaders as Record<string, string> | undefined) },
+      };
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
       const {
@@ -198,7 +229,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         path,
         body,
         query,
-        headers: { ...authHeaders, ...connectorHeaders },
+        headers: { ...authHeaders, ...jsonContentType, ...connectorHeaders },
       };
     }
 
@@ -225,18 +256,40 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     return fullUrl;
   }
 
+  private buildFormData(formData: Record<string, FormDataFieldSpec>): FormData {
+    const fd = new FormData();
+    for (const [fieldName, spec] of Object.entries(formData)) {
+      if (spec.filename !== undefined) {
+        // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
+        const blob = new Blob([spec.content], {
+          type: spec.content_type ?? 'application/octet-stream',
+        });
+        fd.append(fieldName, blob, spec.filename);
+      } else if (spec.content_type !== undefined) {
+        // Typed blob without a filename (e.g. application/json fragment)
+        const blob = new Blob([spec.content], { type: spec.content_type });
+        fd.append(fieldName, blob);
+      } else {
+        // Plain text field — serialize as a string so Content-Disposition has no filename
+        fd.append(fieldName, spec.content);
+      }
+    }
+    return fd;
+  }
+
   private async makeHttpRequest(
     kibanaUrl: string,
     requestConfig: {
       method: string;
       path: string;
       body?: any;
+      formData?: Record<string, FormDataFieldSpec>;
       query?: any;
       headers?: Record<string, string>;
     },
     fetcherOptions?: FetcherOptions
   ): Promise<any> {
-    const { method, path, body, query, headers = {} } = requestConfig;
+    const { method, path, body, formData, query, headers = {} } = requestConfig;
 
     // Two paths can lead to emitEvent: (1) In-process: a workflow step (e.g. kibana.createCase) runs in
     // the same process and gets the fakeRequest from step context; getCasesClient(fakeRequest) and later
@@ -261,11 +314,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       fullUrl = `${fullUrl}?${queryString}`;
     }
 
+    // Build fetch body: multipart FormData or JSON
+    let fetchBody: RequestInit['body'];
+    if (formData) {
+      fetchBody = this.buildFormData(formData);
+    } else {
+      fetchBody = body != null ? JSON.stringify(body) : undefined;
+    }
+
     // Build fetch options
     const fetchOptions: RequestInit = {
       method,
       headers: outboundHeaders,
-      body: body ? JSON.stringify(body) : undefined,
+      body: fetchBody,
     };
 
     // Apply undici Agent with fetcher options

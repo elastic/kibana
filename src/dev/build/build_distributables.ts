@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import execa from 'execa';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -41,12 +42,21 @@ export interface BuildOptions {
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
   skipServerless: boolean;
+  tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
+  if (options.tarZstd) {
+    try {
+      await execa('zstd', ['--version']);
+    } catch {
+      throw new Error('--tar-zstd requires zstd to be installed.');
+    }
+  }
+
   log.verbose('building distributables with options:', options);
 
   log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);

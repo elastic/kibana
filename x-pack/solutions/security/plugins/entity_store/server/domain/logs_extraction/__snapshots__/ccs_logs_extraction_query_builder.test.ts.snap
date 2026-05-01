@@ -4,7 +4,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:metrics-*
     METADATA _index, _id
-  | WHERE 
+  | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
@@ -169,11 +169,194 @@ data_stream*,
 | LIMIT 5000"
 `;
 
+exports[`buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM remote:logs-*
+    METADATA _index, _id
+  | WHERE
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+      AND (
+      @timestamp > TO_DATETIME(\\"2022-01-01T06:00:00.000Z\\")
+      OR (
+        @timestamp == TO_DATETIME(\\"2022-01-01T06:00:00.000Z\\")
+        AND \`_id\` > \\"start-doc-id\\"
+      )
+    )
+      AND (
+      @timestamp < TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\")
+      OR (
+        @timestamp == TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\")
+        AND \`_id\` <= \\"end-doc-id\\"
+      )
+    )
+| EVAL _src_entity_source0 = MV_FIRST(event.module),
+ _src_entity_source1 = MV_FIRST(event.dataset),
+ _src_entity_source2 = MV_FIRST(data_stream.dataset),
+ _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL entity.id = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
+(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
+(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
+| STATS
+    @timestamp = MAX(@timestamp),
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
+    entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL,
+ host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE TO_STRING(host.entity.id) IS NOT NULL,
+ host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE TO_STRING(host.name) IS NOT NULL,
+ host.domain = MV_DEDUPE(TOP(TO_STRING(host.domain), 10)) WHERE TO_STRING(host.domain) IS NOT NULL,
+ host.hostname = MV_DEDUPE(TOP(TO_STRING(host.hostname), 10)) WHERE TO_STRING(host.hostname) IS NOT NULL,
+ host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE TO_STRING(host.id) IS NOT NULL,
+ host.os.name = MV_DEDUPE(TOP(TO_STRING(host.os.name), 10)) WHERE TO_STRING(host.os.name) IS NOT NULL,
+ host.os.type = MV_DEDUPE(TOP(TO_STRING(host.os.type), 10)) WHERE TO_STRING(host.os.type) IS NOT NULL,
+ host.ip = MV_DEDUPE(TOP(TO_IP(host.ip), 10)) WHERE TO_IP(host.ip) IS NOT NULL,
+ host.mac = MV_DEDUPE(TOP(TO_STRING(host.mac), 10)) WHERE TO_STRING(host.mac) IS NOT NULL,
+ host.type = MV_DEDUPE(TOP(TO_STRING(host.type), 10)) WHERE TO_STRING(host.type) IS NOT NULL,
+ host.architecture = MV_DEDUPE(TOP(TO_STRING(host.architecture), 10)) WHERE TO_STRING(host.architecture) IS NOT NULL,
+ host.boot.id = LAST(TO_STRING(host.boot.id), @timestamp) WHERE TO_STRING(host.boot.id) IS NOT NULL,
+ host.cpu.usage = LAST(host.cpu.usage, @timestamp) WHERE host.cpu.usage IS NOT NULL,
+ host.disk.read.bytes = LAST(TO_LONG(host.disk.read.bytes), @timestamp) WHERE TO_LONG(host.disk.read.bytes) IS NOT NULL,
+ host.disk.write.bytes = LAST(TO_LONG(host.disk.write.bytes), @timestamp) WHERE TO_LONG(host.disk.write.bytes) IS NOT NULL,
+ host.network.egress.bytes = LAST(TO_LONG(host.network.egress.bytes), @timestamp) WHERE TO_LONG(host.network.egress.bytes) IS NOT NULL,
+ host.network.egress.packets = LAST(TO_LONG(host.network.egress.packets), @timestamp) WHERE TO_LONG(host.network.egress.packets) IS NOT NULL,
+ host.network.ingress.bytes = LAST(TO_LONG(host.network.ingress.bytes), @timestamp) WHERE TO_LONG(host.network.ingress.bytes) IS NOT NULL,
+ host.network.ingress.packets = LAST(TO_LONG(host.network.ingress.packets), @timestamp) WHERE TO_LONG(host.network.ingress.packets) IS NOT NULL,
+ host.uptime = LAST(TO_LONG(host.uptime), @timestamp) WHERE TO_LONG(host.uptime) IS NOT NULL,
+ host.pid_ns_ino = LAST(TO_STRING(host.pid_ns_ino), @timestamp) WHERE TO_STRING(host.pid_ns_ino) IS NOT NULL,
+ host.os.family = LAST(TO_STRING(host.os.family), @timestamp) WHERE TO_STRING(host.os.family) IS NOT NULL,
+ host.os.full = LAST(TO_STRING(host.os.full), @timestamp) WHERE TO_STRING(host.os.full) IS NOT NULL,
+ host.os.kernel = LAST(TO_STRING(host.os.kernel), @timestamp) WHERE TO_STRING(host.os.kernel) IS NOT NULL,
+ host.os.platform = LAST(TO_STRING(host.os.platform), @timestamp) WHERE TO_STRING(host.os.platform) IS NOT NULL,
+ host.os.version = LAST(TO_STRING(host.os.version), @timestamp) WHERE TO_STRING(host.os.version) IS NOT NULL,
+ host.geo.city_name = LAST(TO_STRING(host.geo.city_name), @timestamp) WHERE TO_STRING(host.geo.city_name) IS NOT NULL,
+ host.geo.continent_code = LAST(TO_STRING(host.geo.continent_code), @timestamp) WHERE TO_STRING(host.geo.continent_code) IS NOT NULL,
+ host.geo.continent_name = LAST(TO_STRING(host.geo.continent_name), @timestamp) WHERE TO_STRING(host.geo.continent_name) IS NOT NULL,
+ host.geo.country_iso_code = LAST(TO_STRING(host.geo.country_iso_code), @timestamp) WHERE TO_STRING(host.geo.country_iso_code) IS NOT NULL,
+ host.geo.country_name = LAST(TO_STRING(host.geo.country_name), @timestamp) WHERE TO_STRING(host.geo.country_name) IS NOT NULL,
+ host.geo.name = MV_DEDUPE(TOP(TO_STRING(host.geo.name), 10)) WHERE TO_STRING(host.geo.name) IS NOT NULL,
+ host.geo.postal_code = MV_DEDUPE(TOP(TO_STRING(host.geo.postal_code), 10)) WHERE TO_STRING(host.geo.postal_code) IS NOT NULL,
+ host.geo.region_iso_code = MV_DEDUPE(TOP(TO_STRING(host.geo.region_iso_code), 10)) WHERE TO_STRING(host.geo.region_iso_code) IS NOT NULL,
+ host.geo.region_name = MV_DEDUPE(TOP(TO_STRING(host.geo.region_name), 10)) WHERE TO_STRING(host.geo.region_name) IS NOT NULL,
+ host.geo.timezone = MV_DEDUPE(TOP(TO_STRING(host.geo.timezone), 10)) WHERE TO_STRING(host.geo.timezone) IS NOT NULL,
+ cloud.provider = LAST(TO_STRING(cloud.provider), @timestamp) WHERE TO_STRING(cloud.provider) IS NOT NULL,
+ cloud.region = LAST(TO_STRING(cloud.region), @timestamp) WHERE TO_STRING(cloud.region) IS NOT NULL,
+ cloud.instance.id = LAST(TO_STRING(cloud.instance.id), @timestamp) WHERE TO_STRING(cloud.instance.id) IS NOT NULL,
+ cloud.machine.type = LAST(TO_STRING(cloud.machine.type), @timestamp) WHERE TO_STRING(cloud.machine.type) IS NOT NULL,
+ agent.id = LAST(TO_STRING(agent.id), @timestamp) WHERE TO_STRING(agent.id) IS NOT NULL,
+ agent.type = LAST(TO_STRING(agent.type), @timestamp) WHERE TO_STRING(agent.type) IS NOT NULL,
+ endpoint.id = LAST(TO_STRING(endpoint.id), @timestamp) WHERE TO_STRING(endpoint.id) IS NOT NULL,
+ asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE TO_STRING(asset.id) IS NOT NULL,
+ asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE TO_STRING(asset.name) IS NOT NULL,
+ asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE TO_STRING(asset.owner) IS NOT NULL,
+ asset.serial_number = LAST(TO_STRING(asset.serial_number), @timestamp) WHERE TO_STRING(asset.serial_number) IS NOT NULL,
+ asset.model = LAST(TO_STRING(asset.model), @timestamp) WHERE TO_STRING(asset.model) IS NOT NULL,
+ asset.vendor = LAST(TO_STRING(asset.vendor), @timestamp) WHERE TO_STRING(asset.vendor) IS NOT NULL,
+ asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
+ asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
+ asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
+ entity.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE TO_STRING(host.risk.calculated_level) IS NOT NULL,
+ entity.risk.calculated_score = LAST(TO_DOUBLE(host.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score) IS NOT NULL,
+ entity.risk.calculated_score_norm = LAST(TO_DOUBLE(host.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score_norm) IS NOT NULL,
+ event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE TO_STRING(event.module) IS NOT NULL,
+ event.dataset = MV_DEDUPE(TOP(TO_STRING(event.dataset), 10)) WHERE TO_STRING(event.dataset) IS NOT NULL,
+ data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE TO_STRING(data_stream.dataset) IS NOT NULL,
+ entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL,
+ entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE TO_STRING(host.entity.type) IS NOT NULL,
+ entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE TO_STRING(host.entity.sub_type) IS NOT NULL,
+ entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE TO_STRING(host.entity.url) IS NOT NULL,
+ entity.attributes.watchlists = MV_DEDUPE(TOP(TO_STRING(host.entity.attributes.watchlists), 10)) WHERE TO_STRING(host.entity.attributes.watchlists) IS NOT NULL,
+ entity.attributes.asset = LAST(TO_BOOLEAN(host.entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.asset) IS NOT NULL,
+ entity.attributes.managed = LAST(TO_BOOLEAN(host.entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.managed) IS NOT NULL,
+ entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(host.entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.mfa_enabled) IS NOT NULL,
+ entity.attributes.storage_class = LAST(TO_STRING(host.entity.attributes.storage_class), @timestamp) WHERE TO_STRING(host.entity.attributes.storage_class) IS NOT NULL,
+ entity.attributes.permissions = MV_DEDUPE(TOP(TO_STRING(host.entity.attributes.permissions), 10)) WHERE TO_STRING(host.entity.attributes.permissions) IS NOT NULL,
+ entity.attributes.known_redirects = MV_DEDUPE(TOP(TO_STRING(host.entity.attributes.known_redirects), 10)) WHERE TO_STRING(host.entity.attributes.known_redirects) IS NOT NULL,
+ entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
+ entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
+ entity.behaviors.rule_names = MV_DEDUPE(TOP(TO_STRING(host.entity.behaviors.rule_names), 100)) WHERE TO_STRING(host.entity.behaviors.rule_names) IS NOT NULL,
+ entity.behaviors.anomaly_job_ids = MV_DEDUPE(TOP(TO_STRING(host.entity.behaviors.anomaly_job_ids), 100)) WHERE TO_STRING(host.entity.behaviors.anomaly_job_ids) IS NOT NULL,
+ entity.relationships.administers.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.host.id), 10)) WHERE TO_STRING(host.entity.relationships.administers.host.id) IS NOT NULL,
+ entity.relationships.administers.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.user.id), 10)) WHERE TO_STRING(host.entity.relationships.administers.user.id) IS NOT NULL,
+ entity.relationships.administers.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.user.email), 10)) WHERE TO_STRING(host.entity.relationships.administers.user.email) IS NOT NULL,
+ entity.relationships.administers.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.host.name), 10)) WHERE TO_STRING(host.entity.relationships.administers.host.name) IS NOT NULL,
+ entity.relationships.administers.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.user.name), 10)) WHERE TO_STRING(host.entity.relationships.administers.user.name) IS NOT NULL,
+ entity.relationships.administers.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.service.name), 10)) WHERE TO_STRING(host.entity.relationships.administers.service.name) IS NOT NULL,
+ entity.relationships.administers.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.administers.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.administers.entity.id) IS NOT NULL,
+ entity.relationships.communicates_with.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.host.id), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.host.id) IS NOT NULL,
+ entity.relationships.communicates_with.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.user.id), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.user.id) IS NOT NULL,
+ entity.relationships.communicates_with.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.user.email), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.user.email) IS NOT NULL,
+ entity.relationships.communicates_with.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.host.name), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.host.name) IS NOT NULL,
+ entity.relationships.communicates_with.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.user.name), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.user.name) IS NOT NULL,
+ entity.relationships.communicates_with.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.service.name), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.service.name) IS NOT NULL,
+ entity.relationships.communicates_with.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.communicates_with.entity.id) IS NOT NULL,
+ entity.relationships.depends_on.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.host.id), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.host.id) IS NOT NULL,
+ entity.relationships.depends_on.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.user.id), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.user.id) IS NOT NULL,
+ entity.relationships.depends_on.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.user.email), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.user.email) IS NOT NULL,
+ entity.relationships.depends_on.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.host.name), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.host.name) IS NOT NULL,
+ entity.relationships.depends_on.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.user.name), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.user.name) IS NOT NULL,
+ entity.relationships.depends_on.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.service.name), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.service.name) IS NOT NULL,
+ entity.relationships.depends_on.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.depends_on.entity.id) IS NOT NULL,
+ entity.relationships.owns_inferred.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.host.id), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.host.id) IS NOT NULL,
+ entity.relationships.owns_inferred.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.user.id), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.user.id) IS NOT NULL,
+ entity.relationships.owns_inferred.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.user.email), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.user.email) IS NOT NULL,
+ entity.relationships.owns_inferred.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.host.name), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.host.name) IS NOT NULL,
+ entity.relationships.owns_inferred.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.user.name), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.user.name) IS NOT NULL,
+ entity.relationships.owns_inferred.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.service.name), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.service.name) IS NOT NULL,
+ entity.relationships.owns_inferred.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.owns_inferred.entity.id) IS NOT NULL,
+ entity.relationships.accesses_infrequently.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.host.id), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.host.id) IS NOT NULL,
+ entity.relationships.accesses_infrequently.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.user.id), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.user.id) IS NOT NULL,
+ entity.relationships.accesses_infrequently.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.user.email), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.user.email) IS NOT NULL,
+ entity.relationships.accesses_infrequently.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.host.name), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.host.name) IS NOT NULL,
+ entity.relationships.accesses_infrequently.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.user.name), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.user.name) IS NOT NULL,
+ entity.relationships.accesses_infrequently.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.service.name), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.service.name) IS NOT NULL,
+ entity.relationships.accesses_infrequently.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.accesses_infrequently.entity.id) IS NOT NULL,
+ entity.relationships.accesses_frequently.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.host.id), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.host.id) IS NOT NULL,
+ entity.relationships.accesses_frequently.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.user.id), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.user.id) IS NOT NULL,
+ entity.relationships.accesses_frequently.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.user.email), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.user.email) IS NOT NULL,
+ entity.relationships.accesses_frequently.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.host.name), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.host.name) IS NOT NULL,
+ entity.relationships.accesses_frequently.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.user.name), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.user.name) IS NOT NULL,
+ entity.relationships.accesses_frequently.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.service.name), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.service.name) IS NOT NULL,
+ entity.relationships.accesses_frequently.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_frequently.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.accesses_frequently.entity.id) IS NOT NULL,
+ entity.relationships.owns.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.host.id), 10)) WHERE TO_STRING(host.entity.relationships.owns.host.id) IS NOT NULL,
+ entity.relationships.owns.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.user.id), 10)) WHERE TO_STRING(host.entity.relationships.owns.user.id) IS NOT NULL,
+ entity.relationships.owns.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.user.email), 10)) WHERE TO_STRING(host.entity.relationships.owns.user.email) IS NOT NULL,
+ entity.relationships.owns.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.host.name), 10)) WHERE TO_STRING(host.entity.relationships.owns.host.name) IS NOT NULL,
+ entity.relationships.owns.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.user.name), 10)) WHERE TO_STRING(host.entity.relationships.owns.user.name) IS NOT NULL,
+ entity.relationships.owns.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.service.name), 10)) WHERE TO_STRING(host.entity.relationships.owns.service.name) IS NOT NULL,
+ entity.relationships.owns.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.owns.entity.id) IS NOT NULL,
+ entity.relationships.supervises.raw_identifiers.host.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.host.id), 10)) WHERE TO_STRING(host.entity.relationships.supervises.host.id) IS NOT NULL,
+ entity.relationships.supervises.raw_identifiers.user.id = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.user.id), 10)) WHERE TO_STRING(host.entity.relationships.supervises.user.id) IS NOT NULL,
+ entity.relationships.supervises.raw_identifiers.user.email = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.user.email), 10)) WHERE TO_STRING(host.entity.relationships.supervises.user.email) IS NOT NULL,
+ entity.relationships.supervises.raw_identifiers.host.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.host.name), 10)) WHERE TO_STRING(host.entity.relationships.supervises.host.name) IS NOT NULL,
+ entity.relationships.supervises.raw_identifiers.user.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.user.name), 10)) WHERE TO_STRING(host.entity.relationships.supervises.user.name) IS NOT NULL,
+ entity.relationships.supervises.raw_identifiers.service.name = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.service.name), 10)) WHERE TO_STRING(host.entity.relationships.supervises.service.name) IS NOT NULL,
+ entity.relationships.supervises.ids = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.supervises.entity.id), 10)) WHERE TO_STRING(host.entity.relationships.supervises.entity.id) IS NOT NULL,
+ entity.relationships.resolution.resolved_to = LAST(TO_STRING(host.entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.resolved_to) IS NOT NULL,
+ entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(host.entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
+ entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
+ entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL
+    BY entity.id
+| KEEP entity*,
+host*,
+cloud*,
+agent*,
+endpoint*,
+asset*,
+event*,
+data_stream*,
+@timestamp
+| SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC
+| LIMIT 10000"
+`;
+
 exports[`buildCcsLogsExtractionEsqlQuery generates expected query with pagination 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
     METADATA _index, _id
-  | WHERE 
+  | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
@@ -330,7 +513,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query for generic entity type
 "SET unmapped_fields=\\"nullify\\";
 FROM remote_cluster:logs-*
     METADATA _index, _id
-  | WHERE 
+  | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))

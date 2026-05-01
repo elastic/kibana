@@ -41,7 +41,7 @@ describe('formatResearcherActionHistory', () => {
       makeExecuteToolAction([{ toolCallId: 'c1', content: 'result' }]),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     const aiMsg = messages[0];
     expect(isAIMessage(aiMsg as AIMessage)).toBe(true);
@@ -57,7 +57,7 @@ describe('formatResearcherActionHistory', () => {
       makeExecuteToolAction([{ toolCallId: 'c1', content: 'result' }]),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     const aiMsg = messages[0];
     expect(isAIMessage(aiMsg as AIMessage)).toBe(true);
@@ -76,7 +76,7 @@ describe('formatResearcherActionHistory', () => {
       ]),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     const aiMsg = messages[0] as AIMessage;
     expect(aiMsg.tool_calls).toHaveLength(2);
