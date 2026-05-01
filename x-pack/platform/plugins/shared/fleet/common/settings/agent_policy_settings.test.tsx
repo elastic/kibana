@@ -6,7 +6,6 @@
  */
 
 import {
-  getAgentPolicyAdvancedSettings,
   zodStringWithDurationValidation,
   zodStringWithYamlValidation,
 } from './agent_policy_settings';
