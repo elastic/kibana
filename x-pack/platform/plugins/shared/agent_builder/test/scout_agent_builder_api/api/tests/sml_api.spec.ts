@@ -10,11 +10,9 @@ import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
-import type { SmlAttachHttpResponse, SmlSearchHttpResponse } from '../../../../common/http_api/sml';
-import {
-  smlElasticsearchIndexMappings,
-  smlIndexName,
-} from '../../../../server/services/sml/sml_storage';
+import type { SmlSearchHttpResponse } from '@kbn/agent-context-layer-plugin/common/http_api/sml';
+import { smlElasticsearchIndexMappings, smlIndexName } from '../../../../server';
+import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
@@ -22,7 +20,12 @@ import {
 import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fixtures/constants';
+import {
+  API_AGENT_BUILDER,
+  COMMON_HEADERS,
+  INTERNAL_AGENT_BUILDER,
+  INTERNAL_AGENT_CONTEXT_LAYER,
+} from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
 apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
@@ -81,7 +84,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest('POST /internal/agent_builder/sml/_search autocomplete', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
+    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
       headers: ih(),
       body: { query: 'pacif', size: 20 },
       responseType: 'json',
@@ -99,7 +102,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   apiTest(
     'POST /internal/agent_builder/sml/_search wildcard returns expected item fields',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
+      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
         headers: ih(),
         body: { query: '*', size: 10 },
         responseType: 'json',
@@ -122,7 +125,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   apiTest(
     'POST /internal/agent_builder/sml/_search omits content when skip_content is true',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
+      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
         headers: ih(),
         body: { query: '*', size: 10, skip_content: true },
         responseType: 'json',
@@ -137,7 +140,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   );
 
   apiTest('POST /internal/agent_builder/sml/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
+    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
       headers: ih(),
       body: { query: '' },
       responseType: 'json',

@@ -24,8 +24,12 @@ const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 
 const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`;
 
+const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>(['bedrock-claude-sonnet-3-7']);
+
 /** Mirrors FTR `x-pack/platform/test/agent_builder/smoke_tests/tests/index.ts` (no try/catch). */
-const allStaticConnectors: AvailableConnectorWithId[] = getAvailableConnectors();
+const allStaticConnectors: AvailableConnectorWithId[] = getAvailableConnectors().filter(
+  (c) => !EXCLUDED_STATIC_CONNECTOR_IDS.has(c.id)
+);
 const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout();
 
 let eisCcmConfigured = false;

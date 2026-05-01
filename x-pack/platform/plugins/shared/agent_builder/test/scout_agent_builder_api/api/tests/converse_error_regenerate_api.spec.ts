@@ -97,7 +97,9 @@ apiTest.describe(
           expect(lastToolMessage).toBeDefined();
           const toolContent = lastToolMessage!.content as string;
           const errorMessage = toolContentToErrorMessage(toolContent);
-          expect(String(errorMessage)).toContain('ERROR: called a tool which was not available');
+          expect(String(errorMessage)).toContain(
+            'ERROR: tool_not_found - called a tool which was not available'
+          );
         }
       );
 

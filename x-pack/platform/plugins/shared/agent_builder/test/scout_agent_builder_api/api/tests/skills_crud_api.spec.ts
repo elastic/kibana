@@ -15,7 +15,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     const createdSkillIds: string[] = [];
-    const BUILTIN_SKILL_ID = 'data-exploration';
+    const BUILTIN_SKILL_ID = 'visualization-creation';
     const mockSkill = {
       id: 'test-skill',
       name: 'test-skill',
@@ -30,7 +30,7 @@ apiTest.describe(
       }
     });
 
-    apiTest('GET lists built-in data-exploration skill', async ({ asAdmin }) => {
+    apiTest('GET lists built-in visualization-creation skill', async ({ asAdmin }) => {
       const response = await asAdmin.get(`${API_AGENT_BUILDER}/skills`, {
         responseType: 'json',
       });

@@ -15,7 +15,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     const createdSkillIds: string[] = [];
-    const BUILTIN_SKILL_ID = 'data-exploration';
+    const BUILTIN_SKILL_ID = 'visualization-creation';
 
     apiTest.afterAll(async ({ asAdmin }) => {
       for (const skillId of createdSkillIds) {
