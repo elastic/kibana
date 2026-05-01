@@ -189,7 +189,7 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -210,17 +210,19 @@ export const EntitiesDataTable = ({
       const panelParam = EntityPanelParamByType[entityType];
       if (!panelKey || !panelParam) return;
 
-      openRightPanel({
-        id: panelKey,
-        params: {
-          [panelParam]: entityName,
-          entityId,
-          contextID: ENTITY_ANALYTICS_TABLE_ID,
-          scopeId: ENTITY_ANALYTICS_TABLE_ID,
+      openFlyout({
+        right: {
+          id: panelKey,
+          params: {
+            [panelParam]: entityName,
+            entityId,
+            contextID: ENTITY_ANALYTICS_TABLE_ID,
+            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+          },
         },
       });
     },
-    [openRightPanel, closeFlyout]
+    [openFlyout, closeFlyout]
   );
 
   const {

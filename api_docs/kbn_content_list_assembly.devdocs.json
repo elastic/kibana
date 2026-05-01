@@ -13,7 +13,15 @@
         ],
         "label": "AssemblyFactory",
         "description": [
-          "\nFactory for defining parts and parsing children within an assembly.\n\nCreated by {@link defineAssembly}. Provides `definePart` for creating\ntyped part factories and `parseChildren` for extracting configuration\nfrom React children.\n"
+          "\nFactory for defining parts and parsing children within an assembly.\n\nCreated by ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.defineAssembly",
+            "text": "defineAssembly"
+          },
+          ". Provides `definePart` for creating\ntyped part factories and `parseChildren` for extracting configuration\nfrom React children.\n"
         ],
         "signature": [
           {
@@ -113,7 +121,15 @@
               }
             ],
             "returnComment": [
-              "A {@link PartFactory } for creating presets and components."
+              "A ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.PartFactory",
+                "text": "PartFactory"
+              },
+              " for creating presets and components."
             ]
           },
           {
@@ -158,6 +174,7 @@
                 "lineNumber": 235,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReactNode",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -371,7 +388,15 @@
         ],
         "label": "PartFactory",
         "description": [
-          "\nFactory for creating parts within an assembly.\n\nCreated by {@link AssemblyFactory.definePart}. Provides methods to\ncreate preset components, generic components, and to tag existing\ncomponents with assembly metadata.\n"
+          "\nFactory for creating parts within an assembly.\n\nCreated by ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.AssemblyFactory.definePart",
+            "text": "AssemblyFactory.definePart"
+          },
+          ". Provides methods to\ncreate preset components, generic components, and to tag existing\ncomponents with assembly metadata.\n"
         ],
         "signature": [
           {
@@ -398,7 +423,15 @@
             ],
             "label": "createPreset",
             "description": [
-              "\nCreate a preset component. The props type is inferred from the\npreset-to-props mapping provided to `definePart`.\n\nOptionally provide a `resolve` callback that converts declarative\nattributes into concrete output (e.g., an `EuiBasicTableColumn`).\nThe callback is stored internally and invoked by {@link resolve}.\n"
+              "\nCreate a preset component. The props type is inferred from the\npreset-to-props mapping provided to `definePart`.\n\nOptionally provide a `resolve` callback that converts declarative\nattributes into concrete output (e.g., an `EuiBasicTableColumn`).\nThe callback is stored internally and invoked by ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.resolve",
+                "text": "resolve"
+              },
+              ".\n"
             ],
             "signature": [
               "<K extends keyof TPresetMap & string>(definition: { name: K; resolve?: ((attributes: TPresetMap[K], context: TContext) => TOutput | undefined) | undefined; }) => React.FC<TPresetMap[K]>"
@@ -491,6 +524,7 @@
                         "lineNumber": 99,
                         "columnNumber": 43,
                         "deprecated": false,
+                        "docsReferencedTypeName": "TContext",
                         "trackAdoption": false,
                         "isRequired": true
                       }
@@ -552,6 +586,7 @@
                 "lineNumber": 114,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ParsedPart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -571,6 +606,7 @@
                 "lineNumber": 114,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "TContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -621,6 +657,7 @@
                 "lineNumber": 126,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReactNode",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -696,6 +733,7 @@
                         "lineNumber": 143,
                         "columnNumber": 16,
                         "deprecated": false,
+                        "docsReferencedTypeName": "P",
                         "trackAdoption": false,
                         "isRequired": true
                       },
@@ -713,6 +751,7 @@
                         "lineNumber": 143,
                         "columnNumber": 31,
                         "deprecated": false,
+                        "docsReferencedTypeName": "TContext",
                         "trackAdoption": false,
                         "isRequired": true
                       }
@@ -762,6 +801,7 @@
                 "lineNumber": 158,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "C",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -844,6 +884,7 @@
             "lineNumber": 59,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -856,7 +897,15 @@
         "tags": [],
         "label": "DeclarativeReturn",
         "description": [
-          "\nReturn type for declarative components.\n\nPrefer {@link DeclarativeComponent} when possible. Use `DeclarativeReturn`\ndirectly when you need to hand-write the full function signature.\n"
+          "\nReturn type for declarative components.\n\nPrefer ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.DeclarativeComponent",
+            "text": "DeclarativeComponent"
+          },
+          " when possible. Use `DeclarativeReturn`\ndirectly when you need to hand-write the full function signature.\n"
         ],
         "signature": [
           "null"
@@ -877,7 +926,15 @@
         ],
         "label": "defineAssembly",
         "description": [
-          "\nDefine a new assembly.\n\nReturns an {@link AssemblyFactory} that provides `definePart()` for\ncreating typed part factories and `parseChildren()` for extracting\nconfiguration from React children.\n"
+          "\nDefine a new assembly.\n\nReturns an ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.AssemblyFactory",
+            "text": "AssemblyFactory"
+          },
+          " that provides `definePart()` for\ncreating typed part factories and `parseChildren()` for extracting\nconfiguration from React children.\n"
         ],
         "signature": [
           "any"

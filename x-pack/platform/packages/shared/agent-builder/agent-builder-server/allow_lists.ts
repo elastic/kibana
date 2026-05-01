@@ -45,23 +45,14 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
-  // Streams – read
-  `${internalNamespaces.streams}.list_streams`,
-  `${internalNamespaces.streams}.get_stream`,
-  `${internalNamespaces.streams}.get_schema`,
-  `${internalNamespaces.streams}.get_data_quality`,
-  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  // Streams
+  `${internalNamespaces.streams}.inspect_streams`,
+  `${internalNamespaces.streams}.diagnose_stream`,
   `${internalNamespaces.streams}.query_documents`,
-  `${internalNamespaces.streams}.get_failed_documents`,
-
-  // Streams – write
-  `${internalNamespaces.streams}.set_retention`,
-  `${internalNamespaces.streams}.fork_stream`,
+  `${internalNamespaces.streams}.design_pipeline`,
+  `${internalNamespaces.streams}.update_stream`,
+  `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
-  `${internalNamespaces.streams}.update_processors`,
-  `${internalNamespaces.streams}.map_fields`,
-  `${internalNamespaces.streams}.set_failure_store`,
-  `${internalNamespaces.streams}.update_stream_description`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -120,6 +111,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'knowledge-indicators-management',
+  'ki-identification-management',
 
   // Platform – Workflows
   'workflow-authoring',

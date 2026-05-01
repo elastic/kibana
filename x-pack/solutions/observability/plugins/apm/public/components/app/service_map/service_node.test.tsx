@@ -129,6 +129,16 @@ describe('ServiceNode', () => {
     expect(label).toBeInTheDocument();
   });
 
+  it('renders context highlight frame when contextHighlight is set', () => {
+    renderServiceNode(createServiceNodeData({ contextHighlight: true }), false);
+    expect(screen.getByTestId('serviceMapNodeContextHighlightFrame')).toBeInTheDocument();
+  });
+
+  it('keeps context highlight frame when the node is selected', () => {
+    renderServiceNode(createServiceNodeData({ contextHighlight: true }), true);
+    expect(screen.getByTestId('serviceMapNodeContextHighlightFrame')).toBeInTheDocument();
+  });
+
   it('renders without icon when agentName is not provided', () => {
     renderServiceNode(createServiceNodeData({ agentName: undefined }));
     expect(screen.queryByRole('img')).not.toBeInTheDocument();

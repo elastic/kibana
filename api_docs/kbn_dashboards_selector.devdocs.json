@@ -165,6 +165,7 @@
                     "lineNumber": 71,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Array",
                     "trackAdoption": false,
                     "isRequired": true
                   }

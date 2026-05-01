@@ -148,6 +148,7 @@ dependsOn:
   - '@kbn/as-code-filters-constants'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/reporting-public'
 tags:
   - plugin
   - prod

@@ -84,7 +84,11 @@ async function mockIntegrationsList(page: ScoutPage, items: unknown[]) {
   );
 }
 
-async function mockIntegrationDetails(page: ScoutPage, integrationId: string) {
+async function mockIntegrationDetails(
+  page: ScoutPage,
+  integrationId: string,
+  options?: { categories?: string[] }
+) {
   await page.route(`**/api/automatic_import/integrations/${integrationId}`, (route) =>
     route.fulfill({
       status: 200,
@@ -94,6 +98,7 @@ async function mockIntegrationDetails(page: ScoutPage, integrationId: string) {
           title: 'Completed Integration',
           version: '1.0.0',
           dataStreams: [],
+          ...(options?.categories ? { categories: options.categories } : {}),
         },
       }),
     })
@@ -211,6 +216,28 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
       .getReviewApproveInlineBtn('Completed Integration')
       .click();
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
+  });
+
+  test('Review modal pre-selects categories returned by the integration API', async ({
+    page,
+    pageObjects,
+  }) => {
+    await mockIntegrationsList(page, [MOCK_COMPLETED]);
+    await mockIntegrationDetails(page, MOCK_COMPLETED.integrationId, {
+      categories: ['security'],
+    });
+    await page.route('**/api/fleet/epm/categories**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [{ id: 'security', title: 'Security', count: 1 }] }),
+      })
+    );
+    await pageObjects.manageIntegrationsTable.navigateTo();
+    await pageObjects.manageIntegrationsTable.openActionsMenu('Completed Integration');
+    await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()).toBeEnabled();
   });
 
   test('Approve button is disabled until version and category are filled', async ({

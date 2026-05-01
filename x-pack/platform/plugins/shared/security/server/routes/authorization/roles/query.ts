@@ -43,22 +43,46 @@ export function defineQueryRolesRoutes({
         version: API_VERSIONS.roles.public.v1,
         validate: {
           request: {
-            body: schema.object({
-              query: schema.maybe(schema.string()),
-              from: schema.maybe(schema.number()),
-              size: schema.maybe(schema.number()),
-              sort: schema.maybe(
-                schema.object({
-                  field: schema.string(),
-                  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
-                })
-              ),
-              filters: schema.maybe(
-                schema.object({
-                  showReservedRoles: schema.maybe(schema.boolean({ defaultValue: true })),
-                })
-              ),
-            }),
+            body: schema.object(
+              {
+                query: schema.maybe(schema.string()),
+                from: schema.maybe(schema.number()),
+                size: schema.maybe(schema.number()),
+                sort: schema.maybe(
+                  schema.object(
+                    {
+                      field: schema.string(),
+                      direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+                    },
+                    {
+                      meta: {
+                        id: 'security_query_roles_sort',
+                        description: 'The sort criteria for the query.',
+                      },
+                    }
+                  )
+                ),
+                filters: schema.maybe(
+                  schema.object(
+                    {
+                      showReservedRoles: schema.maybe(schema.boolean({ defaultValue: true })),
+                    },
+                    {
+                      meta: {
+                        id: 'security_query_roles_filters',
+                        description: 'The filter criteria for the query.',
+                      },
+                    }
+                  )
+                ),
+              },
+              {
+                meta: {
+                  id: 'security_query_roles_body',
+                  description: 'The request body for querying roles.',
+                },
+              }
+            ),
           },
           response: {
             200: {

@@ -318,6 +318,7 @@
             "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -341,6 +342,7 @@
             "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -466,6 +468,7 @@
             "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -549,6 +552,7 @@
             "lineNumber": 31,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevel",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -573,6 +577,7 @@
             "lineNumber": 31,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "Writer",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -786,6 +791,7 @@
             "lineNumber": 22,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -809,6 +815,7 @@
             "lineNumber": 22,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2144,6 +2151,7 @@
             "lineNumber": 221,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldDiscoveryDataParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4662,6 +4670,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ComponentTemplateName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4734,6 +4743,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmSynthtracePipelines",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4751,6 +4761,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmPipelineOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5851,6 +5862,7 @@
                 "lineNumber": 36,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexTemplateName",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5889,6 +5901,7 @@
                 "lineNumber": 37,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexTemplateName",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6063,6 +6076,7 @@
                 "lineNumber": 52,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "MappingTypeMapping",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -7591,6 +7605,7 @@
                 "lineNumber": 34,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsGeneratorConfig",
                 "trackAdoption": false
               }
             ]

@@ -179,6 +179,7 @@
                 "lineNumber": 38,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -215,6 +216,7 @@
                 "lineNumber": 42,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Function",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -265,6 +267,7 @@
                 "lineNumber": 46,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsManagementRecord",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -442,6 +445,7 @@
                 "lineNumber": 30,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ColumnContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -478,6 +482,7 @@
                 "lineNumber": 34,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Function",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -631,6 +636,7 @@
             "lineNumber": 19,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Query",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -701,6 +707,7 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsImportResponse",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -964,7 +971,15 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "public",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-public.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
         "lineNumber": 13,
@@ -1079,7 +1094,15 @@
         "tags": [],
         "label": "SavedObjectRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
+          "\nRepresents a relation between two ",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "public",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-public.SavedObjectWithMetadata",
+            "text": "saved objects"
+          },
+          "."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
         "lineNumber": 58,
@@ -1756,6 +1779,7 @@
               "lineNumber": 19,
               "columnNumber": 28,
               "deprecated": false,
+              "docsReferencedTypeName": "Query",
               "trackAdoption": false
             },
             {
@@ -1815,7 +1839,7 @@
               "id": "def-public.SavedObjectsManagementPluginStart.getTagFindReferences.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n  selectedTags,\n  taggingApi,\n}",
               "description": [],
               "signature": [
                 "{ selectedTags?: string[] | undefined; taggingApi?: ",
@@ -1852,7 +1876,15 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "server",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-server.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
         "lineNumber": 13,
@@ -2200,7 +2232,15 @@
         "tags": [],
         "label": "SavedObjectInvalidRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
+          "\nRepresents a relation between two ",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "saved objects"
+          },
+          "."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
         "lineNumber": 70,
@@ -2344,7 +2384,15 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
         "lineNumber": 13,
@@ -2459,7 +2507,15 @@
         "tags": [],
         "label": "SavedObjectRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
+          "\nRepresents a relation between two ",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "saved objects"
+          },
+          "."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
         "lineNumber": 58,

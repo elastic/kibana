@@ -93,12 +93,7 @@
     "updatedAt",
     "updatedBy"
   ],
-  "alerting_api_key_pending_invalidation": [
-    "apiKeyId",
-    "createdAt",
-    "uiamApiKey"
-  ],
-  "alerting_notification_policy": [
+  "alerting_action_policy": [
     "auth",
     "auth.apiKey",
     "auth.createdByUser",
@@ -121,6 +116,11 @@
     "updatedAt",
     "updatedBy",
     "updatedByUsername"
+  ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
   ],
   "alerting_rule": [
     "createdAt",
@@ -479,6 +479,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-ccs-state": [],
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",

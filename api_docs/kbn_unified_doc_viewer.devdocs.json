@@ -113,6 +113,7 @@
                 "lineNumber": 43,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "DocView",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -322,6 +323,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -357,6 +359,7 @@
             "lineNumber": 31,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -396,6 +399,7 @@
             "lineNumber": 13,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "AnalyticsServiceSetup",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -449,6 +453,7 @@
             "lineNumber": 146,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDocViewerSpanLogViewedEventParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -502,6 +507,7 @@
             "lineNumber": 118,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDocViewerTabViewedEventParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -555,6 +561,7 @@
             "lineNumber": 62,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDocViewerViewedEventParams",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -1,0 +1,2537 @@
+{
+  "id": "@kbn/workflows-yaml",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.InvalidYamlSchemaError",
+        "type": "Class",
+        "tags": [],
+        "label": "InvalidYamlSchemaError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.InvalidYamlSchemaError",
+            "text": "InvalidYamlSchemaError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.InvalidYamlSchemaError.formattedZodError",
+            "type": "Object",
+            "tags": [],
+            "label": "formattedZodError",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.FormattedZodError",
+                "text": "FormattedZodError"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.InvalidYamlSchemaError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.InvalidYamlSchemaError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+                "lineNumber": 32,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.InvalidYamlSchemaError.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "formattedZodError",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows-yaml",
+                    "scope": "common",
+                    "docId": "kibKbnWorkflowsYamlPluginApi",
+                    "section": "def-common.FormattedZodError",
+                    "text": "FormattedZodError"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+                "lineNumber": 32,
+                "columnNumber": 32,
+                "deprecated": false,
+                "docsReferencedTypeName": "FormattedZodError",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.InvalidYamlSyntaxError",
+        "type": "Class",
+        "tags": [],
+        "label": "InvalidYamlSyntaxError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.InvalidYamlSyntaxError",
+            "text": "InvalidYamlSyntaxError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_syntax.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.InvalidYamlSyntaxError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_syntax.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.InvalidYamlSyntaxError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_syntax.ts",
+                "lineNumber": 11,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.WorkflowConflictError",
+        "type": "Class",
+        "tags": [],
+        "label": "WorkflowConflictError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.WorkflowConflictError",
+            "text": "WorkflowConflictError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowConflictError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "signature": [
+              "409"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowConflictError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.WorkflowConflictError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+                "lineNumber": 13,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.WorkflowConflictError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "workflowId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+                "lineNumber": 13,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowConflictError.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => { error: string; message: string; statusCode: number; workflowId: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.WorkflowValidationError",
+        "type": "Class",
+        "tags": [],
+        "label": "WorkflowValidationError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.WorkflowValidationError",
+            "text": "WorkflowValidationError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowValidationError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "signature": [
+              "400"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowValidationError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.WorkflowValidationError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+                "lineNumber": 13,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.WorkflowValidationError.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "validationErrors",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+                "lineNumber": 13,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowValidationError.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => { error: string; message: string; statusCode: number; validationErrors: string[] | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.clearEnrichmentCache",
+        "type": "Function",
+        "tags": [],
+        "label": "clearEnrichmentCache",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.enrichErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "enrichErrorMessage",
+        "description": [],
+        "signature": [
+          "(path: PropertyKey[], originalMessage: string, errorCode: string, context: ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.ErrorContext",
+            "text": "ErrorContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.EnrichmentResult",
+            "text": "EnrichmentResult"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.enrichErrorMessage.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "PropertyKey[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.enrichErrorMessage.$2",
+            "type": "string",
+            "tags": [],
+            "label": "originalMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.enrichErrorMessage.$3",
+            "type": "string",
+            "tags": [],
+            "label": "errorCode",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.enrichErrorMessage.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.ErrorContext",
+                "text": "ErrorContext"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ErrorContext",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.extractLiquidErrorPosition",
+        "type": "Function",
+        "tags": [],
+        "label": "extractLiquidErrorPosition",
+        "description": [
+          "\nExtracts position information from liquidjs error messages\nBy default, liquidjs returns the start of the line of the error message\nThis function tries to pinpoint the specific problematic token rather than just the start of the expression"
+        ],
+        "signature": [
+          "(text: string, errorMessage: string) => { start: number; end: number; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/extract_liquid_error_position.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.extractLiquidErrorPosition.$1",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/extract_liquid_error_position.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.extractLiquidErrorPosition.$2",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/extract_liquid_error_position.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.formatZodError",
+        "type": "Function",
+        "tags": [],
+        "label": "formatZodError",
+        "description": [
+          "\nFormats Zod validation errors into user-friendly messages.\nUses schema-aware enrichment to provide helpful hints about expected values."
+        ],
+        "signature": [
+          "(error: ",
+          "ZodError",
+          "<unknown> | ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.MockZodError",
+            "text": "MockZodError"
+          },
+          ", options: ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.FormatZodErrorOptions",
+            "text": "FormatZodErrorOptions"
+          },
+          ") => FormatZodErrorResult"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.formatZodError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ZodError",
+              "<unknown> | ",
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.MockZodError",
+                "text": "MockZodError"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.formatZodError.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.FormatZodErrorOptions",
+                "text": "FormatZodErrorOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "FormatZodErrorOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getCompactTypeDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getCompactTypeDescription",
+        "description": [
+          "\nGet a compact type description suitable for tooltips"
+        ],
+        "signature": [
+          "(schema: ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/zod_type_description.ts",
+        "lineNumber": 279,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getCompactTypeDescription.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/zod_type_description.ts",
+            "lineNumber": 282,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getDetailedTypeDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getDetailedTypeDescription",
+        "description": [
+          "\nGenerate a detailed human-readable type description from a Zod schema"
+        ],
+        "signature": [
+          "(schema: ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>, options: Partial<GenerateDetailedDescriptionOptions>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/zod_type_description.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getDetailedTypeDescription.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/zod_type_description.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getDetailedTypeDescription.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Partial<GenerateDetailedDescriptionOptions>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/zod_type_description.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Partial",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getLiquidInstance",
+        "type": "Function",
+        "tags": [],
+        "label": "getLiquidInstance",
+        "description": [
+          "\nReturns the shared workflow Liquid engine instance (lazy-initialized).\nRegisters stub filters so that parse() does not throw on known filter names."
+        ],
+        "signature": [
+          "() => ",
+          "Liquid"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/liquid_parse_cache.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getLiteralDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getLiteralDescription",
+        "description": [],
+        "signature": [
+          "(schema: ",
+          "ZodLiteral",
+          "<",
+          "Literal",
+          ">) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/get_zod_type_name.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getLiteralDescription.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodLiteral",
+              "<",
+              "Literal",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/get_zod_type_name.ts",
+            "lineNumber": 72,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getYamlDocumentErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "getYamlDocumentErrors",
+        "description": [],
+        "signature": [
+          "(document: ",
+          "Document",
+          "<",
+          "Node",
+          "<unknown>, true>) => ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.InvalidYamlSyntaxError",
+            "text": "InvalidYamlSyntaxError"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/validate_yaml_document.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getYamlDocumentErrors.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "document",
+            "description": [],
+            "signature": [
+              "Document",
+              "<",
+              "Node",
+              "<unknown>, true>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/validate_yaml_document.ts",
+            "lineNumber": 14,
+            "columnNumber": 39,
+            "deprecated": false,
+            "docsReferencedTypeName": "Document",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getZodTypeName",
+        "type": "Function",
+        "tags": [],
+        "label": "getZodTypeName",
+        "description": [],
+        "signature": [
+          "(schema: ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/get_zod_type_name.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getZodTypeName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/get_zod_type_name.ts",
+            "lineNumber": 12,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.inferZodType",
+        "type": "Function",
+        "tags": [],
+        "label": "inferZodType",
+        "description": [
+          "\nInfer a zod schema from an object."
+        ],
+        "signature": [
+          "(obj: unknown, { isConst = false }: { isConst?: boolean | undefined; }) => ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/infer_zod_type.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.inferZodType.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "obj",
+            "description": [
+              "- The object to infer the schema from."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/infer_zod_type.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.inferZodType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ isConst = false }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/infer_zod_type.ts",
+            "lineNumber": 20,
+            "columnNumber": 24,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows-yaml",
+                "id": "def-common.inferZodType.$2.isConst",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isConst",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/infer_zod_type.ts",
+                "lineNumber": 20,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "The inferred zod schema."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.isDynamicValue",
+        "type": "Function",
+        "tags": [],
+        "label": "isDynamicValue",
+        "description": [
+          "\nChecks if a value matches the dynamic/templated value pattern ($<something>)\nExamples: ${{env.USER}}, ${{ref:myVar}}, ${{someVariable}}\nPattern: starts with ${{ and ends with }}, and any non-empty string in between"
+        ],
+        "signature": [
+          "(value: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.isDynamicValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+            "lineNumber": 65,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.isLiquidTagValue",
+        "type": "Function",
+        "tags": [],
+        "label": "isLiquidTagValue",
+        "description": [
+          "\nChecks if a value contains Liquid tag patterns ({% ... %} or {%- ... -%})\nExamples: {% if condition %}, {%- if condition -%}, multi-line blocks with Liquid tags\nPattern: matches {% or {%- followed by content and %} or -%}\nThe 's' flag allows . to match newlines for multi-line support"
+        ],
+        "signature": [
+          "(value: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.isLiquidTagValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+            "lineNumber": 96,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.isVariableValue",
+        "type": "Function",
+        "tags": [],
+        "label": "isVariableValue",
+        "description": [
+          "\nChecks if a value matches the variable pattern ({{ variable }})\nExamples: {{ variable }}, {{ variable | filter }}\nPattern: starts with {{ and ends with }}, and any non-empty string in between"
+        ],
+        "signature": [
+          "(value: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.isVariableValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+            "lineNumber": 79,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.isWorkflowConflictError",
+        "type": "Function",
+        "tags": [],
+        "label": "isWorkflowConflictError",
+        "description": [],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.isWorkflowConflictError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_conflict_error.ts",
+            "lineNumber": 28,
+            "columnNumber": 41,
+            "deprecated": false,
+            "docsReferencedTypeName": "Error",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.isWorkflowValidationError",
+        "type": "Function",
+        "tags": [],
+        "label": "isWorkflowValidationError",
+        "description": [],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.isWorkflowValidationError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/workflow_validation_error.ts",
+            "lineNumber": 28,
+            "columnNumber": 43,
+            "deprecated": false,
+            "docsReferencedTypeName": "Error",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.parseTemplateString",
+        "type": "Function",
+        "tags": [],
+        "label": "parseTemplateString",
+        "description": [
+          "\nParses a Liquid template string and caches the result.\nUses a bounded LRU cache: when the cache exceeds MAX_PARSE_CACHE_SIZE,\nthe least-recently-used entry is evicted."
+        ],
+        "signature": [
+          "(templateString: string) => ",
+          "Template",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/liquid_parse_cache.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.parseTemplateString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "templateString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/liquid_parse_cache.ts",
+            "lineNumber": 58,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.parseWorkflowYamlForAutocomplete",
+        "type": "Function",
+        "tags": [],
+        "label": "parseWorkflowYamlForAutocomplete",
+        "description": [],
+        "signature": [
+          "(yamlString: string) => ",
+          "ZodSafeParseResult",
+          "<any> | { success: false; error: Error; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_for_autocomplete.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.parseWorkflowYamlForAutocomplete.$1",
+            "type": "string",
+            "tags": [],
+            "label": "yamlString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_for_autocomplete.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.parseWorkflowYamlToJSON",
+        "type": "Function",
+        "tags": [],
+        "label": "parseWorkflowYamlToJSON",
+        "description": [],
+        "signature": [
+          "(yamlString: string, schema: T, options: ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.ParseWorkflowYamlToJSONOptions",
+            "text": "ParseWorkflowYamlToJSONOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.ParseWorkflowYamlToJSONResult",
+            "text": "ParseWorkflowYamlToJSONResult"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.parseWorkflowYamlToJSON.$1",
+            "type": "string",
+            "tags": [],
+            "label": "yamlString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.parseWorkflowYamlToJSON.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "T",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.parseWorkflowYamlToJSON.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.ParseWorkflowYamlToJSONOptions",
+                "text": "ParseWorkflowYamlToJSONOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ParseWorkflowYamlToJSONOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.parseYamlToJSONWithoutValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "parseYamlToJSONWithoutValidation",
+        "description": [
+          "\nParse a YAML string to a JSON object. This function is dangerous because it does not use schema to validate the resulting JSON object."
+        ],
+        "signature": [
+          "(yamlString: string) => ParseYamlToJSONWithoutValidationResult"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json_without_validation.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.parseYamlToJSONWithoutValidation.$1",
+            "type": "string",
+            "tags": [],
+            "label": "yamlString",
+            "description": [
+              "- The YAML string to parse."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json_without_validation.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The JSON object and the YAML document. The document is always\navailable regardless of success/failure because `parseDocument` is\nerror-tolerant."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.stringifyWorkflowDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "stringifyWorkflowDefinition",
+        "description": [
+          "\nStringify the workflow definition to a YAML string."
+        ],
+        "signature": [
+          "(workflowDefinition: Record<string, any>, sortKeys: boolean) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/stringify_workflow_definition.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.stringifyWorkflowDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "workflowDefinition",
+            "description": [
+              "- The workflow definition as a JSON object."
+            ],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/stringify_workflow_definition.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Record",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.stringifyWorkflowDefinition.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "sortKeys",
+            "description": [
+              "- Whether to sort the keys of the workflow definition."
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/stringify_workflow_definition.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The YAML string of the workflow definition."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.updateYamlField",
+        "type": "Function",
+        "tags": [],
+        "label": "updateYamlField",
+        "description": [
+          "\nUpdates a field in YAML while preserving comments, formatting, and blank lines.\nThis is useful when updating workflow metadata (like enabled, name, description, tags)\nwithout losing user's formatting and comments.\n"
+        ],
+        "signature": [
+          "(yamlString: string, fieldPath: string, value: unknown) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/update_yaml_field.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.updateYamlField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "yamlString",
+            "description": [
+              "- The original YAML string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/update_yaml_field.ts",
+            "lineNumber": 22,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.updateYamlField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldPath",
+            "description": [
+              "- The dot-notated path to the field to update (e.g., 'enabled', 'name', 'parent.child')"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/update_yaml_field.ts",
+            "lineNumber": 22,
+            "columnNumber": 53,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.updateYamlField.$3",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The new value for the field"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/update_yaml_field.ts",
+            "lineNumber": 22,
+            "columnNumber": 72,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The updated YAML string with formatting preserved"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.validateLiquidTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "validateLiquidTemplate",
+        "description": [],
+        "signature": [
+          "(yamlString: string, yamlDocument: ",
+          "Document",
+          "<",
+          "Node",
+          "<unknown>, true>) => ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.LiquidValidationError",
+            "text": "LiquidValidationError"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.validateLiquidTemplate.$1",
+            "type": "string",
+            "tags": [],
+            "label": "yamlString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.validateLiquidTemplate.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "yamlDocument",
+            "description": [],
+            "signature": [
+              "Document",
+              "<",
+              "Node",
+              "<unknown>, true>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Document",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.EnrichmentResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "EnrichmentResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.EnrichmentResult.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.EnrichmentResult.enriched",
+            "type": "boolean",
+            "tags": [],
+            "label": "enriched",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.ErrorContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.ErrorContext.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.ErrorContext.yamlDocument",
+            "type": "Object",
+            "tags": [],
+            "label": "yamlDocument",
+            "description": [],
+            "signature": [
+              "Document",
+              "<",
+              "Node",
+              "<unknown>, true> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.ErrorContext.connectorParamsSchemaResolver",
+            "type": "Function",
+            "tags": [],
+            "label": "connectorParamsSchemaResolver",
+            "description": [
+              "\nOptional resolver that returns the params schema for a given connector/step\ntype. When omitted, connector-specific error enrichment is skipped and\nenrichment falls back to the workflow schema."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.ConnectorParamsSchemaResolver",
+                "text": "ConnectorParamsSchemaResolver"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.FormattedZodError",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormattedZodError",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.FormattedZodError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.FormattedZodError.issues",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "issues",
+            "description": [],
+            "signature": [
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue[] | ",
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.MockZodIssue",
+                "text": "MockZodIssue"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.FormatZodErrorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormatZodErrorOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.FormatZodErrorOptions.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "Optional workflow schema for enhanced error messages"
+            ],
+            "signature": [
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.FormatZodErrorOptions.yamlDocument",
+            "type": "Object",
+            "tags": [],
+            "label": "yamlDocument",
+            "description": [
+              "Optional parsed YAML document for step type lookups"
+            ],
+            "signature": [
+              "Document",
+              "<",
+              "Node",
+              "<unknown>, true> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.FormatZodErrorOptions.connectorParamsSchemaResolver",
+            "type": "Function",
+            "tags": [],
+            "label": "connectorParamsSchemaResolver",
+            "description": [
+              "Optional resolver for connector-specific params schemas (injected from the host plugin)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.ConnectorParamsSchemaResolver",
+                "text": "ConnectorParamsSchemaResolver"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/format_zod_error.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LiquidValidationError",
+        "type": "Interface",
+        "tags": [],
+        "label": "LiquidValidationError",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.LiquidValidationError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.LiquidValidationError.startLine",
+            "type": "number",
+            "tags": [],
+            "label": "startLine",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.LiquidValidationError.startColumn",
+            "type": "number",
+            "tags": [],
+            "label": "startColumn",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.LiquidValidationError.endLine",
+            "type": "number",
+            "tags": [],
+            "label": "endLine",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.LiquidValidationError.endColumn",
+            "type": "number",
+            "tags": [],
+            "label": "endColumn",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/liquid/validate_liquid_template.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.MockZodError",
+        "type": "Interface",
+        "tags": [],
+        "label": "MockZodError",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.MockZodError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.MockZodError.issues",
+            "type": "Array",
+            "tags": [],
+            "label": "issues",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.MockZodIssue",
+                "text": "MockZodIssue"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.MockZodIssue",
+        "type": "Interface",
+        "tags": [],
+        "label": "MockZodIssue",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.MockZodIssue.code",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"unknown\" | \"invalid_literal\""
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.MockZodIssue.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.MockZodIssue.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.MockZodIssue.received",
+            "type": "string",
+            "tags": [],
+            "label": "received",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/errors/invalid_yaml_schema.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.ParseWorkflowYamlToJSONOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParseWorkflowYamlToJSONOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.ParseWorkflowYamlToJSONOptions.connectorParamsSchemaResolver",
+            "type": "Function",
+            "tags": [],
+            "label": "connectorParamsSchemaResolver",
+            "description": [
+              "Optional resolver for connector-specific params schemas, injected from the host plugin"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.ConnectorParamsSchemaResolver",
+                "text": "ConnectorParamsSchemaResolver"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.ConnectorParamsSchemaResolver",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorParamsSchemaResolver",
+        "description": [],
+        "signature": [
+          "(stepType: string) => ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>> | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.ConnectorParamsSchemaResolver.$1",
+            "type": "string",
+            "tags": [],
+            "label": "stepType",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/zod/enrich_error_message.ts",
+            "lineNumber": 16,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.ParseWorkflowYamlToJSONResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ParseWorkflowYamlToJSONResult",
+        "description": [],
+        "signature": [
+          "(",
+          "ZodSafeParseResult",
+          "<T> | { success: false; error: Error; }) & { document: ",
+          "Document",
+          "<",
+          "Node",
+          "<unknown>, true>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/parse_workflow_yaml_to_json.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.WORKFLOW_DEFINITION_KEYS_ORDER",
+        "type": "Array",
+        "tags": [],
+        "label": "WORKFLOW_DEFINITION_KEYS_ORDER",
+        "description": [],
+        "signature": [
+          "(string | number | symbol)[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/stringify_workflow_definition.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.ALLOWED_KEY_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "ALLOWED_KEY_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.DYNAMIC_VALUE_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "DYNAMIC_VALUE_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_BLOCK_END_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_BLOCK_END_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_BLOCK_FILTER_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_BLOCK_FILTER_REGEX",
+        "description": [
+          "\nLIQUID_BLOCK_FILTER_REGEX matches a variable followed by a filter within a Liquid block, but outside mustache syntax.\n\nRegex breakdown:\n(?:^|[^{])      - Non-capturing group: start of line or any character except '{' (to avoid mustache blocks)\n\\s*             - Optional whitespace\n[^{}\\s]+        - One or more characters that are not '{', '}', or whitespace (the variable name)\n\\s*             - Optional whitespace\n\\|              - Pipe character separating variable and filter\n\\s*             - Optional whitespace\n(\\w*)           - Capturing group: the filter name (alphanumeric/underscore)\n\\s*$            - Optional whitespace to end of line\n\nExample match: \"foo | filter\""
+        ],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_BLOCK_KEYWORD_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_BLOCK_KEYWORD_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_BLOCK_START_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_BLOCK_START_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_EXPRESSION_REGEX_GLOBAL",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_EXPRESSION_REGEX_GLOBAL",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_FILTER_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_FILTER_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_OUTPUT_REGEX_GLOBAL",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_OUTPUT_REGEX_GLOBAL",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_TAG_REGEX_GLOBAL",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_TAG_REGEX_GLOBAL",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.LIQUID_TAG_VALUE_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LIQUID_TAG_VALUE_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 88,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.PROPERTY_PATH_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "PROPERTY_PATH_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.UNFINISHED_VARIABLE_REGEX_GLOBAL",
+        "type": "Object",
+        "tags": [],
+        "label": "UNFINISHED_VARIABLE_REGEX_GLOBAL",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.VARIABLE_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "VARIABLE_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.VARIABLE_REGEX_GLOBAL",
+        "type": "Object",
+        "tags": [],
+        "label": "VARIABLE_REGEX_GLOBAL",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.VARIABLE_VALUE_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "VARIABLE_VALUE_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
