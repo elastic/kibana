@@ -135,7 +135,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with an expired exception', () => {
-      // TODO make this create rule exception lists
       before(async () => {
         await createExceptionListItem(supertest, log, {
           ...getCreateExceptionListItemMinimalSchemaMock({
