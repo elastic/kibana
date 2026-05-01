@@ -63,6 +63,7 @@ export interface GroupedModel {
   taskTypes: InferenceTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
+  modelMetadata?: EisInferenceEndpointMetadata;
 }
 
 export const getModelName = (endpoint: EisInferenceEndpoint): string => {
@@ -78,6 +79,13 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
     return endpoint.metadata.display.model_creator;
   }
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
+};
+
+export const getModelMetadata = (
+  endpoint: EisInferenceEndpoint
+): EisInferenceEndpointMetadata | undefined => {
+  if (isInferenceEndpointWithMetadata(endpoint)) return endpoint.metadata;
+  return undefined;
 };
 
 const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
@@ -119,6 +127,9 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
+      if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
+        existing.modelMetadata = ep.metadata;
+      }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
       groups.set(key, {
@@ -128,6 +139,7 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
         taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],
         endpoints: [ep],
+        modelMetadata: getModelMetadata(ep),
       });
     }
   }
