@@ -7,10 +7,15 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
+import { FLYOUT_V2_ALERT_PAGINATION_TEST_ID } from './components/test_ids';
+import {
+  __resetAlertsTablePaginationStoreForTests,
+  alertsTablePaginationStore,
+} from '../../../detections/components/alerts_table/alerts_table_pagination_store';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -122,6 +127,13 @@ const renderHeader = (props: RenderHeaderProps) =>
   );
 
 describe('<DocumentHeader />', () => {
+  beforeEach(() => {
+    __resetAlertsTablePaginationStoreForTests();
+  });
+  afterEach(() => {
+    __resetAlertsTablePaginationStoreForTests();
+  });
+
   it('should pass the hit to the severity component', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
@@ -202,5 +214,100 @@ describe('<DocumentHeader />', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  describe('alert pagination', () => {
+    it('does not render the pagination control when no alerts table is driving the flyout', () => {
+      const { queryByTestId } = renderHeader({ hit: alertHit });
+      expect(queryByTestId(FLYOUT_V2_ALERT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render the pagination control when only one alert is in the result set', () => {
+      act(() => {
+        alertsTablePaginationStore.setState({
+          flyoutAlertIndex: 0,
+          pageSize: 50,
+          totalAlertCount: 1,
+        });
+      });
+      const { queryByTestId } = renderHeader({ hit: alertHit });
+      expect(queryByTestId(FLYOUT_V2_ALERT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('renders the pagination control with page count equal to the total alert count', () => {
+      act(() => {
+        alertsTablePaginationStore.setState({
+          flyoutAlertIndex: 2,
+          pageSize: 50,
+          totalAlertCount: 1432,
+        });
+      });
+      const { getByTestId } = renderHeader({ hit: alertHit });
+      const pagination = getByTestId(FLYOUT_V2_ALERT_PAGINATION_TEST_ID);
+      expect(pagination).toBeInTheDocument();
+      // The compressed EuiPagination renders a "{active+1} of {total}" label.
+      expect(pagination).toHaveTextContent('3 of 1432');
+    });
+
+    it('uses the absolute alert index when computing the active page', () => {
+      act(() => {
+        alertsTablePaginationStore.setState({
+          // 2nd alert of the 2nd page (page size 50) → absolute index 51.
+          flyoutAlertIndex: 51,
+          pageSize: 50,
+          totalAlertCount: 1432,
+        });
+      });
+      const { getByTestId } = renderHeader({ hit: alertHit });
+      const pagination = getByTestId(FLYOUT_V2_ALERT_PAGINATION_TEST_ID);
+      expect(pagination).toHaveTextContent('52 of 1432');
+    });
+
+    it('opens the next/prev alert via the AlertsContext when pagination is clicked', () => {
+      const openAlertFlyoutImpl = jest.fn();
+      act(() => {
+        alertsTablePaginationStore.setState({
+          flyoutAlertIndex: 49,
+          pageSize: 50,
+          totalAlertCount: 1432,
+          openAlertFlyoutImpl,
+        });
+      });
+      const { getByTestId } = renderHeader({ hit: alertHit });
+      const pagination = getByTestId(FLYOUT_V2_ALERT_PAGINATION_TEST_ID);
+
+      const nextButton = pagination.querySelector('[data-test-subj="pagination-button-next"]');
+      expect(nextButton).not.toBeNull();
+      fireEvent.click(nextButton as HTMLElement);
+
+      // Last alert of page 1 (absolute index 49) → next is the first alert of
+      // page 2 (absolute index 50). Pagination crosses the page boundary
+      // without changing the underlying table page.
+      expect(openAlertFlyoutImpl).toHaveBeenCalledWith(50);
+
+      const prevButton = pagination.querySelector('[data-test-subj="pagination-button-previous"]');
+      expect(prevButton).not.toBeNull();
+      fireEvent.click(prevButton as HTMLElement);
+
+      expect(openAlertFlyoutImpl).toHaveBeenCalledWith(48);
+    });
+
+    it('renders the pagination control even on non-alert documents (the alerts table is the source of truth)', () => {
+      // For Flyout V2, every alert in the result set is shown — there is no
+      // separate "rule preview" mode (that lives in V1 only). When an alerts
+      // table is driving the flyout, render the pagination unconditionally
+      // for documents that are events or alerts; the alerts table only ever
+      // fills the store with alerts, so a non-alert hit here is paranoid
+      // defensive behaviour.
+      act(() => {
+        alertsTablePaginationStore.setState({
+          flyoutAlertIndex: 1,
+          pageSize: 50,
+          totalAlertCount: 5,
+        });
+      });
+      const { getByTestId } = renderHeader({ hit: eventHit });
+      expect(getByTestId(FLYOUT_V2_ALERT_PAGINATION_TEST_ID)).toBeInTheDocument();
+    });
   });
 });

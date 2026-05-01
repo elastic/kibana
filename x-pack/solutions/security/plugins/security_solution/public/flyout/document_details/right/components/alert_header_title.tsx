@@ -57,12 +57,6 @@ export const AlertHeaderTitle = memo(() => {
   // is only a single alert to navigate.
   const showPagination =
     totalAlertCount > 1 && flyoutAlertIndex != null && flyoutAlertIndex >= 0 && !isRulePreview;
-  const onPaginationClick = useCallback(
-    (newAbsoluteIndex: number) => {
-      openAlertFlyout(newAbsoluteIndex);
-    },
-    [openAlertFlyout]
-  );
 
   const { refetch } = useRefetchByScope({ scopeId });
 
@@ -115,7 +109,7 @@ export const AlertHeaderTitle = memo(() => {
                 aria-label={PAGINATION_ARIA_LABEL}
                 pageCount={totalAlertCount}
                 activePage={flyoutAlertIndex}
-                onPageClick={onPaginationClick}
+                onPageClick={openAlertFlyout}
                 compressed
                 data-test-subj={FLYOUT_ALERT_PAGINATION_TEST_ID}
               />
