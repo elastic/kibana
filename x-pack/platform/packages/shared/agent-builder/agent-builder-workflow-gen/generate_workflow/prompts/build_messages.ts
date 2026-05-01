@@ -67,6 +67,10 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
             success: action.success,
             ...(action.error !== undefined ? { error: action.error } : {}),
             ...(action.data !== undefined ? { data: action.data } : {}),
+            ...(action.currentYaml !== undefined
+              ? { currentWorkflowYaml: action.currentYaml }
+              : {}),
+            ...(action.validation !== undefined ? { validation: action.validation } : {}),
           },
         })
       );
