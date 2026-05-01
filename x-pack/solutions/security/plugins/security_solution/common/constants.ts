@@ -59,7 +59,8 @@ export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
-export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 10_000 as const;
+export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -717,6 +718,7 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
+  entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
 }
 

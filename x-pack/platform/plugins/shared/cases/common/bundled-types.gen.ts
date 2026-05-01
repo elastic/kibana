@@ -409,70 +409,6 @@ export const CaseResponseClosedByProperties = lazySchema(() =>
 );
 export type CaseResponseClosedByProperties = z.infer<typeof CaseResponseClosedByProperties>;
 
-export const CaseResponseCreatedByProperties = lazySchema(() =>
-  z.object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  })
-);
-export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
-
-export const CaseResponsePushedByProperties = lazySchema(() =>
-  z
-    .object({
-      email: z.string().nullable(),
-      full_name: z.string().nullable(),
-      username: z.string().nullable(),
-      profile_uid: z.string().optional(),
-    })
-    .nullable()
-);
-export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
-
-export const CaseResponseUpdatedByProperties = lazySchema(() =>
-  z
-    .object({
-      email: z.string().nullable(),
-      full_name: z.string().nullable(),
-      username: z.string().nullable(),
-      profile_uid: z.string().optional(),
-    })
-    .nullable()
-);
-export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
-
-export const ActionsCommentResponseProperties = lazySchema(() =>
-  z.object({
-    actions: z
-      .object({
-        targets: z
-          .array(
-            z.object({
-              endpointId: z.string().optional(),
-              hostname: z.string().optional(),
-            })
-          )
-          .optional(),
-        type: z.string().optional(),
-      })
-      .optional(),
-    comment: z.string().optional(),
-    created_at: z.string().datetime().optional(),
-    created_by: CaseResponseCreatedByProperties.optional(),
-    id: z.string().optional(),
-    owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
-    pushed_by: CaseResponsePushedByProperties.optional(),
-    type: z.literal('actions'),
-    updated_at: z.string().datetime().nullable().optional(),
-    updated_by: CaseResponseUpdatedByProperties.optional(),
-    version: z.string().optional(),
-  })
-);
-export type ActionsCommentResponseProperties = z.infer<typeof ActionsCommentResponseProperties>;
-
 export const AlertCommentResponseProperties = lazySchema(() =>
   z.object({
     alertId: z.array(z.string()).optional(),
@@ -525,6 +461,40 @@ export const AlertCommentResponseProperties = lazySchema(() =>
   })
 );
 export type AlertCommentResponseProperties = z.infer<typeof AlertCommentResponseProperties>;
+
+export const CaseResponseCreatedByProperties = lazySchema(() =>
+  z.object({
+    email: z.string().nullable(),
+    full_name: z.string().nullable(),
+    username: z.string().nullable(),
+    profile_uid: z.string().optional(),
+  })
+);
+export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
+
+export const CaseResponsePushedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
+export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
+
+export const CaseResponseUpdatedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
+export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
 
 export const EventCommentResponseProperties = lazySchema(() =>
   z.object({
@@ -640,7 +610,6 @@ export const CaseResponseProperties = lazySchema(() =>
     comments: z
       .array(
         z.discriminatedUnion('type', [
-          ActionsCommentResponseProperties,
           AlertCommentResponseProperties,
           EventCommentResponseProperties,
           UserCommentResponseProperties,

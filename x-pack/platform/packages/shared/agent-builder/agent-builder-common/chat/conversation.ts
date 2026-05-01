@@ -6,6 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { ToolOrigin } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -127,6 +128,7 @@ export interface ToolCallWithResult {
    * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
    */
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<

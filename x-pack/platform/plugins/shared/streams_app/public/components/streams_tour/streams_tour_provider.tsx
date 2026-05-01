@@ -35,9 +35,11 @@ import {
 import type { StreamsTourStepId } from './constants';
 import type { TourStepConfig } from './tour_steps_config';
 import { getTourStepsConfig } from './tour_steps_config';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useKibana } from '../../hooks/use_kibana';
-import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../../common/locators';
+import type {
+  StreamsAppLocator,
+  StreamsAppLocatorDefinitionParams,
+} from '../../../common/locators';
 
 export type StreamsTourStepProps = Omit<EuiTourStepProps, 'children' | 'anchor'> & {
   stepId: StreamsTourStepId;
@@ -155,16 +157,15 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     },
     core: { notifications },
   } = useKibana();
-  const { features } = useStreamsPrivileges();
   const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
   const streamsLocator = useMemo(
     () =>
-      share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
+      share.url.locators.get<StreamsAppLocatorDefinitionParams>(
+        STREAMS_APP_LOCATOR_ID
+      ) as StreamsAppLocator,
     [share.url.locators]
   );
-  const attachmentsEnabled = features.attachments.enabled;
-
   const [isCalloutDismissed = false, setCalloutDismissed] = useLocalStorage(
     STREAMS_TOUR_CALLOUT_DISMISSED_KEY,
     false
@@ -178,10 +179,7 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   );
   const prevStepRef = useRef<number>(persistedTourState?.currentTourStep ?? 1);
 
-  const stepsConfig = useMemo(
-    () => getTourStepsConfig({ attachmentsEnabled }),
-    [attachmentsEnabled]
-  );
+  const stepsConfig = useMemo(() => getTourStepsConfig(), []);
 
   const restoredTourState: EuiTourState = {
     ...DEFAULT_TOUR_STATE,

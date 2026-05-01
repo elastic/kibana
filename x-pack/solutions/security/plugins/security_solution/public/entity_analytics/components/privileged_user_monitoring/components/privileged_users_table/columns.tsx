@@ -207,7 +207,7 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
     query: getAlertsByStatusQuery({
       from,
       to,
-      identityFields: { 'user.name': userName },
+      entityFilters: [{ term: { 'user.name': userName } }],
     }),
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
@@ -217,7 +217,7 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
       getAlertsByStatusQuery({
         from,
         to,
-        identityFields: { 'user.name': userName },
+        entityFilters: [{ term: { 'user.name': userName } }],
       })
     );
   }, [setAlertsQuery, from, to, userName]);

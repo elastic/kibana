@@ -34,7 +34,7 @@ export const getDefaultRiskEngineConfiguration = ({
   filter: {},
   identifierType: undefined,
   interval: '1h',
-  pageSize: 3_500,
+  pageSize: 10_000,
   range: { start: 'now-30d', end: 'now' },
   enableResetToZero: true,
   excludeAlertStatuses: ['closed'],
@@ -163,7 +163,7 @@ const adoptLegacyConfigurationSavedObject = async ({
   const adoptedConfiguration = await createConfigurationSavedObject({
     savedObjectsClient,
     namespace,
-    attributes: chosenConfiguration.attributes,
+    attributes: { ...chosenConfiguration.attributes, pageSize: 10_000 },
   });
 
   for (const legacy of allLegacyConfigurations) {

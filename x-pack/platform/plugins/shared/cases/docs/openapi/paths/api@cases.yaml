@@ -63,7 +63,7 @@ delete:
           examples:
             response401:
               $ref: '../components/examples/response_401.yaml'
-  x-code-samples:
+  x-codeSamples:
     - label: curl
       lang: curl
       source: |

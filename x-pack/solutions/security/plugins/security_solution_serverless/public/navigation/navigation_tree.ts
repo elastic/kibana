@@ -39,6 +39,10 @@ export const createNavigationTree = async (
         renderAs: 'home',
       },
       {
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'email',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },

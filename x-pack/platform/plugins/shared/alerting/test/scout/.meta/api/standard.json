@@ -1,5 +1,5 @@
 {
-  "sha1": "b0cba678da5eefa8bf502c8ce06ecb8d1294285a",
+  "sha1": "dff766802eaaae5aa9191e6e69521f0106822900",
   "tests": [
     {
       "id": "d477aadf04adbc2-d5bf7aa0c833ea4",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 12
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 12
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 158,
+        "line": 170,
         "column": 12
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 206,
+        "line": 229,
         "column": 12
       }
     },

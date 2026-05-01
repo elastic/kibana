@@ -39,6 +39,7 @@ import {
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
@@ -56,6 +57,7 @@ export interface RulesClientFactoryOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
+  changeTrackingService?: IChangeTrackingService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
@@ -85,6 +87,7 @@ export class RulesClientFactory {
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
+  private changeTrackingService?: IChangeTrackingService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
@@ -116,6 +119,7 @@ export class RulesClientFactory {
     this.internalSavedObjectsRepository = options.internalSavedObjectsRepository;
     this.actions = options.actions;
     this.eventLog = options.eventLog;
+    this.changeTrackingService = options.changeTrackingService;
     this.kibanaVersion = options.kibanaVersion;
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
@@ -278,6 +282,7 @@ export class RulesClientFactory {
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      changeTrackingService: this.changeTrackingService,
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,

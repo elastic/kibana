@@ -11,18 +11,27 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
-import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
+import {
+  SlackCreateConversationInputSchema,
+  SlackInviteToConversationInputSchema,
+  SlackListChannelsInputSchema,
+  SlackResolveChannelIdInputSchema,
+  SlackSearchMessagesInputSchema,
+  SlackSendMessageInputSchema,
+  SLACK_SEARCH_DEFAULT_COUNT,
+  type SlackAssistantSearchContextResponse,
+  type SlackConversationsListParams,
+  type SlackConversationsListResponse,
+  type SlackCreateConversationInput,
+  type SlackErrorFields,
+  type SlackInviteToConversationInput,
+  type SlackListChannelsInput,
+  type SlackResolveChannelIdInput,
+  type SlackSearchMessagesInput,
+  type SlackSendMessageInput,
+} from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
-const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
-
-// Slack API/connector constants (avoid magic numbers)
-const SLACK_MAX_SEARCH_RESULTS_PER_PAGE = 20;
-const SLACK_SEARCH_DEFAULT_COUNT = SLACK_MAX_SEARCH_RESULTS_PER_PAGE;
-const SLACK_MAX_CONVERSATIONS_LIST_LIMIT = 1000;
-const SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT = SLACK_MAX_CONVERSATIONS_LIST_LIMIT;
-const SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES = 10;
-const SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES = 100;
 
 const SLACK_RETRY_DEFAULT_BASE_DELAY_MS = 1000;
 const SLACK_RETRY_JITTER_MAX_MS = 250;
@@ -32,170 +41,6 @@ const SLACK_MAX_RETRIES = 5;
 
 // Tiny async sleep helper
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const SlackSearchMessagesInputSchema = z.object({
-  query: z
-    .string()
-    .min(1)
-    .describe(
-      'Plain text search query to find messages. Do NOT embed Slack search operators like from: or in: here — use the dedicated fromUser, inChannel, after, and before parameters instead. Keep queries focused on a few keywords rather than long phrases for better results.'
-    ),
-  inChannel: z
-    .string()
-    .optional()
-    .describe(
-      'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).'
-    ),
-  fromUser: z
-    .string()
-    .optional()
-    .describe(
-      "Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query. Accepts a Slack username or user ID, NOT a full name. If you only know a person's full name, search for it as keywords in the query parameter first, then use the sender.username field from results for subsequent filtered searches."
-    ),
-  after: z
-    .string()
-    .optional()
-    .describe(
-      'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).'
-    ),
-  before: z
-    .string()
-    .optional()
-    .describe(
-      'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).'
-    ),
-  sort: z
-    .enum(['score', 'timestamp'])
-    .optional()
-    .describe('Sort order: score (relevance) or timestamp'),
-  sortDir: z.enum(['asc', 'desc']).optional().describe('Sort direction'),
-  count: z
-    .number()
-    .int()
-    .min(1)
-    .max(SLACK_MAX_SEARCH_RESULTS_PER_PAGE)
-    .optional()
-    .describe(
-      `Number of results to return (1-${SLACK_MAX_SEARCH_RESULTS_PER_PAGE}). Slack returns up to ${SLACK_MAX_SEARCH_RESULTS_PER_PAGE} results per page.`
-    ),
-  cursor: z
-    .string()
-    .optional()
-    .describe(
-      'Pagination cursor to fetch the next page of results (use response_metadata.next_cursor from a previous call).'
-    ),
-  includeContextMessages: z
-    .boolean()
-    .optional()
-    .describe(
-      'Include contextual messages (messages before/after the matched message, or thread context). Defaults to true.'
-    ),
-  includeBots: z.boolean().optional().describe('Include bot-authored messages. Defaults to false.'),
-  includeMessageBlocks: z
-    .boolean()
-    .optional()
-    .describe(
-      'Include Block Kit blocks in message results (useful for extracting mentions/links). Defaults to true.'
-    ),
-  raw: z
-    .boolean()
-    .optional()
-    .describe('Return the full raw Slack API response instead of a compact, LLM-friendly result.'),
-});
-type SlackSearchMessagesInput = z.infer<typeof SlackSearchMessagesInputSchema>;
-
-const SlackResolveChannelIdInputSchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .describe(
-      'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).'
-    ),
-  types: z
-    .array(z.enum(SLACK_CONVERSATION_TYPES))
-    .optional()
-    .describe(
-      'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.'
-    ),
-  match: z
-    .enum(['exact', 'contains'])
-    .optional()
-    .describe(
-      'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.'
-    ),
-  excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
-  cursor: z
-    .string()
-    .optional()
-    .describe('Optional cursor to resume a previous scan (advanced). Usually omit.'),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(SLACK_MAX_CONVERSATIONS_LIST_LIMIT)
-    .optional()
-    .describe(
-      `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`
-    ),
-  maxPages: z
-    .number()
-    .int()
-    .min(1)
-    .max(SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES)
-    .optional()
-    .describe(
-      `Maximum number of pages to scan before giving up. Defaults to ${SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES}.`
-    ),
-});
-type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
-
-const SlackCreateConversationInputSchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .describe(
-      'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.'
-    ),
-  isPrivate: z
-    .boolean()
-    .optional()
-    .describe('Whether to create a private channel. Defaults to false (public).'),
-});
-type SlackCreateConversationInput = z.infer<typeof SlackCreateConversationInputSchema>;
-
-const SlackInviteToConversationInputSchema = z.object({
-  channel: z
-    .string()
-    .min(1)
-    .describe('The ID of the channel to invite users to (e.g. C... or G...).'),
-  users: z
-    .string()
-    .min(1)
-    .describe(
-      'Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234).'
-    ),
-});
-type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
-
-const SlackSendMessageInputSchema = z.object({
-  channel: z
-    .string()
-    .min(1)
-    .describe(
-      'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.'
-    ),
-  text: z.string().min(1).describe('The message text to send'),
-  threadTs: z
-    .string()
-    .optional()
-    .describe('Timestamp of another message to reply to (creates a threaded reply)'),
-  unfurlLinks: z
-    .boolean()
-    .optional()
-    .describe('Whether to enable unfurling of primarily text-based content'),
-  unfurlMedia: z.boolean().optional().describe('Whether to enable unfurling of media content'),
-});
-type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -335,7 +180,8 @@ export const Slack: ConnectorSpec = {
     id: '.slack2',
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
-      defaultMessage: 'Search messages, list public channels, and send messages in Slack',
+      defaultMessage:
+        'Search messages, list channels (with pagination), resolve channel names to IDs, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -452,48 +298,84 @@ export const Slack: ConnectorSpec = {
       },
     },
 
+    listChannels: {
+      isTool: true,
+      description:
+        'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
+      input: SlackListChannelsInputSchema,
+      handler: async (ctx, input: SlackListChannelsInput) => {
+        const params: SlackConversationsListParams = {
+          types: input.types.join(','),
+          exclude_archived: input.excludeArchived,
+          limit: input.limit,
+          ...(input.cursor ? { cursor: input.cursor } : {}),
+        };
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsListResponse>({
+          ctx,
+          action: 'listChannels',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listChannels',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (input.raw) {
+          return response.data;
+        }
+
+        const channels = response.data.channels ?? [];
+        const nextCursor = response.data.response_metadata?.next_cursor;
+        const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+
+        return {
+          ok: true as const,
+          source: 'conversations.list' as const,
+          channels: channels.map((c) => ({
+            id: c.id,
+            name: c.name,
+            is_private: c.is_private,
+            is_archived: c.is_archived,
+            is_member: c.is_member,
+          })),
+          nextCursor: hasMore ? nextCursor : undefined,
+          hasMore,
+        };
+      },
+    },
+
     // Helper for LLMs: resolve a channel ID (C.../G...) from a human name (e.g. "#general").
     // Deterministic (uses conversations.list). No caching to avoid cross-tenant/process state.
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
       description:
-        'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use this before sendMessage when you only know the channel name — sendMessage requires a channel ID, not a name.',
+        'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
-      handler: async (ctx, input) => {
-        const typedInput: SlackResolveChannelIdInput =
-          SlackResolveChannelIdInputSchema.parse(input);
+      handler: async (ctx, input: SlackResolveChannelIdInput) => {
+        const nameNorm = input.name.trim().replace(/^#/, '').toLowerCase();
 
-        const nameNorm = typedInput.name.trim().replace(/^#/, '').toLowerCase();
-        const types =
-          typedInput.types && typedInput.types.length > 0
-            ? typedInput.types
-            : (['public_channel'] as Array<(typeof SLACK_CONVERSATION_TYPES)[number]>);
-        const match = typedInput.match ?? 'exact';
-        const excludeArchived = typedInput.excludeArchived ?? true;
-        const limit = typedInput.limit ?? SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT;
-        const maxPages = typedInput.maxPages ?? SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES;
-
-        let cursor = typedInput.cursor;
+        let cursor = input.cursor;
         let pagesFetched = 0;
 
-        while (pagesFetched < maxPages) {
-          const params: Record<string, string | number | boolean> = {
-            types: types.join(','),
-            exclude_archived: excludeArchived,
-            limit,
+        while (pagesFetched < input.maxPages) {
+          const params: SlackConversationsListParams = {
+            types: input.types.join(','),
+            exclude_archived: input.excludeArchived,
+            limit: input.limit,
             ...(cursor ? { cursor } : {}),
           };
 
           ctx.log.debug(`Slack resolveChannelId scan (page ${pagesFetched + 1})`);
-          const response = await slackRequestWithRateLimitRetry<{
-            ok: boolean;
-            error?: string;
-            needed?: string;
-            provided?: string;
-            channels?: Array<{ id?: string; name?: string }>;
-            response_metadata?: { next_cursor?: string };
-          }>({
+          const response = await slackRequestWithRateLimitRetry<SlackConversationsListResponse>({
             ctx,
             action: 'resolveChannelId',
             maxRetries: SLACK_MAX_RETRIES,
@@ -514,7 +396,7 @@ export const Slack: ConnectorSpec = {
           const found = channels.find((c) => {
             const cName = (c.name ?? '').toString().toLowerCase();
             if (!cName) return false;
-            return match === 'exact' ? cName === nameNorm : cName.includes(nameNorm);
+            return input.match === 'exact' ? cName === nameNorm : cName.includes(nameNorm);
           });
 
           if (found?.id) {
@@ -657,7 +539,7 @@ export const Slack: ConnectorSpec = {
     sendMessage: {
       isTool: true,
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID (use resolveChannelId to look up by name). Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
+        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -753,6 +635,8 @@ export const Slack: ConnectorSpec = {
   },
 
   skill: [
-    'Before sending a message to a channel by name, always call resolveChannelId first to get the channel ID, then pass it to sendMessage.',
+    'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
+    'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
+    'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
   ].join('\n'),
 };

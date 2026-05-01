@@ -1386,7 +1386,7 @@ const earliestDefinition: FunctionDefinition = {
     defaultMessage:
       'An alias for `FIRST` where\nthe sort field (the second parameter) is implicit and is set to `@timestamp`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2763,7 +2763,7 @@ const latestDefinition: FunctionDefinition = {
     defaultMessage:
       'An alias for `LAST` where\nthe sort field (the second parameter) is implicit and is set to `@timestamp`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4248,11 +4248,11 @@ const sparklineDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'aggregation',
           type: 'double',
           optional: false,
           description:
-            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -4264,8 +4264,7 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          description: 'Target number of buckets.',
         },
         {
           name: 'from',
@@ -4285,11 +4284,11 @@ const sparklineDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'aggregation',
           type: 'integer',
           optional: false,
           description:
-            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -4301,8 +4300,7 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          description: 'Target number of buckets.',
         },
         {
           name: 'from',
@@ -4322,11 +4320,11 @@ const sparklineDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'aggregation',
           type: 'long',
           optional: false,
           description:
-            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -4338,8 +4336,7 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          description: 'Target number of buckets.',
         },
         {
           name: 'from',

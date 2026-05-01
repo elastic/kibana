@@ -7,6 +7,7 @@
 
 import type { AfterToolCallHookContext, ToolProvider } from '@kbn/agent-builder-server';
 import { filestoreTools } from '@kbn/agent-builder-common/tools';
+import { ToolOrigin } from '@kbn/agent-builder-common';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type { RunContext, SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
@@ -85,7 +86,10 @@ const loadSkillTools = async ({
   }
 
   const inlineTools = (await skill.getInlineTools?.()) ?? [];
-  const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));
+  const inlineExecutableTools = inlineTools.map((tool) => ({
+    ...skillsService.convertSkillTool(tool),
+    origin: ToolOrigin.inline,
+  }));
 
   const registryToolIds = await skill.getRegistryTools();
   if (registryToolIds.length > MAX_SKILL_REGISTRY_TOOLS) {
@@ -95,7 +99,9 @@ const loadSkillTools = async ({
   }
   const registryExecutableTools =
     registryToolIds.length > 0
-      ? await pickTools({ toolProvider, selection: [{ tool_ids: registryToolIds }], request })
+      ? (
+          await pickTools({ toolProvider, selection: [{ tool_ids: registryToolIds }], request })
+        ).map((tool) => ({ ...tool, origin: ToolOrigin.registry }))
       : [];
 
   await toolManager.addTools(

@@ -78,8 +78,21 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
 
           const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+          queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
           return 'success';
         }
+      }
+
+      // Poll timed out waiting for the execution uuid to be persisted.
+      // Fetch whatever leads are available so the cache is populated before
+      // isGenerating flips to false, preventing a spurious empty-state flash.
+      if (!signal.aborted) {
+        const [finalResult, finalStatus] = await Promise.all([
+          fetchLeads({ ...FETCH_LEADS_PARAMS, signal }),
+          fetchLeadGenerationStatus({ signal }),
+        ]);
+        queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
+        queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
       }
       return 'timeout';
     },

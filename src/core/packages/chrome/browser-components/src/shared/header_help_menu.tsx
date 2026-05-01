@@ -103,22 +103,25 @@ const buildDefaultContentLinks = ({
   helpSupportUrl: string;
 }): ChromeHelpMenuLink[] => [
   {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
+      defaultMessage: 'Open GitHub issue',
+    }),
+    href: docLinks.links.kibana.createGithubIssue,
+    iconType: 'logoGithub',
+  },
+  {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle', {
       defaultMessage: 'Kibana documentation',
     }),
     href: kibanaDocLink,
+    iconType: 'documentation',
   },
   {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle', {
-      defaultMessage: 'Ask Elastic',
+      defaultMessage: 'Ask support',
     }),
     href: helpSupportUrl,
-  },
-  {
-    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
-      defaultMessage: 'Open an issue in GitHub',
-    }),
-    href: docLinks.links.kibana.createGithubIssue,
+    iconType: 'question',
   },
 ];
 

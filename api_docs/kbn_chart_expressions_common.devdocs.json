@@ -52,6 +52,7 @@
             "lineNumber": 12,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -92,6 +93,7 @@
             "lineNumber": 50,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1196,6 +1198,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedFieldFormat",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1453,6 +1456,7 @@
             "lineNumber": 76,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1506,6 +1510,7 @@
             "lineNumber": 51,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionRendererEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1546,6 +1551,7 @@
             "lineNumber": 38,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": false
           }

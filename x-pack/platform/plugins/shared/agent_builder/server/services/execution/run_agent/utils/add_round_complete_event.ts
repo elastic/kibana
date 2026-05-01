@@ -404,6 +404,7 @@ const createToolCallStep = ({
     })),
     results: toolResult?.data.results ?? [],
     tool_call_group_id: toolCall.data.tool_call_group_id,
+    tool_origin: toolCall.data.tool_origin,
   };
 };
 

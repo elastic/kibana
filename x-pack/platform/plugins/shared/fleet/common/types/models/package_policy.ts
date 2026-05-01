@@ -7,6 +7,7 @@
 
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
+import type { GlobalDataTag } from './agent_policy';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -109,6 +110,7 @@ export interface NewPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
+  global_data_tags?: GlobalDataTag[];
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {
