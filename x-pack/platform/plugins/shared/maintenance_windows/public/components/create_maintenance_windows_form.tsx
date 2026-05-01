@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,9 +13,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -52,6 +49,7 @@ import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import type { FormProps } from './schema';
 import { schema } from './schema';
+import { ScopeSection } from './scope_section';
 import { SubmitButton } from './submit_button';
 
 const UseField = getUseField({ component: Field });
@@ -74,7 +72,21 @@ const useDefaultTimezone = () => {
 
 const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
   label: timezoneOption,
-})) ?? [{ label: 'UTC' }];
+}));
+
+// Filters in the form may be flat (when restored from a saved object) or already
+// wrapped in a `query` object (when produced by the search bar). Normalize to the
+// `{ $state, meta, query }` shape the maintenance window API expects.
+const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
+  return filtersToTransform.map((filter) => {
+    const { $state, meta, ...rest } = filter;
+    return {
+      $state,
+      meta,
+      query: filter?.query ? { ...filter.query } : { ...rest },
+    };
+  });
+};
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>((props) => {
   const {
@@ -85,8 +97,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     showMultipleSolutionsWarning = false,
   } = props;
 
-  const [defaultStartDateValue] = useState<string>(moment().toISOString());
-  const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
+  const [defaultStartDateValue] = useState<string>(() => moment().toISOString());
+  const [defaultEndDateValue] = useState<string>(() => moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSaveWithoutFiltersModalVisible, setIsSaveWithoutFiltersModalVisible] = useState(false);
   const userConfirmedSaveWithoutFiltersRef = useRef(false);
@@ -131,17 +143,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
-  const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
-    return filtersToTransform.map((filter) => {
-      const { $state, meta, ...rest } = filter;
-      return {
-        $state,
-        meta,
-        query: filter?.query ? { ...filter.query } : { ...rest },
-      };
-    });
-  };
-
   const scopedQueryPayload = useMemo(() => {
     if (!isScopedQueryEnabled) {
       return null;
@@ -150,12 +151,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       return null;
     }
 
-    // Wrapping filters in query object here to avoid schema validation failure
-    const transformedFilters = transformQueryFilters(filters);
-
     return {
       kql: query,
-      filters: transformedFilters,
+      filters: transformQueryFilters(filters),
     };
   }, [isScopedQueryEnabled, query, filters]);
 
@@ -194,8 +192,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
           recurringSchedule: formData.recurringSchedule,
         }),
-        scopedQuery: scopedQueryPayload ?? null,
-        scopeEpisodeQuery: scopeEpisodeQueryPayload ?? null,
+        scopedQuery: scopedQueryPayload,
+        scopeEpisodeQuery: scopeEpisodeQueryPayload,
         ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
       };
 
@@ -241,7 +239,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const [{ recurring, timezone, startDate, endDate }, _, mounted] = useFormData<FormProps>({
     form,
-    watch: ['recurring', 'timezone', 'scopedQuery', 'startDate', 'endDate'],
+    watch: ['recurring', 'timezone', 'startDate', 'endDate'],
   });
 
   const isRecurring = recurring || false;
@@ -298,31 +296,28 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   }, [form]);
 
   const modal = useMemo(() => {
-    let m;
-    if (isModalVisible) {
-      m = (
-        <EuiConfirmModal
-          aria-labelledby={modalTitleId}
-          title={i18n.ARCHIVE_TITLE}
-          titleProps={{ id: modalTitleId }}
-          onCancel={closeModal}
-          onConfirm={() => {
-            closeModal();
-            archiveMaintenanceWindow(
-              { maintenanceWindowId: maintenanceWindowId!, archive: true },
-              { onSuccess }
-            );
-          }}
-          cancelButtonText={i18n.CANCEL}
-          confirmButtonText={i18n.ARCHIVE_TITLE}
-          defaultFocusedButton="confirm"
-          buttonColor="danger"
-        >
-          <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
-        </EuiConfirmModal>
-      );
-    }
-    return m;
+    if (!isModalVisible) return null;
+    return (
+      <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        title={i18n.ARCHIVE_TITLE}
+        titleProps={{ id: modalTitleId }}
+        onCancel={closeModal}
+        onConfirm={() => {
+          closeModal();
+          archiveMaintenanceWindow(
+            { maintenanceWindowId: maintenanceWindowId!, archive: true },
+            { onSuccess }
+          );
+        }}
+        cancelButtonText={i18n.CANCEL}
+        confirmButtonText={i18n.ARCHIVE_TITLE}
+        defaultFocusedButton="confirm"
+        buttonColor="danger"
+      >
+        <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
+      </EuiConfirmModal>
+    );
   }, [
     closeModal,
     archiveMaintenanceWindow,
@@ -470,112 +465,51 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiPanel hasBorder={true}>
-            <EuiFlexGroup
-              direction="row"
-              responsive={false}
-              justifyContent="spaceBetween"
-              alignItems="center"
-            >
-              <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <h4>{i18n.ALERTS_SCOPE_TITLE}</h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <EuiTextColor color="subdued">{i18n.ALERTS_SCOPE_DESCRIPTION}</EuiTextColor>
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  data-test-subj="maintenanceWindowScopedQuerySwitch"
-                  label={i18n.ALERTS_SCOPE_TITLE}
-                  showLabel={false}
-                  checked={isScopedQueryEnabled}
-                  onChange={(event: EuiSwitchEvent) => onScopeQueryToggle(event.target.checked)}
+          <ScopeSection
+            title={i18n.ALERTS_SCOPE_TITLE}
+            description={i18n.ALERTS_SCOPE_DESCRIPTION}
+            switchLabel={i18n.ALERTS_SCOPE_TITLE}
+            switchChecked={isScopedQueryEnabled}
+            onSwitchChange={onScopeQueryToggle}
+            switchDataTestSubj="maintenanceWindowScopedQuerySwitch"
+            expandedSubtitle={i18n.FILTER_ALERTS_SUBTITLE}
+          >
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuery
+                  ruleTypeIds={ruleTypeIds}
+                  query={query}
+                  filters={filters}
+                  isLoading={isLoadingRuleTypes}
+                  isEnabled={isScopedQueryEnabled}
+                  errors={scopedQueryErrors}
+                  onQueryChange={onQueryChange}
+                  onFiltersChange={setFilters}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {isScopedQueryEnabled && (
-              <>
-                <EuiHorizontalRule margin="m" />
-                <EuiText size="s">
-                  <h4>{i18n.FILTER_ALERTS_SUBTITLE}</h4>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <UseField path="scopedQuery">
-                  {() => (
-                    <MaintenanceWindowScopedQuery
-                      ruleTypeIds={ruleTypeIds}
-                      query={query}
-                      filters={filters}
-                      isLoading={isLoadingRuleTypes}
-                      isEnabled={isScopedQueryEnabled}
-                      errors={scopedQueryErrors}
-                      onQueryChange={onQueryChange}
-                      onFiltersChange={setFilters}
-                    />
-                  )}
-                </UseField>
-              </>
-            )}
-          </EuiPanel>
-          <EuiPanel hasBorder={true}>
-            <EuiFlexGroup
-              direction="row"
-              responsive={false}
-              justifyContent="spaceBetween"
-              alignItems="center"
-            >
-              <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <h4>{i18n.EPISODES_SCOPE_TITLE}</h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <EuiTextColor color="subdued">{i18n.EPISODES_SCOPE_DESCRIPTION}</EuiTextColor>
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.EPISODES_SCOPE_TITLE}
-                  showLabel={false}
-                  checked={isEpisodeQueryEnabled}
-                  onChange={(event: EuiSwitchEvent) => onEpisodeQueryToggle(event.target.checked)}
+              )}
+            </UseField>
+          </ScopeSection>
+          <ScopeSection
+            title={i18n.EPISODES_SCOPE_TITLE}
+            description={i18n.EPISODES_SCOPE_DESCRIPTION}
+            switchLabel={i18n.EPISODES_SCOPE_TITLE}
+            switchChecked={isEpisodeQueryEnabled}
+            onSwitchChange={onEpisodeQueryToggle}
+            switchDataTestSubj="episodeScopedQuerySwitch"
+            expandedSubtitle={i18n.FILTER_EPISODES_SUBTITLE}
+          >
+            <UseField path="scopeEpisodeQuery">
+              {() => (
+                <EpisodeMatcherInput
+                  value={episodeQuery}
+                  onChange={setEpisodeQuery}
+                  fullWidth
+                  data-test-subj="maintenanceWindowEpisodeDataFilterInput"
+                  placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {isEpisodeQueryEnabled && (
-              <>
-                <EuiHorizontalRule margin="m" />
-                <EuiText size="s">
-                  <h4>{i18n.FILTER_EPISODES_SUBTITLE}</h4>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <UseField path="scopedQuery">
-                  {() => (
-                    <EpisodeMatcherInput
-                      value={episodeQuery}
-                      onChange={setEpisodeQuery}
-                      fullWidth
-                      data-test-subj="maintenanceWindowEpisodeDataFilterInput"
-                      placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
-                    />
-                  )}
-                </UseField>
-              </>
-            )}
-          </EuiPanel>
+              )}
+            </UseField>
+          </ScopeSection>
         </EuiFlexGroup>
 
         {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
