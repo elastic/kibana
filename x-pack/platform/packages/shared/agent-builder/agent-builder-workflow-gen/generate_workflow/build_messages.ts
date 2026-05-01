@@ -6,7 +6,12 @@
  */
 
 import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages';
+import { SystemMessage } from '@langchain/core/messages';
+import {
+  createUserMessage,
+  createToolCallMessage,
+  createToolResultMessage,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import {
   createSystemPrompt,
   createUserPrompt,
@@ -43,7 +48,7 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
   );
 
   messages.push(
-    new HumanMessage(
+    createUserMessage(
       createUserPrompt({
         nlQuery: state.nlQuery,
         additionalContext: state.additionalContext,
@@ -53,30 +58,20 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
 
   for (const action of state.actions) {
     if (isAgentStepAction(action)) {
-      messages.push(
-        new AIMessage({
-          content: action.text ?? '',
-          tool_calls: action.toolCalls.map((tc) => ({
-            id: tc.toolCallId,
-            name: tc.toolName,
-            args: tc.args,
-          })),
-        })
-      );
+      messages.push(createToolCallMessage(action.toolCalls, action.text));
     } else if (isToolResultAction(action)) {
       messages.push(
-        new ToolMessage({
-          tool_call_id: action.toolCallId,
-          name: action.name,
-          content: JSON.stringify({
+        createToolResultMessage({
+          toolCallId: action.toolCallId,
+          content: {
             success: action.success,
             ...(action.error !== undefined ? { error: action.error } : {}),
             ...(action.data !== undefined ? { data: action.data } : {}),
-          }),
+          },
         })
       );
     } else if (isValidateAction(action) && !action.valid) {
-      messages.push(new HumanMessage(createValidationFailureMessage(action.errors)));
+      messages.push(createUserMessage(createValidationFailureMessage(action.errors)));
     }
   }
 
