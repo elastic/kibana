@@ -238,6 +238,7 @@
                 "lineNumber": 169,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "SslConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -285,6 +286,7 @@
             "lineNumber": 13,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ServerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -337,6 +339,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Request",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -354,6 +357,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ResponseToolkit",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -371,6 +375,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -415,6 +420,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Request",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -517,6 +523,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IHttpConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -534,6 +541,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GetServerListenerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -588,6 +596,7 @@
             "lineNumber": 20,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "IHttpConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -664,6 +673,7 @@
             "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ISslConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -716,6 +726,7 @@
             "lineNumber": 19,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "HapiServer",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -739,6 +750,7 @@
             "lineNumber": 19,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "ISslConfig",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -41,7 +41,7 @@
             "id": "def-public.ContentListToolbar.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  children,\n  'data-test-subj': dataTestSubj = 'contentListToolbar',\n}",
             "description": [],
             "signature": [
               {
@@ -56,6 +56,7 @@
             "lineNumber": 42,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentListToolbarProps",
             "trackAdoption": false
           }
         ],
@@ -68,7 +69,15 @@
         "tags": [],
         "label": "CreatedByFilterRenderer",
         "description": [
-          "\n`CreatedByFilterRenderer` component for `EuiSearchBar` `custom_component` filter.\n\nThin wrapper around {@link UserFieldFilterRenderer} for the `createdBy` field."
+          "\n`CreatedByFilterRenderer` component for `EuiSearchBar` `custom_component` filter.\n\nThin wrapper around ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.UserFieldFilterRenderer",
+            "text": "UserFieldFilterRenderer"
+          },
+          " for the `createdBy` field."
         ],
         "signature": [
           "({ query, onChange, \"data-test-subj\": dataTestSubj, }: ",
@@ -107,6 +116,7 @@
             "lineNumber": 49,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "CreatedByFilterRendererProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -148,6 +158,7 @@
             "lineNumber": 274,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterCountBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -201,6 +212,7 @@
             "lineNumber": 96,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterPopoverProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -256,6 +268,7 @@
             "lineNumber": 53,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterPopoverHeaderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -418,6 +431,7 @@
             "lineNumber": 235,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ModifierKeyTipProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -472,6 +486,7 @@
             "lineNumber": 149,
             "columnNumber": 85,
             "deprecated": false,
+            "docsReferencedTypeName": "SelectableFilterPopoverProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -513,6 +528,7 @@
             "lineNumber": 356,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "StandardOptionRenderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -555,6 +571,7 @@
             "lineNumber": 114,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFieldQueryFilterOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -594,7 +611,15 @@
         "tags": [],
         "label": "ContentListToolbarProps",
         "description": [
-          "\nProps for the {@link ContentListToolbar} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.ContentListToolbar",
+            "text": "ContentListToolbar"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
         "lineNumber": 20,
@@ -609,7 +634,15 @@
             "tags": [],
             "label": "children",
             "description": [
-              "Optional children for declarative configuration via {@link Filters}."
+              "Optional children for declarative configuration via ",
+              {
+                "pluginId": "@kbn/content-list-toolbar",
+                "scope": "public",
+                "docId": "kibKbnContentListToolbarPluginApi",
+                "section": "def-public.Filters",
+                "text": "Filters"
+              },
+              "."
             ],
             "signature": [
               "React.ReactNode"
@@ -648,7 +681,15 @@
         "tags": [],
         "label": "CreatedByFilterRendererProps",
         "description": [
-          "\nProps for the {@link CreatedByFilterRenderer} component.\n\nWhen used with `EuiSearchBar` `custom_component` filters, the search bar passes\n`query` and `onChange` props."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.CreatedByFilterRenderer",
+            "text": "CreatedByFilterRenderer"
+          },
+          " component.\n\nWhen used with `EuiSearchBar` `custom_component` filters, the search bar passes\n`query` and `onChange` props."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
         "lineNumber": 16,
@@ -709,6 +750,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -743,7 +785,15 @@
         "tags": [],
         "label": "FilterPopoverHeaderProps",
         "description": [
-          "\nProps for the {@link FilterPopoverHeader} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.FilterPopoverHeader",
+            "text": "FilterPopoverHeader"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover_header.tsx",
         "lineNumber": 14,
@@ -832,7 +882,15 @@
         "tags": [],
         "label": "FilterPopoverProps",
         "description": [
-          "\nProps for the {@link FilterPopover} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.FilterPopover",
+            "text": "FilterPopover"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -1058,7 +1116,15 @@
         "tags": [],
         "label": "FiltersProps",
         "description": [
-          "\nProps for the {@link Filters} container component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.Filters",
+            "text": "Filters"
+          },
+          " container component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
         "lineNumber": 17,
@@ -1206,7 +1272,15 @@
         "tags": [],
         "label": "SelectableFilterPopoverProps",
         "description": [
-          "\nProps for the {@link SelectableFilterPopover} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.SelectableFilterPopover",
+            "text": "SelectableFilterPopover"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -1307,6 +1381,7 @@
                 "lineNumber": 61,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1320,7 +1395,15 @@
             "tags": [],
             "label": "options",
             "description": [
-              "Options to display. See {@link SelectableFilterOption}."
+              "Options to display. See ",
+              {
+                "pluginId": "@kbn/content-list-toolbar",
+                "scope": "public",
+                "docId": "kibKbnContentListToolbarPluginApi",
+                "section": "def-public.SelectableFilterOption",
+                "text": "SelectableFilterOption"
+              },
+              "."
             ],
             "signature": [
               {
@@ -1385,6 +1468,7 @@
                 "lineNumber": 66,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectableFilterOption",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1552,7 +1636,15 @@
             "tags": [],
             "label": "footerContent",
             "description": [
-              "Optional footer content (rendered below {@link ModifierKeyTip})."
+              "Optional footer content (rendered below ",
+              {
+                "pluginId": "@kbn/content-list-toolbar",
+                "scope": "public",
+                "docId": "kibKbnContentListToolbarPluginApi",
+                "section": "def-public.ModifierKeyTip",
+                "text": "ModifierKeyTip"
+              },
+              ")."
             ],
             "signature": [
               "React.ReactNode"
@@ -1684,7 +1776,15 @@
         "tags": [],
         "label": "CreatedByFilter",
         "description": [
-          "\n`CreatedByFilter` declarative component for toolbar filter composition.\n\nResolves to a `custom_component` filter using {@link CreatedByFilterRenderer}\nwhen the user profiles service is available (`hasCreatedBy` is true)."
+          "\n`CreatedByFilter` declarative component for toolbar filter composition.\n\nResolves to a `custom_component` filter using ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.CreatedByFilterRenderer",
+            "text": "CreatedByFilterRenderer"
+          },
+          "\nwhen the user profiles service is available (`hasCreatedBy` is true)."
         ],
         "signature": [
           "any"
@@ -1737,7 +1837,15 @@
         "tags": [],
         "label": "SortFilter",
         "description": [
-          "\n`SortFilter` declarative component (non-rendering).\n\nThis is a declarative component that doesn't render anything.\nIt specifies that a sort dropdown should appear in the toolbar filters.\nThe `resolve` callback checks whether sorting is available and returns\na `SearchFilterConfig` wrapping {@link SortRenderer}, or `undefined`\nto skip the filter entirely.\n\nSort options are configured via the provider's `sorting` config.\n"
+          "\n`SortFilter` declarative component (non-rendering).\n\nThis is a declarative component that doesn't render anything.\nIt specifies that a sort dropdown should appear in the toolbar filters.\nThe `resolve` callback checks whether sorting is available and returns\na `SearchFilterConfig` wrapping ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.SortRenderer",
+            "text": "SortRenderer"
+          },
+          ", or `undefined`\nto skip the filter entirely.\n\nSort options are configured via the provider's `sorting` config.\n"
         ],
         "signature": [
           "any"
@@ -1756,7 +1864,23 @@
         "tags": [],
         "label": "SortFilterProps",
         "description": [
-          "\nProps for the {@link SortFilter} declarative component.\n\nNote: `SortFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying {@link SortRenderer}. Extend this interface\nonly with props the `resolve` callback can act on directly."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.SortFilter",
+            "text": "SortFilter"
+          },
+          " declarative component.\n\nNote: `SortFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.SortRenderer",
+            "text": "SortRenderer"
+          },
+          ". Extend this interface\nonly with props the `resolve` callback can act on directly."
         ],
         "signature": [
           "{}"
@@ -1775,7 +1899,15 @@
         "tags": [],
         "label": "TagFilter",
         "description": [
-          "\n`TagFilter` declarative component (non-rendering).\n\nThis is a declarative component that doesn't render anything.\nIt specifies that a tag filter dropdown should appear in the toolbar filters.\nThe `resolve` callback checks whether tags are available and returns\na `SearchFilterConfig` wrapping {@link TagFilterRenderer}, or `undefined`\nto skip the filter entirely.\n\nTags must be enabled via the provider's `services.tags` configuration.\n"
+          "\n`TagFilter` declarative component (non-rendering).\n\nThis is a declarative component that doesn't render anything.\nIt specifies that a tag filter dropdown should appear in the toolbar filters.\nThe `resolve` callback checks whether tags are available and returns\na `SearchFilterConfig` wrapping ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.TagFilterRenderer",
+            "text": "TagFilterRenderer"
+          },
+          ", or `undefined`\nto skip the filter entirely.\n\nTags must be enabled via the provider's `services.tags` configuration.\n"
         ],
         "signature": [
           "any"
@@ -1794,7 +1926,23 @@
         "tags": [],
         "label": "TagFilterProps",
         "description": [
-          "\nProps for the {@link TagFilter} declarative component.\n\nNote: `TagFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying {@link TagFilterRenderer}. Extend this interface\nonly with props the `resolve` callback can act on directly."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.TagFilter",
+            "text": "TagFilter"
+          },
+          " declarative component.\n\nNote: `TagFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.TagFilterRenderer",
+            "text": "TagFilterRenderer"
+          },
+          ". Extend this interface\nonly with props the `resolve` callback can act on directly."
         ],
         "signature": [
           "{}"

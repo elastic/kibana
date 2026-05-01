@@ -11,6 +11,7 @@ import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import type { EditResult, StepDefinition } from './yaml_edit_utils';
 import {
@@ -26,7 +27,6 @@ import {
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
   workflowTools,
 } from '../../../common/agent_builder/constants';
-import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { WorkflowsAiTelemetryClient } from '../../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetupContract } from '../../types';
@@ -68,7 +68,6 @@ export const stepDefinitionSchema = z.object({
         timeout: z.string().optional(),
         description: z.string().optional(),
         do: z.array(z.record(z.string(), z.unknown())).optional(),
-        then: z.array(z.record(z.string(), z.unknown())).optional(),
         else: z.array(z.record(z.string(), z.unknown())).optional(),
         condition: z.string().optional(),
       }

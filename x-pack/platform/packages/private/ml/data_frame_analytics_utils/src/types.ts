@@ -9,7 +9,6 @@ import type Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { EsErrorBody } from '@kbn/ml-error-utils';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { ANALYSIS_CONFIG_TYPE } from './constants';
 
@@ -24,7 +23,7 @@ export interface DeleteDataFrameAnalyticsWithIndexStatus {
   /**
    * Optional error
    */
-  error?: EsErrorBody | Boom.Boom;
+  error?: estypes.ErrorResponseBase | Boom.Boom;
 }
 
 /**

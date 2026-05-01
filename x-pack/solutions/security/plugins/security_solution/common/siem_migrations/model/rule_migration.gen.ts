@@ -30,7 +30,9 @@ import {
 /**
  * The original rule vendor identifier.
  */
-export const OriginalRuleVendor = lazySchema(() => z.enum(['splunk', 'qradar']));
+export const OriginalRuleVendor = lazySchema(() =>
+  z.enum(['splunk', 'qradar', 'microsoft-sentinel'])
+);
 export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
 export type OriginalRuleVendorEnum = typeof OriginalRuleVendor.enum;
 export const OriginalRuleVendorEnum = OriginalRuleVendor.enum;

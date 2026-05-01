@@ -55,6 +55,7 @@
             "lineNumber": 39,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "BuildVisualizationConfigParams",
             "trackAdoption": false,
             "isRequired": true
           }

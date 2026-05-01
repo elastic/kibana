@@ -209,22 +209,24 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { navigateTo } = useNavigateTo();
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const openUserFlyout = useCallback(
     (userName: string, entityId: string) => {
-      openRightPanel({
-        id: UserPanelKey,
-        params: {
-          userName,
-          entityId,
-          contextID: tableType,
-          scopeId: tableType,
-          isPreviewMode: false,
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName,
+            entityId,
+            contextID: tableType,
+            scopeId: tableType,
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [openRightPanel]
+    [openFlyout]
   );
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(

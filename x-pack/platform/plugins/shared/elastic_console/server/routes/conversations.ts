@@ -203,6 +203,7 @@ export const registerConversationRoutes = ({
           title: schema.string(),
           conversation_rounds: schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
             defaultValue: [],
+            maxSize: 1000,
           }),
         }),
       },
@@ -278,7 +279,7 @@ export const registerConversationRoutes = ({
         body: schema.object({
           title: schema.maybe(schema.string()),
           conversation_rounds: schema.maybe(
-            schema.arrayOf(schema.recordOf(schema.string(), schema.any()))
+            schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
           ),
         }),
       },

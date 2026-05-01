@@ -65,11 +65,15 @@ describe('DynamicRiskLevelPanel', () => {
         [RiskSeverity.Critical]: 5,
       },
       loading: false,
+      refetch: jest.fn(),
+      inspect: { dsl: ['mock-dsl'], response: ['mock-response'] },
     });
 
     mockUseRiskLevelsEsqlQuery.mockReturnValue({
       records: [],
       isLoading: false,
+      refetch: jest.fn(),
+      inspect: { dsl: ['mock-dsl'], response: ['mock-response'] },
     });
   });
 
@@ -95,6 +99,18 @@ describe('DynamicRiskLevelPanel', () => {
     );
 
     expect(screen.getByText('VIP users risk levels')).toBeInTheDocument();
+  });
+
+  it('renders the inspect button', () => {
+    mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), true));
+
+    render(
+      <TestProviders>
+        <DynamicRiskLevelPanel />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('inspect-icon-button')).toBeInTheDocument();
   });
 
   it('threads an onPartitionClick handler to the donut that adds a global filter for entity.risk.calculated_level', () => {
