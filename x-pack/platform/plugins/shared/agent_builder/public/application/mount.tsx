@@ -19,6 +19,7 @@ import type { AgentBuilderStartDependencies } from '../types';
 import { AgentBuilderServicesContext } from './context/agent_builder_services_context';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
+import { SendMessageProvider } from './context/send_message/send_message_context';
 
 export const mountApp = async ({
   core,
@@ -52,7 +53,9 @@ export const mountApp = async ({
                   <RedirectAppLinks coreStart={core}>
                     <PageWrapper>
                       <Router history={history}>
-                        <AgentBuilderRoutes />
+                        <SendMessageProvider>
+                          <AgentBuilderRoutes />
+                        </SendMessageProvider>
                       </Router>
                     </PageWrapper>
                   </RedirectAppLinks>
