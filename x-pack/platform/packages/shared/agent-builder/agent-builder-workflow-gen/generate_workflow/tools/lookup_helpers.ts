@@ -24,12 +24,29 @@ export interface StepDefinitionForAgent {
   examples?: string[];
 }
 
-const MAX_DESCRIPTION_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 150;
+
+const cleanDescription = (text: string): string =>
+  text
+    // Strip HTML tags (Kibana OpenAPI-derived descriptions embed <div>, <span>, …).
+    .replace(/<[^>]+>/g, ' ')
+    // Strip a leading markdown-bold preamble like "**Spaces method and path…**".
+    .replace(/^\s*\*\*[^*]+\*\*\s*/, '')
+    // Collapse any whitespace run (including \n\n paragraph breaks) into one space.
+    .replace(/\s+/g, ' ')
+    .trim();
 
 export function truncateDescription(text: string | null | undefined): string | undefined {
   if (!text) return undefined;
-  if (text.length <= MAX_DESCRIPTION_LENGTH) return text;
-  return `${text.slice(0, MAX_DESCRIPTION_LENGTH)}...`;
+  const cleaned = cleanDescription(text);
+  if (!cleaned) return undefined;
+  if (cleaned.length <= MAX_DESCRIPTION_LENGTH) return cleaned;
+  // Prefer cutting at the first full sentence boundary if it falls within the budget.
+  const firstSentence = cleaned.match(/^.{20,}?[.!?](?=\s|$)/);
+  if (firstSentence && firstSentence[0].length <= MAX_DESCRIPTION_LENGTH) {
+    return firstSentence[0];
+  }
+  return `${cleaned.slice(0, MAX_DESCRIPTION_LENGTH)}…`;
 }
 
 export function categorizeConnectorType(type: string): string {
@@ -67,6 +84,8 @@ export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAg
  * `getRegisteredStepDefinitions`. Picking by length gives a stable result
  * for both shapes.
  */
+const normalizeForCompare = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
 const pickLabelAndDescription = (
   summary: string | null | undefined,
   description: string | null | undefined,
@@ -78,10 +97,18 @@ const pickLabelAndDescription = (
   if (!a) return { label: b! };
   if (!b) return { label: a };
   const [shortText, longText] = a.length <= b.length ? [a, b] : [b, a];
-  return {
-    label: shortText,
-    description: shortText === longText ? undefined : truncateDescription(longText),
-  };
+  if (shortText === longText) return { label: shortText };
+  const truncated = truncateDescription(longText);
+  if (!truncated) return { label: shortText };
+  // Drop the description when it just restates the label (common for
+  // OpenAPI-derived contracts where the description starts with the title
+  // before launching into reference docs we already trimmed away).
+  const nLabel = normalizeForCompare(shortText);
+  const nDesc = normalizeForCompare(truncated);
+  if (nDesc === nLabel || nDesc.startsWith(nLabel)) {
+    return { label: shortText };
+  }
+  return { label: shortText, description: truncated };
 };
 
 export function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
