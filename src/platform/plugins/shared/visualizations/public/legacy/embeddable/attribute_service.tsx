@@ -154,6 +154,7 @@ export class AttributeService {
             hasLibraryItemWithTitle={hasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title={get(
               saveOptions,
               'saveModalTitle',

@@ -44,6 +44,7 @@ interface DashboardSaveModalProps {
     newAccessMode,
   }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags?: string[];
@@ -72,6 +73,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   showStoreTimeOnSave = true,
   showStoreProjectRoutingOnSave = true,
   tags,
+  lastSavedTitle,
   title,
   timeRestore,
   projectRoutingRestore,
@@ -215,6 +217,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
       onClose={onClose}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showDescription

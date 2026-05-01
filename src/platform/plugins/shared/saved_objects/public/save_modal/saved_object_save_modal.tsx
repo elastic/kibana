@@ -60,6 +60,7 @@ interface Props<T = void> {
   hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
   onSave: (props: OnSaveProps) => Promise<T>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   showCopyOnSave: boolean;
   mustCopyOnSaveMessage?: string;
@@ -264,7 +265,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
 
     const newCopyOnSave = Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave;
     const isUpdateWithSameTitle =
-      !newCopyOnSave && this.state.title.toLowerCase() === this.props.title.toLowerCase();
+      !newCopyOnSave && this.state.title.toLowerCase() === this.props.lastSavedTitle.toLowerCase();
     const checkForDuplicateTitle = this.state.isTitleDuplicateConfirmed
       ? false
       : !isUpdateWithSameTitle;

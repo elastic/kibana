@@ -111,9 +111,9 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
             hasLibraryItemWithTitle={embeddable.hasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title={lastTitle ?? ''}
             showCopyOnSave={false}
-            initialCopyOnSave={true}
             objectType={
               typeof embeddable.getTypeDisplayName === 'function'
                 ? embeddable.getTypeDisplayName()

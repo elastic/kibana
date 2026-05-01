@@ -43,6 +43,7 @@ export const SaveModal = ({
   domElement,
   savedObjectsTagging,
   onSave,
+  lastSavedTitle,
   title,
   description,
   tags,
@@ -52,6 +53,7 @@ export const SaveModal = ({
   domElement: HTMLDivElement;
   savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
   onSave: (props: ModalOnSaveProps) => Promise<void>;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags: string[];
@@ -69,6 +71,7 @@ export const SaveModal = ({
         await onSave({ ...props, closeModal, newTags: selectedTags });
       }}
       onClose={closeModal}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showCopyOnSave={showCopyOnSave}
@@ -308,6 +311,7 @@ export const getSaveLayerAction = ({
               eventAnnotationService={eventAnnotationService}
               domElement={domElement}
               savedObjectsTagging={savedObjectsTagging}
+              lastSavedTitle={''}
               onSave={async (props) => {
                 await onSave({
                   state,

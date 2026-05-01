@@ -143,6 +143,7 @@ export async function openSaveModal({
         showSaveModal(
           <DashboardSaveModal
             tags={tags}
+            lastSavedTitle={lastSavedId ? title : ''}
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
             timeRestore={timeRestore}

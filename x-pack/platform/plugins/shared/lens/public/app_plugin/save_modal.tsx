@@ -63,6 +63,7 @@ export const SaveModal = (props: Props) => {
   if (originatingApp && returnToOrigin !== false) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
+        lastSavedTitle={savedObjectId && title ? title : ''}
         hasLibraryItemWithTitle={hasLibraryItemWithTitle}
         savedObjectsTagging={savedObjectsTagging}
         initialTags={tagsIds}
@@ -86,6 +87,7 @@ export const SaveModal = (props: Props) => {
 
   return (
     <TagEnhancedSavedObjectSaveModalDashboard
+      lastSavedTitle={savedObjectId && title ? title : ''}
       hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}

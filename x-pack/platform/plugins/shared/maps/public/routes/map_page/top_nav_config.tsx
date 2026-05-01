@@ -158,6 +158,7 @@ export function getTopNavConfig({
         ) : undefined;
 
         const saveModalProps = {
+          lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
           hasLibraryItemWithTitle,
           onSave: async (
             props: OnSaveProps & {

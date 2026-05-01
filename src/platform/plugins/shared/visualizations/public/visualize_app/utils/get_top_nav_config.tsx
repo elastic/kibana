@@ -649,6 +649,7 @@ export const getTopNavConfig = (
                 saveModal = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
+                    lastSavedTitle={savedVis?.title ?? ''}
                     hasLibraryItemWithTitle={hasLibraryItemWithTitle}
                     onSave={onSave}
                     options={tagOptions}
@@ -682,6 +683,7 @@ export const getTopNavConfig = (
                       description: savedVis?.description || '',
                     }}
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
+                    lastSavedTitle={savedVis?.title ?? ''}
                     hasLibraryItemWithTitle={hasLibraryItemWithTitle}
                     onSave={onSave}
                     tagOptions={tagOptions}

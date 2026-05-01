@@ -132,15 +132,22 @@ export function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboar
 
   const isValid = !(dashboardOption === 'existing' && selectedDashboard === null);
 
-  const hasLibraryItemWithTitle = props.canSaveByReference
-    ? props.hasLibraryItemWithTitle
-    : async () => false;
+  const { hasLibraryItemWithTitle, lastSavedTitle } = props.canSaveByReference
+    ? {
+        hasLibraryItemWithTitle: props.hasLibraryItemWithTitle,
+        lastSavedTitle: props.lastSavedTitle,
+      }
+    : {
+        hasLibraryItemWithTitle: async () => false,
+        lastSavedTitle: '',
+      };
 
   return (
     <SavedObjectSaveModal
       customModalTitle={customModalTitle}
       hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={onModalSave}
+      lastSavedTitle={lastSavedTitle}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
       options={

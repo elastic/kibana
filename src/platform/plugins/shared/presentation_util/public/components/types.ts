@@ -56,6 +56,7 @@ interface SaveModalDashboardByValueAndByReferenceProps<SaveResponse = void>
   /** object can be saved by reference. */
   canSaveByReference: true;
   hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
+  lastSavedTitle: string;
 }
 
 /** Props for the save modal with dashboard options. */
