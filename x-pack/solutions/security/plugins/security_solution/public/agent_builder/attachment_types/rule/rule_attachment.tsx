@@ -35,11 +35,11 @@ import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 
 const INDEX_FIELD_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel',
+  'xpack.securitySolution.agentBuilder.ruleAttachment.indexPatternsHeading',
   { defaultMessage: 'Index patterns' }
 );
 const RULE_TYPE_FIELD_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleTypeFieldLabel',
+  'xpack.securitySolution.agentBuilder.ruleAttachment.ruleTypeLabel',
   { defaultMessage: 'Rule type' }
 );
 const QUERY_LABEL = i18n.translate('xpack.securitySolution.detectionEngine.createRule.queryLabel', {
