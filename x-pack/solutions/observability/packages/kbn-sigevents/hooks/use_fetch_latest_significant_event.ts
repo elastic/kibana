@@ -154,7 +154,7 @@ export function useFetchLatestSignificantEvent(): {
     (): estypes.SearchRequest => ({
       index: SIGEVENTS_INDEX,
       query: {
-        term: { 'verdict.keyword': 'promoted' },
+        term: { verdict: 'promoted' },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
       size: 100,

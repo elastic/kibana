@@ -47,7 +47,7 @@ describe('useFetchSystemOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockSearch.mockImplementation(({ params }: { params: { index: string } }) => {
+    mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
       if (params.index === 'traces-*') {
         return of({
           rawResponse: {
@@ -79,7 +79,7 @@ describe('useFetchSystemOverview', () => {
           },
         });
       }
-      if (params.index === 'sigevents-events-ms') {
+      if (params.index === 'sigevents-events-ms' && params.size === 5) {
         return of({
           rawResponse: {
             hits: {
@@ -89,10 +89,33 @@ describe('useFetchSystemOverview', () => {
           },
         });
       }
-      if (params.index === 'sigevents-detections-ms') {
+      if (params.index === 'sigevents-events-ms' && params.size === 0) {
         return of({
           rawResponse: {
-            hits: { hits: [], total: { value: 5, relation: 'eq' } },
+            hits: { hits: [], total: { value: 0, relation: 'eq' } },
+            aggregations: {
+              by_impact: {
+                buckets: [
+                  {
+                    key: 'medium',
+                    doc_count: 1,
+                    by_verdict: {
+                      buckets: [{ key: 'acknowledged', doc_count: 1 }],
+                    },
+                  },
+                  {
+                    key: 'low',
+                    doc_count: 2,
+                    by_verdict: {
+                      buckets: [
+                        { key: 'acknowledged', doc_count: 1 },
+                        { key: 'demoted', doc_count: 1 },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           },
         });
       }
@@ -116,7 +139,7 @@ describe('useFetchSystemOverview', () => {
     expect(result.current.data).toBeNull();
   });
 
-  it('merges trace and log service counts', async () => {
+  it('counts unique services from traces and logs', async () => {
     const { result } = renderHook(() => useFetchSystemOverview(), {
       wrapper: createWrapper(),
     });
@@ -126,33 +149,19 @@ describe('useFetchSystemOverview', () => {
     expect(result.current.error).toBeNull();
     expect(result.current.data).not.toBeNull();
 
-    const { services } = result.current.data!;
     // Should have 4 unique services: frontend, payment, checkout, otel-collector
-    expect(services).toHaveLength(4);
-
-    const frontend = services.find((s) => s.name === 'frontend');
-    expect(frontend).toEqual({ name: 'frontend', traceCount: 500, logCount: 1000 });
-
-    const payment = services.find((s) => s.name === 'payment');
-    expect(payment).toEqual({ name: 'payment', traceCount: 300, logCount: 0 });
-
-    const otelCollector = services.find((s) => s.name === 'otel-collector');
-    expect(otelCollector).toEqual({ name: 'otel-collector', traceCount: 0, logCount: 400 });
+    expect(result.current.data!.serviceCount).toBe(4);
   });
 
-  it('sorts services by total count descending', async () => {
+  it('returns zero for entity and technology counts (KI not available)', async () => {
     const { result } = renderHook(() => useFetchSystemOverview(), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    const { services } = result.current.data!;
-    // frontend: 1500, otel-collector: 400, payment: 300, checkout: 200
-    expect(services[0].name).toBe('frontend');
-    expect(services[1].name).toBe('otel-collector');
-    expect(services[2].name).toBe('payment');
-    expect(services[3].name).toBe('checkout');
+    expect(result.current.data!.entityCount).toBe(0);
+    expect(result.current.data!.technologyCount).toBe(0);
   });
 
   it('returns acknowledged events', async () => {
@@ -168,27 +177,18 @@ describe('useFetchSystemOverview', () => {
     );
   });
 
-  it('returns detection count from total hits', async () => {
+  it('counts sigEvents by priority from impact agg', async () => {
     const { result } = renderHook(() => useFetchSystemOverview(), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.data!.detectionCount).toBe(5);
-  });
-
-  it('counts impact levels correctly', async () => {
-    const { result } = renderHook(() => useFetchSystemOverview(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    // From acknowledgedDocs: one medium (highCount=0, mediumCount=1) and one low (lowCount=1)
-    expect(result.current.data!.highCount).toBe(0);
-    expect(result.current.data!.mediumCount).toBe(1);
-    expect(result.current.data!.lowCount).toBe(1);
+    const { sigEventsByPriority } = result.current.data!;
+    expect(sigEventsByPriority.critical).toEqual({ open: 0, resolved: 0 });
+    expect(sigEventsByPriority.high).toEqual({ open: 0, resolved: 0 });
+    expect(sigEventsByPriority.medium).toEqual({ open: 1, resolved: 0 });
+    expect(sigEventsByPriority.low).toEqual({ open: 1, resolved: 1 });
   });
 
   it('returns error when search fails', async () => {
