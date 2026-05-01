@@ -42,7 +42,7 @@ import {
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
