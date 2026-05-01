@@ -19,7 +19,6 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
@@ -51,7 +50,7 @@ import type {
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
-import { HealthBadge } from './health_badge';
+import { AnomaliesBadge } from './anomalies_badge';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import { getESQLQuery, type IndexType } from '../../../shared/links/discover_links/get_esql_query';
 import { useServiceActions } from './service_actions';
@@ -73,7 +72,7 @@ export function getServiceColumns({
   comparisonDataLoading,
   comparisonData,
   breakpoints,
-  showHealthStatusColumn,
+  showAnomaliesColumn,
   showAlertsColumn,
   showSlosColumn,
   link,
@@ -82,7 +81,7 @@ export function getServiceColumns({
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
-  showHealthStatusColumn: boolean;
+  showAnomaliesColumn: boolean;
   showAlertsColumn: boolean;
   showSlosColumn: boolean;
   comparisonDataLoading: boolean;
@@ -185,17 +184,17 @@ export function getServiceColumns({
           } as ITableColumn<ServiceListItem>,
         ]
       : []),
-    ...(showHealthStatusColumn
+    ...(showAnomaliesColumn
       ? [
           {
-            field: ServiceInventoryFieldName.HealthStatus,
-            name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-              defaultMessage: 'Health',
+            field: ServiceInventoryFieldName.AnomalyScore,
+            name: i18n.translate('xpack.apm.servicesTable.anomaliesColumnLabel', {
+              defaultMessage: 'Anomalies',
             }),
             nameTooltip: {
-              content: i18n.translate('xpack.apm.servicesTable.healthColumnLabel.tooltip', {
+              content: i18n.translate('xpack.apm.servicesTable.anomaliesColumnLabel.tooltip', {
                 defaultMessage:
-                  'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
+                  'The anomaly score (max.) is the maximum ML anomaly score detected for the service in the selected time range.',
               }),
               icon: 'question',
               iconProps: {
@@ -205,8 +204,8 @@ export function getServiceColumns({
             width: '6.5em',
             minWidth: '6.5em',
             sortable: true,
-            render: (_, { healthStatus }) => {
-              return <HealthBadge healthStatus={healthStatus ?? ServiceHealthStatus.unknown} />;
+            render: (_, { anomalyScore }) => {
+              return <AnomaliesBadge score={anomalyScore} />;
             },
           } as ITableColumn<ServiceListItem>,
         ]
@@ -340,7 +339,7 @@ interface Props {
   comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
-  displayHealthStatus: boolean;
+  displayAnomalies: boolean;
   displayAlerts: boolean;
   displaySlos: boolean;
   initialSortField: ServiceInventoryFieldName;
@@ -360,7 +359,7 @@ export function ApmServicesTable({
   noItemsMessage,
   comparisonDataLoading,
   comparisonData,
-  displayHealthStatus,
+  displayAnomalies,
   displayAlerts,
   displaySlos,
   initialSortField,
@@ -482,7 +481,7 @@ export function ApmServicesTable({
       comparisonDataLoading,
       comparisonData,
       breakpoints,
-      showHealthStatusColumn: displayHealthStatus,
+      showAnomaliesColumn: displayAnomalies,
       showAlertsColumn: displayAlerts,
       showSlosColumn: displaySlos,
       link,
@@ -495,7 +494,7 @@ export function ApmServicesTable({
     comparisonDataLoading,
     comparisonData,
     breakpoints,
-    displayHealthStatus,
+    displayAnomalies,
     displayAlerts,
     displaySlos,
     link,
