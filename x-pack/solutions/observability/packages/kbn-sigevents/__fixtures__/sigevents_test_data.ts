@@ -386,7 +386,7 @@ export const makePromotedEventsData = (timestamp: string): LatestSignificantEven
     >((acc, edge) => {
       for (const name of [edge.source, edge.target]) {
         if (name && !acc.some((s) => s.id === name)) {
-          acc.push({ id: name, label: name, iconType: 'node' });
+          acc.push({ id: name, label: name, iconType: 'layers' });
         }
       }
       return acc;

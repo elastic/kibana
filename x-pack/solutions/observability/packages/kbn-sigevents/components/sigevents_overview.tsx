@@ -40,8 +40,8 @@ export interface HealthyMetricCardItem {
 }
 
 const DEFAULT_IMPACTED_CARDS: ImpactedCardItem[] = [
-  { id: 'payment', label: 'Service', value: 'payment', iconType: 'node' },
-  { id: 'checkout', label: 'Service', value: 'checkout', iconType: 'node' },
+  { id: 'payment', label: 'Service', value: 'payment', iconType: 'layers' },
+  { id: 'checkout', label: 'Service', value: 'checkout', iconType: 'layers' },
 ];
 
 export interface SigeventsOverviewProps {

@@ -106,7 +106,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     .map((item) => ({
       id: item.ki_id,
       label: item.name,
-      iconType: 'node' as const,
+      iconType: 'layers' as const,
     }));
 
   const edgeDerivedServices: ImpactedService[] = (doc.dependency_edges ?? []).reduce<
@@ -114,7 +114,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
   >((acc, edge) => {
     for (const name of [edge.source, edge.target]) {
       if (name && !acc.some((s) => s.id === name)) {
-        acc.push({ id: name, label: name, iconType: 'node' as const });
+        acc.push({ id: name, label: name, iconType: 'layers' as const });
       }
     }
     return acc;
@@ -151,7 +151,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
             id: `service-${service.id}`,
             label: 'Service',
             value: service.label,
-            iconType: 'node' as const,
+            iconType: 'layers' as const,
           })),
         ]
       : [...causeCards, ...exposedEdgeCards];
