@@ -21,7 +21,9 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
-import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
+// Submit is gated globally on any-conversation streaming until concurrent streams are
+// unblocked in a future PR — at which point it becomes a per-conversation check.
+import { useIsAnyConversationStreaming } from '../../../hooks/use_is_any_conversation_streaming';
 import {
   useAgentId,
   useConversationTitle,
@@ -145,7 +147,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
 }) => {
-  const isSendingMessage = useIsSendingMessage();
+  const isSendingMessage = useIsAnyConversationStreaming();
   const { pendingMessage, error, isResuming } = useSendMessage();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
