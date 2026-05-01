@@ -73,6 +73,11 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
+const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.email.noRecipientsErrorMessage',
+  { defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required' }
+);
+
 function validateConfig(
   configObject: ConnectorTypeConfigType,
   validatorServices: ValidatorServices
@@ -183,7 +188,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
-    throw new Error('at least one entry in [to], [cc], or [bcc] is required');
+    throw new Error(NO_RECIPIENTS_ERROR_MESSAGE);
   }
 
   try {
@@ -309,9 +314,7 @@ async function executor(
     return {
       status: 'error',
       actionId,
-      message: i18n.translate('xpack.stackConnectors.email.noRecipientsErrorMessage', {
-        defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required',
-      }),
+      message: NO_RECIPIENTS_ERROR_MESSAGE,
       errorSource: TaskErrorSource.USER,
     };
   }

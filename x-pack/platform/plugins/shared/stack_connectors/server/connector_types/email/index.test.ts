@@ -528,7 +528,7 @@ describe('params validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: at least one entry in [to], [cc], or [bcc] is required"`
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
     );
   });
 

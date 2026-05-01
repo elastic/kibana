@@ -169,22 +169,26 @@ export function getConnectorType(
   };
 }
 
-function getToFields(actionParams: EmailActionParams): string[] {
-  if (!Array.isArray(actionParams.to)) return [];
-  return actionParams.to.filter((email) => email.trim().length > 0);
+type EmailRecipientField = 'to' | 'cc' | 'bcc' | 'replyTo';
+
+function getRecipientFields(
+  actionParams: EmailActionParams,
+  field: EmailRecipientField,
+  { dropEmpty }: { dropEmpty: boolean }
+): string[] {
+  const value = actionParams[field];
+  if (!Array.isArray(value)) return [];
+  return dropEmpty ? value.filter((email) => email.trim().length > 0) : value;
 }
 
-function getCcFields(actionParams: EmailActionParams): string[] {
-  if (!Array.isArray(actionParams.cc)) return [];
-  return actionParams.cc.filter((email) => email.trim().length > 0);
-}
+const getToFields = (actionParams: EmailActionParams) =>
+  getRecipientFields(actionParams, 'to', { dropEmpty: true });
 
-function getBccFields(actionParams: EmailActionParams): string[] {
-  if (!Array.isArray(actionParams.bcc)) return [];
-  return actionParams.bcc.filter((email) => email.trim().length > 0);
-}
+const getCcFields = (actionParams: EmailActionParams) =>
+  getRecipientFields(actionParams, 'cc', { dropEmpty: true });
 
-function getReplyToFields(actionParams: EmailActionParams): string[] {
-  if (!Array.isArray(actionParams.replyTo)) return [];
-  return actionParams.replyTo;
-}
+const getBccFields = (actionParams: EmailActionParams) =>
+  getRecipientFields(actionParams, 'bcc', { dropEmpty: true });
+
+const getReplyToFields = (actionParams: EmailActionParams) =>
+  getRecipientFields(actionParams, 'replyTo', { dropEmpty: false });
