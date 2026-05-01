@@ -31,6 +31,8 @@ apiTest.describe(
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('parsed_agent');
       expect(query).toContain('`http.user_agent`');
+      expect(query).toContain('EVAL');
+      expect(query).toContain('`parsed_agent.original`');
     });
 
     apiTest('should generate USER_AGENT command with default target field', async () => {
@@ -48,6 +50,8 @@ apiTest.describe(
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('user_agent');
       expect(query).toContain('agent_string');
+      expect(query).toContain('EVAL');
+      expect(query).toContain('`user_agent.original`');
     });
 
     apiTest('should generate USER_AGENT command with regex_file option', async () => {
@@ -110,10 +114,11 @@ apiTest.describe(
       expect(query).toContain('name');
       expect(query).toContain('os');
       expect(query).toContain('version');
+      expect(query).not.toContain('`parsed_agent.original`');
     });
 
     apiTest(
-      'should omit original from USER_AGENT properties in ES|QL (unsupported there)',
+      'should omit original from USER_AGENT WITH map but add original via EVAL (ES|QL parity with ingest)',
       async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -121,6 +126,7 @@ apiTest.describe(
               action: 'user_agent',
               from: 'agent_string',
               to: 'parsed_agent',
+              ignore_missing: true,
               properties: ['name', 'original', 'version'],
             } as UserAgentProcessor,
           ],
@@ -133,6 +139,73 @@ apiTest.describe(
         expect(query).toContain('name');
         expect(query).toContain('version');
         expect(query).not.toMatch(/["']original["']/);
+        expect(query).toContain('EVAL');
+        expect(query).toContain('`parsed_agent.original`');
+      }
+    );
+
+    apiTest(
+      'should add EVAL for target.original when properties default (ingest parity)',
+      async () => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'user_agent',
+              from: 'agent',
+              ignore_missing: true,
+            } as UserAgentProcessor,
+          ],
+        };
+
+        const { query } = await transpile(streamlangDSL);
+
+        expect(query).toContain('USER_AGENT');
+        expect(query).toContain('EVAL');
+        expect(query).toContain('`user_agent.original`');
+      }
+    );
+
+    apiTest('should not add EVAL for original when properties exclude it', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent',
+            ignore_missing: true,
+            properties: ['name', 'version'],
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = await transpile(streamlangDSL);
+
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('WITH');
+      expect(query).not.toContain('`user_agent.original`');
+    });
+
+    apiTest(
+      'should use the same CASE expression for USER_AGENT and original EVAL when where is set',
+      async () => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'user_agent',
+              from: 'agent',
+              to: 'parsed_agent',
+              ignore_missing: true,
+              where: { field: 'keep', eq: true },
+            } as UserAgentProcessor,
+          ],
+        };
+
+        const { query } = await transpile(streamlangDSL);
+
+        expect(query).toContain('USER_AGENT');
+        expect(query).toContain('CASE');
+        expect(query).toContain('keep');
+        expect(query).toContain('`parsed_agent.original`');
+        expect(query.match(/CASE\(/g) ?? []).toHaveLength(2);
       }
     );
 
@@ -162,6 +235,7 @@ apiTest.describe(
       expect(query).toContain('device');
       expect(query).toContain('extract_device_type');
       expect(query).toMatch(/extract_device_type":\s*TRUE/i);
+      expect(query).not.toContain('`parsed_agent.original`');
     });
 
     apiTest('should handle where condition with conditional execution', async () => {
@@ -181,6 +255,9 @@ apiTest.describe(
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('CASE');
       expect(query).toContain('should_parse');
+      expect(query).toContain('EVAL');
+      expect(query).toContain('`parsed_agent.original`');
+      expect(query.match(/CASE\(/g) ?? []).toHaveLength(2);
     });
 
     [

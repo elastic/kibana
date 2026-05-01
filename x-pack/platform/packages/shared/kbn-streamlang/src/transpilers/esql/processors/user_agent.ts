@@ -36,7 +36,12 @@ import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
  *    Generates:
  *    ```txt
  *    | USER_AGENT parsed_agent = user_agent.original WITH {"regex_file": "myregexes.yaml", "extract_device_type": true}
+ *    | EVAL parsed_agent.original = user_agent.original
  *    ```
+ *
+ * ES|QL does not populate `target.original` (unlike the ingest user_agent processor). When `properties` is omitted
+ * or includes `original`, we emit `EVAL target.original = <source>` using the same source expression as the
+ * USER_AGENT command. `original` is never passed in WITH `properties` because ES|QL does not accept it there.
  */
 export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): ESQLAstCommand[] {
   const {
@@ -109,5 +114,17 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
   }
 
   commands.push(cmd);
+
+  const includeOriginal = properties?.includes('original') ?? true;
+  if (includeOriginal) {
+    const originalTarget = Builder.expression.column(`${to}.original`);
+    commands.push(
+      Builder.command({
+        name: 'eval',
+        args: [Builder.expression.func.binary('=', [originalTarget, conditionalSource])],
+      })
+    );
+  }
+
   return commands;
 }
