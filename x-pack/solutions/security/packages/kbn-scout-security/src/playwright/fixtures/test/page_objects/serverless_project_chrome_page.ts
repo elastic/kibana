@@ -5,63 +5,65 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 /**
  * Serverless / project chrome (Security home): primary nav, More overflow, Agent Builder deep link.
  * Stack Management routes often omit full project nav — navigate via `securitySolutionUI` first.
+ *
+ * Locator shape mirrors {@link ObservabilityNavigation} in `@kbn/scout-oblt` for consistency.
  */
 export class ServerlessProjectChromePage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly primaryNav: Locator;
+  public readonly morePopover: Locator;
+  public readonly moreMenuTrigger: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
+    this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
+    this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
+  }
 
   async navigateToSecuritySolutionHomeForChromeNav() {
     await this.page.gotoApp('securitySolutionUI');
-    await this.page.testSubj.locator('kbnChromeNav-primaryNavigation').waitFor({
+    await this.primaryNav.waitFor({
       state: 'visible',
+      // securitySolutionUI loads the full SIEM shell; first project chrome render can exceed the default action timeout in CI.
       timeout: 35_000,
     });
   }
 
-  /**
-   * Agent Builder item in primary row or "More" popover (same idea as ObservabilityNavigation.navItemInBodyById).
-   */
-  getAgentBuilderNavItemInProjectChrome() {
-    const primary = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
-    const morePopover = this.page.testSubj.locator('side-nav-popover-More');
-    return primary
-      .locator('[data-test-subj~="nav-item-id-agent_builder"]')
-      .or(morePopover.locator('[data-test-subj~="nav-item-id-agent_builder"]'));
+  /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyById). */
+  navItemInBodyById(id: string): Locator {
+    const selector = `[data-test-subj~="nav-item-id-${id}"]`;
+    return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
   }
 
-  getMoreMenuTrigger() {
-    return this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
+  /** Agent Builder nav item when present (deep link id `agent_builder`). */
+  getAgentBuilderNavItemInProjectChrome(): Locator {
+    return this.navItemInBodyById('agent_builder');
+  }
+
+  private async openMoreMenuIfTriggerVisible(): Promise<void> {
+    if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
+      return;
+    }
+    await this.moreMenuTrigger.click();
+    await this.morePopover.waitFor({
+      state: 'visible',
+      // Popover mount and layout after trigger click; bound so we fail fast under the suite timeout while tolerating CI variance.
+      timeout: 10_000,
+    });
   }
 
   async openChromeNavMoreMenuIfAgentBuilderLinkNotVisible(): Promise<void> {
-    const agentLink = this.getAgentBuilderNavItemInProjectChrome();
-    if (await agentLink.isVisible()) {
+    if (await this.getAgentBuilderNavItemInProjectChrome().isVisible()) {
       return;
     }
-    const more = this.getMoreMenuTrigger();
-    if ((await more.count()) === 0 || !(await more.isVisible())) {
-      return;
-    }
-    await more.click();
-    await this.page.testSubj.locator('side-nav-popover-More').waitFor({
-      state: 'visible',
-      timeout: 10_000,
-    });
+    await this.openMoreMenuIfTriggerVisible();
   }
 
   async openChromeNavMoreMenuIfPresent(): Promise<void> {
-    const more = this.getMoreMenuTrigger();
-    if ((await more.count()) === 0 || !(await more.isVisible())) {
-      return;
-    }
-    await more.click();
-    await this.page.testSubj.locator('side-nav-popover-More').waitFor({
-      state: 'visible',
-      timeout: 10_000,
-    });
+    await this.openMoreMenuIfTriggerVisible();
   }
 }
