@@ -34,7 +34,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 const mockSave = jest.fn();
-const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(() => false);
+const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(false);
 const mockClose = jest.fn();
 
 describe('SavedObjectSaveModal', () => {
