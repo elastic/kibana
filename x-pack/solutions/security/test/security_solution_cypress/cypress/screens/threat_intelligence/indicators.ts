@@ -67,9 +67,8 @@ export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubject
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterOut'
 );
-export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM = getDataTestSubjectSelector(
-  'iocHeaderBlockItem'
-);
+export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM =
+  getDataTestSubjectSelector('iocHeaderBlockItem');
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterIn'
 );
