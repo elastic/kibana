@@ -861,6 +861,134 @@ paths:
       summary: Update an exception list
       tags:
         - Security Exceptions API
+  /api/exception_lists/_bulk_export:
+    post:
+      description: Exports exception lists and their associated items to an NDJSON file.
+      operationId: ExportExceptionLists
+      parameters:
+        - description: Filters the returned results according to the KQL query string
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Determines whether to include expired exceptions in the exported
+            list. Expiration date defined by `expire_time`.
+          example: true
+          in: query
+          name: include_expired_exceptions
+          required: true
+          schema:
+            default: 'true'
+            enum:
+              - 'true'
+              - 'false'
+            type: string
+        - description: >-
+            Determines whether the exception lists are in the default namespace
+            (`single`) or in the global `agnostic` namespace. Defaults to
+            `single` if not provided.
+          in: query
+          name: namespace_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+      responses:
+        '200':
+          content:
+            application/ndjson:
+              examples:
+                exportSavedObjectsResponse:
+                  value: >
+                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This
+                    is a sample detection type
+                    exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample
+                    Detection Exception
+                    List","namespace_type":"single","os_types":[],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
+
+                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This
+                    is a sample endpoint type
+                    exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some
+                    host","another
+                    host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample
+                    Endpoint Exception
+                    List","namespace_type":"single","os_types":["linux"],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
+
+                    {"exported_exception_list_count":1,"exported_exception_list_item_count":1,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
+              schema:
+                description: >-
+                  A `.ndjson` file containing the specified exception lists and
+                  their items
+                format: binary
+                type: string
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request query]: list_id: Required, namespace_type:
+                      Required TODO
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/exception_lists/_export] is unauthorized
+                      for user, this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Export multiple exception lists
+      tags:
+        - Security Exceptions API
   /api/exception_lists/_duplicate:
     post:
       description: Duplicate an existing exception list.
