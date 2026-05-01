@@ -41,6 +41,7 @@ export async function buildEmbeddable<
       isDuplicable: true,
       isCustomizable: true,
       isPinnable: false,
+      canBeRelatedPanelsIndicator: false,
     };
     return {
       // Spread default panel capabilities first, allow apiRegistration to override them

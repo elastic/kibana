@@ -133,7 +133,6 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 47422
   painlessLab: 6299
-  presentationPanel: 10936
   presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
@@ -204,7 +203,7 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 22023
+  visTypeTimeseries: 21819
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
