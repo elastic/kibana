@@ -119,12 +119,15 @@ export default function emailTest({ getService }: FtrProviderContext) {
         expect(conn.status).to.be(200);
         const { id } = conn.body;
 
+        // validateParams throws Boom.badRequest, which the action executor
+        // wraps as { status: 'error', errorSource: 'user' } in a 200 response.
         const { status, body } = await runConnector(id, [], [], []);
-        // validateParams throws synchronously, so the action framework returns 400
-        expect(status).to.be(400);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
         expect(body?.message).to.match(
           /At least one entry in \[to\], \[cc\], or \[bcc\] is required/
         );
+        expect(body?.errorSource).to.be('user');
       });
 
       it('rejects via validateParams when to/cc/bcc contain only empty/whitespace strings', async () => {
@@ -134,12 +137,14 @@ export default function emailTest({ getService }: FtrProviderContext) {
         const { id } = conn.body;
 
         // validateParams filters blanks before the recipients-required check,
-        // so the request is rejected synchronously with HTTP 400.
+        // so the same wrapped error path fires as for fully-empty arrays.
         const { status, body } = await runConnector(id, ['', '  '], [' '], ['']);
-        expect(status).to.be(400);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
         expect(body?.message).to.match(
           /At least one entry in \[to\], \[cc\], or \[bcc\] is required/
         );
+        expect(body?.errorSource).to.be('user');
       });
 
       it('succeeds when only Cc has a valid recipient', async () => {
