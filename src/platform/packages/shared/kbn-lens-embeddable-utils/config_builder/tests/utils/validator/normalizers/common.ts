@@ -20,6 +20,13 @@ const COMMON_STATE_IGNORE_PATHS = [
   'type', // misplaced type, see https://github.com/elastic/kibana/issues/245683
   'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
+  // TODO: check missing properties striped out in transforms
+  'state.datasourceStates.formBased.layers.*.indexPatternId',
+  'state.datasourceStates.formBased.currentIndexPatternId',
+  // TODO: check differing properties changed in transforms
+  'state.datasourceStates.formBased.layers.*.columns.*.label',
+  'state.datasourceStates.formBased.layers.*.columns.*.customLabel',
+  'state.datasourceStates.formBased.layers.*.columns.*.params',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -44,6 +51,17 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     const { layerId, columnRemapping } = getArgs(attributes);
 
     removeEmptyProperties(attributes);
+
+    const layers = attributes.state.datasourceStates.formBased?.layers ?? {};
+
+    // TODO: check dataType mismatch
+    for (const layer of Object.values(layers)) {
+      for (const col of Object.values(layer.columns)) {
+        if (col.dataType === 'ip') {
+          col.dataType = 'string'; // ip is set to string in transforms
+        }
+      }
+    }
 
     // Move deprecated indexpattern datasource to formBased
     attributes.state.datasourceStates.formBased =

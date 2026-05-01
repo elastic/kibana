@@ -19,8 +19,6 @@ type HeatmapAttributes = Extract<LensAttributes, { visualizationType: 'lnsHeatma
 
 const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
   original: (attributes) => {
-    // state.state.visualization.palette = normalizePaletteState(state.state.visualization.palette);
-
     const {
       legend: { isVisible, shouldTruncate },
       gridConfig: { isXAxisTitleVisible, isYAxisTitleVisible },
@@ -93,46 +91,12 @@ const alignId: NormalizerConfig<HeatmapAttributes> = {
   },
 };
 
-const missingProperties: NormalizerConfig<HeatmapAttributes> = {
-  ignore: [
-    'state.datasourceStates.formBased.layers.*.indexPatternId',
-    'state.datasourceStates.formBased.currentIndexPatternId',
-  ],
-};
-
-const conflictingProperties: NormalizerConfig<HeatmapAttributes> = {
-  original: (attributes) => {
-    const layers = attributes.state.datasourceStates.formBased?.layers ?? {};
-
-    for (const layer of Object.values(layers)) {
-      for (const col of Object.values(layer.columns)) {
-        if (col.dataType === 'ip') {
-          col.dataType = 'string'; // ip is set to string in transforms
-        }
-        // if (col.dataType === 'string') {
-        //   col.dataType = 'number'; // string is set to number in transforms
-        // }
-      }
-    }
-
-    return attributes;
-  },
-  ignore: [
-    'state.datasourceStates.formBased.layers.*.columns.*.label',
-    'state.datasourceStates.formBased.layers.*.columns.*.customLabel',
-    'state.datasourceStates.formBased.layers.*.columns.*.params', // these are wildly different
-    // 'state.visualization.legend.shouldTruncate',
-  ],
-};
-
 export const normalizeHeatmap = mergeNormalizers([
   getCommonNormalizer<HeatmapAttributes>(({ state: { visualization } }) => ({
     layerId: visualization.layerId,
     columnRemapping: getColumnRemapping(visualization),
   })),
+  alignId,
   alignLegacyTypes,
   getPaletteNormalizer<HeatmapAttributes>('state.visualization.palette'),
-  alignId,
-  missingProperties,
-  conflictingProperties,
 ]);
