@@ -22,7 +22,11 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
-          operations: schema.arrayOf(schema.any()),
+          // `operations` is an Elasticsearch bulk payload: action/source line pairs
+          // with heterogeneous shapes (index, create, update, delete, doc body),
+          // so the per-element schema stays `schema.any()`. The cap bounds the
+          // request and prevents an unbounded array from being forwarded to ES.
+          operations: schema.arrayOf(schema.any(), { maxSize: 1000 }),
         }),
       },
       security: {
