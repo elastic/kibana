@@ -21,12 +21,7 @@ import { buildBoundTools } from './tools/schemas';
 import { dispatchToolCall } from './tools/dispatch';
 import { validateGeneratedYaml } from './validate';
 import { buildMessagesFromActions } from './build_messages';
-import {
-  agentStepAction,
-  findLastAgentStep,
-  toolResultAction,
-  validateAction,
-} from './actions';
+import { agentStepAction, findLastAgentStep, toolResultAction, validateAction } from './actions';
 import type { Action } from './types';
 
 export interface CreateGraphArgs {
@@ -73,7 +68,9 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
 
   const toolsNode = async (state: StateType): Promise<Partial<StateType>> => {
     const lastAgentStep = findLastAgentStep(state.actions);
-    if (!lastAgentStep) return {};
+    if (!lastAgentStep) {
+      return {};
+    }
 
     let yaml = state.yaml;
     const newActions: Action[] = [];

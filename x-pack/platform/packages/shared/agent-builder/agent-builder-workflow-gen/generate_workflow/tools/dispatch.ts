@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  insertStep,
-  modifyStep,
-  modifyStepProperty,
-  deleteStep,
-} from '@kbn/workflows-yaml';
+import { insertStep, modifyStep, modifyStepProperty, deleteStep } from '@kbn/workflows-yaml';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
 import { TOOL_NAMES, type ToolName } from './schemas';
 import { lookupStepDefinitions, lookupTriggerDefinitions, type LookupDeps } from './lookup';

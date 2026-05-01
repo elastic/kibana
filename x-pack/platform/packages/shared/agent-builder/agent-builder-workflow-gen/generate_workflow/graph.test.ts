@@ -114,9 +114,12 @@ steps:
       });
     const aiNoCall = () => new AIMessage({ content: 'done' });
     const responses = [
-      aiToolCall(), aiNoCall(),
-      aiToolCall(), aiNoCall(),
-      aiToolCall(), aiNoCall(),
+      aiToolCall(),
+      aiNoCall(),
+      aiToolCall(),
+      aiNoCall(),
+      aiToolCall(),
+      aiNoCall(),
     ];
     const chatModel = buildChatModel(responses);
 
@@ -126,8 +129,8 @@ steps:
       diagnostics: [{ severity: 'error', source: 's', message: 'bad' }],
     });
 
-    await expect(
-      generateWorkflow({ nlQuery: 'q', maxRetries: 3, ...deps })
-    ).rejects.toThrow(/Could not generate workflow/);
+    await expect(generateWorkflow({ nlQuery: 'q', maxRetries: 3, ...deps })).rejects.toThrow(
+      /Could not generate workflow/
+    );
   });
 });

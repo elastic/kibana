@@ -17,7 +17,11 @@ describe('validateGeneratedYaml', () => {
       }),
     } as any;
 
-    const result = await validateGeneratedYaml('yaml', { api, spaceId: 'default', request: {} as any });
+    const result = await validateGeneratedYaml('yaml', {
+      api,
+      spaceId: 'default',
+      request: {} as any,
+    });
     expect(result.valid).toBe(true);
     expect(result.parsedWorkflow).toBeDefined();
     expect(result.errors).toEqual([]);
@@ -34,7 +38,11 @@ describe('validateGeneratedYaml', () => {
       }),
     } as any;
 
-    const result = await validateGeneratedYaml('y', { api, spaceId: 'default', request: {} as any });
+    const result = await validateGeneratedYaml('y', {
+      api,
+      spaceId: 'default',
+      request: {} as any,
+    });
     expect(result.valid).toBe(false);
     expect(result.errors).toEqual(['[schema] missing field (at steps.0)']);
   });

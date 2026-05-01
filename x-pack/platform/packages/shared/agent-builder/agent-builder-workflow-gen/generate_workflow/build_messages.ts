@@ -12,11 +12,7 @@ import {
   createToolCallMessage,
   createToolResultMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import {
-  createSystemPrompt,
-  createUserPrompt,
-  createValidationFailureMessage,
-} from './prompts';
+import { createSystemPrompt, createUserPrompt, createValidationFailureMessage } from './prompts';
 import { isAgentStepAction, isToolResultAction, isValidateAction } from './actions';
 import type { StateType } from './state';
 
