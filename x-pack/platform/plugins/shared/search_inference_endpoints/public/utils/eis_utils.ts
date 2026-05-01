@@ -7,10 +7,13 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import type { EisInferenceEndpoint } from '../../common/types';
+import { MODEL_DEPRECATED_STATUS } from '../../common/constants';
+import type { EisInferenceEndpoint, EisInferenceEndpointMetadata } from '../../common/types';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../common/type_guards';
@@ -207,3 +210,21 @@ export const filterGroupedModels = (
     })
     .sort((a, b) => a.modelName.localeCompare(b.modelName));
 };
+
+export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return false;
+  if (metadata?.heuristics?.status?.toLowerCase() === MODEL_DEPRECATED_STATUS) return true;
+  return false;
+}
+
+export function isModelDecommissioned(metadata: EisInferenceEndpointMetadata | undefined) {
+  const eolDate = getModelEOLDate(metadata);
+  if (!eolDate) return false;
+  return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
+}
+
+export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return undefined;
+  if (!metadata?.heuristics?.end_of_life_date) return undefined;
+  return dateMath.parse(metadata.heuristics.end_of_life_date);
+}
