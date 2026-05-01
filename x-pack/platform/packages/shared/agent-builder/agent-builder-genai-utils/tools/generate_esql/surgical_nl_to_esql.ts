@@ -137,17 +137,14 @@ Generate the ES|QL pipe(s) that should replace the marked comment.`,
 };
 
 /**
- * Returns a single concrete index/datastream/alias from the buffer that is safe to sample,
- * or `undefined` for empty / multi-target / wildcard sources (those don't fit
- * `resolveResourceForEsqlWithSamplingStats`, which targets a single resource).
+ * Index pattern from the buffer's source command (FROM/TS/PromQL), or `undefined` if there
+ * is no source command yet. Patterns and comma-separated targets are passed through —
+ * `resolveResourceForEsql` resolves them via `_resolve/index` and `_field_caps`, and
+ * `_search` accepts them natively for sampling.
  */
 const getSamplingTarget = (currentQuery: string): string | undefined => {
   try {
-    const indexPattern = getIndexPatternFromESQLQuery(currentQuery);
-    if (!indexPattern || indexPattern.includes(',') || indexPattern.includes('*')) {
-      return undefined;
-    }
-    return indexPattern;
+    return getIndexPatternFromESQLQuery(currentQuery) || undefined;
   } catch {
     return undefined;
   }
