@@ -94,9 +94,9 @@ export const AppBadges = memo(() => {
             closePopover={handleClosePopover}
             panelPaddingSize="s"
           >
-            <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
               {overflowBadges.map((badge) => (
-                <EuiFlexItem key={badge.label}>
+                <EuiFlexItem grow={false} key={badge.label}>
                   <AppBadge badge={badge} />
                 </EuiFlexItem>
               ))}

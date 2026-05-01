@@ -59,6 +59,7 @@ export type {
   ChromeNextGlobalSearchConfig,
   ChromeNextHeaderBack,
   ChromeNextHeaderBadge,
+  ChromeNextHeaderBadgeMenuItem,
   ChromeNextHeaderCallout,
   ChromeNextHeaderConfig,
   ChromeNextHeaderGlobalActions,
