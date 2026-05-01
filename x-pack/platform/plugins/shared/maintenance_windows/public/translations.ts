@@ -127,7 +127,7 @@ export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope
 export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alerts.description',
   {
-    defaultMessage: 'Supress alert notifications during maintenance',
+    defaultMessage: 'Suppress alert notifications during maintenance',
   }
 );
 
@@ -157,7 +157,7 @@ export const EPISODES_SCOPE_TITLE = i18n.translate(
 export const EPISODES_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.episodes.description',
   {
-    defaultMessage: 'Supress alert notifications during maintenance',
+    defaultMessage: 'Suppress alert notifications during maintenance',
   }
 );
 
