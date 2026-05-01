@@ -917,7 +917,10 @@ export class PackageInstaller {
         this.artifactRepositoryProxyUrl
       );
       zipArchive = await openZipArchive(downloadedFullPath);
-      validateArtifactArchive(zipArchive);
+      const validationResult = validateArtifactArchive(zipArchive);
+      if (!validationResult.valid) {
+        throw new Error(`Artifact archive validation failed: ${validationResult.error}`);
+      }
     } finally {
       zipArchive?.close();
       await Fs.unlink(precheckArtifactPath).catch(() => {});
