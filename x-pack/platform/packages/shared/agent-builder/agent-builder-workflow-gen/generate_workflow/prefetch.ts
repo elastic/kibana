@@ -10,6 +10,7 @@ import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows'
 import { builtInStepDefinitions, builtInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import { pickLabelAndDescription } from './tools/lookup_helpers';
 import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
 interface DepsBase {
@@ -25,12 +26,15 @@ const toSummary = (s: BaseStepDefinition): StepDefinitionSummary => ({
   category: s.category as string,
 });
 
-const toConnectorSummary = (c: ConnectorContractUnion): StepDefinitionSummary => ({
-  id: c.type,
-  label: c.summary ?? c.description ?? c.type,
-  description: c.description ?? undefined,
-  category: categorizeConnectorType(c.type),
-});
+const toConnectorSummary = (c: ConnectorContractUnion): StepDefinitionSummary => {
+  const { label, description } = pickLabelAndDescription(c.summary, c.description, c.type);
+  return {
+    id: c.type,
+    label,
+    description,
+    category: categorizeConnectorType(c.type),
+  };
+};
 
 export const prefetchConnectors = async ({
   api,

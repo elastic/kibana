@@ -59,6 +59,31 @@ export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAg
   };
 }
 
+/**
+ * Pick the short label and the long description from a connector's
+ * `summary` / `description` pair. Most contracts follow `summary=short` /
+ * `description=long` (e.g. `elasticsearch.indices.create`), but workflows-
+ * extension registered step definitions have these inverted by
+ * `getRegisteredStepDefinitions`. Picking by length gives a stable result
+ * for both shapes.
+ */
+const pickLabelAndDescription = (
+  summary: string | null | undefined,
+  description: string | null | undefined,
+  fallback: string
+): { label: string; description?: string } => {
+  const a = summary ?? null;
+  const b = description ?? null;
+  if (!a && !b) return { label: fallback };
+  if (!a) return { label: b! };
+  if (!b) return { label: a };
+  const [shortText, longText] = a.length <= b.length ? [a, b] : [b, a];
+  return {
+    label: shortText,
+    description: shortText === longText ? undefined : truncateDescription(longText),
+  };
+};
+
 export function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
   const connectorId = connector.hasConnectorId || 'none';
   const inputParams = buildStepParamsSummary(connector.paramsSchema);
@@ -66,11 +91,16 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     ? buildStepParamsSummary(connector.configSchema)
     : undefined;
   const outputSummary = buildOutputSummary(connector.outputSchema);
+  const { label, description } = pickLabelAndDescription(
+    connector.summary,
+    connector.description,
+    connector.type
+  );
 
   return {
     id: connector.type,
-    label: connector.summary ?? connector.description ?? connector.type,
-    description: truncateDescription(connector.description),
+    label,
+    description,
     category: categorizeConnectorType(connector.type),
     connectorId,
     ...(inputParams.length > 0 ? { inputParams } : {}),
@@ -79,3 +109,5 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     examples: connector.examples?.snippet ? [connector.examples.snippet] : undefined,
   };
 }
+
+export { pickLabelAndDescription };
