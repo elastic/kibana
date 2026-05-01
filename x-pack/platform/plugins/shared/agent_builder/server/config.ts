@@ -23,9 +23,14 @@ export const configSchema = schema.object({
     numWords: schema.number({ defaultValue: 750, min: 1, max: 5000 }),
   }),
   tracing: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    send_to_self: schema.boolean({ defaultValue: true }),
+    exporters: schema.arrayOf(
+      schema.object({
+        url: schema.uri({ scheme: ['http', 'https'] }),
+        headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+      }),
+      { defaultValue: [] }
+    ),
     scheduledDelay,
   }),
 });

@@ -7,11 +7,11 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { LateBindingSpanProcessor } from '@kbn/tracing';
+import { LateBindingSpanProcessor, ElasticsearchOtlpExporter } from '@kbn/tracing';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { ElasticsearchOtlpExporter } from '@kbn/tracing';
 import { LRUCache } from 'lru-cache';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
@@ -57,6 +57,24 @@ const createCachedIsEnabled = async (core: CoreStart, logger: Logger): Promise<(
   };
 };
 
+const buildExporters = (
+  core: CoreStart,
+  tracingConfig: AgentBuilderConfig['tracing']
+): tracing.SpanExporter[] => {
+  return [
+    ...(tracingConfig.send_to_self
+      ? [new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser)]
+      : []),
+    ...tracingConfig.exporters.map(
+      ({ url, headers }) =>
+        new OTLPTraceExporter({
+          url,
+          ...(headers ? { headers } : {}),
+        })
+    ),
+  ];
+};
+
 export const registerTracingExporter = async ({
   core,
   tracingConfig,
@@ -66,22 +84,24 @@ export const registerTracingExporter = async ({
   tracingConfig: AgentBuilderConfig['tracing'];
   logger: Logger;
 }): Promise<(() => Promise<void>) | undefined> => {
-  if (!tracingConfig.enabled) {
+  const exporters = buildExporters(core, tracingConfig);
+
+  if (exporters.length === 0) {
     return undefined;
   }
 
-  const exporter = tracingConfig.url
-    ? new OTLPTraceExporter({
-        url: tracingConfig.url,
-        ...(tracingConfig.headers ? { headers: tracingConfig.headers } : {}),
-      })
-    : new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser);
+  const isEnabled = await createCachedIsEnabled(core, logger);
 
-  const processor = new AgentBuilderSpanProcessor({
-    exporter,
-    scheduledDelayMillis: tracingConfig.scheduledDelay,
-    isEnabled: await createCachedIsEnabled(core, logger),
+  const tearDowns = exporters.map((exporter) => {
+    const processor = new AgentBuilderSpanProcessor({
+      exporter,
+      scheduledDelayMillis: tracingConfig.scheduledDelay,
+      isEnabled,
+    });
+    return LateBindingSpanProcessor.register(processor);
   });
 
-  return LateBindingSpanProcessor.register(processor);
+  return async () => {
+    await Promise.all(tearDowns.map((teardown) => teardown()));
+  };
 };
