@@ -61,7 +61,7 @@ paths:
                   value:
                     statusCode: 400
                     error: Bad Request
-                    message: '[request query]: list_id: Required, namespace_type: Required TODO'
+                    message: '[request query]: include_expired_exceptions: Invalid option: expected one of "true"|"false"'
         401:
           description: Unsuccessful authentication response
           content:
