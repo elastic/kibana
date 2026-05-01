@@ -24,9 +24,7 @@ const generateWorkflowSchema = z.object({
   instructions: z
     .string()
     .optional()
-    .describe(
-      '(optional) Additional instructions to steer the generation (system-prompt extras).'
-    ),
+    .describe('(optional) Additional instructions to steer the generation (system-prompt extras).'),
 });
 
 export const generateWorkflowTool = ({
@@ -39,7 +37,8 @@ export const generateWorkflowTool = ({
   return {
     id: platformCoreTools.generateWorkflow,
     type: ToolType.builtin,
-    description: cleanPrompt(`Generate an Elastic workflow YAML definition from a natural-language description.
+    description:
+      cleanPrompt(`Generate an Elastic workflow YAML definition from a natural-language description.
 
       Returns the validated workflow definition in the response.
       Use this tool when the user asks to create, draft, or scaffold a new workflow.
