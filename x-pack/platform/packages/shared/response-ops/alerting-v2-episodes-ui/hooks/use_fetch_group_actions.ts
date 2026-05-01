@@ -27,13 +27,13 @@ const tagsFromRow = (value: GroupActionRow['tags']): string[] => {
 
 export interface UseFetchGroupActionsOptions {
   groupHashes: string[];
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
-export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) =>
+export const useFetchGroupActions = ({ groupHashes, expressions }: UseFetchGroupActionsOptions) =>
   useQuery({
     queryKey: queryKeys.groupActions(groupHashes),
-    queryFn: ({ signal }) => fetchGroupActions({ groupHashes, abortSignal: signal, services }),
+    queryFn: ({ signal }) => fetchGroupActions({ groupHashes, abortSignal: signal, expressions }),
     enabled: groupHashes.length > 0,
     keepPreviousData: true,
     select: (rows) => {
@@ -46,6 +46,8 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
           lastSnoozeAction: row.last_snooze_action ?? null,
           snoozeExpiry: row.snooze_expiry ?? null,
           tags: tagsFromRow(row.tags),
+          lastSnoozeActor: row.last_snooze_actor ?? null,
+          lastDeactivateActor: row.last_deactivate_actor ?? null,
         });
       }
       return map;

@@ -479,6 +479,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-ccs-state": [],
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
@@ -512,6 +513,7 @@
     "name",
     "package_assets",
     "pending_upgrade_review",
+    "previous_dependency_versions",
     "previous_version",
     "verification_key_id",
     "verification_status",

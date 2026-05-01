@@ -1476,6 +1476,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1738,6 +1742,10 @@
         "properties": {}
       },
       "pending_upgrade_review": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "previous_dependency_versions": {
         "dynamic": false,
         "properties": {}
       },

@@ -790,10 +790,6 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_ai_telemetry_client.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_management_telemetry_client.ts"
-              },
-              {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
