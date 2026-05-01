@@ -209,10 +209,12 @@ export class AgentBuilderPlugin
 
   start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
     this.startDeps = startDeps;
-    this.teardownTracing = registerTracingExporter({
+    registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
       logger: this.logger.get('tracing'),
+    }).then((teardownTracing) => {
+      this.teardownTracing = teardownTracing;
     });
     const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =

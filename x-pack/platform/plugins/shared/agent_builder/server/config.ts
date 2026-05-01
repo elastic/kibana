@@ -24,7 +24,7 @@ export const configSchema = schema.object({
   }),
   tracing: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    url: schema.maybe(schema.string()),
+    url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     scheduledDelay,
   }),

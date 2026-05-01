@@ -18,7 +18,16 @@ import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 
 const SETTING_CACHE_TTL_MS = 30_000;
 
-const createCachedIsEnabled = (core: CoreStart, logger: Logger): (() => boolean) => {
+/**
+ * Returns a synchronous `isEnabled()` function backed by an LRU cache with
+ * stale-while-revalidate semantics.
+ * We need the cache to prevent calling the async uiSettings read on the hot path.
+ *
+ * The span processor hot-path requires also required synchronous check, but the underlying uiSettings read is async.
+ * The cache with `allowStale: true` ensures `isEnabled()` always returns instantly
+ * (stale or fresh) while a background fetch refreshes the value every {@link SETTING_CACHE_TTL_MS} ms.
+ */
+const createCachedIsEnabled = async (core: CoreStart, logger: Logger): Promise<() => boolean> => {
   const cache = new LRUCache<string, boolean>({
     max: 1,
     ttl: SETTING_CACHE_TTL_MS,
@@ -35,7 +44,7 @@ const createCachedIsEnabled = (core: CoreStart, logger: Logger): (() => boolean)
   });
 
   // Eagerly populate the cache so the first synchronous isEnabled() call has a value
-  cache.fetch('enabled').catch((error) => {
+  await cache.fetch('enabled').catch((error) => {
     logger.error(`Failed to fetch tracing settings: ${error.message}`);
   });
 
@@ -48,7 +57,7 @@ const createCachedIsEnabled = (core: CoreStart, logger: Logger): (() => boolean)
   };
 };
 
-export const registerTracingExporter = ({
+export const registerTracingExporter = async ({
   core,
   tracingConfig,
   logger,
@@ -56,7 +65,7 @@ export const registerTracingExporter = ({
   core: CoreStart;
   tracingConfig: AgentBuilderConfig['tracing'];
   logger: Logger;
-}): (() => Promise<void>) | undefined => {
+}): Promise<(() => Promise<void>) | undefined> => {
   if (!tracingConfig.enabled) {
     return undefined;
   }
@@ -71,7 +80,7 @@ export const registerTracingExporter = ({
   const processor = new AgentBuilderSpanProcessor({
     exporter,
     scheduledDelayMillis: tracingConfig.scheduledDelay,
-    isEnabled: createCachedIsEnabled(core, logger),
+    isEnabled: await createCachedIsEnabled(core, logger),
   });
 
   return LateBindingSpanProcessor.register(processor);
