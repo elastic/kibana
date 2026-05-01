@@ -150,6 +150,7 @@ export function SigeventsOverviewPage() {
         values: { eventTitle },
       })
     );
+    setConversationKey((prev) => prev + 1);
   }, [eventData?.mainEventTitle]);
 
   const handleFlyoutRemediate = useCallback(() => {
@@ -165,6 +166,7 @@ export function SigeventsOverviewPage() {
         values: { eventTitle },
       })
     );
+    setConversationKey((prev) => prev + 1);
   }, []);
 
   const EmbeddableConversation = useMemo(
@@ -239,7 +241,7 @@ export function SigeventsOverviewPage() {
       }
       return {
         valueCss: accentValueCss,
-        iconType: (priority === 'low' ? 'eye' : 'warning') as const,
+        iconType: priority === 'low' ? 'eye' : 'warning',
         iconBackground: euiTheme.colors.backgroundLightAccent,
         iconColor: euiTheme.colors.textAccent,
       };
