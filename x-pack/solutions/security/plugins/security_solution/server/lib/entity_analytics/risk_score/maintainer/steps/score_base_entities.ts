@@ -45,20 +45,12 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
 export type Phase1BaseScoringSummary = StepResult;
 
 /**
- * Computes base risk scores for one entity type and streams paginated results.
+ * Streams base risk scores for one entity type, one page per yield.
  *
- * Strategy:
- * - The lookup index (built by Phase 0) is the authoritative set of entities
- *   to score. Phase 0 deduplicates rows by `entity_id`, so a single
- *   `search_after` walk over the lookup index visits each entity exactly once.
- * - Each page reads up to `pageSize` `entity_id`s from the lookup index
- *   (filtered to the current entity type via the EUID type prefix), then
- *   passes them to one ES|QL query as a `WHERE entity_id IN (...)` clause.
- *   Lucene pushes the predicate down so non-matching alerts are dropped at
- *   scan time, keeping memory bounded — empirically ~3× lower than the
- *   LOOKUP JOIN shape on alert-heavy workloads.
- * - Modifier entities are fetched after scoring, only for IDs that produced
- *   scores, to avoid round-trips for entities with zero alerts.
+ * Each page: `search_after` over the Phase-0 lookup index (filtered by EUID
+ * type prefix) for up to `pageSize` IDs, then one ES|QL query with those IDs
+ * as a `WHERE entity_id IN (...)` predicate. Modifier entities are fetched
+ * only for IDs that produced scores.
  */
 export const calculateBaseEntityScores = async function* ({
   esClient,
@@ -182,16 +174,12 @@ const fetchNextLookupPage = async ({
     _source: ['entity_id'],
     track_total_hits: false,
     sort: [{ entity_id: { order: 'asc' } }],
-    // Strict undefined check: the lookup index never stores empty-string EUIDs
-    // today, but a truthy check would treat one as "no cursor" and re-page
-    // from the start — guard against that drift.
+    // Strict undefined: a truthy check would fold an empty-string cursor
+    // into "no cursor" and re-page from the start.
     search_after: cursor !== undefined ? [cursor] : undefined,
-    query: {
-      // EUIDs are always prefixed with `${entityType}:` (see
-      // appendTypeIdIfNeeded in entity_store/common/domain/euid/esql.ts), so
-      // a prefix filter is sufficient to scope the page to one entity type.
-      prefix: { entity_id: `${entityType}:` },
-    },
+    // EUIDs are `${entityType}:...` (see appendTypeIdIfNeeded in
+    // entity_store/common/domain/euid/esql.ts), so a prefix scopes the page.
+    query: { prefix: { entity_id: `${entityType}:` } },
   });
 
   const hits = response.hits.hits ?? [];
@@ -203,8 +191,7 @@ const fetchNextLookupPage = async ({
     }
   }
 
-  // Termination: short page (fewer hits than requested) means the slice for
-  // this entity type is exhausted.
+  // Short page = slice exhausted.
   const nextCursor = hits.length < pageSize ? undefined : entityIds[entityIds.length - 1];
   return { entityIds, nextCursor };
 };

@@ -29,15 +29,9 @@ export interface RiskScoreModifierEntity {
 }
 
 /**
- * Raw entity-store `_source` shape for fields the modifier pipeline reads.
- *
- * `watchlists` and `resolved_to` are typed as `unknown` because the entity
- * store's `_source` is not strictly typed at the boundary — values can arrive
- * as strings, arrays, or missing entirely. `normalizeModifierEntity`
- * (`maintainer/utils/fetch_entities_by_ids.ts`) is the single boundary that
- * converts this loose shape into the strict `RiskScoreModifierEntity`.
- *
- * Keep this type loose — only widen the boundary, never the normalized output.
+ * Loose entity-store `_source` boundary shape. `unknown` fields are variably
+ * typed; `normalizeModifierEntity` is the single normalizer to the strict
+ * `RiskScoreModifierEntity`. Keep this type loose — only widen at the boundary.
  */
 export interface EntityStoreModifierSource {
   entity?: {

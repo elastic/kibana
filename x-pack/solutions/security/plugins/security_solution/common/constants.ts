@@ -60,25 +60,11 @@ export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
 /**
- * Default page size for the risk score maintainer.
- *
- * Each scoring page issues an ES|QL query of the form
- * `STATS ... BY entity_id` over up to `pageSize` entity buckets. ES|QL
- * pre-allocates per-bucket state for `TOP(risk_score, alertSampleSizePerShard)`
- * — i.e. roughly `alertSampleSizePerShard × 8 bytes` of heap per bucket plus
- * fixed overhead. With the default `alertSampleSizePerShard = 10_000`
- * (see `server/config.ts`), worst-case per-page heap is approximately
- * `pageSize × 80 KB`.
- *
- * 5,000 keeps that worst-case footprint at ~400 MB, which fits within
- * smaller stateful and serverless deployments without tripping the request
- * circuit breaker, while still preserving the scoring shape (round trips
- * scale with `totalEntities / pageSize`, and Lucene's terms-filter pushdown
- * means total alert work is roughly invariant to `pageSize`).
- *
- * Operators on cloud-class deployments can raise `pageSize` up to
- * {@link MAX_RISK_SCORE_PAGE_SIZE} via the risk-engine configuration saved
- * object when they have heap to spare.
+ * Per-page heap for `STATS ... BY entity_id` is ~`pageSize × alertSampleSizePerShard × 8 bytes`.
+ * With the default `alertSampleSizePerShard = 10_000`, 5,000 keeps the worst case at ~400 MB —
+ * safe on small/serverless heaps. Total alert work is roughly invariant to `pageSize` thanks to
+ * Lucene's terms-filter pushdown. Operators with heap to spare can raise via saved object up to
+ * {@link MAX_RISK_SCORE_PAGE_SIZE}.
  */
 export const DEFAULT_RISK_SCORE_PAGE_SIZE = 5_000 as const;
 export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;

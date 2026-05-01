@@ -24,19 +24,12 @@ export const getLookupIndexName = (namespace: string): string =>
   getIndexPatternLookup(namespace).alias;
 
 /**
- * Creates the lookup index if missing, or applies the current mapping to an
- * existing index.
+ * Create or upgrade the lookup index. `putMapping` is idempotent for additive
+ * changes (adds new fields, no-ops on matches, rejects type conflicts), so
+ * future fields in `LOOKUP_INDEX_MAPPING` are picked up automatically.
  *
- * `putMapping` is idempotent for additive mapping changes — Elasticsearch adds
- * any new fields, no-ops on fields already present with matching types, and
- * rejects conflicting type changes (the desired loud-failure semantic). This
- * means future field additions to `LOOKUP_INDEX_MAPPING` are picked up
- * automatically without further code changes here.
- *
- * Prior art: `entity_analytics/utils/create_or_update_index.ts` does the same
- * pattern at the package level, but it also re-applies settings on update.
- * `index.mode: 'lookup'` is a create-only setting, so a thin local
- * implementation avoids logging benign putSettings failures every run.
+ * Not using `entity_analytics/utils/create_or_update_index.ts`: it also
+ * re-applies settings on update, and `index.mode: 'lookup'` is create-only.
  */
 export const ensureLookupIndex = async ({
   esClient,

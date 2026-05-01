@@ -210,11 +210,9 @@ export const fetchResolutionGroupMemberIds = async ({
       _source: ['entity_id'],
       track_total_hits: false,
       sort: [{ entity_id: { order: 'asc' } }],
-      // Strict undefined check, not truthy: an empty-string entity_id would
-      // pass the typeof === 'string' check below and be assigned back into
-      // searchAfter. With a truthy check here the empty string would be
-      // treated as "no cursor", ES would return the same first page, and the
-      // loop would never terminate.
+      // Strict undefined: a truthy check would fold an empty-string entity_id
+      // (assigned via the typeof check below) into "no cursor" and re-page
+      // from the start forever.
       search_after: searchAfter !== undefined ? [searchAfter] : undefined,
       query: {
         bool: {

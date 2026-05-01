@@ -48,13 +48,12 @@ interface BulkSummary {
 }
 
 /**
- * Returns the lookup rows implied by a single entity-store entity:
- * - alias entity (has resolved_to): one alias row + one self-row for the target.
- * - plain entity: one self-row.
+ * Lookup rows for one entity:
+ * - alias (has resolved_to): alias row + eager target self-row.
+ * - plain: self-row only.
  *
- * Self-rows for resolution targets are written eagerly (not derived from
- * alerts) so resolution scoring can attribute a target's own alerts to its
- * group via LOOKUP JOIN — see elastic/kibana#263542.
+ * Eager target self-rows let resolution scoring attribute a target's own
+ * alerts to its group via LOOKUP JOIN (elastic/kibana#263542).
  */
 const buildLookupRowsForEntity = (
   source: EntityStoreLookupSource,
@@ -100,9 +99,8 @@ const buildLookupRowsForEntity = (
 };
 
 /**
- * De-duplicates rows produced for the page (same entity may appear as alias
- * source and as another alias's target) and returns the bulk action/document
- * pairs in the order ES expects.
+ * De-dupes rows for the page (an entity may appear as alias source and another
+ * alias's target) and emits ES bulk action/document pairs.
  */
 const toBulkIndexOperations = (
   docs: LookupDocument[],
@@ -110,11 +108,9 @@ const toBulkIndexOperations = (
 ): Array<BulkOperationContainer | LookupDocument> => {
   const byEntityId = new Map<string, LookupDocument>();
   for (const doc of docs) {
-    // Alias rows (specific) take precedence over self-rows (defaulted) when
-    // both are produced for the same entity_id within a single page. Doing
-    // this by relationship_type rather than insertion order keeps the
-    // outcome stable when a resolution chain (A→B, B→C) puts B's eager
-    // self-row ahead of B's own alias row in the doc list.
+    // Alias rows beat self-rows for the same entity_id. Decide by
+    // relationship_type, not insertion order — chains (A→B, B→C) can place
+    // B's eager self-row before B's own alias row.
     const existing = byEntityId.get(doc.entity_id);
     if (
       existing === undefined ||
@@ -149,13 +145,9 @@ const incrementReason = (
 };
 
 /**
- * Folds an ES bulk response into success/failure counts plus a bounded
- * reason→count map. Handles three observed shapes uniformly:
- *
- * - Per-item details present (`response.items`): inspect each.
- * - All success, no items echoed: count `expectedItemCount` as successful.
- * - Errors flag set with no items echoed: charge all `expectedItemCount`
- *   items as failed under `UNKNOWN_BULK_ERROR_REASON`.
+ * Folds a bulk response into counts + bounded reason map. Three shapes:
+ * per-item details → inspect each; no items + no errors → all success;
+ * no items + errors → all failed as `UNKNOWN_BULK_ERROR_REASON`.
  */
 const summarizeBulkResponse = (response: BulkResponse, expectedItemCount: number): BulkSummary => {
   const reasonsByCount = new Map<string, number>();

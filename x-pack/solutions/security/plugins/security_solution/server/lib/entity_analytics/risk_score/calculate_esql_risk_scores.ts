@@ -48,11 +48,9 @@ type ESQLResults = Array<
 const escapeEsqlStringLiteral = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-// Reject IDs containing characters that cannot be safely interpolated into an
-// ES|QL double-quoted string literal: NUL, LF, CR, line separator, paragraph
-// separator. These would either break the literal or be silently re-interpreted
-// by ES|QL's lexer. Entity IDs containing them are almost certainly malformed
-// upstream — fail loud rather than score against a possibly-different ID.
+// Chars that cannot be safely interpolated into an ES|QL double-quoted literal
+// (NUL/LF/CR/LS/PS). Reject loud rather than risk silent reinterpretation —
+// IDs containing them are almost certainly malformed upstream.
 const ESQL_INVALID_LITERAL_CHARS = /[\u0000\u000A\u000D\u2028\u2029]/;
 const assertEsqlInterpolatableIds = (ids: string[]): void => {
   if (ids.some((id) => ESQL_INVALID_LITERAL_CHARS.test(id))) {
@@ -578,21 +576,13 @@ export const getBaseScoreESQL = (
 };
 
 /**
- * Base scoring query that filters alerts by an explicit `entity_id IN (...)`
- * list of EUIDs sourced from the lookup index.
+ * Base scoring filtered by an explicit `entity_id IN (...)` list. The IN-clause
+ * pushes down to Lucene so non-matching alerts are dropped at scan time; a
+ * LOOKUP JOIN against a large lookup index instead trips the request circuit
+ * breaker on alert-heavy workloads (~150K alerts, default heap).
  *
- * Why an IN-clause and not a LOOKUP JOIN:
- * - The IN-clause lets ES|QL/Lucene push the entity-id predicate down into
- *   the alert scan, so non-matching alerts are dropped before any join-side
- *   materialization. A LOOKUP JOIN against a large lookup index forces the
- *   full alert page to be hashed/probed and trips the request circuit
- *   breaker on alert-heavy workloads (~150K alerts on a default heap).
- * - Pagination is owned by the caller, which streams `entity_id` from the
- *   lookup index via `search_after` and passes one slice per call.
- *
- * The caller is responsible for sizing `entityIds` so the resulting
- * `entity_id IN (...)` clause stays within `index.max_terms_count` (default
- * 65,536) and the ES|QL row-output cap (10,000).
+ * Caller sizes `entityIds` to stay within `index.max_terms_count` (65,536) and
+ * the 10,000 ES|QL row cap.
  */
 export const getBaseScoreESQLByIds = (
   entityType: EntityType,
