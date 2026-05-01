@@ -37,7 +37,7 @@ spaceTest.describe('ES|QL Async Polling - HTTP/2', { tag: tags.deploymentAgnosti
       }
     });
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
