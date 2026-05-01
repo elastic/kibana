@@ -35,6 +35,13 @@ export const BOOTSTRAP_PREBUILT_RULES_PACKAGE_FAILURE = i18n.translate(
   }
 );
 
+export const BOOTSTRAP_PREBUILT_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesFailure',
+  {
+    defaultMessage: 'Failed to bootstrap prebuilt rules',
+  }
+);
+
 export const BOOTSTRAP_EASE_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.bootstrapEaseRulesFailure',
   {
