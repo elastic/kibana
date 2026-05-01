@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -32,6 +33,7 @@ export interface PluginStartDependencies {
   llmTasks?: LlmTasksPluginStart;
   cases?: CasesServerStart;
   spaces?: SpacesPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

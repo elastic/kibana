@@ -10,6 +10,7 @@
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/workflows-management-plugin",
+    "@kbn/workflows-extensions",
     "@kbn/agent-builder-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/agent-builder-genai-utils",
