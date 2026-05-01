@@ -99,6 +99,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSelectableComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -364,6 +365,7 @@
                 "lineNumber": 31,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "EuiSelectableOption",
                 "trackAdoption": false,
                 "isRequired": true
               }

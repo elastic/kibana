@@ -59,7 +59,8 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
 
   const headerStyles = css`
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base} ${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
+    padding-left: ${euiTheme.size.l};
     flex-grow: 0;
   `;
 

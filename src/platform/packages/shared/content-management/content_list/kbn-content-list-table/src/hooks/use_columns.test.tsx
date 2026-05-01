@@ -129,7 +129,15 @@ describe('useColumns', () => {
 
   describe('preset columns', () => {
     it('resolves a `Column.Name` preset child', () => {
-      const children = <NameColumn columnTitle="Dashboard Name" width="50%" />;
+      const children = (
+        <NameColumn
+          columnTitle="Dashboard Name"
+          width="32em"
+          minWidth="24em"
+          maxWidth="64em"
+          truncateText={{ lines: 4 }}
+        />
+      );
 
       const { result } = renderHook(() => useColumns(children), {
         wrapper: createWrapper(),
@@ -139,7 +147,10 @@ describe('useColumns', () => {
       expect(result.current[0]).toMatchObject({
         field: 'title',
         name: 'Dashboard Name',
-        width: '50%',
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '64em',
+        truncateText: { lines: 4 },
         sortable: true,
       });
     });
@@ -158,7 +169,17 @@ describe('useColumns', () => {
   describe('custom columns', () => {
     it('resolves a custom `Column` child', () => {
       const render = jest.fn(() => <span>custom</span>);
-      const children = <Column id="status" name="Status" width="20%" render={render} />;
+      const children = (
+        <Column
+          id="status"
+          name="Status"
+          width="12em"
+          minWidth="10em"
+          maxWidth="16em"
+          truncateText
+          render={render}
+        />
+      );
 
       const { result } = renderHook(() => useColumns(children), {
         wrapper: createWrapper(),
@@ -168,7 +189,10 @@ describe('useColumns', () => {
       expect(result.current[0]).toMatchObject({
         field: 'status',
         name: 'Status',
-        width: '20%',
+        width: '12em',
+        minWidth: '10em',
+        maxWidth: '16em',
+        truncateText: true,
       });
     });
 

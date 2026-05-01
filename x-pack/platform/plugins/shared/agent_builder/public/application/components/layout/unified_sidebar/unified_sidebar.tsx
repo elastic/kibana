@@ -13,14 +13,17 @@ import { EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { storageKeys } from '../../../storage_keys';
-import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_config';
+import {
+  getSidebarViewForRoute,
+  getAgentIdFromPath,
+  getPathWithSwitchedAgent,
+} from '../../../route_config';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { getLastAgentId } from '../../../hooks/use_last_agent_id';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationSidebarView } from './views/conversation_view';
 import { ManageSidebarView } from './views/manage_view';
 import { SidebarHeader } from './shared/sidebar_header';
-import { appPaths } from '../../../utils/app_paths';
 
 export const SIDEBAR_WIDTH = 300;
 export const CONDENSED_SIDEBAR_WIDTH = 64;
@@ -50,8 +53,8 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   }, [isAgentsFetched, agentIdFromUrl, validateAgentId, setStoredAgentId]);
 
   const getNavigationPath = useCallback(
-    (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
-    []
+    (newAgentId: string) => getPathWithSwitchedAgent(location.pathname, newAgentId),
+    [location.pathname]
   );
 
   const sidebarStyles = css`

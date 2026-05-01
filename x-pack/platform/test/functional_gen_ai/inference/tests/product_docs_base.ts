@@ -142,7 +142,6 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         )}`
       );
     });
-
     it('installs the E5 product docs', async () => {
       const e5ProductDocs = await installProductDoc(
         supertest,

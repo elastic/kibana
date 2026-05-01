@@ -14,17 +14,22 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DeleteTimelinesRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The list of IDs of the Timelines or Timeline templates to delete
+     */
+    savedObjectIds: z.array(z.string()).max(100),
+    /**
+     * Saved search IDs that should be deleted alongside the timelines
+     */
+    searchIds: z.array(z.string()).max(100).optional(),
+  })
+);
 export type DeleteTimelinesRequestBody = z.infer<typeof DeleteTimelinesRequestBody>;
-export const DeleteTimelinesRequestBody = z.object({
-  /**
-   * The list of IDs of the Timelines or Timeline templates to delete
-   */
-  savedObjectIds: z.array(z.string()).max(100),
-  /**
-   * Saved search IDs that should be deleted alongside the timelines
-   */
-  searchIds: z.array(z.string()).max(100).optional(),
-});
 export type DeleteTimelinesRequestBodyInput = z.input<typeof DeleteTimelinesRequestBody>;
+
+export const DeleteTimelinesResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
+export type DeleteTimelinesResponse = z.infer<typeof DeleteTimelinesResponse>;

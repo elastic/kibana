@@ -29,6 +29,17 @@ export interface PreviouslyIdentifiedFeature {
   description?: string;
   properties: Record<string, unknown>;
 }
+
+export const toPreviouslyIdentifiedFeature = (
+  feature: BaseFeature
+): PreviouslyIdentifiedFeature => ({
+  id: feature.id,
+  type: feature.type,
+  subtype: feature.subtype,
+  title: feature.title,
+  description: feature.description,
+  properties: feature.properties,
+});
 export type { IgnoredFeature } from '@kbn/streams-schema';
 
 export interface ExcludedFeatureSummary {
@@ -119,7 +130,7 @@ export async function identifyFeatures({
   return {
     features,
     ignoredFeatures,
-    tokensUsed: sumTokens({ prompt: 0, completion: 0, total: 0, cached: 0 }, response.tokens),
+    tokensUsed: sumTokens({ added: response.tokens }),
   };
 }
 

@@ -14,30 +14,34 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
+export const GetEndpointSuggestionsRequestParams = lazySchema(() =>
+  z.object({
+    suggestion_type: z.literal('eventFilters'),
+  })
+);
 export type GetEndpointSuggestionsRequestParams = z.infer<
   typeof GetEndpointSuggestionsRequestParams
 >;
-export const GetEndpointSuggestionsRequestParams = z.object({
-  suggestion_type: z.literal('eventFilters'),
-});
 export type GetEndpointSuggestionsRequestParamsInput = z.input<
   typeof GetEndpointSuggestionsRequestParams
 >;
 
+export const GetEndpointSuggestionsRequestBody = lazySchema(() =>
+  z.object({
+    field: z.string().optional(),
+    query: z.string().optional(),
+    filters: z.array(z.object({})).max(50).optional(),
+    fieldMeta: z.unknown(),
+  })
+);
 export type GetEndpointSuggestionsRequestBody = z.infer<typeof GetEndpointSuggestionsRequestBody>;
-export const GetEndpointSuggestionsRequestBody = z.object({
-  field: z.string().optional(),
-  query: z.string().optional(),
-  filters: z.array(z.object({})).max(50).optional(),
-  fieldMeta: z.unknown(),
-});
 export type GetEndpointSuggestionsRequestBodyInput = z.input<
   typeof GetEndpointSuggestionsRequestBody
 >;
 
+export const GetEndpointSuggestionsResponse = lazySchema(() => SuccessResponse);
 export type GetEndpointSuggestionsResponse = z.infer<typeof GetEndpointSuggestionsResponse>;
-export const GetEndpointSuggestionsResponse = SuccessResponse;

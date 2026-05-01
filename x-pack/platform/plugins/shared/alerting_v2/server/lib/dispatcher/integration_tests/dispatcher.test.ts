@@ -8,6 +8,7 @@
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   ALERT_ACTIONS_DATA_STREAM,
@@ -19,16 +20,13 @@ import {
 } from '../../../resources/datastreams/alert_events';
 import type {
   RuleSavedObjectAttributes,
-  NotificationPolicySavedObjectAttributes,
+  ActionPolicySavedObjectAttributes,
 } from '../../../saved_objects';
-import {
-  RULE_SAVED_OBJECT_TYPE,
-  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE, ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
   QueryService,
   type QueryServiceContract,
@@ -53,6 +51,7 @@ import {
   ApplyThrottlingStep,
   DispatchStep,
   StoreActionsStep,
+  StoreExecutionHistoryStep,
 } from '../steps';
 import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
@@ -409,7 +408,7 @@ const MATCHER_ALERT_EVENTS: AlertEvent[] = [
 
 /**
  * GroupBy test: 4 episodes for rule-groupby across 4 series, grouped into 2 hosts.
- * A policy with groupBy: ['host.name'] should produce 2 notification groups.
+ * A policy with groupBy: ['host.name'] should produce 2 action groups.
  */
 const GROUPBY_ALERT_EVENTS: AlertEvent[] = [
   {
@@ -473,8 +472,9 @@ describe('DispatcherService integration tests', () => {
   let storageService: StorageServiceContract;
   let mockLoggerService: LoggerServiceContract;
   let rulesSoService: RulesSavedObjectServiceContract;
-  let npSoService: NotificationPolicySavedObjectServiceContract;
+  let npSoService: ActionPolicySavedObjectServiceContract;
   let mockWfm: WorkflowsServerPluginSetup['management'];
+  let eventLogger: ReturnType<typeof eventLoggerMock.create>;
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -488,9 +488,9 @@ describe('DispatcherService integration tests', () => {
       }),
       undefined as unknown as SpacesPluginStart
     );
-    npSoService = new NotificationPolicySavedObjectService(
+    npSoService = new ActionPolicySavedObjectService(
       kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
-        includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+        includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE],
       }),
       undefined as unknown as SpacesPluginStart,
       undefined as unknown as EncryptedSavedObjectsClient
@@ -518,6 +518,7 @@ describe('DispatcherService integration tests', () => {
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
     mockWfm = createMockWorkflowsManagement();
+    eventLogger = eventLoggerMock.create();
 
     jest.spyOn(npSoService, 'findAllDecrypted').mockImplementation(async () => {
       const { saved_objects: allPolicies } = await npSoService.find({
@@ -540,13 +541,14 @@ describe('DispatcherService integration tests', () => {
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
+      new StoreExecutionHistoryStep(eventLogger),
     ]);
     dispatcherService = new DispatcherService(pipeline);
 
-    await setNotificationPolicyThrottle(npSoService, null);
-    await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_ID, true);
-    await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_MATCHER_ID, false);
-    await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_GROUPBY_ID, false);
+    await setActionPolicyThrottle(npSoService, null);
+    await setActionPolicyEnabled(npSoService, ACTION_POLICY_ID, true);
+    await setActionPolicyEnabled(npSoService, ACTION_POLICY_MATCHER_ID, false);
+    await setActionPolicyEnabled(npSoService, ACTION_POLICY_GROUPBY_ID, false);
   });
 
   describe('when there are no alert events', () => {
@@ -563,6 +565,7 @@ describe('DispatcherService integration tests', () => {
       });
 
       expect(actionsResponse.hits.hits).toHaveLength(0);
+      expect(eventLogger.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -611,12 +614,23 @@ describe('DispatcherService integration tests', () => {
       });
 
       expect(notifiedActionsResponse.hits.hits).toHaveLength(3);
+
+      const loggedActions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+      expect(loggedActions).toEqual(['dispatched']);
+      const [[summaryEvent]] = eventLogger.logEvent.mock.calls;
+      const refTypes = summaryEvent?.kibana?.saved_objects?.map((ref) => ref?.type);
+      expect(refTypes).toEqual([ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE]);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.episode_count).toBe(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.episode_ids).toHaveLength(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.rule_count).toBe(1);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.action_group_count).toBe(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.workflow_execution_ids).toEqual([]);
     });
   });
 
-  describe('when the notification policy has a throttle interval', () => {
-    it('should persist notified actions for dispatched notification groups', async () => {
-      await setNotificationPolicyThrottle(npSoService, {
+  describe('when the action policy has a throttle interval', () => {
+    it('should persist notified actions for dispatched action groups', async () => {
+      await setActionPolicyThrottle(npSoService, {
         strategy: 'per_status_interval',
         interval: '1h',
       });
@@ -650,7 +664,7 @@ describe('DispatcherService integration tests', () => {
           source: 'internal',
           reason: 'notified by policy np-1',
         });
-        expect(action.notification_group_id).toEqual(expect.any(String));
+        expect(action.action_group_id).toEqual(expect.any(String));
         expect(action.group_hash).not.toBe('irrelevant');
       });
     });
@@ -830,10 +844,10 @@ describe('DispatcherService integration tests', () => {
     });
   });
 
-  describe('when the notification policy has a matcher', () => {
+  describe('when the action policy has a matcher', () => {
     beforeEach(async () => {
-      await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_ID, false);
-      await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_MATCHER_ID, true);
+      await setActionPolicyEnabled(npSoService, ACTION_POLICY_ID, false);
+      await setActionPolicyEnabled(npSoService, ACTION_POLICY_MATCHER_ID, true);
     });
 
     it('should only dispatch episodes matching the KQL expression', async () => {
@@ -882,18 +896,18 @@ describe('DispatcherService integration tests', () => {
     });
   });
 
-  describe('when the notification policy has groupBy fields', () => {
+  describe('when the action policy has groupBy fields', () => {
     beforeEach(async () => {
-      await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_ID, false);
-      await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_GROUPBY_ID, true);
-      await setNotificationPolicyThrottle(npSoService, null, NOTIFICATION_POLICY_GROUPBY_ID);
+      await setActionPolicyEnabled(npSoService, ACTION_POLICY_ID, false);
+      await setActionPolicyEnabled(npSoService, ACTION_POLICY_GROUPBY_ID, true);
+      await setActionPolicyThrottle(npSoService, null, ACTION_POLICY_GROUPBY_ID);
     });
 
     it('should group episodes by the specified data fields', async () => {
-      await setNotificationPolicyThrottle(
+      await setActionPolicyThrottle(
         npSoService,
         { strategy: 'time_interval', interval: '1h' },
-        NOTIFICATION_POLICY_GROUPBY_ID
+        ACTION_POLICY_GROUPBY_ID
       );
       await seedAlertEvents(esClient, GROUPBY_ALERT_EVENTS);
 
@@ -936,7 +950,7 @@ describe('DispatcherService integration tests', () => {
       );
 
       expect(notifiedActions).toHaveLength(2);
-      const groupIds = notifiedActions.map((a) => a.notification_group_id);
+      const groupIds = notifiedActions.map((a) => a.action_group_id);
       expect(new Set(groupIds).size).toBe(2);
       notifiedActions.forEach((action) => {
         expect(action).toMatchObject({
@@ -951,7 +965,7 @@ describe('DispatcherService integration tests', () => {
 
   describe('throttle strategies', () => {
     it('per_episode + on_status_change: throttles on second dispatch when status unchanged', async () => {
-      await setNotificationPolicyThrottle(npSoService, { strategy: 'on_status_change' });
+      await setActionPolicyThrottle(npSoService, { strategy: 'on_status_change' });
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
       await dispatcherService.run({
@@ -982,7 +996,7 @@ describe('DispatcherService integration tests', () => {
     });
 
     it('per_episode + per_status_interval: throttles within interval when status unchanged', async () => {
-      await setNotificationPolicyThrottle(npSoService, {
+      await setActionPolicyThrottle(npSoService, {
         strategy: 'per_status_interval',
         interval: '1h',
       });
@@ -1010,7 +1024,7 @@ describe('DispatcherService integration tests', () => {
         (hit) => hit._source as Record<string, unknown>
       );
       notifiedSources.forEach((action) => {
-        expect(action.notification_group_id).toEqual(expect.any(String));
+        expect(action.action_group_id).toEqual(expect.any(String));
         expect(action.episode_status).toEqual(expect.any(String));
       });
 
@@ -1029,7 +1043,7 @@ describe('DispatcherService integration tests', () => {
     });
 
     it('per_episode + every_time: dispatches new event even when status unchanged', async () => {
-      await setNotificationPolicyThrottle(npSoService, { strategy: 'every_time' });
+      await setActionPolicyThrottle(npSoService, { strategy: 'every_time' });
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
       await dispatcherService.run({
@@ -1077,7 +1091,7 @@ describe('DispatcherService integration tests', () => {
     });
 
     it('all + time_interval: digest mode groups all episodes and throttles on second dispatch', async () => {
-      await updateNotificationPolicy(npSoService, NOTIFICATION_POLICY_ID, {
+      await updateActionPolicy(npSoService, ACTION_POLICY_ID, {
         groupingMode: 'all',
         throttle: { strategy: 'time_interval', interval: '1h' },
       });
@@ -1125,12 +1139,12 @@ describe('DispatcherService integration tests', () => {
     });
 
     it('per_field + time_interval: throttles groups on second dispatch within interval', async () => {
-      await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_ID, false);
-      await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_GROUPBY_ID, true);
-      await setNotificationPolicyThrottle(
+      await setActionPolicyEnabled(npSoService, ACTION_POLICY_ID, false);
+      await setActionPolicyEnabled(npSoService, ACTION_POLICY_GROUPBY_ID, true);
+      await setActionPolicyThrottle(
         npSoService,
         { strategy: 'time_interval', interval: '1h' },
-        NOTIFICATION_POLICY_GROUPBY_ID
+        ACTION_POLICY_GROUPBY_ID
       );
       await seedAlertEvents(esClient, GROUPBY_ALERT_EVENTS);
 
@@ -1202,9 +1216,9 @@ async function seedAlertEvents(esClient: ElasticsearchClient, events: AlertEvent
   });
 }
 
-const NOTIFICATION_POLICY_ID = 'np-1';
-const NOTIFICATION_POLICY_MATCHER_ID = 'np-matcher';
-const NOTIFICATION_POLICY_GROUPBY_ID = 'np-groupby';
+const ACTION_POLICY_ID = 'np-1';
+const ACTION_POLICY_MATCHER_ID = 'np-matcher';
+const ACTION_POLICY_GROUPBY_ID = 'np-groupby';
 
 const TEST_RULE_IDS = [
   'rule-1',
@@ -1219,11 +1233,11 @@ const TEST_RULE_IDS = [
 
 async function seedRulesAndPolicies(
   rulesSoService: RulesSavedObjectServiceContract,
-  npSoService: NotificationPolicySavedObjectServiceContract
+  npSoService: ActionPolicySavedObjectServiceContract
 ): Promise<void> {
-  const policyAttrs: NotificationPolicySavedObjectAttributes = {
+  const policyAttrs: ActionPolicySavedObjectAttributes = {
     name: 'Test Policy',
-    description: 'Test notification policy',
+    description: 'Test action policy',
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
     auth: {
@@ -1238,18 +1252,18 @@ async function seedRulesAndPolicies(
     createdAt: '2026-01-20T00:00:00.000Z',
     updatedAt: '2026-01-20T00:00:00.000Z',
   };
-  await npSoService.create({ attrs: policyAttrs, id: NOTIFICATION_POLICY_ID });
+  await npSoService.create({ attrs: policyAttrs, id: ACTION_POLICY_ID });
 
-  const matcherPolicyAttrs: NotificationPolicySavedObjectAttributes = {
+  const matcherPolicyAttrs: ActionPolicySavedObjectAttributes = {
     ...policyAttrs,
     name: 'Matcher Policy',
     description: 'Only matches critical severity',
     enabled: false,
     matcher: 'data.severity: "critical"',
   };
-  await npSoService.create({ attrs: matcherPolicyAttrs, id: NOTIFICATION_POLICY_MATCHER_ID });
+  await npSoService.create({ attrs: matcherPolicyAttrs, id: ACTION_POLICY_MATCHER_ID });
 
-  const groupByPolicyAttrs: NotificationPolicySavedObjectAttributes = {
+  const groupByPolicyAttrs: ActionPolicySavedObjectAttributes = {
     ...policyAttrs,
     name: 'GroupBy Policy',
     description: 'Groups by host.name',
@@ -1257,7 +1271,7 @@ async function seedRulesAndPolicies(
     groupBy: ['data.host.name'],
     groupingMode: 'per_field',
   };
-  await npSoService.create({ attrs: groupByPolicyAttrs, id: NOTIFICATION_POLICY_GROUPBY_ID });
+  await npSoService.create({ attrs: groupByPolicyAttrs, id: ACTION_POLICY_GROUPBY_ID });
 
   const ruleAttrs: RuleSavedObjectAttributes = {
     kind: 'alert',
@@ -1277,10 +1291,10 @@ async function seedRulesAndPolicies(
   );
 }
 
-async function setNotificationPolicyThrottle(
-  npSoService: NotificationPolicySavedObjectServiceContract,
-  throttle: NotificationPolicySavedObjectAttributes['throttle'],
-  policyId: string = NOTIFICATION_POLICY_ID
+async function setActionPolicyThrottle(
+  npSoService: ActionPolicySavedObjectServiceContract,
+  throttle: ActionPolicySavedObjectAttributes['throttle'],
+  policyId: string = ACTION_POLICY_ID
 ): Promise<void> {
   const policy = await npSoService.get(policyId);
 
@@ -1291,8 +1305,8 @@ async function setNotificationPolicyThrottle(
   });
 }
 
-async function setNotificationPolicyEnabled(
-  npSoService: NotificationPolicySavedObjectServiceContract,
+async function setActionPolicyEnabled(
+  npSoService: ActionPolicySavedObjectServiceContract,
   policyId: string,
   enabled: boolean
 ): Promise<void> {
@@ -1305,10 +1319,10 @@ async function setNotificationPolicyEnabled(
   });
 }
 
-async function updateNotificationPolicy(
-  npSoService: NotificationPolicySavedObjectServiceContract,
+async function updateActionPolicy(
+  npSoService: ActionPolicySavedObjectServiceContract,
   policyId: string,
-  attrs: Partial<NotificationPolicySavedObjectAttributes>
+  attrs: Partial<ActionPolicySavedObjectAttributes>
 ): Promise<void> {
   const policy = await npSoService.get(policyId);
 

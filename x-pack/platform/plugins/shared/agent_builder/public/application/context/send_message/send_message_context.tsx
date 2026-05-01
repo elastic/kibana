@@ -31,6 +31,7 @@ interface SendMessageState {
     selectedConnector: string | undefined;
     selectConnector: (connectorId: string) => void;
     defaultConnectorId?: string;
+    defaultConnectorOnly: boolean;
   };
 }
 
@@ -88,6 +89,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
           selectedConnector: connectorSelection.selectedConnector,
           selectConnector: connectorSelection.selectConnector,
           defaultConnectorId: connectorSelection.defaultConnectorId,
+          defaultConnectorOnly: connectorSelection.defaultConnectorOnly,
         },
       }}
     >

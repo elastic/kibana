@@ -63,6 +63,7 @@
             "lineNumber": 20,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentIconProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -114,6 +115,7 @@
             "lineNumber": 20,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudProviderIconProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -219,6 +221,7 @@
             "lineNumber": 19,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudProvider",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -271,6 +274,7 @@
             "lineNumber": 20,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ServerlessType",
             "trackAdoption": false,
             "isRequired": false
           }

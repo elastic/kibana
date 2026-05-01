@@ -187,11 +187,6 @@ export const STATS_PROMOTE_DISABLED_TOOLTIP = i18n.translate(
   { defaultMessage: 'STATS queries cannot be promoted to rules yet' }
 );
 
-export const SAVE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.saveQueryErrorToastTitle',
-  { defaultMessage: 'Failed to save query' }
-);
-
 export const DELETE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.deleteQueryErrorToastTitle',
   { defaultMessage: 'Failed to delete query' }

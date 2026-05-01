@@ -21,7 +21,6 @@ export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallPara
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param
 export const LogExtractionInstallParams = LogExtractionConfig.pick({
-  filter: true,
   fieldHistoryLength: true,
   additionalIndexPatterns: true,
   lookbackPeriod: true,
@@ -34,7 +33,6 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
 
 export const LogExtractionUpdateParams = z.object({
-  filter: z.string().optional(),
   fieldHistoryLength: z.number().int().optional(),
   additionalIndexPatterns: z.array(z.string()).optional(),
   lookbackPeriod: z
@@ -49,8 +47,8 @@ export const LogExtractionUpdateParams = z.object({
     .string()
     .regex(/[smdh]$/)
     .optional(),
-  docsLimit: z.number().int().positive().optional(),
-  maxLogsPerPage: z.number().int().positive().optional(),
+  docsLimit: z.number().int().min(1).optional(),
+  maxLogsPerPage: z.number().int().min(1).optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

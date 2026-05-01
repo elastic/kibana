@@ -108,7 +108,7 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns `undefined` in read-only mode', () => {
+      it('returns `undefined` in read-only mode when onInspect is not configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
@@ -116,6 +116,36 @@ describe('actions column builder', () => {
         const result = buildActionsColumn({}, context);
 
         expect(result).toBeUndefined();
+      });
+
+      it('returns only inspect action in read-only mode when onInspect is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          isReadOnly: true,
+          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(1);
+        expect(result.actions[0]).toMatchObject({
+          icon: 'inspect',
+          'data-test-subj': 'content-list-table-action-inspect',
+        });
+      });
+
+      it('includes inspect action alongside edit and delete when onInspect is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(3);
+        expect(result.actions[0]).toMatchObject({ icon: 'pencil' });
+        expect(result.actions[1]).toMatchObject({ icon: 'trash' });
+        expect(result.actions[2]).toMatchObject({ icon: 'inspect' });
       });
     });
 
@@ -162,16 +192,33 @@ describe('actions column builder', () => {
 
     describe('custom configuration', () => {
       it('applies custom width', () => {
-        const props: ActionsColumnProps = { width: '150px' };
+        const props: ActionsColumnProps = {
+          width: '5em',
+          minWidth: '5em',
+          maxWidth: '5em',
+        };
         const result = buildActionsColumn(props, defaultContext);
 
-        expect(result).toMatchObject({ width: '150px' });
+        expect(result).toMatchObject({ width: '5em', minWidth: '5em', maxWidth: '5em' });
       });
 
-      it('does not include width when not specified', () => {
+      it('computes a default width from the action count when not specified', () => {
         const result = buildActionsColumn({}, defaultContext);
 
-        expect(result).not.toHaveProperty('width');
+        // 2 actions × 28px + 8px padding = 64px.
+        expect(result).toMatchObject({ width: '64px', minWidth: '64px' });
+      });
+
+      it('sticks the actions column by default', () => {
+        const result = buildActionsColumn({}, defaultContext);
+
+        expect(result).toMatchObject({ sticky: true });
+      });
+
+      it('allows sticky behavior to be disabled', () => {
+        const result = buildActionsColumn({ sticky: false }, defaultContext);
+
+        expect(result).toMatchObject({ sticky: false });
       });
 
       it('applies custom column title', () => {

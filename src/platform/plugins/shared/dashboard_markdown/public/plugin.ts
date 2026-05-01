@@ -39,7 +39,7 @@ export class DashboardMarkdownPlugin
     core: CoreSetup<MarkdownStartDeps>,
     { embeddable, contentManagement }: MarkdownSetupDeps
   ) {
-    embeddable.registerReactEmbeddableFactory(MARKDOWN_EMBEDDABLE_TYPE, async () => {
+    embeddable.registerEmbeddablePublicDefinition(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
       return markdownEmbeddableFactory;
     });

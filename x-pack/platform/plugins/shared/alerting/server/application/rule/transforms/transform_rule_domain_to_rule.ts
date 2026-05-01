@@ -33,6 +33,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     muteAll: ruleDomain.muteAll,
     notifyWhen: ruleDomain.notifyWhen,
     mutedInstanceIds: ruleDomain.mutedInstanceIds,
+    snoozedInstances: ruleDomain.snoozedInstances,
     executionStatus: ruleDomain.executionStatus,
     monitoring: ruleDomain.monitoring,
     snoozeSchedule: ruleDomain.snoozeSchedule,
@@ -49,7 +50,6 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     artifacts: ruleDomain.artifacts,
   };
 
-  // Remove all undefined keys to clean up the object
   type RuleKeys = keyof Rule;
   for (const key in rule) {
     if (rule[key as RuleKeys] === undefined) {

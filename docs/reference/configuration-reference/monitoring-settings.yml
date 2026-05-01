@@ -1,0 +1,248 @@
+---
+# This file is used to generate "Monitoring settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Monitoring settings in Kibana
+id: monitoring-settings-kb
+page_description: |
+  By default, **{{stack-monitor-app}}** is enabled, but data collection is disabled. When you first start {{kib}} monitoring, you are prompted to enable data collection. If you are using {{stack-security-features}}, you must be signed in as a user with the `cluster:manage` privilege to enable data collection. The built-in `superuser` role has this privilege and the built-in `elastic` user has this role.
+
+  You can adjust how monitoring data is collected from {{kib}} and displayed in {{kib}} by configuring settings in the `kibana.yml` file. There are also `monitoring.ui.elasticsearch.*` settings, which support the same values as [{{kib}} configuration settings](/reference/configuration-reference/general-settings.md).
+
+  To control how data is collected from your {{es}} nodes, you configure [`xpack.monitoring.collection` settings](elasticsearch://reference/elasticsearch/configuration-reference/monitoring-settings.md) in `elasticsearch.yml`. To control how monitoring data is collected from Logstash, configure monitoring settings in `logstash.yml`.
+
+  For more information, check out [Monitor a cluster](docs-content://deploy-manage/monitor.md).
+
+
+groups:
+  - group: General monitoring settings
+    id: monitoring-general-settings
+    settings:
+
+      - setting: monitoring.cluster_alerts.email_notifications.enabled
+        description: |
+          When enabled, sends email notifications for Watcher alerts to the specified email address.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: deprecated 7.11+
+          self: deprecated
+          ech: unavailable
+        deprecation_details: "Deprecated in 7.11."
+
+      - setting: monitoring.cluster_alerts.email_notifications.email_address
+        description: |
+          When enabled, specifies the email address where you want to receive cluster alert notifications.
+        datatype: string
+        applies_to:
+          stack: deprecated 7.11+
+          ech: deprecated
+          self: deprecated
+        deprecation_details: "Deprecated in 7.11."
+
+      - setting: monitoring.ui.ccs.enabled
+        description: |
+          Set to `true` (default) to enable [cross-cluster search](docs-content://solutions/search/cross-cluster-search.md) of your monitoring data. The [`remote_cluster_client`](docs-content://deploy-manage/remote-clusters/remote-clusters-settings.md) role must exist on each node.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.elasticsearch.hosts
+        description: |
+          Specifies the location of the {{es}} cluster where your monitoring data is stored.
+
+          By default, this is the same as [`elasticsearch.hosts`](/reference/configuration-reference/general-settings.md#elasticsearch-hosts). This setting enables you to use a single {{kib}} instance to search and visualize data in your production cluster as well as monitor data sent to a dedicated monitoring cluster.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.elasticsearch.username
+        description: |
+          Specifies the username used by {{kib}} monitoring to establish a persistent connection in {{kib}} to the {{es}} monitoring cluster and to verify licensing status on the {{es}} monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
+
+          All other requests performed by **{{stack-monitor-app}}** to the monitoring {{es}} cluster uses the authenticated user's credentials, which must be the same on both the {{es}} monitoring cluster and the {{es}} production cluster.
+
+          If not set, {{kib}} uses the value of the [`elasticsearch.username`](/reference/configuration-reference/general-settings.md#elasticsearch-user-passwd) setting.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.elasticsearch.password
+        description: |
+          Specifies the password used by {{kib}} monitoring to establish a persistent connection in {{kib}}  to the {{es}} monitoring cluster and to verify licensing status on the {{es}} monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
+
+          All other requests performed by **{{stack-monitor-app}}** to the monitoring {{es}} cluster use the authenticated user's credentials, which must be the same on both the {{es}} monitoring cluster and the {{es}} production cluster.
+
+          If not set, {{kib}} uses the value of the [`elasticsearch.password`](/reference/configuration-reference/general-settings.md#elasticsearch-user-passwd) setting.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.elasticsearch.serviceAccountToken
+        description: |
+          Specifies a [service account token](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-service-token) for the {{es}} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to using `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.elasticsearch.pingTimeout
+        description: |
+          Specifies the time in milliseconds to wait for {{es}} to respond to internal health checks. By default, it matches the [`elasticsearch.pingTimeout`](/reference/configuration-reference/general-settings.md#elasticsearch-pingTimeout) setting, which has a default value of `30000`.
+        datatype: int
+        default: 30000
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.elasticsearch.ssl
+        description: |
+          Shares the same configuration as [`elasticsearch.ssl`](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-cert-key). These settings configure encrypted communication between {{kib}} and the monitoring cluster.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+  - group: Monitoring collection settings
+    id: monitoring-collection-settings
+    description: |
+      These settings control how data is collected from {{kib}}.
+    settings:
+
+      - setting: monitoring.kibana.collection.enabled
+        description: |
+          Set to `true` (default) to enable data collection from the {{kib}} NodeJS server for {{kib}} dashboards to be featured in **{{stack-monitor-app}}**.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.kibana.collection.interval
+        description: |
+          Specifies the number of milliseconds to wait in between data sampling on the {{kib}} NodeJS server for the metrics that are displayed in the {{kib}} dashboards. Defaults to `10000` (10 seconds).
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: Monitoring UI settings
+    id: monitoring-ui-settings
+    description: |
+      These settings adjust how **{{stack-monitor-app}}** displays monitoring data. However, the defaults work best in most circumstances. For more information about configuring {{kib}}, see [Setting {{kib}} server properties](/reference/configuration-reference/general-settings.md).
+    settings:
+
+      - setting: monitoring.ui.elasticsearch.logFetchCount
+        description: |
+          Specifies the number of log entries to display in **{{stack-monitor-app}}**. Defaults to `10`. The maximum value is `50`.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.enabled
+        id: monitoring-ui-enabled
+        description: |
+          Set to `false` to hide **{{stack-monitor-app}}**. The monitoring back-end continues to run as an agent for sending {{kib}} stats to the monitoring cluster. Defaults to `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.logs.index
+        description: |
+          Specifies the name of the indices that are shown on the [**Logs**](docs-content://deploy-manage/monitor/monitoring-data/elasticsearch-metrics.md#logs-monitor-page) page in **{{stack-monitor-app}}**. The default value is `filebeat-*`.
+        datatype: string
+        default: "filebeat-*"
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.metricbeat.index
+        description: |
+          Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried.
+        datatype: string
+        default: "metricbeat-*"
+        applies_to:
+          stack: deprecated 8.15+
+          self: deprecated
+          ech: unavailable
+        deprecation_details: "This setting was deprecated in 8.15.0."
+
+      - setting: monitoring.ui.max_bucket_size
+        description: |
+          Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://reference/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: monitoring.ui.min_interval_seconds
+        description: |
+          Specifies the minimum number of seconds that a time bucket in a chart can represent. Defaults to 10. If you modify the `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same value in this setting.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: monitoring.ui.kibana.reporting.stale_status_threshold_seconds
+        description: |
+          Specifies how many seconds can pass before the Kibana status reports are considered stale. Defaults to `120`.
+        datatype: int
+        default: 120
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+  - group: Monitoring UI container settings
+    id: monitoring-ui-cgroup-settings
+    description: |
+      **{{stack-monitor-app}}** exposes the Cgroup statistics that we collect for you to make better decisions about your container performance, rather than guessing based on the overall machine performance. If you are not running your applications in a container, then Cgroup statistics are not useful.
+    settings:
+
+      - setting: monitoring.ui.container.elasticsearch.enabled
+        description: |
+          For {{es}} clusters that are running in containers, this setting changes the **Node Listing** to display the CPU utilization based on the reported Cgroup statistics. It also adds the calculated Cgroup CPU utilization to the **Node Overview** page instead of the overall operating system's CPU utilization. Defaults to `false`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: monitoring.ui.container.logstash.enabled
+        description: |
+          For {{ls}} nodes that are running in containers, this setting changes the {{ls}} **Node Listing** to display the CPU utilization based on the reported Cgroup statistics. It also adds the calculated Cgroup CPU utilization to the {{ls}} node detail pages instead of the overall operating system's CPU utilization. Defaults to `false`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable

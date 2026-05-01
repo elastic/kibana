@@ -1,5 +1,5 @@
 {
-  "sha1": "f42e67bedd1f3e9905624ce94117cad6b0c98139",
+  "sha1": "355f80ffb551acef4a742276ef8eb2cf2888cb5c",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -706,7 +706,7 @@
     {
       "id": "f99b488a0e6019e-b6ddb921df7e2cd",
       "title": "Node Details: host without metrics Overview Tab - KPI tiles show N/A",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -715,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_without_metrics.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 27,
+        "column": 10
       }
     },
     {

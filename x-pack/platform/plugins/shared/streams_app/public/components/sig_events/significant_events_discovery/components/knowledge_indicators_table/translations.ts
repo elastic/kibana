@@ -113,13 +113,42 @@ export const EMPTY_STATE_DESCRIPTION = i18n.translate(
   'xpack.streams.knowledgeIndicators.emptyState.description',
   {
     defaultMessage:
-      'Facts about your stream automatically extracted from log data to power rule generation. To generate knowledge indicators, go to Streams tab and start onboarding.',
+      'Facts about your stream automatically extracted from log data to power rule generation. Select streams below and generate knowledge indicators.',
   }
 );
 
-export const EMPTY_STATE_GO_TO_STREAMS = i18n.translate(
-  'xpack.streams.knowledgeIndicators.emptyState.goToStreamsButton',
-  { defaultMessage: 'Go to Streams tab' }
+export const GENERATION_IN_PROGRESS_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.generationInProgressTitle',
+  {
+    defaultMessage: 'Generating knowledge indicators...',
+  }
+);
+
+export const getGenerationInProgressDescription = (streamNames: string[]): string => {
+  const count = streamNames.length;
+  if (count <= 2) {
+    return i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescriptionFew', {
+      defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
+      values: { streams: streamNames.join(', ') },
+    });
+  }
+  return i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescriptionMany', {
+    defaultMessage:
+      'Generation is running for {first}, {second} and {remaining} more. This may take a few minutes.',
+    values: {
+      first: streamNames[0],
+      second: streamNames[1],
+      remaining: count - 2,
+    },
+  });
+};
+
+export const HIDDEN_COMPUTED_FEATURES_HINT = i18n.translate(
+  'xpack.streams.knowledgeIndicators.hiddenComputedFeaturesHint',
+  {
+    defaultMessage:
+      'There are computed features hidden. Enable "Show computed features" to see them.',
+  }
 );
 
 export const CANNOT_EXCLUDE_SELECTION_TOOLTIP = i18n.translate(

@@ -8,8 +8,13 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { IStorageClient } from '@kbn/storage-adapter';
+import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
+
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
 import type { QueryStorageSettings } from '../storage_settings';
 import {
   ASSET_ID,
@@ -25,6 +30,7 @@ import {
   QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  QUERY_TYPE,
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME,
@@ -51,11 +57,9 @@ const createMockDefinition = (name = 'logs.test'): Streams.all.Definition =>
 const createQueryClient = ({
   storageClient = createMockStorageClient(),
   logger = createMockLogger(),
-  inferenceAvailable = false,
 }: {
   storageClient?: ReturnType<typeof createMockStorageClient>;
   logger?: ReturnType<typeof createMockLogger>;
-  inferenceAvailable?: boolean;
 } = {}) => {
   const client = new QueryClient(
     {
@@ -67,8 +71,7 @@ const createQueryClient = ({
       rulesClient: {} as RulesClient,
       logger: logger as unknown as Logger,
     },
-    true,
-    inferenceAvailable
+    true
   );
   return { client, storageClient, logger };
 };
@@ -257,7 +260,7 @@ describe('QueryClient backward compatibility', () => {
       storageClient.search.mockResolvedValue({
         hits: { hits: [toSearchHit(createNewShapeStoredDoc())] },
       });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
+      const { client } = createQueryClient({ storageClient });
 
       const [result] = await client.getQueryLinks(['logs.test']);
 
@@ -296,10 +299,10 @@ describe('QueryClient backward compatibility', () => {
   });
 
   describe('writing documents', () => {
-    it('omits query.search_embedding when inference is unavailable', async () => {
+    it('always populates query.search_embedding on the first bulk attempt', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: false });
+      const { client } = createQueryClient({ storageClient });
 
       await client.syncQueryList(createMockDefinition(), [
         {
@@ -315,37 +318,16 @@ describe('QueryClient backward compatibility', () => {
       const indexOp = bulkCall.operations[0];
       expect(indexOp.index).toBeDefined();
       const document = indexOp.index!.document;
-      expect(document).not.toHaveProperty(QUERY_SEARCH_EMBEDDING);
-      expect(document[QUERY_TITLE]).toBe('SSH Brute Force Detection');
-    });
-
-    it('includes query.search_embedding when inference is available', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
-
-      await client.syncQueryList(createMockDefinition(), [
-        {
-          [ASSET_ID]: 'q-1',
-          [ASSET_TYPE]: 'query',
-          query: createQuery({ id: 'q-1' }),
-          rule_backed: true,
-          rule_id: 'rule-1',
-        },
-      ]);
-
-      const bulkCall = storageClient.bulk.mock.calls[0][0];
-      const indexOp = bulkCall.operations[0];
-      const document = indexOp.index!.document;
       expect(document[QUERY_SEARCH_EMBEDDING]).toBe(
         'Stream: logs.test\nTitle: SSH Brute Force Detection\nDescription: Detects repeated failed SSH login attempts from a single source IP'
       );
+      expect(document[QUERY_TITLE]).toBe('SSH Brute Force Detection');
     });
 
     it('generates correct embedding text for documents without description', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
+      const { client } = createQueryClient({ storageClient });
 
       await client.syncQueryList(createMockDefinition(), [
         {
@@ -363,25 +345,148 @@ describe('QueryClient backward compatibility', () => {
         'Stream: logs.test\nTitle: SSH Brute Force Detection'
       );
     });
+
+    it('retries the bulk write with the embedding field after a transient inference-related BulkOperationError', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const inferenceError = new BulkOperationError(
+        'Unable to find model deployment task [elser-endpoint]',
+        {
+          errors: true,
+          took: 0,
+          items: [
+            {
+              index: {
+                _index: '.kibana_streams_assets',
+                _id: 'doc-1',
+                status: 500,
+                error: {
+                  type: 'exception',
+                  reason:
+                    'Exception when running inference id [elser-endpoint] on field [query.search_embedding]',
+                  caused_by: {
+                    type: 'status_exception',
+                    reason: 'Unable to find model deployment task [elser-endpoint]',
+                  },
+                },
+              },
+            },
+          ],
+        }
+      );
+      storageClient.bulk
+        .mockRejectedValueOnce(inferenceError)
+        .mockResolvedValueOnce({ errors: false, items: [] });
+      const logger = createMockLogger();
+      const { client } = createQueryClient({ storageClient, logger });
+
+      await client.syncQueryList(createMockDefinition(), [
+        {
+          [ASSET_ID]: 'q-1',
+          [ASSET_TYPE]: 'query',
+          query: createQuery({ id: 'q-1' }),
+          rule_backed: true,
+          rule_id: 'rule-1',
+        },
+      ]);
+
+      expect(storageClient.bulk).toHaveBeenCalledTimes(2);
+      const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index!.document;
+      const secondDoc = storageClient.bulk.mock.calls[1][0].operations[0].index!.document;
+      expect(firstDoc[QUERY_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      expect(secondDoc[QUERY_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('retrying in 2000ms (attempt 1/3)')
+      );
+    });
+
+    it('falls back to writing without the embedding only after every backoff retry fails', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const inferenceError = new BulkOperationError(
+        'Unable to find model deployment task [elser-endpoint]',
+        {
+          errors: true,
+          took: 0,
+          items: [
+            {
+              index: {
+                _index: '.kibana_streams_assets',
+                _id: 'doc-1',
+                status: 500,
+                error: {
+                  type: 'exception',
+                  reason:
+                    'Exception when running inference id [elser-endpoint] on field [query.search_embedding]',
+                  caused_by: {
+                    type: 'status_exception',
+                    reason: 'Unable to find model deployment task [elser-endpoint]',
+                  },
+                },
+              },
+            },
+          ],
+        }
+      );
+      storageClient.bulk
+        .mockRejectedValueOnce(inferenceError)
+        .mockRejectedValueOnce(inferenceError)
+        .mockRejectedValueOnce(inferenceError)
+        .mockResolvedValueOnce({ errors: false, items: [] });
+      const logger = createMockLogger();
+      const { client } = createQueryClient({ storageClient, logger });
+
+      await client.syncQueryList(createMockDefinition(), [
+        {
+          [ASSET_ID]: 'q-1',
+          [ASSET_TYPE]: 'query',
+          query: createQuery({ id: 'q-1' }),
+          rule_backed: true,
+          rule_id: 'rule-1',
+        },
+      ]);
+
+      expect(storageClient.bulk).toHaveBeenCalledTimes(4);
+      const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index!.document;
+      const fallbackDoc = storageClient.bulk.mock.calls[3][0].operations[0].index!.document;
+      expect(firstDoc[QUERY_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      // QUERY_SEARCH_EMBEDDING contains a dot, so we cannot use toHaveProperty
+      // (Jest treats dotted strings as nested paths).
+      expect(QUERY_SEARCH_EMBEDDING in fallbackDoc).toBe(false);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'after 3 attempts -- falling back to writing without semantic_text embedding'
+        )
+      );
+    });
+
+    it('propagates non-BulkOperationError failures without retrying', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+      storageClient.bulk.mockRejectedValueOnce(new Error('connection reset'));
+      const { client } = createQueryClient({ storageClient });
+
+      await expect(
+        client.syncQueryList(createMockDefinition(), [
+          {
+            [ASSET_ID]: 'q-1',
+            [ASSET_TYPE]: 'query',
+            query: createQuery({ id: 'q-1' }),
+            rule_backed: true,
+            rule_id: 'rule-1',
+          },
+        ])
+      ).rejects.toThrow('connection reset');
+
+      expect(storageClient.bulk).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('search mode resolution', () => {
-    it('defaults to keyword search when inference is unavailable', async () => {
+    it('defaults to hybrid search when no searchMode is provided', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: false });
-
-      await client.findQueries(['logs.test'], 'SSH');
-
-      const searchArgs = storageClient.search.mock.calls[0][0];
-      expect(searchArgs.query).toBeDefined();
-      expect(searchArgs.retriever).toBeUndefined();
-    });
-
-    it('defaults to hybrid search when inference is available', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
+      const { client } = createQueryClient({ storageClient });
 
       await client.findQueries(['logs.test'], 'SSH');
 
@@ -392,7 +497,7 @@ describe('QueryClient backward compatibility', () => {
     it('uses keyword search when explicitly requested', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
+      const { client } = createQueryClient({ storageClient });
 
       await client.findQueries(['logs.test'], 'SSH', undefined, 'keyword');
 
@@ -401,35 +506,15 @@ describe('QueryClient backward compatibility', () => {
       expect(searchArgs.retriever).toBeUndefined();
     });
 
-    it('uses semantic search when explicitly requested and inference is available', async () => {
+    it('uses semantic search when explicitly requested', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
+      const { client } = createQueryClient({ storageClient });
 
       await client.findQueries(['logs.test'], 'SSH', undefined, 'semantic');
 
       const searchArgs = storageClient.search.mock.calls[0][0];
-      expect(searchArgs.retriever?.standard).toBeDefined();
-    });
-
-    it('falls back to keyword when semantic is requested but inference is unavailable', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const logger = createMockLogger();
-      const { client } = createQueryClient({
-        storageClient,
-        logger,
-        inferenceAvailable: false,
-      });
-
-      await client.findQueries(['logs.test'], 'SSH', undefined, 'semantic');
-
-      const searchArgs = storageClient.search.mock.calls[0][0];
-      expect(searchArgs.query).toBeDefined();
-      expect(searchArgs.retriever).toBeUndefined();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('inference is unavailable')
-      );
+      expect(searchArgs.retriever?.linear).toBeDefined();
     });
 
     it('falls back to keyword when auto-resolved hybrid search throws an error', async () => {
@@ -438,25 +523,19 @@ describe('QueryClient backward compatibility', () => {
       storageClient.search
         .mockRejectedValueOnce(new Error('retriever parse error'))
         .mockResolvedValueOnce({ hits: { hits: [] } });
-      const { client } = createQueryClient({
-        storageClient,
-        logger,
-        inferenceAvailable: true,
-      });
+      const { client } = createQueryClient({ storageClient, logger });
 
       const results = await client.findQueries(['logs.test'], 'SSH');
 
       expect(storageClient.search).toHaveBeenCalledTimes(2);
       expect(results).toEqual([]);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('"hybrid" failed, falling back to keyword')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
     });
 
     it('propagates the error when an explicit searchMode fails', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockRejectedValue(new Error('inference unavailable'));
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: true });
+      const { client } = createQueryClient({ storageClient });
 
       await expect(client.findQueries(['logs.test'], 'SSH', undefined, 'semantic')).rejects.toThrow(
         'inference unavailable'
@@ -466,7 +545,7 @@ describe('QueryClient backward compatibility', () => {
     it('propagates the error when keyword search itself throws', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockRejectedValue(new Error('index not found'));
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: false });
+      const { client } = createQueryClient({ storageClient });
 
       await expect(client.findQueries(['logs.test'], 'SSH')).rejects.toThrow('index not found');
     });
@@ -513,7 +592,7 @@ describe('QueryClient backward compatibility', () => {
       });
     });
 
-    describe('getUnbackedQueriesCount with minSeverityScore', () => {
+    describe('countPromotableUnbackedQueries with minSeverityScore', () => {
       it('includes a range filter when minSeverityScore is provided', async () => {
         const storageClient = createMockStorageClient();
         storageClient.search.mockResolvedValue({
@@ -521,7 +600,7 @@ describe('QueryClient backward compatibility', () => {
         });
         const { client } = createQueryClient({ storageClient });
 
-        const count = await client.getUnbackedQueriesCount({ minSeverityScore: 60 });
+        const count = await client.countPromotableUnbackedQueries({ minSeverityScore: 60 });
 
         const searchArgs = storageClient.search.mock.calls[0][0];
         const filter: unknown[] = searchArgs.query.bool.filter;
@@ -536,7 +615,7 @@ describe('QueryClient backward compatibility', () => {
         });
         const { client } = createQueryClient({ storageClient });
 
-        await client.getUnbackedQueriesCount();
+        await client.countPromotableUnbackedQueries();
 
         const searchArgs = storageClient.search.mock.calls[0][0];
         const filter: unknown[] = searchArgs.query.bool.filter;
@@ -551,13 +630,13 @@ describe('QueryClient backward compatibility', () => {
       });
     });
 
-    describe('getAllUnbackedQueries with minSeverityScore', () => {
+    describe('getPromotableUnbackedQueries with minSeverityScore', () => {
       it('passes minSeverityScore through to the underlying search', async () => {
         const storageClient = createMockStorageClient();
         storageClient.search.mockResolvedValue({ hits: { hits: [] } });
         const { client } = createQueryClient({ storageClient });
 
-        await client.getAllUnbackedQueries({ minSeverityScore: 60 });
+        await client.getPromotableUnbackedQueries({ minSeverityScore: 60 });
 
         const searchArgs = storageClient.search.mock.calls[0][0];
         const filter: unknown[] = searchArgs.query.bool.filter;
@@ -571,7 +650,7 @@ describe('QueryClient backward compatibility', () => {
         storageClient.search.mockResolvedValue({ hits: { hits: [] } });
         const { client } = createQueryClient({ storageClient });
 
-        await client.getAllUnbackedQueries();
+        await client.getPromotableUnbackedQueries();
 
         const searchArgs = storageClient.search.mock.calls[0][0];
         const filter: unknown[] = searchArgs.query.bool.filter;
@@ -583,6 +662,185 @@ describe('QueryClient backward compatibility', () => {
             QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
         );
         expect(rangeFilter).toBeUndefined();
+      });
+
+      it('excludes STATS queries via must_not so the set matches the count', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getPromotableUnbackedQueries();
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const mustNot: unknown = searchArgs.query.bool.must_not;
+        expect(mustNot).toContainEqual({ term: { [QUERY_TYPE]: QUERY_TYPE_STATS } });
+      });
+    });
+
+    describe('promoteUnbackedQueries orchestration', () => {
+      const promotableHit = (overrides: Record<string, unknown>) =>
+        toSearchHit(createOldShapeStoredDoc({ [RULE_BACKED]: false, ...overrides }));
+
+      it('promotes every promotable candidate when queryIds is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q2', [ASSET_UUID]: 'u2' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 2, skipped_stats: 0 });
+
+        const result = await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([['logs.a', createMockDefinition('logs.a')]]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(1);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+          'q2',
+        ]);
+        expect(result).toEqual({ promoted: 2, skipped_stats: 0 });
+      });
+
+      it('groups queries by stream_name and invokes promoteQueries once per stream', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({ [STREAM_NAME]: 'logs.b', [ASSET_ID]: 'q2', [ASSET_UUID]: 'u2' }),
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q3', [ASSET_UUID]: 'u3' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 1, skipped_stats: 0 });
+
+        await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([
+            ['logs.a', createMockDefinition('logs.a')],
+            ['logs.b', createMockDefinition('logs.b')],
+          ]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(2);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+          'q3',
+        ]);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.b' }), [
+          'q2',
+        ]);
+      });
+
+      it('warns and skips when a stream definition is missing', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({
+                [STREAM_NAME]: 'logs.missing',
+                [ASSET_ID]: 'q2',
+                [ASSET_UUID]: 'u2',
+              }),
+            ],
+          },
+        });
+        const { client, logger } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 1, skipped_stats: 0 });
+
+        await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([['logs.a', createMockDefinition('logs.a')]]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(1);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+        ]);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping promotion for missing stream logs.missing')
+        );
+      });
+
+      it('sums promoted and skipped_stats across streams', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({ [STREAM_NAME]: 'logs.b', [ASSET_ID]: 'q2', [ASSET_UUID]: 'u2' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValueOnce({ promoted: 2, skipped_stats: 0 })
+          .mockResolvedValueOnce({ promoted: 3, skipped_stats: 1 });
+
+        const result = await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([
+            ['logs.a', createMockDefinition('logs.a')],
+            ['logs.b', createMockDefinition('logs.b')],
+          ]),
+        });
+
+        expect(result).toEqual({ promoted: 5, skipped_stats: 1 });
+      });
+
+      it('silently drops queryIds that are not in the promotable set', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 1, skipped_stats: 0 });
+
+        // q-unknown does not match any candidate (e.g. a STATS id, or an
+        // id that no longer exists) — it must be silently filtered out.
+        const result = await client.promoteUnbackedQueries({
+          queryIds: ['q1', 'q-unknown'],
+          streamDefinitions: new Map([['logs.a', createMockDefinition('logs.a')]]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(1);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+        ]);
+        expect(result).toEqual({ promoted: 1, skipped_stats: 0 });
+      });
+
+      it('passes minSeverityScore through to getPromotableUnbackedQueries', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+        jest.spyOn(client, 'promoteQueries').mockResolvedValue({ promoted: 0, skipped_stats: 0 });
+
+        await client.promoteUnbackedQueries({
+          minSeverityScore: 70,
+          streamDefinitions: new Map(),
+        });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 70 } } });
       });
     });
 
@@ -618,8 +876,7 @@ describe('QueryClient backward compatibility', () => {
             rulesClient: rulesClient as unknown as RulesClient,
             logger: createMockLogger() as unknown as Logger,
           },
-          true,
-          false
+          true
         );
 
         await client.promoteQueries(createMockDefinition(), ['query-old-1']);
@@ -647,7 +904,7 @@ describe('QueryClient backward compatibility', () => {
       storageClient.search.mockResolvedValue({
         hits: { hits: [toSearchHit(createOldShapeStoredDoc())] },
       });
-      const { client } = createQueryClient({ storageClient, inferenceAvailable: false });
+      const { client } = createQueryClient({ storageClient });
 
       const results = await client.findQueries(['logs.test'], 'SSH');
 

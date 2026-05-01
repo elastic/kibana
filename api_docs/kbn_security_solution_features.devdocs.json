@@ -674,6 +674,7 @@
             "lineNumber": 40,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "MutableKibanaFeatureConfig",
             "trackAdoption": false
           }
         ],

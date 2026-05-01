@@ -19,6 +19,7 @@ import {
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
@@ -41,6 +42,7 @@ const MetricsExperienceGridWrapper = (
     <UnifiedMetricsExperienceGrid
       {...props}
       actions={props.actions}
+      profileId={METRICS_DATA_SOURCE_PROFILE_ID}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
     />
