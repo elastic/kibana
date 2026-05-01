@@ -120,14 +120,14 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
-  const onCreateOrUpdateError = useCallback((error: IHttpFetchError<KibanaServerError>) => {
+  const onCreateOrUpdateError = (error: IHttpFetchError<KibanaServerError>) => {
     if (!error.body?.message) {
       return;
     }
     if (isScopedQueryError(error.body.message)) {
       setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
     }
-  }, []);
+  };
 
   const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
     useCreateMaintenanceWindow({
@@ -171,64 +171,49 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     };
   }, [isEpisodeQueryEnabled, episodeQuery]);
 
-  const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
-    async (formData, isValid) => {
-      if (!isValid || scopedQueryErrors.length !== 0) {
-        return;
-      }
+  const submitMaintenanceWindow: FormSubmitHandler<FormProps> = async (formData, isValid) => {
+    if (!isValid || scopedQueryErrors.length !== 0) {
+      return;
+    }
 
-      if (isScopedQueryEnabled && !scopedQueryPayload) {
-        setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE]);
-        return;
-      }
+    if (isScopedQueryEnabled && !scopedQueryPayload) {
+      setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE]);
+      return;
+    }
 
-      const startDate = moment(formData.startDate);
-      const endDate = moment(formData.endDate);
-      const maintenanceWindow = {
-        title: formData.title,
-        duration: endDate.diff(startDate),
-        rRule: convertToRRule({
-          startDate: startDate.toISOString(),
-          timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
-          recurringSchedule: formData.recurringSchedule,
-        }),
-        scopedQuery: scopedQueryPayload,
-        scopeEpisodeQuery: scopeEpisodeQueryPayload,
-        ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
-      };
+    const startDate = moment(formData.startDate);
+    const endDate = moment(formData.endDate);
+    const maintenanceWindow = {
+      title: formData.title,
+      duration: endDate.diff(startDate),
+      rRule: convertToRRule({
+        startDate: startDate.toISOString(),
+        timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
+        recurringSchedule: formData.recurringSchedule,
+      }),
+      scopedQuery: scopedQueryPayload,
+      scopeEpisodeQuery: scopeEpisodeQueryPayload,
+      ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
+    };
 
-      if (!scopedQueryPayload && !scopeEpisodeQueryPayload) {
-        if (userConfirmedSaveWithoutFiltersRef.current) {
-          userConfirmedSaveWithoutFiltersRef.current = false;
-        } else {
-          setIsSaveWithoutFiltersModalVisible(true);
-          return;
-        }
-      }
-
-      if (isEditMode) {
-        updateMaintenanceWindow(
-          { maintenanceWindowId, updateParams: maintenanceWindow },
-          { onSuccess }
-        );
+    if (!scopedQueryPayload && !scopeEpisodeQueryPayload) {
+      if (userConfirmedSaveWithoutFiltersRef.current) {
+        userConfirmedSaveWithoutFiltersRef.current = false;
       } else {
-        createMaintenanceWindow(maintenanceWindow, { onSuccess });
+        setIsSaveWithoutFiltersModalVisible(true);
+        return;
       }
-    },
-    [
-      scopedQueryErrors.length,
-      isScopedQueryEnabled,
-      scopedQueryPayload,
-      scopeEpisodeQueryPayload,
-      defaultTimezone,
-      isEditMode,
-      showMultipleSolutionsWarning,
-      updateMaintenanceWindow,
-      maintenanceWindowId,
-      onSuccess,
-      createMaintenanceWindow,
-    ]
-  );
+    }
+
+    if (isEditMode) {
+      updateMaintenanceWindow(
+        { maintenanceWindowId, updateParams: maintenanceWindow },
+        { onSuccess }
+      );
+    } else {
+      createMaintenanceWindow(maintenanceWindow, { onSuccess });
+    }
+  };
 
   const { form } = useForm<FormProps>({
     defaultValue: initialValue,
@@ -244,9 +229,6 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
 
   const isRecurring = recurring || false;
 
-  const closeModal = useCallback(() => setIsModalVisible(false), []);
-  const showModal = useCallback(() => setIsModalVisible(true), []);
-
   const ruleTypeIds = useMemo(() => {
     if (!Array.isArray(ruleTypes) || !mounted) {
       return [];
@@ -255,100 +237,21 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     return ruleTypes.map((ruleType) => ruleType.id);
   }, [ruleTypes, mounted]);
 
-  const onScopeQueryToggle = useCallback(
-    (isEnabled: boolean) => {
-      setIsScopedQueryEnabled(isEnabled);
-      if (scopedQueryErrors.length) {
-        setScopedQueryErrors([]);
-      }
-    },
-    [setIsScopedQueryEnabled, scopedQueryErrors, setScopedQueryErrors]
-  );
+  const onScopeQueryToggle = (isEnabled: boolean) => {
+    setIsScopedQueryEnabled(isEnabled);
+    setScopedQueryErrors((prev) => (prev.length ? [] : prev));
+  };
 
-  const onEpisodeQueryToggle = useCallback(
-    (isEnabled: boolean) => {
-      setIsEpisodeQueryEnabled(isEnabled);
-    },
-    [setIsEpisodeQueryEnabled]
-  );
-
-  const onQueryChange = useCallback(
-    (newQuery: string) => {
-      if (scopedQueryErrors.length) {
-        setScopedQueryErrors([]);
-      }
-      setQuery(newQuery);
-    },
-    [scopedQueryErrors]
-  );
+  // Memoized so the prop identity stays stable across renders, allowing the
+  // memoized `MaintenanceWindowScopedQuery` child to skip re-renders that are
+  // unrelated to the search bar input.
+  const onQueryChange = useCallback((newQuery: string) => {
+    setScopedQueryErrors((prev) => (prev.length ? [] : prev));
+    setQuery(newQuery);
+  }, []);
 
   const modalTitleId = useGeneratedHtmlId();
   const saveWithoutFiltersModalTitleId = useGeneratedHtmlId();
-
-  const closeSaveWithoutFiltersModal = useCallback(() => {
-    setIsSaveWithoutFiltersModalVisible(false);
-  }, []);
-
-  const confirmSaveWithoutFilters = useCallback(() => {
-    userConfirmedSaveWithoutFiltersRef.current = true;
-    setIsSaveWithoutFiltersModalVisible(false);
-    form.submit();
-  }, [form]);
-
-  const modal = useMemo(() => {
-    if (!isModalVisible) return null;
-    return (
-      <EuiConfirmModal
-        aria-labelledby={modalTitleId}
-        title={i18n.ARCHIVE_TITLE}
-        titleProps={{ id: modalTitleId }}
-        onCancel={closeModal}
-        onConfirm={() => {
-          closeModal();
-          archiveMaintenanceWindow(
-            { maintenanceWindowId: maintenanceWindowId!, archive: true },
-            { onSuccess }
-          );
-        }}
-        cancelButtonText={i18n.CANCEL}
-        confirmButtonText={i18n.ARCHIVE_TITLE}
-        defaultFocusedButton="confirm"
-        buttonColor="danger"
-      >
-        <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
-      </EuiConfirmModal>
-    );
-  }, [
-    closeModal,
-    archiveMaintenanceWindow,
-    isModalVisible,
-    maintenanceWindowId,
-    onSuccess,
-    modalTitleId,
-  ]);
-
-  const saveWithoutFiltersModal = useMemo(() => {
-    if (!isSaveWithoutFiltersModalVisible) return null;
-    return (
-      <EuiConfirmModal
-        aria-labelledby={saveWithoutFiltersModalTitleId}
-        title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
-        titleProps={{ id: saveWithoutFiltersModalTitleId }}
-        onCancel={closeSaveWithoutFiltersModal}
-        onConfirm={confirmSaveWithoutFilters}
-        cancelButtonText={i18n.CANCEL}
-        confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
-        data-test-subj="saveWithoutFiltersConfirmModal"
-      >
-        <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
-      </EuiConfirmModal>
-    );
-  }, [
-    isSaveWithoutFiltersModalVisible,
-    saveWithoutFiltersModalTitleId,
-    closeSaveWithoutFiltersModal,
-    confirmSaveWithoutFilters,
-  ]);
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
@@ -494,7 +397,7 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
             description={i18n.EPISODES_SCOPE_DESCRIPTION}
             switchLabel={i18n.EPISODES_SCOPE_TITLE}
             switchChecked={isEpisodeQueryEnabled}
-            onSwitchChange={onEpisodeQueryToggle}
+            onSwitchChange={setIsEpisodeQueryEnabled}
             switchDataTestSubj="episodeScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_EPISODES_SUBTITLE}
           >
@@ -535,13 +438,50 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
       >
         {isEditMode && (
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="danger" onClick={showModal}>
+            <EuiButton fill color="danger" onClick={() => setIsModalVisible(true)}>
               {i18n.ARCHIVE}
             </EuiButton>
-            {modal}
+            {isModalVisible && (
+              <EuiConfirmModal
+                aria-labelledby={modalTitleId}
+                title={i18n.ARCHIVE_TITLE}
+                titleProps={{ id: modalTitleId }}
+                onCancel={() => setIsModalVisible(false)}
+                onConfirm={() => {
+                  setIsModalVisible(false);
+                  archiveMaintenanceWindow(
+                    { maintenanceWindowId: maintenanceWindowId!, archive: true },
+                    { onSuccess }
+                  );
+                }}
+                cancelButtonText={i18n.CANCEL}
+                confirmButtonText={i18n.ARCHIVE_TITLE}
+                defaultFocusedButton="confirm"
+                buttonColor="danger"
+              >
+                <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
+              </EuiConfirmModal>
+            )}
           </EuiFlexItem>
         )}
-        {saveWithoutFiltersModal}
+        {isSaveWithoutFiltersModalVisible && (
+          <EuiConfirmModal
+            aria-labelledby={saveWithoutFiltersModalTitleId}
+            title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
+            titleProps={{ id: saveWithoutFiltersModalTitleId }}
+            onCancel={() => setIsSaveWithoutFiltersModalVisible(false)}
+            onConfirm={() => {
+              userConfirmedSaveWithoutFiltersRef.current = true;
+              setIsSaveWithoutFiltersModalVisible(false);
+              form.submit();
+            }}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
+            data-test-subj="saveWithoutFiltersConfirmModal"
+          >
+            <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
+          </EuiConfirmModal>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
