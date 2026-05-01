@@ -127,19 +127,19 @@ export default function emailTest({ getService }: FtrProviderContext) {
         );
       });
 
-      it('rejects via the executor when to/cc/bcc contain only empty/whitespace strings', async () => {
+      it('rejects via validateParams when to/cc/bcc contain only empty/whitespace strings', async () => {
         const from = `bob@${EmailDomainAllowed}`;
         const conn = await createConnector(from);
         expect(conn.status).to.be(200);
         const { id } = conn.body;
 
-        // validateParams sees non-empty arrays so it passes; the executor
-        // filters empty/whitespace and short-circuits with the new error.
+        // validateParams filters blanks before the recipients-required check,
+        // so the request is rejected synchronously with HTTP 400.
         const { status, body } = await runConnector(id, ['', '  '], [' '], ['']);
-        expect(status).to.be(200);
-        expect(body?.status).to.be('error');
-        expect(body?.message).to.be('At least one entry in [to], [cc], or [bcc] is required');
-        expect(body?.errorSource).to.be('user');
+        expect(status).to.be(400);
+        expect(body?.message).to.match(
+          /At least one entry in \[to\], \[cc\], or \[bcc\] is required/
+        );
       });
 
       it('succeeds when only Cc has a valid recipient', async () => {

@@ -532,6 +532,24 @@ describe('params validation', () => {
     );
   });
 
+  test('params validation fails when recipients only contain empty/whitespace strings', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['', ' '],
+          cc: [''],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
   test('params validation for emails calls validateEmailAddresses', async () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
