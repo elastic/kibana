@@ -18,7 +18,7 @@ import {
   prefetchTriggerDefinitions,
 } from './prefetch';
 import { StateAnnotation, type StateType } from './state';
-import { buildBoundTools } from './tools/schemas';
+import { buildBoundTools, isEditToolName } from './tools/schemas';
 import { dispatchToolCall } from './tools/dispatch';
 import { validateGeneratedYaml } from './validate';
 import { buildMessagesFromActions } from './prompts';
@@ -85,9 +85,22 @@ export const createGenerateWorkflowGraph = ({
 
     for (const call of lastAgentStep.toolCalls) {
       const result = await dispatchToolCall({ yaml }, call, dispatchDeps);
+
+      // Detect whether this dispatch mutated the YAML. set_yaml replaces it
+      // entirely; insert/modify/delete return a new yaml on success. We
+      // surface the post-edit YAML and a fresh validation result so the
+      // LLM sees its own progress turn-by-turn.
+      const yamlChanged = result.yaml !== undefined && result.yaml !== yaml;
       if (result.yaml !== undefined) {
         yaml = result.yaml;
       }
+
+      let perEditValidation: { valid: boolean; errors: string[] } | undefined;
+      if (isEditToolName(call.toolName) && yamlChanged) {
+        const validation = await validateGeneratedYaml(yaml, dispatchDeps);
+        perEditValidation = { valid: validation.valid, errors: validation.errors };
+      }
+
       newActions.push(
         toolResultAction({
           toolCallId: call.toolCallId,
@@ -95,6 +108,8 @@ export const createGenerateWorkflowGraph = ({
           success: result.message.success,
           data: result.message.data,
           error: result.message.error,
+          currentYaml: isEditToolName(call.toolName) ? yaml : undefined,
+          validation: perEditValidation,
         })
       );
     }
