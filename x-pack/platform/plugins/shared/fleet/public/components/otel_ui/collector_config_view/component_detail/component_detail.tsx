@@ -7,23 +7,18 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
-  EuiCodeBlock,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiPanel,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
-import { dump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 
 import type {
   OTelCollectorConfig,
@@ -33,6 +28,11 @@ import type {
 
 import type { OTelComponentType } from '../graph_view/constants';
 import { COMPONENT_TYPE_LABELS } from '../graph_view/constants';
+import { findComponentHealth } from '../graph_view/enrich_nodes_with_health';
+import { getComponentHealthStatus, getHealthStatusLabel, HEALTH_STATUS_COLORS } from '../utils';
+
+import { ComponentConfigTab } from './component_config_tab';
+import { ComponentHealthTab } from './component_health_tab';
 
 const getComponentSection = (
   config: OTelCollectorConfig,
@@ -47,51 +47,9 @@ const getComponentSection = (
       return config.connectors;
     case 'exporter':
       return config.exporters;
+    case 'pipeline':
+      return config.service?.pipelines as Record<string, unknown> | undefined;
   }
-};
-
-const findComponentHealth = (
-  health: ComponentHealth | undefined,
-  componentType: OTelComponentType,
-  componentId: string
-): ComponentHealth | undefined => {
-  const key = `${componentType}:${componentId}`;
-  const map = health?.component_health_map;
-  if (!map) {
-    return undefined;
-  }
-  if (map[key]) {
-    return map[key];
-  }
-  for (const entry of Object.values(map)) {
-    const found = findComponentHealth(entry, componentType, componentId);
-    if (found) {
-      return found;
-    }
-  }
-  return undefined;
-};
-
-const getHealthStatusLabel = (componentHealth: ComponentHealth) => {
-  if (componentHealth.healthy) {
-    return i18n.translate('xpack.fleet.otelUi.componentDetail.health.statusHealthy', {
-      defaultMessage: 'Healthy',
-    });
-  }
-  return i18n.translate('xpack.fleet.otelUi.componentDetail.health.statusUnhealthy', {
-    defaultMessage: 'Unhealthy',
-  });
-};
-
-const getHealthColor = (componentHealth: ComponentHealth) => {
-  if (componentHealth.healthy) {
-    return 'success' as const;
-  }
-  const normalizedStatus = componentHealth.status?.toLowerCase() ?? '';
-  if (normalizedStatus.includes('degraded') || normalizedStatus.includes('warning')) {
-    return 'warning' as const;
-  }
-  return 'danger' as const;
 };
 
 type ComponentDetailTabId = 'config' | 'health' | 'metrics';
@@ -140,32 +98,50 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
     [health, componentType, componentId]
   );
 
-  const yamlContent = useMemo(() => {
-    if (componentConfig == null) {
-      return null;
-    }
-    return dump({ [componentId]: componentConfig }, { lineWidth: -1, quotingType: '"' });
-  }, [componentId, componentConfig]);
+  const healthStatus = getComponentHealthStatus(componentHealth);
+  const healhtLabel = (
+    <EuiFlexItem grow={false}>
+      <EuiHealth
+        color={HEALTH_STATUS_COLORS[healthStatus]}
+        data-test-subj="otelComponentHealthStatus"
+      >
+        {getHealthStatusLabel(healthStatus)}
+      </EuiHealth>
+    </EuiFlexItem>
+  );
 
   return (
     <EuiPanel paddingSize="m" data-test-subj="otelComponentDetail">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
-              {COMPONENT_TYPE_LABELS[componentType]}: {componentId}
-            </h4>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h4>
+                  {COMPONENT_TYPE_LABELS[componentType]}: {componentId}
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={i18n.translate('xpack.fleet.otelUi.componentDetail.closeButtonAriaLabel', {
-              defaultMessage: 'Close component detail',
-            })}
-            onClick={onClose}
-            data-test-subj="otelComponentDetailCloseButton"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            {componentHealth && healhtLabel}
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={i18n.translate(
+                  'xpack.fleet.otelUi.componentDetail.closeButtonAriaLabel',
+                  {
+                    defaultMessage: 'Close component detail',
+                  }
+                )}
+                onClick={onClose}
+                data-test-subj="otelComponentDetailCloseButton"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -182,86 +158,11 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      {selectedTabId === 'config' &&
-        (yamlContent ? (
-          <EuiCodeBlock
-            overflowHeight="390px"
-            language="yaml"
-            isCopyable
-            fontSize="m"
-            paddingSize="s"
-          >
-            {yamlContent}
-          </EuiCodeBlock>
-        ) : (
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.fleet.otelUi.componentDetail.noConfiguration', {
-              defaultMessage: 'No additional configuration',
-            })}
-          </EuiText>
-        ))}
-      {selectedTabId === 'health' &&
-        (componentHealth ? (
-          <EuiDescriptionList
-            compressed
-            type="column"
-            data-test-subj="otelComponentDetailHealth"
-            listItems={[
-              {
-                title: i18n.translate('xpack.fleet.otelUi.componentDetail.health.statusLabel', {
-                  defaultMessage: 'Status',
-                }),
-                description: (
-                  <EuiBadge color={getHealthColor(componentHealth)}>
-                    {getHealthStatusLabel(componentHealth)}
-                  </EuiBadge>
-                ),
-              },
-              {
-                title: i18n.translate(
-                  'xpack.fleet.otelUi.componentDetail.health.reportedStatusLabel',
-                  { defaultMessage: 'Reported status' }
-                ),
-                description: componentHealth.status || '-',
-              },
-              {
-                title: i18n.translate(
-                  'xpack.fleet.otelUi.componentDetail.health.lastUpdatedLabel',
-                  { defaultMessage: 'Last updated' }
-                ),
-                description: componentHealth.status_time_unix_nano ? (
-                  <EuiToolTip
-                    content={
-                      <FormattedDate
-                        value={componentHealth.status_time_unix_nano / 1_000_000}
-                        year="numeric"
-                        month="short"
-                        day="2-digit"
-                        hour="numeric"
-                        minute="numeric"
-                        timeZoneName="short"
-                      />
-                    }
-                  >
-                    <span tabIndex={0}>
-                      <FormattedRelative
-                        value={componentHealth.status_time_unix_nano / 1_000_000}
-                      />
-                    </span>
-                  </EuiToolTip>
-                ) : (
-                  '-'
-                ),
-              },
-            ]}
-          />
-        ) : (
-          <EuiText size="s" color="subdued" data-test-subj="otelComponentDetailHealthNoData">
-            {i18n.translate('xpack.fleet.otelUi.componentDetail.health.noData', {
-              defaultMessage: 'No health data available',
-            })}
-          </EuiText>
-        ))}
+      {selectedTabId === 'config' && (
+        <ComponentConfigTab componentId={componentId} componentConfig={componentConfig} />
+      )}
+      {selectedTabId === 'health' && <ComponentHealthTab componentHealth={componentHealth} />}
+
       {selectedTabId === 'metrics' && (
         <EuiText size="s" color="subdued" data-test-subj="otelComponentDetailMetricsPlaceholder">
           {i18n.translate('xpack.fleet.otelUi.componentDetail.metricsPlaceholder', {

@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent } from '@testing-library/react';
+
+import type { TestRenderer } from '../../../../mock';
+import { createFleetTestRendererMock } from '../../../../mock';
 
 import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common/types';
 
@@ -50,8 +52,14 @@ const config: OTelCollectorConfig = {
 };
 
 describe('OTelComponentDetail', () => {
+  let testRenderer: TestRenderer;
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+  });
+
   it('renders the component title with type label and ID', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
         componentType="receiver"
@@ -60,11 +68,11 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(screen.getByText(/Receiver: otlp/)).toBeInTheDocument();
+    expect(result.getByText(/Receiver: otlp/)).toBeInTheDocument();
   });
 
   it('renders the component configuration as YAML', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
         componentType="receiver"
@@ -73,9 +81,9 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(screen.getByText(/protocols:/)).toBeInTheDocument();
-    expect(screen.getByText(/grpc:/)).toBeInTheDocument();
-    expect(screen.getByText(/0.0.0.0:4317/)).toBeInTheDocument();
+    expect(result.getByText(/protocols:/)).toBeInTheDocument();
+    expect(result.getByText(/grpc:/)).toBeInTheDocument();
+    expect(result.getByText(/0.0.0.0:4317/)).toBeInTheDocument();
   });
 
   it('renders "No additional configuration" when component has no config', () => {
@@ -84,7 +92,7 @@ describe('OTelComponentDetail', () => {
       service: { pipelines: {} },
     };
 
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="noop"
         componentType="receiver"
@@ -93,13 +101,13 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(screen.getByText('No additional configuration')).toBeInTheDocument();
+    expect(result.getByText('No additional configuration')).toBeInTheDocument();
   });
 
   it('calls onClose when the close button is clicked', () => {
     const onClose = jest.fn();
 
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="batch"
         componentType="processor"
@@ -108,12 +116,12 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('otelComponentDetailCloseButton'));
+    fireEvent.click(result.getByTestId('otelComponentDetailCloseButton'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('renders exporter configuration correctly', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="elasticsearch/default"
         componentType="exporter"
@@ -122,12 +130,12 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(screen.getByText(/Exporter: elasticsearch\/default/)).toBeInTheDocument();
-    expect(screen.getByText(/localhost:9200/)).toBeInTheDocument();
+    expect(result.getByText(/Exporter: elasticsearch\/default/)).toBeInTheDocument();
+    expect(result.getByText(/localhost:9200/)).toBeInTheDocument();
   });
 
   it('renders three tabs: Config, Health, Metrics', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
         componentType="receiver"
@@ -136,13 +144,13 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(screen.getByTestId('otelComponentDetailTab-config')).toBeInTheDocument();
-    expect(screen.getByTestId('otelComponentDetailTab-health')).toBeInTheDocument();
-    expect(screen.getByTestId('otelComponentDetailTab-metrics')).toBeInTheDocument();
+    expect(result.getByTestId('otelComponentDetailTab-config')).toBeInTheDocument();
+    expect(result.getByTestId('otelComponentDetailTab-health')).toBeInTheDocument();
+    expect(result.getByTestId('otelComponentDetailTab-metrics')).toBeInTheDocument();
   });
 
   it('shows Config tab content by default', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
         componentType="receiver"
@@ -151,15 +159,15 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(screen.getByTestId('otelComponentDetailTab-config')).toHaveAttribute(
+    expect(result.getByTestId('otelComponentDetailTab-config')).toHaveAttribute(
       'aria-selected',
       'true'
     );
-    expect(screen.getByText(/protocols:/)).toBeInTheDocument();
+    expect(result.getByText(/protocols:/)).toBeInTheDocument();
   });
 
   it('switches to Health tab and shows no data message when no health prop', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
         componentType="receiver"
@@ -168,9 +176,9 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('otelComponentDetailTab-health'));
-    expect(screen.getByTestId('otelComponentDetailHealthNoData')).toBeInTheDocument();
-    expect(screen.queryByText(/protocols:/)).not.toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
+    expect(result.getByTestId('otelComponentDetailHealthNoData')).toBeInTheDocument();
+    expect(result.queryByText(/protocols:/)).not.toBeInTheDocument();
   });
 
   it('shows health description list with status, reported status, and last updated', () => {
@@ -186,22 +194,21 @@ describe('OTelComponentDetail', () => {
       },
     };
 
-    render(
-      <I18nProvider>
-        <OTelComponentDetail
-          componentId="otlp"
-          componentType="receiver"
-          config={config}
-          health={health}
-          onClose={jest.fn()}
-        />
-      </I18nProvider>
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        health={health}
+        onClose={jest.fn()}
+      />
     );
 
-    fireEvent.click(screen.getByTestId('otelComponentDetailTab-health'));
-    expect(screen.getByTestId('otelComponentDetailHealth')).toBeInTheDocument();
-    expect(screen.getByText('Healthy')).toBeInTheDocument();
-    expect(screen.getByText('StatusOK')).toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
+    const healthPanel = result.getByTestId('otelComponentDetailHealth');
+    expect(healthPanel).toBeInTheDocument();
+    expect(healthPanel.textContent).toContain('Healthy');
+    expect(healthPanel.textContent).toContain('StatusOK');
   });
 
   it('shows unhealthy status badge when component is unhealthy', () => {
@@ -211,27 +218,26 @@ describe('OTelComponentDetail', () => {
       component_health_map: {
         'processor:batch': {
           healthy: false,
-          status: 'StatusError',
+          status: 'StatusPermanentError',
           status_time_unix_nano: 1_714_500_000_000_000_000,
         },
       },
     };
 
-    render(
-      <I18nProvider>
-        <OTelComponentDetail
-          componentId="batch"
-          componentType="processor"
-          config={config}
-          health={health}
-          onClose={jest.fn()}
-        />
-      </I18nProvider>
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="batch"
+        componentType="processor"
+        config={config}
+        health={health}
+        onClose={jest.fn()}
+      />
     );
 
-    fireEvent.click(screen.getByTestId('otelComponentDetailTab-health'));
-    expect(screen.getByText('Unhealthy')).toBeInTheDocument();
-    expect(screen.getByText('StatusError')).toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
+    const healthPanel = result.getByTestId('otelComponentDetailHealth');
+    expect(healthPanel.textContent).toContain('Unhealthy');
+    expect(healthPanel.textContent).toContain('StatusPermanentError');
   });
 
   it('finds component health in nested health map', () => {
@@ -245,7 +251,7 @@ describe('OTelComponentDetail', () => {
           component_health_map: {
             'receiver:otlp': {
               healthy: true,
-              status: 'Running',
+              status: 'StatusOK',
               status_time_unix_nano: 1_714_500_000_000_000_000,
             },
           },
@@ -253,26 +259,40 @@ describe('OTelComponentDetail', () => {
       },
     };
 
-    render(
-      <I18nProvider>
-        <OTelComponentDetail
-          componentId="otlp"
-          componentType="receiver"
-          config={config}
-          health={health}
-          onClose={jest.fn()}
-        />
-      </I18nProvider>
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        health={health}
+        onClose={jest.fn()}
+      />
     );
 
-    fireEvent.click(screen.getByTestId('otelComponentDetailTab-health'));
-    expect(screen.getByTestId('otelComponentDetailHealth')).toBeInTheDocument();
-    expect(screen.getByText('Healthy')).toBeInTheDocument();
-    expect(screen.getByText('Running')).toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
+    const healthPanel = result.getByTestId('otelComponentDetailHealth');
+    expect(healthPanel).toBeInTheDocument();
+    expect(healthPanel.textContent).toContain('Healthy');
+  });
+
+  it('renders pipeline detail with pipeline YAML', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="logs/default"
+        componentType="pipeline"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.getByText(/Pipeline: logs\/default/)).toBeInTheDocument();
+    expect(result.getByText(/receivers:/)).toBeInTheDocument();
+    expect(result.getByText(/processors:/)).toBeInTheDocument();
+    expect(result.getByText(/exporters:/)).toBeInTheDocument();
   });
 
   it('switches to Metrics tab and shows placeholder', () => {
-    render(
+    const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
         componentType="receiver"
@@ -281,8 +301,8 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('otelComponentDetailTab-metrics'));
-    expect(screen.getByTestId('otelComponentDetailMetricsPlaceholder')).toBeInTheDocument();
-    expect(screen.queryByText(/protocols:/)).not.toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-metrics'));
+    expect(result.getByTestId('otelComponentDetailMetricsPlaceholder')).toBeInTheDocument();
+    expect(result.queryByText(/protocols:/)).not.toBeInTheDocument();
   });
 });
