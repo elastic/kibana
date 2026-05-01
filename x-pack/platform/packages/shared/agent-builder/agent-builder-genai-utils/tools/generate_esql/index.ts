@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export { generateEsql, type GenerateEsqlResponse } from './nl_to_esql';
 export {
-  generateSurgicalEsql,
+  generateEsql,
   buildNlToEsqlAdditionalContext,
-  type GenerateSurgicalEsqlResponse,
-} from './surgical_nl_to_esql';
+  type GenerateEsqlResponse,
+} from './nl_to_esql';
+export { generateSurgicalEsql, type GenerateSurgicalEsqlResponse } from './surgical_nl_to_esql';

@@ -57,6 +57,12 @@ export const useCommentToEsql = ({
   const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
   const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
   const actionDisposablesRef = useRef<monaco.IDisposable[]>([]);
+  // Aborts the in-flight nl_to_esql HTTP request when the user retriggers or accepts/rejects.
+  const abortControllerRef = useRef<AbortController | undefined>(undefined);
+  // Sticky decoration that tracks the comment line as the user types during the LLM wait.
+  const commentAnchorRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(
+    undefined
+  );
 
   // Diff styles for the comment and the generated code
   const commentToEsqlStyle = useMemo(
@@ -72,6 +78,16 @@ export const useCommentToEsql = ({
     [euiTheme.colors.backgroundLightSuccess, euiTheme.colors.backgroundLightWarning]
   );
 
+  const clearCommentAnchor = useCallback(() => {
+    commentAnchorRef.current?.clear();
+    commentAnchorRef.current = undefined;
+  }, []);
+
+  const abortInFlight = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = undefined;
+  }, []);
+
   const cleanup = useCallback(() => {
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
@@ -85,7 +101,10 @@ export const useCommentToEsql = ({
     actionDisposablesRef.current = [];
     contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
-  }, []);
+
+    clearCommentAnchor();
+    abortInFlight();
+  }, [clearCommentAnchor, abortInFlight]);
 
   const acceptChange = useCallback(() => {
     const editor = editorRef.current;
@@ -203,7 +222,8 @@ export const useCommentToEsql = ({
     async (
       nlInstruction: string,
       isSurgical: boolean,
-      currentQuery: string
+      currentQuery: string,
+      signal: AbortSignal
     ): Promise<GenerateResult | null> => {
       try {
         const result = await http.post<{ content: string; replacesNext?: boolean }>(
@@ -214,11 +234,14 @@ export const useCommentToEsql = ({
               currentQuery,
               ...(isSurgical ? { isSurgical: true } : {}),
             }),
+            signal,
           }
         );
         if (!result.content) return null;
         return { content: result.content, replacesNext: result.replacesNext ?? false };
       } catch (error) {
+        // The user retriggered or cancelled — swallow and let the new run own the UX.
+        if (signal.aborted) return null;
         const message =
           (error as { body?: { message?: string } })?.body?.message ??
           i18n.translate('esqlEditor.commentToEsql.error', {
@@ -236,7 +259,8 @@ export const useCommentToEsql = ({
     const model = editorModel.current;
     if (!editor || !model) return;
 
-    if (reviewStateRef.current) {
+    // Retrigger: abort any in-flight request and tear down a pending review.
+    if (reviewStateRef.current || abortControllerRef.current) {
       cleanup();
     }
 
@@ -262,36 +286,62 @@ export const useCommentToEsql = ({
       ? markCommentInQuery(fullText, targetComment.lineNumber)
       : fullText;
 
-    const result = await generateESQL(nlInstruction, isSurgical, queryForRoute);
-    if (!result) return;
+    // Sticky anchor that follows the comment line if the user types above it during the wait.
+    commentAnchorRef.current = editor.createDecorationsCollection([
+      {
+        range: new monaco.Range(targetComment.lineNumber, 1, targetComment.lineNumber, 1),
+        options: {
+          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+        },
+      },
+    ]);
 
-    if (!isModelStillValid(editorModel.current, targetComment.lineNumber)) return;
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const result = await generateESQL(nlInstruction, isSurgical, queryForRoute, controller.signal);
+
+    // Was aborted (retrigger / cleanup) or had no content.
+    if (controller.signal.aborted || !result) {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = undefined;
+      }
+      return;
+    }
+    abortControllerRef.current = undefined;
+
+    const liveModel = editorModel.current;
+    const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
+    clearCommentAnchor();
+
+    const currentCommentLine = anchorRanges[0]?.startLineNumber;
+    if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
 
     if (!isSurgical) {
-      const fullRange = model.getFullModelRange();
+      const fullRange = liveModel.getFullModelRange();
       editor.executeEdits('nl-to-esql', [{ range: fullRange, text: result.content }]);
       return;
     }
 
     const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
       editor,
-      model,
-      targetComment.lineNumber,
+      liveModel,
+      currentCommentLine,
       result.content
     );
 
     const replacedLineNumber =
-      result.replacesNext && generatedLineEnd + 1 <= model.getLineCount()
+      result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
         ? generatedLineEnd + 1
         : null;
 
     showReview({
-      commentLineNumber: targetComment.lineNumber,
+      commentLineNumber: currentCommentLine,
       generatedLineStart,
       generatedLineEnd,
       replacedLineNumber,
     });
-  }, [editorRef, editorModel, cleanup, generateESQL, showReview]);
+  }, [editorRef, editorModel, cleanup, clearCommentAnchor, generateESQL, showReview]);
 
   return {
     commentToEsqlStyle,

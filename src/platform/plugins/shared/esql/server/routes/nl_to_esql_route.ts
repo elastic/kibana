@@ -22,7 +22,10 @@ import {
 } from '@kbn/agent-builder-genai-utils';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+
+const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
 import type { EsqlServerPluginStart } from '../types';
 
@@ -82,7 +85,7 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          nlInstruction: schema.string(),
+          nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
           currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
           isSurgical: schema.maybe(schema.boolean()),
         }),
@@ -119,12 +122,16 @@ export const registerNLtoESQLRoute = (
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
         const isSurgicalRequest = Boolean(isSurgical && trimmedCurrent);
+        const signal = getRequestAbortedSignal(request.events.aborted$);
 
         if (isSurgicalRequest) {
           const { content, replacesNext } = await generateSurgicalEsql({
             model,
+            esClient: client,
+            logger,
             nlInstruction,
             currentQuery: trimmedCurrent ?? '',
+            signal,
           });
           return response.ok({
             body: { content, replacesNext },

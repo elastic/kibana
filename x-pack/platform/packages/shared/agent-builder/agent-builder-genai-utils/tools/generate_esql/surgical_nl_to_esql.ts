@@ -5,97 +5,182 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { extractTextContent } from '../../langchain/messages';
-import { getBundledEsqlSyntaxExamplesSnippets } from './shared/bundled_esql_prompts';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import { EsqlQuery } from '@elastic/esql';
+import type { ESQLSource } from '@elastic/esql/types';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
+import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
+import {
+  resolveResourceForEsqlWithSamplingStats,
+  formatResourceWithSampledValues,
+  type ResolvedResourceWithSampling,
+} from '../utils/resources';
 
-const buildSurgicalSystemMessage = (syntax: string, examples: string): string => {
-  if (!syntax && !examples) {
-    return '';
-  }
-  return `You help complete ES|QL in the Kibana editor. The next user message is the full task. Follow it exactly: REPLACES_NEXT line, then a fenced \`\`\`esql\`\`\` block with only pipe line(s) (fragment), not a full query.
+const SURGICAL_FROM_PLACEHOLDER = 'FROM _surgical_dummy_';
 
-## Documentation
+const SurgicalGenerationSchema = z
+  .object({
+    replacesNext: z
+      .boolean()
+      .describe(
+        'true if the generated code is a modified version of the pipe directly after the marked comment and should replace it; false if the generated code is a new pipe to insert without removing any existing pipe.'
+      ),
+    code: z
+      .string()
+      .describe(
+        'Only the ES|QL pipe(s) that should replace the marked comment. Do not include the full query. Do not wrap in markdown fences.'
+      ),
+  })
+  .describe('Surgical ES|QL fragment to insert into the editor.');
 
-The following sections use the same bundled ES|QL prompt material as the full \`generateEsql\` tool (excerpts may be truncated for length).
+const RequestDocsSchema = z
+  .object({
+    commands: z
+      .array(z.string())
+      .optional()
+      .describe('ES|QL source and processing commands to get documentation for.'),
+    functions: z.array(z.string()).optional().describe('ES|QL functions to get documentation for.'),
+  })
+  .describe('Tool to use to request ES|QL documentation');
 
-${
-  syntax
-    ? `<syntax-overview>
-${syntax}
-</syntax-overview>`
-    : ''
-}
-
-${
-  examples
-    ? `<esql-examples>
-${examples}
-</esql-examples>`
-    : ''
-}`;
+const formatFetchedDocs = (fetchedDocs: Record<string, string>): string => {
+  const entries = Object.values(fetchedDocs);
+  if (!entries.length) return '';
+  return entries.join('\n\n');
 };
 
-const buildSurgicalUserMessage = ({
+const buildRequestDocsMessages = ({
   nlInstruction,
   currentQuery,
+  prompts,
 }: {
   nlInstruction: string;
   currentQuery: string;
-}): string => {
-  return `You are an ES|QL expert completing a partial query in the editor.
-The target comment line is marked with >>> and <<< delimiters in the query below.
-That comment is a natural-language instruction describing what ES|QL code should replace it.
-Other comment lines (without >>> <<<) are regular documentation comments — ignore them as instructions.
+  prompts: EsqlPrompts;
+}): BaseMessageLike[] => [
+  [
+    'system',
+    `You are an Elasticsearch assistant that helps with writing ES|QL queries.
 
-User instruction (from the marked comment):
-${nlInstruction}
+Your current task is to look at a partial ES|QL query in the editor and at a single instruction (a comment) the user wants to turn into pipe(s). Pick the ES|QL commands and functions you will need to write that fragment, so a later step can fetch documentation for only those keywords.
 
-Your task: output ONLY the ES|QL pipe(s) that should replace the marked comment.
-Do not output the full query.
-Fence the replacement code with the esql tag. Do not explain it.
-
-If the instruction asks to modify or extend an existing pipe command (e.g. "also add ...", "change ...", "add a column"),
-output the complete modified version of that pipe. Otherwise output only new pipe(s).
-
-Before the code block, output exactly one of these lines:
-  REPLACES_NEXT: true
-  REPLACES_NEXT: false
-Output "true" when your generated code is a modified version of the pipe immediately after the marked comment
-(i.e. it should replace that pipe, not be added alongside it).
-Output "false" when your generated code is new and should be inserted without removing any existing pipe.
-
-<CurrentQuery>
+<syntax-overview>
+${prompts.syntax}
+</syntax-overview>`,
+  ],
+  [
+    'user',
+    `<current_query>
 ${currentQuery}
-</CurrentQuery>`;
-};
+</current_query>
 
-const extractSurgicalResponse = (content: string): { esql: string; replacesNext: boolean } => {
-  const codeMatch = content.match(/```esql\s*([\s\S]*?)```/);
-  const esql = codeMatch ? codeMatch[1].trim() : content.trim();
-  const flagMatch = content.match(/REPLACES_NEXT:\s*(true|false)/i);
-  const replacesNext = flagMatch ? flagMatch[1].toLowerCase() === 'true' : false;
-  return { esql, replacesNext };
+<instruction>
+${nlInstruction}
+</instruction>
+
+Request documentation for the commands and functions you will need to generate the pipe(s) for this instruction.`,
+  ],
+];
+
+const buildSurgicalMessages = ({
+  nlInstruction,
+  currentQuery,
+  fetchedDocs,
+  resource,
+}: {
+  nlInstruction: string;
+  currentQuery: string;
+  fetchedDocs: Record<string, string>;
+  resource: ResolvedResourceWithSampling | undefined;
+}): BaseMessageLike[] => {
+  const docsBlock = formatFetchedDocs(fetchedDocs);
+  const resourceBlock = resource ? formatResourceWithSampledValues({ resource }) : '';
+
+  return [
+    [
+      'system',
+      `You are an ES|QL expert completing a partial query in the editor. The user has written a natural-language comment describing a step they want; your job is to output the ES|QL pipe(s) that should replace that comment.
+
+The target comment is marked with >>> and <<< delimiters in the query. Other comment lines (without those delimiters) are regular documentation — ignore them as instructions.
+
+Output ONLY the pipe fragment. Do not output the full query. Do not include markdown fences.
+
+If the instruction asks to modify or extend the existing pipe immediately after the comment (e.g. "also add ...", "change ...", "add a column"), output the complete modified version of that pipe and set replacesNext=true.
+Otherwise output only new pipe(s) and set replacesNext=false.
+
+${
+  docsBlock
+    ? `## Relevant ES|QL documentation
+
+${docsBlock}`
+    : ''
+}`,
+    ],
+    [
+      'user',
+      `<current_query>
+${currentQuery}
+</current_query>
+
+${resourceBlock ? `${resourceBlock}\n` : ''}<instruction>
+${nlInstruction}
+</instruction>
+
+Generate the ES|QL pipe(s) that should replace the marked comment.`,
+    ],
+  ];
 };
 
 /**
- * {@link buildNlToEsqlAdditionalContext} is appended to `nlQuery` when using {@link generateEsql}
- * from the ES|QL editor (non-surgical) so the model sees the current buffer.
+ * Pulls the first index/datastream/alias name from a buffer's FROM (or TS) command.
+ * Returns undefined if the buffer has no FROM/TS command or if the source list is empty.
+ * Patterns/wildcards are returned as-is and may fail to resolve later — callers should tolerate that.
  */
-export const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
-  if (currentQuery) {
-    return [
-      'The user is in the ES|QL editor. Below is their current query.',
-      'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-      'If the request is for a new or unrelated query, you may produce a full replacement.',
-      '',
-      '<current_query>',
-      currentQuery,
-      '</current_query>',
-    ].join('\n');
+const extractFromTarget = (currentQuery: string): string | undefined => {
+  try {
+    const ast = EsqlQuery.fromSrc(currentQuery).ast;
+    const sourceCommand = ast.commands.find(({ name }) => name === 'from' || name === 'ts');
+    const sources = ((sourceCommand?.args ?? []) as ESQLSource[]).filter(
+      (arg) => arg.sourceType === 'index'
+    );
+    const first = sources[0]?.name;
+    if (!first) return undefined;
+    // Multi-target / wildcards: skip sampling — resolveResourceForEsqlWithSamplingStats
+    // works against a single target and pattern resolution is best-effort.
+    if (first.includes(',') || first.includes('*')) return undefined;
+    return first;
+  } catch {
+    return undefined;
   }
-  return '';
+};
+
+/**
+ * Runs `correctCommonEsqlMistakes` on a pipe fragment by wrapping it with a synthetic
+ * FROM so it parses as a full query, then strips the wrapper from the corrected output.
+ * Falls back to the original fragment if anything goes wrong.
+ */
+const correctSurgicalFragment = (rawFragment: string): string => {
+  const fragment = rawFragment.trim();
+  if (!fragment) return fragment;
+
+  const fragmentWithLeadingPipe = fragment.startsWith('|') ? fragment : `| ${fragment}`;
+  const wrapped = `${SURGICAL_FROM_PLACEHOLDER}\n${fragmentWithLeadingPipe}`;
+
+  try {
+    const { output } = correctCommonEsqlMistakes(wrapped);
+    const idx = output.indexOf('|');
+    if (idx === -1) return fragment;
+    const corrected = output.slice(idx).trim();
+    return fragment.startsWith('|') ? corrected : corrected.replace(/^\|\s*/, '');
+  } catch {
+    return fragment;
+  }
 };
 
 export interface GenerateSurgicalEsqlResponse {
@@ -105,20 +190,36 @@ export interface GenerateSurgicalEsqlResponse {
   replacesNext: boolean;
 }
 
+export interface GenerateSurgicalEsqlParams {
+  model: ScopedModel;
+  esClient: ElasticsearchClient;
+  logger?: Logger;
+  nlInstruction: string;
+  currentQuery: string;
+  signal?: AbortSignal;
+}
+
 /**
- * Surgical ES|QL completion: pipe fragment + REPLACES_NEXT, without the full `generateEsql` graph
- * (no full-query validation loop). Uses the same bundled syntax/examples material as
- * \`generateEsql\` (see \`createGenerateEsqlPrompt\`), without the graph's keyword-doc / validate loop.
+ * Surgical ES|QL completion used by the editor's comment-to-ES|QL action.
+ *
+ * Mirrors the pieces of {@link generateEsql} that matter for fragment generation:
+ *  - keyword-targeted documentation (request_documentation step)
+ *  - sampled field stats from the buffer's FROM target, when resolvable
+ *  - `correctCommonEsqlMistakes` post-processing
+ *  - structured output (no markdown-fence parsing)
+ *
+ * Skips the parts of {@link generateEsql} that don't apply to a fragment:
+ *  - index discovery via indexExplorer (we already have the buffer's FROM)
+ *  - validate/execute/retry loop (the output is a fragment, not a runnable query)
  */
 export const generateSurgicalEsql = async ({
   model,
+  esClient,
+  logger,
   nlInstruction,
   currentQuery,
-}: {
-  model: ScopedModel;
-  nlInstruction: string;
-  currentQuery: string;
-}): Promise<GenerateSurgicalEsqlResponse> => {
+  signal,
+}: GenerateSurgicalEsqlParams): Promise<GenerateSurgicalEsqlResponse> => {
   return withActiveInferenceSpan(
     'GenerateSurgicalEsql',
     {
@@ -127,30 +228,51 @@ export const generateSurgicalEsql = async ({
       },
     },
     async () => {
-      let syntax = '';
-      let examples = '';
-      try {
-        const snippets = await getBundledEsqlSyntaxExamplesSnippets();
-        syntax = snippets.syntax;
-        examples = snippets.examples;
-      } catch {
-        // proceed without bundled docs
-      }
-      const systemMessage = buildSurgicalSystemMessage(syntax, examples);
-      const userMessage = buildSurgicalUserMessage({ nlInstruction, currentQuery });
+      const docBase = await EsqlDocumentBase.load();
 
-      const messages: Array<['system' | 'user', string]> = systemMessage
-        ? [
-            ['system', systemMessage],
-            ['user', userMessage],
-          ]
-        : [['user', userMessage]];
+      const fromTarget = extractFromTarget(currentQuery);
+      const resourcePromise = fromTarget
+        ? resolveResourceForEsqlWithSamplingStats({
+            resourceName: fromTarget,
+            esClient,
+            samplingSize: 50,
+          }).catch((e) => {
+            logger?.debug(
+              `[generateSurgicalEsql] failed to resolve resource '${fromTarget}': ${e?.message}`
+            );
+            return undefined;
+          })
+        : Promise.resolve(undefined);
 
-      const response = await model.chatModel.invoke(messages);
+      const requestDocModel = model.chatModel.withStructuredOutput(RequestDocsSchema, {
+        name: 'request_documentation',
+      });
 
-      const rawContent = extractTextContent(response);
-      const { esql, replacesNext } = extractSurgicalResponse(rawContent);
-      return { content: esql, replacesNext };
+      const [{ commands = [], functions = [] }, resource] = await Promise.all([
+        requestDocModel.invoke(
+          buildRequestDocsMessages({
+            nlInstruction,
+            currentQuery,
+            prompts: docBase.getPrompts(),
+          }),
+          { signal }
+        ),
+        resourcePromise,
+      ]);
+
+      const fetchedDocs = docBase.getDocumentation([...commands, ...functions]);
+
+      const generateModel = model.chatModel.withStructuredOutput(SurgicalGenerationSchema, {
+        name: 'generate_surgical_esql',
+      });
+
+      const { replacesNext, code } = await generateModel.invoke(
+        buildSurgicalMessages({ nlInstruction, currentQuery, fetchedDocs, resource }),
+        { signal }
+      );
+
+      const corrected = correctSurgicalFragment(code);
+      return { content: corrected, replacesNext };
     }
   );
 };

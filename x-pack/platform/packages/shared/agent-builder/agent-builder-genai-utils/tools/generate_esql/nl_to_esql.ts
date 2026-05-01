@@ -12,10 +12,30 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
+import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
-import { loadEsqlDocumentBaseOnce } from './shared/bundled_esql_prompts';
+
+/**
+ * Wraps the editor's current buffer as additional context for {@link generateEsql} when
+ * the user asks for a full query while content already exists in the editor.
+ * Used by the non-surgical path of the editor's NL-to-ES|QL route.
+ */
+export const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
+  if (currentQuery) {
+    return [
+      'The user is in the ES|QL editor. Below is their current query.',
+      'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
+      'If the request is for a new or unrelated query, you may produce a full replacement.',
+      '',
+      '<current_query>',
+      currentQuery,
+      '</current_query>',
+    ].join('\n');
+  }
+  return '';
+};
 
 export interface GenerateEsqlResponse {
   /**
@@ -106,7 +126,7 @@ export const generateEsql = async ({
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
-  const docBase = await loadEsqlDocumentBaseOnce();
+  const docBase = await EsqlDocumentBase.load();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
   const graph = createNlToEsqlGraph({
