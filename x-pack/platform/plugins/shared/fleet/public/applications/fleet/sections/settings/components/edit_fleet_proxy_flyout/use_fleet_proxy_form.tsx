@@ -218,6 +218,8 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
   const isDisabled =
     isLoading ||
     !hasChanged ||
+    !nameInput.value ||
+    !urlInput.value ||
     nameInput.props.isInvalid ||
     urlInput.props.isInvalid ||
     certificateAuthoritiesInput.props.isInvalid ||

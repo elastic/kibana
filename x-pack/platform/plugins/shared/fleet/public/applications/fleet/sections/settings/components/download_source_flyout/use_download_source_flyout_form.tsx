@@ -366,6 +366,12 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     validate,
   ]);
 
+  const authType = authTypeInput.value as AuthType;
+  const isAuthMissing =
+    (authType === 'username_password' &&
+      (!usernameInput.value || (!passwordInput.value && !passwordSecretInput.value))) ||
+    (authType === 'api_key' && !apiKeyInput.value && !apiKeySecretInput.value);
+
   return {
     inputs,
     submit,
@@ -374,6 +380,9 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       isLoading ||
       (downloadSource && !hasChanged) ||
       isEditDisabled ||
+      !nameInput.value ||
+      !hostInput.value ||
+      isAuthMissing ||
       sslCertificateAuthoritiesInput.props.isInvalid ||
       sslCertificateInput.props.isInvalid ||
       (sslKeyInput.value ? sslKeyInput.props.isInvalid : sslKeySecretInput.props.isInvalid),

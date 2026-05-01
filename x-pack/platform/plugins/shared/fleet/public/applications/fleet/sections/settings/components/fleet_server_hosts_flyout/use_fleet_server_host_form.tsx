@@ -387,6 +387,8 @@ export function useFleetServerHostsForm(
     isEditDisabled ||
     isLoading ||
     !hasChanged ||
+    !nameInput.value ||
+    !hostUrlsInput.value.some((v) => v.trim()) ||
     hostUrlsInput.props.isInvalid ||
     nameInput.props.isInvalid ||
     sslCertificateAuthoritiesInput.props.isInvalid ||

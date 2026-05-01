@@ -1224,6 +1224,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     notifications.toasts,
   ]);
 
+  const isHostsMissing = isKafka
+    ? !kafkaHostsInput.value.some((v) => v.trim())
+    : isLogstash
+    ? !logstashHostsInput.value.some((v) => v.trim())
+    : isRemoteElasticsearch
+    ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
+    : !elasticsearchUrlInput.value.some((v) => v.trim());
+
   return {
     inputs,
     submit,
@@ -1233,6 +1241,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled:
       isLoading ||
       (output && !hasChanged) ||
+      !nameInput.value ||
+      isHostsMissing ||
       (isLogstash && !hasEncryptedSavedObjectConfigured) ||
       (!isKafka &&
         (sslCertificateAuthoritiesInput.props.isInvalid ||
