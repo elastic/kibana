@@ -164,9 +164,7 @@ export class SampleTaskManagerFixturePlugin
               if (!user) {
                 return null;
               }
-              // Reading any AuthenticatedUser field other than profile_uid
-              // off an enriched fake request must throw — capture that
-              // behavior so the FTR test can assert on it.
+              // Capture that non-profile_uid fields throw on the enriched user.
               let usernameAccessThrew = false;
               try {
                 void user.username;

@@ -1846,28 +1846,31 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduled.userScope?.userProfileId).to.eql(testProfileUid);
         expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(true);
 
+        // The task is one-shot, so it's removed from saved objects after it
+        // runs. The task indexes its captured state into the test history
+        // index instead, so assert against that.
         await retry.try(async () => {
-          const task = await currentTask<{
-            resolvedFromTaskRequest: { profileUid?: string; usernameAccessThrew: boolean } | null;
-            resolvedFromChildRequest: { profileUid?: string; usernameAccessThrew: boolean } | null;
-            ran?: boolean;
-          }>(scheduled.id);
+          const docs = await historyDocs(scheduled.id);
+          expect(docs.length).to.eql(1);
 
-          expect(task.state.ran).to.be(true);
+          const state = JSON.parse(docs[0]._source.state) as {
+            resolvedFromTaskRequest: {
+              profileUid?: string;
+              usernameAccessThrew: boolean;
+            } | null;
+            resolvedFromChildRequest: {
+              profileUid?: string;
+              usernameAccessThrew: boolean;
+            } | null;
+          };
 
-          expect(task.state.resolvedFromTaskRequest).to.be.an('object');
-          expect(task.state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
-          // Reading any non-profile_uid field on the enriched fake user
-          // must throw, including for the parent task's fake request.
-          expect(task.state.resolvedFromTaskRequest?.usernameAccessThrew).to.be(true);
+          expect(state.resolvedFromTaskRequest).to.be.an('object');
+          expect(state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
+          expect(state.resolvedFromTaskRequest?.usernameAccessThrew).to.be(true);
 
-          expect(task.state.resolvedFromChildRequest).to.be.an('object');
-          expect(task.state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
-          // Same enforcement on a child fake request that was enriched via
-          // the RunContext.enrichRequest callback.
-          expect(task.state.resolvedFromChildRequest?.usernameAccessThrew).to.be(true);
-
-          expect(task.userScope?.userProfileId).to.eql(testProfileUid);
+          expect(state.resolvedFromChildRequest).to.be.an('object');
+          expect(state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
+          expect(state.resolvedFromChildRequest?.usernameAccessThrew).to.be(true);
         });
       });
     });
