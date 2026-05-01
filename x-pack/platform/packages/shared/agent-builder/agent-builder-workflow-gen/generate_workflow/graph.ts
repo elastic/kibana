@@ -21,7 +21,7 @@ import { StateAnnotation, type StateType } from './state';
 import { buildBoundTools } from './tools/schemas';
 import { dispatchToolCall } from './tools/dispatch';
 import { validateGeneratedYaml } from './validate';
-import { buildMessagesFromActions } from './build_messages';
+import { buildMessagesFromActions } from './prompts';
 import { agentStepAction, findLastAgentStep, toolResultAction, validateAction } from './actions';
 import type { Action } from './types';
 

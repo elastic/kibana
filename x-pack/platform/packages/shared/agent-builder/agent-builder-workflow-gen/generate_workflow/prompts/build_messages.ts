@@ -12,9 +12,13 @@ import {
   createToolCallMessage,
   createToolResultMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import { createSystemPrompt, createUserPrompt, createValidationFailureMessage } from './prompts';
-import { isAgentStepAction, isToolResultAction, isValidateAction } from './actions';
-import type { StateType } from './state';
+import {
+  createSystemPrompt,
+  createUserPrompt,
+  createValidationFailureMessage,
+} from './build_prompts';
+import { isAgentStepAction, isToolResultAction, isValidateAction } from '../actions';
+import type { StateType } from '../state';
 
 /**
  * Reconstruct the LangChain message list from the graph state's actions.

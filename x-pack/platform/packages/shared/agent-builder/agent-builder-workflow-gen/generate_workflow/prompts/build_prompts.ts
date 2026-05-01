@@ -10,7 +10,7 @@ import {
   formatStepDefinitionsBlock,
   formatTriggersBlock,
 } from './format_prefetched';
-import type { PrefetchedContext } from './types';
+import type { PrefetchedContext } from '../types';
 
 export const createSystemPrompt = ({
   prefetched,

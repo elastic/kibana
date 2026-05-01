@@ -18,7 +18,7 @@ import type {
   ConnectorSummary,
   StepDefinitionSummary,
   TriggerDefinitionSummary,
-} from './types';
+} from '../types';
 
 describe('groupConnectorsByActionType', () => {
   it('groups instances and collapses identical stepTypes per actionTypeId', () => {

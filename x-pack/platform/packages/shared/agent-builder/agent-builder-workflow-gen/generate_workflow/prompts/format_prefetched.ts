@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
+import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from '../types';
 
 /* ---------------- Connectors ---------------- */
 
