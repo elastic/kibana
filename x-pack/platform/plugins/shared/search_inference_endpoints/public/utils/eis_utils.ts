@@ -11,7 +11,11 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { MODEL_DEPRECATED_STATUS } from '../../common/constants';
-import type { EisInferenceEndpoint, EisInferenceEndpointMetadata } from '../../common/types';
+import {
+  type EisInferenceEndpoint,
+  type EisInferenceEndpointMetadata,
+  EisModelStatus,
+} from '../../common/types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
@@ -63,6 +67,7 @@ export interface GroupedModel {
   service: 'elastic';
   modelName: string;
   modelCreator: string;
+  modelStatus: EisModelStatus;
   taskTypes: InferenceTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
@@ -89,6 +94,23 @@ export const getModelMetadata = (
 ): EisInferenceEndpointMetadata | undefined => {
   if (isInferenceEndpointWithMetadata(endpoint)) return endpoint.metadata;
   return undefined;
+};
+
+export const getModelStatus = (
+  metadata: EisInferenceEndpointMetadata | undefined
+): EisModelStatus => {
+  if (!metadata) return EisModelStatus.Unknown;
+  if (isModelDecommissioned(metadata)) return EisModelStatus.Decommissioned;
+  switch (metadata.heuristics?.status) {
+    case EisModelStatus.GA:
+      return EisModelStatus.GA;
+    case EisModelStatus.Preview:
+      return EisModelStatus.Preview;
+    case EisModelStatus.Deprecated:
+      return EisModelStatus.Deprecated;
+    default:
+      return EisModelStatus.Unknown;
+  }
 };
 
 const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
@@ -132,17 +154,20 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       }
       if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
         existing.modelMetadata = ep.metadata;
+        existing.modelStatus = getModelStatus(ep.metadata);
       }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
+      const modelMetadata = getModelMetadata(ep);
       groups.set(key, {
         service: ep.service,
         modelName: getModelName(ep),
         modelCreator: getModelCreator(ep),
+        modelStatus: getModelStatus(modelMetadata),
         taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],
         endpoints: [ep],
-        modelMetadata: getModelMetadata(ep),
+        modelMetadata,
       });
     }
   }

@@ -110,3 +110,11 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
     };
   };
 };
+
+export enum EisModelStatus {
+  Preview = 'preview',
+  GA = 'ga',
+  Deprecated = 'deprecated',
+  Decommissioned = 'decommissioned',
+  Unknown = 'unknown',
+}
