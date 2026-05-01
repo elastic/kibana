@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { LatestSignificantEventData } from '../../hooks/use_fetch_latest_significant_event';
+import type { LatestSignificantEventData } from '../hooks/use_fetch_latest_significant_event';
 
 export interface OtherPromotedEventsProps {
   events: LatestSignificantEventData[];

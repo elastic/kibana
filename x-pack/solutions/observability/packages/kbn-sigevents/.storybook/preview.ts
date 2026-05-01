@@ -19,13 +19,15 @@ export const parameters = {
           [
             'SigeventsOverview',
             [
-              'Act 2: Something Is Wrong',
               'Act 0: No Detection Workflows',
               'Act 1: We Know Your System',
+              'Act 2: Something Is Wrong',
             ],
           ],
         ],
       ],
     },
+    selectedPanel: 'storybook/canvas',
+    initialActive: 'canvas',
   },
 };

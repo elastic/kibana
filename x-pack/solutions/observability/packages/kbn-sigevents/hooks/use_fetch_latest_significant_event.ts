@@ -9,10 +9,15 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { estypes } from '@elastic/elasticsearch';
-import { useKibana } from '../utils/kibana_react';
-import type { ImpactedService } from '../components/sigevents_overview/main_significant_event';
-import type { ImpactedCardItem } from '../components/sigevents_overview/sigevents_overview';
-import type { SignificantEventDetailFields } from '../components/sigevents_overview/significant_event_detail_body';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ImpactedService } from '../components/main_significant_event';
+import type { ImpactedCardItem } from '../components/sigevents_overview';
+import type { SignificantEventDetailFields } from '../components/significant_event_detail_body';
+
+interface SigeventsKibanaServices {
+  data: DataPublicPluginStart;
+}
 
 const SIGEVENTS_INDEX = 'sigevents-events-ms';
 
@@ -142,14 +147,14 @@ export function useFetchLatestSignificantEvent(): {
   otherPromotedEvents: LatestSignificantEventData[];
   refetch: () => void;
 } {
-  const { services } = useKibana();
+  const { services } = useKibana<SigeventsKibanaServices>();
   const { data: dataService } = services;
 
   const searchParams = useMemo(
     (): estypes.SearchRequest => ({
       index: SIGEVENTS_INDEX,
       query: {
-        term: { verdict: 'promoted' },
+        term: { 'verdict.keyword': 'promoted' },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
       size: 100,

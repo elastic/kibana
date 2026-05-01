@@ -18,8 +18,8 @@ import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
 import { LowerPriorityEvents } from './lower_priority_events';
 import { OtherPromotedEvents } from './other_promoted_events';
-import type { EventDocument } from '../../hooks/use_fetch_system_overview';
-import type { LatestSignificantEventData } from '../../hooks/use_fetch_latest_significant_event';
+import type { EventDocument } from '../hooks/use_fetch_system_overview';
+import type { LatestSignificantEventData } from '../hooks/use_fetch_latest_significant_event';
 
 // Re-export EventDocument for convenience
 export type { EventDocument };

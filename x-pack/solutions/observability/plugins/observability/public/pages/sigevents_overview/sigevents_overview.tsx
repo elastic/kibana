@@ -21,14 +21,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
+import {
+  useFetchLatestSignificantEvent,
+  useFetchSystemOverview,
+  SigeventsOverview,
+  SignificantEventDetailBody,
+  SignificantEventDetailHeader,
+} from '@kbn/sigevents';
+import type { HealthyMetricCardItem } from '@kbn/sigevents';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
-import { useFetchLatestSignificantEvent } from '../../hooks/use_fetch_latest_significant_event';
-import { useFetchSystemOverview } from '../../hooks/use_fetch_system_overview';
-import { SigeventsOverview } from '../../components/sigevents_overview';
-import type { HealthyMetricCardItem } from '../../components/sigevents_overview';
-import { SignificantEventDetailBody } from '../../components/sigevents_overview/significant_event_detail_body';
-import { SignificantEventDetailHeader } from '../../components/sigevents_overview/significant_event_detail_header';
 
 const MAX_CONTENT_WIDTH = 900;
 
@@ -161,8 +163,6 @@ export function SigeventsOverviewPage() {
     () => agentBuilder?.getEmbeddableConversation(),
     [agentBuilder]
   );
-
-  const isLlmAvailable = !!EmbeddableConversation;
 
   const detailFields = eventData?.detailFields;
 
@@ -339,7 +339,6 @@ export function SigeventsOverviewPage() {
                   onViewDetails={openDetailFlyout}
                   onRemediate={handleRemediate}
                   onRemediateEvent={handleRemediateEvent}
-                  isLlmAvailable={isLlmAvailable}
                 />
               ) : (
                 <SigeventsOverview
@@ -348,7 +347,6 @@ export function SigeventsOverviewPage() {
                   lowerPriorityEvents={overviewData?.acknowledgedEvents}
                   onViewDetails={openDetailFlyout}
                   onRemediateEvent={handleRemediateEvent}
-                  isLlmAvailable={isLlmAvailable}
                 />
               )}
             </EuiFlexItem>
@@ -398,7 +396,6 @@ export function SigeventsOverviewPage() {
               event={detailFields}
               hideHeader
               onRemediate={handleFlyoutRemediate}
-              isLlmAvailable={isLlmAvailable}
             />
           </EuiFlyoutBody>
         </EuiFlyout>

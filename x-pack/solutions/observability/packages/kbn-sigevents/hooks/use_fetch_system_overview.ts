@@ -9,7 +9,12 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { estypes } from '@elastic/elasticsearch';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
+interface SigeventsKibanaServices {
+  data: DataPublicPluginStart;
+}
 
 const TRACES_INDEX = 'traces-*';
 const LOGS_INDEX = 'logs-*';
@@ -63,7 +68,7 @@ export function useFetchSystemOverview(): {
   data: SystemOverviewData | null;
   refetch: () => void;
 } {
-  const { services } = useKibana();
+  const { services } = useKibana<SigeventsKibanaServices>();
   const { data: dataService } = services;
 
   const {
@@ -98,9 +103,7 @@ export function useFetchSystemOverview(): {
         index: EVENTS_INDEX,
         size: 5,
         query: {
-          bool: {
-            must_not: [{ term: { verdict: 'promoted' } }],
-          },
+          term: { 'verdict.keyword': 'acknowledged' },
         },
         sort: [{ criticality: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       };

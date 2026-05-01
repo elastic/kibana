@@ -29,8 +29,8 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, Criteria, EuiHealthProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EventDocument } from '../../hooks/use_fetch_system_overview';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { EventDocument } from '../hooks/use_fetch_system_overview';
 import { InfoPanel } from './info_panel';
 import { RootCausePanel } from './root_cause_panel';
 import { RecommendationsPlanPanel } from './recommendations_plan_panel';
@@ -140,15 +140,17 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
     }
   }, []);
 
-  const sortedEvents = [...events].sort((a, b) => {
-    const aVal = a[sortField];
-    const bVal = b[sortField];
-    const direction = sortDirection === 'asc' ? 1 : -1;
-    if (typeof aVal === 'number' && typeof bVal === 'number') {
-      return (aVal - bVal) * direction;
-    }
-    return String(aVal).localeCompare(String(bVal)) * direction;
-  });
+  const sortedEvents = [...events]
+    .sort((a, b) => {
+      const aVal = a[sortField];
+      const bVal = b[sortField];
+      const direction = sortDirection === 'asc' ? 1 : -1;
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return (aVal - bVal) * direction;
+      }
+      return String(aVal).localeCompare(String(bVal)) * direction;
+    })
+    .slice(0, 5);
 
   const toggleEvent = useCallback((item: EventDocument) => {
     setSelectedEvent((current) => (current && current.event_id === item.event_id ? null : item));

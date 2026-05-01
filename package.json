@@ -1128,6 +1128,7 @@
     "@kbn/shared-ux-utility": "link:src/platform/packages/shared/kbn-shared-ux-utility",
     "@kbn/sidebar-examples-plugin": "link:examples/sidebar_examples",
     "@kbn/siem-readiness": "link:x-pack/solutions/security/packages/siem-readiness",
+    "@kbn/sigevents": "link:x-pack/solutions/observability/packages/kbn-sigevents",
     "@kbn/slo-plugin": "link:x-pack/solutions/observability/plugins/slo",
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
     "@kbn/slo-shared-plugin": "link:x-pack/platform/plugins/shared/slo_shared",
