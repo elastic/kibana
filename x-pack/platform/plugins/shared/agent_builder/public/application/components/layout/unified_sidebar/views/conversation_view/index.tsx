@@ -34,6 +34,7 @@ import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_age
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
+import { useSendMessageContext } from '../../../../../context/send_message/send_message_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -80,6 +81,7 @@ export const ConversationSidebarView: React.FC = () => {
 
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
+  const { removeAllErrors } = useSendMessageContext();
 
   const isNewConversationRoute =
     conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
@@ -127,7 +129,12 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const handlePressNewConversation = () => {
+    removeAllErrors();
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+  };
+
+  const handleConversationItemClick = () => {
+    removeAllErrors();
   };
 
   return (
@@ -233,6 +240,7 @@ export const ConversationSidebarView: React.FC = () => {
                         agentId={agentId}
                         currentConversationId={conversationId}
                         isNewConversationRoute={isNewConversationRoute}
+                        onItemClick={handleConversationItemClick}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -253,6 +261,7 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
+            removeAllErrors();
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );
