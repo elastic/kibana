@@ -137,7 +137,7 @@ export const useDashboardListingTable = ({
                 return;
               }
 
-              if (value === dashboard.attributes.title) {
+              if (value.toLowerCase() === dashboard.attributes.title.toLowerCase()) {
                 return;
               }
 

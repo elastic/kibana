@@ -263,7 +263,8 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
     });
 
     const newCopyOnSave = Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave;
-    const isUpdateWithSameTitle = !newCopyOnSave && this.state.title === this.props.title;
+    const isUpdateWithSameTitle =
+      !newCopyOnSave && this.state.title.toLowerCase() === this.props.title.toLowerCase();
     const checkForDuplicateTitle = this.state.isTitleDuplicateConfirmed
       ? false
       : !isUpdateWithSameTitle;

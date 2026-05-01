@@ -202,7 +202,7 @@ const useTableListViewProps = (
             const content = visualizedUserContent.current?.find((c) => c.id === id);
             if (!content) return;
 
-            if (value === content.title) {
+            if (value.toLowerCase() === content.title.toLowerCase()) {
               return;
             }
 
