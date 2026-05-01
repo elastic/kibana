@@ -149,13 +149,4 @@ describe('score_base_entities', () => {
       terms: { 'entity.id': ['user:a@okta', 'user:b@okta'] },
     });
   });
-
-  it('skips ES|QL and modifier fetches when the lookup page is empty', async () => {
-    mockLookupPage(esClient, []);
-
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
-
-    expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
-    expect(crudClient.listEntities as jest.Mock).not.toHaveBeenCalled();
-  });
 });

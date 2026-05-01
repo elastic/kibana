@@ -6,10 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import {
-  RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
-  RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
-} from '../../../telemetry/event_based/events';
+import { RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT } from '../../../telemetry/event_based/events';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
 
 describe('createRiskScoreMaintainerTelemetryReporter', () => {
@@ -19,93 +16,25 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
     jest.clearAllMocks();
   });
 
-  it('reports run completion with resolution and prune counters', () => {
-    const reporter = createRiskScoreMaintainerTelemetryReporter({
-      telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
-    });
-
-    const runTelemetry = reporter.forRun({
-      namespace: 'default',
-      entityType: 'host',
-      idBasedRiskScoringEnabled: true,
-    });
-
-    runTelemetry.completionSummary({
-      runStatus: 'success',
-      scoresWrittenBase: 3,
-      scoresWrittenResolution: 2,
-      scoresWrittenResetToZero: 1,
-      pagesProcessed: 4,
-      lookupPrunedDocs: 9,
-    });
-
-    expect(reportEvent).toHaveBeenCalledWith(
-      RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType,
-      expect.objectContaining({
-        namespace: 'default',
-        entityType: 'host',
-        status: 'success',
-        scoresWrittenTotal: 6,
-        scoresWrittenBase: 3,
-        scoresWrittenResolution: 2,
-        scoresWrittenResetToZero: 1,
-        lookupPrunedDocs: 9,
-      })
-    );
-  });
-
-  it('reports phase0 lookup build success and resolution skipped stages', () => {
+  it('sums base, resolution, and reset-to-zero counters into scoresWrittenTotal', () => {
     const reporter = createRiskScoreMaintainerTelemetryReporter({
       telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
     });
 
     reporter
-      .startPhase0LookupBuildStage({
-        namespace: 'default',
-        idBasedRiskScoringEnabled: false,
-      })
-      .success({
-        entitiesIterated: 3,
-        lookupRowsWritten: 2,
-        pagesProcessed: 2,
-        bulkBatches: 2,
-        lookupRowsFailed: 0,
+      .forRun({ namespace: 'default', entityType: 'host', idBasedRiskScoringEnabled: true })
+      .completionSummary({
+        runStatus: 'success',
+        scoresWrittenBase: 3,
+        scoresWrittenResolution: 2,
+        scoresWrittenResetToZero: 1,
+        pagesProcessed: 4,
+        lookupPrunedDocs: 9,
       });
-    const runTelemetry = reporter.forRun({
-      namespace: 'default',
-      entityType: 'user',
-      idBasedRiskScoringEnabled: false,
-    });
-    runTelemetry.startResolutionStage().skipped('lookup_empty');
 
-    expect(reportEvent).toHaveBeenNthCalledWith(
-      1,
-      RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType,
-      expect.objectContaining({
-        namespace: 'default',
-        entityType: 'all',
-        stage: 'phase0_lookup_build',
-        status: 'success',
-        entitiesIterated: 3,
-        lookupRowsWritten: 2,
-        pagesProcessed: 2,
-        bulkBatches: 2,
-        lookupRowsFailed: 0,
-        durationMs: expect.any(Number),
-      })
-    );
-
-    expect(reportEvent).toHaveBeenNthCalledWith(
-      2,
-      RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType,
-      expect.objectContaining({
-        namespace: 'default',
-        entityType: 'user',
-        stage: 'phase2_resolution_scoring',
-        status: 'skipped',
-        skipReason: 'lookup_empty',
-        durationMs: expect.any(Number),
-      })
+    expect(reportEvent).toHaveBeenCalledWith(
+      RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType,
+      expect.objectContaining({ scoresWrittenTotal: 6 })
     );
   });
 

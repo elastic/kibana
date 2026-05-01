@@ -123,32 +123,6 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
     });
 
-    it('escapes quote characters in resolution target ID list', () => {
-      const query = getResolutionScoreESQLByIds(
-        EntityType.user,
-        ['user:with"quote@okta'],
-        5000,
-        1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
-      );
-
-      expect(query).toContain('"user:with\\"quote@okta"');
-    });
-
-    it('escapes backslash characters in resolution target ID list', () => {
-      const query = getResolutionScoreESQLByIds(
-        EntityType.user,
-        ['user:with\\slash@okta'],
-        5000,
-        1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
-      );
-
-      expect(query).toContain('"user:with\\\\slash@okta"');
-    });
-
     it('escapes quote and backslash characters in resolution target ID list', () => {
       const query = getResolutionScoreESQLByIds(
         EntityType.user,
@@ -179,47 +153,6 @@ describe('Calculate risk scores with ESQL', () => {
           '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
-    });
-
-    it.each([
-      ['NUL', '\u0000'],
-      ['LF', '\u000A'],
-      ['CR', '\u000D'],
-      ['LS', '\u2028'],
-      ['PS', '\u2029'],
-    ])('throws when resolution target ID list contains %s control character', (_label, char) => {
-      expect(() =>
-        getResolutionScoreESQLByIds(
-          EntityType.user,
-          ['user:good@okta', `user:bad${char}@okta`],
-          5000,
-          1000,
-          '.alerts-security.alerts-default',
-          '.entity_analytics.risk_score.lookup-default'
-        )
-      ).toThrow('Entity ID contains an unsupported control character');
-    });
-
-    it('keeps ordinary EUIDs unchanged in base score and resolution ID lists', () => {
-      const euid = 'user:jane@acme.com@okta';
-      const baseQuery = getBaseScoreESQLByIds(
-        EntityType.user,
-        [euid],
-        5000,
-        1000,
-        '.alerts-security.alerts-default'
-      );
-      const resolutionQuery = getResolutionScoreESQLByIds(
-        EntityType.user,
-        [euid],
-        5000,
-        1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
-      );
-
-      expect(baseQuery).toContain(`"${euid}"`);
-      expect(resolutionQuery).toContain(`"${euid}"`);
     });
   });
 

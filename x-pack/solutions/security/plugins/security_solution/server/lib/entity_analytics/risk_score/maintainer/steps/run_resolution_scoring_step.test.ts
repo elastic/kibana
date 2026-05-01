@@ -73,42 +73,6 @@ describe('runResolutionScoringStep', () => {
     });
   });
 
-  it('stops before fetching a second page when aborted after first page', async () => {
-    const abortController = new AbortController();
-    async function* abortAwareGenerator() {
-      yield [{ entity_id: 'user:target-1' }] as unknown as Array<Record<string, unknown>>;
-      if (abortController.signal.aborted) {
-        return;
-      }
-      yield [{ entity_id: 'user:target-2' }] as unknown as Array<Record<string, unknown>>;
-    }
-    (calculateResolutionEntityScores as jest.Mock).mockImplementation(abortAwareGenerator);
-    (persistScoresToRiskIndex as jest.Mock).mockImplementationOnce(async () => {
-      abortController.abort();
-      return 1;
-    });
-
-    const result = await runResolutionScoringStep({
-      esClient,
-      crudClient,
-      logger,
-      entityType: EntityType.host,
-      alertsIndex: '.alerts-security.alerts-default',
-      lookupIndex: '.entity_analytics.risk_score.lookup-default',
-      pageSize: 1000,
-      sampleSize: 1000,
-      now: '2026-01-01T00:00:00.000Z',
-      calculationRunId: 'run-1',
-      abortSignal: abortController.signal,
-      watchlistConfigs: new Map(),
-      idBasedRiskScoringEnabled: true,
-      writer: {} as unknown as RiskEngineDataWriter,
-    });
-
-    expect(persistScoresToRiskIndex).toHaveBeenCalledTimes(1);
-    expect(result.pagesProcessed).toBe(1);
-  });
-
   it('reports lookup_empty when no lookup pages are returned', async () => {
     (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([]));
 

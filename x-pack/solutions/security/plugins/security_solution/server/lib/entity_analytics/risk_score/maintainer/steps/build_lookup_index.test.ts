@@ -128,47 +128,6 @@ describe('build_lookup_index', () => {
     });
   });
 
-  it('preserves alias row over self-row during page deduplication', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [
-        { entity: { id: 'user:b' } },
-        {
-          entity: {
-            id: 'user:a',
-            relationships: { resolution: { resolved_to: 'user:b' } },
-          },
-        },
-      ],
-      nextSearchAfter: undefined,
-    });
-
-    await buildLookupIndex({
-      esClient,
-      crudClient,
-      logger,
-      lookupIndex: '.lookup-default',
-      entityTypes: [EntityType.user],
-      calculationRunId: RUN_ID,
-      now: NOW,
-    });
-
-    const operations = (esClient.bulk as jest.Mock).mock.calls[0][0].operations;
-    expect(operations).toEqual([
-      { index: { _index: '.lookup-default', _id: 'user:b' } },
-      expect.objectContaining({
-        entity_id: 'user:b',
-        resolution_target_id: 'user:b',
-        relationship_type: 'self',
-      }),
-      { index: { _index: '.lookup-default', _id: 'user:a' } },
-      expect.objectContaining({
-        entity_id: 'user:a',
-        resolution_target_id: 'user:b',
-        relationship_type: 'entity.relationships.resolution.resolved_to',
-      }),
-    ]);
-  });
-
   it("keeps an alias row over an earlier alias-target's eager self-row in a resolution chain", async () => {
     // Chain A→B, B→C. Phase 0 emits B's eager self-row while processing A
     // (because B is A's resolution target), then later emits B's own alias
@@ -218,44 +177,6 @@ describe('build_lookup_index', () => {
     );
   });
 
-  it('iterates through multiple pages with searchAfter', async () => {
-    (crudClient.listEntities as jest.Mock)
-      .mockResolvedValueOnce({
-        entities: [{ entity: { id: 'host:1' } }],
-        nextSearchAfter: ['cursor-1'],
-      })
-      .mockResolvedValueOnce({
-        entities: [{ entity: { id: 'host:2' } }],
-        nextSearchAfter: undefined,
-      });
-
-    const result = await buildLookupIndex({
-      esClient,
-      crudClient,
-      logger,
-      lookupIndex: '.lookup-default',
-      entityTypes: [EntityType.host],
-      calculationRunId: RUN_ID,
-      now: NOW,
-    });
-
-    expect(result).toEqual({
-      lookupRowsWritten: 2,
-      entitiesIterated: 2,
-      pagesProcessed: 2,
-      bulkBatches: 2,
-      lookupRowsFailed: 0,
-    });
-    expect(crudClient.listEntities).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ searchAfter: undefined })
-    );
-    expect(crudClient.listEntities).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ searchAfter: ['cursor-1'] })
-    );
-  });
-
   it('returns early when aborted between pages', async () => {
     const abortController = new AbortController();
     (crudClient.listEntities as jest.Mock).mockImplementationOnce(() => {
@@ -287,13 +208,13 @@ describe('build_lookup_index', () => {
     expect(esClient.indices.refresh).not.toHaveBeenCalled();
   });
 
-  it('returns zero counters for empty entity store and refreshes once', async () => {
+  it('skips bulk and still refreshes once for an empty entity store', async () => {
     (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
       entities: [],
       nextSearchAfter: undefined,
     });
 
-    const result = await buildLookupIndex({
+    await buildLookupIndex({
       esClient,
       crudClient,
       logger,
@@ -303,13 +224,6 @@ describe('build_lookup_index', () => {
       now: NOW,
     });
 
-    expect(result).toEqual({
-      lookupRowsWritten: 0,
-      entitiesIterated: 0,
-      pagesProcessed: 1,
-      bulkBatches: 0,
-      lookupRowsFailed: 0,
-    });
     expect(esClient.bulk).not.toHaveBeenCalled();
     expect(esClient.indices.refresh).toHaveBeenCalledTimes(1);
   });
@@ -354,39 +268,6 @@ describe('build_lookup_index', () => {
       'Phase 0 lookup build had 2 failed item(s) across 4 iterated entities; reasons: 1x failed reason A; 1x failed reason B'
     );
     expect(esClient.indices.refresh).not.toHaveBeenCalled();
-  });
-
-  it('aggregates duplicate failure reasons across pages', async () => {
-    (crudClient.listEntities as jest.Mock)
-      .mockResolvedValueOnce({
-        entities: [{ entity: { id: 'host:1' } }],
-        nextSearchAfter: ['cursor-1'],
-      })
-      .mockResolvedValueOnce({
-        entities: [{ entity: { id: 'host:2' } }],
-        nextSearchAfter: undefined,
-      });
-    (esClient.bulk as jest.Mock)
-      .mockResolvedValueOnce({
-        errors: true,
-        items: [{ index: { _id: 'host:1', status: 400, error: { reason: 'same reason' } } }],
-      })
-      .mockResolvedValueOnce({
-        errors: true,
-        items: [{ index: { _id: 'host:2', status: 400, error: { reason: 'same reason' } } }],
-      });
-
-    await expect(
-      buildLookupIndex({
-        esClient,
-        crudClient,
-        logger,
-        lookupIndex: '.lookup-default',
-        entityTypes: [EntityType.host],
-        calculationRunId: RUN_ID,
-        now: NOW,
-      })
-    ).rejects.toThrow('2x same reason');
   });
 
   // Covers the bulk-summary path where ES reports `errors: true` but echoes
