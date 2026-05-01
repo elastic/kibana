@@ -22,7 +22,7 @@ jest.mock('del', () => jest.fn().mockResolvedValue(undefined));
 
 jest.mock('@kbn/core-i18n-server-internal', () => ({
   getKibanaTranslationFiles: jest.fn().mockResolvedValue([]),
-  supportedLocale: ['en'],
+  discoverAllTranslationPaths: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('@kbn/i18n', () => ({
