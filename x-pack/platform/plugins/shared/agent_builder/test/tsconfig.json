@@ -24,6 +24,7 @@
     "@kbn/repo-info",
     "@kbn/test",
     "@kbn/test-es-server",
-    "@kbn/test-suites-xpack-platform"
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/agent-context-layer-plugin"
   ]
 }
