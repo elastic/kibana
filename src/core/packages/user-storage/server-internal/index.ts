@@ -9,6 +9,7 @@
 
 export {
   UserStorageService,
+  UserStorageClient,
   userStorageType,
   userStorageGlobalType,
   USER_STORAGE_SO_TYPE,

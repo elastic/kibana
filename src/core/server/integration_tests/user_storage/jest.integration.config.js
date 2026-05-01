@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UserStorageService } from './user_storage_service';
-export type { UserStorageSetupDeps } from './user_storage_service';
-export { UserStorageClient } from './user_storage_client';
-export { userStorageType, userStorageGlobalType } from './saved_objects';
-export { USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE } from './saved_objects';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/server/integration_tests/user_storage'],
+  testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
+};
