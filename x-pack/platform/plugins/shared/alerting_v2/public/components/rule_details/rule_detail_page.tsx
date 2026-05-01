@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -16,6 +24,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
+import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { useRule } from './rule_context';
 import { paths } from '../../constants';
@@ -24,6 +33,12 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { basePath } = useService(CoreStart('http'));
+  const { euiTheme } = useEuiTheme();
+
+  const sidebarColumnStyles = css`
+    border-left: ${euiTheme.border.thin};
+    padding-left: ${euiTheme.size.l};
+  `;
 
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
@@ -74,7 +89,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
       <EuiSpacer size="l" />
 
-      <RuleSidebar />
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart" data-test-subj="ruleDetailLayout">
+        <EuiFlexItem grow={2} data-test-subj="ruleDetailOverviewColumn">
+          <RuleOverviewSection />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1} data-test-subj="ruleDetailSidebarColumn" css={sidebarColumnStyles}>
+          <RuleSidebar />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="l" />
       {showDeleteConfirmation && (
