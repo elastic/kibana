@@ -12,6 +12,8 @@ import { generateWorkflow } from '@kbn/agent-builder-workflow-gen';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows-management-plugin/common/agent_builder/constants';
+import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 const generateWorkflowSchema = z.object({
   query: z.string().describe('A natural-language description of the workflow to generate.'),
@@ -46,7 +48,7 @@ export const generateWorkflowTool = ({
     schema: generateWorkflowSchema,
     handler: async (
       { query, context, instructions },
-      { modelProvider, logger, request, spaceId }
+      { modelProvider, logger, request, spaceId, attachments }
     ) => {
       const model = await modelProvider.getDefaultModel();
 
@@ -62,8 +64,16 @@ export const generateWorkflowTool = ({
           workflowsApi,
         });
 
+        const newAttachment = await attachments.add({
+          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+          data: {
+            name: workflow.name,
+            yaml: stringifyWorkflowDefinition(workflow),
+          },
+        });
+
         return {
-          results: [otherResult({ workflow })],
+          results: [otherResult({ attachmentId: newAttachment.id, success: true, created: true })],
         };
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
