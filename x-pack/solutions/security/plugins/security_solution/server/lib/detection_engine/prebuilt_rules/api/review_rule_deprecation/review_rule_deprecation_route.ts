@@ -62,7 +62,7 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
             // Map rule_id -> { id, name } from the installed rules.
             const installedRuleMap = new Map<string, { id: string; name: string }>();
             for (const rule of fetchedRules) {
-              if (rule.params.ruleSource?.type === 'external') {
+              if (rule.params.immutable) {
                 installedRuleMap.set(rule.params.ruleId, { id: rule.id, name: rule.name });
               }
             }
