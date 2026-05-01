@@ -39,6 +39,7 @@ jest.mock('../../hooks/use_time_range', () => ({
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: { uiSettings: {} },
     dependencies: {
       start: {
         data: { search: { search: jest.fn() } },

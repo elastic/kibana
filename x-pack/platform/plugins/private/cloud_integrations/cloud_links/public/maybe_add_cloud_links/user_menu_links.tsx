@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n, getAvailableLocales } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { openAppearanceModal } from './appearance_selector';
+import { openLanguageModal } from './language_selector';
 
 export const createUserMenuLinks = async ({
   core,
@@ -71,6 +72,19 @@ export const createUserMenuLinks = async ({
         openAppearanceModal({ core, security, isServerless });
       },
       order: 400,
+    });
+  }
+
+  if (getAvailableLocales().length > 0) {
+    userMenuLinks.push({
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.languageLinkText', {
+        defaultMessage: 'Language',
+      }),
+      iconType: 'globe',
+      onClick: () => {
+        openLanguageModal({ core, security });
+      },
+      order: 500,
     });
   }
 
