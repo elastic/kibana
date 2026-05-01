@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation } from '@langchain/langgraph';
 import type { Action, PrefetchedContext, ValidationResult } from './types';
 
@@ -21,10 +20,6 @@ export const StateAnnotation = Annotation.Root({
 
   // working buffers
   yaml: Annotation<string>({ reducer: (_a, b) => b, default: () => '' }),
-  messages: Annotation<BaseMessage[]>({
-    reducer: (a, b) => [...a, ...b],
-    default: () => [],
-  }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],

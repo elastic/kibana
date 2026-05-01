@@ -6,8 +6,7 @@
  */
 
 import { StateGraph } from '@langchain/langgraph';
-import type { AIMessage } from '@langchain/core/messages';
-import { HumanMessage, SystemMessage, ToolMessage, isAIMessage } from '@langchain/core/messages';
+import { isAIMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -21,7 +20,7 @@ import { StateAnnotation, type StateType } from './state';
 import { buildBoundTools } from './tools/schemas';
 import { dispatchToolCall } from './tools/dispatch';
 import { validateGeneratedYaml } from './validate';
-import { createSystemPrompt, createUserPrompt, createValidationFailureMessage } from './prompts';
+import { buildMessagesFromActions } from './build_messages';
 import type { Action } from './types';
 
 export interface CreateGraphArgs {
@@ -37,60 +36,57 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
   const modelWithTools = model.chatModel.bindTools!(tools);
   const dispatchDeps = { api, spaceId, request };
 
-  const prefetchNode = async (state: StateType): Promise<Partial<StateType>> => {
+  const prefetchNode = async (_state: StateType): Promise<Partial<StateType>> => {
     const [connectors, stepDefinitions, triggerDefinitions] = await Promise.all([
       prefetchConnectors({ api, spaceId, request }),
       prefetchStepDefinitions({ api, spaceId, request }),
       prefetchTriggerDefinitions(),
     ]);
 
-    const prefetched = { connectors, stepDefinitions, triggerDefinitions };
-    const systemPrompt = createSystemPrompt({
-      prefetched,
-      additionalInstructions: state.additionalInstructions,
-    });
-    const userPromptArr = createUserPrompt({
-      nlQuery: state.nlQuery,
-      additionalContext: state.additionalContext,
-    }) as ['user', string];
-
-    return {
-      prefetched,
-      messages: [new SystemMessage(systemPrompt), new HumanMessage(userPromptArr[1])],
-    };
+    return { prefetched: { connectors, stepDefinitions, triggerDefinitions } };
   };
 
   const agentNode = async (state: StateType): Promise<Partial<StateType>> => {
-    const aiMessage = await modelWithTools.invoke(state.messages);
+    const messages = buildMessagesFromActions(state);
+    const aiMessage = await modelWithTools.invoke(messages);
     const toolCalls = isAIMessage(aiMessage) ? aiMessage.tool_calls ?? [] : [];
 
     const action: Action = {
       type: 'agent_step',
-      toolCalls: toolCalls.map((tc) => ({ name: tc.name, args: tc.args })),
+      toolCalls: toolCalls.map((tc) => ({
+        id: tc.id ?? '',
+        name: tc.name,
+        args: tc.args,
+      })),
       text: typeof aiMessage.content === 'string' ? aiMessage.content : undefined,
     };
 
-    return {
-      messages: [aiMessage],
-      actions: [action],
-    };
+    return { actions: [action] };
+  };
+
+  const findLastAgentStep = (
+    actions: Action[]
+  ): Extract<Action, { type: 'agent_step' }> | undefined => {
+    for (let i = actions.length - 1; i >= 0; i--) {
+      const a = actions[i];
+      if (a.type === 'agent_step') return a;
+    }
+    return undefined;
   };
 
   const branchAfterAgent = (state: StateType): 'tools' | 'validate' => {
-    const last = state.messages[state.messages.length - 1];
-    const calls = isAIMessage(last) ? last.tool_calls ?? [] : [];
-    return calls.length > 0 ? 'tools' : 'validate';
+    const lastAgentStep = findLastAgentStep(state.actions);
+    return lastAgentStep && lastAgentStep.toolCalls.length > 0 ? 'tools' : 'validate';
   };
 
   const toolsNode = async (state: StateType): Promise<Partial<StateType>> => {
-    const last = state.messages[state.messages.length - 1] as AIMessage;
-    const calls = last.tool_calls ?? [];
+    const lastAgentStep = findLastAgentStep(state.actions);
+    if (!lastAgentStep) return {};
 
     let yaml = state.yaml;
-    const toolMessages: ToolMessage[] = [];
     const newActions: Action[] = [];
 
-    for (const call of calls) {
+    for (const call of lastAgentStep.toolCalls) {
       const result = await dispatchToolCall(
         { yaml },
         { name: call.name, args: call.args },
@@ -99,40 +95,28 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
       if (result.yaml !== undefined) {
         yaml = result.yaml;
       }
-      toolMessages.push(
-        new ToolMessage({
-          tool_call_id: call.id ?? '',
-          name: call.name,
-          content: JSON.stringify(result.message),
-        })
-      );
       newActions.push({
         type: 'tool_result',
+        toolCallId: call.id,
         name: call.name,
         success: result.message.success,
-        error: result.message.error,
+        ...(result.message.data !== undefined ? { data: result.message.data } : {}),
+        ...(result.message.error !== undefined ? { error: result.message.error } : {}),
       });
     }
 
-    return { yaml, messages: toolMessages, actions: newActions };
+    return { yaml, actions: newActions };
   };
 
   const validateNode = async (state: StateType): Promise<Partial<StateType>> => {
     const validation = await validateGeneratedYaml(state.yaml, dispatchDeps);
     const nextAttempts = state.validationAttempts + 1;
 
-    const update: Partial<StateType> = {
+    return {
       validation,
       validationAttempts: nextAttempts,
       actions: [{ type: 'validate', valid: validation.valid, errors: validation.errors }],
     };
-
-    if (!validation.valid && nextAttempts < state.maxRetries) {
-      const failureMsg = createValidationFailureMessage(validation.errors) as ['user', string];
-      update.messages = [new HumanMessage(failureMsg[1])];
-    }
-
-    return update;
   };
 
   const branchAfterValidate = (state: StateType): 'agent' | 'finalize' => {
