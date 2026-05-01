@@ -355,38 +355,54 @@ export const EntityStoreUtils = (
     }
 
     // Install schedules the risk-score maintainer with enabled: true.
-    // Stop it and wait for any in-flight run to settle so tests can set up
-    // preconditions before triggering scoring via the sync run_now route.
-    // The run_now route calls ensureRiskScoreSetup before scoring, so the
-    // data stream and other resources are created on first use even if
-    // we stop the maintainer before its first Task Manager execution.
-    // Tests that need the maintainer running (e.g. async lifecycle tests)
-    // pass stopMaintainerAfterInstall: false to skip this block.
+    // Wait for any TM auto-run to complete, then stop the task so tests
+    // can set up preconditions before triggering scoring via the sync
+    // run_now route. The run_now route calls ensureRiskScoreSetup before
+    // scoring, so resources are created on first use even if we stop the
+    // maintainer before its first TM execution. Tests that need the
+    // maintainer running (e.g. async lifecycle tests) pass
+    // stopMaintainerAfterInstall: false to skip this block.
     if (stopMaintainerAfterInstall) {
       const maintainerRoutes = entityMaintainerRouteHelpersFactory(
         supertest,
         namespace !== 'default' ? namespace : undefined
       );
-      try {
-        await maintainerRoutes.stopMaintainer('risk-score');
-      } catch (e) {
-        log.debug(`stopMaintainer after install failed (may not be registered yet): ${e.message}`);
-      }
+
+      // Wait for any TM auto-run to finish BEFORE stopping. Install
+      // schedules the task with enabled=true so TM may auto-run it
+      // immediately. Calling stopMaintainer (bulkUpdateState) while TM
+      // is mid-execution causes a version_conflict_engine_exception on
+      // TM's write-back, permanently wedging the task in "running" state.
       let lastSeenRuns = -1;
       await retry.waitForWithTimeout(
-        'risk-score maintainer to settle after install',
-        30_000,
+        'risk-score maintainer to be idle before stop after install',
+        60_000,
         async () => {
           const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
           const maintainer = response.body.maintainers.find(
-            (m: { id: string; runs: number }) => m.id === 'risk-score'
+            (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === 'risk-score'
           );
-          const runs = maintainer?.runs ?? 0;
+          if (!maintainer) return false;
+
+          const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+          if (!isNextRunInFuture) {
+            lastSeenRuns = -1;
+            return false;
+          }
+
+          const runs = maintainer.runs;
           if (runs === lastSeenRuns) return true;
           lastSeenRuns = runs;
           return false;
         }
       );
+
+      try {
+        await maintainerRoutes.stopMaintainer('risk-score');
+      } catch (e) {
+        log.debug(`stopMaintainer after install failed (may not be registered yet): ${e.message}`);
+      }
     }
 
     return res;
