@@ -17,7 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const toasts = getService('toasts');
-  const find = getService('find');
   const objectRemover = new ObjectRemover(supertest);
 
   describe('Maintenance window create form', () => {
@@ -111,12 +110,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await nameInput.click();
       await nameInput.type('New Maintenance Window');
-      const button = await find.byCssSelector(
-        '[data-test-subj*="maintenanceWindowScopedQuerySwitch"] button'
-      );
-
       // Turn on filters toggle
-      await button.click();
+      await testSubjects.click('maintenanceWindowScopedQuerySwitch');
 
       await retry.try(async () => {
         await testSubjects.existOrFail('maintenanceWindowScopeQuery');
@@ -136,6 +131,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created maintenance window 'New Maintenance Window'`);
+      });
+    });
+
+    it('should create a maintenance window with an episode-data filter', async () => {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('mw-create-button');
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('createMaintenanceWindowForm');
+      });
+
+      const nameInput = await testSubjects.find('createMaintenanceWindowFormNameInput');
+
+      await nameInput.click();
+      await nameInput.type('MW with episode filter');
+
+      // Turn on episode-data filter toggle
+      await testSubjects.click('episodeScopedQuerySwitch');
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenanceWindowEpisodeDataFilterInput');
+      });
+
+      const episodeInput = await testSubjects.find('maintenanceWindowEpisodeDataFilterInput');
+      await episodeInput.click();
+      await episodeInput.type('rule.id: "abc"');
+      await episodeInput.pressKeys(ENTER_KEY);
+
+      // With an episode filter set, the "save without filters" modal must NOT appear.
+      await (await testSubjects.find('create-submit')).click();
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql(`Created maintenance window 'MW with episode filter'`);
       });
     });
   });
