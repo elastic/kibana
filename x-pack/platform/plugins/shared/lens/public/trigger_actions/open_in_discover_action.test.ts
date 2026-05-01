@@ -169,7 +169,7 @@ describe('open in discover action', () => {
       locator,
       {
         get: () => ({
-          isTimeBased: () => false,
+          isTimeBased: () => true,
           toSpec: () => ({ id: 'index-pattern-id' }),
         }),
       } as unknown as DataViewsService,
@@ -219,7 +219,7 @@ describe('open in discover action', () => {
       locator,
       {
         get: () => ({
-          isTimeBased: () => false,
+          isTimeBased: () => true,
           toSpec: () => ({ id: 'index-pattern-id' }),
         }),
       } as unknown as DataViewsService,
@@ -262,7 +262,7 @@ describe('open in discover action', () => {
       locator,
       {
         get: () => ({
-          isTimeBased: () => false,
+          isTimeBased: () => true,
           toSpec: () => ({ id: 'index-pattern-id' }),
         }),
       } as unknown as DataViewsService,

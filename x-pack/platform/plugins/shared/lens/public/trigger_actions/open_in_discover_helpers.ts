@@ -81,7 +81,7 @@ async function getDiscoverLocationParams({
   // if the target data view is time based, attempt to split out a time range from the provided filters
   if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
     const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
+    const { restOfFilters, timeRange } = extractTimeRange(filtersToApply, timeFieldName);
     filtersToApply = restOfFilters;
     if (timeRange) {
       timeRangeToApply = timeRange;
