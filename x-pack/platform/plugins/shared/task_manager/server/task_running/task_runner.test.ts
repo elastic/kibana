@@ -2004,6 +2004,53 @@ describe('TaskManagerRunner', () => {
       expect(wasCancelled).toBeTruthy();
     });
 
+    test('stops the heartbeat timer before processResult to prevent version conflicts on recurring tasks', async () => {
+      const callOrder: string[] = [];
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1m' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      store.partialUpdate.mockImplementation(async (doc) => {
+        if (doc.retryAt && !doc.status) {
+          callOrder.push('heartbeat');
+        } else if (doc.status === TaskStatus.Idle) {
+          callOrder.push('processResult');
+          jest.advanceTimersByTime(60000);
+        }
+        return mockInstance({
+          ...doc,
+          schedule: { interval: '1m' },
+        }) as ConcreteTaskInstance;
+      });
+
+      await runner.run();
+
+      const lastHeartbeatIndex = callOrder.lastIndexOf('heartbeat');
+      const processResultIndex = callOrder.indexOf('processResult');
+      expect(processResultIndex).toBeGreaterThan(-1);
+      expect(lastHeartbeatIndex).toBeLessThan(processResultIndex);
+    });
+
     describe('TaskEvents', () => {
       test('emits TaskEvent when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();
