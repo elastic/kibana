@@ -178,6 +178,7 @@ export function useStreamDocCountsFetch({
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
+        uiSettings,
       }) as Promise<UnparsedEsqlResponse>;
 
       histogramPromiseCache.current[cacheKey] = histogramPromise;
