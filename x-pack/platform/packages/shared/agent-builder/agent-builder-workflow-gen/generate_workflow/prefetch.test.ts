@@ -5,11 +5,23 @@
  * 2.0.
  */
 
+import type { BaseStepDefinition } from '@kbn/workflows';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
   prefetchTriggerDefinitions,
 } from './prefetch';
+
+const buildExtensionsStub = (customSteps: BaseStepDefinition[] = []) =>
+  ({
+    getAllStepDefinitions: jest.fn().mockReturnValue(customSteps),
+    getStepDefinition: jest.fn(),
+    hasStepDefinition: jest.fn(),
+    isReady: jest.fn().mockResolvedValue(undefined),
+    getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+    getTriggerDefinition: jest.fn(),
+    getClient: jest.fn(),
+  } as any);
 
 describe('prefetch helpers', () => {
   describe('prefetchConnectors', () => {
@@ -32,7 +44,12 @@ describe('prefetch helpers', () => {
         }),
       } as any;
 
-      const result = await prefetchConnectors({ api, spaceId: 'default', request: {} as any });
+      const result = await prefetchConnectors({
+        api,
+        spaceId: 'default',
+        request: {} as any,
+        workflowsExtensions: buildExtensionsStub(),
+      });
 
       expect(result).toEqual([
         { id: 'slack-1', name: 'Eng Slack', actionTypeId: '.slack', stepTypes: ['slack'] },
@@ -52,6 +69,7 @@ describe('prefetch helpers', () => {
         api: { getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }) } as any,
         spaceId: 'default',
         request: {} as any,
+        workflowsExtensions: buildExtensionsStub(),
       });
 
       expect(result.length).toBeGreaterThan(0);
@@ -71,11 +89,45 @@ describe('prefetch helpers', () => {
         api: { getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }) } as any,
         spaceId: 'default',
         request: {} as any,
+        workflowsExtensions: buildExtensionsStub(),
       });
 
       for (const def of result) {
         expect((def as any).deprecated).toBeFalsy();
       }
+    });
+
+    it('merges custom step definitions from workflowsExtensions', async () => {
+      const customStep = {
+        id: 'agent_builder.run_agent',
+        label: 'Run Agent',
+        description: 'Invokes an Agent Builder agent.',
+        category: 'ai',
+        inputSchema: {} as any,
+        outputSchema: {} as any,
+      } as unknown as BaseStepDefinition;
+
+      const result = await prefetchStepDefinitions({
+        api: {
+          getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+        } as any,
+        spaceId: 'default',
+        request: {} as any,
+        workflowsExtensions: buildExtensionsStub([customStep]),
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('agent_builder.run_agent');
+
+      const entry = result.find((d) => d.id === 'agent_builder.run_agent');
+      expect(entry).toEqual(
+        expect.objectContaining({
+          id: 'agent_builder.run_agent',
+          label: 'Run Agent',
+          description: 'Invokes an Agent Builder agent.',
+          category: 'ai',
+        })
+      );
     });
   });
 
