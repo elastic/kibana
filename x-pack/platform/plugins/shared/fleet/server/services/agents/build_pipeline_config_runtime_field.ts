@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 // Requires _source to be stored on .fleet-agents (it is by default).
 // Non-OpAMP agents emit nothing (cfg null or no service block).
 // Emits a deterministically assembled fingerprint string covering:
+//   - service.pipelines: sorted pipeline names; receivers+exporters sorted, processors in config order
 //   - top-level component sections (receivers, processors, exporters, connectors): sorted keys
-//   - service.pipelines: sorted pipeline names, each with sorted component ref lists
 //   - service.extensions: sorted active extension list
 // the fingerprint string is hashed to a human-readable label in TypeScript by pipelineConfigLabel().
 export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
@@ -25,17 +25,8 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
 
         def parts = new ArrayList();
 
-        // Top-level component sections — sorted keys only (names, not config values)
-        for (def section : ['receivers', 'processors', 'exporters', 'connectors']) {
-          if (cfg[section] instanceof Map) {
-            def keys = new ArrayList(cfg[section].keySet());
-            Collections.sort(keys);
-            parts.add(section + ':' + String.join(',', keys));
-          }
-        }
-
         if (cfg.service instanceof Map) {
-          // service.pipelines — sorted pipeline names with sorted component ref lists
+          // service.pipelines — sorted pipeline names; receivers+exporters sorted, processors in config order (order is semantically significant)
           if (cfg.service.pipelines instanceof Map) {
             def pipeNames = new ArrayList(cfg.service.pipelines.keySet());
             Collections.sort(pipeNames);
@@ -45,7 +36,7 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
               def r  = pipe.receivers  instanceof List ? new ArrayList(pipe.receivers)  : new ArrayList();
               def pr = pipe.processors instanceof List ? new ArrayList(pipe.processors) : new ArrayList();
               def ex = pipe.exporters  instanceof List ? new ArrayList(pipe.exporters)  : new ArrayList();
-              Collections.sort(r); Collections.sort(pr); Collections.sort(ex);
+              Collections.sort(r); Collections.sort(ex);
               parts.add('pipe:' + p + '[' + String.join(',', r) + '|' + String.join(',', pr) + '|' + String.join(',', ex) + ']');
             }
           }
@@ -55,6 +46,18 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
             def exts = new ArrayList(cfg.service.extensions);
             Collections.sort(exts);
             parts.add('ext:' + String.join(',', exts));
+          }
+        }
+
+        // Top-level component sections — sorted keys only (names, not config values).
+        // OTel allows variant-suffixed names (e.g. "otlp/grpc", "otlp/http") to run multiple
+        // instances of the same component type. Full keys including the suffix are used here,
+        // so "otlp/grpc" and "otlp/http" appear as distinct entries in the fingerprint.
+        for (def section : ['receivers', 'processors', 'exporters', 'connectors']) {
+          if (cfg[section] instanceof Map) {
+            def keys = new ArrayList(cfg[section].keySet());
+            Collections.sort(keys);
+            parts.add(section + ':' + String.join(',', keys));
           }
         }
 

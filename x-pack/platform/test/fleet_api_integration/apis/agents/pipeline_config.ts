@@ -11,30 +11,30 @@ import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 // Expected fingerprints — derived by hand from PIPELINE_CONFIG_RUNTIME_FIELD Painless script:
-//   sections ['receivers','processors','exporters','connectors'] → sorted keys per section
-//   pipelines (sorted name) → sorted receivers|sorted processors|sorted exporters
+//   pipelines (sorted name) → sorted receivers | processors in config order | sorted exporters
 //   service.extensions → sorted list
+//   sections ['receivers','processors','exporters','connectors'] → sorted keys per section
 //   all joined with ';'
 const EXPECTED_FINGERPRINTS: Record<string, string> = {
-  // receivers: otlp | exporters: otlphttp | pipeline: logs
-  'basic-logs': 'receivers:otlp;exporters:otlphttp;pipe:logs[otlp||otlphttp]',
+  // pipeline: logs | receivers: otlp | exporters: otlphttp
+  'basic-logs': 'pipe:logs[otlp||otlphttp];receivers:otlp;exporters:otlphttp',
 
-  // receivers: hostmetrics+otlp (sorted) | exporters: otlphttp | pipelines: logs, metrics
+  // pipelines: logs, metrics | receivers: hostmetrics+otlp (sorted) | exporters: otlphttp
   'logs-and-metrics':
-    'receivers:hostmetrics,otlp;exporters:otlphttp;pipe:logs[otlp||otlphttp];pipe:metrics[hostmetrics||otlphttp]',
+    'pipe:logs[otlp||otlphttp];pipe:metrics[hostmetrics||otlphttp];receivers:hostmetrics,otlp;exporters:otlphttp',
 
-  // receivers: otlp | processors: batch | exporters: otlphttp | pipelines: logs+metrics
+  // pipelines: logs+metrics | receivers: otlp | processors: batch | exporters: otlphttp
   'batch-processor':
-    'receivers:otlp;processors:batch;exporters:otlphttp;pipe:logs[otlp|batch|otlphttp];pipe:metrics[otlp|batch|otlphttp]',
+    'pipe:logs[otlp|batch|otlphttp];pipe:metrics[otlp|batch|otlphttp];receivers:otlp;processors:batch;exporters:otlphttp',
 
-  // receivers: otlp | processors: batch | exporters: otlphttp | connectors: spanmetrics | pipelines: metrics+traces
+  // pipelines: metrics+traces | receivers: otlp | processors: batch | exporters: otlphttp | connectors: spanmetrics
   'spanmetrics-connector':
-    'receivers:otlp;processors:batch;exporters:otlphttp;connectors:spanmetrics;pipe:metrics[spanmetrics||otlphttp];pipe:traces[otlp|batch|spanmetrics]',
+    'pipe:metrics[spanmetrics||otlphttp];pipe:traces[otlp|batch|spanmetrics];receivers:otlp;processors:batch;exporters:otlphttp;connectors:spanmetrics',
 
-  // receivers: otlp | processors: batch,memory_limiter (sorted) | exporters: debug,otlphttp (sorted)
-  // pipelines: logs+metrics | extensions: health_check,zpages (sorted)
+  // pipelines: logs+metrics (processors in config order: memory_limiter,batch) | extensions: health_check,zpages (sorted)
+  // receivers: otlp | processors: batch,memory_limiter (sorted in top-level keys) | exporters: debug,otlphttp (sorted)
   extensions:
-    'receivers:otlp;processors:batch,memory_limiter;exporters:debug,otlphttp;pipe:logs[otlp|batch,memory_limiter|debug,otlphttp];pipe:metrics[otlp|batch,memory_limiter|otlphttp];ext:health_check,zpages',
+    'pipe:logs[otlp|memory_limiter,batch|debug,otlphttp];pipe:metrics[otlp|memory_limiter,batch|otlphttp];ext:health_check,zpages;receivers:otlp;processors:batch,memory_limiter;exporters:debug,otlphttp',
 };
 
 // Two collectors per group — different per-instance values (port numbers, endpoints, api keys)
