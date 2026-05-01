@@ -14,6 +14,7 @@ import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
+import { CloudLinks } from './cloud_links';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
@@ -89,23 +90,31 @@ export const SearchHomepagePage = () => {
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup>
-          <BasicMetricBadges />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <KibanaVersionBadge
-              docLink={
-                cloud?.isServerlessEnabled
-                  ? docLinks.serverlessReleaseNotes
-                  : cloud?.isCloudEnabled
-                  ? docLinks.hostedCloudReleaseNotes
-                  : docLinks.releaseNotes
-              }
-              kibanaVersion={
-                !cloud?.isServerlessEnabled
-                  ? `v${kibanaVersion}`
-                  : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
-                      defaultMessage: 'Changelog',
-                    })
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <BasicMetricBadges />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CloudLinks
+              versionBadge={
+                <KibanaVersionBadge
+                  docLink={
+                    cloud?.isServerlessEnabled
+                      ? docLinks.serverlessReleaseNotes
+                      : cloud?.isCloudEnabled
+                      ? docLinks.hostedCloudReleaseNotes
+                      : docLinks.releaseNotes
+                  }
+                  kibanaVersion={
+                    !cloud?.isServerlessEnabled
+                      ? `v${kibanaVersion}`
+                      : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
+                          defaultMessage: 'Changelog',
+                        })
+                  }
+                />
               }
             />
           </EuiFlexItem>
