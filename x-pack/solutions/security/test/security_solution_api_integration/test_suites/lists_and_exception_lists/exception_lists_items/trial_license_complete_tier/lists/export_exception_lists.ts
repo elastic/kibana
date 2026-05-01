@@ -220,15 +220,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(exportedListIds).not.toContain('endpoint-list');
       });
     });
-
-    describe('when exception list count exceeds the default export size limit', () => {
-      it('returns an error');
-      it('does not retrieve exception list items');
-    });
-
-    it('returns an error when exception list + items count exceeds the default export size limit');
-    it('returns a partial list of items if a filter is provided');
-    it('returns a 422 if the total size of the requested lists exceeds the limit');
   });
 };
 
