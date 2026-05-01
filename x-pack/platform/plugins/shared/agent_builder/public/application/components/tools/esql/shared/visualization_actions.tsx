@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   InlineEditLensEmbeddableContext,
@@ -19,7 +19,7 @@ import {
   EditVisualizationButton,
   saveButtonLabel,
 } from './edit_visualization_button';
-import { actionsContainer } from './styles';
+import { actionsContainerStyles } from './styles';
 
 interface Props {
   onSave: () => void;
@@ -36,7 +36,6 @@ export function VisualizationActions({
   lensLoadEvent,
   setLensInput,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { application },
   } = useKibana();
@@ -46,8 +45,7 @@ export function VisualizationActions({
   }
 
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
-  const containerCss = css(actionsContainer(euiTheme));
-  const iconCss = css({ marginLeft: '-1px' });
+
   const saveButton = (
     <EuiButtonIcon
       display="base"
@@ -55,7 +53,7 @@ export function VisualizationActions({
       size="s"
       iconType="save"
       aria-label={saveButtonLabel}
-      className={iconCss}
+      css={css({ marginLeft: '-1px' })}
       isDisabled={!canWriteDashboards}
       onClick={() => {
         if (canWriteDashboards) {
@@ -66,10 +64,7 @@ export function VisualizationActions({
   );
 
   return (
-    <div
-      className={`visualization-button-actions ${containerCss}`}
-      data-test-subj="visualizationButtonActions"
-    >
+    <div css={actionsContainerStyles} data-test-subj="visualizationButtonActions">
       <EditVisualizationButton
         uiActions={uiActions}
         lensInput={lensInput}

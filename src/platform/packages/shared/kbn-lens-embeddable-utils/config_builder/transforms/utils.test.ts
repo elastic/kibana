@@ -17,6 +17,7 @@ import {
   buildDataSourceState,
   isSingleLayer,
   generateLayer,
+  generateApiLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
 } from './utils';
@@ -243,7 +244,7 @@ describe('buildDatasourceStates', () => {
           },
         },
         sampling: 1,
-        ignore_global_filters: false,
+        ignore_global_filters: true,
       },
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
@@ -260,6 +261,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
+                "ignoreGlobalFilters": true,
                 "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
@@ -280,6 +282,22 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+});
+
+describe('generateApiLayer', () => {
+  test('returns text based ignore_global_filters from layer state', () => {
+    const result = generateApiLayer({
+      index: 'test-index',
+      query: { esql: 'FROM test-index' },
+      columns: [],
+      ignoreGlobalFilters: true,
+    });
+
+    expect(result).toEqual({
+      sampling: 1,
+      ignore_global_filters: true,
+    });
   });
 });
 

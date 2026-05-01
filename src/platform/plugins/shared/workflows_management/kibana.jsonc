@@ -33,6 +33,6 @@
       "licensing"
     ],
     "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
-    "runtimePluginDependencies": ["agentBuilder"]
+    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer"]
   }
 }
