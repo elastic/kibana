@@ -12,8 +12,13 @@ import {
   collapseSubActionFamilies,
   bucketStepsBySection,
   formatStepDefinitionsBlock,
+  formatTriggersBlock,
 } from './format_prefetched';
-import type { ConnectorSummary, StepDefinitionSummary } from './types';
+import type {
+  ConnectorSummary,
+  StepDefinitionSummary,
+  TriggerDefinitionSummary,
+} from './types';
 
 describe('groupConnectorsByActionType', () => {
   it('groups instances and collapses identical stepTypes per actionTypeId', () => {
@@ -236,5 +241,25 @@ describe('formatStepDefinitionsBlock', () => {
     // github.* family collapses (8 > 5):
     expect(out).toMatch(/github\.\* \(8 actions/);
     expect(out).not.toMatch(/github\.x0/);
+  });
+});
+
+describe('formatTriggersBlock', () => {
+  const trigger = (over: Partial<TriggerDefinitionSummary> = {}): TriggerDefinitionSummary => ({
+    id: 'manual',
+    label: 'Manual',
+    description: 'Trigger manually',
+    ...over,
+  });
+
+  it('drops the redundant label and renders one bullet per trigger', () => {
+    const out = formatTriggersBlock([
+      trigger({ id: 'manual', label: 'Manual', description: 'Trigger manually' }),
+      trigger({ id: 'scheduled', label: 'Scheduled', description: 'On a recurring schedule' }),
+    ]);
+
+    expect(out).toBe(
+      ['- manual — Trigger manually', '- scheduled — On a recurring schedule'].join('\n')
+    );
   });
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ConnectorSummary, StepDefinitionSummary } from './types';
+import type {
+  ConnectorSummary,
+  StepDefinitionSummary,
+  TriggerDefinitionSummary,
+} from './types';
 
 /* ---------------- Connectors ---------------- */
 
@@ -195,3 +199,21 @@ export const formatStepDefinitionsBlock = (
     })
     .join('\n\n');
 };
+
+/* ---------------- Triggers ---------------- */
+
+export const formatTriggersBlock = (defs: TriggerDefinitionSummary[]): string =>
+  defs
+    .map((d) => {
+      const labelIsRedundant = normalize(d.label) === normalize(d.id);
+      const description = d.description && d.description !== d.label ? d.description : undefined;
+      let line = `- ${d.id}`;
+      if (!labelIsRedundant) {
+        line += ` (${d.label})`;
+      }
+      if (description) {
+        line += ` — ${description}`;
+      }
+      return line;
+    })
+    .join('\n');
