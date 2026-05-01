@@ -36,9 +36,12 @@ describe('workflowAuthoringSkill', () => {
       expect(workflowAuthoringSkill.content).toContain('platform.core.sml_attach');
     });
 
-    it('does not reference list_workflows or get_workflow tools', () => {
-      expect(workflowAuthoringSkill.content).not.toContain('list_workflows');
-      expect(workflowAuthoringSkill.content).not.toContain('get_workflow');
+    it('does not reference the removed list_workflows or get_workflow tools', () => {
+      expect(workflowAuthoringSkill.content).not.toContain('platform.workflows.list_workflows');
+      // Match the bare tool id only — `platform.core.get_workflow_execution_status`
+      // legitimately mentions `get_workflow` as part of a different tool id and must
+      // be allowed.
+      expect(workflowAuthoringSkill.content).not.toMatch(/platform\.workflows\.get_workflow(?!_)/);
     });
 
     it('references the workflow attachment type', () => {
