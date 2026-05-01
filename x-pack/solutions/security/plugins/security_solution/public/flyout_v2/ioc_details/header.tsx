@@ -26,6 +26,7 @@ import type { RightPanelTabType, RightPanelPaths } from './tabs';
 import { flyoutHeaderBlockStyles } from '../shared/components/flyout_header_block';
 import { FlyoutTitle } from '../shared/components/flyout_title';
 import { Timestamp } from '../shared/components/timestamp';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { HeaderBlock } from './components/header_block';
 import { unwrapValue } from '../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import { IOC_DETAILS_TITLE_TEST_ID, IOC_DETAILS_SUBTITLE_TEST_ID } from './test_ids';
@@ -50,6 +51,10 @@ export interface HeaderProps {
    * Tabs to display in the header
    */
   tabs?: RightPanelTabType[];
+  /**
+   * Renderer for cell actions
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 const highLevelFields = [
@@ -63,7 +68,7 @@ const highLevelFields = [
  * Header of the indicator details flyout
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ indicator, selectedTabId, setSelectedTabId, tabs }) => {
+  ({ indicator, selectedTabId, setSelectedTabId, tabs, renderCellActions }) => {
     const onSelectedTabChanged = useCallback(
       (id: RightPanelPaths) => (setSelectedTabId ? setSelectedTabId(id) : () => {}),
       [setSelectedTabId]
@@ -116,26 +121,42 @@ export const Header: FC<HeaderProps> = memo(
           <EuiFlexItem css={flyoutHeaderBlockStyles}>
             <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
               <EuiFlexItem>
-                <HeaderBlock indicator={indicator} field={highLevelFields[0]} />
+                <HeaderBlock
+                  indicator={indicator}
+                  field={highLevelFields[0]}
+                  renderCellActions={renderCellActions}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
-                <HeaderBlock indicator={indicator} field={highLevelFields[1]} />
+                <HeaderBlock
+                  indicator={indicator}
+                  field={highLevelFields[1]}
+                  renderCellActions={renderCellActions}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem css={flyoutHeaderBlockStyles}>
             <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
               <EuiFlexItem>
-                <HeaderBlock indicator={indicator} field={highLevelFields[2]} />
+                <HeaderBlock
+                  indicator={indicator}
+                  field={highLevelFields[2]}
+                  renderCellActions={renderCellActions}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
-                <HeaderBlock indicator={indicator} field={highLevelFields[3]} />
+                <HeaderBlock
+                  indicator={indicator}
+                  field={highLevelFields[3]}
+                  renderCellActions={renderCellActions}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      [indicator]
+      [indicator, renderCellActions]
     );
 
     return (

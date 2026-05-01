@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FieldTypesProvider } from '../../threat_intelligence/containers/field_types_provider';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -37,12 +38,16 @@ export interface IOCDetailsProps {
    * The indicator document, as a Discover data table record
    */
   hit: DataTableRecord;
+  /**
+   * Renderer for cell actions
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
  * IOC details system flyout content.
  */
-export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit }) => {
+export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit, renderCellActions }) => {
   const indicator = useMemo<Indicator>(
     () => ({ _id: hit.raw._id, fields: hit.flattened as Indicator['fields'] }),
     [hit]
@@ -55,8 +60,8 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit }) => {
   }, [setSelectedTabId]);
 
   const tabs = useMemo(
-    () => getTabsDisplayed({ indicator, onViewAllFieldsInTable }),
-    [indicator, onViewAllFieldsInTable]
+    () => getTabsDisplayed({ indicator, onViewAllFieldsInTable, renderCellActions }),
+    [indicator, onViewAllFieldsInTable, renderCellActions]
   );
 
   return (
@@ -67,6 +72,7 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit }) => {
           tabs={tabs}
           selectedTabId={selectedTabId}
           setSelectedTabId={setSelectedTabId}
+          renderCellActions={renderCellActions}
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={iocFlyoutBodyCss}>

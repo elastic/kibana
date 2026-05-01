@@ -24,6 +24,7 @@ import { FLYOUT_STORAGE_KEYS } from '../../flyout_v2/ioc_details/constants/local
 import { useKibana } from '../../common/lib/kibana';
 import { FLYOUT_FOOTER_TEST_ID } from '../document_details/right/test_ids';
 import { iocFlyoutBodyCss } from '../../flyout_v2/ioc_details';
+import { cellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 /**
  * Panel to be displayed in the ioc details expandable flyout right section
@@ -47,7 +48,7 @@ export const IOCPanel: FC<Partial<IOCDetailsProps>> = memo(({ path }) => {
         },
       });
 
-      storage.set(FLYOUT_STORAGE_KEYS.SELECTED_TAB, tabId);
+      storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
     [indicator._id, openRightPanel, storage]
   );
@@ -57,19 +58,25 @@ export const IOCPanel: FC<Partial<IOCDetailsProps>> = memo(({ path }) => {
   }, [setSelectedTabId]);
 
   const tabs = useMemo(
-    () => getTabsDisplayed({ indicator, onViewAllFieldsInTable }),
+    () =>
+      getTabsDisplayed({
+        indicator,
+        onViewAllFieldsInTable,
+        renderCellActions: cellActionRenderer,
+      }),
     [indicator, onViewAllFieldsInTable]
   );
 
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <FlyoutHeader css={{ '.euiPanel': { 'padding-bottom': '0' } }}>
+      <FlyoutHeader css={{ '.euiFlyoutHeader > .euiPanel': { 'padding-bottom': '0' } }}>
         <Header
           indicator={indicator}
           tabs={tabs}
           selectedTabId={selectedTabId}
           setSelectedTabId={setSelectedTabId}
+          renderCellActions={cellActionRenderer}
         />
       </FlyoutHeader>
       <EuiFlyoutBody css={iocFlyoutBodyCss}>

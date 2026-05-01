@@ -14,11 +14,6 @@ import {
 } from '../../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../../common/components/cell_actions', () => ({
-  SecurityCellActions: jest.fn(({ children }) => <div>{children}</div>),
-  CellActionsMode: { HOVER_DOWN: 'hover-down' },
-}));
-
 describe('HeaderBlock', () => {
   const indicator = generateMockIndicator();
 

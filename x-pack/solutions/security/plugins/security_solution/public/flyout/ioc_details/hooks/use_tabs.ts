@@ -42,7 +42,7 @@ export const useTabs = ({ path }: UseTabsParams): UseTabsResult => {
       }
     }
 
-    const tabSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.SELECTED_TAB);
+    const tabSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
     if (tabSavedInLocalStorage && validTabIds.includes(tabSavedInLocalStorage as RightPanelPaths)) {
       return tabSavedInLocalStorage as RightPanelPaths;
     }

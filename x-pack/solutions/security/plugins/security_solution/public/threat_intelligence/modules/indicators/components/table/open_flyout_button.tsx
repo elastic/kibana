@@ -18,6 +18,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { IOCDetails } from '../../../../../flyout_v2/ioc_details';
+import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
@@ -57,7 +58,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
           services,
           store,
           history,
-          children: <IOCDetails hit={hit} />,
+          children: <IOCDetails hit={hit} renderCellActions={cellActionRenderer} />,
         }),
         {
           ...defaultFlyoutProperties,

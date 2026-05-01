@@ -10,6 +10,7 @@ import { EuiPanel } from '@elastic/eui';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
 import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { IndicatorFieldsTable } from './fields_table';
 
 /**
@@ -29,6 +30,7 @@ const byIndicatorType = (indicatorType: string, field: string) =>
 interface HighlightedValuesTableProps {
   indicator: Indicator;
   ['data-test-subj']?: string;
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
@@ -37,6 +39,7 @@ interface HighlightedValuesTableProps {
 export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
+  renderCellActions,
 }) => {
   const highlightedFields = useMemo(() => {
     const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
@@ -53,6 +56,7 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
         fields={highlightedFields}
         data-test-subj={dataTestSubj}
         compressed
+        renderCellActions={renderCellActions}
       />
     </EuiPanel>
   );

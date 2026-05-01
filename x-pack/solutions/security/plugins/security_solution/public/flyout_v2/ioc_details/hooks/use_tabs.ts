@@ -45,7 +45,7 @@ export const useTabs = ({ initialTabId }: UseTabsParams): UseTabsResult => {
       return initialTabId;
     }
 
-    const tabFromStorage = storage.get(FLYOUT_STORAGE_KEYS.SELECTED_TAB);
+    const tabFromStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
     if (isValidTabId(tabFromStorage)) {
       return tabFromStorage;
     }
@@ -56,7 +56,7 @@ export const useTabs = ({ initialTabId }: UseTabsParams): UseTabsResult => {
   const setSelectedTabId = useCallback(
     (tabId: RightPanelPaths) => {
       setSelectedTabIdState(tabId);
-      storage.set(FLYOUT_STORAGE_KEYS.SELECTED_TAB, tabId);
+      storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
     [storage]
   );

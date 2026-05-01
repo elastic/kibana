@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
 import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
-import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
+import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 
 const euiTableSearchOptions: EuiSearchBarProps = {
   box: {
@@ -34,6 +34,7 @@ export interface IndicatorFieldsTableProps {
   indicator: Indicator;
   ['data-test-subj']?: string;
   compressed?: boolean;
+  renderCellActions?: CellActionRenderer;
 }
 
 export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
@@ -41,6 +42,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
   compressed,
+  renderCellActions = noopCellActionRenderer,
 }) => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
   const columns = useMemo(
@@ -63,19 +65,17 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
               defaultMessage="Value"
             />
           ),
-          render: (item: TableItem) => (
-            <SecurityCellActions
-              data={{ field: item.key, value: item.value }}
-              mode={CellActionsMode.HOVER_DOWN}
-              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
-            >
-              <IndicatorFieldValue indicator={indicator} field={item.key} />
-            </SecurityCellActions>
-          ),
+          render: (item: TableItem) =>
+            renderCellActions({
+              field: item.key,
+              value: item.value ?? [],
+              scopeId: '',
+              children: <IndicatorFieldValue indicator={indicator} field={item.key} />,
+            }),
           width: '70%',
         },
       ] as Array<EuiBasicTableColumn<TableItem>>,
-    [indicator]
+    [indicator, renderCellActions]
   );
 
   const items = useMemo(() => {

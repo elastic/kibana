@@ -6,5 +6,5 @@
  */
 
 export const FLYOUT_STORAGE_KEYS = {
-  SELECTED_TAB: 'securitySolution.iocDetailsFlyout.selectedTab',
+  RIGHT_PANEL_SELECTED_TABS: 'securitySolution.iocDetailsFlyout.rightPanel.selectedTabs',
 };

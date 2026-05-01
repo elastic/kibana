@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
 import { IndicatorFieldsTable } from '../components/fields_table';
 
@@ -17,12 +18,16 @@ export interface TableTabProps {
    * The indicator document
    */
   indicator: Indicator;
+  /**
+   * Renderer for cell actions
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
  * Table view displayed in the document details expandable flyout right section
  */
-export const TableTab = memo(({ indicator }: TableTabProps) => {
+export const TableTab = memo(({ indicator, renderCellActions }: TableTabProps) => {
   const items: string[] = Object.keys(indicator.fields);
 
   return items.length === 0 ? (
@@ -32,6 +37,7 @@ export const TableTab = memo(({ indicator }: TableTabProps) => {
       data-test-subj={FLYOUT_TABLE_TEST_ID}
       fields={items}
       indicator={indicator}
+      renderCellActions={renderCellActions}
     />
   );
 });

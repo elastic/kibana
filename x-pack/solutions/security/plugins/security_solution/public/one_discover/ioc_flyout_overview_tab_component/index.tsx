@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { Content } from '../../flyout_v2/ioc_details/content';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { getTabsDisplayed } from '../../flyout_v2/ioc_details/tabs';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import { DiscoverCellActions } from '../cell_actions';
 
 export interface IOCFlyoutOverviewTabProps {
   /**
@@ -27,12 +30,32 @@ export interface IOCFlyoutOverviewTabProps {
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Current Discover columns shown in the doc viewer.
+   */
+  columns?: DocViewRenderProps['columns'];
+  /**
+   * Discover filter callback used by flyout cell actions.
+   */
+  filter?: DocViewRenderProps['filter'];
+  /**
+   * Callback used to add a column to the Discover table.
+   */
+  onAddColumn?: DocViewRenderProps['onAddColumn'];
+  /**
+   * Callback used to remove a column from the Discover table.
+   */
+  onRemoveColumn?: DocViewRenderProps['onRemoveColumn'];
 }
 
 export const IOCFlyoutOverviewTab = ({
   hit,
   servicesPromise,
   storePromise,
+  columns,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
 }: IOCFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -42,7 +65,23 @@ export const IOCFlyoutOverviewTab = ({
     [hit]
   );
 
-  const tabs = useMemo(() => getTabsDisplayed({ indicator }), [indicator]);
+  const renderCellActions = useCallback<CellActionRenderer>(
+    (props) => (
+      <DiscoverCellActions
+        {...props}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    ),
+    [columns, filter, onAddColumn, onRemoveColumn]
+  );
+
+  const tabs = useMemo(
+    () => getTabsDisplayed({ indicator, renderCellActions }),
+    [indicator, renderCellActions]
+  );
 
   useEffect(() => {
     let isCanceled = false;

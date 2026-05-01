@@ -9,6 +9,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { JsonTab } from './tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
@@ -36,6 +37,10 @@ export interface GetTabsDisplayedOptions {
    * Callback to navigate to the table tab from the overview tab
    */
   onViewAllFieldsInTable?: () => void;
+  /**
+   * Renderer for cell actions
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
@@ -44,6 +49,7 @@ export interface GetTabsDisplayedOptions {
 export const getTabsDisplayed = ({
   indicator,
   onViewAllFieldsInTable,
+  renderCellActions,
 }: GetTabsDisplayedOptions): RightPanelTabType[] => [
   {
     id: 'overview',
@@ -54,7 +60,13 @@ export const getTabsDisplayed = ({
         defaultMessage="Overview"
       />
     ),
-    content: <OverviewTab indicator={indicator} onViewAllFieldsInTable={onViewAllFieldsInTable} />,
+    content: (
+      <OverviewTab
+        indicator={indicator}
+        onViewAllFieldsInTable={onViewAllFieldsInTable}
+        renderCellActions={renderCellActions}
+      />
+    ),
   },
   {
     id: 'table',
@@ -65,7 +77,7 @@ export const getTabsDisplayed = ({
         defaultMessage="Table"
       />
     ),
-    content: <TableTab indicator={indicator} />,
+    content: <TableTab indicator={indicator} renderCellActions={renderCellActions} />,
   },
   {
     id: 'json',

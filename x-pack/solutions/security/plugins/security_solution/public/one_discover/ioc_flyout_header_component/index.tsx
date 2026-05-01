@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { Header } from '../../flyout_v2/ioc_details/header';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { DiscoverCellActions } from '../cell_actions';
 
 export interface IOCFlyoutHeaderProps {
   /**
@@ -26,15 +29,52 @@ export interface IOCFlyoutHeaderProps {
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Current Discover columns shown in the doc viewer.
+   */
+  columns?: DocViewRenderProps['columns'];
+  /**
+   * Discover filter callback used by flyout cell actions.
+   */
+  filter?: DocViewRenderProps['filter'];
+  /**
+   * Callback used to add a column to the Discover table.
+   */
+  onAddColumn?: DocViewRenderProps['onAddColumn'];
+  /**
+   * Callback used to remove a column from the Discover table.
+   */
+  onRemoveColumn?: DocViewRenderProps['onRemoveColumn'];
 }
 
-export const IOCFlyoutHeader = ({ hit, servicesPromise, storePromise }: IOCFlyoutHeaderProps) => {
+export const IOCFlyoutHeader = ({
+  hit,
+  servicesPromise,
+  storePromise,
+  columns,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+}: IOCFlyoutHeaderProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
 
   const indicator = useMemo<Indicator>(
     () => ({ _id: hit.raw._id, fields: hit.flattened as Indicator['fields'] }),
     [hit]
+  );
+
+  const renderCellActions = useCallback<CellActionRenderer>(
+    (props) => (
+      <DiscoverCellActions
+        {...props}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    ),
+    [columns, filter, onAddColumn, onRemoveColumn]
   );
 
   useEffect(() => {
@@ -68,6 +108,6 @@ export const IOCFlyoutHeader = ({ hit, servicesPromise, storePromise }: IOCFlyou
   return flyoutProviders({
     services,
     store,
-    children: <Header indicator={indicator} />,
+    children: <Header indicator={indicator} renderCellActions={renderCellActions} />,
   });
 };
