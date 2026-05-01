@@ -33,6 +33,11 @@ export class BasePath implements IBasePath {
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
+  /**
+   * @deprecated Use {@link FakeRequest.spaceId} (server) or read `request.spaceId`
+   * directly. Will be removed in Phase 2 once all consumers have migrated off
+   * `basePath.set` for space-scoping background tasks.
+   */
   public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
     this.setForRawRequest(ensureRawRequest(request), requestSpecificBasePath);
   };

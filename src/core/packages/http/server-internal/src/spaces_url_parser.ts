@@ -25,35 +25,20 @@ const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
  * @internal
  */
 export function getSpaceIdFromPath(
-  requestBasePath?: string | null,
-  serverBasePath?: string | null
+  requestBasePath: string = '/',
+  serverBasePath: string = '/'
 ): { spaceId: string; pathHasExplicitSpaceIdentifier: boolean } {
-  if (requestBasePath == null) requestBasePath = '/';
-  if (serverBasePath == null) serverBasePath = '/';
-  const pathToCheck: string = stripServerBasePath(requestBasePath, serverBasePath);
+  const pathToCheck = stripServerBasePath(requestBasePath, serverBasePath);
+  const match = pathToCheck.match(spaceContextRegex);
 
-  const matchResult = pathToCheck.match(spaceContextRegex);
-
-  if (!matchResult || matchResult.length === 0) {
-    return {
-      spaceId: DEFAULT_SPACE_ID,
-      pathHasExplicitSpaceIdentifier: false,
-    };
+  if (!match) {
+    return { spaceId: DEFAULT_SPACE_ID, pathHasExplicitSpaceIdentifier: false };
   }
 
-  const [, spaceId] = matchResult;
-
-  if (!spaceId) {
-    throw new Error(`Unable to determine Space ID from request path: ${requestBasePath}`);
-  }
-
-  return {
-    spaceId,
-    pathHasExplicitSpaceIdentifier: true,
-  };
+  return { spaceId: match[1], pathHasExplicitSpaceIdentifier: true };
 }
 
-function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
+function stripServerBasePath(requestBasePath: string, serverBasePath: string): string {
   if (serverBasePath && serverBasePath !== '/' && requestBasePath.startsWith(serverBasePath)) {
     return requestBasePath.slice(serverBasePath.length);
   }

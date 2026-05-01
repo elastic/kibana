@@ -46,9 +46,8 @@ import type {
   TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
-import { isBoom } from '@hapi/boom';
+import Boom, { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { Env } from '@kbn/config';
@@ -132,6 +131,56 @@ function startEluMeasurement<T>(
       );
     }
   };
+}
+
+/**
+ * Strips `config.basePath` from the request URL when `rewriteBasePath` is
+ * enabled. Returns false when the URL doesn't match the configured basePath,
+ * signalling the caller to respond with 404.
+ */
+function stripConfiguredBasePath(
+  request: Request,
+  config: HttpConfig,
+  basePathService: BasePath
+): boolean {
+  if (config.basePath === undefined || !config.rewriteBasePath) {
+    return true;
+  }
+  const oldUrl = request.url.pathname + request.url.search;
+  const newUrl = basePathService.remove(oldUrl);
+  if (newUrl === oldUrl) {
+    return false;
+  }
+  setRewrittenUrl(request, newUrl);
+  return true;
+}
+
+/**
+ * Extracts the space id from a clean URL (one that has already been stripped
+ * of `config.basePath`). When the path carries an explicit `/s/<spaceId>`
+ * prefix the URL is rewritten to drop it and the per-request basePath is
+ * recorded so downstream code can prepend it.
+ */
+function extractSpaceFromUrl(request: Request, basePathService: BasePath): string {
+  const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(request.url.pathname);
+  if (!pathHasExplicitSpaceIdentifier) {
+    return spaceId;
+  }
+  const reqBasePath = `/s/${spaceId}`;
+  basePathService.setForRawRequest(request, reqBasePath);
+  const newPathname = request.url.pathname.slice(reqBasePath.length) || '/';
+  setRewrittenUrl(request, `${newPathname}${request.url.search}`);
+  return spaceId;
+}
+
+/**
+ * Records the original URL on the first rewrite of a request so handlers can
+ * recover it later, and applies the new URL via Hapi's setUrl.
+ */
+function setRewrittenUrl(request: Request, newUrl: string): void {
+  const app = request.app as KibanaRequestState;
+  app.rewrittenUrl = app.rewrittenUrl ?? request.url;
+  request.setUrl(newUrl);
 }
 
 /** @internal */
@@ -302,7 +351,6 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
-    this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
@@ -483,22 +531,6 @@ export class HttpServer {
     });
   }
 
-  private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
-    if (config.basePath === undefined || !config.rewriteBasePath) {
-      return;
-    }
-
-    this.registerOnPreRouting((request, response, toolkit) => {
-      const oldUrl = request.url.pathname + request.url.search;
-      const newURL = basePathService.remove(oldUrl);
-      const shouldRedirect = newURL !== oldUrl;
-      if (shouldRedirect) {
-        return toolkit.rewriteUrl(newURL);
-      }
-      return response.notFound();
-    });
-  }
-
   private setupConditionalCompression(config: HttpConfig) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -625,33 +657,12 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      let spaceId: string | undefined;
-      let pathHasExplicitSpaceIdentifier = false;
-      try {
-        const spaceResult = getSpaceIdFromPath(request.url.pathname, config.basePath);
-        spaceId = spaceResult.spaceId;
-        pathHasExplicitSpaceIdentifier = spaceResult.pathHasExplicitSpaceIdentifier;
-      } catch {
-        spaceId = parentContext?.space;
+      if (!stripConfiguredBasePath(request, config, basePathService)) {
+        throw Boom.notFound();
       }
+      const spaceId = extractSpaceFromUrl(request, basePathService);
 
       const app: KibanaRequestState = request.app as KibanaRequestState;
-
-      if (pathHasExplicitSpaceIdentifier && spaceId) {
-        const reqBasePath = `/s/${spaceId}`;
-        basePathService.setForRawRequest(request, reqBasePath);
-
-        app.rewrittenUrl = app.rewrittenUrl ?? request.url;
-
-        const pathname = request.url.pathname;
-        const serverBase =
-          config.basePath && pathname.startsWith(config.basePath) ? config.basePath : '';
-        const pathAfterBase = serverBase ? pathname.slice(serverBase.length) : pathname;
-        const pathAfterSpace = pathAfterBase.slice(reqBasePath.length) || '/';
-        const newUrl = `${serverBase}${pathAfterSpace}${request.url.search}`;
-        request.setUrl(newUrl);
-        request.raw.req.url = newUrl;
-      }
 
       userActivity?.setInjectedContext({
         kibana: { space: { id: spaceId } },
@@ -678,7 +689,7 @@ export class HttpServer {
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
-      app.spaceId = spaceId ?? DEFAULT_SPACE_ID;
+      app.spaceId = spaceId;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
