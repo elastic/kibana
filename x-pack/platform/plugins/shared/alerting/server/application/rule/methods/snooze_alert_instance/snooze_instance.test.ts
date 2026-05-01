@@ -221,7 +221,7 @@ describe('snooze alert instance', () => {
         params: { alertId: '1', alertInstanceId: 'instance1' },
         query: { validateAlertsExistence: false },
         body: {
-          expiresAt: '2026-05-01T00:00:00.000Z',
+          expiresAt: '2099-12-31T23:59:59.000Z',
           conditions: [{ type: 'field_change', field: 'host.name' }],
         },
       })
@@ -257,7 +257,7 @@ describe('snooze alert instance', () => {
         params: { alertId: '1', alertInstanceId: 'instance1' },
         query: { validateAlertsExistence: true },
         body: {
-          expiresAt: '2026-05-01T00:00:00.000Z',
+          expiresAt: '2099-12-31T23:59:59.000Z',
         },
       })
     ).rejects.toThrow('Alerts service is unavailable');
