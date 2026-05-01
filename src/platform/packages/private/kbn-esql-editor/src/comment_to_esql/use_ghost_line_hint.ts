@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useCallback, useRef, useMemo } from 'react';
 import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,10 @@ const CURSOR_PAUSE_MS = 400;
  * Returns true when the cursor is on an empty line and the editor
  * has content (so we don't clash with the empty-editor placeholder).
  */
-const shouldShowGhostHint = (model: monaco.editor.ITextModel, lineNumber: number): boolean => {
+export const shouldShowGhostHint = (
+  model: monaco.editor.ITextModel,
+  lineNumber: number
+): boolean => {
   const lineContent = model.getLineContent(lineNumber);
   if (lineContent.trim() !== '') {
     return false;
