@@ -108,13 +108,32 @@ apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCA
   apiTest(
     'connectors API uses per-space inference settings for the same feature',
     async ({ apiClient }) => {
+      // Endpoint IDs differ by deployment (stateful vs serverless). Discover two real IDs from
+      // the live catalog before asserting per-space saved-object overrides.
+      const baseline = await apiClient.get(spaceConnectorsUrl(SPACE_A, 'agent_builder'), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+      });
+      expect(baseline).toHaveStatusCode(200);
+      const catalogIds = (baseline.body.connectors ?? []).map(
+        (c: { connectorId: string }) => c.connectorId
+      );
+      expect(catalogIds.length).toBeGreaterThanOrEqual(2);
+      const idForA = catalogIds[0];
+      const distinctFromFirst = catalogIds.filter((id) => id !== idForA);
+      expect(distinctFromFirst.length).toBeGreaterThan(0);
+      const idForB = distinctFromFirst[0];
+
       await apiClient.put(spaceApiPath(SPACE_A), {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderAnthropic] }),
+        body: JSON.stringify({
+          features: [{ feature_id: 'agent_builder', endpoints: [{ id: idForA }] }],
+        }),
       });
       await apiClient.put(spaceApiPath(SPACE_B), {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderClaudeOpus] }),
+        body: JSON.stringify({
+          features: [{ feature_id: 'agent_builder', endpoints: [{ id: idForB }] }],
+        }),
       });
 
       const resA = await apiClient.get(spaceConnectorsUrl(SPACE_A, 'agent_builder'), {
@@ -131,12 +150,10 @@ apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCA
 
       const idsA = (resA.body.connectors ?? []).map((c: { connectorId: string }) => c.connectorId);
       const idsB = (resB.body.connectors ?? []).map((c: { connectorId: string }) => c.connectorId);
-      const expectedIdA = SAMPLE_FEATURES.agentBuilderAnthropic.endpoints[0].id;
-      const expectedIdB = SAMPLE_FEATURES.agentBuilderClaudeOpus.endpoints[0].id;
       expect(idsA.length).toBeGreaterThan(0);
       expect(idsB.length).toBeGreaterThan(0);
-      expect(idsA[0]).toStrictEqual(expectedIdA);
-      expect(idsB[0]).toStrictEqual(expectedIdB);
+      expect(idsA[0]).toStrictEqual(idForA);
+      expect(idsB[0]).toStrictEqual(idForB);
       expect(idsA[0]).not.toStrictEqual(idsB[0]);
     }
   );
