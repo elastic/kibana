@@ -93,7 +93,9 @@ describe('<AlertHeaderTitle />', () => {
     setTotalAlertCount: jest.fn(),
     isFlyoutAlertLoading: false,
     setIsFlyoutAlertLoading: jest.fn(),
-    openAlertFlyoutImplRef: { current: null },
+    flyoutAlert: null,
+    setFlyoutAlert: jest.fn(),
+    setOpenAlertFlyoutImpl: jest.fn(),
     openAlertFlyout: openAlertFlyoutMock,
   };
 

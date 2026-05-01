@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
@@ -28,6 +28,11 @@ import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_
 import type { OpenFlyoutLinkRenderer } from '../../shared/components/open_flyout_link';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import {
+  __resetAlertsTablePaginationStoreForTests,
+  alertsTablePaginationStore,
+} from '../../../detections/components/alerts_table/alerts_table_pagination_store';
+import { FLYOUT_V2_LOADING_SPINNER_TEST_ID } from './components/test_ids';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../common/hooks/is_in_security_app');
@@ -85,6 +90,11 @@ describe('<DocumentFlyout />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    __resetAlertsTablePaginationStoreForTests();
+  });
+
+  afterEach(() => {
+    __resetAlertsTablePaginationStoreForTests();
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
@@ -252,6 +262,51 @@ describe('<DocumentFlyout />', () => {
     );
 
     expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-assignees-updated', 'true');
+  });
+
+  describe('cross-page pagination loading branch', () => {
+    it('renders the header and a centered spinner instead of the body when isFlyoutAlertLoading is true', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+      act(() => {
+        alertsTablePaginationStore.setState({ isFlyoutAlertLoading: true });
+      });
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit()}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      // Header is preserved so the in-flyout pagination control (rendered by
+      // it) remains operable while the new alert loads.
+      expect(getByTestId('mock-header')).toBeInTheDocument();
+      expect(getByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).toBeInTheDocument();
+      // The body and footer are replaced by the spinner branch — neither
+      // tab content nor footer should render.
+      expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
+      expect(queryByTestId('mock-footer')).not.toBeInTheDocument();
+    });
+
+    it('renders the normal body once the flyout alert loading flag clears', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit()}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
+      expect(queryByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 
   describe('remote document callout', () => {

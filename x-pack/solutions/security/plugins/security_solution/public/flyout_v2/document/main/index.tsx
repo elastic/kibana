@@ -7,10 +7,13 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -22,6 +25,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
@@ -47,6 +51,7 @@ import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_
 import { getAncestorsIndexById } from './utils/get_ancestors_index_by_id';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
+import { FLYOUT_V2_LOADING_SPINNER_TEST_ID } from './components/test_ids';
 
 const footerStyles = css`
   @media (max-width: 767px) {
@@ -116,6 +121,11 @@ export const DocumentFlyout = memo(
     const isSecurityApp = useIsInSecurityApp();
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
+    // While the in-flyout pagination is fetching an alert from a different
+    // page than the alerts table is showing, render a centered spinner in the
+    // body and keep the previous alert's header (with the new pagination
+    // position) visible. Mirrors the V1 `RightPanel` loading branch.
+    const { isFlyoutAlertLoading } = useAlertsContext();
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
     // The selected tab is persisted to localStorage.
@@ -209,6 +219,34 @@ export const DocumentFlyout = memo(
 
     if (missingAlertsPrivilege) {
       return <FlyoutMissingAlertsPrivilege />;
+    }
+
+    if (isFlyoutAlertLoading) {
+      return (
+        <>
+          <RemoteDocumentCallout hit={hit} />
+          <EuiFlyoutHeader>
+            <Header
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+              onShowNotes={onShowNotes}
+            />
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="center"
+              css={{ height: '100%' }}
+              data-test-subj={FLYOUT_V2_LOADING_SPINNER_TEST_ID}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
+        </>
+      );
     }
 
     return (
