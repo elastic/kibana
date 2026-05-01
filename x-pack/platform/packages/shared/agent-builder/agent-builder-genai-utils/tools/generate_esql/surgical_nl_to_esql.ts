@@ -137,20 +137,6 @@ Generate the ES|QL pipe(s) that should replace the marked comment.`,
 };
 
 /**
- * Index pattern from the buffer's source command (FROM/TS/PromQL), or `undefined` if there
- * is no source command yet. Patterns and comma-separated targets are passed through —
- * `resolveResourceForEsql` resolves them via `_resolve/index` and `_field_caps`, and
- * `_search` accepts them natively for sampling.
- */
-const getSamplingTarget = (currentQuery: string): string | undefined => {
-  try {
-    return getIndexPatternFromESQLQuery(currentQuery) || undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-/**
  * Runs `correctCommonEsqlMistakes` on a pipe fragment by wrapping it with a synthetic
  * FROM so it parses as a full query, then strips the wrapper from the corrected output.
  * Falls back to the original fragment if anything goes wrong.
@@ -220,15 +206,15 @@ export const generateSurgicalEsql = async ({
     async () => {
       const docBase = await EsqlDocumentBase.load();
 
-      const samplingTarget = getSamplingTarget(currentQuery);
-      const resourcePromise = samplingTarget
+      const resourceName = getIndexPatternFromESQLQuery(currentQuery) || undefined;
+      const resourcePromise = resourceName
         ? resolveResourceForEsqlWithSamplingStats({
-            resourceName: samplingTarget,
+            resourceName,
             esClient,
             samplingSize: 50,
           }).catch((e) => {
             logger?.debug(
-              `[generateSurgicalEsql] failed to resolve resource '${samplingTarget}': ${e?.message}`
+              `[generateSurgicalEsql] failed to resolve resource '${resourceName}': ${e?.message}`
             );
             return undefined;
           })
