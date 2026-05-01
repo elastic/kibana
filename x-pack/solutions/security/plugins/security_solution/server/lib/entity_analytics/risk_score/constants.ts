@@ -54,17 +54,25 @@ export const MAX_INPUTS_COUNT = 10;
 export const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
 
 /**
- * Page size for auxiliary entity store searches (e.g. resolution-member lookups).
- * Kept well below Elasticsearch's default index.max_result_window (10,000) to
- * avoid search_phase_execution_exception on any index configuration.
+ * Page size for entity store cursor-mode (`search_after`) reads.
+ *
+ * Bounded only by `index.max_result_window` (default 10,000) when the cursor's
+ * implicit `from` is 0 — which is the case for `search_after`. We sit at that
+ * cap.
+ *
+ * Phase 0 lookup build uses this directly. Phase 1 base scoring is driven by
+ * the lookup index (cursor-paginated via ES|QL output on `entity_id`) and
+ * doesn't read the entity store directly anymore — see
+ * `score_base_entities.ts` for the LOOKUP JOIN scoring path.
  */
-export const MAX_ENTITY_SEARCH_PAGE_SIZE = 1_000;
+export const MAX_ENTITY_SEARCH_PAGE_SIZE = 10_000;
 
 /**
- * Maximum number of resolution target IDs paginated per resolution scoring page.
- * Aligns with MAX_ENTITY_SEARCH_PAGE_SIZE so the resulting ES|QL `IN (...)` clause
- * stays well below the default `esql.query_string.size.limit` (1MB).
- * Bounding this does not affect scoring output: STATS BY resolution_target_id
- * yields one row per ID, so the in-query LIMIT never truncates.
+ * Maximum number of resolution target IDs scored per ES|QL pass.
+ *
+ * Resolution scoring still uses an `IN (...)` clause sourced from a composite
+ * aggregation over the lookup index. The effective ceiling on this count is
+ * `index.max_terms_count` (default 65,536). 10,000 fits well within that and
+ * matches the ES|QL row-output cap so the in-query LIMIT never truncates.
  */
-export const MAX_RESOLUTION_TARGETS_PER_PAGE = 1_000;
+export const MAX_RESOLUTION_TARGETS_PER_PAGE = 10_000;

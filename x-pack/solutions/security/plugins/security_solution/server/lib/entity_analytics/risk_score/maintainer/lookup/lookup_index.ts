@@ -20,43 +20,24 @@ const LOOKUP_INDEX_MAPPING: MappingTypeMapping = {
   },
 };
 
-const getCalculationRunIdMappingType = async ({
-  esClient,
-  index,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-}): Promise<string | undefined> => {
-  const mappingResponse = await esClient.indices.getMapping({ index });
-  const properties = mappingResponse[index]?.mappings?.properties as
-    | Record<string, { type?: string }>
-    | undefined;
-  return properties?.calculation_run_id?.type;
-};
-
-export const upgradeLookupIndexMappingIfNeeded = async ({
-  esClient,
-  index,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-}): Promise<void> => {
-  const calculationRunIdType = await getCalculationRunIdMappingType({ esClient, index });
-  if (calculationRunIdType === 'keyword') {
-    return;
-  }
-
-  await esClient.indices.putMapping({
-    index,
-    properties: {
-      calculation_run_id: { type: 'keyword' },
-    },
-  });
-};
-
 export const getLookupIndexName = (namespace: string): string =>
   getIndexPatternLookup(namespace).alias;
 
+/**
+ * Creates the lookup index if missing, or applies the current mapping to an
+ * existing index.
+ *
+ * `putMapping` is idempotent for additive mapping changes — Elasticsearch adds
+ * any new fields, no-ops on fields already present with matching types, and
+ * rejects conflicting type changes (the desired loud-failure semantic). This
+ * means future field additions to `LOOKUP_INDEX_MAPPING` are picked up
+ * automatically without further code changes here.
+ *
+ * Prior art: `entity_analytics/utils/create_or_update_index.ts` does the same
+ * pattern at the package level, but it also re-applies settings on update.
+ * `index.mode: 'lookup'` is a create-only setting, so a thin local
+ * implementation avoids logging benign putSettings failures every run.
+ */
 export const ensureLookupIndex = async ({
   esClient,
   namespace,
@@ -67,23 +48,27 @@ export const ensureLookupIndex = async ({
   const lookupIndex = getLookupIndexName(namespace);
   const exists = await esClient.indices.exists({ index: lookupIndex });
 
-  if (!exists) {
-    try {
-      await esClient.indices.create({
-        index: lookupIndex,
-        settings: {
-          'index.mode': 'lookup',
-        },
-        mappings: LOOKUP_INDEX_MAPPING,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (!errorMessage.includes('resource_already_exists_exception')) {
-        throw error;
-      }
+  if (exists) {
+    await esClient.indices.putMapping({
+      index: lookupIndex,
+      properties: LOOKUP_INDEX_MAPPING.properties,
+    });
+    return lookupIndex;
+  }
+
+  try {
+    await esClient.indices.create({
+      index: lookupIndex,
+      settings: {
+        'index.mode': 'lookup',
+      },
+      mappings: LOOKUP_INDEX_MAPPING,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (!errorMessage.includes('resource_already_exists_exception')) {
+      throw error;
     }
-  } else {
-    await upgradeLookupIndexMappingIfNeeded({ esClient, index: lookupIndex });
   }
 
   return lookupIndex;

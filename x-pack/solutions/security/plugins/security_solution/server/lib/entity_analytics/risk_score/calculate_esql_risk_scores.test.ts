@@ -9,7 +9,7 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
-  getBaseScoreESQLByIds,
+  getBaseScoreESQLViaLookupJoin,
   getESQL,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
@@ -91,40 +91,49 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
     });
 
-    it('escapes quote characters in base ID list', () => {
-      const query = getBaseScoreESQLByIds(
+    it('builds a base score query with LOOKUP JOIN and no cursor for the first page', () => {
+      const query = getBaseScoreESQLViaLookupJoin(
         EntityType.user,
-        ['user:with"quote@okta'],
+        {},
         5000,
         1000,
-        '.alerts-security.alerts-default'
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
       );
 
-      expect(query).toContain('"user:with\\"quote@okta"');
+      expect(query).toContain(
+        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
+      );
+      expect(query).toContain('WHERE relationship_type IS NOT NULL');
+      // No cursor on the first page.
+      expect(query).not.toContain('WHERE entity_id >');
+      expect(query).toContain('SORT entity_id ASC');
+      expect(query).toContain('BY entity_id');
     });
 
-    it('escapes backslash characters in base ID list', () => {
-      const query = getBaseScoreESQLByIds(
+    it('appends an exclusive cursor when bounds.lower is provided', () => {
+      const query = getBaseScoreESQLViaLookupJoin(
         EntityType.user,
-        ['user:with\\slash@okta'],
+        { lower: 'user:cursor@okta' },
         5000,
         1000,
-        '.alerts-security.alerts-default'
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
       );
 
-      expect(query).toContain('"user:with\\\\slash@okta"');
+      expect(query).toContain('WHERE entity_id > "user:cursor@okta"');
     });
 
-    it('escapes quote and backslash characters in base ID list', () => {
-      const query = getBaseScoreESQLByIds(
+    it('escapes quote and backslash characters in the cursor', () => {
+      const query = getBaseScoreESQLViaLookupJoin(
         EntityType.user,
-        ['user:plain@acme.com@okta', 'user:with"quote\\slash@okta'],
+        { lower: 'user:with"quote\\slash@okta' },
         5000,
         1000,
-        '.alerts-security.alerts-default'
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
       );
 
-      expect(query).toContain('"user:plain@acme.com@okta"');
       expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
     });
 
@@ -168,23 +177,17 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
     });
 
-    it('throws when base ID list contains unsupported control character', () => {
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when base score cursor contains %s control character', (_label, char) => {
       expect(() =>
-        getBaseScoreESQLByIds(
+        getBaseScoreESQLViaLookupJoin(
           EntityType.user,
-          ['user:good@okta', 'user:bad\u0000@okta'],
-          5000,
-          1000,
-          '.alerts-security.alerts-default'
-        )
-      ).toThrow('Entity ID contains an unsupported control character');
-    });
-
-    it('throws when resolution target ID list contains unsupported control character', () => {
-      expect(() =>
-        getResolutionScoreESQLByIds(
-          EntityType.user,
-          ['user:good@okta', 'user:bad\u0000@okta'],
+          { lower: `user:bad${char}@okta` },
           5000,
           1000,
           '.alerts-security.alerts-default',
@@ -193,14 +196,34 @@ describe('Calculate risk scores with ESQL', () => {
       ).toThrow('Entity ID contains an unsupported control character');
     });
 
-    it('keeps ordinary EUID ids unchanged in both ID-list builders', () => {
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when resolution target ID list contains %s control character', (_label, char) => {
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:good@okta', `user:bad${char}@okta`],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('keeps ordinary EUIDs unchanged in cursor and resolution ID list', () => {
       const euid = 'user:jane@acme.com@okta';
-      const baseQuery = getBaseScoreESQLByIds(
+      const baseQuery = getBaseScoreESQLViaLookupJoin(
         EntityType.user,
-        [euid],
+        { lower: euid },
         5000,
         1000,
-        '.alerts-security.alerts-default'
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
       );
       const resolutionQuery = getResolutionScoreESQLByIds(
         EntityType.user,

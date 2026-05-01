@@ -11,14 +11,14 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
-import { getBaseScoreESQLByIds } from '../../calculate_esql_risk_scores';
+import { getBaseScoreESQLViaLookupJoin } from '../../calculate_esql_risk_scores';
+import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
-import type { ScoredEntityPage, StepResult, RiskScoreModifierEntity } from './pipeline_types';
-import { normalizeModifierEntity } from '../utils/fetch_entities_by_ids';
+import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pipeline_types';
+import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
-import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -27,6 +27,7 @@ interface ScoreBaseEntitiesParams {
   entityType: EntityType;
   alertFilters: QueryDslQueryContainer[];
   alertsIndex: string;
+  lookupIndex: string;
   pageSize: number;
   sampleSize: number;
   now: string;
@@ -38,7 +39,6 @@ interface ScoreBaseEntitiesParams {
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
-  abortSignal?: AbortSignal;
 }
 
 export type Phase1BaseScoringSummary = StepResult;
@@ -46,8 +46,19 @@ export type Phase1BaseScoringSummary = StepResult;
 /**
  * Computes base risk scores for one entity type and streams paginated results.
  *
- * Each page is scored from alert inputs, enriched with entity-derived modifiers,
- * and returned without persistence.
+ * Strategy:
+ * - The lookup index (built by Phase 0) is the authoritative set of entities
+ *   to score. Each row has `entity_id` keyed and `relationship_type` non-null
+ *   for every in-store entity.
+ * - One ES|QL query per page LOOKUP-JOINs alerts against the lookup index,
+ *   drops the cross-product (alerts whose `entity_id` isn't in the lookup),
+ *   and STATS BY `entity_id`.
+ * - Pagination uses an `entity_id` cursor on the ES|QL output: each page reads
+ *   up to `pageSize` rows sorted by `entity_id` ASC (capped at 10,000 by ES|QL),
+ *   and the last row's `entity_id` becomes the next page's exclusive lower
+ *   bound. Termination: row count < pageSize.
+ * - Modifier entities are fetched after scoring, only for IDs that produced
+ *   scores — fewer round trips than fetching every store entity upfront.
  */
 export const calculateBaseEntityScores = async function* ({
   esClient,
@@ -56,6 +67,7 @@ export const calculateBaseEntityScores = async function* ({
   entityType,
   alertFilters,
   alertsIndex,
+  lookupIndex,
   pageSize,
   sampleSize,
   now,
@@ -63,66 +75,53 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
-  let searchAfter: Array<string | number> | undefined;
-  let previousSearchAfter: Array<string | number> | undefined;
+  let cursor: string | undefined;
 
-  do {
+  while (true) {
     if (abortSignal?.aborted) {
       logger.info('Base scoring aborted between pages');
       return;
     }
-    const { entities, nextSearchAfter } = await crudClient.listEntities({
-      filter: { terms: { 'entity.EngineMetadata.Type': [entityType] } },
-      size: Math.min(pageSize, MAX_ENTITY_SEARCH_PAGE_SIZE),
-      searchAfter,
-      source: [
-        'entity.id',
-        'entity.attributes.watchlists',
-        'entity.relationships.resolution.resolved_to',
-        'asset.criticality',
-      ],
+
+    const scores = await scorePage({
+      esClient,
+      entityType,
+      bounds: cursor !== undefined ? { lower: cursor } : {},
+      sampleSize,
+      pageSize,
+      alertsIndex,
+      lookupIndex,
+      alertFilters,
     });
-    searchAfter = nextSearchAfter;
-    if (
-      searchAfter !== undefined &&
-      previousSearchAfter !== undefined &&
-      JSON.stringify(searchAfter) === JSON.stringify(previousSearchAfter)
-    ) {
-      logger.error(
-        'listEntities returned the same searchAfter cursor twice; aborting pagination to prevent infinite loop'
-      );
-      break;
+
+    if (scores.length === 0) {
+      return;
     }
-    previousSearchAfter = searchAfter;
 
-    const entityIds = entities
-      .map((entity) => entity.entity?.id)
-      .filter((id): id is string => typeof id === 'string');
+    const entities = await fetchEntitiesByIds({
+      crudClient,
+      entityIds: scores.map((score) => score.entity_id),
+      logger,
+      errorContext:
+        'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+    });
 
-    if (entityIds.length > 0) {
-      const scores = await scorePageByIds({
-        esClient,
-        entityType,
-        entityIds,
-        sampleSize,
-        pageSize,
-        alertsIndex,
-        alertFilters,
-      });
+    yield applyBaseScoreModifiers({
+      scores,
+      entities,
+      now,
+      entityType,
+      calculationRunId,
+      watchlistConfigs,
+    });
 
-      if (scores.length > 0) {
-        const entityMap = buildEntityMapFromListResult(entities);
-        yield applyBaseScoreModifiers({
-          scores,
-          entities: entityMap,
-          now,
-          entityType,
-          calculationRunId,
-          watchlistConfigs,
-        });
-      }
+    // ES|QL caps any single response at 10,000 rows regardless of LIMIT, so
+    // fewer than `pageSize` returned means we've consumed the tail.
+    if (scores.length < pageSize) {
+      return;
     }
-  } while (searchAfter !== undefined);
+    cursor = scores[scores.length - 1].entity_id;
+  }
 };
 
 export const scoreBaseEntities = async ({
@@ -156,50 +155,39 @@ export const scoreBaseEntities = async ({
   };
 };
 
-const scorePageByIds = async ({
+const scorePage = async ({
   esClient,
   entityType,
-  entityIds,
+  bounds,
   sampleSize,
   pageSize,
   alertsIndex,
+  lookupIndex,
   alertFilters,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
-  entityIds: string[];
+  bounds: { lower?: string };
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
+  lookupIndex: string;
   alertFilters: QueryDslQueryContainer[];
-}) => {
-  const query = getBaseScoreESQLByIds(entityType, entityIds, sampleSize, pageSize, alertsIndex);
+}): Promise<ParsedRiskScore[]> => {
+  const query = getBaseScoreESQLViaLookupJoin(
+    entityType,
+    bounds,
+    sampleSize,
+    pageSize,
+    alertsIndex,
+    lookupIndex
+  );
   const esqlResponse = await esClient.esql.query({
     query,
     filter: { bool: { filter: alertFilters } },
   });
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
-};
-
-const buildEntityMapFromListResult = (
-  entities: Array<{
-    entity?: {
-      id?: string;
-      attributes?: { watchlists?: unknown };
-      relationships?: { resolution?: { resolved_to?: unknown } };
-    };
-    asset?: RiskScoreModifierEntity['asset'] | null;
-  }>
-): Map<string, RiskScoreModifierEntity> => {
-  const entityMap = new Map<string, RiskScoreModifierEntity>();
-  for (const entity of entities) {
-    const normalized = normalizeModifierEntity(entity);
-    if (normalized?.entity?.id) {
-      entityMap.set(normalized.entity.id, normalized);
-    }
-  }
-  return entityMap;
 };
 
 const applyBaseScoreModifiers = ({
@@ -210,7 +198,7 @@ const applyBaseScoreModifiers = ({
   calculationRunId,
   watchlistConfigs,
 }: {
-  scores: ReturnType<ReturnType<typeof parseEsqlBaseScoreRow>>[];
+  scores: ParsedRiskScore[];
   entities: Map<string, RiskScoreModifierEntity>;
   now: string;
   entityType: EntityType;

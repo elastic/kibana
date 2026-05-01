@@ -48,6 +48,20 @@ type ESQLResults = Array<
 const escapeEsqlStringLiteral = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
+// Reject IDs containing characters that cannot be safely interpolated into an
+// ES|QL double-quoted string literal: NUL, LF, CR, line separator, paragraph
+// separator. These would either break the literal or be silently re-interpreted
+// by ES|QL's lexer. Entity IDs containing them are almost certainly malformed
+// upstream — fail loud rather than score against a possibly-different ID.
+const ESQL_INVALID_LITERAL_CHARS = /[\u0000\u000A\u000D\u2028\u2029]/;
+const assertEsqlInterpolatableIds = (ids: string[]): void => {
+  if (ids.some((id) => ESQL_INVALID_LITERAL_CHARS.test(id))) {
+    throw new Error(
+      'Entity ID contains an unsupported control character (NUL/LF/CR/LS/PS) and cannot be safely interpolated into ES|QL'
+    );
+  }
+};
+
 export const calculateScoresWithESQL = async (
   params: {
     assetCriticalityService: AssetCriticalityService;
@@ -563,33 +577,48 @@ export const getBaseScoreESQL = (
   return query;
 };
 
-export const getBaseScoreESQLByIds = (
+/**
+ * Base scoring query that joins alerts against the lookup index instead of
+ * filtering by an explicit ID list.
+ *
+ * Why LOOKUP JOIN over `IN (...)`:
+ * - Phase 0 has already populated the lookup index with one row per entity
+ *   in the entity store. The lookup row's `relationship_type` is non-null
+ *   for every in-store entity (self-row or alias row).
+ * - The join naturally drops alerts whose `entity_id` isn't in the store
+ *   (cross-product waste) without an IN clause.
+ * - No query-string size coupling to the entity count.
+ *
+ * Pagination strategy (caller's responsibility): pass an exclusive `lastEntityId`
+ * cursor in `bounds.lower` to fetch the next slice. ES|QL caps any single
+ * query at 10,000 result rows regardless of `LIMIT`, so the caller iterates
+ * by reading the last row's `entity_id` from each response and feeding it
+ * back as the next `bounds.lower`. Termination: row count < pageSize.
+ */
+export const getBaseScoreESQLViaLookupJoin = (
   entityType: EntityType,
-  entityIds: string[],
+  bounds: { lower?: string },
   sampleSize: number,
   pageSize: number,
-  index: string
+  alertsIndex: string,
+  lookupIndex: string
 ): string => {
   const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
 
-  if (entityIds.length === 0) {
-    throw new Error('At least one entity ID must be provided for ID-based base scoring');
+  if (bounds.lower !== undefined) {
+    assertEsqlInterpolatableIds([bounds.lower]);
   }
 
-  const invalid = entityIds.find((id) => /[\u0000\u2028\u2029]/.test(id));
-  if (invalid !== undefined) {
-    throw new Error(
-      'Entity ID contains an unsupported control character and cannot be safely interpolated into ES|QL'
-    );
-  }
-
-  const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+  const cursorClause =
+    bounds.lower !== undefined
+      ? `| WHERE entity_id > "${escapeEsqlStringLiteral(bounds.lower)}"`
+      : '';
 
   const query = /* esql */ `
-  FROM ${index} METADATA _index
+  FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
     | RENAME kibana.alert.risk_score as risk_score,
@@ -602,7 +631,9 @@ export const getBaseScoreESQLByIds = (
            rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | WHERE entity_id IN (${idsClause})
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | WHERE relationship_type IS NOT NULL
+    ${cursorClause}
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -610,7 +641,7 @@ export const getBaseScoreESQLByIds = (
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
         BY entity_id
-    | SORT scores DESC
+    | SORT entity_id ASC
     | LIMIT ${pageSize}
   `;
 
@@ -710,12 +741,7 @@ export const getResolutionScoreESQLByIds = (
     throw new Error('At least one resolution target ID must be provided for resolution scoring');
   }
 
-  const invalid = resolutionTargetIds.find((id) => /[\u0000\u2028\u2029]/.test(id));
-  if (invalid !== undefined) {
-    throw new Error(
-      'Entity ID contains an unsupported control character and cannot be safely interpolated into ES|QL'
-    );
-  }
+  assertEsqlInterpolatableIds(resolutionTargetIds);
 
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 

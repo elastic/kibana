@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
@@ -13,6 +14,7 @@ import type { ScopedLogger } from '../utils/with_log_context';
 import {
   RESOLUTION_RELATIONSHIP_TYPE,
   SELF_RELATIONSHIP_TYPE,
+  type EntityStoreLookupSource,
   type LookupDocument,
 } from '../lookup/lookup_types';
 
@@ -36,70 +38,147 @@ export interface BuildLookupIndexResult {
 }
 
 const LOOKUP_BUILD_PAGE_SIZE = MAX_ENTITY_SEARCH_PAGE_SIZE;
+const FAILURE_REASONS_CAP = 5;
+const UNKNOWN_BULK_ERROR_REASON = 'unknown_bulk_error';
 
-const buildLookupOperationsForPage = ({
-  entities,
-  now,
-  calculationRunId,
-  lookupIndex,
-}: {
-  entities: Array<{
-    entity?: {
-      id?: string;
-      relationships?: { resolution?: { resolved_to?: string } };
-    };
-  }>;
-  now: string;
-  calculationRunId: string;
-  lookupIndex: string;
-}): Array<Record<string, unknown>> => {
-  const pageLookupMap = new Map<string, LookupDocument>();
+interface BulkSummary {
+  successfulItems: number;
+  failedItems: number;
+  reasonsByCount: Map<string, number>;
+}
 
-  for (const storeEntity of entities) {
-    const entityId = storeEntity.entity?.id;
-    if (entityId) {
-      const resolvedTo = storeEntity.entity?.relationships?.resolution?.resolved_to;
+/**
+ * Returns the lookup rows implied by a single entity-store entity:
+ * - alias entity (has resolved_to): one alias row + one self-row for the target.
+ * - plain entity: one self-row.
+ *
+ * Self-rows for resolution targets are written eagerly (not derived from
+ * alerts) so resolution scoring can attribute a target's own alerts to its
+ * group via LOOKUP JOIN — see elastic/kibana#263542.
+ */
+const buildLookupRowsForEntity = (
+  source: EntityStoreLookupSource,
+  { calculationRunId, now }: { calculationRunId: string; now: string }
+): LookupDocument[] => {
+  const entityId = source.entity?.id;
+  if (!entityId) {
+    return [];
+  }
 
-      if (resolvedTo) {
-        pageLookupMap.set(entityId, {
-          entity_id: entityId,
-          resolution_target_id: resolvedTo,
-          propagation_target_id: null,
-          relationship_type: RESOLUTION_RELATIONSHIP_TYPE,
-          calculation_run_id: calculationRunId,
-          '@timestamp': now,
-        });
+  const resolvedTo = source.entity?.relationships?.resolution?.resolved_to;
+  if (resolvedTo) {
+    return [
+      {
+        entity_id: entityId,
+        resolution_target_id: resolvedTo,
+        propagation_target_id: null,
+        relationship_type: RESOLUTION_RELATIONSHIP_TYPE,
+        calculation_run_id: calculationRunId,
+        '@timestamp': now,
+      },
+      {
+        entity_id: resolvedTo,
+        resolution_target_id: resolvedTo,
+        propagation_target_id: null,
+        relationship_type: SELF_RELATIONSHIP_TYPE,
+        calculation_run_id: calculationRunId,
+        '@timestamp': now,
+      },
+    ];
+  }
 
-        if (!pageLookupMap.has(resolvedTo)) {
-          pageLookupMap.set(resolvedTo, {
-            entity_id: resolvedTo,
-            resolution_target_id: resolvedTo,
-            propagation_target_id: null,
-            relationship_type: SELF_RELATIONSHIP_TYPE,
-            calculation_run_id: calculationRunId,
-            '@timestamp': now,
-          });
-        }
-      } else if (!pageLookupMap.has(entityId)) {
-        pageLookupMap.set(entityId, {
-          entity_id: entityId,
-          resolution_target_id: entityId,
-          propagation_target_id: null,
-          relationship_type: SELF_RELATIONSHIP_TYPE,
-          calculation_run_id: calculationRunId,
-          '@timestamp': now,
-        });
-      }
+  return [
+    {
+      entity_id: entityId,
+      resolution_target_id: entityId,
+      propagation_target_id: null,
+      relationship_type: SELF_RELATIONSHIP_TYPE,
+      calculation_run_id: calculationRunId,
+      '@timestamp': now,
+    },
+  ];
+};
+
+/**
+ * De-duplicates rows produced for the page (same entity may appear as alias
+ * source and as another alias's target) and returns the bulk action/document
+ * pairs in the order ES expects.
+ */
+const toBulkIndexOperations = (
+  docs: LookupDocument[],
+  index: string
+): Array<BulkOperationContainer | LookupDocument> => {
+  const byEntityId = new Map<string, LookupDocument>();
+  for (const doc of docs) {
+    // First write wins: alias rows (specific) take precedence over
+    // self-rows (defaulted) when both are produced for the same entity_id
+    // within a single page.
+    if (!byEntityId.has(doc.entity_id)) {
+      byEntityId.set(doc.entity_id, doc);
     }
   }
 
-  const operations: Array<Record<string, unknown>> = [];
-  for (const doc of pageLookupMap.values()) {
-    operations.push({ index: { _index: lookupIndex, _id: doc.entity_id } });
-    operations.push(doc as unknown as Record<string, unknown>);
+  const operations: Array<BulkOperationContainer | LookupDocument> = [];
+  for (const doc of byEntityId.values()) {
+    operations.push({ index: { _index: index, _id: doc.entity_id } });
+    operations.push(doc);
+  }
+  return operations;
+};
+
+const incrementReason = (
+  reasonsByCount: Map<string, number>,
+  reason: string,
+  amount: number
+): void => {
+  const existing = reasonsByCount.get(reason);
+  if (existing !== undefined) {
+    reasonsByCount.set(reason, existing + amount);
+    return;
+  }
+  if (reasonsByCount.size < FAILURE_REASONS_CAP) {
+    reasonsByCount.set(reason, amount);
+  }
+};
+
+/**
+ * Folds an ES bulk response into success/failure counts plus a bounded
+ * reason→count map. Handles three observed shapes uniformly:
+ *
+ * - Per-item details present (`response.items`): inspect each.
+ * - All success, no items echoed: count `expectedItemCount` as successful.
+ * - Errors flag set with no items echoed: charge all `expectedItemCount`
+ *   items as failed under `UNKNOWN_BULK_ERROR_REASON`.
+ */
+const summarizeBulkResponse = (response: BulkResponse, expectedItemCount: number): BulkSummary => {
+  const reasonsByCount = new Map<string, number>();
+  const items = response.items ?? [];
+
+  if (items.length === 0) {
+    if (response.errors) {
+      incrementReason(reasonsByCount, UNKNOWN_BULK_ERROR_REASON, expectedItemCount);
+      return { successfulItems: 0, failedItems: expectedItemCount, reasonsByCount };
+    }
+    return { successfulItems: expectedItemCount, failedItems: 0, reasonsByCount };
   }
 
-  return operations;
+  let successfulItems = 0;
+  let failedItems = 0;
+  for (const item of items) {
+    if (item.index?.error) {
+      failedItems += 1;
+      incrementReason(reasonsByCount, item.index.error.reason ?? UNKNOWN_BULK_ERROR_REASON, 1);
+    } else if (item.index) {
+      successfulItems += 1;
+    }
+  }
+  return { successfulItems, failedItems, reasonsByCount };
+};
+
+const mergeFailureReasons = (target: Map<string, number>, source: Map<string, number>): void => {
+  for (const [reason, count] of source) {
+    incrementReason(target, reason, count);
+  }
 };
 
 const fetchNextEntityStorePage = async ({
@@ -146,7 +225,7 @@ export const buildLookupIndex = async ({
   let lookupRowsFailed = 0;
   let searchAfter: Array<string | number> | undefined;
   let previousSearchAfter: Array<string | number> | undefined;
-  const failureReasonsTopN = new Map<string, number>();
+  const failureReasons = new Map<string, number>();
 
   do {
     if (abortSignal?.aborted) {
@@ -180,55 +259,22 @@ export const buildLookupIndex = async ({
     previousSearchAfter = searchAfter;
     pagesProcessed += 1;
 
-    const operations = buildLookupOperationsForPage({
-      entities,
-      now,
-      calculationRunId,
-      lookupIndex,
-    });
-
+    const docs = entities.flatMap((entity: EntityStoreLookupSource) =>
+      buildLookupRowsForEntity(entity, { calculationRunId, now })
+    );
+    const operations = toBulkIndexOperations(docs, lookupIndex);
     if (operations.length > 0) {
       bulkBatches += 1;
       const response = await esClient.bulk({ operations });
-      const items = response.items ?? [];
-      let successfulItems = 0;
-
-      for (const item of items) {
-        if (item.index?.error) {
-          lookupRowsFailed += 1;
-          const reason = item.index.error.reason ?? 'unknown_bulk_error';
-          if (failureReasonsTopN.has(reason)) {
-            failureReasonsTopN.set(reason, (failureReasonsTopN.get(reason) ?? 0) + 1);
-          } else if (failureReasonsTopN.size < 5) {
-            failureReasonsTopN.set(reason, 1);
-          }
-        } else if (item.index) {
-          successfulItems += 1;
-        }
-      }
-
-      if (!response.errors && items.length === 0) {
-        successfulItems = operations.length / 2;
-      }
-
-      if (response.errors && items.length === 0) {
-        lookupRowsFailed += operations.length / 2;
-        if (!failureReasonsTopN.has('unknown_bulk_error') && failureReasonsTopN.size < 5) {
-          failureReasonsTopN.set('unknown_bulk_error', operations.length / 2);
-        } else if (failureReasonsTopN.has('unknown_bulk_error')) {
-          failureReasonsTopN.set(
-            'unknown_bulk_error',
-            (failureReasonsTopN.get('unknown_bulk_error') ?? 0) + operations.length / 2
-          );
-        }
-      }
-
-      lookupRowsWritten += successfulItems;
+      const summary = summarizeBulkResponse(response, operations.length / 2);
+      lookupRowsWritten += summary.successfulItems;
+      lookupRowsFailed += summary.failedItems;
+      mergeFailureReasons(failureReasons, summary.reasonsByCount);
     }
   } while (searchAfter !== undefined);
 
   if (lookupRowsFailed > 0) {
-    const reasonsSummary = [...failureReasonsTopN.entries()]
+    const reasonsSummary = [...failureReasons.entries()]
       .map(([reason, count]) => `${count}x ${reason}`)
       .join('; ');
     throw new Error(

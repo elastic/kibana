@@ -339,4 +339,29 @@ describe('build_lookup_index', () => {
       })
     ).rejects.toThrow('2x same reason');
   });
+
+  // Covers the bulk-summary path where ES reports `errors: true` but echoes
+  // no `items`. We must charge the entire batch as failed under the catch-all
+  // reason instead of silently treating the page as a no-op.
+  it('charges all items as failed when bulk reports errors with no item details', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
+      entities: [{ entity: { id: 'host:1' } }, { entity: { id: 'host:2' } }],
+      nextSearchAfter: undefined,
+    });
+    (esClient.bulk as jest.Mock).mockResolvedValueOnce({ errors: true, items: [] });
+
+    await expect(
+      buildLookupIndex({
+        esClient,
+        crudClient,
+        logger,
+        lookupIndex: '.lookup-default',
+        entityTypes: [EntityType.host],
+        calculationRunId: RUN_ID,
+        now: NOW,
+      })
+    ).rejects.toThrow(
+      'Phase 0 lookup build had 2 failed item(s) across 2 iterated entities; reasons: 2x unknown_bulk_error'
+    );
+  });
 });

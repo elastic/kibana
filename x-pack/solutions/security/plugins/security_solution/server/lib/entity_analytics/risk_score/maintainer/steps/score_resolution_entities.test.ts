@@ -44,7 +44,7 @@ describe('score_resolution_entities', () => {
     (esClient.esql.query as jest.Mock).mockResolvedValue({ values: [] });
   });
 
-  it('caps composite page size at 1000 when configured pageSize is larger', async () => {
+  it('caps composite page size at MAX_RESOLUTION_TARGETS_PER_PAGE when configured pageSize is larger', async () => {
     (esClient.search as jest.Mock).mockResolvedValue({
       aggregations: {
         by_resolution_target: {
@@ -120,7 +120,7 @@ describe('score_resolution_entities', () => {
     );
   });
 
-  it('builds an IN list with exactly 1000 IDs when page has 1000 buckets', async () => {
+  it('builds an IN list with exactly MAX_RESOLUTION_TARGETS_PER_PAGE IDs when page is full', async () => {
     const buckets = Array.from({ length: MAX_RESOLUTION_TARGETS_PER_PAGE }, (_, i) => ({
       key: { resolution_target_id: `user:target-${i}` },
     }));
@@ -166,5 +166,43 @@ describe('score_resolution_entities', () => {
         ),
       })
     ).rejects.toThrow('exceeding cap');
+  });
+
+  // Regression: a hit with entity_id === '' previously caused an infinite loop —
+  // the truthy check on searchAfter folded '' to undefined for ES (returning
+  // the same first page) while the loop termination kept treating '' as a
+  // valid cursor. The fix swapped to a strict undefined check.
+  it('terminates pagination when an entity_id is the empty string', async () => {
+    let callCount = 0;
+    (esClient.search as jest.Mock).mockImplementation(async () => {
+      callCount += 1;
+      if (callCount === 1) {
+        return {
+          hits: {
+            hits: [
+              { _source: { entity_id: '' }, sort: [''] },
+              { _source: { entity_id: 'user:b' }, sort: ['user:b'] },
+            ],
+          },
+        };
+      }
+      return { hits: { hits: [] } };
+    });
+
+    const memberIds = await fetchResolutionGroupMemberIds({
+      esClient,
+      logger,
+      lookupIndex: '.entity_analytics.risk_score.lookup-default',
+      resolutionTargetIds: ['user:target-1'],
+    });
+
+    // Two calls: page-1 (returns the two hits) + page-2 (empty, terminates).
+    expect(callCount).toBe(2);
+    expect(memberIds).toEqual(new Set(['', 'user:b']));
+
+    // Page-2 must use the last sort value as cursor (here 'user:b'),
+    // not undefined — verifying the strict undefined check is in place.
+    const secondCall = (esClient.search as jest.Mock).mock.calls[1][0];
+    expect(secondCall.search_after).toEqual(['user:b']);
   });
 });
