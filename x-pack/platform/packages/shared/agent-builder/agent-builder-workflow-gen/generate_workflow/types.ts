@@ -86,30 +86,46 @@ export interface ValidationResult {
 }
 
 /**
- * Discriminated union of recorded actions. This is the single source of truth
- * for the graph's history — the LangChain message list passed to the model is
- * reconstructed from this array on each cycle (mirrors the pattern used in
- * generate_esql and other agentic graphs).
+ * Recorded actions. This is the single source of truth for the graph's
+ * history — the LangChain message list passed to the model is reconstructed
+ * from this array on each cycle (mirrors the pattern used in generate_esql
+ * and other agentic graphs).
  *
- * Note: `agent_step.toolCalls[].id` and `tool_result.toolCallId` are required
- * to satisfy provider tool-call/tool-result pairing rules (Anthropic, OpenAI).
+ * Note: `AgentStepAction.toolCalls[].id` and `ToolResultAction.toolCallId`
+ * are required to satisfy provider tool-call/tool-result pairing rules
+ * (Anthropic, OpenAI).
  *
  * Reasoning/thinking blocks are NOT captured here. If/when extended thinking
- * is enabled for this graph, `agent_step` must grow to carry the structured
- * assistant content blocks so providers can replay them on subsequent turns.
+ * is enabled for this graph, `AgentStepAction` must grow to carry the
+ * structured assistant content blocks so providers can replay them on
+ * subsequent turns.
  */
-export type Action =
-  | {
-      type: 'agent_step';
-      toolCalls: Array<{ id: string; name: string; args: unknown }>;
-      text?: string;
-    }
-  | {
-      type: 'tool_result';
-      toolCallId: string;
-      name: string;
-      success: boolean;
-      data?: unknown;
-      error?: string;
-    }
-  | { type: 'validate'; valid: boolean; errors: string[] };
+
+export interface RecordedToolCall {
+  id: string;
+  name: string;
+  args: unknown;
+}
+
+export interface AgentStepAction {
+  type: 'agent_step';
+  toolCalls: RecordedToolCall[];
+  text?: string;
+}
+
+export interface ToolResultAction {
+  type: 'tool_result';
+  toolCallId: string;
+  name: string;
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}
+
+export interface ValidateAction {
+  type: 'validate';
+  valid: boolean;
+  errors: string[];
+}
+
+export type Action = AgentStepAction | ToolResultAction | ValidateAction;

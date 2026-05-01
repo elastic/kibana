@@ -12,6 +12,7 @@ import {
   createUserPrompt,
   createValidationFailureMessage,
 } from './prompts';
+import { isAgentStepAction, isToolResultAction, isValidateAction } from './actions';
 import type { StateType } from './state';
 
 /**
@@ -48,38 +49,32 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
   messages.push(new HumanMessage(userPrompt[1]));
 
   for (const action of state.actions) {
-    switch (action.type) {
-      case 'agent_step':
-        messages.push(
-          new AIMessage({
-            content: action.text ?? '',
-            tool_calls: action.toolCalls.map((tc) => ({
-              id: tc.id,
-              name: tc.name,
-              args: tc.args as Record<string, unknown>,
-            })),
-          })
-        );
-        break;
-      case 'tool_result':
-        messages.push(
-          new ToolMessage({
-            tool_call_id: action.toolCallId,
-            name: action.name,
-            content: JSON.stringify({
-              success: action.success,
-              ...(action.error !== undefined ? { error: action.error } : {}),
-              ...(action.data !== undefined ? { data: action.data } : {}),
-            }),
-          })
-        );
-        break;
-      case 'validate':
-        if (!action.valid) {
-          const failure = createValidationFailureMessage(action.errors) as ['user', string];
-          messages.push(new HumanMessage(failure[1]));
-        }
-        break;
+    if (isAgentStepAction(action)) {
+      messages.push(
+        new AIMessage({
+          content: action.text ?? '',
+          tool_calls: action.toolCalls.map((tc) => ({
+            id: tc.id,
+            name: tc.name,
+            args: tc.args as Record<string, unknown>,
+          })),
+        })
+      );
+    } else if (isToolResultAction(action)) {
+      messages.push(
+        new ToolMessage({
+          tool_call_id: action.toolCallId,
+          name: action.name,
+          content: JSON.stringify({
+            success: action.success,
+            ...(action.error !== undefined ? { error: action.error } : {}),
+            ...(action.data !== undefined ? { data: action.data } : {}),
+          }),
+        })
+      );
+    } else if (isValidateAction(action) && !action.valid) {
+      const failure = createValidationFailureMessage(action.errors) as ['user', string];
+      messages.push(new HumanMessage(failure[1]));
     }
   }
 

@@ -21,6 +21,12 @@ import { buildBoundTools } from './tools/schemas';
 import { dispatchToolCall } from './tools/dispatch';
 import { validateGeneratedYaml } from './validate';
 import { buildMessagesFromActions } from './build_messages';
+import {
+  agentStepAction,
+  findLastAgentStep,
+  toolResultAction,
+  validateAction,
+} from './actions';
 import type { Action } from './types';
 
 export interface CreateGraphArgs {
@@ -51,27 +57,18 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
     const aiMessage = await modelWithTools.invoke(messages);
     const toolCalls = isAIMessage(aiMessage) ? aiMessage.tool_calls ?? [] : [];
 
-    const action: Action = {
-      type: 'agent_step',
-      toolCalls: toolCalls.map((tc) => ({
-        id: tc.id ?? '',
-        name: tc.name,
-        args: tc.args,
-      })),
-      text: typeof aiMessage.content === 'string' ? aiMessage.content : undefined,
+    return {
+      actions: [
+        agentStepAction({
+          toolCalls: toolCalls.map((tc) => ({
+            id: tc.id ?? '',
+            name: tc.name,
+            args: tc.args,
+          })),
+          text: typeof aiMessage.content === 'string' ? aiMessage.content : undefined,
+        }),
+      ],
     };
-
-    return { actions: [action] };
-  };
-
-  const findLastAgentStep = (
-    actions: Action[]
-  ): Extract<Action, { type: 'agent_step' }> | undefined => {
-    for (let i = actions.length - 1; i >= 0; i--) {
-      const a = actions[i];
-      if (a.type === 'agent_step') return a;
-    }
-    return undefined;
   };
 
   const branchAfterAgent = (state: StateType): 'tools' | 'validate' => {
@@ -95,14 +92,15 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
       if (result.yaml !== undefined) {
         yaml = result.yaml;
       }
-      newActions.push({
-        type: 'tool_result',
-        toolCallId: call.id,
-        name: call.name,
-        success: result.message.success,
-        ...(result.message.data !== undefined ? { data: result.message.data } : {}),
-        ...(result.message.error !== undefined ? { error: result.message.error } : {}),
-      });
+      newActions.push(
+        toolResultAction({
+          toolCallId: call.id,
+          name: call.name,
+          success: result.message.success,
+          data: result.message.data,
+          error: result.message.error,
+        })
+      );
     }
 
     return { yaml, actions: newActions };
@@ -115,7 +113,7 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
     return {
       validation,
       validationAttempts: nextAttempts,
-      actions: [{ type: 'validate', valid: validation.valid, errors: validation.errors }],
+      actions: [validateAction({ valid: validation.valid, errors: validation.errors })],
     };
   };
 
