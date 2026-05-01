@@ -578,44 +578,41 @@ export const getBaseScoreESQL = (
 };
 
 /**
- * Base scoring query that joins alerts against the lookup index instead of
- * filtering by an explicit ID list.
+ * Base scoring query that filters alerts by an explicit `entity_id IN (...)`
+ * list of EUIDs sourced from the lookup index.
  *
- * Why LOOKUP JOIN over `IN (...)`:
- * - Phase 0 has already populated the lookup index with one row per entity
- *   in the entity store. The lookup row's `relationship_type` is non-null
- *   for every in-store entity (self-row or alias row).
- * - The join naturally drops alerts whose `entity_id` isn't in the store
- *   (cross-product waste) without an IN clause.
- * - No query-string size coupling to the entity count.
+ * Why an IN-clause and not a LOOKUP JOIN:
+ * - The IN-clause lets ES|QL/Lucene push the entity-id predicate down into
+ *   the alert scan, so non-matching alerts are dropped before any join-side
+ *   materialization. A LOOKUP JOIN against a large lookup index forces the
+ *   full alert page to be hashed/probed and trips the request circuit
+ *   breaker on alert-heavy workloads (~150K alerts on a default heap).
+ * - Pagination is owned by the caller, which streams `entity_id` from the
+ *   lookup index via `search_after` and passes one slice per call.
  *
- * Pagination strategy (caller's responsibility): pass an exclusive `lastEntityId`
- * cursor in `bounds.lower` to fetch the next slice. ES|QL caps any single
- * query at 10,000 result rows regardless of `LIMIT`, so the caller iterates
- * by reading the last row's `entity_id` from each response and feeding it
- * back as the next `bounds.lower`. Termination: row count < pageSize.
+ * The caller is responsible for sizing `entityIds` so the resulting
+ * `entity_id IN (...)` clause stays within `index.max_terms_count` (default
+ * 65,536) and the ES|QL row-output cap (10,000).
  */
-export const getBaseScoreESQLViaLookupJoin = (
+export const getBaseScoreESQLByIds = (
   entityType: EntityType,
-  bounds: { lower?: string },
+  entityIds: string[],
   sampleSize: number,
   pageSize: number,
-  alertsIndex: string,
-  lookupIndex: string
+  alertsIndex: string
 ): string => {
   const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
 
-  if (bounds.lower !== undefined) {
-    assertEsqlInterpolatableIds([bounds.lower]);
+  if (entityIds.length === 0) {
+    throw new Error('At least one entity ID must be provided for ID-based base scoring');
   }
 
-  const cursorClause =
-    bounds.lower !== undefined
-      ? `| WHERE entity_id > "${escapeEsqlStringLiteral(bounds.lower)}"`
-      : '';
+  assertEsqlInterpolatableIds(entityIds);
+
+  const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
   const query = /* esql */ `
   FROM ${alertsIndex} METADATA _index
@@ -631,9 +628,7 @@ export const getBaseScoreESQLViaLookupJoin = (
            rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | WHERE relationship_type IS NOT NULL
-    ${cursorClause}
+    | WHERE entity_id IN (${idsClause})
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -641,7 +636,7 @@ export const getBaseScoreESQLViaLookupJoin = (
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
         BY entity_id
-    | SORT entity_id ASC
+    | SORT scores DESC
     | LIMIT ${pageSize}
   `;
 

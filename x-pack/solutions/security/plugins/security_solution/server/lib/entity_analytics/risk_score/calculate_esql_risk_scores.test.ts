@@ -9,7 +9,7 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
-  getBaseScoreESQLViaLookupJoin,
+  getBaseScoreESQLByIds,
   getESQL,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
@@ -91,47 +91,33 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
     });
 
-    it('builds a base score query with LOOKUP JOIN and no cursor for the first page', () => {
-      const query = getBaseScoreESQLViaLookupJoin(
+    it('builds a base score query with an entity_id IN clause from the supplied ids', () => {
+      const query = getBaseScoreESQLByIds(
         EntityType.user,
-        {},
+        ['user:a@okta', 'user:b@okta'],
         5000,
         1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
+        '.alerts-security.alerts-default'
       );
 
-      expect(query).toContain(
-        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
-      );
-      expect(query).toContain('WHERE relationship_type IS NOT NULL');
-      // No cursor on the first page.
-      expect(query).not.toContain('WHERE entity_id >');
-      expect(query).toContain('SORT entity_id ASC');
+      expect(query).toContain('WHERE entity_id IN ("user:a@okta", "user:b@okta")');
       expect(query).toContain('BY entity_id');
+      expect(query).not.toContain('LOOKUP JOIN');
     });
 
-    it('appends an exclusive cursor when bounds.lower is provided', () => {
-      const query = getBaseScoreESQLViaLookupJoin(
-        EntityType.user,
-        { lower: 'user:cursor@okta' },
-        5000,
-        1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
-      );
-
-      expect(query).toContain('WHERE entity_id > "user:cursor@okta"');
+    it('throws when getBaseScoreESQLByIds is called with an empty id list', () => {
+      expect(() =>
+        getBaseScoreESQLByIds(EntityType.user, [], 5000, 1000, '.alerts-security.alerts-default')
+      ).toThrow('At least one entity ID must be provided');
     });
 
-    it('escapes quote and backslash characters in the cursor', () => {
-      const query = getBaseScoreESQLViaLookupJoin(
+    it('escapes quote and backslash characters in the base score id list', () => {
+      const query = getBaseScoreESQLByIds(
         EntityType.user,
-        { lower: 'user:with"quote\\slash@okta' },
+        ['user:with"quote\\slash@okta'],
         5000,
         1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
+        '.alerts-security.alerts-default'
       );
 
       expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
@@ -183,15 +169,14 @@ describe('Calculate risk scores with ESQL', () => {
       ['CR', '\u000D'],
       ['LS', '\u2028'],
       ['PS', '\u2029'],
-    ])('throws when base score cursor contains %s control character', (_label, char) => {
+    ])('throws when base score id list contains %s control character', (_label, char) => {
       expect(() =>
-        getBaseScoreESQLViaLookupJoin(
+        getBaseScoreESQLByIds(
           EntityType.user,
-          { lower: `user:bad${char}@okta` },
+          ['user:good@okta', `user:bad${char}@okta`],
           5000,
           1000,
-          '.alerts-security.alerts-default',
-          '.entity_analytics.risk_score.lookup-default'
+          '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
     });
@@ -215,15 +200,14 @@ describe('Calculate risk scores with ESQL', () => {
       ).toThrow('Entity ID contains an unsupported control character');
     });
 
-    it('keeps ordinary EUIDs unchanged in cursor and resolution ID list', () => {
+    it('keeps ordinary EUIDs unchanged in base score and resolution ID lists', () => {
       const euid = 'user:jane@acme.com@okta';
-      const baseQuery = getBaseScoreESQLViaLookupJoin(
+      const baseQuery = getBaseScoreESQLByIds(
         EntityType.user,
-        { lower: euid },
+        [euid],
         5000,
         1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
+        '.alerts-security.alerts-default'
       );
       const resolutionQuery = getResolutionScoreESQLByIds(
         EntityType.user,

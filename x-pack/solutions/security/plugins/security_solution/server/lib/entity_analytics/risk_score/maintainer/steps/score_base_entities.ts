@@ -11,7 +11,8 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
-import { getBaseScoreESQLViaLookupJoin } from '../../calculate_esql_risk_scores';
+import { getBaseScoreESQLByIds } from '../../calculate_esql_risk_scores';
+import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
@@ -48,17 +49,16 @@ export type Phase1BaseScoringSummary = StepResult;
  *
  * Strategy:
  * - The lookup index (built by Phase 0) is the authoritative set of entities
- *   to score. Each row has `entity_id` keyed and `relationship_type` non-null
- *   for every in-store entity.
- * - One ES|QL query per page LOOKUP-JOINs alerts against the lookup index,
- *   drops the cross-product (alerts whose `entity_id` isn't in the lookup),
- *   and STATS BY `entity_id`.
- * - Pagination uses an `entity_id` cursor on the ES|QL output: each page reads
- *   up to `pageSize` rows sorted by `entity_id` ASC (capped at 10,000 by ES|QL),
- *   and the last row's `entity_id` becomes the next page's exclusive lower
- *   bound. Termination: row count < pageSize.
+ *   to score. Phase 0 deduplicates rows by `entity_id`, so a single
+ *   `search_after` walk over the lookup index visits each entity exactly once.
+ * - Each page reads up to `pageSize` `entity_id`s from the lookup index
+ *   (filtered to the current entity type via the EUID type prefix), then
+ *   passes them to one ES|QL query as a `WHERE entity_id IN (...)` clause.
+ *   Lucene pushes the predicate down so non-matching alerts are dropped at
+ *   scan time, keeping memory bounded — empirically ~3× lower than the
+ *   LOOKUP JOIN shape on alert-heavy workloads.
  * - Modifier entities are fetched after scoring, only for IDs that produced
- *   scores — fewer round trips than fetching every store entity upfront.
+ *   scores, to avoid round-trips for entities with zero alerts.
  */
 export const calculateBaseEntityScores = async function* ({
   esClient,
@@ -75,6 +75,7 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
+  const lookupPageSize = Math.min(pageSize, MAX_ENTITY_SEARCH_PAGE_SIZE);
   let cursor: string | undefined;
 
   while (true) {
@@ -83,44 +84,51 @@ export const calculateBaseEntityScores = async function* ({
       return;
     }
 
-    const scores = await scorePage({
+    const { entityIds, nextCursor } = await fetchNextLookupPage({
+      esClient,
+      lookupIndex,
+      entityType,
+      pageSize: lookupPageSize,
+      cursor,
+    });
+
+    if (entityIds.length === 0) {
+      return;
+    }
+
+    const scores = await scorePageByIds({
       esClient,
       entityType,
-      bounds: cursor !== undefined ? { lower: cursor } : {},
+      entityIds,
       sampleSize,
       pageSize,
       alertsIndex,
-      lookupIndex,
       alertFilters,
     });
 
-    if (scores.length === 0) {
-      return;
+    if (scores.length > 0) {
+      const entities = await fetchEntitiesByIds({
+        crudClient,
+        entityIds: scores.map((score) => score.entity_id),
+        logger,
+        errorContext:
+          'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+      });
+
+      yield applyBaseScoreModifiers({
+        scores,
+        entities,
+        now,
+        entityType,
+        calculationRunId,
+        watchlistConfigs,
+      });
     }
 
-    const entities = await fetchEntitiesByIds({
-      crudClient,
-      entityIds: scores.map((score) => score.entity_id),
-      logger,
-      errorContext:
-        'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
-    });
-
-    yield applyBaseScoreModifiers({
-      scores,
-      entities,
-      now,
-      entityType,
-      calculationRunId,
-      watchlistConfigs,
-    });
-
-    // ES|QL caps any single response at 10,000 rows regardless of LIMIT, so
-    // fewer than `pageSize` returned means we've consumed the tail.
-    if (scores.length < pageSize) {
+    if (nextCursor === undefined) {
       return;
     }
-    cursor = scores[scores.length - 1].entity_id;
+    cursor = nextCursor;
   }
 };
 
@@ -155,33 +163,70 @@ export const scoreBaseEntities = async ({
   };
 };
 
-const scorePage = async ({
+const fetchNextLookupPage = async ({
+  esClient,
+  lookupIndex,
+  entityType,
+  pageSize,
+  cursor,
+}: {
+  esClient: ElasticsearchClient;
+  lookupIndex: string;
+  entityType: EntityType;
+  pageSize: number;
+  cursor: string | undefined;
+}): Promise<{ entityIds: string[]; nextCursor: string | undefined }> => {
+  const response = await esClient.search<{ entity_id?: string }>({
+    index: lookupIndex,
+    size: pageSize,
+    _source: ['entity_id'],
+    track_total_hits: false,
+    sort: [{ entity_id: { order: 'asc' } }],
+    // Strict undefined check: the lookup index never stores empty-string EUIDs
+    // today, but a truthy check would treat one as "no cursor" and re-page
+    // from the start — guard against that drift.
+    search_after: cursor !== undefined ? [cursor] : undefined,
+    query: {
+      // EUIDs are always prefixed with `${entityType}:` (see
+      // appendTypeIdIfNeeded in entity_store/common/domain/euid/esql.ts), so
+      // a prefix filter is sufficient to scope the page to one entity type.
+      prefix: { entity_id: `${entityType}:` },
+    },
+  });
+
+  const hits = response.hits.hits ?? [];
+  const entityIds: string[] = [];
+  for (const hit of hits) {
+    const entityId = hit._source?.entity_id;
+    if (typeof entityId === 'string') {
+      entityIds.push(entityId);
+    }
+  }
+
+  // Termination: short page (fewer hits than requested) means the slice for
+  // this entity type is exhausted.
+  const nextCursor = hits.length < pageSize ? undefined : entityIds[entityIds.length - 1];
+  return { entityIds, nextCursor };
+};
+
+const scorePageByIds = async ({
   esClient,
   entityType,
-  bounds,
+  entityIds,
   sampleSize,
   pageSize,
   alertsIndex,
-  lookupIndex,
   alertFilters,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
-  bounds: { lower?: string };
+  entityIds: string[];
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
-  lookupIndex: string;
   alertFilters: QueryDslQueryContainer[];
 }): Promise<ParsedRiskScore[]> => {
-  const query = getBaseScoreESQLViaLookupJoin(
-    entityType,
-    bounds,
-    sampleSize,
-    pageSize,
-    alertsIndex,
-    lookupIndex
-  );
+  const query = getBaseScoreESQLByIds(entityType, entityIds, sampleSize, pageSize, alertsIndex);
   const esqlResponse = await esClient.esql.query({
     query,
     filter: { bool: { filter: alertFilters } },

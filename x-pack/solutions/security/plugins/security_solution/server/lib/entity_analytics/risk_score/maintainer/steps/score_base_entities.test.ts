@@ -42,7 +42,20 @@ const baseParams = {
 
 // Build a fake ES|QL row in the column order parseEsqlBaseScoreRow expects:
 // [alert_count, scores, risk_inputs, entity_id]
-const esqlRow = (entityId: string) => [1, 0.5, '{"risk_score":"50","time":"2026-01-01T00:00:00.000Z","id":"a"}', entityId];
+const esqlRow = (entityId: string) => [
+  1,
+  0.5,
+  '{"risk_score":"50","time":"2026-01-01T00:00:00.000Z","id":"a"}',
+  entityId,
+];
+
+const lookupHit = (entityId: string) => ({ _source: { entity_id: entityId } });
+
+const mockLookupPage = (esClient: ElasticsearchClient, entityIds: string[]) => {
+  (esClient.search as jest.Mock).mockImplementationOnce(async () => ({
+    hits: { hits: entityIds.map(lookupHit) },
+  }));
+};
 
 describe('score_base_entities', () => {
   let esClient: ElasticsearchClient;
@@ -53,54 +66,59 @@ describe('score_base_entities', () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     crudClient = { listEntities: jest.fn() } as unknown as EntityUpdateClient;
     logger = buildLogger();
-    (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [], nextSearchAfter: undefined });
+    (crudClient.listEntities as jest.Mock).mockResolvedValue({
+      entities: [],
+      nextSearchAfter: undefined,
+    });
   });
 
-  it('issues a single ES|QL call when the page is not full (terminates immediately)', async () => {
+  it('terminates after a single page when the lookup page is not full', async () => {
+    mockLookupPage(esClient, ['user:a@okta']);
     (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
       values: [esqlRow('user:a@okta')],
     });
 
-    await collectPages(
-      calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams })
-    );
+    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
 
+    expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
-    const firstQuery = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
-    expect(firstQuery).not.toContain('WHERE entity_id >');
+
+    const lookupCall = (esClient.search as jest.Mock).mock.calls[0][0];
+    expect(lookupCall.index).toBe(baseParams.lookupIndex);
+    expect(lookupCall.search_after).toBeUndefined();
+    expect(lookupCall.query).toEqual({ prefix: { entity_id: 'user:' } });
+
+    const esqlQuery = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+    expect(esqlQuery).toContain('WHERE entity_id IN ("user:a@okta")');
   });
 
-  it('paginates via entity_id cursor when pages are full', async () => {
+  it('paginates the lookup index by entity_id cursor when pages are full', async () => {
+    const fullPage = Array.from(
+      { length: baseParams.pageSize },
+      (_, i) => `user:${i.toString().padStart(3, '0')}@okta`
+    );
+    mockLookupPage(esClient, fullPage);
+    mockLookupPage(esClient, ['user:zzz@okta']);
+
     (esClient.esql.query as jest.Mock)
-      // page 1: full → continue
-      .mockResolvedValueOnce({
-        values: Array.from({ length: baseParams.pageSize }, (_, i) =>
-          esqlRow(`user:${i.toString().padStart(3, '0')}@okta`)
-        ),
-      })
-      // page 2: partial → terminate
+      .mockResolvedValueOnce({ values: fullPage.map(esqlRow) })
       .mockResolvedValueOnce({ values: [esqlRow('user:zzz@okta')] });
 
-    await collectPages(
-      calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams })
-    );
+    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
 
-    expect(esClient.esql.query as jest.Mock).toHaveBeenCalledTimes(2);
-
-    // Page 2's query must carry the cursor — last entity_id of page 1.
-    const secondQuery = (esClient.esql.query as jest.Mock).mock.calls[1][0].query as string;
-    expect(secondQuery).toContain('WHERE entity_id > "user:099@okta"');
+    expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(2);
+    const secondLookupCall = (esClient.search as jest.Mock).mock.calls[1][0];
+    expect(secondLookupCall.search_after).toEqual([fullPage[fullPage.length - 1]]);
   });
 
   it('does not produce another ES|QL call when the abort signal fires between pages', async () => {
     const controller = new AbortController();
+    const fullPage = Array.from({ length: baseParams.pageSize }, (_, i) => `user:${i}@okta`);
+    mockLookupPage(esClient, fullPage);
+
     (esClient.esql.query as jest.Mock).mockImplementationOnce(async () => {
       controller.abort();
-      return {
-        values: Array.from({ length: baseParams.pageSize }, (_, i) =>
-          esqlRow(`user:${i}@okta`)
-        ),
-      };
+      return { values: fullPage.map(esqlRow) };
     });
 
     await collectPages(
@@ -117,18 +135,27 @@ describe('score_base_entities', () => {
   });
 
   it('fetches modifier entities only for IDs that produced scores', async () => {
+    // Lookup returns three IDs but only two get scored.
+    mockLookupPage(esClient, ['user:a@okta', 'user:b@okta', 'user:c@okta']);
     (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
       values: [esqlRow('user:a@okta'), esqlRow('user:b@okta')],
     });
 
-    await collectPages(
-      calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams })
-    );
+    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
 
     expect(crudClient.listEntities as jest.Mock).toHaveBeenCalledTimes(1);
     const fetchArgs = (crudClient.listEntities as jest.Mock).mock.calls[0][0];
     expect(fetchArgs.filter).toEqual({
       terms: { 'entity.id': ['user:a@okta', 'user:b@okta'] },
     });
+  });
+
+  it('skips ES|QL and modifier fetches when the lookup page is empty', async () => {
+    mockLookupPage(esClient, []);
+
+    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+
+    expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+    expect(crudClient.listEntities as jest.Mock).not.toHaveBeenCalled();
   });
 });
