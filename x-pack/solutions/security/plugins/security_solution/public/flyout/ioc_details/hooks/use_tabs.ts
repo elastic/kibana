@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import type { PanelPath } from '@kbn/expandable-flyout';
-import type { RightPanelPaths } from '../../../flyout_v2/ioc_details/tabs';
+import type { RightPanelPaths } from '../../../flyout_v2/ioc/tabs';
 import { useKibana } from '../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../../flyout_v2/ioc_details/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../flyout_v2/ioc/constants/local_storage';
 
 const validTabIds: RightPanelPaths[] = ['overview', 'table', 'json'];
 
