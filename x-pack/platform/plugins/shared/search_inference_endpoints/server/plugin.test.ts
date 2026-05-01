@@ -98,9 +98,13 @@ describe('SearchInferenceEndpointsPlugin', () => {
       const coreStart = coreMock.createStart();
       plugin.setup(coreSetup, { features });
 
+      const inference = inferenceMock.createStartContract();
+      inference.getConnectorList.mockResolvedValue([]);
+      inference.getConnectorById.mockRejectedValue(new Error('not found'));
+
       const startContract = plugin.start(coreStart, {
         actions: actionsMock.createStart(),
-        inference: inferenceMock.createStartContract(),
+        inference,
       });
 
       const request = httpServerMock.createKibanaRequest();

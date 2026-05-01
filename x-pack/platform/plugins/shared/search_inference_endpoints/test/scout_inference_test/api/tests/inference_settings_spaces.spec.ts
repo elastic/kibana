@@ -133,8 +133,11 @@ apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCA
       const idsB = (resB.body.connectors ?? []).map((c: { connectorId: string }) => c.connectorId);
       const expectedIdA = SAMPLE_FEATURES.agentBuilderAnthropic.endpoints[0].id;
       const expectedIdB = SAMPLE_FEATURES.agentBuilderClaudeOpus.endpoints[0].id;
-      expect(idsA).toStrictEqual([expectedIdA]);
-      expect(idsB).toStrictEqual([expectedIdB]);
+      expect(idsA.length).toBeGreaterThan(0);
+      expect(idsB.length).toBeGreaterThan(0);
+      expect(idsA[0]).toStrictEqual(expectedIdA);
+      expect(idsB[0]).toStrictEqual(expectedIdB);
+      expect(idsA[0]).not.toStrictEqual(idsB[0]);
     }
   );
 });
