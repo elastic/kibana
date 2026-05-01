@@ -6,16 +6,15 @@
  */
 
 import expect from 'expect';
-import { partition } from 'lodash';
 import type SuperTest from 'supertest';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { ITEM_TYPE, ENDPOINT_TYPE } from '@kbn/lists-plugin/common/constants.mock';
+import { ITEM_TYPE, DETECTION_TYPE } from '@kbn/lists-plugin/common/constants.mock';
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { binaryToString, deleteAllExceptions } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createExceptionList,
   createExceptionListItem,
@@ -26,21 +25,16 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const es = getService('es');
 
-  describe.only('@serverless @ess Exceptions API - Exporting Exception Lists', () => {
-    let ids: string[];
-    let listIds: string[];
-
+  describe('@serverless @ess Exceptions API - Exporting Exception Lists', () => {
     before(async () => {
       await deleteAllExceptions(supertest, log);
 
       // create three lists, each with two items
-      // TODO make this a method of the lists test service
-      ({ ids, listIds } = await bulkCreateExceptionLists(supertest, log, {
+      await bulkCreateExceptionLists(supertest, log, {
         listCount: 3,
         itemCount: 2,
-      }));
+      });
     });
 
     after(async () => {
@@ -81,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).toEqual(
         expect.objectContaining({
           message:
-            'No lists found for filter: "exception-list.attributes.list_id:non-existent-list-id"',
+            'No exception lists found for filter: "exception-list.attributes.list_id:non-existent-list-id"',
           status_code: 404,
         })
       );
@@ -95,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
         .parse(binaryToString);
 
       const exportedRows: Array<{ type: string; list_id: string }> = parseRows(body);
-      const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+      const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
       const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
 
       expect(exportedLists).toHaveLength(1); // 1 list matching the filter
@@ -115,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         .parse(binaryToString);
 
       const exportedRows: Array<{ type: string; list_id: string }> = parseRows(body);
-      const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+      const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
       const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
 
       expect(exportedLists).toHaveLength(2); // 2 lists matching the filter
@@ -133,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
         .parse(binaryToString);
 
       const exportedRows: Array<{ type: string }> = parseRows(body);
-      const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+      const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
       const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
 
       expect(exportedLists).toHaveLength(3); // 3 lists
@@ -164,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
           .parse(binaryToString);
 
         const exportedRows: Array<{ type: string }> = parseRows(body);
-        const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+        const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
         const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
 
         expect(exportedLists).toHaveLength(3); // 3 lists
@@ -179,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
           .parse(binaryToString);
 
         const exportedRows: Array<{ type: string }> = parseRows(body);
-        const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+        const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
         const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
 
         expect(exportedLists).toHaveLength(3); // 3 lists
@@ -216,17 +210,14 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200)
           .parse(binaryToString);
 
-        const exportedRows: Array<{ type: string }> = parseRows(body);
-        const [exportedItems, exportedLists] = partition(
-          exportedRows,
-          (row) => row?.type === ITEM_TYPE
-        );
+        const exportedRows: Array<{ type: string; list_id?: string }> = parseRows(body);
+        const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
+        const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+        const exportedListIds = exportedLists.map((row) => row.list_id);
 
-        console.log('exportedItems', JSON.stringify(exportedItems, null, 2));
-        console.log('exportedLists', JSON.stringify(exportedLists, null, 2));
-
-        expect(exportedLists).toHaveLength(3); // 3 lists
-        expect(exportedItems).toHaveLength(6); // 3 lists * 2 items
+        expect(exportedLists).toHaveLength(3); // 3 detection lists; defend list excluded
+        expect(exportedItems).toHaveLength(6); // 3 lists * 2 items; defend item excluded
+        expect(exportedListIds).not.toContain('endpoint-list');
       });
     });
 
@@ -241,7 +232,6 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
-// TODO make this create rule exception lists
 const bulkCreateExceptionLists = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
@@ -255,7 +245,12 @@ const bulkCreateExceptionLists = async (
     const { body: list } = await supertest
       .post(EXCEPTION_LIST_URL)
       .set('kbn-xsrf', 'true')
-      .send(getCreateExceptionListMinimalSchemaMock({ list_id: `list-${i}` }))
+      .send(
+        getCreateExceptionListMinimalSchemaMock({
+          list_id: `list-${i}`,
+          type: DETECTION_TYPE,
+        })
+      )
       .expect(200);
 
     ids.push(list.id);

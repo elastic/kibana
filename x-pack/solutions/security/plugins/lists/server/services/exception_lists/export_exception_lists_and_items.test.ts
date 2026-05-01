@@ -6,23 +6,31 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 
 import { exportExceptionListsAndItems } from './export_exception_lists_and_items';
-import { findExceptionListItemsPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
+import { findExceptionListsItemsPointInTimeFinder } from './find_exception_lists_items_point_in_time_finder';
 import { findExceptionListPointInTimeFinder } from './find_exception_list_point_in_time_finder';
 
-jest.mock('./find_exception_list_items_point_in_time_finder');
+jest.mock('./find_exception_lists_items_point_in_time_finder');
 jest.mock('./find_exception_list_point_in_time_finder');
+
+const namespaceType: NamespaceType = 'single';
+
+const baseOptions = {
+  filter: undefined,
+  includeExpiredExceptions: true,
+  namespaceType,
+  savedObjectsClient: savedObjectsClientMock.create(),
+};
 
 describe('export_exception_lists_and_items', () => {
   describe('exportExceptionListsAndItems', () => {
     it('returns null when no exception lists are found', async () => {
-      const result = await exportExceptionListsAndItems({
-        includeExpiredExceptions: true,
-      });
+      const result = await exportExceptionListsAndItems(baseOptions);
 
       expect(result).toEqual(null);
     });
@@ -38,7 +46,7 @@ describe('export_exception_lists_and_items', () => {
           });
         }
       );
-      (findExceptionListItemsPointInTimeFinder as jest.Mock).mockImplementationOnce(
+      (findExceptionListsItemsPointInTimeFinder as jest.Mock).mockImplementationOnce(
         ({ executeFunctionOnStream }) => {
           executeFunctionOnStream({
             data: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
@@ -46,9 +54,7 @@ describe('export_exception_lists_and_items', () => {
         }
       );
 
-      const result = await exportExceptionListsAndItems({
-        includeExpiredExceptions: true,
-      });
+      const result = await exportExceptionListsAndItems(baseOptions);
 
       const parsedExportData =
         result?.exportData
