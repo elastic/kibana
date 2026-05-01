@@ -7,11 +7,10 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
-import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { CloudLinks } from './cloud_links';
@@ -24,8 +23,6 @@ export const SearchHomepagePage = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
-
-  const { user } = useAuthenticatedUser();
 
   useEffect(() => {
     if (searchNavigation) {
@@ -60,18 +57,7 @@ export const SearchHomepagePage = () => {
               data-test-subj="searchHomepageHeaderLeftsideGroup"
             >
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>
-                    {user?.full_name
-                      ? i18n.translate('xpack.searchHomepage.welcome.title', {
-                          defaultMessage: 'Welcome, {username}',
-                          values: { username: user.full_name },
-                        })
-                      : i18n.translate('xpack.searchHomepage.welcome.title.default', {
-                          defaultMessage: 'Welcome',
-                        })}
-                  </h3>
-                </EuiTitle>
+                <CloudLinks />
               </EuiFlexItem>
               {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
                 <EuiFlexItem grow={false}>
@@ -81,40 +67,28 @@ export const SearchHomepagePage = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <ConnectToElasticsearch />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ConnectToElasticsearch />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup>
+          <BasicMetricBadges />
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <BasicMetricBadges />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CloudLinks
-              versionBadge={
-                <KibanaVersionBadge
-                  docLink={
-                    cloud?.isServerlessEnabled
-                      ? docLinks.serverlessReleaseNotes
-                      : cloud?.isCloudEnabled
-                      ? docLinks.hostedCloudReleaseNotes
-                      : docLinks.releaseNotes
-                  }
-                  kibanaVersion={
-                    !cloud?.isServerlessEnabled
-                      ? `v${kibanaVersion}`
-                      : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
-                          defaultMessage: 'Changelog',
-                        })
-                  }
-                />
+            <KibanaVersionBadge
+              docLink={
+                cloud?.isServerlessEnabled
+                  ? docLinks.serverlessReleaseNotes
+                  : cloud?.isCloudEnabled
+                  ? docLinks.hostedCloudReleaseNotes
+                  : docLinks.releaseNotes
+              }
+              kibanaVersion={
+                !cloud?.isServerlessEnabled
+                  ? `v${kibanaVersion}`
+                  : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
+                      defaultMessage: 'Changelog',
+                    })
               }
             />
           </EuiFlexItem>

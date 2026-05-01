@@ -5,96 +5,85 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
-const CLOUD_LINKS = [
-  {
-    id: 'organization',
-    label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
-      defaultMessage: 'Organization',
-    }),
-    path: '/account/members',
-  },
-  {
-    id: 'billing',
-    label: i18n.translate('xpack.searchHomepage.cloudLinks.billing', {
-      defaultMessage: 'Billing',
-    }),
-    path: '/billing/overview',
-  },
-  {
-    id: 'usage',
-    label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
-      defaultMessage: 'Usage',
-    }),
-    path: '/billing/usage',
-  },
-];
-
-interface CloudLinksProps {
-  versionBadge?: ReactNode;
-}
-
-export const CloudLinks = ({ versionBadge }: CloudLinksProps) => {
+export const CloudLinks = () => {
   const {
     services: { cloud },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const separatorCss = css({
-    borderLeft: euiTheme.border.thin,
-    height: euiTheme.size.l,
-  });
+  if (!cloud?.isCloudEnabled || !cloud?.baseUrl) {
+    return null;
+  }
 
-  const showCloudLinks = cloud?.isCloudEnabled && cloud?.baseUrl;
-  const baseUrl = cloud?.baseUrl?.replace(/\/$/, '');
+  const baseUrl = cloud.baseUrl.replace(/\/$/, '');
+
+  const cloudLinks = [
+    {
+      id: 'elasticCloud',
+      label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
+        defaultMessage: 'Elastic Cloud',
+      }),
+      path: '/home',
+    },
+    {
+      id: 'usage',
+      label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
+        defaultMessage: 'Usage',
+      }),
+      path: '/billing/usage',
+    },
+    {
+      id: 'organization',
+      label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
+        defaultMessage: 'Organization',
+      }),
+      path: '/account/members',
+    },
+  ];
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-      {showCloudLinks && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              href={`${baseUrl}/home`}
-              target="_blank"
-              external={false}
-              data-test-subj="searchHomepageCloudLink-home"
-            >
-              <EuiIcon type="logoCloud" size="m" aria-hidden={true} />
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span css={separatorCss} />
-          </EuiFlexItem>
-          {CLOUD_LINKS.map((link) => (
-            <EuiFlexItem grow={false} key={link.id}>
-              <EuiLink
-                href={`${baseUrl}${link.path}`}
-                target="_blank"
-                external={false}
-                data-test-subj={`searchHomepageCloudLink-${link.id}`}
-              >
-                {link.label}
-              </EuiLink>
-            </EuiFlexItem>
-          ))}
-        </>
-      )}
-      {versionBadge && (
-        <>
-          {showCloudLinks && (
-            <EuiFlexItem grow={false}>
-              <span css={separatorCss} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>{versionBadge}</EuiFlexItem>
-        </>
-      )}
+    <EuiFlexGroup
+      gutterSize="m"
+      alignItems="center"
+      css={css`
+        background: ${euiTheme.colors.backgroundBasePrimary};
+        border-radius: ${euiTheme.size.m};
+        height: 24px;
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          href={`${baseUrl}/home`}
+          target="_blank"
+          external={false}
+          data-test-subj="searchHomepageCloudLink-home"
+        >
+          <EuiIcon type="logoCloud" size="m" aria-hidden={true} />
+        </EuiLink>
+      </EuiFlexItem>
+      {cloudLinks.map((link) => (
+        <EuiFlexItem grow={false} key={link.id}>
+          <EuiLink
+            href={`${baseUrl}${link.path}`}
+            target="_blank"
+            external={false}
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+            `}
+            data-test-subj={`searchHomepageCloudLink-${link.id}`}
+          >
+            {link.label}
+          </EuiLink>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };
