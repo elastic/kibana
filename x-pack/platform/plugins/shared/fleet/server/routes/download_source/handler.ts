@@ -25,8 +25,32 @@ import type {
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 
-function ensureNoDuplicateSecrets(downloadSource: Partial<DownloadSource>) {
+// Support clearing auth via PUT requests
+export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
+  auth?: DownloadSource['auth'] | null;
+};
+
+/**
+ * Validates download source auth configuration.
+ *
+ * Allowed auth configurations:
+ * - auth headers only (no credentials)
+ * - username + password (together), optionally with headers (no api_key)
+ * - api_key, optionally with headers (no username/password)
+ * - auth: null (to clear all auth data)
+ * - auth: undefined (no changes to auth)
+ */
+export function validateDownloadSource(downloadSource: DownloadSourceWithNullableAuth) {
+  throwIfSslPathInvalid([
+    ...(downloadSource.ssl?.certificate_authorities ?? []),
+    downloadSource.ssl?.certificate,
+    downloadSource.ssl?.key,
+    downloadSource.secrets?.ssl?.key,
+  ]);
+
+  // For settings that can be stored as secrets, only allow either plain text or secret reference.
   if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
   }

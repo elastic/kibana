@@ -107,3 +107,5 @@ export {
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
+
+export { validateSslCertPath } from './ssl_validators';

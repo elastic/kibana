@@ -230,12 +230,7 @@ export const KafkaSchema = {
       schema.literal(kafkaCompressionType.None),
     ])
   ),
-  compression_level: schema.conditional(
-    schema.siblingRef('compression'),
-    schema.string({ validate: (val) => (val === kafkaCompressionType.Gzip ? undefined : 'never') }),
-    schema.number(),
-    schema.never()
-  ),
+  compression_level: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   client_id: schema.maybe(schema.string()),
   auth_type: schema.oneOf([
     schema.literal(kafkaAuthType.None),
