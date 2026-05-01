@@ -6,7 +6,6 @@
  */
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,10 +15,8 @@ import {
   EuiFormLabel,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTextColor,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -48,6 +45,7 @@ import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_wind
 import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
 import { EpisodeMatcherInput } from './episode_matcher_input';
+import { EpisodeScopedQuerySwitch } from './episode_scoped_query_switch';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
@@ -490,37 +488,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h4>{i18n.CREATE_FORM_ALERTINGV2_FILTERS_TITLE}</h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.TECHNICAL_PREVIEW_LABEL}
-                  iconType="flask"
-                  tooltipContent={i18n.CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP}
-                  size="s"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiText size="s">
-              <p>
-                <EuiTextColor color="subdued">
-                  {i18n.CREATE_FORM_ALERTINGV2_FILTERS_DESCRIPTION}
-                </EuiTextColor>
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
             <UseField path="scopeEpisodeQuery">
               {() => (
                 <>
-                  <EuiSwitch
-                    data-test-subj="maintenanceWindowEpisodeDataFilterSwitch"
-                    label={i18n.CREATE_FORM_ALERTINGV2_FILTERS_TOGGLE_LABEL}
+                  <EpisodeScopedQuerySwitch
                     checked={isEpisodeQueryEnabled}
-                    onChange={onEpisodeQueryToggle}
+                    onEnabledChange={setIsEpisodeQueryEnabled}
                   />
                   {isEpisodeQueryEnabled && (
                     <>

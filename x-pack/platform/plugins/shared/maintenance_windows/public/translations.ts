@@ -503,7 +503,7 @@ export const CREATE_FORM_ALERTINGV2_FILTERS_DESCRIPTION = i18n.translate(
 export const CREATE_FORM_ALERTINGV2_FILTERS_TOGGLE_LABEL = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2FiltersToggleLabel',
   {
-    defaultMessage: 'Filter episodes by data',
+    defaultMessage: 'Filter episodes',
   }
 );
 
