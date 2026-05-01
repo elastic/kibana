@@ -164,6 +164,36 @@ describe('formatStepEntry', () => {
       )
     ).toBe('- foreach (Loop) — Loop over a list');
   });
+
+  it('does NOT strip a parenthetical when its content does not equal the id (e.g. "(Async)")', () => {
+    expect(
+      formatStepEntry(
+        step({
+          id: 'workflow.executeAsync',
+          label: 'Execute Workflow (Async)',
+          description: 'Start another workflow without waiting',
+        })
+      )
+    ).toBe(
+      '- workflow.executeAsync (Execute Workflow (Async)) — Start another workflow without waiting'
+    );
+  });
+
+  it('keeps a label that adds context beyond the id (id is contained in the label)', () => {
+    expect(
+      formatStepEntry(
+        step({ id: 'teams', label: 'Microsoft Teams', description: undefined })
+      )
+    ).toBe('- teams (Microsoft Teams)');
+  });
+
+  it('keeps a label like "ServiceNow ITSM" when only the id is contained in it', () => {
+    expect(
+      formatStepEntry(
+        step({ id: 'servicenow', label: 'ServiceNow ITSM', description: undefined })
+      )
+    ).toBe('- servicenow (ServiceNow ITSM)');
+  });
 });
 
 describe('collapseSubActionFamilies', () => {

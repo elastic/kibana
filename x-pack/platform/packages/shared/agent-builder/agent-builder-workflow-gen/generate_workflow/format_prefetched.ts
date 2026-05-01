@@ -54,18 +54,38 @@ export const formatConnectorsBlock = (connectors: ConnectorSummary[]): string =>
 
 const normalize = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-// Strip trailing parenthetical hints from labels like "Loop (foreach)" → "Loop".
-const cleanLabel = (label: string): string => label.replace(/\s*\([^)]*\)\s*$/, '').trim();
+// Strip a trailing parenthetical hint from a label only when its content
+// matches the id exactly (e.g. "Loop (foreach)" with id "foreach" → "Loop").
+// We do NOT strip when the parenthetical adds discriminating info that's
+// not just a verbatim id repeat (e.g. "Execute Workflow (Async)" with id
+// "workflow.executeAsync" — paren content "Async" ≠ id, keep it).
+const cleanLabel = (label: string, id: string): string => {
+  const match = label.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  if (!match) return label.trim();
+  const [, head, paren] = match;
+  if (normalize(paren) === normalize(id)) {
+    return head.trim();
+  }
+  return label.trim();
+};
 
+// Drop the label only when it is "smaller-or-equal" to the id (i.e. a
+// substring of the id after normalization). When the label is BIGGER than
+// the id (id ⊆ label), the label is adding context — keep it.
+// Examples:
+//   - id="loop.break", label="Break"          → label ⊆ id  → drop
+//   - id="console", label="Console"           → label = id  → drop
+//   - id="teams",   label="Microsoft Teams"   → id ⊆ label  → keep
+//   - id="servicenow", label="ServiceNow ITSM" → id ⊆ label → keep
 const isLabelRedundant = (label: string, id: string): boolean => {
   const nLabel = normalize(label);
-  const nId = normalize(id);
   if (!nLabel) return true;
-  return nId.includes(nLabel) || nLabel.includes(nId);
+  const nId = normalize(id);
+  return nId.includes(nLabel);
 };
 
 export const formatStepEntry = (s: StepDefinitionSummary): string => {
-  const cleanedLabel = cleanLabel(s.label);
+  const cleanedLabel = cleanLabel(s.label, s.id);
   const labelRedundant = isLabelRedundant(cleanedLabel, s.id);
   const description =
     s.description && s.description !== s.label && s.description !== cleanedLabel
@@ -223,7 +243,7 @@ export const formatStepDefinitionsBlock = (
 export const formatTriggersBlock = (defs: TriggerDefinitionSummary[]): string =>
   defs
     .map((d) => {
-      const cleanedLabel = cleanLabel(d.label);
+      const cleanedLabel = cleanLabel(d.label, d.id);
       const labelRedundant = isLabelRedundant(cleanedLabel, d.id);
       const description =
         d.description && d.description !== d.label && d.description !== cleanedLabel
