@@ -47,9 +47,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain(
       'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
     );
-    expect(queryString).toContain(
-      'last_tags = LAST(tags, @timestamp) WHERE (action_type IN ("tag"))'
-    );
+    expect(queryString).toContain('last_tags = LAST(tags, @timestamp) WHERE action_type == "tag"');
     expect(queryString).toContain('BY group_hash');
     expect(queryString).toContain('EVAL effective_status = CASE');
     expect(queryString).toContain('last_deactivate_action == "deactivate"');
@@ -224,12 +222,14 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('action_type IN ("deactivate", "activate", "tag", "assign")');
-    expect(queryString).toContain('_ep_id = COALESCE(episode_id, episode.id)');
     expect(queryString).toContain(
-      'last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE (action_type IN ("assign"))'
+      'action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
-    expect(queryString).toContain('BY _ep_id');
+    expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
+    expect(queryString).toContain(
+      'last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"'
+    );
+    expect(queryString).toContain('BY episode_id');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
   });
 
@@ -237,8 +237,10 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery({ sortField: '@timestamp', sortDirection: 'desc' }, {});
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('action_type IN ("deactivate", "activate", "tag", "assign")');
-    expect(queryString).toContain('_ep_id = COALESCE(episode_id, episode.id)');
+    expect(queryString).toContain(
+      'action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")'
+    );
+    expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
     expect(queryString).toContain('last_assignee_uid');
     expect(queryString).not.toContain('WHERE last_assignee_uid');
   });
@@ -264,5 +266,28 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
+});
+
+describe('buildEpisodesBaseQuery — action state stats', () => {
+  it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {
+    const esql = buildEpisodesBaseQuery().print('basic');
+    expect(esql).toMatch(
+      /last_snooze_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("snooze",\s*"unsnooze"\)\)/
+    );
+    expect(esql).toMatch(
+      /snooze_expiry\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
+    );
+  });
+  it('unifies episode.id and episode_id before computing per-episode action stats', () => {
+    const esql = buildEpisodesBaseQuery().print('basic');
+    expect(esql).toMatch(/EVAL\s+episode_id\s*=\s*COALESCE\(`episode\.id`,\s*episode_id\)/);
+    expect(esql).toMatch(
+      /last_ack_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("ack",\s*"unack"\)\)/
+    );
+    expect(esql).toMatch(
+      /last_assignee_uid\s*=\s*LAST\(assignee_uid,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"assign"/
+    );
+    expect(esql).toMatch(/BY\s*episode_id/);
   });
 });
