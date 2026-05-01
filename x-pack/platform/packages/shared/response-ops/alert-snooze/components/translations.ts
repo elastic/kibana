@@ -85,12 +85,20 @@ export const SNOOZE_BUTTON = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.snoozeButton',
   { defaultMessage: 'Snooze alert' }
 );
+export const QUICK_SNOOZE_POPOVER_SUBTITLE = i18n.translate(
+  'responseOpsAlertSnooze.quickSnoozePopover.subtitle',
+  { defaultMessage: 'Silence actions immediately or schedule downtime and conditions.' }
+);
+export const QUICK_SNOOZE_POPOVER_APPLY = i18n.translate(
+  'responseOpsAlertSnooze.quickSnoozePopover.apply',
+  { defaultMessage: 'Apply' }
+);
 
 export const PANEL_TITLE = i18n.translate('responseOpsAlertSnooze.alertSnoozePanel.title', {
   defaultMessage: 'Snooze notifications',
 });
 export const PANEL_SUBTITLE = i18n.translate('responseOpsAlertSnooze.alertSnoozePanel.subtitle', {
-  defaultMessage: 'Silence actions immediately or schedule downtimes and conditions.',
+  defaultMessage: 'Silence actions immediately or schedule downtimes.',
 });
 export const SNOOZE_TYPE_LEGEND = i18n.translate(
   'responseOpsAlertSnooze.alertSnoozePanel.snoozeTypeLegend',

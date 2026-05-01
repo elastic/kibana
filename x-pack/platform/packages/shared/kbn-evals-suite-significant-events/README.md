@@ -146,6 +146,7 @@ node scripts/evals run \
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
+| `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
 | `TRACING_ES_API_KEY`                    | API key for the trace Elasticsearch cluster                                 | —                          |
 

@@ -127,7 +127,7 @@ export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) =>
 
       {previewText !== null && (
         <EuiPanel color="subdued" paddingSize="s" hasBorder={false} hasShadow={false}>
-          <EuiText size="s" data-test-subj="quickSnoozeUnsnoozeTime">
+          <EuiText size="xs" data-test-subj="quickSnoozeUnsnoozeTime" color="subdued">
             <p>{previewText}</p>
           </EuiText>
         </EuiPanel>

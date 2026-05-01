@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../..';
@@ -73,8 +74,10 @@ export interface UrlSyncedAlertsSearchBarProps
   > {
   showFilterControls?: boolean;
   urlStorageKey?: string;
+  filterControlsStorageKey?: string;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
   onFilterSelected?: (filters: Filter[]) => void;
+  defaultFilterControls?: FilterControlConfig[];
 }
 
 /**
@@ -84,8 +87,10 @@ export const UrlSyncedAlertsSearchBar = ({
   ruleTypeIds,
   showFilterControls = false,
   urlStorageKey = ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
+  filterControlsStorageKey: filterControlsStorageKeyProp = 'alertsSearchBar',
   onEsQueryChange,
   onFilterSelected,
+  defaultFilterControls,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -174,8 +179,8 @@ export const UrlSyncedAlertsSearchBar = ({
   );
 
   const filterControlsStorageKey = useMemo(
-    () => ['alertsSearchBar', spaceId, 'filterControls'].filter(Boolean).join('.'),
-    [spaceId]
+    () => [filterControlsStorageKeyProp, spaceId, 'filterControls'].filter(Boolean).join('.'),
+    [filterControlsStorageKeyProp, spaceId]
   );
 
   const resetFilters = useCallback(() => {
@@ -211,6 +216,7 @@ export const UrlSyncedAlertsSearchBar = ({
             filters={controlFilters}
             onFiltersChange={onControlFiltersChange}
             storageKey={filterControlsStorageKey}
+            defaultControls={defaultFilterControls}
             services={{
               http,
               notifications,

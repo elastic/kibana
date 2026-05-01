@@ -1,5 +1,5 @@
 {
-  "sha1": "f2e92329c9196e2894197cfc12de20e9f0a29802",
+  "sha1": "4a83423f5f891945fce7f525c0a3cf57eea06e5e",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -79,28 +79,28 @@
     {
       "id": "ca5617d2526fece-4f1df209bb20bf0",
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 38,
+        "line": 37,
         "column": 7
       }
     },
     {
       "id": "ca5617d2526fece-6a2b3b1f642b875",
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 79,
+        "line": 78,
         "column": 7
       }
     },
@@ -116,7 +116,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
-        "line": 29,
+        "line": 34,
         "column": 9
       }
     },
@@ -132,7 +132,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
-        "line": 41,
+        "line": 45,
         "column": 9
       }
     },
@@ -148,7 +148,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
-        "line": 53,
+        "line": 56,
         "column": 9
       }
     },
@@ -3414,7 +3414,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 80,
+        "line": 75,
         "column": 7
       }
     },
@@ -3428,7 +3428,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 119,
+        "line": 110,
         "column": 7
       }
     },
@@ -3484,7 +3484,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 9
       }
     },
@@ -3498,7 +3498,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
-        "line": 93,
+        "line": 92,
         "column": 9
       }
     },
@@ -3514,6 +3514,62 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream.spec.ts",
         "line": 47,
         "column": 7
+      }
+    },
+    {
+      "id": "3e76e529836fa51-954060f727470ef",
+      "title": "Query streams - Deleting nested query streams cascades to children Should remove deleted child query streams and their nested children from the streams list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/query_stream_nesting_delete.spec.ts",
+        "line": 51,
+        "column": 9
+      }
+    },
+    {
+      "id": "1d7b60af2dc5a0a-2b60abaef4ef722",
+      "title": "Query streams - Error when child references wrong parent Should error when child query stream references wrong parent in ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/query_stream_nesting_error.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "579ac9c8d69db7d-be15972670dc753",
+      "title": "Query streams - Nested partitioning from ingest stream parent Should create nested query streams from ingest stream parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/query_stream_nesting_ingest_parent.spec.ts",
+        "line": 51,
+        "column": 9
+      }
+    },
+    {
+      "id": "69ce3bc6cc1651a-c770787ca18927a",
+      "title": "Query streams - Nested partitioning from query stream parent Should create nested query streams from query stream parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/query_stream_nesting_query_parent.spec.ts",
+        "line": 51,
+        "column": 9
       }
     },
     {

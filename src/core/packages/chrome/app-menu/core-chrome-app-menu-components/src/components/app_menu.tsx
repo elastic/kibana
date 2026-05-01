@@ -68,6 +68,7 @@ export const AppMenuComponent = ({
     shouldOverflow: shouldOverflowBase,
   } = getAppMenuItems({
     config,
+    hasStaticItems,
   });
 
   const processedStaticItems = processStaticItems(staticItems);
