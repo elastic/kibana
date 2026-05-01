@@ -88,7 +88,7 @@ const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
   });
 };
 
-export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>((props) => {
+export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormProps) => {
   const {
     onCancel,
     onSuccess,
@@ -557,6 +557,4 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       </EuiFlexGroup>
     </Form>
   );
-});
-
-CreateMaintenanceWindowForm.displayName = 'CreateMaintenanceWindowForm';
+};

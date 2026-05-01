@@ -29,7 +29,7 @@ export interface ScopeSectionProps {
   children: React.ReactNode;
 }
 
-export const ScopeSection: React.FC<ScopeSectionProps> = ({
+export const ScopeSection = ({
   title,
   description,
   switchLabel,
@@ -38,7 +38,7 @@ export const ScopeSection: React.FC<ScopeSectionProps> = ({
   switchDataTestSubj,
   expandedSubtitle,
   children,
-}) => (
+}: ScopeSectionProps) => (
   <EuiPanel hasBorder={true}>
     <EuiFlexGroup
       direction="row"
