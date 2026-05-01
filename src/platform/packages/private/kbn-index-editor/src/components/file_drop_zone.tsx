@@ -31,7 +31,9 @@ import { FilesPreview } from './file_preview';
 import type { KibanaContextExtra } from '../types';
 import { IndexEditorErrors } from '../types';
 
-const acceptedFileFormats = ['.csv'];
+const acceptedFileFormats: Record<string, string[]> = {
+  'text/csv': ['.csv'],
+};
 
 export interface FileSelectorContextType {
   onFileSelectorClick: () => void;
