@@ -120,46 +120,51 @@ export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.solutionSelection.title',
+export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.alerts.title', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.scope.alerts.description',
   {
-    defaultMessage: 'Solution specific maintenance window',
+    defaultMessage: 'Supress alert notifications during maintenance',
   }
 );
 
-export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.createForm.solutionSelection.description',
+export const SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.title', {
+  defaultMessage: 'Scope',
+});
+
+export const SCOPE_DESCRIPTION = i18n.translate('xpack.maintenanceWindows.scope.description', {
+  defaultMessage:
+    'Select the scope of this maintenance window by choosing what to suppress during maintenance',
+});
+
+export const FILTER_ALERTS_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.alerts.filterAlertsSubtitle',
   {
-    defaultMessage:
-      'Only rules associated with the selected solution are affected by the maintenance window.',
+    defaultMessage: 'Filter alerts',
   }
 );
 
-export const CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.solutionSelection.checkboxGroupTitle',
+export const EPISODES_SCOPE_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.episodes.title',
   {
-    defaultMessage: 'Select the solution this should affect',
+    defaultMessage: 'Episodes',
   }
 );
 
-export const CREATE_FORM_SOLUTION_OBSERVABILITY_RULES = i18n.translate(
-  'xpack.maintenanceWindows.createForm.solutionIds.observabilityRules',
+export const EPISODES_SCOPE_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.scope.episodes.description',
   {
-    defaultMessage: 'Observability rules',
+    defaultMessage: 'Supress alert notifications during maintenance',
   }
 );
 
-export const CREATE_FORM_SOLUTION_SECURITY_RULES = i18n.translate(
-  'xpack.maintenanceWindows.createForm.solutionIds.securityRules',
+export const FILTER_EPISODES_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.episodes.filterEpisodesSubtitle',
   {
-    defaultMessage: 'Security rules',
-  }
-);
-
-export const CREATE_FORM_SOLUTION_STACK_RULES = i18n.translate(
-  'xpack.maintenanceWindows.createForm.solutionIds.stackRules',
-  {
-    defaultMessage: 'Stack rules',
+    defaultMessage: 'Filter episodes',
   }
 );
 
@@ -173,7 +178,7 @@ export const CREATE_FORM_SCOPED_QUERY_TITLE = i18n.translate(
 export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.createForm.scopedQuery.description',
   {
-    defaultMessage: 'Add filters that refine the scope of the maintenance window.',
+    defaultMessage: 'Supress alert notifications during maintenance',
   }
 );
 
@@ -206,15 +211,6 @@ export const CREATE_FORM_RECURRING_SUMMARY_PREFIX = (summary: string) =>
 
 export const CANCEL = i18n.translate('xpack.maintenanceWindows.createForm.cancel', {
   defaultMessage: 'Cancel',
-});
-
-export const TABLE_ALERTS = i18n.translate('xpack.maintenanceWindows.table.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-// Add this tooltip to the Alerts column heading on the MW table
-export const TABLE_ALERTS_TOOLTIP = i18n.translate('xpack.maintenanceWindows.table.alertsTooltip', {
-  defaultMessage: 'The total number of alerts created in the maintenance window.',
 });
 
 export const TABLE_STATUS = i18n.translate('xpack.maintenanceWindows.table.status', {

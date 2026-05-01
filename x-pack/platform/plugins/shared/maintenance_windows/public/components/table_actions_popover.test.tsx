@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 
@@ -133,11 +133,8 @@ describe('TableActionsPopover', () => {
   });
 
   test('it shows the success toast when maintenance window id is copied', async () => {
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: jest.fn().mockResolvedValue(''),
-      },
-    });
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const writeTextSpy = jest.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
 
     const result = appMockRenderer.render(
       <TableActionsPopover
@@ -152,19 +149,21 @@ describe('TableActionsPopover', () => {
       />
     );
 
-    await userEvent.click(await result.findByTestId('table-actions-icon-button'));
+    await user.click(await result.findByTestId('table-actions-icon-button'));
     expect(await result.findByTestId('table-actions-copy-id')).toBeInTheDocument();
 
-    await userEvent.click(await result.findByTestId('table-actions-copy-id'));
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
-    expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
+    await user.click(await result.findByTestId('table-actions-copy-id'));
+    expect(writeTextSpy).toHaveBeenCalledWith('123');
+    await waitFor(() => {
+      expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
+    });
 
-    Object.assign(navigator, global.window.navigator.clipboard);
+    writeTextSpy.mockRestore();
   });
 
   test('it calls onDelete function when maintenance window is deleted', async () => {
     const onDelete = jest.fn();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}

@@ -14,9 +14,12 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiHorizontalRule,
+  EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextColor,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -45,10 +48,8 @@ import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_wind
 import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
 import { EpisodeMatcherInput } from './episode_matcher_input';
-import { EpisodeScopedQuerySwitch } from './episode_scoped_query_switch';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
-import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { SubmitButton } from './submit_button';
@@ -267,8 +268,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   );
 
   const onEpisodeQueryToggle = useCallback(
-    (event: EuiSwitchEvent) => {
-      setIsEpisodeQueryEnabled(event.target.checked);
+    (isEnabled: boolean) => {
+      setIsEpisodeQueryEnabled(isEnabled);
     },
     [setIsEpisodeQueryEnabled]
   );
@@ -458,60 +459,125 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             />
           </EuiFlexItem>
         )}
-        <>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="xl" />
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuerySwitch
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="s">
+          <EuiTitle size="s">
+            <h3>{i18n.SCOPE_TITLE}</h3>
+          </EuiTitle>
+          <EuiText size="s">
+            <p>
+              <EuiTextColor color="subdued">{i18n.SCOPE_DESCRIPTION}</EuiTextColor>
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup
+              direction="row"
+              responsive={false}
+              justifyContent="spaceBetween"
+              alignItems="center"
+            >
+              <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <h4>{i18n.ALERTS_SCOPE_TITLE}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <EuiTextColor color="subdued">{i18n.ALERTS_SCOPE_DESCRIPTION}</EuiTextColor>
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  data-test-subj="maintenanceWindowScopedQuerySwitch"
+                  label={i18n.ALERTS_SCOPE_TITLE}
+                  showLabel={false}
                   checked={isScopedQueryEnabled}
-                  onEnabledChange={onScopeQueryToggle}
+                  onChange={(event: EuiSwitchEvent) => onScopeQueryToggle(event.target.checked)}
                 />
-              )}
-            </UseField>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuery
-                  ruleTypeIds={ruleTypeIds}
-                  query={query}
-                  filters={filters}
-                  isLoading={isLoadingRuleTypes}
-                  isEnabled={isScopedQueryEnabled}
-                  errors={scopedQueryErrors}
-                  onQueryChange={onQueryChange}
-                  onFiltersChange={setFilters}
-                />
-              )}
-            </UseField>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="xl" />
-            <UseField path="scopeEpisodeQuery">
-              {() => (
-                <>
-                  <EpisodeScopedQuerySwitch
-                    checked={isEpisodeQueryEnabled}
-                    onEnabledChange={setIsEpisodeQueryEnabled}
-                  />
-                  {isEpisodeQueryEnabled && (
-                    <>
-                      <EuiSpacer size="m" />
-                      <EpisodeMatcherInput
-                        value={episodeQuery}
-                        onChange={setEpisodeQuery}
-                        fullWidth
-                        data-test-subj="maintenanceWindowEpisodeDataFilterInput"
-                        placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
-                      />
-                    </>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isScopedQueryEnabled && (
+              <>
+                <EuiHorizontalRule margin="m" />
+                <EuiText size="s">
+                  <h4>{i18n.FILTER_ALERTS_SUBTITLE}</h4>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <UseField path="scopedQuery">
+                  {() => (
+                    <MaintenanceWindowScopedQuery
+                      ruleTypeIds={ruleTypeIds}
+                      query={query}
+                      filters={filters}
+                      isLoading={isLoadingRuleTypes}
+                      isEnabled={isScopedQueryEnabled}
+                      errors={scopedQueryErrors}
+                      onQueryChange={onQueryChange}
+                      onFiltersChange={setFilters}
+                    />
                   )}
-                </>
-              )}
-            </UseField>
-          </EuiFlexItem>
-        </>
+                </UseField>
+              </>
+            )}
+          </EuiPanel>
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup
+              direction="row"
+              responsive={false}
+              justifyContent="spaceBetween"
+              alignItems="center"
+            >
+              <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <h4>{i18n.EPISODES_SCOPE_TITLE}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <EuiTextColor color="subdued">{i18n.EPISODES_SCOPE_DESCRIPTION}</EuiTextColor>
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.EPISODES_SCOPE_TITLE}
+                  showLabel={false}
+                  checked={isEpisodeQueryEnabled}
+                  onChange={(event: EuiSwitchEvent) => onEpisodeQueryToggle(event.target.checked)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isEpisodeQueryEnabled && (
+              <>
+                <EuiHorizontalRule margin="m" />
+                <EuiText size="s">
+                  <h4>{i18n.FILTER_EPISODES_SUBTITLE}</h4>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <UseField path="scopedQuery">
+                  {() => (
+                    <EpisodeMatcherInput
+                      value={episodeQuery}
+                      onChange={setEpisodeQuery}
+                      fullWidth
+                      data-test-subj="maintenanceWindowEpisodeDataFilterInput"
+                      placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
+                    />
+                  )}
+                </UseField>
+              </>
+            )}
+          </EuiPanel>
+        </EuiFlexGroup>
+
         {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
