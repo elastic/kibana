@@ -84,14 +84,15 @@ describe('registerTracingExporter', () => {
     jest.clearAllMocks();
   });
 
-  it('returns undefined when tracing is disabled', () => {
+  it('returns undefined when no exporters are configured', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      enabled: false,
+      send_to_self: false,
+      exporters: [],
       scheduledDelay: 1000,
     };
 
-    const result = registerTracingExporter({
+    const result = await registerTracingExporter({
       core: coreStart,
       tracingConfig,
       logger,
@@ -101,36 +102,41 @@ describe('registerTracingExporter', () => {
     expect(LateBindingSpanProcessor.register).not.toHaveBeenCalled();
   });
 
-  it('creates OTLPTraceExporter when url is configured', () => {
+  it('creates OTLPTraceExporter when exporters with url are configured', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      enabled: true,
-      url: 'http://otel-collector:4318/v1/traces',
-      headers: { Authorization: 'Bearer token' },
+      send_to_self: false,
+      exporters: [
+        {
+          url: 'http://otel-collector:4318/v1/traces',
+          headers: { Authorization: 'Bearer token' },
+        },
+      ],
       scheduledDelay: 750,
     };
 
-    registerTracingExporter({
+    await registerTracingExporter({
       core: coreStart,
       tracingConfig,
       logger,
     });
 
     expect(MockedOtlpExporter).toHaveBeenCalledWith({
-      url: tracingConfig.url,
+      url: 'http://otel-collector:4318/v1/traces',
       headers: { Authorization: 'Bearer token' },
     });
     expect(MockedEsOtlpExporter).not.toHaveBeenCalled();
   });
 
-  it('creates ElasticsearchOtlpExporter when no url is configured', () => {
+  it('creates ElasticsearchOtlpExporter when send_to_self is true', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      enabled: true,
+      send_to_self: true,
+      exporters: [],
       scheduledDelay: 500,
     };
 
-    registerTracingExporter({
+    await registerTracingExporter({
       core: coreStart,
       tracingConfig,
       logger,
@@ -142,14 +148,15 @@ describe('registerTracingExporter', () => {
     expect(MockedOtlpExporter).not.toHaveBeenCalled();
   });
 
-  it('registers processor via LateBindingSpanProcessor', () => {
+  it('registers processor via LateBindingSpanProcessor', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      enabled: true,
+      send_to_self: true,
+      exporters: [],
       scheduledDelay: 250,
     };
 
-    registerTracingExporter({
+    await registerTracingExporter({
       core: coreStart,
       tracingConfig,
       logger,
@@ -161,14 +168,15 @@ describe('registerTracingExporter', () => {
     expect(registeredProcessor).toBe(MockedAgentBuilderProcessor.mock.instances[0]);
   });
 
-  it('createCachedIsEnabled returns false initially then true after cache fetch', async () => {
+  it('createCachedIsEnabled returns true after registerTracingExporter resolves', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      enabled: true,
+      send_to_self: true,
+      exporters: [],
       scheduledDelay: 100,
     };
 
-    registerTracingExporter({
+    await registerTracingExporter({
       core: coreStart,
       tracingConfig,
       logger,
@@ -176,10 +184,6 @@ describe('registerTracingExporter', () => {
 
     const ctorOpts = MockedAgentBuilderProcessor.mock.calls[0][0];
     const { isEnabled } = ctorOpts;
-    expect(isEnabled!()).toBe(false);
-
-    await flushPromises();
-
     expect(isEnabled!()).toBe(true);
   });
 
@@ -189,12 +193,12 @@ describe('registerTracingExporter', () => {
     scopedUiSettings.get.mockResolvedValue(true);
 
     const tracingConfig: TracingConfig = {
-      enabled: true,
+      send_to_self: true,
+      exporters: [],
       scheduledDelay: 100,
     };
 
-    registerTracingExporter({ core: coreStart, tracingConfig, logger });
-    await flushPromises();
+    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
 
     const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
     expect(isEnabled!()).toBe(true);
@@ -212,12 +216,12 @@ describe('registerTracingExporter', () => {
     scopedUiSettings.get.mockResolvedValue(true);
 
     const tracingConfig: TracingConfig = {
-      enabled: true,
+      send_to_self: true,
+      exporters: [],
       scheduledDelay: 100,
     };
 
-    registerTracingExporter({ core: coreStart, tracingConfig, logger });
-    await flushPromises();
+    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
 
     scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
 

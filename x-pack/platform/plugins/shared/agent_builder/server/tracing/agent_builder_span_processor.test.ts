@@ -132,7 +132,7 @@ describe('AgentBuilderSpanProcessor', () => {
     };
   }
 
-  it('onStart marks inference spans with attribute when enabled', () => {
+  it('onStart marks inference spans with attribute when enabled', async () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -141,26 +141,26 @@ describe('AgentBuilderSpanProcessor', () => {
 
     const span = createMockSpan('inference');
     const parentContext = inferenceParentContext();
-    processor.onStart(span, parentContext);
+    await processor.onStart(span, parentContext);
 
     expect(span.setAttribute).toHaveBeenCalledWith(SHOULD_TRACK_ATTR, true);
     expect(mockBatch.onStart).toHaveBeenCalledWith(span, parentContext);
   });
 
-  it('onStart skips non-inference spans', () => {
+  it('onStart skips non-inference spans', async () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
     });
 
     const span = createMockSpan('http');
-    processor.onStart(span, context.active());
+    await processor.onStart(span, context.active());
 
     expect(span.setAttribute).not.toHaveBeenCalled();
     expect(mockBatch.onStart).not.toHaveBeenCalled();
   });
 
-  it('onStart skips when isEnabled returns false', () => {
+  it('onStart skips when isEnabled returns false', async () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -168,7 +168,7 @@ describe('AgentBuilderSpanProcessor', () => {
     });
 
     const span = createMockSpan('inference');
-    processor.onStart(span, inferenceParentContext());
+    await processor.onStart(span, inferenceParentContext());
 
     expect(span.setAttribute).not.toHaveBeenCalled();
     expect(mockBatch.onStart).not.toHaveBeenCalled();

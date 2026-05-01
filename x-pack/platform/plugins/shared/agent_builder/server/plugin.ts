@@ -209,7 +209,7 @@ export class AgentBuilderPlugin
 
   start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
     this.startDeps = startDeps;
-    registerTracingExporter({
+    void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
       logger: this.logger.get('tracing'),
