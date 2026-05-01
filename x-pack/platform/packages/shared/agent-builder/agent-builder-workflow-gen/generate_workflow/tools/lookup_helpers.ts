@@ -9,6 +9,7 @@ import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows'
 import {
   buildOutputSummary,
   buildStepParamsSummary,
+  isInternalConnector,
   StepCategory,
 } from '@kbn/workflows';
 
@@ -24,45 +25,12 @@ export interface StepDefinitionForAgent {
   examples?: string[];
 }
 
-const MAX_DESCRIPTION_LENGTH = 150;
-
-const cleanDescription = (text: string): string =>
-  text
-    // Strip the Kibana OpenAPI "Spaces method and path" preamble in one shot:
-    // the markdown-bold header, the <div>VERB PATH</div> block, and the
-    // "Refer to [Spaces](...) for more information." sentence.
-    .replace(
-      /^\s*\*\*Spaces method and path for this operation:\*\*[\s\S]*?for more information\.\s*/,
-      ''
-    )
-    // Strip HTML tags (Kibana OpenAPI-derived descriptions embed <div>, <span>, <br/>, …).
-    .replace(/<[^>]+>/g, ' ')
-    // Strip any other leading markdown-bold preamble like "**Some title:**".
-    .replace(/^\s*\*\*[^*]+\*\*\s*/, '')
-    // Strip leading/trailing markdown link wrappers but keep the link text:
-    // "[Spaces](url)" → "Spaces".
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    // Drop trailing "[Required authorization] Route required privileges: …"
-    // annotation that auto-generated Kibana contracts append.
-    .replace(/\[Required authorization\][\s\S]*$/, '')
-    // Drop a trailing "Documentation: <url>" annotation auto-generated for
-    // some contracts.
-    .replace(/\bDocumentation:\s*https?:\/\/\S+\s*$/, '')
-    // Collapse any whitespace run (including \n\n paragraph breaks) into one space.
-    .replace(/\s+/g, ' ')
-    .trim();
+const MAX_DESCRIPTION_LENGTH = 200;
 
 export function truncateDescription(text: string | null | undefined): string | undefined {
   if (!text) return undefined;
-  const cleaned = cleanDescription(text);
-  if (!cleaned) return undefined;
-  if (cleaned.length <= MAX_DESCRIPTION_LENGTH) return cleaned;
-  // Prefer cutting at the first full sentence boundary if it falls within the budget.
-  const firstSentence = cleaned.match(/^.{20,}?[.!?](?=\s|$)/);
-  if (firstSentence && firstSentence[0].length <= MAX_DESCRIPTION_LENGTH) {
-    return firstSentence[0];
-  }
-  return `${cleaned.slice(0, MAX_DESCRIPTION_LENGTH)}…`;
+  if (text.length <= MAX_DESCRIPTION_LENGTH) return text;
+  return `${text.slice(0, MAX_DESCRIPTION_LENGTH)}…`;
 }
 
 export function categorizeConnectorType(type: string): string {
@@ -94,37 +62,34 @@ export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAg
 
 /**
  * Pick the short label and the long description from a connector's
- * `summary` / `description` pair. Most contracts follow `summary=short` /
- * `description=long` (e.g. `elasticsearch.indices.create`), but workflows-
- * extension registered step definitions have these inverted by
- * `getRegisteredStepDefinitions`. Picking by length gives a stable result
- * for both shapes.
+ * `summary` / `description` pair.
+ *
+ * - For most contracts (`elasticsearch.indices.create`, …) `summary` is short
+ *   and `description` is long. For workflows-extension registered step
+ *   definitions, `getRegisteredStepDefinitions` inverts that. Picking by
+ *   length gives a stable result for both shapes.
+ *
+ * - For auto-generated `InternalConnectorContract`s (every `elasticsearch.*`
+ *   and `kibana.*` API contract) the description is OpenAPI reference docs —
+ *   multi-paragraph, HTML-laden, full of "Spaces method and path" preambles.
+ *   None of that is useful for the agent at planning time, so we drop it
+ *   entirely. The agent can call `get_step_definitions` for the schema if
+ *   it needs more.
  */
-const normalizeForCompare = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-const pickLabelAndDescription = (
-  summary: string | null | undefined,
-  description: string | null | undefined,
-  fallback: string
+export const pickLabelAndDescription = (
+  connector: ConnectorContractUnion
 ): { label: string; description?: string } => {
-  const a = summary ?? null;
-  const b = description ?? null;
+  const a = connector.summary ?? null;
+  const b = connector.description ?? null;
+  const fallback = connector.type;
   if (!a && !b) return { label: fallback };
   if (!a) return { label: b! };
   if (!b) return { label: a };
   const [shortText, longText] = a.length <= b.length ? [a, b] : [b, a];
-  if (shortText === longText) return { label: shortText };
-  const truncated = truncateDescription(longText);
-  if (!truncated) return { label: shortText };
-  // Drop the description when it just restates the label (common for
-  // OpenAPI-derived contracts where the description starts with the title
-  // before launching into reference docs we already trimmed away).
-  const nLabel = normalizeForCompare(shortText);
-  const nDesc = normalizeForCompare(truncated);
-  if (nDesc === nLabel || nDesc.startsWith(nLabel)) {
+  if (isInternalConnector(connector) || shortText === longText) {
     return { label: shortText };
   }
-  return { label: shortText, description: truncated };
+  return { label: shortText, description: truncateDescription(longText) };
 };
 
 export function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
@@ -134,11 +99,7 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     ? buildStepParamsSummary(connector.configSchema)
     : undefined;
   const outputSummary = buildOutputSummary(connector.outputSchema);
-  const { label, description } = pickLabelAndDescription(
-    connector.summary,
-    connector.description,
-    connector.type
-  );
+  const { label, description } = pickLabelAndDescription(connector);
 
   return {
     id: connector.type,
@@ -152,5 +113,3 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     examples: connector.examples?.snippet ? [connector.examples.snippet] : undefined,
   };
 }
-
-export { pickLabelAndDescription };

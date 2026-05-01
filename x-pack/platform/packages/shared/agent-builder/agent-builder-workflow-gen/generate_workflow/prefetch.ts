@@ -27,7 +27,7 @@ const toSummary = (s: BaseStepDefinition): StepDefinitionSummary => ({
 });
 
 const toConnectorSummary = (c: ConnectorContractUnion): StepDefinitionSummary => {
-  const { label, description } = pickLabelAndDescription(c.summary, c.description, c.type);
+  const { label, description } = pickLabelAndDescription(c);
   return {
     id: c.type,
     label,
