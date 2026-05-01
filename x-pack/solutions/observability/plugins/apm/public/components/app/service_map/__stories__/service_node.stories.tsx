@@ -13,7 +13,6 @@ import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
 import { ServiceNode } from '../service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -115,34 +114,34 @@ export const NoAgentIcon: Story = {
   }),
 };
 
-export const AllHealthStatuses: StoryObj = {
+export const AllAnomalyScores: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
           {...createNodeProps({
-            id: 'no-status',
-            label: 'No Status',
+            id: 'no-score',
+            label: 'No anomaly score',
             isService: true,
             agentName: 'java',
           })}
         />
-        <LabelText>No Status</LabelText>
+        <LabelText>No anomaly score</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
           {...createNodeProps({
-            id: 'healthy',
-            label: 'healthy-service',
+            id: 'low',
+            label: 'low-severity-service',
             isService: true,
             agentName: 'nodejs',
             serviceAnomalyStats: {
-              healthStatus: ServiceHealthStatus.healthy,
               transactionType: 'request',
+              anomalyScore: 3,
             },
           })}
         />
-        <LabelText>Healthy</LabelText>
+        <LabelText>Low (score)</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
@@ -152,13 +151,12 @@ export const AllHealthStatuses: StoryObj = {
             isService: true,
             agentName: 'python',
             serviceAnomalyStats: {
-              healthStatus: ServiceHealthStatus.warning,
               transactionType: 'request',
-              anomalyScore: 50,
+              anomalyScore: 15,
             },
           })}
         />
-        <LabelText>Warning</LabelText>
+        <LabelText>Warning (score)</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
@@ -168,13 +166,12 @@ export const AllHealthStatuses: StoryObj = {
             isService: true,
             agentName: 'ruby',
             serviceAnomalyStats: {
-              healthStatus: ServiceHealthStatus.critical,
               transactionType: 'request',
               anomalyScore: 85,
             },
           })}
         />
-        <LabelText>Critical</LabelText>
+        <LabelText>Critical (score)</LabelText>
       </div>
     </div>
   ),

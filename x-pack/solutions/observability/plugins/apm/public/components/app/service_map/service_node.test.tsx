@@ -11,9 +11,8 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
+import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -46,23 +45,6 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
 jest.mock('./use_service_map_alerts_tab_href', () => ({
   useServiceMapAlertsTabHref: jest.fn(() => '/app/apm/services/Test%20Service/alerts'),
   useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
-}));
-
-// Mock getServiceHealthStatusColor
-jest.mock('../../../../common/service_health_status', () => ({
-  ...jest.requireActual('../../../../common/service_health_status'),
-  getServiceHealthStatusColor: jest.fn((_theme, status) => {
-    switch (status) {
-      case 'critical':
-        return MOCK_EUI_THEME.colors.danger;
-      case 'warning':
-        return MOCK_EUI_THEME.colors.warning;
-      case 'healthy':
-        return MOCK_EUI_THEME.colors.success;
-      default:
-        return MOCK_DEFAULT_COLOR;
-    }
-  }),
 }));
 
 const defaultNodeProps = {
@@ -144,11 +126,10 @@ describe('ServiceNode', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
-  describe('health status styling', () => {
-    it('renders with warning health status', () => {
+  describe('anomaly score styling', () => {
+    it('renders with mid-range anomaly score', () => {
       const data = createServiceNodeData({
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.warning,
           jobId: 'test-job',
           transactionType: 'request',
           actualValue: 100,
@@ -159,10 +140,9 @@ describe('ServiceNode', () => {
       expect(screen.getByText('Test Service')).toBeInTheDocument();
     });
 
-    it('renders with critical health status', () => {
+    it('renders with high anomaly score', () => {
       const data = createServiceNodeData({
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.critical,
           jobId: 'test-job',
           transactionType: 'request',
           actualValue: 200,
