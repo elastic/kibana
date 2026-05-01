@@ -36,6 +36,10 @@ responses.
 
 There's also a `rest_api` folder that defines the structure of the RESTful API endpoints.
 
+### Agent Builder integration
+
+The plugin contributes a `monitor-management` skill, an inline tool, an attachment type, and an SML type to the [Agent Builder](../../../../platform/plugins/shared/agent_builder/README.md) framework. See [`server/agent_builder/README.md`](./server/agent_builder/README.md) for the architecture, the `operations[]` surface, the auth model, and local dev setup.
+
 ## Testing
 
 ### Unit tests
