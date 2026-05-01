@@ -69,9 +69,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       const closeFlyout = async () => {
-        await find.clickByCssSelector(
-          '[data-test-subj="edit-connector-flyout-close-btn"]:not(disabled)'
-        );
+        await testSubjects.click('edit-connector-flyout-close-btn');
+        // The connector flyout pops up a "discard unsaved changes" confirm
+        // modal when the form is dirty (subject/message filled). Acknowledge
+        // it so the flyout actually closes.
+        if (await testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+          await testSubjects.click('confirmModalConfirmButton');
+        }
         await find.waitForDeletedByCssSelector(
           '[data-test-subj="edit-connector-flyout-close-btn"]'
         );
