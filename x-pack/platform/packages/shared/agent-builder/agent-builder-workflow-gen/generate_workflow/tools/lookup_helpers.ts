@@ -28,10 +28,26 @@ const MAX_DESCRIPTION_LENGTH = 150;
 
 const cleanDescription = (text: string): string =>
   text
-    // Strip HTML tags (Kibana OpenAPI-derived descriptions embed <div>, <span>, …).
+    // Strip the Kibana OpenAPI "Spaces method and path" preamble in one shot:
+    // the markdown-bold header, the <div>VERB PATH</div> block, and the
+    // "Refer to [Spaces](...) for more information." sentence.
+    .replace(
+      /^\s*\*\*Spaces method and path for this operation:\*\*[\s\S]*?for more information\.\s*/,
+      ''
+    )
+    // Strip HTML tags (Kibana OpenAPI-derived descriptions embed <div>, <span>, <br/>, …).
     .replace(/<[^>]+>/g, ' ')
-    // Strip a leading markdown-bold preamble like "**Spaces method and path…**".
+    // Strip any other leading markdown-bold preamble like "**Some title:**".
     .replace(/^\s*\*\*[^*]+\*\*\s*/, '')
+    // Strip leading/trailing markdown link wrappers but keep the link text:
+    // "[Spaces](url)" → "Spaces".
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Drop trailing "[Required authorization] Route required privileges: …"
+    // annotation that auto-generated Kibana contracts append.
+    .replace(/\[Required authorization\][\s\S]*$/, '')
+    // Drop a trailing "Documentation: <url>" annotation auto-generated for
+    // some contracts.
+    .replace(/\bDocumentation:\s*https?:\/\/\S+\s*$/, '')
     // Collapse any whitespace run (including \n\n paragraph breaks) into one space.
     .replace(/\s+/g, ' ')
     .trim();
