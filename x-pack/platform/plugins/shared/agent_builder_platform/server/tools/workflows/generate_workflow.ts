@@ -6,12 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { CoreSetup } from '@kbn/core/server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { generateWorkflow } from '@kbn/agent-builder-workflow-gen';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../../types';
 
 const generateWorkflowSchema = z.object({
   query: z.string().describe('A natural-language description of the workflow to generate.'),
@@ -28,8 +30,10 @@ const generateWorkflowSchema = z.object({
 });
 
 export const generateWorkflowTool = ({
+  coreSetup,
   workflowsManagement,
 }: {
+  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   workflowsManagement: WorkflowsServerPluginSetup;
 }): BuiltinToolDefinition<typeof generateWorkflowSchema> => {
   const { management: workflowsApi } = workflowsManagement;
@@ -48,6 +52,18 @@ export const generateWorkflowTool = ({
       { query, context, instructions },
       { modelProvider, logger, request, spaceId }
     ) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const workflowsExtensions = pluginsStart.workflowsExtensions;
+      if (!workflowsExtensions) {
+        return {
+          results: [
+            errorResult(
+              'Workflow generation is unavailable: workflowsExtensions plugin is not started.'
+            ),
+          ],
+        };
+      }
+
       const model = await modelProvider.getDefaultModel();
 
       try {
@@ -60,6 +76,7 @@ export const generateWorkflowTool = ({
           request,
           spaceId,
           workflowsApi,
+          workflowsExtensions,
         });
 
         return {

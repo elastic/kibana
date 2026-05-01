@@ -54,7 +54,7 @@ export const registerTools = ({
     tools.push(
       getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
       resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement }),
-      generateWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement })
+      generateWorkflowTool({ coreSetup, workflowsManagement: setupDeps.workflowsManagement })
     );
   }
 
