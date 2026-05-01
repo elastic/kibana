@@ -169,8 +169,18 @@ export class DatasetClient {
   }
 
   async datasetExists(datasetId: string): Promise<boolean> {
-    const dataset = await this.getDatasetById(datasetId);
-    return dataset !== undefined;
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: false,
+      query: {
+        term: {
+          _id: datasetId,
+        },
+      },
+    });
+
+    return response.hits.hits.length > 0;
   }
 
   async getByName(name: string): Promise<DatasetWithExamples | undefined> {
@@ -329,10 +339,15 @@ export class DatasetClient {
 
   async updateExample(
     exampleId: string,
-    updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>
+    updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>,
+    expectedDatasetId?: string
   ): Promise<ExampleDocument | undefined> {
     const existing = await this.getExampleById(exampleId);
     if (!existing) {
+      return undefined;
+    }
+
+    if (expectedDatasetId && existing.dataset_id !== expectedDatasetId) {
       return undefined;
     }
 
@@ -377,7 +392,7 @@ export class DatasetClient {
     const searchResponse = await this.examplesStorage.search({
       track_total_hits: false,
       size: 1,
-      _source: ['dataset_id'] as const,
+      _source: ['dataset_id'],
       query: {
         term: {
           _id: exampleId,

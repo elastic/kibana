@@ -90,8 +90,8 @@ export const registerAddExamplesRoute = ({
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const datasetClient = evalsContext.datasetService.getClient(esClient);
 
-          const dataset = await datasetClient.get(datasetId);
-          if (!dataset) {
+          const exists = await datasetClient.datasetExists(datasetId);
+          if (!exists) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });

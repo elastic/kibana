@@ -354,6 +354,40 @@ describe('DatasetClient', () => {
     expect(fetched?.examples).toHaveLength(1);
   });
 
+  it('updates an example when expectedDatasetId matches', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToUpdate = created.examples[0];
+
+    const updated = await client.updateExample(
+      exampleToUpdate.id,
+      { output: { expected: 'updated' } },
+      created.id
+    );
+
+    expect(updated).toBeDefined();
+    expect(updated?.output).toEqual({ expected: 'updated' });
+  });
+
+  it('refuses to update an example when expectedDatasetId does not match', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToUpdate = created.examples[0];
+
+    const updated = await client.updateExample(
+      exampleToUpdate.id,
+      { output: { expected: 'updated' } },
+      'wrong-dataset-id'
+    );
+
+    expect(updated).toBeUndefined();
+
+    const fetched = await client.get(created.id);
+    expect(fetched?.examples[0].output).toEqual(baseExampleA.output);
+  });
+
   it('deleteExamplesByDatasetId removes all examples for a dataset', async () => {
     const { client } = createClient();
 

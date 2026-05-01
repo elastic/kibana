@@ -89,25 +89,23 @@ export const registerUpdateExampleRoute = ({
           const evalsContext = await context.evals;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const datasetClient = evalsContext.datasetService.getClient(esClient);
-          const dataset = await datasetClient.get(datasetId);
 
-          if (!dataset) {
+          const exists = await datasetClient.datasetExists(datasetId);
+          if (!exists) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });
           }
 
-          if (!dataset.examples.some((example) => example.id === exampleId)) {
-            return response.notFound({
-              body: { message: `Evaluation dataset example not found: ${exampleId}` },
-            });
-          }
-
-          const updatedExample = await datasetClient.updateExample(exampleId, {
-            input,
-            output,
-            metadata,
-          });
+          const updatedExample = await datasetClient.updateExample(
+            exampleId,
+            {
+              input,
+              output,
+              metadata,
+            },
+            datasetId
+          );
 
           if (!updatedExample) {
             return response.notFound({

@@ -453,7 +453,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockResolvedValueOnce({ added: 2 });
 
       const request = httpServerMock.createKibanaRequest({
@@ -484,7 +484,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
 
       const request = httpServerMock.createKibanaRequest({
@@ -511,7 +511,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
 
       const request = httpServerMock.createKibanaRequest({
@@ -536,7 +536,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce(undefined);
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -558,7 +558,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASET_EXAMPLES_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.addExamples.mockRejectedValueOnce(new ExampleAlreadyExistsError('1 duplicate'));
 
       const request = httpServerMock.createKibanaRequest({
@@ -584,7 +584,7 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.updateExample.mockResolvedValueOnce({
         ...datasetExample,
         output: { answer: 'updated' },
@@ -602,11 +602,15 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.updateExample).toHaveBeenCalledWith(exampleId, {
-        input: undefined,
-        output: { answer: 'updated' },
-        metadata: undefined,
-      });
+      expect(datasetClient.updateExample).toHaveBeenCalledWith(
+        exampleId,
+        {
+          input: undefined,
+          output: { answer: 'updated' },
+          metadata: undefined,
+        },
+        datasetId
+      );
       expect(response.status).toBe(200);
       expect(response.payload.output).toEqual({ answer: 'updated' });
     });
@@ -617,7 +621,7 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce(undefined);
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'put',
@@ -633,6 +637,7 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+      expect(datasetClient.updateExample).not.toHaveBeenCalled();
     });
 
     it('returns 404 when example is not in dataset', async () => {
@@ -641,7 +646,8 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.updateExample.mockResolvedValueOnce(undefined);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'put',
@@ -659,7 +665,15 @@ describe('dataset routes', () => {
       expect(response.payload).toEqual({
         message: `Evaluation dataset example not found: ${exampleId}`,
       });
-      expect(datasetClient.updateExample).not.toHaveBeenCalled();
+      expect(datasetClient.updateExample).toHaveBeenCalledWith(
+        exampleId,
+        {
+          input: {},
+          output: undefined,
+          metadata: undefined,
+        },
+        datasetId
+      );
     });
 
     it('returns 409 when updated content matches another existing example', async () => {
@@ -668,7 +682,7 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.updateExample.mockRejectedValueOnce(
         new ExampleAlreadyExistsError('collision-id')
       );
