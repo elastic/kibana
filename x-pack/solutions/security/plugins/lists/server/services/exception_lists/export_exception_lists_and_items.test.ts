@@ -6,7 +6,11 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
@@ -26,6 +30,22 @@ const baseOptions = {
   namespaceType,
   savedObjectsClient: savedObjectsClientMock.create(),
 };
+
+const mockListsFinder = (lists: ExceptionListSchema[]): void => {
+  (findExceptionListPointInTimeFinder as jest.Mock).mockImplementationOnce(
+    ({ executeFunctionOnStream }) => executeFunctionOnStream({ data: lists })
+  );
+};
+
+const mockItemsFinder = (items: ExceptionListItemSchema[]): void => {
+  (findExceptionListsItemsPointInTimeFinder as jest.Mock).mockImplementationOnce(
+    ({ executeFunctionOnStream }) => executeFunctionOnStream({ data: items })
+  );
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('export_exception_lists_and_items', () => {
   describe('exportExceptionListsAndItems', () => {
@@ -78,7 +98,39 @@ describe('export_exception_lists_and_items', () => {
     });
 
     it.todo('does not include expired exceptions by default');
-    it.todo('does not include rule exception lists');
+
+    it('only includes shared detection-type exception lists', async () => {
+      // The positive `type: detection` filter implicitly excludes both
+      // `endpoint*` (Defend) and `rule_default` (per-rule) exception lists,
+      // which have their own dedicated export workflows.
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems(baseOptions);
+
+      expect(findExceptionListPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining('attributes.type: detection'),
+        })
+      );
+    });
+
+    it('combines the user-supplied filter with the detection-type filter', async () => {
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({
+        ...baseOptions,
+        filter: 'exception-list.attributes.list_id: foo',
+      });
+
+      expect(findExceptionListPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            '(exception-list.attributes.list_id: foo) AND exception-list.attributes.type: detection',
+        })
+      );
+    });
 
     describe('when exception list count exceeds the default export size limit', () => {
       it.todo('returns an error');

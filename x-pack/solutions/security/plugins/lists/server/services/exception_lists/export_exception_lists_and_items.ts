@@ -51,12 +51,13 @@ export const exportExceptionListsAndItems = async ({
   };
 
   const savedObjectPrefix = getSavedObjectType({ namespaceType });
-  // Exclude defend (endpoint) exception lists from bulk export. Those are surfaced through
-  // dedicated Defend workflows and should not be co-mingled with detection rule exception lists.
-  const excludeDefendListsFilter = `NOT ${savedObjectPrefix}.attributes.type: endpoint*`;
+  // Bulk export only emits shared detection exception lists. `endpoint*` lists belong
+  // to dedicated Defend workflows, and `rule_default` lists are scoped to a single
+  // rule and are exported alongside that rule rather than on their own.
+  const detectionListsFilter = `${savedObjectPrefix}.attributes.type: detection`;
   const listFilter = dataFilter
-    ? `(${dataFilter}) AND ${excludeDefendListsFilter}`
-    : excludeDefendListsFilter;
+    ? `(${dataFilter}) AND ${detectionListsFilter}`
+    : detectionListsFilter;
 
   await findExceptionListPointInTimeFinder({
     executeFunctionOnStream: appendExceptionList,
