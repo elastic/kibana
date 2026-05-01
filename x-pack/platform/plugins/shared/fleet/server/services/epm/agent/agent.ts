@@ -27,24 +27,63 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
-  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-  const yamlFromCompiledTemplate = parse(compiledTemplate, {});
-
-  // Hack to keep empty string ('') values around in the end yaml because
-  // `load` replaces empty strings with null
-  const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
-    (acc, [key, value]) => {
-      if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
-        acc[key] = '';
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {} as { [k: string]: any }
+  // Must run before replaceRootLevelYamlVariables: stringify output may contain
+  // unquoted `"` chars (e.g. regexp patterns) that cause this regex to match
+  // across lines and corrupt the YAML structure.
+  compiledTemplate = compiledTemplate.replace(/"(?:[^"\\]|\\.)*"/gs, (match) =>
+    match.includes('\n')
+      ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
+      : match
   );
 
-  return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
+  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
+
+  try {
+    const yamlFromCompiledTemplate = parse(compiledTemplate);
+
+    // Hack to keep empty string ('') values around in the end yaml because
+    // `load` replaces empty strings with null
+    const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
+      (acc, [key, value]) => {
+        if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
+          acc[key] = '';
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {} as { [k: string]: any }
+    );
+
+    return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
+  } catch (error) {
+    const errorMessage = handleYamlError(error, compiledTemplate);
+    throw new PackagePolicyValidationError(errorMessage, error);
+  }
+}
+
+function handleYamlError(err: any, yaml: string): string {
+  // Handle duplicated key errors from yaml package
+  // The yaml package error message format: "Map keys must be unique at line X, column Y:..."
+  if (err?.code === 'DUPLICATE_KEY') {
+    let key = 'unknown';
+    // Try to extract the key from the error message or position
+    if (err.linePos && err.linePos[0]) {
+      const line = err.linePos[0].line - 1; // Convert to 0-based index
+      const lines = yaml.split('\n');
+      if (line >= 0 && line < lines.length) {
+        const lineContent = lines[line];
+        // Extract key from the line (everything before the colon)
+        const colonIndex = lineContent.indexOf(':');
+        if (colonIndex > 0) {
+          key = lineContent.substring(0, colonIndex).trim();
+        }
+      }
+    }
+    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
+  }
+
+  return err?.message || String(err);
 }
 
 function isValidKey(key: string) {
@@ -186,7 +225,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
-      val ? stringify(val) : ''
+      val ? stringify(val, { collectionStyle: 'block', lineWidth: 0 }) : ''
     );
   });
 
