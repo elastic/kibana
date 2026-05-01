@@ -14,6 +14,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
   ({ migrationSource, setMigrationSource, disabled, migrationSourceOptions }) => {
     const isQradarEnabled = useIsExperimentalFeatureEnabled('qradarRulesMigration');
+    const isSentinelEnabled = useIsExperimentalFeatureEnabled('sentinelRulesMigration');
     const handleMigrationSourceChange = useCallback(
       (selectedVendor: MigrationSource) => {
         setMigrationSource(selectedVendor);
@@ -29,7 +30,9 @@ export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
               label={i18n.MIGRATION_SOURCE_DROPDOWN_TITLE}
               fullWidth
               helpText={
-                disabled && isQradarEnabled ? i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT : undefined
+                disabled && (isQradarEnabled || isSentinelEnabled)
+                  ? i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT
+                  : undefined
               }
             >
               <EuiSuperSelect

@@ -15,6 +15,7 @@ import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_qu
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useUiSetting } from '../../../common/lib/kibana';
 import type { SeverityCount } from '../severity/types';
+import type { InspectResponse } from '../../../types';
 
 const mergeSeverityCounts = (
   a: SeverityCount | undefined,
@@ -33,6 +34,7 @@ interface UseCombinedRiskScoreKpiResult {
   error: unknown;
   isModuleDisabled: boolean;
   refetch: () => void;
+  inspect: InspectResponse;
 }
 
 interface UseCombinedRiskScoreKpiOptions {
@@ -118,11 +120,22 @@ export const useCombinedRiskScoreKpi = (
     ? mergeSeverityCounts(hostStoreKpi.severityCount, userStoreKpi.severityCount)
     : combinedRiskKpi.severityCount ?? EMPTY_SEVERITY_COUNT;
 
+  const inspect: InspectResponse = useMemo(() => {
+    if (entityStoreV2Enabled) {
+      return {
+        dsl: [...hostStoreKpi.inspect.dsl, ...userStoreKpi.inspect.dsl],
+        response: [...hostStoreKpi.inspect.response, ...userStoreKpi.inspect.response],
+      };
+    }
+    return combinedRiskKpi.inspect;
+  }, [entityStoreV2Enabled, hostStoreKpi.inspect, userStoreKpi.inspect, combinedRiskKpi.inspect]);
+
   return {
     severityCount,
     loading,
     error,
     isModuleDisabled,
     refetch,
+    inspect,
   };
 };

@@ -12,6 +12,7 @@ components:
       enum:
         - splunk
         - qradar
+        - microsoft-sentinel
 
     OriginalRuleAnnotations:
       type: object

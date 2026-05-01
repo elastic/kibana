@@ -384,6 +384,36 @@ paths:
         404:
           description: Indicates the migration id was not found.
 
+  /internal/siem_migrations/rules/{migration_id}/sentinel/rules:
+    post:
+      summary: Add Microsoft Sentinel rules from JSON export to a rule migration
+      operationId: CreateSentinelRuleMigrationRules
+      x-codegen-enabled: true
+      x-internal: true
+      description: Parses Microsoft Sentinel ARM template JSON export and adds rules to an existing migration
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to add Sentinel rules to
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../vendor/rules/sentinel.schema.yaml#/components/schemas/CreateSentinelRulesBody'
+      responses:
+        200:
+          description: Indicates Sentinel rules have been added to the migration successfully.
+        400:
+          description: Indicates invalid request body or no valid rules found.
+        404:
+          description: Indicates the migration id was not found.
+
   /internal/siem_migrations/rules/{migration_id}/rules/enhance:
     post:
       summary: Enhance Rules in a rule migrations with any additional data.
