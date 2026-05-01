@@ -212,7 +212,8 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   const canShowMmlEstimationHelp =
     state === DATA_FRAME_TASK_STATE.STOPPED &&
     explainFetchState !== 'error' &&
-    (explainFetchState === 'loading' || (estimatedMml !== '' && modelMemoryLimit !== estimatedMml));
+    (explainFetchState === 'loading' ||
+      (estimatedMml !== '' && modelMemoryLimit?.toUpperCase() !== estimatedMml?.toUpperCase()));
 
   let mmlEstimationHelpText: React.ReactNode = null;
   if (canShowMmlEstimationHelp) {
