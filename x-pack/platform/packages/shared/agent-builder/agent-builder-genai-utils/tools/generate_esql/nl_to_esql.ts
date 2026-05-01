@@ -17,26 +17,6 @@ import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 
-/**
- * Wraps the editor's current buffer as additional context for {@link generateEsql} when
- * the user asks for a full query while content already exists in the editor.
- * Used by the non-surgical path of the editor's NL-to-ES|QL route.
- */
-export const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
-  if (currentQuery) {
-    return [
-      'The user is in the ES|QL editor. Below is their current query.',
-      'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-      'If the request is for a new or unrelated query, you may produce a full replacement.',
-      '',
-      '<current_query>',
-      currentQuery,
-      '</current_query>',
-    ].join('\n');
-  }
-  return '';
-};
-
 export interface GenerateEsqlResponse {
   /**
    * The ES|QL query which was generated

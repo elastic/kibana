@@ -15,17 +15,30 @@ import type {
 } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import {
-  buildNlToEsqlAdditionalContext,
-  generateEsql,
-  generateSurgicalEsql,
-} from '@kbn/agent-builder-genai-utils';
+import { generateEsql, generateSurgicalEsql } from '@kbn/agent-builder-genai-utils';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
+
+/**
+ * Wraps the editor's current buffer as additional context for {@link generateEsql} on the
+ * non-surgical path: the user has typed something but is asking for a fresh query.
+ */
+const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
+  if (!currentQuery) return '';
+  return [
+    'The user is in the ES|QL editor. Below is their current query.',
+    'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
+    'If the request is for a new or unrelated query, you may produce a full replacement.',
+    '',
+    '<current_query>',
+    currentQuery,
+    '</current_query>',
+  ].join('\n');
+};
 
 import type { EsqlServerPluginStart } from '../types';
 

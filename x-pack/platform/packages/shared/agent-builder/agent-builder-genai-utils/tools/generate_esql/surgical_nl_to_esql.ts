@@ -11,8 +11,7 @@ import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { EsqlQuery } from '@elastic/esql';
-import type { ESQLSource } from '@elastic/esql/types';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
@@ -138,23 +137,17 @@ Generate the ES|QL pipe(s) that should replace the marked comment.`,
 };
 
 /**
- * Pulls the first index/datastream/alias name from a buffer's FROM (or TS) command.
- * Returns undefined if the buffer has no FROM/TS command or if the source list is empty.
- * Patterns/wildcards are returned as-is and may fail to resolve later — callers should tolerate that.
+ * Returns a single concrete index/datastream/alias from the buffer that is safe to sample,
+ * or `undefined` for empty / multi-target / wildcard sources (those don't fit
+ * `resolveResourceForEsqlWithSamplingStats`, which targets a single resource).
  */
-const extractFromTarget = (currentQuery: string): string | undefined => {
+const getSamplingTarget = (currentQuery: string): string | undefined => {
   try {
-    const ast = EsqlQuery.fromSrc(currentQuery).ast;
-    const sourceCommand = ast.commands.find(({ name }) => name === 'from' || name === 'ts');
-    const sources = ((sourceCommand?.args ?? []) as ESQLSource[]).filter(
-      (arg) => arg.sourceType === 'index'
-    );
-    const first = sources[0]?.name;
-    if (!first) return undefined;
-    // Multi-target / wildcards: skip sampling — resolveResourceForEsqlWithSamplingStats
-    // works against a single target and pattern resolution is best-effort.
-    if (first.includes(',') || first.includes('*')) return undefined;
-    return first;
+    const indexPattern = getIndexPatternFromESQLQuery(currentQuery);
+    if (!indexPattern || indexPattern.includes(',') || indexPattern.includes('*')) {
+      return undefined;
+    }
+    return indexPattern;
   } catch {
     return undefined;
   }
@@ -230,15 +223,15 @@ export const generateSurgicalEsql = async ({
     async () => {
       const docBase = await EsqlDocumentBase.load();
 
-      const fromTarget = extractFromTarget(currentQuery);
-      const resourcePromise = fromTarget
+      const samplingTarget = getSamplingTarget(currentQuery);
+      const resourcePromise = samplingTarget
         ? resolveResourceForEsqlWithSamplingStats({
-            resourceName: fromTarget,
+            resourceName: samplingTarget,
             esClient,
             samplingSize: 50,
           }).catch((e) => {
             logger?.debug(
-              `[generateSurgicalEsql] failed to resolve resource '${fromTarget}': ${e?.message}`
+              `[generateSurgicalEsql] failed to resolve resource '${samplingTarget}': ${e?.message}`
             );
             return undefined;
           })

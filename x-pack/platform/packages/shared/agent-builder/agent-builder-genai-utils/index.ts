@@ -38,7 +38,6 @@ export {
   generateEsql,
   type GenerateEsqlResponse,
   generateSurgicalEsql,
-  buildNlToEsqlAdditionalContext,
   type GenerateSurgicalEsqlResponse,
   relevanceSearch,
   type RelevanceSearchResponse,

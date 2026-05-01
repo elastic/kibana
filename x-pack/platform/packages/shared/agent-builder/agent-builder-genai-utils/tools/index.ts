@@ -10,7 +10,6 @@ export {
   generateEsql,
   type GenerateEsqlResponse,
   generateSurgicalEsql,
-  buildNlToEsqlAdditionalContext,
   type GenerateSurgicalEsqlResponse,
 } from './generate_esql';
 export { relevanceSearch, type RelevanceSearchResponse } from './relevance_search';
