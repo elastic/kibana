@@ -81,6 +81,8 @@ pivot:
       - "Feature:Data Frame Analytics"
       - "Feature:Inference UI"
       - "Feature:ML/AIOps"
+      - "feature:agent-builder"
+      - "Team:agent-builder"
     "Alerting and reporting":
       - "Feature:Alerting"
       - "Team:Alerting Services"
