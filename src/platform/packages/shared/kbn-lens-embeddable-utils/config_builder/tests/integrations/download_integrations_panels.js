@@ -83,7 +83,7 @@ async function processDashboardFile(filePath, packageName) {
     const results = [];
 
     // Iterate through panels
-    for (const panel of panels) {
+    for (const [index, panel] of panels.entries()) {
       // Check if embeddableConfig.attributes exists and matches criteria
       if (panel.embeddableConfig?.attributes) {
         const attrs = panel.embeddableConfig.attributes;
@@ -93,7 +93,9 @@ async function processDashboardFile(filePath, packageName) {
           results.push({
             package_name: packageName,
             dashboard_file: path.basename(filePath),
-            panel_title: panel.title || '',
+            panel_title:
+              panel.title ||
+              `${dashboard.attributes.title ?? dashboard.id} (panel ${index} of ${panels.length})`,
             attributes: attrs,
           });
         }
