@@ -9,6 +9,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { SearchInferenceEndpointsPlugin } from './plugin';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
@@ -99,10 +100,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       const startContract = plugin.start(coreStart, {
         actions: actionsMock.createStart(),
-        inference: {
-          getConnectorById: jest.fn().mockRejectedValue(new Error('not found')),
-          getConnectorList: jest.fn().mockResolvedValue([]),
-        },
+        inference: inferenceMock.createStartContract(),
       });
 
       const request = httpServerMock.createKibanaRequest();
