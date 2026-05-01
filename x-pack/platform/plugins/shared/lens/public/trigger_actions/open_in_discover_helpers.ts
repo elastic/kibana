@@ -18,9 +18,11 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
+  apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import {
   convertFiltersToESQLExpression,
+  convertQueryToESQLExpression,
   getEsqlControls,
   injectWhereClauseAfterSourceCommand,
 } from '@kbn/esql-utils';
@@ -87,15 +89,33 @@ async function getDiscoverLocationParams({
   }
 
   if (embeddable.isTextBasedLanguage()) {
-    // Discover ES|QL mode can't accept DSL filters — convert what we can to a
-    // WHERE clause injected right after the source command (so the filter runs
-    // before any STATS/KEEP/DROP/RENAME), and drop any untranslatable ones.
-    if (filtersToApply.length && isOfAggregateQueryType(args.query)) {
-      const { esqlExpression } = convertFiltersToESQLExpression(filtersToApply);
-      if (esqlExpression) {
+    // Discover ES|QL mode can't accept DSL filters or a separate KQL/Lucene query —
+    // translate what we can to ES|QL (filters via convertFiltersToESQLExpression,
+    // dashboard query bar via KQL(...)/QSTR(...)) and inject as a WHERE right after
+    // the source command. Untranslatable filters are dropped.
+    if (isOfAggregateQueryType(args.query)) {
+      const expressions: string[] = [];
+
+      const dashboardQuery =
+        apiPublishesUnifiedSearch(embeddable.parentApi) && embeddable.parentApi.query$?.getValue();
+      if (dashboardQuery && !isOfAggregateQueryType(dashboardQuery)) {
+        const queryExpression = convertQueryToESQLExpression(dashboardQuery);
+        if (queryExpression) {
+          expressions.push(queryExpression);
+        }
+      }
+
+      if (filtersToApply.length) {
+        const { esqlExpression } = convertFiltersToESQLExpression(filtersToApply);
+        if (esqlExpression) {
+          expressions.push(esqlExpression);
+        }
+      }
+
+      if (expressions.length) {
         queryToApply = {
           ...args.query,
-          esql: injectWhereClauseAfterSourceCommand(args.query.esql, esqlExpression),
+          esql: injectWhereClauseAfterSourceCommand(args.query.esql, expressions.join(' AND ')),
         };
       }
     }

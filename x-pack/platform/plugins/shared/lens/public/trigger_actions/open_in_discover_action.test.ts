@@ -187,6 +187,54 @@ describe('open in discover action', () => {
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
+  it('navigates to discover for an ES|QL chart and translates the dashboard KQL into a KQL(...) clause', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [],
+      query: { esql: 'FROM logs' },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+      parentApi: {
+        query$: { getValue: () => ({ language: 'kuery', query: 'host.name : "web-1"' }) },
+        filters$: { getValue: () => [] },
+        timeRange$: { getValue: () => undefined },
+      },
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => false,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      filters: [],
+      query: { esql: 'FROM logs\n| WHERE KQL("""host.name : "web-1"""")' },
+    });
+  });
+
   it('navigates to discover for an ES|QL chart and drops untranslatable filters', async () => {
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },
