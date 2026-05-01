@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, map, switchMap, type Subscription } from 'rxjs';
+import { concatMap, filter, map, type Subscription } from 'rxjs';
+
 import { apiPublishesBlockingError } from '@kbn/presentation-publishing';
+
 import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from './kibana_services';
 
@@ -54,7 +56,7 @@ class DashboardUserActivitySession {
           return activity;
         }),
         filter((activity) => activity !== undefined), // filter out activities that haven't ended
-        switchMap(async (activity) => {
+        concatMap(async (activity) => {
           const event = this.eventQueues[activity.type].shift();
           if (!event) {
             return;
