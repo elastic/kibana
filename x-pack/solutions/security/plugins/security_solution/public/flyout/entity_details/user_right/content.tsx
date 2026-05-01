@@ -15,6 +15,7 @@ import { AssetCriticalityAccordion } from '../../../entity_analytics/components/
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -44,6 +45,8 @@ interface UserPanelContentProps {
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   entityStoreEntityId?: string;
+  /** See {@link RiskSummaryProps.resolutionRiskFallback}. */
+  resolutionRiskFallback?: EntityRiskScore<EntityType.user>;
 }
 
 export const UserPanelContent = ({
@@ -59,6 +62,7 @@ export const UserPanelContent = ({
   entityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
+  resolutionRiskFallback,
 }: UserPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -87,6 +91,7 @@ export const UserPanelContent = ({
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
               entityId={entityRecord?.entity.id}
+              resolutionRiskFallback={resolutionRiskFallback}
             />
             <EuiHorizontalRule />
           </>

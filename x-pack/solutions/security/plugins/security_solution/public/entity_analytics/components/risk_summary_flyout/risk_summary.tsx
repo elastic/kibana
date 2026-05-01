@@ -34,6 +34,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
+import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useResolutionGroup } from '../entity_resolution/hooks/use_resolution_group';
@@ -63,6 +64,14 @@ export interface RiskSummaryProps<T extends EntityType> {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
   entityId?: string;
+  /**
+   * Optional resolution-group risk record used as a fallback when the internal
+   * `useRiskScore` lookup against the legacy risk index returns no document. Agent Builder
+   * canvas surfaces (Preview Only flyout) embed this projection on the attachment payload
+   * because the legacy risk index search strategy is keyed by an `id_value` shape the
+   * canvas's data scope cannot match. See `entity_card_flyout_overview_canvas.tsx`.
+   */
+  resolutionRiskFallback?: EntityRiskScore<T>;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -73,6 +82,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   queryId,
   openDetailsPanel,
   isPreviewMode,
+  resolutionRiskFallback,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -220,9 +230,9 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     skip: !shouldFetchResolutionRiskScore,
   });
   const resolutionRiskData =
-    resolutionRiskScoreData.data && resolutionRiskScoreData.data.length > 0
+    (resolutionRiskScoreData.data && resolutionRiskScoreData.data.length > 0
       ? resolutionRiskScoreData.data[0]
-      : undefined;
+      : undefined) ?? resolutionRiskFallback;
   const resolutionEntityData = getEntityData<T>(entityType, resolutionRiskData);
   const resolutionRows = useMemo(
     () => getItems(resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled),
