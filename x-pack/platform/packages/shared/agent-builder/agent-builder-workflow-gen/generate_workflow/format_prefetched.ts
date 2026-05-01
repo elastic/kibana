@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ConnectorSummary,
-  StepDefinitionSummary,
-  TriggerDefinitionSummary,
-} from './types';
+import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
 /* ---------------- Connectors ---------------- */
 
@@ -58,13 +54,27 @@ export const formatConnectorsBlock = (connectors: ConnectorSummary[]): string =>
 
 const normalize = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
+// Strip trailing parenthetical hints from labels like "Loop (foreach)" → "Loop".
+const cleanLabel = (label: string): string => label.replace(/\s*\([^)]*\)\s*$/, '').trim();
+
+const isLabelRedundant = (label: string, id: string): boolean => {
+  const nLabel = normalize(label);
+  const nId = normalize(id);
+  if (!nLabel) return true;
+  return nId.includes(nLabel) || nLabel.includes(nId);
+};
+
 export const formatStepEntry = (s: StepDefinitionSummary): string => {
-  const labelIsRedundant = normalize(s.label) === normalize(s.id);
-  const description = s.description && s.description !== s.label ? s.description : undefined;
+  const cleanedLabel = cleanLabel(s.label);
+  const labelRedundant = isLabelRedundant(cleanedLabel, s.id);
+  const description =
+    s.description && s.description !== s.label && s.description !== cleanedLabel
+      ? s.description
+      : undefined;
 
   let line = `- ${s.id}`;
-  if (!labelIsRedundant) {
-    line += ` (${s.label})`;
+  if (!labelRedundant) {
+    line += ` (${cleanedLabel})`;
   }
   if (description) {
     line += ` — ${description}`;
@@ -176,24 +186,32 @@ export const bucketStepsBySection = (steps: StepDefinitionSummary[]): StepSectio
   }));
 };
 
+const CONNECTOR_STEPS_SECTION = 'Connector steps';
+
 export const formatStepDefinitionsBlock = (
   steps: StepDefinitionSummary[],
-  options: { collapseThreshold?: number } = {}
+  options: { connectorCollapseThreshold?: number } = {}
 ): string => {
-  const collapseThreshold = options.collapseThreshold ?? 5;
+  // Only the connector-steps section gets collapse treatment — every other
+  // section is a curated short list that should always enumerate fully.
+  // Default threshold of 1 collapses any connector multi-action family.
+  const connectorCollapseThreshold = options.connectorCollapseThreshold ?? 1;
   const sections = bucketStepsBySection(steps);
 
   return sections
     .map((section) => {
-      const { enumerated, collapsed } = collapseSubActionFamilies(
-        section.steps,
-        collapseThreshold
-      );
-      const lines: string[] = [`### ${section.title}`, ...enumerated.map(formatStepEntry)];
-      for (const fam of collapsed) {
-        lines.push(
-          `- ${fam.prefix}.* (${fam.count} actions — call get_step_definitions with search="${fam.prefix}" for details)`
+      const lines: string[] = [`### ${section.title}`];
+      if (section.title === CONNECTOR_STEPS_SECTION) {
+        const { enumerated, collapsed } = collapseSubActionFamilies(
+          section.steps,
+          connectorCollapseThreshold
         );
+        lines.push(...enumerated.map(formatStepEntry));
+        for (const fam of collapsed) {
+          lines.push(`- ${fam.prefix}.* (${fam.count} actions)`);
+        }
+      } else {
+        lines.push(...section.steps.map(formatStepEntry));
       }
       return lines.join('\n');
     })
@@ -205,11 +223,15 @@ export const formatStepDefinitionsBlock = (
 export const formatTriggersBlock = (defs: TriggerDefinitionSummary[]): string =>
   defs
     .map((d) => {
-      const labelIsRedundant = normalize(d.label) === normalize(d.id);
-      const description = d.description && d.description !== d.label ? d.description : undefined;
+      const cleanedLabel = cleanLabel(d.label);
+      const labelRedundant = isLabelRedundant(cleanedLabel, d.id);
+      const description =
+        d.description && d.description !== d.label && d.description !== cleanedLabel
+          ? d.description
+          : undefined;
       let line = `- ${d.id}`;
-      if (!labelIsRedundant) {
-        line += ` (${d.label})`;
+      if (!labelRedundant) {
+        line += ` (${cleanedLabel})`;
       }
       if (description) {
         line += ` — ${description}`;

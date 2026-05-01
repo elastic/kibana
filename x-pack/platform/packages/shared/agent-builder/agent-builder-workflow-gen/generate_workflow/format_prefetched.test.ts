@@ -148,6 +148,22 @@ describe('formatStepEntry', () => {
     expect(formatStepEntry(step({ id: 'slack_api', label: 'Slack API', description: undefined })))
       .toBe('- slack_api');
   });
+
+  it('drops a label that is a substring of the id (e.g. "Break" inside "loop.break")', () => {
+    expect(
+      formatStepEntry(
+        step({ id: 'loop.break', label: 'Break', description: 'Exit the enclosing loop' })
+      )
+    ).toBe('- loop.break — Exit the enclosing loop');
+  });
+
+  it('strips trailing parentheticals from labels like "Loop (foreach)"', () => {
+    expect(
+      formatStepEntry(
+        step({ id: 'foreach', label: 'Loop (foreach)', description: 'Loop over a list' })
+      )
+    ).toBe('- foreach (Loop) — Loop over a list');
+  });
 });
 
 describe('collapseSubActionFamilies', () => {
@@ -218,11 +234,12 @@ describe('bucketStepsBySection', () => {
 });
 
 describe('formatStepDefinitionsBlock', () => {
-  it('renders sections with headers, applies entry formatting and family collapse', () => {
+  it('only collapses families inside the Connector steps section', () => {
     const githubIds = Array.from({ length: 8 }).map((_, i) => `github.x${i}`);
+    const dataIds = Array.from({ length: 11 }).map((_, i) => `data.op${i}`);
     const steps: StepDefinitionSummary[] = [
       { id: 'if', label: 'If', description: 'Conditional', category: 'flowControl' },
-      { id: 'data.set', label: 'Set Variables', description: 'Set vars', category: 'data' },
+      ...dataIds.map((id) => ({ id, label: id, category: 'data' as const })),
       { id: 'console', label: 'Console', description: 'Log', category: 'kibana' },
       { id: 'slack', label: 'Slack', description: undefined, category: 'external' },
       ...githubIds.map((id) => ({ id, label: id, category: 'external' as const })),
@@ -232,15 +249,34 @@ describe('formatStepDefinitionsBlock', () => {
 
     expect(out).toContain('### Control flow');
     expect(out).toContain('- if — Conditional');
+    // Data manipulation never collapses, even with 11 entries.
     expect(out).toContain('### Data manipulation');
-    expect(out).toContain('- data.set (Set Variables) — Set vars');
+    expect(out).toContain('- data.op0');
+    expect(out).toContain('- data.op10');
+    expect(out).not.toMatch(/data\.\* \(/);
+    // Logging keeps console.
     expect(out).toContain('### Logging / Diagnostics');
     expect(out).toContain('- console — Log');
+    // Connector steps: singletons enumerate, families collapse, no search hint.
     expect(out).toContain('### Connector steps');
     expect(out).toContain('- slack');
-    // github.* family collapses (8 > 5):
-    expect(out).toMatch(/github\.\* \(8 actions/);
+    expect(out).toContain('- github.* (8 actions)');
     expect(out).not.toMatch(/github\.x0/);
+    expect(out).not.toMatch(/search="github"/);
+  });
+
+  it('collapses any connector multi-action family with the default threshold (≥2)', () => {
+    const steps: StepDefinitionSummary[] = [
+      { id: 'aws_lambda.invoke', label: 'AWS Lambda', category: 'external' },
+      { id: 'aws_lambda.listFunctions', label: 'AWS Lambda', category: 'external' },
+      { id: 'slack', label: 'Slack', category: 'external' },
+    ];
+
+    const out = formatStepDefinitionsBlock(steps);
+
+    expect(out).toContain('- aws_lambda.* (2 actions)');
+    expect(out).not.toContain('aws_lambda.invoke');
+    expect(out).toContain('- slack');
   });
 });
 

@@ -28,10 +28,11 @@ the compact summaries below.
 
 ${formatStepDefinitionsBlock(prefetched.stepDefinitions)}
 
-Call \`get_step_definitions\` with a specific \`stepType\` to fetch the full
-schema (input params, config params, examples) before emitting steps you have
-not used recently. For high-cardinality families (shown above as \`<prefix>.*\`)
-pass \`search="<prefix>"\` to enumerate the sub-actions.
+Use \`get_step_definitions\` to fetch more details:
+- pass \`stepType="<id>"\` for the full schema of a specific step (input params,
+  config params, examples) before emitting steps you have not used recently.
+- for collapsed families shown above as \`<prefix>.*\`, pass \`search="<prefix>"\`
+  to enumerate the sub-actions.
 
 ## Available trigger types (compact summary)
 
