@@ -117,6 +117,8 @@ export class UserStorageClient implements IUserStorageClient {
             { id: this.profileUid }
           );
         } catch (createErr) {
+          // Conflict means a concurrent first-write for this user beat us to create().
+          // The doc now exists but our key isn't in it yet — retry as update().
           if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
             await this.soClient.update(soType, this.profileUid, dataUpdate);
           } else {
