@@ -142,4 +142,83 @@ steps:
       /Could not generate workflow/
     );
   });
+
+  it('records currentYaml and a passing validation on each successful edit', async () => {
+    const responses = [
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: '1', name: 'set_yaml', args: { yaml: VALID_YAML } }],
+      }),
+      new AIMessage({ content: 'done' }),
+    ];
+    const chatModel = buildChatModel(responses);
+
+    const deps = baseDeps(chatModel);
+    // Per-edit + post-loop validation will both call validateWorkflow.
+    deps.workflowsApi.validateWorkflow = jest.fn().mockResolvedValue({
+      valid: true,
+      diagnostics: [],
+      parsedWorkflow: {
+        version: '1',
+        name: 'hello world',
+        triggers: [{ type: 'manual' }],
+        steps: [{ name: 'greet', type: 'console', with: { message: 'hi' } }],
+      },
+    });
+
+    const result = await generateWorkflow({ nlQuery: 'q', ...deps });
+    expect(result.workflow.name).toBe('hello world');
+    // Per-edit validation runs once for the single set_yaml dispatch,
+    // post-loop validation runs once more after the agent exits the loop.
+    expect(deps.workflowsApi.validateWorkflow).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not validate during lookup-only tool calls', async () => {
+    const lookupYaml = `version: '1'
+name: lookup-only
+triggers:
+  - type: manual
+steps:
+  - name: noop
+    type: console
+    with:
+      message: hi
+`;
+    const responses = [
+      new AIMessage({
+        content: '',
+        tool_calls: [
+          {
+            id: '1',
+            name: 'get_step_definitions',
+            args: { stepType: 'console' },
+          },
+        ],
+      }),
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: '2', name: 'set_yaml', args: { yaml: lookupYaml } }],
+      }),
+      new AIMessage({ content: 'done' }),
+    ];
+    const chatModel = buildChatModel(responses);
+
+    const deps = baseDeps(chatModel);
+    deps.workflowsApi.validateWorkflow = jest.fn().mockResolvedValue({
+      valid: true,
+      diagnostics: [],
+      parsedWorkflow: {
+        version: '1',
+        name: 'lookup-only',
+        triggers: [{ type: 'manual' }],
+        steps: [{ name: 'noop', type: 'console', with: { message: 'hi' } }],
+      },
+    });
+
+    await generateWorkflow({ nlQuery: 'q', ...deps });
+
+    // get_step_definitions does NOT trigger per-edit validation;
+    // set_yaml does (once); post-loop validate runs (once more).
+    expect(deps.workflowsApi.validateWorkflow).toHaveBeenCalledTimes(2);
+  });
 });
