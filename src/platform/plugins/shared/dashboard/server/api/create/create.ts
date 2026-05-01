@@ -8,17 +8,18 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardCreateRequestBody } from './types';
+import type { RequestTiming } from '@kbn/core-http-server';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
-import type { DashboardCreateResponseBody } from './types';
+import type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
+  serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
@@ -26,7 +27,8 @@ export async function create(
 
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfData,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
@@ -50,6 +52,7 @@ export async function create(
     savedObject,
     'create',
     dashboardStateSchema,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
 }

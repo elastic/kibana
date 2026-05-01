@@ -12,7 +12,7 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 export interface FetchGroupActionsOptions {
   groupHashes: string[];
   abortSignal?: AbortSignal;
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
 /**
@@ -21,7 +21,7 @@ export interface FetchGroupActionsOptions {
 export const fetchGroupActions = ({
   groupHashes,
   abortSignal,
-  services: { expressions },
+  expressions,
 }: FetchGroupActionsOptions): Promise<GroupActionRow[]> => {
   return executeEsqlQuery<GroupActionRow>({
     expressions,

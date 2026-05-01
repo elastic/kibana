@@ -68,6 +68,7 @@ const previouslyRegisteredTypes = [
   'entity-definition',
   'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-store-ccs-state',
   'entity-engine-descriptor-v2',
   'entity-store-global-state',
   'epm-packages',

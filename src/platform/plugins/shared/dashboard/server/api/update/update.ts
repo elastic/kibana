@@ -8,6 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import Boom from '@hapi/boom';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
@@ -23,6 +24,7 @@ export async function update(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardUpdateRequestBody,
+  serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
@@ -30,7 +32,8 @@ export async function update(
   const { access_control: accessControl, ...restOfBody } = updateBody;
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfBody,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
 
   let isCreateRequest = false;
@@ -83,7 +86,8 @@ export async function update(
         savedObject,
         'create',
         dashboardStateSchema,
-        isDashboardAppRequest
+        isDashboardAppRequest,
+        serverTiming
       );
     } catch (e) {
       // If the document was created between the resolve check and the create call
@@ -159,6 +163,7 @@ export async function update(
     updated,
     'update',
     dashboardStateSchema,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
 }

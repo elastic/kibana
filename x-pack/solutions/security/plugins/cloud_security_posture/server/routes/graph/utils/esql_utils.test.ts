@@ -110,11 +110,11 @@ describe('ESQL utils', () => {
       expect(result).toContain('| RENAME actorEntityName    = entity.name');
       expect(result).toContain('| RENAME actorEntityType    = entity.type');
       expect(result).toContain('| RENAME actorEntitySubType = entity.sub_type');
-      expect(result).toContain('| RENAME actorHostIp        = host.ip');
+      expect(result).toContain('| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip))');
       expect(result).toContain('| RENAME targetEntityName    = entity.name');
       expect(result).toContain('| RENAME targetEntityType    = entity.type');
       expect(result).toContain('| RENAME targetEntitySubType = entity.sub_type');
-      expect(result).toContain('| RENAME targetHostIp        = host.ip');
+      expect(result).toContain('| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip))');
     });
 
     it('should include two LOOKUP JOIN statements for actor and target', () => {
