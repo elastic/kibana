@@ -35,6 +35,7 @@ import {
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
+  installPackageWithVersion,
   interceptPackId,
   interceptAgentPolicyId,
   policyContainsIntegration,
@@ -83,6 +84,10 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let policyId: string;
 
     beforeEach(() => {
+      // PR #266513 disables Add integration when viewed package version differs from installed.
+      // FTR config auto-installs latest osquery_manager; force the old version so the button stays enabled.
+      installPackageWithVersion('osquery_manager', oldVersion);
+
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
@@ -162,6 +167,10 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
 
     beforeEach(() => {
+      // PR #266513 disables Add integration when viewed package version differs from installed.
+      // FTR config auto-installs latest osquery_manager; force the old version so the button stays enabled.
+      installPackageWithVersion('osquery_manager', oldVersion);
+
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
