@@ -50,9 +50,17 @@ export const exportExceptionListsAndItems = async ({
     });
   };
 
+  const savedObjectPrefix = getSavedObjectType({ namespaceType });
+  // Exclude defend (endpoint) exception lists from bulk export. Those are surfaced through
+  // dedicated Defend workflows and should not be co-mingled with detection rule exception lists.
+  const excludeDefendListsFilter = `NOT ${savedObjectPrefix}.attributes.type: endpoint*`;
+  const listFilter = dataFilter
+    ? `(${dataFilter}) AND ${excludeDefendListsFilter}`
+    : excludeDefendListsFilter;
+
   await findExceptionListPointInTimeFinder({
     executeFunctionOnStream: appendExceptionList,
-    filter: dataFilter,
+    filter: listFilter,
     maxSize: 10_000,
     namespaceType: [namespaceType],
     perPage: 1_000,
@@ -65,12 +73,10 @@ export const exportExceptionListsAndItems = async ({
     return null;
   }
 
-  // Stream the results from the Point In Time (PIT) finder into this array
   const exceptionItems: ExceptionListItemSchema[] = [];
   const appendExceptionItem = (response: FoundExceptionListItemSchema): void => {
     exceptionItems.push(...response.data);
   };
-  const savedObjectPrefix = getSavedObjectType({ namespaceType });
   let filter = dataFilter;
 
   if (!includeExpiredExceptions) {
