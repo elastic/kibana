@@ -7,15 +7,18 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/core/server';
 
 import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
 import { createRulePipelineState } from './test_utils';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
   let abortController: AbortController;
+  let mockLogger: jest.Mocked<Logger>;
 
   // @ts-expect-error: not all fields are required
   const taskInstance: ConcreteTaskInstance = {
@@ -28,7 +31,9 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
-    runner = new RuleExecutorTaskRunner(pipeline);
+    const mockLoggerService = createLoggerService();
+    mockLogger = mockLoggerService.mockLogger;
+    runner = new RuleExecutorTaskRunner(pipeline, mockLoggerService.loggerService);
     abortController = new AbortController();
   });
 
@@ -83,7 +88,7 @@ describe('RuleExecutorTaskRunner', () => {
       expect(result).toEqual({ state: {} });
     });
 
-    it('throws an unrecoverable error when pipeline halts with rule_deleted', async () => {
+    it('throws an unrecoverable error and logs a warning when pipeline halts with rule_deleted', async () => {
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_deleted',
@@ -94,6 +99,9 @@ describe('RuleExecutorTaskRunner', () => {
 
       expect(result).toBeInstanceOf(Error);
       expect(isUnrecoverableError(result)).toBe(true);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Removing task for rule "rule-1" in the "default" space because the rule no longer exists.'
+      );
     });
 
     it('preserves previous state when pipeline halts with rule_disabled', async () => {

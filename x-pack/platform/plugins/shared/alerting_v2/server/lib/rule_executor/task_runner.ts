@@ -16,13 +16,18 @@ import type {
   RuleExecutionPipelineResult,
 } from './execution_pipeline';
 import { RuleExecutionPipeline } from './execution_pipeline';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
   constructor(
-    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract
+    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
@@ -75,6 +80,10 @@ export class RuleExecutorTaskRunner {
     }
 
     if (result.haltReason === 'rule_deleted') {
+      const params = taskInstance.params as RuleExecutorTaskParams;
+      this.logger.warn({
+        message: `Removing task for rule "${params.ruleId}" in the "${params.spaceId}" space because the rule no longer exists.`,
+      });
       throwUnrecoverableError(new Error('Rule no longer exists'));
     }
 
