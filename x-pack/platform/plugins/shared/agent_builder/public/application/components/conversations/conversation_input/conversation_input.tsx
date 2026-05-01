@@ -18,6 +18,7 @@ import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
@@ -145,7 +146,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onEditorFocus,
 }) => {
   const isSendingMessage = useIsSendingMessage();
-  const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
+  const { pendingMessage, error, isResuming } = useSendMessage();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -158,6 +159,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAwaitingPrompt = useIsAwaitingPrompt();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
+  const submitMessage = useSubmitMessage();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -241,7 +243,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    sendMessage({ message: content });
+    submitMessage(content);
     messageEditorController.clear();
     onSubmit?.();
   };

@@ -123,13 +123,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     validateAndSetConversationId,
   ]);
 
-  const onConversationCreated = useCallback(
-    ({ conversationId: id }: { conversationId: string }) => {
-      setConversationId(id);
-    },
-    [setConversationId]
-  );
-
   const onDeleteConversation = useCallback(() => {
     setConversationId(undefined);
   }, [setConversationId]);
@@ -147,7 +140,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     conversationId,
     queryClient,
     conversationsService: services.conversationsService,
-    onConversationCreated,
     onDeleteConversation,
   });
 

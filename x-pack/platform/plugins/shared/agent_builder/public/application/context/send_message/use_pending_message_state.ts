@@ -7,7 +7,6 @@
 
 import produce from 'immer';
 import { useState } from 'react';
-import { newConversationId } from '../../utils/new_conversation';
 
 interface PendingMessageState {
   pendingMessage?: string;
@@ -18,9 +17,8 @@ export const usePendingMessageState = ({ conversationId }: { conversationId?: st
     Record<string, PendingMessageState>
   >({});
 
-  const id = conversationId ?? newConversationId;
-
-  const updateState = (updater: (c: PendingMessageState) => void) => {
+  const updateStateFor = (id: string | undefined, updater: (c: PendingMessageState) => void) => {
+    if (!id) return;
     setConversationIdToPendingMessageState(
       produce((draft) => {
         draft[id] ??= {};
@@ -29,17 +27,19 @@ export const usePendingMessageState = ({ conversationId }: { conversationId?: st
     );
   };
 
-  const pendingMessageState = conversationIdToPendingMessageState[id] ?? {};
+  const pendingMessageState = conversationId
+    ? conversationIdToPendingMessageState[conversationId] ?? {}
+    : {};
 
   return {
     pendingMessageState,
-    setPendingMessage: (pendingMessage: string) => {
-      updateState((state) => {
+    setPendingMessage: (pendingMessage: string, id: string | undefined = conversationId) => {
+      updateStateFor(id, (state) => {
         state.pendingMessage = pendingMessage;
       });
     },
-    removePendingMessage: () => {
-      updateState((state) => {
+    removePendingMessage: (id: string | undefined = conversationId) => {
+      updateStateFor(id, (state) => {
         delete state.pendingMessage;
       });
     },

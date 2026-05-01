@@ -66,7 +66,7 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
       browserApiTools: browserApiToolsMetadata,
     });
 
-    return subscribeToChatEvents(events$);
+    return subscribeToChatEvents(events$, conversationActions);
   };
 
   const { mutate, isLoading } = useMutation({

@@ -12,7 +12,7 @@ import { useResumeRoundMutation } from './use_resume_round_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
-  sendMessage: ({ message }: { message: string }) => void;
+  sendMessage: (params: { message: string; conversationId: string }) => void;
   isResponseLoading: boolean;
   pendingMessage: string | undefined;
   error: unknown;

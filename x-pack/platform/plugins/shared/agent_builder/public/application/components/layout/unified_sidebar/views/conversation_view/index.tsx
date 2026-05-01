@@ -23,7 +23,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
-import { newConversationId } from '../../../../../utils/new_conversation';
 import {
   getAgentIdFromPath,
   getAgentSettingsNavItems,
@@ -83,7 +82,7 @@ export const ConversationSidebarView: React.FC = () => {
   const hasConversations = conversations.length > 0;
 
   const isNewConversationRoute =
-    conversationId === newConversationId || pathname === appPaths.agent.root({ agentId });
+    conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
 
   const navItems = useMemo(
     () => getAgentSettingsNavItems(agentId, featureFlags),

@@ -12,7 +12,7 @@ import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { newConversationId, createNewRound } from '../utils/new_conversation';
+import { createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useAgentBuilderServices } from './use_agent_builder_service';
@@ -24,7 +24,7 @@ import { useConversationContext } from '../context/conversation/conversation_con
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+  const queryKey = queryKeys.conversations.byId(conversationId ?? '');
   const isSendingMessage = useIsSendingMessage();
 
   const {
@@ -36,8 +36,9 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    // Disable query if we are on a new conversation or if there is a message currently being sent
-    // Otherwise a refetch will overwrite our optimistic updates
+    // Disable query when there's no conversationId yet (entry "new" state) or while a message is
+    // streaming (a refetch would overwrite optimistic updates). When the mutation finishes,
+    // `onSettled` invalidates this query and the gate flips open, triggering the GET.
     enabled: Boolean(conversationId) && !isSendingMessage,
     queryFn: () => {
       if (!conversationId) {
