@@ -13,9 +13,9 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  useIsWithinBreakpoints,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLoadConnectors } from '@kbn/inference-connectors';
@@ -66,7 +66,16 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   filters,
   pageFilters: [],
   sort: [['@timestamp', 'desc']],
+  pageIndex: 0,
 });
+
+const riskPanelFlexItemStyle = css`
+  min-width: 460px;
+`;
+
+const anomaliesPanelFlexItemStyle = css`
+  min-width: 500px;
+`;
 
 export const EntityAnalyticsHomePage = () => {
   const { telemetry, agentBuilder, http } = useKibana().services;
@@ -117,23 +126,28 @@ export const EntityAnalyticsHomePage = () => {
     [newDataViewPickerEnabled, oldIsSourcererLoading, entityDataViewLoading]
   );
 
-  const location = useLocation();
+  // Only subscribe to `search` rather than the whole `location` object so this
+  // component doesn't re-render (and re-create callbacks) on unrelated URL
+  // updates like flyout params.
+  const { search } = useLocation();
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const selectedWatchlistId = useMemo(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
-  }, [location.search]);
+  }, [search]);
 
   const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     return params.get('watchlistName') || undefined;
-  }, [location.search]);
+  }, [search]);
 
   const setSelectedWatchlist = useCallback(
     (id?: string, name?: string) => {
-      const params = new URLSearchParams(location.search);
+      // Read the latest search from `history.location` to keep this callback's
+      // reference stable across unrelated URL updates.
+      const params = new URLSearchParams(history.location.search);
       if (id) {
         params.set('watchlistId', id);
       } else {
@@ -144,9 +158,9 @@ export const EntityAnalyticsHomePage = () => {
       } else {
         params.delete('watchlistName');
       }
-      history.replace({ ...location, search: params.toString() });
+      history.replace({ ...history.location, search: params.toString() });
     },
-    [location, history]
+    [history]
   );
 
   const indicesExist = useMemo(
@@ -154,7 +168,6 @@ export const EntityAnalyticsHomePage = () => {
     [entityDataViewLoading, newDataViewPickerEnabled, oldIndicesExist]
   );
 
-  const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
   const { data: entityStoreStatusData } = useEntityStoreStatus();
@@ -196,6 +209,7 @@ export const EntityAnalyticsHomePage = () => {
           dataView={entityDataView}
           id={InputsModelId.global}
           sourcererDataViewSpec={oldSourcererDataViewSpec}
+          hideDatePicker
         />
       </FiltersGlobal>
 
@@ -262,20 +276,17 @@ export const EntityAnalyticsHomePage = () => {
             )}
 
             <EuiFlexItem>
-              <EuiFlexGroup
-                direction={isXlScreen ? 'row' : 'column'}
-                responsive={false}
-                gutterSize="l"
-              >
-                <EuiFlexItem grow={1}>
+              <EuiFlexGroup wrap gutterSize="m">
+                <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
                   <EuiPanel hasBorder>
                     <DynamicRiskLevelPanel
                       watchlistId={selectedWatchlistId}
                       watchlistName={selectedWatchlistName}
+                      entityDataView={entityDataView}
                     />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem grow={2}>
+                <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
                   <EuiPanel hasBorder>
                     <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>

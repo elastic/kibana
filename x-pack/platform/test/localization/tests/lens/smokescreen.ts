@@ -55,11 +55,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `Maximum de ${field}` : 'Maximum';
       case 'terms':
-        return field
-          ? `${values} valeurs les plus élevées de ${field}`
-          : 'Valeurs les plus élevées';
+        return field ? `Top ${values} valeurs de ${field}` : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '(null)';
       default:
         return term;
     }
@@ -97,9 +98,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `${field} の最高値` : '最高';
       case 'terms':
-        return field ? `${field}の上位${values} の値` : 'トップの値';
+        return field ? `${values} の上位値${field}` : 'トップの値';
       case 'sum':
         return '合計';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '（null）';
       default:
         return term;
     }
@@ -140,6 +144,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} 的排名前 ${values} 的值` : `排名最前值`;
       case 'sum':
         return '求和';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '（空）';
       default:
         return term;
     }
@@ -194,6 +201,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'sum':
         // xpack.maps.aggType.sumLabel
         return 'Summe';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '(Null)';
       default:
         return term;
     }
@@ -210,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'de-DE':
         return getTranslationDe;
       default:
-        return (v: string, field?: string) => v;
+        return (v: string, field?: string) => (v === 'null' ? NULL_LABEL : v);
     }
   }
 
@@ -712,7 +722,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        NULL_LABEL,
+        termTranslator('null'),
         '222,420.00',
         '702,050.00',
         '1,879,613.33',

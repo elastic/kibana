@@ -11,6 +11,7 @@ import {
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import type { ProvisioningStatusDocs, UiamApiKeyByRuleId } from '../types';
+import { getErrorMessage } from './error_utils';
 
 /**
  * Builds a provisioning status doc for a rule that was skipped (no API key, already has UIAM key, or user-created key).
@@ -105,7 +106,9 @@ export const createStatusFromBulkUpdateResult = (
     status: so.error ? UiamApiKeyProvisioningStatus.FAILED : UiamApiKeyProvisioningStatus.COMPLETED,
     ...(so.error
       ? {
-          message: `Error bulk updating the rule with ID ${so.id}: ${so.error.message ?? so.error}`,
+          message: `Error bulk updating the rule with ID ${so.id}: ${
+            so.error.message ?? getErrorMessage(so.error)
+          }`,
         }
       : {}),
   },

@@ -73,6 +73,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterManager",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -96,6 +97,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimefilterContract",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -113,6 +115,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CoreStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -218,6 +221,7 @@
             "lineNumber": 163,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "StatefulSearchBarDeps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -274,6 +278,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -322,6 +327,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -370,6 +376,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -418,6 +425,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -786,6 +794,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false
           }
         ],
@@ -1014,6 +1023,7 @@
                 "lineNumber": 39,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataView",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1173,6 +1183,7 @@
                 "lineNumber": 66,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataView",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1223,6 +1234,7 @@
                 "lineNumber": 68,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataViewSpec",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1313,6 +1325,7 @@
                 "lineNumber": 80,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataView",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2163,7 +2176,14 @@
           "tags": [],
           "label": "ui",
           "description": [
-            "\nprewired UI components\n{@link UnifiedSearchPublicPluginStartUi}"
+            "\nprewired UI components\n",
+            {
+              "pluginId": "unifiedSearch",
+              "scope": "public",
+              "docId": "kibUnifiedSearchPluginApi",
+              "section": "def-public.UnifiedSearchPublicPluginStartUi",
+              "text": "UnifiedSearchPublicPluginStartUi"
+            }
           ],
           "signature": [
             "UnifiedSearchPublicPluginStartUi"

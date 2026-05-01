@@ -8,10 +8,9 @@
  */
 import { isOptionNode, isLiteral, isParamLiteral } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLCommandOption, ESQLColumn } from '@elastic/esql/types';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 export type LimitCaretPosition = 'after_limit_keyword' | 'after_value' | 'grouping_expression';
-
-const ENDS_WITH_WHITESPACE_REGEX = /\s+$/;
 
 export function getPosition(command: ESQLAstAllCommands, innerText: string): LimitCaretPosition {
   const lastCommandArg = command.args[command.args.length - 1];
@@ -24,7 +23,7 @@ export function getPosition(command: ESQLAstAllCommands, innerText: string): Lim
   const firstArg = Array.isArray(rawFirstArg) ? rawFirstArg[0] : rawFirstArg;
   const hasValue = firstArg && (isLiteral(firstArg) || isParamLiteral(firstArg));
 
-  if (hasValue && ENDS_WITH_WHITESPACE_REGEX.test(innerText)) {
+  if (hasValue && endsWithWhitespace(innerText)) {
     return 'after_value';
   }
 

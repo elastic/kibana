@@ -21,28 +21,28 @@ jest.mock('react-redux', () => ({
 describe('useOverviewTrendsRequests', () => {
   const mockMonitor1 = {
     configId: 'monitor-1',
-    locationId: 'us-east',
+    locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
     name: 'Monitor 1',
     schedule: '3',
   } as OverviewStatusMetaData;
 
   const mockMonitor2 = {
     configId: 'monitor-2',
-    locationId: 'us-west',
+    locations: [{ id: 'us-west', label: 'US West', status: 'up' }],
     name: 'Monitor 2',
     schedule: '5',
   } as OverviewStatusMetaData;
 
   const mockMonitor3 = {
     configId: 'monitor-3',
-    locationId: 'eu-central',
+    locations: [{ id: 'eu-central', label: 'EU Central', status: 'up' }],
     name: 'Monitor 3',
     schedule: '10',
   } as OverviewStatusMetaData;
 
   const mockMonitor4 = {
     configId: 'monitor-4',
-    locationId: 'us-east',
+    locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
     name: 'Monitor 4',
     schedule: '3',
   } as OverviewStatusMetaData;
@@ -77,10 +77,10 @@ describe('useOverviewTrendsRequests', () => {
       expect.objectContaining({
         type: 'batchTrendStats',
         payload: expect.arrayContaining([
-          { configId: 'monitor-1', locationId: 'us-east', schedule: '3' },
-          { configId: 'monitor-2', locationId: 'us-west', schedule: '5' },
-          { configId: 'monitor-3', locationId: 'eu-central', schedule: '10' },
-          { configId: 'monitor-4', locationId: 'us-east', schedule: '3' },
+          { configId: 'monitor-1', locationIds: ['us-east'], schedule: '3' },
+          { configId: 'monitor-2', locationIds: ['us-west'], schedule: '5' },
+          { configId: 'monitor-3', locationIds: ['eu-central'], schedule: '10' },
+          { configId: 'monitor-4', locationIds: ['us-east'], schedule: '3' },
         ]),
       })
     );
@@ -102,8 +102,8 @@ describe('useOverviewTrendsRequests', () => {
       expect.objectContaining({
         type: 'batchTrendStats',
         payload: expect.arrayContaining([
-          { configId: 'monitor-2', locationId: 'us-west', schedule: '5' },
-          { configId: 'monitor-3', locationId: 'eu-central', schedule: '10' },
+          { configId: 'monitor-2', locationIds: ['us-west'], schedule: '5' },
+          { configId: 'monitor-3', locationIds: ['eu-central'], schedule: '10' },
         ]),
       })
     );
@@ -125,8 +125,8 @@ describe('useOverviewTrendsRequests', () => {
       expect.objectContaining({
         type: 'batchTrendStats',
         payload: expect.arrayContaining([
-          { configId: 'monitor-2', locationId: 'us-west', schedule: '5' },
-          { configId: 'monitor-3', locationId: 'eu-central', schedule: '10' },
+          { configId: 'monitor-2', locationIds: ['us-west'], schedule: '5' },
+          { configId: 'monitor-3', locationIds: ['eu-central'], schedule: '10' },
         ]),
       })
     );

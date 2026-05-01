@@ -118,6 +118,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -178,16 +179,17 @@
                 "id": "def-common.UseTableState.onTableChange.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ page, sort }",
                 "description": [],
                 "signature": [
                   "Criteria",
                   "<T>"
                 ],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 33796,
+                "lineNumber": 33798,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Criteria",
                 "trackAdoption": false
               }
             ]
@@ -263,6 +265,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]

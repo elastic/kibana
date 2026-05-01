@@ -35,6 +35,7 @@
             "lineNumber": 15,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -128,6 +129,7 @@
             "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -186,6 +188,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -262,6 +265,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -321,6 +325,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -380,6 +385,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -676,6 +682,7 @@
                 "lineNumber": 31,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventAnnotationGroupConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -726,6 +733,7 @@
                 "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventAnnotationGroupConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },

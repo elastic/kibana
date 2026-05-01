@@ -406,7 +406,9 @@
             "type": "string",
             "tags": [],
             "label": "eql",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.eqlRule\""
             ],
@@ -422,7 +424,9 @@
             "type": "string",
             "tags": [],
             "label": "esql",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.esqlRule\""
             ],
@@ -438,7 +442,9 @@
             "type": "string",
             "tags": [],
             "label": "machine_learning",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.mlRule\""
             ],
@@ -454,7 +460,9 @@
             "type": "string",
             "tags": [],
             "label": "query",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.queryRule\""
             ],
@@ -470,7 +478,9 @@
             "type": "string",
             "tags": [],
             "label": "saved_query",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.savedQueryRule\""
             ],
@@ -486,7 +496,9 @@
             "type": "string",
             "tags": [],
             "label": "threat_match",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.indicatorRule\""
             ],
@@ -502,7 +514,9 @@
             "type": "string",
             "tags": [],
             "label": "threshold",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.thresholdRule\""
             ],
@@ -518,7 +532,9 @@
             "type": "string",
             "tags": [],
             "label": "new_terms",
-            "description": [],
+            "description": [
+              "\nMaps legacy rule types to RAC rule type IDs."
+            ],
             "signature": [
               "\"siem.newTermsRule\""
             ],

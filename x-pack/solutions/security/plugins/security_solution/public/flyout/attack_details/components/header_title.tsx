@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { buildDataTableRecord, getFieldValue, type EsHitRecord } from '@kbn/discover-utils';
-import { isNonLocalIndexName } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
@@ -27,7 +25,6 @@ import {
 import { useHeaderData } from '../hooks/use_header_data';
 import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
-import { RemoteDocumentBadge } from '../../../flyout_v2/document/components/remote_document_badge';
 
 const ATTACK_HEADER_BADGE = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.header.badge.attackLabel',
@@ -41,13 +38,8 @@ const ATTACK_HEADER_BADGE = i18n.translate(
  */
 export const HeaderTitle = memo(() => {
   const { title, timestamp, alertsCount } = useHeaderData();
-  const { attackId, searchHit } = useAttackDetailsContext();
+  const { attackId } = useAttackDetailsContext();
   const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
-  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const isRemoteDocument = useMemo(
-    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
-    [hit]
-  );
 
   return (
     <>
@@ -58,21 +50,15 @@ export const HeaderTitle = memo(() => {
         </>
       )}
       <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
-      {isRemoteDocument ? (
-        <RemoteDocumentBadge hit={hit} />
-      ) : (
-        <>
-          <EuiSpacer size="s" />
-          <EuiBadge
-            aria-label={ATTACK_HEADER_BADGE}
-            color="hollow"
-            data-test-subj={HEADER_BADGE_TEST_ID}
-            tabIndex={0}
-          >
-            {ATTACK_HEADER_BADGE}
-          </EuiBadge>
-        </>
-      )}
+      <EuiSpacer size="s" />
+      <EuiBadge
+        aria-label={ATTACK_HEADER_BADGE}
+        color="hollow"
+        data-test-subj={HEADER_BADGE_TEST_ID}
+        tabIndex={0}
+      >
+        {ATTACK_HEADER_BADGE}
+      </EuiBadge>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem css={flyoutHeaderBlockStyles}>

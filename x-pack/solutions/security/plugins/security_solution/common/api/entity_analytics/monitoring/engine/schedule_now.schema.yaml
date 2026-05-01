@@ -38,3 +38,8 @@ paths:
                   message:
                     type: string
                     description: Error message indicating the engine is already running
+              examples:
+                ScheduleMonitoringEngineConflict:
+                  summary: Engine is already running
+                  value:
+                    message: "Monitoring engine is already running"

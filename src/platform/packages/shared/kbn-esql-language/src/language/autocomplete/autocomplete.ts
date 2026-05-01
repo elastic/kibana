@@ -36,7 +36,7 @@ import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_hel
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
-import { attachReplacementRanges, attachRootQueryReplacementRanges } from './utils/prefix_range';
+import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -177,11 +177,18 @@ export async function suggest(
       );
 
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      const rootLevelQuerySuggestions = attachRootQueryReplacementRanges(
-        [...suggestions.filter(isSourceCommandSuggestion), ...recommendedQueriesSuggestions],
+      const rootLevelSuggestions: ISuggestionItem[] = [
+        ...suggestions.filter(isSourceCommandSuggestion),
+        ...recommendedQueriesSuggestions,
+      ].map((suggestion) => ({
+        ...suggestion,
+        replacementRangeStrategy: { kind: ReplacementRangeStrategyKind.ROOT_QUERY },
+      }));
+
+      const rootLevelQuerySuggestions = attachReplacementRanges(innerText, rootLevelSuggestions, {
         fullText,
-        offset
-      );
+        offset,
+      });
 
       return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
         command: '',
@@ -236,7 +243,7 @@ export async function suggest(
     );
 
     return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
-      columns: await getColumnMapOnce(),
+      commandContext: { columns: await getColumnMapOnce() },
     });
   }
   return [];

@@ -245,6 +245,7 @@ export class AutomaticImportService {
       createdByProfileUid: integrationSO.created_by_profile_uid,
       status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
       dataStreams: dataStreamsResponses,
+      categories: integrationSO.metadata.categories,
     };
     return integrationResponse;
   }

@@ -22,6 +22,7 @@ import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
+import type { ReplacementRangeStrategy } from '../../language/autocomplete/utils/prefix_range';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -84,6 +85,7 @@ export interface ISuggestionItem {
   };
   /**
    * The range that should be replaced when the suggestion is applied
+   * Prefer `replacementRangeStrategy`; use this only as an escape hatch.
    *
    * IMPORTANT NOTE!!!
    *
@@ -94,6 +96,10 @@ export interface ISuggestionItem {
     start: number;
     end: number;
   };
+  /**
+   * Centralized replacement-range strategy.
+   */
+  replacementRangeStrategy?: ReplacementRangeStrategy;
   /**
    * If the suggestions list is incomplete and should be re-requested when the user types more characters.
    * If a completion item with incomplete true is shown, the editor will ask for new suggestions in every keystroke

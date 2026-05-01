@@ -162,6 +162,65 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ActiveConversation",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActiveConversation",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ActiveConversation.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nActive conversation id, if one already exists.\nUndefined means we're currently in a new conversation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ActiveConversation.conversation",
+            "type": "Object",
+            "tags": [],
+            "label": "conversation",
+            "description": [
+              "\nThe currently bound conversation, when it has been successfully fetched.\nUndefined while the conversation is new, still loading, or failed to load."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.AgentBuilderAnnouncementModalProps",
         "type": "Interface",
         "tags": [],
@@ -284,7 +343,7 @@
           "\nPublic-facing contract for the attachment service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 167,
+        "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -314,7 +373,7 @@
               "<TAttachment>) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 171,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -332,7 +391,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 178,
+                "lineNumber": 170,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -358,9 +417,10 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 179,
+                "lineNumber": 171,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AttachmentUIDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -392,7 +452,7 @@
               "<TAttachment> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 182,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -410,7 +470,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 189,
+                "lineNumber": 181,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -481,6 +541,7 @@
                 "lineNumber": 115,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "TAttachment",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -615,6 +676,7 @@
                 "lineNumber": 130,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "AttachmentRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -676,6 +738,7 @@
                 "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AttachmentRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -693,6 +756,7 @@
                 "lineNumber": 150,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CanvasRenderCallbacks",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -736,54 +800,55 @@
                 "lineNumber": 156,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetActionButtonsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ChatUiEventsContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChatUiEventsContract",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/agent-builder-browser",
-            "id": "def-common.AttachmentUIDefinition.onAttachmentMount",
-            "type": "Function",
+            "id": "def-common.ChatUiEventsContract.activeConversation$",
+            "type": "Object",
             "tags": [],
-            "label": "onAttachmentMount",
+            "label": "activeConversation$",
             "description": [
-              "\nOptional lifecycle hook called when an attachment is first rendered in the conversation.\nCalled once per attachment (not per version). Use for setting up subscriptions or\nother side effects that should persist across version renders.\n"
+              "\nEmits the currently active conversation binding for both the embeddable sidebar and\nthe full-page routed chat. Emits `null` when no chat surface is currently bound.\n\nBacked by a `BehaviorSubject`: new subscribers receive the current value immediately."
             ],
             "signature": [
-              "((params: ",
-              "AttachmentLifecycleParams",
-              "<TAttachment>) => void | (() => void)) | undefined"
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ActiveConversation",
+                "text": "ActiveConversation"
+              },
+              " | null>"
             ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 157,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/agent-builder-browser",
-                "id": "def-common.AttachmentUIDefinition.onAttachmentMount.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "AttachmentLifecycleParams",
-                  "<TAttachment>"
-                ],
-                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 164,
-                "columnNumber": 24,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "Optional cleanup function called when the attachment is removed from the conversation."
-            ]
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -798,7 +863,7 @@
           "\nPublic-facing contract for AgentBuilder's events service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
-        "lineNumber": 11,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -825,7 +890,31 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
-            "lineNumber": 15,
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EventsServiceStartContract.ui",
+            "type": "Object",
+            "tags": [],
+            "label": "ui",
+            "description": [
+              "\nChat UI-shell state observables."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ChatUiEventsContract",
+                "text": "ChatUiEventsContract"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1179,6 +1268,7 @@
                 "lineNumber": 51,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecuteToolParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1239,6 +1329,7 @@
                 "lineNumber": 55,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ListWorkflowsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
