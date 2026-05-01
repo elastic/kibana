@@ -7,7 +7,7 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
-import type { EntityRiskScore, ServiceItem } from '../../../../common/search_strategy';
+import type { ServiceItem } from '../../../../common/search_strategy';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -36,8 +36,6 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   entityStoreEntityId?: string;
-  /** See {@link RiskSummaryProps.resolutionRiskFallback}. */
-  resolutionRiskFallback?: EntityRiskScore<EntityType.service>;
 }
 
 export const ServicePanelContent = ({
@@ -52,7 +50,6 @@ export const ServicePanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   entityStoreEntityId,
-  resolutionRiskFallback,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -69,7 +66,6 @@ export const ServicePanelContent = ({
             isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
             entityId={entityRecord?.entity.id}
-            resolutionRiskFallback={resolutionRiskFallback}
           />
           <EuiHorizontalRule />
         </>
