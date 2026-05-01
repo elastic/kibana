@@ -21,6 +21,7 @@ const retryResponseStatuses = [
 ];
 
 const boundedRetryAttempts = 3;
+const minTimeoutMs = 1_000;
 const maxRetryDelayMs = 64_000;
 
 function isRetryableEsClientError(e: Error): boolean {
@@ -36,7 +37,7 @@ function isRetryableEsClientError(e: Error): boolean {
 }
 
 function getExponentialDelayMs(attempt: number) {
-  return Math.min(1000 * Math.pow(2, attempt), maxRetryDelayMs);
+  return Math.min(1_000 * Math.pow(2, attempt), maxRetryDelayMs);
 }
 
 interface RequestParamsMeta {
@@ -77,7 +78,7 @@ export interface RetryEsOptions {
 export function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions = {}) {
   return pRetry(fn, {
     forever: true,
-    minTimeout: 1000,
+    minTimeout: minTimeoutMs,
     factor: 2,
     maxTimeout: maxRetryDelayMs,
     onFailedAttempt: (error) => {
@@ -97,7 +98,7 @@ export function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions = {}) {
             error
           )} call failed with retryable error ${errorType}${dataStream}. This operation will be retried indefinitely because this is a transient ES state. Retrying attempt ${
             error.attemptNumber
-          } in ${retryDelay / 1000} seconds.`
+          } in ${retryDelay / 1_000} seconds.`
         );
 
         return;
