@@ -25,6 +25,8 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
@@ -269,23 +271,27 @@ export const registerRuleAttachment = ({
   attachments,
   application,
   aiRuleCreation,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.rule,
-    createRuleAttachmentDefinition({ application, aiRuleCreation })
+    createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings })
   );
 };
 
 export const createRuleAttachmentDefinition = ({
   application,
   aiRuleCreation,
+  uiSettings,
 }: {
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
+  uiSettings: IUiSettingsClient;
 }): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) =>
     getRuleName(attachment) ??
@@ -298,6 +304,10 @@ export const createRuleAttachmentDefinition = ({
     const rule = parseRuleFromAttachment(attachment);
     const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
     if (!rule || !canEditRules) {
+      return [];
+    }
+
+    if (rule.type === 'esql' && !uiSettings.get(ENABLE_ESQL)) {
       return [];
     }
 
