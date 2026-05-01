@@ -147,6 +147,12 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
 
   const exposedEdgeCards: ImpactedCardItem[] = (doc.dependency_edges ?? [])
     .filter((edge) => edge.exposure === 'exposed')
+    .reduce<Array<{ source: string }>>((acc, edge) => {
+      if (!acc.some((e) => e.source === edge.source)) {
+        acc.push(edge);
+      }
+      return acc;
+    }, [])
     .map((edge) => ({
       id: `exposed-${edge.source}`,
       label: 'Impacted',
