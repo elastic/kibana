@@ -14,7 +14,7 @@ import { ExecutionType } from '@kbn/workflows';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
@@ -373,14 +373,29 @@ describe('WorkflowExecutionQueryService', () => {
       },
     });
 
+    /**
+     * Helper that mocks the parent-workflow alive-check lookup. The service
+     * issues a second `.workflows-workflows` search after the step executions
+     * search to filter out orphaned docs whose parent has been soft-deleted.
+     */
+    const mockAliveWorkflowsLookup = (aliveIds: string[]) => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: aliveIds.map((id) => ({ _id: id })),
+          total: { value: aliveIds.length },
+        },
+      } as any);
+    };
+
     it('issues a term-only query against keyword-indexed fields and omits stepType', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [buildHit()], total: { value: 1 } },
       } as any);
+      mockAliveWorkflowsLookup(['wf-1']);
 
       const result = await service.listWaitingForInputSteps('default');
 
-      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         index: string;
         query: {
@@ -463,6 +478,137 @@ describe('WorkflowExecutionQueryService', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to list waiting-for-input step executions')
       );
+    });
+
+    // Orphan-filtering regressions — soft-deleted workflows leave their step
+    // execution docs behind in `.workflows-step-executions` (see
+    // `workflow_deletion.ts` — only hard-deletes call deleteByQuery against
+    // that index). Without these the Inbox surfaces ghost actions for
+    // workflows the user has already removed from `/app/workflows`.
+    describe('orphan filtering (soft-deleted parent workflows)', () => {
+      it('drops step executions whose parent workflow is soft-deleted and adjusts total', async () => {
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              buildHit({ id: 'doc-1', workflowId: 'wf-alive' }),
+              buildHit({ id: 'doc-2', workflowId: 'wf-deleted' }),
+              buildHit({ id: 'doc-3', workflowId: 'wf-alive-2' }),
+            ],
+            total: { value: 3 },
+          },
+        } as any);
+        // Only two of the three parent workflows survive the must_not on
+        // `deleted_at`, so `wf-deleted` is omitted from the lookup hits.
+        mockAliveWorkflowsLookup(['wf-alive', 'wf-alive-2']);
+
+        const result = await service.listWaitingForInputSteps('default');
+
+        expect(result.results).toHaveLength(2);
+        expect(result.results.map((r) => r.id)).toEqual(['doc-1', 'doc-3']);
+        expect(result.total).toBe(2);
+      });
+
+      it('drops step executions whose parent workflow no longer exists at all', async () => {
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [buildHit({ id: 'doc-1', workflowId: 'wf-gone' })],
+            total: { value: 1 },
+          },
+        } as any);
+        mockAliveWorkflowsLookup([]);
+
+        const result = await service.listWaitingForInputSteps('default');
+
+        expect(result.results).toEqual([]);
+        expect(result.total).toBe(0);
+      });
+
+      it('issues the alive-workflow lookup against .workflows-workflows with the right filters', async () => {
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              buildHit({ workflowId: 'wf-1' }),
+              // duplicate workflowId should be deduplicated in the lookup
+              buildHit({ id: 'doc-2', workflowId: 'wf-1' }),
+              buildHit({ id: 'doc-3', workflowId: 'wf-2' }),
+            ],
+            total: { value: 3 },
+          },
+        } as any);
+        mockAliveWorkflowsLookup(['wf-1', 'wf-2']);
+
+        await service.listWaitingForInputSteps('default');
+
+        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+        const lookupArgs = mockEsClient.search.mock.calls[1][0] as {
+          index: string;
+          _source: boolean;
+          query: {
+            bool: {
+              must: Array<Record<string, unknown>>;
+              must_not: Array<Record<string, unknown>>;
+            };
+          };
+          size: number;
+        };
+        expect(lookupArgs.index).toBe(WORKFLOWS_INDEX);
+        expect(lookupArgs._source).toBe(false);
+        const idsClause = lookupArgs.query.bool.must.find(
+          (c): c is { ids: { values: string[] } } => 'ids' in c
+        );
+        expect(idsClause?.ids.values.sort()).toEqual(['wf-1', 'wf-2']);
+        expect(lookupArgs.query.bool.must).toContainEqual({ term: { spaceId: 'default' } });
+        expect(lookupArgs.query.bool.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
+      });
+
+      it('skips the parent-workflow lookup when no step executions match', async () => {
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: { hits: [], total: { value: 0 } },
+        } as any);
+
+        const result = await service.listWaitingForInputSteps('default');
+
+        expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({ results: [], total: 0 });
+      });
+
+      it('falls back to unfiltered results and warns when the workflow lookup errors', async () => {
+        mockEsClient.search
+          .mockResolvedValueOnce({
+            hits: { hits: [buildHit()], total: { value: 1 } },
+          } as any)
+          .mockRejectedValueOnce(new Error('lookup boom'));
+
+        const result = await service.listWaitingForInputSteps('default');
+
+        // Transient lookup failure must not empty the Inbox.
+        expect(result.results).toHaveLength(1);
+        expect(result.total).toBe(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to validate parent workflows for inbox listing')
+        );
+      });
+
+      it('treats index_not_found on the workflow lookup as "no alive workflows"', async () => {
+        mockEsClient.search
+          .mockResolvedValueOnce({
+            hits: { hits: [buildHit()], total: { value: 1 } },
+          } as any)
+          .mockRejectedValueOnce(
+            new errors.ResponseError({
+              statusCode: 404,
+              body: { error: { type: 'index_not_found_exception' } },
+              headers: {},
+              meta: {} as any,
+              warnings: [],
+            })
+          );
+
+        const result = await service.listWaitingForInputSteps('default');
+
+        expect(result.results).toEqual([]);
+        expect(result.total).toBe(0);
+      });
     });
   });
 });
