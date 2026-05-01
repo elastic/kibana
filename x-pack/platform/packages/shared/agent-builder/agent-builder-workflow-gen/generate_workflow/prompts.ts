@@ -5,29 +5,12 @@
  * 2.0.
  */
 
+import {
+  formatConnectorsBlock,
+  formatStepDefinitionsBlock,
+  formatTriggersBlock,
+} from './format_prefetched';
 import type { PrefetchedContext } from './types';
-
-const formatConnectors = (connectors: PrefetchedContext['connectors']): string =>
-  connectors.length === 0
-    ? 'No connectors are configured in the user environment.'
-    : connectors
-        .map(
-          (c) =>
-            `- id="${c.id}" name="${c.name}" actionTypeId="${
-              c.actionTypeId
-            }" stepTypes=[${c.stepTypes.join(', ')}]`
-        )
-        .join('\n');
-
-const formatStepDefinitions = (defs: PrefetchedContext['stepDefinitions']): string =>
-  defs
-    .map(
-      (d) => `- ${d.id} (${d.category}) — ${d.label}${d.description ? `: ${d.description}` : ''}`
-    )
-    .join('\n');
-
-const formatTriggerDefinitions = (defs: PrefetchedContext['triggerDefinitions']): string =>
-  defs.map((d) => `- ${d.id} — ${d.label}${d.description ? `: ${d.description}` : ''}`).join('\n');
 
 export const createSystemPrompt = ({
   prefetched,
@@ -41,23 +24,24 @@ You have access to a set of tools to (a) build the workflow YAML and (b) look up
 the full schema for any step type or trigger type when you need details beyond
 the compact summaries below.
 
-## Available connectors
-
-${formatConnectors(prefetched.connectors)}
-
 ## Available step types (compact summary)
 
-${formatStepDefinitions(prefetched.stepDefinitions)}
+${formatStepDefinitionsBlock(prefetched.stepDefinitions)}
 
 Call \`get_step_definitions\` with a specific \`stepType\` to fetch the full
 schema (input params, config params, examples) before emitting steps you have
-not used recently.
+not used recently. For high-cardinality families (shown above as \`<prefix>.*\`)
+pass \`search="<prefix>"\` to enumerate the sub-actions.
 
 ## Available trigger types (compact summary)
 
-${formatTriggerDefinitions(prefetched.triggerDefinitions)}
+${formatTriggersBlock(prefetched.triggerDefinitions)}
 
 Call \`get_trigger_definitions\` for the full schema and event-context schema.
+
+## Configured connectors
+
+${formatConnectorsBlock(prefetched.connectors)}
 
 ## Generation rules
 
