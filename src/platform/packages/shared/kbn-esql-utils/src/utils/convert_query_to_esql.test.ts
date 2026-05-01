@@ -11,9 +11,9 @@ import { convertQueryToESQLExpression } from './convert_query_to_esql';
 
 describe('convertQueryToESQLExpression', () => {
   it('translates a kuery query into a KQL(...) expression', () => {
-    expect(
-      convertQueryToESQLExpression({ language: 'kuery', query: 'host.name : "web-1"' })
-    ).toBe('KQL("""host.name : "web-1"""")');
+    expect(convertQueryToESQLExpression({ language: 'kuery', query: 'host.name : "web-1"' })).toBe(
+      'KQL("""host.name : "web-1"""")'
+    );
   });
 
   it('translates a lucene query into a QSTR(...) expression and escapes quotes', () => {
@@ -27,9 +27,9 @@ describe('convertQueryToESQLExpression', () => {
   });
 
   it('returns an empty string for an unsupported language', () => {
-    expect(
-      convertQueryToESQLExpression({ language: 'esql' as 'kuery', query: 'FROM logs' })
-    ).toBe('');
+    expect(convertQueryToESQLExpression({ language: 'esql' as 'kuery', query: 'FROM logs' })).toBe(
+      ''
+    );
   });
 
   it('returns an empty string for an undefined query', () => {
