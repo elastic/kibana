@@ -42,11 +42,14 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
     )
   );
 
-  const userPrompt = createUserPrompt({
-    nlQuery: state.nlQuery,
-    additionalContext: state.additionalContext,
-  }) as ['user', string];
-  messages.push(new HumanMessage(userPrompt[1]));
+  messages.push(
+    new HumanMessage(
+      createUserPrompt({
+        nlQuery: state.nlQuery,
+        additionalContext: state.additionalContext,
+      })
+    )
+  );
 
   for (const action of state.actions) {
     if (isAgentStepAction(action)) {
@@ -73,8 +76,7 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
         })
       );
     } else if (isValidateAction(action) && !action.valid) {
-      const failure = createValidationFailureMessage(action.errors) as ['user', string];
-      messages.push(new HumanMessage(failure[1]));
+      messages.push(new HumanMessage(createValidationFailureMessage(action.errors)));
     }
   }
 

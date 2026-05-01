@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BaseMessageLike } from '@langchain/core/messages';
 import type { PrefetchedContext } from './types';
 
 const formatConnectors = (connectors: PrefetchedContext['connectors']): string =>
@@ -82,18 +81,14 @@ export const createUserPrompt = ({
 }: {
   nlQuery: string;
   additionalContext?: string;
-}): BaseMessageLike => [
-  'user',
+}): string =>
   `<user-query>\n${nlQuery}\n</user-query>${
     additionalContext ? `\n\n<additional-context>\n${additionalContext}\n</additional-context>` : ''
-  }`,
-];
+  }`;
 
-export const createValidationFailureMessage = (errors: string[]): BaseMessageLike => [
-  'user',
+export const createValidationFailureMessage = (errors: string[]): string =>
   `The workflow YAML you produced failed validation with the following errors:
 
 ${errors.map((e) => `- ${e}`).join('\n')}
 
-Fix the issues and update the workflow.`,
-];
+Fix the issues and update the workflow.`;
