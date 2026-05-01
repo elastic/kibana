@@ -52,7 +52,6 @@ export class SampleTaskManagerFixturePlugin
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
 
     const fakeRequestEnricher = taskManager.enrichFakeRequest;
-    const pluginSecurityStart = this.securityStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -154,10 +153,12 @@ export class SampleTaskManagerFixturePlugin
         },
         createTaskRunner: ({ taskInstance, fakeRequest, enrichRequest }: RunContext) => ({
           async run() {
-            const security = await pluginSecurityStart;
+            // Use Core's wrapped security so getCurrentUser consults the
+            // fake-request enrichment map.
+            const [{ security, elasticsearch }] = await core.getStartServices();
 
             const resolveUser = (request: KibanaRequest | undefined) => {
-              if (!request || !security) {
+              if (!request) {
                 return null;
               }
               const user = security.authc.getCurrentUser(request);
@@ -188,7 +189,6 @@ export class SampleTaskManagerFixturePlugin
               resolvedFromChildRequest = resolveUser(childFakeRequest);
             }
 
-            const [{ elasticsearch }] = await core.getStartServices();
             await elasticsearch.client.asInternalUser.index({
               index: '.kibana_task_manager_test_result',
               document: {
