@@ -585,6 +585,7 @@ export enum RegistryVarsEntryKeys {
   max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
   section = 'section',
 }
 
@@ -613,6 +614,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
   [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
+  [RegistryVarsEntryKeys.migrate_from]?: string;
   [RegistryVarsEntryKeys.section]?: string;
 }
 
@@ -807,6 +809,8 @@ export interface Installation {
   installed_as_dependency?: boolean;
   /** Namespaces opted in for namespace-level customization for this package. */
   namespace_customization_enabled_for?: string[];
+  /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
+  previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
 }
 
 export interface PackageUsageStats {

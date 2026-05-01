@@ -1395,6 +1395,10 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          previous_dependency_versions: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {
@@ -1505,7 +1509,12 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {},
+              addedMappings: {
+                previous_dependency_versions: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
             },
           ],
           schemas: {

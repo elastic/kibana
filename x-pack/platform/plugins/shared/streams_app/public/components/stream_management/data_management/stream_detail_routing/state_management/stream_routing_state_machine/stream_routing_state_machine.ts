@@ -12,6 +12,7 @@ import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
   BulkForkItem,
+  PartitionableDefinition,
   StreamRoutingContext,
   StreamRoutingEvent,
   StreamRoutingInput,
@@ -88,7 +89,7 @@ export const streamRoutingMachine = setup({
       routing: context.initialRouting,
       isConditionEditorValid: true,
     })),
-    setupRouting: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => {
+    setupRouting: assign((_, params: { definition: PartitionableDefinition }) => {
       const routing = Streams.WiredStream.Definition.is(params.definition.stream)
         ? params.definition.stream.ingest.wired.routing.map(routingConverter.toUIDefinition)
         : [];
@@ -103,7 +104,7 @@ export const streamRoutingMachine = setup({
     storeCurrentRuleId: assign((_, params: { id: StreamRoutingContext['currentRuleId'] }) => ({
       currentRuleId: params.id,
     })),
-    storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
+    storeDefinition: assign((_, params: { definition: PartitionableDefinition }) => ({
       definition: params.definition,
     })),
     storeSuggestedRuleId: assign((_, params: { id: StreamRoutingContext['suggestedRuleId'] }) => ({
@@ -174,8 +175,10 @@ export const streamRoutingMachine = setup({
       'isConditionEditorValid',
     ]),
     hasMultipleRoutingRules: ({ context }) => context.routing.length > 1,
-    hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
-    hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
+    hasManagePrivileges: ({ context }) =>
+      'privileges' in context.definition ? context.definition.privileges.manage : true,
+    hasSimulatePrivileges: ({ context }) =>
+      'privileges' in context.definition ? context.definition.privileges.simulate : true,
     isAlreadyEditing: ({ context }, params: { id: string }) => context.currentRuleId === params.id,
     isConditionEditorValid: ({ context }) => context.isConditionEditorValid,
     isValidRouting: ({ context }) =>
@@ -203,6 +206,10 @@ export const streamRoutingMachine = setup({
     },
     isClassicStream: ({ context }) =>
       Streams.ClassicStream.Definition.is(context.definition.stream),
+    isQueryStream: ({ context }) => Streams.QueryStream.Definition.is(context.definition.stream),
+    isQueryOnlyStream: ({ context }) =>
+      Streams.ClassicStream.Definition.is(context.definition.stream) ||
+      Streams.QueryStream.Definition.is(context.definition.stream),
     allBulkForksProcessed: ({ context }) => {
       const { bulkFork } = context;
       return bulkFork !== null && bulkFork.results.length >= bulkFork.items.length;
@@ -229,9 +236,9 @@ export const streamRoutingMachine = setup({
     initializing: {
       always: [
         {
-          // Classic streams only support query mode — skip ingestMode entirely
+          // Classic and query streams only support query mode — skip ingestMode entirely
           target: '#queryMode',
-          guard: 'isClassicStream',
+          guard: 'isQueryOnlyStream',
         },
         { target: 'ready' },
       ],
@@ -248,7 +255,7 @@ export const streamRoutingMachine = setup({
         },
         'stream.received': [
           {
-            guard: 'isClassicStream',
+            guard: 'isQueryOnlyStream',
             actions: [
               { type: 'storeDefinition', params: ({ event }) => event },
               { type: 'setupRouting', params: ({ event }) => ({ definition: event.definition }) },
@@ -824,7 +831,7 @@ export const streamRoutingMachine = setup({
           initial: 'idle',
           on: {
             'childStreams.mode.changeToIngestMode': {
-              guard: not('isClassicStream'),
+              guard: not('isQueryOnlyStream'),
               target: '#ingestMode',
               actions: assign({ editingQueryStreamName: null }),
             },

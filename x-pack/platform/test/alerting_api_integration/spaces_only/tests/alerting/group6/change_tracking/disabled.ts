@@ -17,7 +17,7 @@ export default function changeTrackingDisabledTest({ getService }: FtrProviderCo
       await new Promise((resolve) => setTimeout(resolve, 5_000));
 
       const response = await es.indices.getDataStream(
-        { name: '.kibana-change-history' },
+        { name: '.kibana_change_history' },
         { ignore: [404] }
       );
       expect(response.data_streams?.length ?? 0).to.equal(0);
