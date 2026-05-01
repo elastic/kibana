@@ -28,102 +28,84 @@ const CONVERSATION_DATA = [
   },
 ];
 
-test.describe(
-  'Agent Builder — conversation history',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+test.describe('Agent Builder — conversation history', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
 
-    test.afterAll(async ({ esClient }) => {
-      await deleteAllConversationsFromEs(esClient);
-    });
+  test.afterAll(async ({ esClient }) => {
+    await deleteAllConversationsFromEs(esClient);
+  });
 
-    test('conversation history flows', async ({ page, pageObjects, llmProxy }) => {
-      test.setTimeout(180_000);
-      const conversationIds: string[] = [];
+  test('conversation history flows', async ({ page, pageObjects, llmProxy }) => {
+    test.setTimeout(180_000);
+    const conversationIds: string[] = [];
 
-      await test.step('create three conversations', async () => {
-        for (const conv of CONVERSATION_DATA) {
-          const id = await pageObjects.agentBuilder.createConversationViaUI(
-            conv.title,
-            conv.userMessage,
-            conv.expectedResponse,
-            llmProxy
-          );
-          conversationIds.push(id);
-        }
-      });
-
-      await test.step('navigate via sidebar', async () => {
-        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[0])).toBe(
-          true
-        );
-        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(
-          true
-        );
-        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[2])).toBe(
-          true
-        );
-        for (let i = 0; i < CONVERSATION_DATA.length; i++) {
-          const conv = CONVERSATION_DATA[i];
-          const convId = conversationIds[i];
-          await pageObjects.agentBuilder.navigateToConversationViaHistory(convId);
-          await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
-              hasText: conv.expectedResponse,
-            })
-          ).toContainText(conv.expectedResponse);
-        }
-      });
-
-      await test.step('navigate via URL', async () => {
-        for (let i = 0; i < CONVERSATION_DATA.length; i++) {
-          const conv = CONVERSATION_DATA[i];
-          const convId = conversationIds[i];
-          await pageObjects.agentBuilder.navigateToConversationById(convId);
-          await expect(
-            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
-              hasText: conv.expectedResponse,
-            })
-          ).toContainText(conv.expectedResponse);
-        }
-      });
-
-      await test.step('continue conversation', async () => {
-        const MOCKED_INPUT = 'User message continuing conversation';
-        const MOCKED_RESPONSE = 'LLM response continuing the conversation';
-        await pageObjects.agentBuilder.navigateToConversationViaHistory(conversationIds[1]);
-        await pageObjects.agentBuilder.continueConversation(
-          MOCKED_INPUT,
-          MOCKED_RESPONSE,
+    await test.step('create three conversations', async () => {
+      for (const conv of CONVERSATION_DATA) {
+        const id = await pageObjects.agentBuilder.createConversationViaUI(
+          conv.title,
+          conv.userMessage,
+          conv.expectedResponse,
           llmProxy
         );
-      });
-
-      await test.step('delete conversation', async () => {
-        const conversationIdToDelete = conversationIds[0];
-        await pageObjects.agentBuilder.deleteConversation(conversationIdToDelete);
-        await expect(async () => {
-          expect(
-            await pageObjects.agentBuilder.isConversationInHistory(conversationIdToDelete)
-          ).toBe(false);
-        }).toPass({ timeout: 120_000 });
-        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(
-          true
-        );
-        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[2])).toBe(
-          true
-        );
-      });
-
-      await test.step('rename conversation', async () => {
-        const newTitle = 'Renamed Conversation Title';
-        await pageObjects.agentBuilder.navigateToConversationViaHistory(conversationIds[1]);
-        const updatedTitle = await pageObjects.agentBuilder.renameConversation(newTitle);
-        expect(updatedTitle).toBe(newTitle);
-      });
+        conversationIds.push(id);
+      }
     });
-  }
-);
+
+    await test.step('navigate via sidebar', async () => {
+      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[0])).toBe(true);
+      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(true);
+      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[2])).toBe(true);
+      for (let i = 0; i < CONVERSATION_DATA.length; i++) {
+        const conv = CONVERSATION_DATA[i];
+        const convId = conversationIds[i];
+        await pageObjects.agentBuilder.navigateToConversationViaHistory(convId);
+        await expect(
+          page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            hasText: conv.expectedResponse,
+          })
+        ).toContainText(conv.expectedResponse);
+      }
+    });
+
+    await test.step('navigate via URL', async () => {
+      for (let i = 0; i < CONVERSATION_DATA.length; i++) {
+        const conv = CONVERSATION_DATA[i];
+        const convId = conversationIds[i];
+        await pageObjects.agentBuilder.navigateToConversationById(convId);
+        await expect(
+          page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            hasText: conv.expectedResponse,
+          })
+        ).toContainText(conv.expectedResponse);
+      }
+    });
+
+    await test.step('continue conversation', async () => {
+      const MOCKED_INPUT = 'User message continuing conversation';
+      const MOCKED_RESPONSE = 'LLM response continuing the conversation';
+      await pageObjects.agentBuilder.navigateToConversationViaHistory(conversationIds[1]);
+      await pageObjects.agentBuilder.continueConversation(MOCKED_INPUT, MOCKED_RESPONSE, llmProxy);
+    });
+
+    await test.step('delete conversation', async () => {
+      const conversationIdToDelete = conversationIds[0];
+      await pageObjects.agentBuilder.deleteConversation(conversationIdToDelete);
+      await expect(async () => {
+        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIdToDelete)).toBe(
+          false
+        );
+      }).toPass({ timeout: 120_000 });
+      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(true);
+      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[2])).toBe(true);
+    });
+
+    await test.step('rename conversation', async () => {
+      const newTitle = 'Renamed Conversation Title';
+      await pageObjects.agentBuilder.navigateToConversationViaHistory(conversationIds[1]);
+      const updatedTitle = await pageObjects.agentBuilder.renameConversation(newTitle);
+      expect(updatedTitle).toBe(newTitle);
+    });
+  });
+});
