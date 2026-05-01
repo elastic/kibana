@@ -22,10 +22,10 @@ describe('transformOut', () => {
           type: 'dashboardLink',
           destination: 'https://github.com/',
           options: {
-            open_in_new_tab: false,
-            use_time_range: false,
-            use_filters: false,
-          } as LinkOptions,
+            openInNewTab: false,
+            useCurrentDateRange: false,
+            useCurrentFilters: false,
+          } as unknown as LinkOptions,
         },
       ],
     } as LinksEmbeddableState;
@@ -47,9 +47,9 @@ describe('transformOut', () => {
           type: 'externalLink',
           destination: 'https://github.com/',
           options: {
-            open_in_new_tab: false,
-            encode_url: true,
-          } as LinkOptions,
+            openInNewTab: false,
+            encodeUrl: true,
+          } as unknown as LinkOptions,
         },
       ],
     } as LinksEmbeddableState;
