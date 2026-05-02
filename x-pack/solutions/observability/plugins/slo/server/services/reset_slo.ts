@@ -175,8 +175,8 @@ export class ResetSLO {
         tempDocPromise,
       ]);
 
-      // Start summary transform; for non-ESQL also start rollup transform
-      if (isEsql) {
+      // Start summary transform; for non-ESQL (or ESQL without workflowManager) also start rollup transform
+      if (isEsql && this.workflowManager) {
         await this.summaryTransformManager.start(summaryTransformId);
       } else {
         const rollupTransformId = getSLOTransformId(id, revision);

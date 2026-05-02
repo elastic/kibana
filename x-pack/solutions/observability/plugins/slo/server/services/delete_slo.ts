@@ -74,6 +74,9 @@ export class DeleteSLO {
       // Delete the workflow instead of rollup transform for ESQL SLOs
       deleteOps.push(this.workflowManager.delete(getSLOWorkflowId(slo.id, slo.revision)));
     } else {
+      // For non-ESQL SLOs or when workflowManager is unavailable (e.g., during migration),
+      // attempt to delete rollup transform. For ESQL SLOs without a transform, this is a safe
+      // no-op because TransformManager.uninstall ignores 404.
       const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
       deleteOps.push(this.transformManager.uninstall(rollupTransformId));
     }

@@ -162,8 +162,8 @@ export class UpdateSLO {
         tempDocPromise,
       ]);
 
-      // Start summary transform (and rollup transform only for non-ESQL)
-      if (isEsql) {
+      // Start summary transform (and rollup transform only for non-ESQL or when workflowManager unavailable)
+      if (isEsql && this.workflowManager) {
         await this.summaryTransformManager.start(updatedSummaryTransformId);
       } else {
         const updatedRollupTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);

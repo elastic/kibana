@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { setTimeout } from 'timers/promises';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/core/server';
 import { getSLOWorkflowId } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
-import { retryTransientEsErrors } from '../utils/retry';
 import { generateEsqlSloWorkflowYaml } from './esql_workflow_template';
 
 type WorkflowId = string;
@@ -28,6 +28,40 @@ interface WorkflowManagerDeps {
   logger: Logger;
   spaceId: string;
 }
+
+const RETRYABLE_STATUS_CODES = [408, 429, 502, 503, 504];
+const MAX_RETRY_ATTEMPTS = 5;
+
+/**
+ * Retry wrapper for HTTP calls to the Workflow API.
+ * Unlike retryTransientEsErrors which checks for ES client error types,
+ * this checks the statusCode property on plain Error objects thrown by callWorkflowApi.
+ */
+const retryTransientHttpErrors = async <T>(
+  httpCall: () => Promise<T>,
+  { logger, attempt = 0 }: { logger?: Logger; attempt?: number } = {}
+): Promise<T> => {
+  try {
+    return await httpCall();
+  } catch (e) {
+    const statusCode = (e as { statusCode?: number }).statusCode;
+    const isRetryable = statusCode !== undefined && RETRYABLE_STATUS_CODES.includes(statusCode);
+
+    if (attempt < MAX_RETRY_ATTEMPTS && isRetryable) {
+      const retryCount = attempt + 1;
+      const retryDelaySec = Math.min(Math.pow(2, retryCount), 64);
+
+      logger?.warn(
+        `Retrying Workflow API call after [${retryDelaySec}s] due to error: ${e.toString()}`
+      );
+
+      await setTimeout(retryDelaySec * 1000);
+      return retryTransientHttpErrors(httpCall, { logger, attempt: retryCount });
+    }
+
+    throw e;
+  }
+};
 
 export class DefaultWorkflowManager implements WorkflowManager {
   private readonly baseUrl: string;
@@ -48,7 +82,7 @@ export class DefaultWorkflowManager implements WorkflowManager {
 
     this.logger.debug(`Creating workflow [${workflowId}] for ESQL SLO [${slo.id}]`);
 
-    await retryTransientEsErrors(
+    await retryTransientHttpErrors(
       () =>
         this.callWorkflowApi('POST', '/api/workflows/workflow', {
           id: workflowId,
@@ -67,7 +101,7 @@ export class DefaultWorkflowManager implements WorkflowManager {
 
     this.logger.debug(`Updating workflow [${workflowId}] for ESQL SLO [${slo.id}]`);
 
-    await retryTransientEsErrors(
+    await retryTransientHttpErrors(
       () =>
         this.callWorkflowApi('PUT', `/api/workflows/workflow/${encodeURIComponent(workflowId)}`, {
           yaml,
@@ -98,7 +132,7 @@ export class DefaultWorkflowManager implements WorkflowManager {
   async enable(workflowId: WorkflowId): Promise<void> {
     this.logger.debug(`Enabling workflow [${workflowId}]`);
 
-    await retryTransientEsErrors(
+    await retryTransientHttpErrors(
       () =>
         this.callWorkflowApi(
           'POST',
@@ -111,7 +145,7 @@ export class DefaultWorkflowManager implements WorkflowManager {
   async disable(workflowId: WorkflowId): Promise<void> {
     this.logger.debug(`Disabling workflow [${workflowId}]`);
 
-    await retryTransientEsErrors(
+    await retryTransientHttpErrors(
       () =>
         this.callWorkflowApi(
           'POST',
