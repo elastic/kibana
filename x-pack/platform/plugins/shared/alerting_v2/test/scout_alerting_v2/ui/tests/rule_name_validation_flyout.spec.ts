@@ -7,15 +7,15 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { ALL_ROLE, test } from '../fixtures';
 
 test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects, esClient }) => {
-    await browserAuth.loginAsAdmin();
+  const SOURCE_INDEX = 'test-discover-rule-validation';
 
+  test.beforeAll(async ({ esClient }) => {
     await esClient.indices.create(
       {
-        index: 'test-discover-rule-validation',
+        index: SOURCE_INDEX,
         mappings: {
           properties: {
             '@timestamp': { type: 'date' },
@@ -25,63 +25,46 @@ test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.c
       },
       { ignore: [400] }
     );
+  });
 
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(ALL_ROLE);
     await pageObjects.ruleForm.gotoDiscover();
   });
 
   test.afterAll(async ({ esClient }) => {
-    await esClient.indices.delete({ index: 'test-discover-rule-validation' }, { ignore: [404] });
+    await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
   });
 
   test('opens rule form flyout and displays default placeholder name', async ({ pageObjects }) => {
-    await test.step('switch to ES|QL mode', async () => {
-      await pageObjects.ruleForm.switchToEsqlMode();
-    });
+    await pageObjects.ruleForm.switchToEsqlMode();
+    await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
 
-    await test.step('open rule form flyout', async () => {
-      await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-    });
-
-    await test.step('verify default placeholder name is shown', async () => {
-      await expect(pageObjects.ruleForm.nameInput()).toBeVisible();
-      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute(
-        'placeholder',
-        'Untitled rule'
-      );
-    });
+    await expect(pageObjects.ruleForm.nameInput).toBeVisible();
+    await expect(pageObjects.ruleForm.nameInput).toHaveAttribute('placeholder', 'Untitled rule');
   });
 
   test('shows validation error when saving flyout with empty default name', async ({
     pageObjects,
   }) => {
-    await test.step('switch to ES|QL mode and open flyout', async () => {
-      await pageObjects.ruleForm.switchToEsqlMode();
-      await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.nameInput()).toBeVisible();
-    });
+    await pageObjects.ruleForm.switchToEsqlMode();
+    await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
+    await expect(pageObjects.ruleForm.nameInput).toBeVisible();
 
-    await test.step('click save and verify validation error', async () => {
-      await pageObjects.ruleForm.clickFlyoutSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Name is required');
-    });
+    await pageObjects.ruleForm.clickFlyoutSave();
+    await expect(pageObjects.ruleForm.errorCallout).toBeVisible();
+    await expect(pageObjects.ruleForm.errorCallout).toContainText('Name is required');
   });
 
   test('error callout scrolls into view in flyout on failed submission', async ({
     pageObjects,
   }) => {
-    await test.step('switch to ES|QL mode and open flyout', async () => {
-      await pageObjects.ruleForm.switchToEsqlMode();
-      await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.nameInput()).toBeVisible();
-    });
+    await pageObjects.ruleForm.switchToEsqlMode();
+    await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
+    await expect(pageObjects.ruleForm.nameInput).toBeVisible();
 
-    await test.step('click save and verify error callout is visible in viewport', async () => {
-      await pageObjects.ruleForm.clickFlyoutSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toBeInViewport();
-    });
+    await pageObjects.ruleForm.clickFlyoutSave();
+    await expect(pageObjects.ruleForm.errorCallout).toBeVisible();
+    await expect(pageObjects.ruleForm.errorCallout).toBeInViewport();
   });
 });

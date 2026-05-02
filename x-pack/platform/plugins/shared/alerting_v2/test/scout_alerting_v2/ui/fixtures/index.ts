@@ -5,39 +5,33 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { DiscoverAppMenu } from './page_objects/discover_app_menu';
-import { RuleFormPage } from './page_objects/rule_form_page';
-import { RulesListPage } from './page_objects/rules_list_page';
+import { test as baseTest } from '@kbn/scout';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { extendPageObjects, type AlertingPageObjects } from './page_objects';
+import { buildAlertingApiServices, type AlertingApiServicesFixture } from '../../api/fixtures';
 
-export interface AlertingV2UiFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
-    discoverAppMenu: DiscoverAppMenu;
-    ruleForm: RuleFormPage;
-    rulesList: RulesListPage;
-  };
+export interface AlertingTestFixtures extends ScoutTestFixtures {
+  pageObjects: AlertingPageObjects;
 }
 
-export const test = baseTest.extend<AlertingV2UiFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: AlertingV2UiFixtures['pageObjects'];
-      page: AlertingV2UiFixtures['page'];
-    },
-    use: (pageObjects: AlertingV2UiFixtures['pageObjects']) => Promise<void>
-  ) => {
-    const discoverAppMenu = createLazyPageObject(DiscoverAppMenu, page);
-    const extendedPageObjects = {
-      ...pageObjects,
-      discoverAppMenu,
-      ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
-      rulesList: createLazyPageObject(RulesListPage, page),
-    };
+export interface UiWorkerFixtures extends ScoutWorkerFixtures {
+  apiServices: AlertingApiServicesFixture;
+}
 
-    await use(extendedPageObjects);
+export const test = baseTest.extend<AlertingTestFixtures, UiWorkerFixtures>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    await use(extendPageObjects(pageObjects, page));
   },
+  apiServices: [
+    async ({ apiServices, esClient, kbnClient, log }, use) => {
+      const extended = apiServices as AlertingApiServicesFixture;
+      extended.alertingV2 = buildAlertingApiServices({ esClient, kbnClient, log });
+      await use(extended);
+    },
+    { scope: 'worker' },
+  ],
 });
+
+export { ALL_ROLE, READ_ROLE } from '../../common/roles';
+export { buildCreateRuleData } from '../../common/builders';
+export * as testData from '../../common/constants';

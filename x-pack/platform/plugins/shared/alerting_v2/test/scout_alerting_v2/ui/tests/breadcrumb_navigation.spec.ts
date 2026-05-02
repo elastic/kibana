@@ -7,11 +7,11 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { READ_ROLE, test } from '../fixtures';
 
 test.describe('Breadcrumb navigation', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginWithCustomRole(READ_ROLE);
     await pageObjects.ruleForm.gotoCreate();
   });
 

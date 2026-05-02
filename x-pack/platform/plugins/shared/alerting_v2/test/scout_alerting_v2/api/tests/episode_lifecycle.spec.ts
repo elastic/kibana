@@ -7,8 +7,8 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
-import { apiTest, tags } from '@kbn/scout';
-import { API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../fixtures';
+import { tags } from '@kbn/scout';
+import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 /**
  * E2E episode lifecycle tests for alerting_v2 alert rules.
@@ -22,7 +22,7 @@ import { API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../fixtures';
  *
  * Episode state machine (basic strategy):
  *   inactive --[breached]--> pending
- *   pending  --[breached]--> activef
+ *   pending  --[breached]--> active
  *   active   --[recovered]--> recovering
  *   recovering --[recovered]--> inactive
  */
@@ -30,13 +30,12 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
   const SOURCE_INDEX = 'test-alerting-v2-e2e-source';
   const SCHEDULE_INTERVAL = '5s';
   const LOOKBACK_WINDOW = '1m';
-  const POLL_INTERVAL_MS = 1000;
+  // Rule executions go through task manager + the director; first events can take
+  // 30-40s on a freshly booted Kibana. Keep the budget slightly above that.
   const POLL_TIMEOUT_MS = 45_000;
-
-  const ruleIds: string[] = [];
+  const POLL_INTERVAL_MS = 1000;
 
   apiTest.beforeAll(async ({ esClient }) => {
-    // Create the source data index that rules will query
     await esClient.indices.create(
       {
         index: SOURCE_INDEX,
@@ -53,71 +52,37 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
     );
   });
 
-  apiTest.afterAll(async ({ esClient, apiClient, requestAuth }) => {
-    const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-
-    for (const ruleId of ruleIds) {
-      await apiClient
-        .delete(`${RULE_API_PATH}/${ruleId}`, {
-          headers: { ...API_HEADERS, ...apiKeyHeader },
-        })
-        .catch(() => {});
-    }
+  apiTest.afterAll(async ({ esClient, apiServices }) => {
+    await apiServices.alertingV2.rules.cleanUp();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
 
     await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
-    await esClient
-      .deleteByQuery(
-        {
-          index: ALERTING_EVENTS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-          conflicts: 'proceed',
-        },
-        { ignore: [404] }
-      )
-      .catch(() => {});
   });
 
   /**
-   * Polls .rule-events until the expected number of director-processed events
-   * (type=alert, episode.status IS NOT NULL) appear for the given rule.
+   * Returns all director-processed events (type=alert with episode.status set)
+   * for the given rule, sorted by @timestamp.
    */
-  async function waitForAlertEvents(
+  async function getAlertEvents(
     esClient: EsClient,
-    ruleId: string,
-    expectedCount: number
+    ruleId: string
   ): Promise<Array<Record<string, unknown>>> {
-    const start = Date.now();
-
-    while (Date.now() - start < POLL_TIMEOUT_MS) {
-      await esClient.indices.refresh({ index: ALERTING_EVENTS_INDEX }).catch(() => {});
-
-      const result = await esClient.search({
-        index: ALERTING_EVENTS_INDEX,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'rule.id': ruleId } },
-              { term: { type: 'alert' } },
-              { exists: { field: 'episode.status' } },
-            ],
-          },
+    await esClient.indices.refresh({ index: testData.ALERT_EVENTS_DATA_STREAM });
+    const result = await esClient.search({
+      index: testData.ALERT_EVENTS_DATA_STREAM,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'rule.id': ruleId } },
+            { term: { type: 'alert' } },
+            { exists: { field: 'episode.status' } },
+          ],
         },
-        sort: [{ '@timestamp': 'asc' }],
-        size: 100,
-      });
-
-      if (result.hits.hits.length >= expectedCount) {
-        return result.hits.hits.map((hit) => hit._source as Record<string, unknown>);
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-    }
-
-    throw new Error(
-      `Timed out after ${POLL_TIMEOUT_MS}ms waiting for ${expectedCount} alert events for rule ${ruleId}`
-    );
+      },
+      sort: [{ '@timestamp': 'asc' }],
+      size: 100,
+    });
+    return result.hits.hits.map((hit) => hit._source as Record<string, unknown>);
   }
 
   /**
@@ -127,10 +92,9 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
     esClient: EsClient,
     ruleId: string
   ): Promise<Map<string, Record<string, unknown>>> {
-    await esClient.indices.refresh({ index: ALERTING_EVENTS_INDEX }).catch(() => {});
-
+    await esClient.indices.refresh({ index: testData.ALERT_EVENTS_DATA_STREAM });
     const result = await esClient.search({
-      index: ALERTING_EVENTS_INDEX,
+      index: testData.ALERT_EVENTS_DATA_STREAM,
       query: {
         bool: {
           filter: [
@@ -150,70 +114,12 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
       const doc = hit._source as Record<string, unknown>;
       stateMap.set(doc.group_hash as string, doc);
     }
-
     return stateMap;
-  }
-
-  /**
-   * Polls getLatestEpisodeStates until the expected statuses appear.
-   * This avoids race conditions where event counts can be satisfied
-   * by pre-condition executions before the state change takes effect.
-   */
-  async function waitForEpisodeStatuses(
-    esClient: EsClient,
-    ruleId: string,
-    expectedStatuses: string[]
-  ): Promise<Map<string, Record<string, unknown>>> {
-    const start = Date.now();
-
-    let pollCount = 0;
-
-    while (Date.now() - start < POLL_TIMEOUT_MS) {
-      pollCount++;
-      const states = await getLatestEpisodeStates(esClient, ruleId);
-      const statuses = Array.from(states.values()).map(
-        (doc) => (doc.episode as Record<string, unknown>).status as string
-      );
-
-      // eslint-disable-next-line no-console
-      console.log(
-        `[waitForEpisodeStatuses] poll #${pollCount} | rule=${ruleId} | expected=[${expectedStatuses}] | actual=[${statuses}] | groups=${
-          states.size
-        } | entries=${JSON.stringify(
-          Array.from(states.entries()).map(([hash, doc]) => ({
-            group_hash: hash,
-            type: doc.type,
-            status: doc.status,
-            episode: doc.episode,
-          }))
-        )}`
-      );
-
-      const sortedExpected = [...expectedStatuses].sort();
-      const sortedActual = [...statuses].sort();
-      const allFound =
-        sortedExpected.length === sortedActual.length &&
-        sortedExpected.every((s, i) => s === sortedActual[i]);
-      if (allFound) {
-        return states;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-    }
-
-    throw new Error(
-      `Timed out after ${POLL_TIMEOUT_MS}ms waiting for episode statuses [${expectedStatuses.join(
-        ', '
-      )}] for rule ${ruleId}`
-    );
   }
 
   apiTest(
     'should transition through pending -> active when source data keeps breaching',
-    async ({ apiClient, esClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-
-      // Index breaching data into the source index
+    async ({ apiServices, esClient }) => {
       await esClient.index({
         index: SOURCE_INDEX,
         document: {
@@ -225,11 +131,8 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         refresh: true,
       });
 
-      // Create an alert rule that queries the source index
-      const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
-        body: {
-          kind: 'alert',
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
           metadata: { name: 'e2e-lifecycle-pending-active' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
@@ -241,23 +144,24 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           recovery_policy: { type: 'no_breach' },
           grouping: { fields: ['host.name'] },
           state_transition: null,
-        },
-        responseType: 'json',
-      });
+        })
+      );
 
-      expect(createResponse.statusCode).toBe(200);
-      const ruleId = createResponse.body.id;
-      ruleIds.push(ruleId);
+      // First execution: should produce a "pending" episode
+      await expect
+        .poll(() => getAlertEvents(esClient, rule.id).then((events) => events.length), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(1);
 
-      // Wait for first execution: should produce a "pending" episode
-      const eventsAfterFirst = await waitForAlertEvents(esClient, ruleId, 1);
+      const eventsAfterFirst = await getAlertEvents(esClient, rule.id);
       const firstEpisode = eventsAfterFirst[0].episode as Record<string, unknown>;
       expect(firstEpisode.status).toBe('pending');
       expect(firstEpisode.id).toBeDefined();
 
       const episodeId = firstEpisode.id;
 
-      // Keep breaching data present and wait for second execution: pending -> active
       await esClient.index({
         index: SOURCE_INDEX,
         document: {
@@ -269,38 +173,40 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         refresh: true,
       });
 
-      const eventsAfterSecond = await waitForAlertEvents(esClient, ruleId, 2);
+      // Second execution: pending -> active
+      await expect
+        .poll(() => getAlertEvents(esClient, rule.id).then((events) => events.length), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(2);
+
+      const eventsAfterSecond = await getAlertEvents(esClient, rule.id);
       const secondEpisode = eventsAfterSecond[1].episode as Record<string, unknown>;
       expect(secondEpisode.status).toBe('active');
-      // Same episode ID through the lifecycle
       expect(secondEpisode.id).toBe(episodeId);
     }
   );
 
   apiTest(
     'should transition active -> recovering -> inactive when source data stops breaching',
-    async ({ apiClient, esClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
+    async ({ apiServices, esClient }) => {
+      // Bulk-index the breaching docs to avoid sequential round-trips.
+      const breachOperations = Array.from({ length: 3 }, (_value, i) => [
+        { index: { _index: SOURCE_INDEX } },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-recovery-1',
+          'http.response.status_code': 503,
+          value: i,
+        },
+      ]).flat();
+      await esClient.bulk({ operations: breachOperations, refresh: 'wait_for' });
 
-      // Index breaching data
-      for (let i = 0; i < 3; i++) {
-        await esClient.index({
-          index: SOURCE_INDEX,
-          document: {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-recovery-1',
-            'http.response.status_code': 503,
-            value: i,
-          },
-          refresh: true,
-        });
-      }
-
-      // Create rule with pending_count=0 and recovering_count=0 (skip intermediate states)
-      const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
-        body: {
-          kind: 'alert',
+      // pending_count=0 + recovering_count=0 makes the state machine skip the
+      // intermediate states so we can assert active <-> inactive directly.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
           metadata: { name: 'e2e-lifecycle-recovery' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
@@ -311,24 +217,24 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           },
           recovery_policy: { type: 'no_breach' },
           grouping: { fields: ['host.name'] },
-          state_transition: {
-            pending_count: 0,
-            recovering_count: 0,
-          },
-        },
-        responseType: 'json',
-      });
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
 
-      expect(createResponse.statusCode).toBe(200);
-      const ruleId = createResponse.body.id;
-      ruleIds.push(ruleId);
+      expect(rule).toMatchObject({ id: expect.stringContaining('') });
 
-      // Wait for first execution: should go directly to active (pending_count=0)
-      const eventsAfterBreach = await waitForAlertEvents(esClient, ruleId, 1);
+      // First execution: should go directly to active (pending_count=0)
+      await expect
+        .poll(() => getAlertEvents(esClient, rule.id).then((events) => events.length), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(1);
+
+      const eventsAfterBreach = await getAlertEvents(esClient, rule.id);
       const activeEpisode = eventsAfterBreach[0].episode as Record<string, unknown>;
       expect(activeEpisode.status).toBe('active');
 
-      // Remove the breaching data so recovery triggers
       await esClient.deleteByQuery({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-recovery-1' } },
@@ -336,102 +242,88 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         wait_for_completion: true,
       });
 
-      // Wait for recovery: active -> inactive (recovering_count=0 skips recovering)
-      const eventsAfterRecovery = await waitForAlertEvents(esClient, ruleId, 2);
+      // Recovery: active -> inactive (recovering_count=0 skips recovering)
+      await expect
+        .poll(() => getAlertEvents(esClient, rule.id).then((events) => events.length), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(2);
+
+      const eventsAfterRecovery = await getAlertEvents(esClient, rule.id);
       const recoveredEpisode = eventsAfterRecovery[1].episode as Record<string, unknown>;
       expect(recoveredEpisode.status).toBe('inactive');
-
-      // Same episode ID throughout
       expect(recoveredEpisode.id).toBe(activeEpisode.id);
     }
   );
 
-  apiTest(
-    'should track multiple groups independently',
-    async ({ apiClient, esClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-
-      // Index breaching data for two different hosts
-      await esClient.index({
-        index: SOURCE_INDEX,
-        document: {
+  apiTest('should track multiple groups independently', async ({ apiServices, esClient }) => {
+    await esClient.bulk({
+      operations: [
+        { index: { _index: SOURCE_INDEX } },
+        {
           '@timestamp': new Date().toISOString(),
           'host.name': 'host-multi-a',
           'http.response.status_code': 500,
           value: 1,
         },
-        refresh: true,
-      });
-      await esClient.index({
-        index: SOURCE_INDEX,
-        document: {
+        { index: { _index: SOURCE_INDEX } },
+        {
           '@timestamp': new Date().toISOString(),
           'host.name': 'host-multi-b',
           'http.response.status_code': 500,
           value: 1,
         },
-        refresh: true,
-      });
+      ],
+      refresh: 'wait_for',
+    });
 
-      const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
-        body: {
-          kind: 'alert',
-          metadata: { name: 'e2e-lifecycle-multi-group' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-a", "host-multi-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: {
-            pending_count: 0,
-            recovering_count: 0,
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'e2e-lifecycle-multi-group' },
+        time_field: '@timestamp',
+        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+        evaluation: {
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-a", "host-multi-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        responseType: 'json',
-      });
+        recovery_policy: { type: 'no_breach' },
+        grouping: { fields: ['host.name'] },
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      })
+    );
 
-      expect(createResponse.statusCode).toBe(200);
-      const ruleId = createResponse.body.id;
-      ruleIds.push(ruleId);
+    expect(rule).toMatchObject({ id: expect.stringContaining('') });
 
-      // Wait for both groups to become active
-      await waitForEpisodeStatuses(esClient, ruleId, ['active', 'active']);
+    const expectStatusesEventually = (expected: string[]) =>
+      expect
+        .poll(
+          async () => {
+            const states = await getLatestEpisodeStates(esClient, rule.id);
+            return Array.from(states.values())
+              .map((doc) => (doc.episode as Record<string, unknown>).status as string)
+              .sort();
+          },
+          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+        )
+        .toStrictEqual([...expected].sort());
 
-      // Remove data for host-multi-a only, host-multi-b stays
-      await esClient.deleteByQuery({
-        index: SOURCE_INDEX,
-        query: { term: { 'host.name': 'host-multi-a' } },
-        refresh: true,
-        wait_for_completion: true,
-      });
+    await expectStatusesEventually(['active', 'active']);
 
-      // Poll until host-multi-a recovers to inactive while host-multi-b stays active
-      const statesAfterPartialRecovery = await waitForEpisodeStatuses(esClient, ruleId, [
-        'inactive',
-        'active',
-      ]);
+    await esClient.deleteByQuery({
+      index: SOURCE_INDEX,
+      query: { term: { 'host.name': 'host-multi-a' } },
+      refresh: true,
+      wait_for_completion: true,
+    });
 
-      const latestStatuses = Array.from(statesAfterPartialRecovery.values()).map(
-        (doc) => (doc.episode as Record<string, unknown>).status
-      );
-
-      // host-multi-a should be inactive (recovered), host-multi-b should still be active
-      expect(latestStatuses).toContain('inactive');
-      expect(latestStatuses).toContain('active');
-    }
-  );
+    await expectStatusesEventually(['inactive', 'active']);
+  });
 
   apiTest(
     'should use pending_count threshold before transitioning to active',
-    async ({ apiClient, esClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-
-      // Index breaching data
+    async ({ apiServices, esClient }) => {
       await esClient.index({
         index: SOURCE_INDEX,
         document: {
@@ -443,15 +335,11 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         refresh: true,
       });
 
-      // Create rule with pending_count=2.
-      // The threshold check is: nextCount = currentStatusCount + 1 >= pending_count.
-      // So with pending_count=2:
+      // pending_count=2: nextCount = currentStatusCount + 1 >= pending_count.
       //   Exec 1: no previous → enters pending (statusCount=1)
       //   Exec 2: statusCount=1, nextCount=2 >= 2 → transitions to active
-      const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
-        body: {
-          kind: 'alert',
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
           metadata: { name: 'e2e-lifecycle-threshold' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
@@ -462,23 +350,32 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           },
           recovery_policy: { type: 'no_breach' },
           grouping: { fields: ['host.name'] },
-          state_transition: {
-            pending_count: 2,
-          },
-        },
-        responseType: 'json',
-      });
+          state_transition: { pending_count: 2 },
+        })
+      );
 
-      expect(createResponse.statusCode).toBe(200);
-      const ruleId = createResponse.body.id;
-      ruleIds.push(ruleId);
+      expect(rule).toMatchObject({ id: expect.stringContaining('') });
 
-      // Wait for first execution: should be pending (statusCount=1, nextCount=1 < 2)
-      const eventsAfterFirst = await waitForAlertEvents(esClient, ruleId, 1);
+      // First execution: pending (statusCount=1, nextCount=1 < 2)
+      await expect
+        .poll(() => getAlertEvents(esClient, rule.id).then((events) => events.length), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(1);
+
+      const eventsAfterFirst = await getAlertEvents(esClient, rule.id);
       expect((eventsAfterFirst[0].episode as Record<string, unknown>).status).toBe('pending');
 
-      // Second execution: should now be active (statusCount=1, nextCount=2 >= 2)
-      const eventsAfterSecond = await waitForAlertEvents(esClient, ruleId, 2);
+      // Second execution: active (statusCount=1, nextCount=2 >= 2)
+      await expect
+        .poll(() => getAlertEvents(esClient, rule.id).then((events) => events.length), {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThanOrEqual(2);
+
+      const eventsAfterSecond = await getAlertEvents(esClient, rule.id);
       expect((eventsAfterSecond[1].episode as Record<string, unknown>).status).toBe('active');
 
       // Both events should share the same episode ID

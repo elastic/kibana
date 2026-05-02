@@ -6,14 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { apiTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import {
-  API_HEADERS,
-  INSIGHTS_API_PATH,
-  RULE_DOCTOR_INSIGHTS_INDEX,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '../fixtures';
+import { apiTest, testData } from '../fixtures';
+
+const SEEDED_INSIGHT_COUNT = 3;
 
 const createInsight = (overrides: Record<string, unknown> = {}) => ({
   '@timestamp': new Date().toISOString(),
@@ -37,20 +34,18 @@ const createInsight = (overrides: Record<string, unknown> = {}) => ({
 apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiServices }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
 
-    await kbnClient.uiSettings.update({
-      [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-    });
+    await apiServices.alertingV2.settings.setExperimentalFeaturesEnabled(true);
 
     await esClient.indices.delete({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
+      index: testData.RULE_DOCTOR_INSIGHTS_INDEX,
       ignore_unavailable: true,
     });
 
     await esClient.indices.create({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
+      index: testData.RULE_DOCTOR_INSIGHTS_INDEX,
       mappings: {
         dynamic: false,
         properties: {
@@ -78,39 +73,40 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
     ];
 
     const operations = insights.flatMap((insight) => [
-      { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: insight.insight_id } },
+      { index: { _index: testData.RULE_DOCTOR_INSIGHTS_INDEX, _id: insight.insight_id } },
       insight,
     ]);
 
     await esClient.bulk({ operations, refresh: 'wait_for' });
   });
 
-  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+  apiTest.afterAll(async ({ esClient, apiServices }) => {
     await esClient.indices.delete({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
+      index: testData.RULE_DOCTOR_INSIGHTS_INDEX,
       ignore_unavailable: true,
     });
 
-    await kbnClient.uiSettings.update({
-      [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
-    });
+    await apiServices.alertingV2.settings.setExperimentalFeaturesEnabled(false);
   });
 
   apiTest('should list insights with pagination', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}?perPage=2&page=1`, {
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}?perPage=2&page=1`, {
       headers: { ...adminCredentials.apiKeyHeader },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.page).toBe(1);
-    expect(response.body.perPage).toBe(2);
+    expect(response.body).toMatchObject({
+      page: 1,
+      perPage: 2,
+      total: SEEDED_INSIGHT_COUNT,
+      items: expect.arrayContaining([]),
+    });
     expect(response.body.items).toHaveLength(2);
-    expect(response.body.total).toBeGreaterThanOrEqual(3);
   });
 
   apiTest('should filter insights by status', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}?status=dismissed`, {
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}?status=dismissed`, {
       headers: { ...adminCredentials.apiKeyHeader },
       responseType: 'json',
     });
@@ -123,18 +119,21 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
   });
 
   apiTest('should get an insight by ID', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}/scout-insight-1`, {
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}/scout-insight-1`, {
       headers: { ...adminCredentials.apiKeyHeader },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.insight_id).toBe('scout-insight-1');
-    expect(response.body.status).toBe('open');
+    expect(response.body).toMatchObject({
+      insight_id: 'scout-insight-1',
+      status: 'open',
+      type: 'coverage_gap',
+    });
   });
 
   apiTest('should return 404 for an unknown insight ID', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}/nonexistent-id`, {
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}/nonexistent-id`, {
       headers: { ...adminCredentials.apiKeyHeader },
       responseType: 'json',
     });
@@ -143,15 +142,18 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
   });
 
   apiTest('should update insight status from open to dismissed', async ({ apiClient }) => {
-    const updateResponse = await apiClient.put(`${INSIGHTS_API_PATH}/scout-insight-2/status`, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: { status: 'dismissed' },
-      responseType: 'json',
-    });
+    const updateResponse = await apiClient.put(
+      `${testData.INSIGHTS_API_PATH}/scout-insight-2/status`,
+      {
+        headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        body: { status: 'dismissed' },
+        responseType: 'json',
+      }
+    );
 
     expect(updateResponse).toHaveStatusCode(204);
 
-    const getResponse = await apiClient.get(`${INSIGHTS_API_PATH}/scout-insight-2`, {
+    const getResponse = await apiClient.get(`${testData.INSIGHTS_API_PATH}/scout-insight-2`, {
       headers: { ...adminCredentials.apiKeyHeader },
       responseType: 'json',
     });
@@ -161,8 +163,8 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
   });
 
   apiTest('should return 404 when updating status of unknown insight', async ({ apiClient }) => {
-    const response = await apiClient.put(`${INSIGHTS_API_PATH}/nonexistent-id/status`, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.put(`${testData.INSIGHTS_API_PATH}/nonexistent-id/status`, {
+      headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       body: { status: 'applied' },
       responseType: 'json',
     });
