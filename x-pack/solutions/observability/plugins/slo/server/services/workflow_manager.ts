@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getSLOWorkflowId } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -25,7 +25,6 @@ export interface WorkflowManager {
 interface WorkflowManagerDeps {
   kibanaUrl: string;
   request: KibanaRequest;
-  httpSetup: HttpServiceSetup;
   logger: Logger;
   spaceId: string;
 }
@@ -35,14 +34,12 @@ export class DefaultWorkflowManager implements WorkflowManager {
   private readonly logger: Logger;
   private readonly spaceId: string;
   private readonly request: KibanaRequest;
-  private readonly httpSetup: HttpServiceSetup;
 
   constructor(deps: WorkflowManagerDeps) {
     this.baseUrl = deps.kibanaUrl;
     this.logger = deps.logger;
     this.spaceId = deps.spaceId;
     this.request = deps.request;
-    this.httpSetup = deps.httpSetup;
   }
 
   async create(slo: SLODefinition): Promise<WorkflowId> {
