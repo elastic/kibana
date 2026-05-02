@@ -6,7 +6,7 @@
  */
 
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { getSLOPipelineId } from '../../common/constants';
+import { getSLOPipelineId, SLI_DESTINATION_INDEX_NAME } from '../../common/constants';
 import type { EsqlCustomIndicator, SLODefinition } from '../domain/models';
 
 /**
@@ -30,7 +30,7 @@ export const generateEsqlSloWorkflowYaml = (slo: SLODefinition, spaceId: string)
   const syncDelayMinutes = getSyncDelayMinutes(slo);
   const lookbackMinutes = computeLookbackMinutes(slo);
   const pipelineId = getSLOPipelineId(slo.id, slo.revision);
-  const sliIndex = '.slo-observability.sli-v3.6';
+  const sliIndex = SLI_DESTINATION_INDEX_NAME;
   const isTimeslices = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod);
   const timesliceTarget = slo.objective.timesliceTarget ?? 0.95;
 
@@ -52,6 +52,7 @@ export const generateEsqlSloWorkflowYaml = (slo: SLODefinition, spaceId: string)
     : '';
 
   // Build isGoodSlice computation
+  // Use numerator >= denominator * target to avoid Liquid's integer division issue
   const isGoodSliceBlock = isTimeslices
     ? `
         - name: compute_is_good_slice
@@ -60,7 +61,7 @@ export const generateEsqlSloWorkflowYaml = (slo: SLODefinition, spaceId: string)
             operations:
               - operation: set
                 field: isGoodSlice
-                value: "{% if item.numerator != null and item.denominator != null and item.denominator > 0 %}{% assign ratio = item.numerator | divided_by: item.denominator %}{% if ratio >= ${timesliceTarget} %}1{% else %}0{% endif %}{% else %}0{% endif %}"`
+                value: "{% if item.numerator != null and item.denominator != null and item.denominator > 0 %}{% assign threshold = item.denominator | times: ${timesliceTarget} %}{% if item.numerator >= threshold %}1{% else %}0{% endif %}{% else %}0{% endif %}"`
     : '';
 
   // Build the isGoodSlice field in the document body

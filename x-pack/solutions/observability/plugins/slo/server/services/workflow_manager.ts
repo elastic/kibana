@@ -98,18 +98,26 @@ export class DefaultWorkflowManager implements WorkflowManager {
   async enable(workflowId: WorkflowId): Promise<void> {
     this.logger.debug(`Enabling workflow [${workflowId}]`);
 
-    await this.callWorkflowApi(
-      'POST',
-      `/api/workflows/workflow/${encodeURIComponent(workflowId)}/_enable`
+    await retryTransientEsErrors(
+      () =>
+        this.callWorkflowApi(
+          'POST',
+          `/api/workflows/workflow/${encodeURIComponent(workflowId)}/_enable`
+        ),
+      { logger: this.logger }
     );
   }
 
   async disable(workflowId: WorkflowId): Promise<void> {
     this.logger.debug(`Disabling workflow [${workflowId}]`);
 
-    await this.callWorkflowApi(
-      'POST',
-      `/api/workflows/workflow/${encodeURIComponent(workflowId)}/_disable`
+    await retryTransientEsErrors(
+      () =>
+        this.callWorkflowApi(
+          'POST',
+          `/api/workflows/workflow/${encodeURIComponent(workflowId)}/_disable`
+        ),
+      { logger: this.logger }
     );
   }
 

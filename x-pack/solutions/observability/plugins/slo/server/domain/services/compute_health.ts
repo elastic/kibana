@@ -16,6 +16,7 @@ import {
   getWildcardTransformId,
 } from '../../../common/constants';
 import type { TransformHealth } from '../models/health';
+import { isEsqlIndicatorType } from '../models/indicators';
 
 interface Item {
   id: string;
@@ -101,14 +102,14 @@ function computeItemHealth(
 ): { rollup: TransformHealth; summary: TransformHealth; isProblematic: boolean } {
   // ESQL SLOs do not have a rollup transform — they use Kibana Workflows.
   // For ESQL SLOs, skip the rollup transform health check and report it as healthy.
-  const isEsql = item.indicatorType === 'sli.esql.custom';
+  const isEsql = isEsqlIndicatorType(item.indicatorType ?? '');
 
   const rollup: TransformHealth = isEsql
     ? {
         isProblematic: false,
         missing: false,
         status: 'healthy',
-        state: 'started',
+        state: item.enabled ? 'started' : 'stopped',
         stateMatches: true,
       }
     : getTransformHealth(item, transformStatsById[getSLOTransformId(item.id, item.revision)]);
