@@ -23,6 +23,7 @@ import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 
 export type AssetInventoryStatus =
   | 'inactive_feature'
+  | 'entity_store_v2_disabled'
   | 'disabled'
   | 'initializing'
   | 'empty'
@@ -144,8 +145,11 @@ export const useAssetInventoryStatus = () => {
   });
 
   const data = useMemo<AssetInventoryStatusResponse | undefined>(() => {
-    if (!isAssetInventoryEnabled || !v2FlagsEnabled) {
+    if (!isAssetInventoryEnabled) {
       return { status: 'inactive_feature' };
+    }
+    if (!v2FlagsEnabled) {
+      return { status: 'entity_store_v2_disabled' };
     }
 
     if (entityStoreStatusQuery.isLoading || privilegesQuery.isLoading || hasDocsQuery.isLoading) {

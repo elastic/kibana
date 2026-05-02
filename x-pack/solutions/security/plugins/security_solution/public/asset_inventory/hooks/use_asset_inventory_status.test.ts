@@ -120,23 +120,23 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns inactive_feature when the entity-store v2 UI setting is disabled', async () => {
+  it('returns entity_store_v2_disabled when the entity-store v2 UI setting is disabled', async () => {
     setUiSettings({ assetInventory: true, entityStoreV2: false });
 
     const { result } = renderStatusHook();
 
     await waitFor(() => {
-      expect(result.current.data).toEqual({ status: 'inactive_feature' });
+      expect(result.current.data).toEqual({ status: 'entity_store_v2_disabled' });
     });
   });
 
-  it('returns inactive_feature when the entity-store v2 experimental flag is disabled', async () => {
+  it('returns entity_store_v2_disabled when the entity-store v2 experimental flag is disabled', async () => {
     mockIsExperimentalFeatureEnabled.mockReturnValue(false);
 
     const { result } = renderStatusHook();
 
     await waitFor(() => {
-      expect(result.current.data).toEqual({ status: 'inactive_feature' });
+      expect(result.current.data).toEqual({ status: 'entity_store_v2_disabled' });
     });
   });
 
