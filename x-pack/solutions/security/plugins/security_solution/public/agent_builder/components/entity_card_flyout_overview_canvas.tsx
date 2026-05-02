@@ -395,11 +395,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   const riskScoreStateFromAttachment = useMemo(
     () =>
       attachmentRiskStats
-        ? buildRiskScoreStateFromAttachmentRiskStats(
-            EntityType.host,
-            attachmentRiskStats,
-            hostName
-          )
+        ? buildRiskScoreStateFromAttachmentRiskStats(EntityType.host, attachmentRiskStats, hostName)
         : null,
     [attachmentRiskStats, hostName]
   );
@@ -776,11 +772,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   const riskScoreStateFromAttachment = useMemo(
     () =>
       attachmentRiskStats
-        ? buildRiskScoreStateFromAttachmentRiskStats(
-            EntityType.user,
-            attachmentRiskStats,
-            userName
-          )
+        ? buildRiskScoreStateFromAttachmentRiskStats(EntityType.user, attachmentRiskStats, userName)
         : null,
     [attachmentRiskStats, userName]
   );
