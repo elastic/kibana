@@ -61,8 +61,7 @@ const isTaskComponent = (component: unknown): component is TaskComponent =>
 
 const hasGenericEngineExecuted = (engine: GenericEntityEngineStatus): boolean =>
   !!engine.components?.some(
-    (component) =>
-      component.resource === 'task' && isTaskComponent(component) && component.runs > 0
+    (component) => component.resource === 'task' && isTaskComponent(component) && component.runs > 0
   );
 
 /**
