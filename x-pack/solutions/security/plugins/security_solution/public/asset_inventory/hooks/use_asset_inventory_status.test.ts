@@ -200,7 +200,7 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns empty when the generic engine transform has triggered with no docs', async () => {
+  it('returns empty when the generic engine task has executed with no docs', async () => {
     setHasDocs(false);
     setEntityStoreStatus({
       status: 'running',
@@ -208,7 +208,7 @@ describe('useAssetInventoryStatus', () => {
         {
           type: 'generic',
           components: [
-            { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 1 } },
+            { resource: 'task', runs: 1, status: 'success', remainingLogsToExtract: 0 },
           ],
         },
       ],
@@ -221,7 +221,7 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns initializing when the generic engine transform has not yet triggered', async () => {
+  it('returns initializing when the generic engine task has not yet executed', async () => {
     setHasDocs(false);
     setEntityStoreStatus({
       status: 'running',
@@ -229,7 +229,7 @@ describe('useAssetInventoryStatus', () => {
         {
           type: 'generic',
           components: [
-            { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 0 } },
+            { resource: 'task', runs: 0, status: 'idle', remainingLogsToExtract: null },
           ],
         },
       ],
