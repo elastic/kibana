@@ -59,3 +59,29 @@ export const fieldSettingsBaseSchema = schema.object(
     },
   }
 );
+
+const popularitySchema = schema.maybe(
+  schema.number({
+    min: 0,
+    meta: {
+      id: 'kbn-runtime-field-popularity',
+      title: 'Popularity',
+      description:
+        'Adjust the popularity to make the field appear higher or lower in the fields list. By default, Discover orders fields from most selected to least selected.',
+    },
+  })
+);
+
+export const fieldSettingsWithPopularitySchema = fieldSettingsBaseSchema.extends(
+  {
+    popularity: popularitySchema,
+  },
+  {
+    meta: {
+      id: 'kbn-field-settings-with-popularity',
+      title: 'Field settings',
+      description:
+        'Display overrides for a field. These settings can define a custom label, description, format and popularity.',
+    },
+  }
+);

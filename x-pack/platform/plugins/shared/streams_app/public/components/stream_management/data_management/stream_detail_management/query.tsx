@@ -59,7 +59,7 @@ export function QueryStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { attachments, overviewPage },
+    features: { overviewPage },
   } = useStreamsPrivileges();
 
   const { euiTheme } = useEuiTheme();
@@ -98,14 +98,12 @@ export function QueryStreamDetailManagement({
     }),
   };
 
-  if (attachments?.enabled) {
-    tabs.attachments = {
-      content: <StreamDetailAttachments definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-        defaultMessage: 'Attachments',
-      }),
-    };
-  }
+  tabs.attachments = {
+    content: <StreamDetailAttachments definition={definition} />,
+    label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+      defaultMessage: 'Attachments',
+    }),
+  };
 
   if (significantEvents) {
     tabs.significantEvents = significantEvents;
