@@ -105,7 +105,15 @@ export const buildUpdatedAtColumn = (
  * </ContentListTable>
  * ```
  */
+/** Default width for the skeleton cell. "Last updated" values ("2 hours ago")
+ *  are short, so we use a narrower width than the Name column. */
+const DEFAULT_UPDATED_AT_SKELETON_WIDTH = '120px';
+
 export const UpdatedAtColumn = column.createPreset({
   name: 'updatedAt',
   resolve: buildUpdatedAtColumn,
+  skeleton: (attributes) => ({
+    shape: 'text',
+    width: attributes.width ?? DEFAULT_UPDATED_AT_SKELETON_WIDTH,
+  }),
 });
