@@ -207,9 +207,7 @@ describe('useAssetInventoryStatus', () => {
       engines: [
         {
           type: 'generic',
-          components: [
-            { resource: 'task', runs: 1, status: 'success', remainingLogsToExtract: 0 },
-          ],
+          components: [{ resource: 'task', runs: 1, status: 'success', remainingLogsToExtract: 0 }],
         },
       ],
     });
@@ -228,9 +226,7 @@ describe('useAssetInventoryStatus', () => {
       engines: [
         {
           type: 'generic',
-          components: [
-            { resource: 'task', runs: 0, status: 'idle', remainingLogsToExtract: null },
-          ],
+          components: [{ resource: 'task', runs: 0, status: 'idle', remainingLogsToExtract: null }],
         },
       ],
     });
