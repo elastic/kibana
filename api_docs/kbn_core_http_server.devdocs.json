@@ -19702,6 +19702,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_ease_rules/bootstrap_ease_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/revert_prebuilt_rule/revert_prebuilt_rule_route.ts"
               },
               {
