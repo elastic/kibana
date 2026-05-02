@@ -2,9 +2,9 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: c4d-standard-16
+      machineType: n4-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
@@ -32,9 +32,11 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      machineType: n2d-standard-8
+      machineType: n4-standard-8
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
@@ -51,9 +53,11 @@ steps:
     env:
       CHECK_GATE: 'true'
     agents:
-      machineType: n2d-standard-2
+      machineType: n4-standard-2
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -64,9 +68,11 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: n2d-standard-16
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -80,9 +86,11 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: n2d-standard-32
+      machineType: n4-standard-32
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
@@ -96,9 +104,11 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_oxlint.sh
     label: 'Linting (with oxlint)'
     agents:
-      machineType: n2d-standard-16
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     key: linting_with_oxlint
     timeout_in_minutes: 60
@@ -112,9 +122,11 @@ steps:
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:
-      machineType: n2d-standard-2
+      machineType: n4-standard-2
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     key: check_oas_snapshot
     depends_on:
       - build
@@ -129,9 +141,11 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c3d-standard-8-lssd
+      machineType: n4-standard-8
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
@@ -146,7 +160,9 @@ steps:
     label: 'Pick Test Group Run Order'
     key: pick_test_group_run_order
     agents:
-      machineType: n2-standard-2
+      machineType: n4-standard-2
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 115
     timeout_in_minutes: 15
     env:
@@ -162,7 +178,9 @@ steps:
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
-      machineType: n2d-standard-8
+      machineType: n4-standard-8
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
     key: build_scout_tests
     timeout_in_minutes: 20
     env:
@@ -178,7 +196,9 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      machineType: n2-standard-2
+      machineType: n4-standard-2
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
     key: ci_stats_ready
     timeout_in_minutes: 10
     depends_on:
@@ -192,10 +212,11 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      machineType: c4d-highmem-4
+      machineType: n4-highmem-4
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
+      spotZones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 105
     key: build_api_docs
     timeout_in_minutes: 60

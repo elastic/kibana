@@ -136,6 +136,7 @@ describe('agent_images', () => {
         expect.objectContaining({
           machineType: 'n4-standard-4',
           diskType: 'hyperdisk-balanced',
+          zones: 'us-central1-a,us-east4-b,us-east1-b',
           preemptible: true,
           provider: DEFAULT_AGENT_IMAGE_CONFIG.provider,
         })

@@ -3,9 +3,11 @@ steps:
     label: 'Asset Inventory Cypress Tests'
     key: asset-inventory
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -22,9 +24,11 @@ steps:
     key: asset-inventory-serverless
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60

@@ -2,9 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/renovate.sh
     label: 'Renovate validation'
     agents:
-      machineType: n2-highcpu-8
+      machineType: n4-highcpu-8
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     key: renovate_validation
     timeout_in_minutes: 60
     retry:

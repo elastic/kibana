@@ -4,10 +4,12 @@ steps:
     key: security-serverless-rule-management
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 120
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -24,9 +26,11 @@ steps:
     key: security-serverless-rule-management-prebuilt-customization
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -43,9 +47,11 @@ steps:
     key: security-serverless-rule-management-prebuilt-installation
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -62,9 +68,11 @@ steps:
     key: security-serverless-rule-management-prebuilt-management
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -81,9 +89,11 @@ steps:
     key: security-serverless-rule-management-prebuilt-upgrade
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -99,9 +109,11 @@ steps:
     label: 'Rule Management - Security Solution Cypress Tests'
     key: security-rule-management
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -117,9 +129,11 @@ steps:
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     key: security-rule-management-prebuilt-customization
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -135,9 +149,11 @@ steps:
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
     key: security-rule-management-prebuilt-installation
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -153,9 +169,11 @@ steps:
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
     key: security-rule-management-prebuilt-management
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -171,9 +189,11 @@ steps:
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     key: security-rule-management-prebuilt-upgrade
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60

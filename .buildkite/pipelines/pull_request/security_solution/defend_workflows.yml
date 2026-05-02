@@ -4,10 +4,12 @@ steps:
     key: defend-workflows
     agents:
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n4-highmem-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 120
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -25,10 +27,12 @@ steps:
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n4-highmem-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 120
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60

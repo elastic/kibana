@@ -3,10 +3,12 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     key: security-investigations
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 110
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -23,10 +25,12 @@ steps:
     key: security-serverless-investigations
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 110
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     depends_on:
       - build
     timeout_in_minutes: 60

@@ -11,9 +11,11 @@ steps:
         env:
           FTR_EIS_CCM: '1'
         agents:
-          machineType: n2-standard-2
+          machineType: n4-standard-2
+          diskType: hyperdisk-balanced
+          zones: us-central1-a,us-east4-b,us-east1-b
           preemptible: true
-          spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+          spotZones: us-central1-a,us-east4-b,us-east1-b
         artifact_paths:
           - 'target/eis_models.json'
         retry:
@@ -38,9 +40,11 @@ steps:
         timeout_in_minutes: 50
         parallelism: 1
         agents:
-          machineType: n2-standard-4
+          machineType: n4-standard-4
+          diskType: hyperdisk-balanced
+          zones: us-central1-a,us-east4-b,us-east1-b
           preemptible: true
-          spotZones: us-central1-f,us-central1-c,us-central1-a
+          spotZones: us-central1-a,us-east4-b,us-east1-b
         retry:
           automatic:
             - exit_status: '-1'

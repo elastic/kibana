@@ -95,7 +95,9 @@ const expandAgentQueue = (queueName: string = 'n4-4-spot', diskSizeGb?: number) 
   return {
     ...getAgentImageConfig(),
     machineType: `${kind}-standard-${cores}`,
-    ...(kind === 'n4' ? { diskType: 'hyperdisk-balanced' } : {}),
+    ...(kind === 'n4'
+      ? { diskType: 'hyperdisk-balanced', zones: 'us-central1-a,us-east4-b,us-east1-b' }
+      : {}),
     ...(diskSizeGb ? { diskSizeGb } : {}),
     ...additionalProps,
   };

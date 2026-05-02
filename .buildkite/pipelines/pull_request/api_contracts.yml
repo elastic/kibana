@@ -2,10 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/checks/api_contracts.sh
     label: 'Check API Contracts'
     agents:
-      machineType: c4d-standard-2
+      machineType: n4-standard-2
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-a,us-east4-b,us-east1-b
     key: check_api_contracts
     depends_on: check_oas_snapshot
     timeout_in_minutes: 30

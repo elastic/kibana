@@ -3,9 +3,9 @@ steps:
     label: 'FTR Bench'
     key: ftr_bench
     agents:
-      machineType: c4d-standard-16
+      machineType: n4-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-c,us-central1-a
+      zones: us-central1-a,us-east4-b,us-east1-b
       diskSizeGb: 200
     timeout_in_minutes: 120
     soft_fail: true

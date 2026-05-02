@@ -3,7 +3,9 @@ steps:
     label: 'Build Cloud Image'
     key: build_cloud_image
     agents:
-      machineType: n2-standard-2
+      machineType: n4-standard-2
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
     depends_on:
       - build

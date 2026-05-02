@@ -5,4 +5,6 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     agents:
-      machineType: n2-standard-2
+      machineType: n4-standard-2
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b

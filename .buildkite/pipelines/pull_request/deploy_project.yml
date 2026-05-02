@@ -3,7 +3,9 @@ steps:
     label: 'Build Project Image'
     key: build_project_image
     agents:
-      machineType: n2-standard-16
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
       diskSizeGb: 150
     timeout_in_minutes: 90
@@ -15,7 +17,9 @@ steps:
     label: 'Deploy Project'
     key: deploy_project
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
     timeout_in_minutes: 10
     depends_on:

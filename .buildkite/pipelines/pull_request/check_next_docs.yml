@@ -3,7 +3,9 @@ steps:
     label: 'Build and Validate Next Docs'
     key: check_next_docs
     agents:
-      machineType: n2-standard-4
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-east4-b,us-east1-b
       preemptible: true
     timeout_in_minutes: 30
     retry:
