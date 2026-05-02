@@ -34,11 +34,11 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
+import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useResolutionGroup } from '../entity_resolution/hooks/use_resolution_group';
 import { getEntityId } from '../entity_resolution/helpers';
-import { useResolutionRiskFallback } from './resolution_risk_fallback_context';
 
 import {
   columnsArray,
@@ -64,6 +64,8 @@ export interface RiskSummaryProps<T extends EntityType> {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
   entityId?: string;
+  /** Optional prefetched resolution-group risk; used when the internal risk-index lookup returns no doc. */
+  prefetchedResolutionRisk?: EntityRiskScore<T>;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -74,8 +76,8 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   queryId,
   openDetailsPanel,
   isPreviewMode,
+  prefetchedResolutionRisk,
 }: RiskSummaryProps<T>) => {
-  const resolutionRiskFallback = useResolutionRiskFallback(entityType);
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const fallbackRiskData = data && data.length > 0 ? data[0] : undefined;
@@ -224,7 +226,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const resolutionRiskData =
     (resolutionRiskScoreData.data && resolutionRiskScoreData.data.length > 0
       ? resolutionRiskScoreData.data[0]
-      : undefined) ?? resolutionRiskFallback;
+      : undefined) ?? prefetchedResolutionRisk;
   const resolutionEntityData = getEntityData<T>(entityType, resolutionRiskData);
   const resolutionRows = useMemo(
     () => getItems(resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled),

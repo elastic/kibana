@@ -93,7 +93,6 @@ import {
   type SecurityAgentBuilderChrome,
 } from '../attachment_types/entity_explore_navigation';
 import type { RiskScoreState } from '../../entity_analytics/api/hooks/use_risk_score';
-import { ResolutionRiskFallbackProvider } from '../../entity_analytics/components/risk_summary_flyout/resolution_risk_fallback_context';
 
 const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
 
@@ -257,6 +256,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   openSidebarConversation?: () => void;
   searchSession?: ISessionService;
   attachmentRiskStats?: EntityAttachmentRiskStats;
+  attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
 }> = ({
   hostName,
   entityId,
@@ -266,6 +266,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   openSidebarConversation,
   searchSession,
   attachmentRiskStats,
+  attachmentResolutionRiskStats,
 }) => {
   const euidApi = useEntityStoreEuidApi();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -403,6 +404,18 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     [attachmentRiskStats, hostName]
   );
 
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      attachmentResolutionRiskStats
+        ? buildEntityRiskScoreFromAttachmentRiskStats(
+            EntityType.host,
+            attachmentResolutionRiskStats,
+            hostName
+          )
+        : undefined,
+    [attachmentResolutionRiskStats, hostName]
+  );
+
   const effectiveRiskScoreState =
     riskScoreStateFromAttachment ?? riskScoreStateFromStore ?? riskScoreState;
   const isRiskScoreExist =
@@ -494,6 +507,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
         )}
       </FlyoutBody>
@@ -604,6 +618,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   openSidebarConversation?: () => void;
   searchSession?: ISessionService;
   attachmentRiskStats?: EntityAttachmentRiskStats;
+  attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
 }> = ({
   userName,
   entityId: entityIdProp,
@@ -613,6 +628,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   openSidebarConversation,
   searchSession,
   attachmentRiskStats,
+  attachmentResolutionRiskStats,
 }) => {
   const euidApi = useEntityStoreEuidApi();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -769,6 +785,18 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     [attachmentRiskStats, userName]
   );
 
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      attachmentResolutionRiskStats
+        ? buildEntityRiskScoreFromAttachmentRiskStats(
+            EntityType.user,
+            attachmentResolutionRiskStats,
+            userName
+          )
+        : undefined,
+    [attachmentResolutionRiskStats, userName]
+  );
+
   const effectiveRiskScoreState =
     riskScoreStateFromAttachment ?? riskScoreStateFromStore ?? riskScoreState;
 
@@ -841,6 +869,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
         )}
       </FlyoutBody>
@@ -942,6 +971,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   openSidebarConversation?: () => void;
   searchSession?: ISessionService;
   attachmentRiskStats?: EntityAttachmentRiskStats;
+  attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
 }> = ({
   serviceName,
   entityId,
@@ -951,6 +981,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   openSidebarConversation,
   searchSession,
   attachmentRiskStats,
+  attachmentResolutionRiskStats,
 }) => {
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -1009,6 +1040,18 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
           )
         : null,
     [attachmentRiskStats, serviceName]
+  );
+
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      attachmentResolutionRiskStats
+        ? buildEntityRiskScoreFromAttachmentRiskStats(
+            EntityType.service,
+            attachmentResolutionRiskStats,
+            serviceName
+          )
+        : undefined,
+    [attachmentResolutionRiskStats, serviceName]
   );
 
   const effectiveRiskScoreState = riskScoreStateFromAttachment ?? riskScoreState;
@@ -1117,6 +1160,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
         )}
       </FlyoutBody>
@@ -1141,22 +1185,9 @@ export interface EntityCardFlyoutOverviewCanvasProps {
    * before the legitimate `agent_builder → securitySolutionUI` navigation.
    */
   searchSession?: ISessionService;
-  /**
-   * Rich risk-doc projection embedded on single-entity attachments by `security.get_entity`.
-   * When present, the per-type canvas builds the `FlyoutRiskSummary` from it (matching the
-   * inline `EntityCard`'s `RiskSummaryMini` source of truth) instead of falling back to the
-   * entity store's summary-only risk fields, which produce an all-zero contributions table.
-   */
+  /** Rich risk-doc projection from `security.get_entity`; preferred over entity-store summary risk. */
   riskStats?: EntityAttachmentRiskStats;
-  /**
-   * Resolution-group risk projection embedded on single-entity attachments. Surfaced to
-   * `FlyoutRiskSummary` via `ResolutionRiskFallbackProvider` (React context) so the Preview
-   * Only flyout shows the same "Resolution group risk score" panel the in-app flyout does —
-   * needed because the canvas's `useRiskScore` lookup against the legacy risk index returns
-   * no match when filtered by the EUID-shaped `id_value`. The context approach keeps the
-   * shared host/user/service `*PanelContent` components in `flyout/entity_details/`
-   * Agent-Builder-agnostic — no fallback prop drills through them.
-   */
+  /** Resolution-group risk fallback; threaded through to {@link FlyoutRiskSummary}. */
   resolutionRiskStats?: EntityAttachmentRiskStats;
 }
 
@@ -1198,77 +1229,52 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
 
   if (identifier.identifierType === 'host') {
     const hostName = getHostNameForHostDetailsUrl(exploreRow);
-    const resolutionRiskFallback = resolutionRiskStats
-      ? buildEntityRiskScoreFromAttachmentRiskStats(EntityType.host, resolutionRiskStats, hostName)
-      : undefined;
     return (
-      <ResolutionRiskFallbackProvider
-        entityType={EntityType.host}
-        riskScore={resolutionRiskFallback}
-      >
-        <HostEntityFlyoutOverviewCanvas
-          hostName={hostName}
-          entityId={entityId}
-          application={application}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
-          openSidebarConversation={openSidebarConversation}
-          searchSession={searchSession}
-          attachmentRiskStats={riskStats}
-        />
-      </ResolutionRiskFallbackProvider>
+      <HostEntityFlyoutOverviewCanvas
+        hostName={hostName}
+        entityId={entityId}
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={openSidebarConversation}
+        searchSession={searchSession}
+        attachmentRiskStats={riskStats}
+        attachmentResolutionRiskStats={resolutionRiskStats}
+      />
     );
   }
 
   if (identifier.identifierType === 'user') {
     const userName = getUserNameForUserDetailsUrl(exploreRow);
-    const resolutionRiskFallback = resolutionRiskStats
-      ? buildEntityRiskScoreFromAttachmentRiskStats(EntityType.user, resolutionRiskStats, userName)
-      : undefined;
     return (
-      <ResolutionRiskFallbackProvider
-        entityType={EntityType.user}
-        riskScore={resolutionRiskFallback}
-      >
-        <UserEntityFlyoutOverviewCanvas
-          userName={userName}
-          entityId={entityId}
-          application={application}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
-          openSidebarConversation={openSidebarConversation}
-          searchSession={searchSession}
-          attachmentRiskStats={riskStats}
-        />
-      </ResolutionRiskFallbackProvider>
+      <UserEntityFlyoutOverviewCanvas
+        userName={userName}
+        entityId={entityId}
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={openSidebarConversation}
+        searchSession={searchSession}
+        attachmentRiskStats={riskStats}
+        attachmentResolutionRiskStats={resolutionRiskStats}
+      />
     );
   }
 
   if (identifier.identifierType === 'service') {
     const displayName = getServiceNameForServiceDetailsUrl(exploreRow);
-    const resolutionRiskFallback = resolutionRiskStats
-      ? buildEntityRiskScoreFromAttachmentRiskStats(
-          EntityType.service,
-          resolutionRiskStats,
-          displayName
-        )
-      : undefined;
     return (
-      <ResolutionRiskFallbackProvider
-        entityType={EntityType.service}
-        riskScore={resolutionRiskFallback}
-      >
-        <ServiceEntityFlyoutOverviewCanvas
-          serviceName={displayName}
-          entityId={entityId}
-          application={application}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
-          openSidebarConversation={openSidebarConversation}
-          searchSession={searchSession}
-          attachmentRiskStats={riskStats}
-        />
-      </ResolutionRiskFallbackProvider>
+      <ServiceEntityFlyoutOverviewCanvas
+        serviceName={displayName}
+        entityId={entityId}
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={openSidebarConversation}
+        searchSession={searchSession}
+        attachmentRiskStats={riskStats}
+        attachmentResolutionRiskStats={resolutionRiskStats}
+      />
     );
   }
 
