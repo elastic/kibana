@@ -11,6 +11,7 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
+import { SyntheticsRemoteBadge } from '../../../../common/components/synthetics_remote_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
@@ -35,11 +36,19 @@ export const MetricItemBody = ({
       }}
     />
   );
+  const remoteBadge = <SyntheticsRemoteBadge remote={monitor.remote} />;
+
+  const badges = (
+    <>
+      {typeBadge}
+      {remoteBadge}
+    </>
+  );
   if (tags.length === 0 && (monitor?.locations?.length ?? 0) <= 1) {
     return (
       <>
         <EuiSpacer size="xs" />
-        {typeBadge}
+        {badges}
       </>
     );
   }
@@ -48,7 +57,7 @@ export const MetricItemBody = ({
     <>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
         {monitor?.locations?.length > 1 && (
           <EuiFlexItem grow={false}>
             <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />

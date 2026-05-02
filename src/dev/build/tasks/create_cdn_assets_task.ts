@@ -47,7 +47,7 @@ export const CreateCdnAssets: Task = {
     const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));
     const allTranslationPaths = await discoverAllTranslationPaths(pluginPaths);
     const discoveredLocales = Array.from(
-      new Set(allTranslationPaths.map((path) => basename(path, '.json')))
+      new Set(['en', ...allTranslationPaths.map((path) => basename(path, '.json'))])
     );
     for (const locale of discoveredLocales) {
       const translationFileContent = await generateTranslationFile(locale, pluginPaths);
