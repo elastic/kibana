@@ -43,6 +43,7 @@ const context = {
   authorization: { ensureAuthorized: async () => {} },
   ruleTypeRegistry: {
     ensureRuleTypeEnabled: () => {},
+    get: () => ({ solution: 'stack', trackChanges: false }),
   },
   getUserName: async () => {},
 } as unknown as RulesClientContext;

@@ -12,6 +12,8 @@ import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -240,6 +242,39 @@ const bulkDisableRulesWithOCC = async (
         savedObjectsBulkCreateOptions: { overwrite: true },
       })
   );
+
+  if (context.changeTrackingService) {
+    const changes = rulesToDisable.reduce<RuleChange[]>((acc, rule) => {
+      const updated = result.saved_objects.find((r) => r.id === rule.id);
+      if (!updated || updated.error) {
+        return acc;
+      }
+      const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      if (!ruleType.trackChanges) {
+        return acc;
+      }
+      acc.push({
+        objectId: rule.id,
+        objectType: RULE_SAVED_OBJECT_TYPE,
+        module: ruleType.solution,
+        snapshot: {
+          attributes: rule.attributes as RawRule,
+          references: rule.references ?? [],
+        },
+      });
+      return acc;
+    }, []);
+    if (changes.length) {
+      await context.changeTrackingService.logBulk(changes, {
+        action: RuleChangeTrackingAction.ruleDisable,
+        // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
+        username: username ?? 'unknown',
+        userProfileId: undefined,
+        spaceId: context.spaceId,
+        data: { metadata: { bulkCount: rulesToDisable.length } },
+      });
+    }
+  }
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];

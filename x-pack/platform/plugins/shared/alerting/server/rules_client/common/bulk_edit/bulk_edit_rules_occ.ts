@@ -9,9 +9,13 @@ import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import type { ChangeTrackingAction } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import type { RuleChange } from '../../lib/change_tracking';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -41,6 +45,7 @@ export interface BulkEditOccOptions<Params extends RuleParams> {
   shouldInvalidateApiKeys: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  changeTrackingAction?: ChangeTrackingAction;
 }
 
 const isValidInterval = (interval: string | undefined): interval is string => {
@@ -158,6 +163,8 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     rules,
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
+    changeTrackingAction: options.changeTrackingAction,
+    username,
   });
 
   return {
@@ -174,14 +181,18 @@ async function saveBulkUpdatedRules({
   rules,
   apiKeysMap,
   shouldInvalidateApiKeys,
+  changeTrackingAction,
+  username,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
+  changeTrackingAction?: ChangeTrackingAction;
+  username: string | null;
 }) {
   const apiKeysToInvalidate: string[] = [];
-  let result;
+  let result: SavedObjectsBulkResponse<RawRule>;
   try {
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
@@ -191,6 +202,39 @@ async function saveBulkUpdatedRules({
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
       savedObjectsBulkCreateOptions: { overwrite: true },
     });
+
+    if (context.changeTrackingService) {
+      const changes = rules.reduce<RuleChange[]>((acc, rule) => {
+        const updated = result.saved_objects.find((r) => r.id === rule.id);
+        if (!updated || updated.error) {
+          return acc;
+        }
+        const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+        if (!ruleType.trackChanges) {
+          return acc;
+        }
+        acc.push({
+          objectId: rule.id,
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: ruleType.solution,
+          snapshot: {
+            attributes: rule.attributes as RawRule,
+            references: rule.references ?? [],
+          },
+        });
+        return acc;
+      }, []);
+      if (changes.length) {
+        await context.changeTrackingService.logBulk(changes, {
+          action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
+          // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
+          username: username ?? 'unknown',
+          userProfileId: undefined,
+          spaceId: context.spaceId,
+          data: { metadata: { bulkCount: rules.length } },
+        });
+      }
+    }
   } catch (e) {
     // avoid unused newly generated API keys
 

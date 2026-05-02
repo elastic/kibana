@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -375,6 +376,27 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         references: extractedReferences,
       },
     });
+
+    if (context.changeTrackingService && ruleType.trackChanges) {
+      await context.changeTrackingService.log(
+        {
+          objectId: id,
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: ruleType.solution,
+          snapshot: {
+            attributes: updatedRuleAttributes,
+            references: extractedReferences,
+          },
+        },
+        {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
+          username: username ?? 'unknown',
+          userProfileId: undefined,
+          spaceId: context.spaceId,
+        }
+      );
+    }
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
 

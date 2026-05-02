@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -35,6 +37,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   let oldApiKeyCreatedByUser: boolean | undefined | null = false;
   let oldUiamApiKeyToInvalidate: string | undefined | null;
   let attributes: RawRule;
+  let references: SavedObjectReference[] = [];
   let version: string | undefined;
 
   try {
@@ -56,6 +59,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     oldUiamApiKeyToInvalidate = decryptedAlert.attributes.uiamApiKey;
     attributes = decryptedAlert.attributes;
+    references = decryptedAlert.references ?? [];
     version = decryptedAlert.version;
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
@@ -68,6 +72,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       id
     );
     attributes = alert.attributes;
+    references = alert.references ?? [];
     version = alert.version;
   }
 
@@ -119,11 +124,33 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   try {
     await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, updateAttributes, {
       version,
     });
+
+    if (context.changeTrackingService && ruleType.trackChanges) {
+      await context.changeTrackingService.log(
+        {
+          objectId: id,
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: ruleType.solution,
+          snapshot: {
+            attributes: { ...attributes, ...updateAttributes } as RawRule,
+            references,
+          },
+        },
+        {
+          action: RuleChangeTrackingAction.ruleUpdateApiKey,
+          // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
+          username: username ?? 'unknown',
+          userProfileId: undefined,
+          spaceId: context.spaceId,
+        }
+      );
+    }
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;
 

@@ -10,6 +10,8 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import {
   combineFiltersWithInternalRuleTypeFilter,
   constructIgnoreInternalRuleTypesFilter,
@@ -277,6 +279,36 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  if (context.changeTrackingService) {
+    const changes = rules.reduce<RuleChange[]>((acc, rule) => {
+      const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+      if (!ruleType.trackChanges) {
+        return acc;
+      }
+      acc.push({
+        objectId: rule.id,
+        objectType: RULE_SAVED_OBJECT_TYPE,
+        module: ruleType.solution,
+        snapshot: {
+          attributes: rule.attributes,
+          references: rule.references ?? [],
+        },
+      });
+      return acc;
+    }, []);
+    if (changes.length) {
+      const username = await context.getUserName();
+      await context.changeTrackingService.logBulk(changes, {
+        action: RuleChangeTrackingAction.ruleDelete,
+        // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
+        username: username ?? 'unknown',
+        userProfileId: undefined,
+        spaceId: context.spaceId,
+        data: { metadata: { bulkCount: rules.length } },
+      });
+    }
+  }
 
   return {
     errors,
