@@ -45,7 +45,9 @@ describe('lookup_index routes', () => {
 
       expect(() => validate.body.validate({ operations })).toThrow(
         new RegExp(
-          `array size is \\[${BULK_OPERATIONS_MAX_SIZE + 1}\\], but cannot be greater than \\[${BULK_OPERATIONS_MAX_SIZE}\\]`
+          `array size is \\[${
+            BULK_OPERATIONS_MAX_SIZE + 1
+          }\\], but cannot be greater than \\[${BULK_OPERATIONS_MAX_SIZE}\\]`
         )
       );
     });
