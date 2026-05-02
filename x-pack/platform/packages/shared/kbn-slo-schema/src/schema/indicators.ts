@@ -265,6 +265,19 @@ const histogramIndicatorSchema = t.type({
   ]),
 });
 
+const esqlCustomIndicatorTypeSchema = t.literal('sli.esql.custom');
+const esqlCustomIndicatorSchema = t.type({
+  type: esqlCustomIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      esqlQuery: t.string,
+    }),
+    t.partial({
+      groupBy: t.array(t.string),
+    }),
+  ]),
+});
+
 const syntheticsParamSchema = t.type({
   value: allOrAnyString,
   label: allOrAnyString,
@@ -294,6 +307,7 @@ const indicatorTypesSchema = t.union([
   metricCustomIndicatorTypeSchema,
   timesliceMetricIndicatorTypeSchema,
   histogramIndicatorTypeSchema,
+  esqlCustomIndicatorTypeSchema,
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
@@ -323,6 +337,7 @@ const indicatorSchema = t.union([
   metricCustomIndicatorSchema,
   timesliceMetricIndicatorSchema,
   histogramIndicatorSchema,
+  esqlCustomIndicatorSchema,
 ]);
 
 export {
@@ -351,6 +366,8 @@ export {
   timesliceMetricPercentileMetric,
   histogramIndicatorTypeSchema,
   histogramIndicatorSchema,
+  esqlCustomIndicatorSchema,
+  esqlCustomIndicatorTypeSchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,

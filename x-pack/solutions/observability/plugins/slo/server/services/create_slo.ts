@@ -27,11 +27,12 @@ import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getSLOWorkflowId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
-import { Duration, DurationUnit } from '../domain/models';
+import { Duration, DurationUnit, isEsqlIndicatorType } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
@@ -39,6 +40,7 @@ import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
+import type { WorkflowManager } from './workflow_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 
@@ -52,7 +54,8 @@ export class CreateSLO {
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private username: string
+    private username: string,
+    private workflowManager?: WorkflowManager
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -64,7 +67,85 @@ export class CreateSLO {
       assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser),
     ]);
 
-    const rollbackOperations = [];
+    if (isEsqlIndicatorType(slo.indicator.type)) {
+      return this.executeEsql(slo);
+    }
+
+    return this.executeTransformBased(slo);
+  }
+
+  private async executeEsql(slo: SLODefinition): Promise<CreateSLOResponse> {
+    if (!this.workflowManager) {
+      throw new Error('WorkflowManager is required for ESQL SLO creation');
+    }
+
+    const rollbackOperations: Array<() => Promise<unknown>> = [];
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+
+    try {
+      const createPromise = this.repository.create(slo);
+      rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
+
+      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo, this.spaceId));
+      rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
+
+      // ESQL SLOs use workflows instead of rollup transforms
+      const workflowPromise = this.workflowManager.create(slo);
+      rollbackOperations.push(() =>
+        this.workflowManager!.delete(getSLOWorkflowId(slo.id, slo.revision))
+      );
+
+      const summaryPipelinePromise = this.createPipeline(
+        getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+      );
+      rollbackOperations.push(() =>
+        this.deletePipeline(getSLOSummaryPipelineId(slo.id, slo.revision))
+      );
+
+      // Summary transform is still used for ESQL SLOs
+      const summaryTransformPromise = this.summaryTransformManager.install(slo);
+      rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
+
+      const tempDocPromise = this.createTempSummaryDocument(slo);
+      rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
+
+      await Promise.all([
+        createPromise,
+        sloPipelinePromise,
+        workflowPromise,
+        summaryPipelinePromise,
+        summaryTransformPromise,
+        tempDocPromise,
+      ]);
+
+      // Start only the summary transform (workflow starts on its own schedule)
+      await this.summaryTransformManager.start(summaryTransformId);
+    } catch (err) {
+      this.logger.debug(
+        `Cannot create the ESQL SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
+      );
+
+      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
+        try {
+          await operation();
+        } catch (rollbackErr) {
+          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+        }
+      });
+
+      if (err.meta?.body?.error?.type === 'security_exception') {
+        throw new SecurityException(err.meta.body.error.reason);
+      }
+
+      throw err;
+    }
+
+    return this.toResponse(slo);
+  }
+
+  private async executeTransformBased(slo: SLODefinition): Promise<CreateSLOResponse> {
+    const rollbackOperations: Array<() => Promise<unknown>> = [];
+
     const createPromise = this.repository.create(slo);
     rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
 

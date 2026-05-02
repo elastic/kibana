@@ -23,6 +23,7 @@ interface Item {
   revision: number;
   name: string;
   enabled: boolean;
+  indicatorType?: string;
 }
 
 interface Dependencies {
@@ -98,10 +99,20 @@ function computeItemHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
   item: Item
 ): { rollup: TransformHealth; summary: TransformHealth; isProblematic: boolean } {
-  const rollup = getTransformHealth(
-    item,
-    transformStatsById[getSLOTransformId(item.id, item.revision)]
-  );
+  // ESQL SLOs do not have a rollup transform — they use Kibana Workflows.
+  // For ESQL SLOs, skip the rollup transform health check and report it as healthy.
+  const isEsql = item.indicatorType === 'sli.esql.custom';
+
+  const rollup: TransformHealth = isEsql
+    ? {
+        isProblematic: false,
+        missing: false,
+        status: 'healthy',
+        state: 'started',
+        stateMatches: true,
+      }
+    : getTransformHealth(item, transformStatsById[getSLOTransformId(item.id, item.revision)]);
+
   const summary = getTransformHealth(
     item,
     transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]

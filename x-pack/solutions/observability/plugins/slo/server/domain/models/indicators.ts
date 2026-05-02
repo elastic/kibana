@@ -8,6 +8,7 @@
 import type {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  esqlCustomIndicatorSchema,
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
@@ -19,8 +20,16 @@ type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateI
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
 type KQLCustomIndicator = t.TypeOf<typeof kqlCustomIndicatorSchema>;
 type MetricCustomIndicator = t.TypeOf<typeof metricCustomIndicatorSchema>;
+type EsqlCustomIndicator = t.TypeOf<typeof esqlCustomIndicatorSchema>;
 type Indicator = t.TypeOf<typeof indicatorSchema>;
 type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
+
+const ESQL_INDICATOR_TYPE = 'sli.esql.custom' as const;
+
+const isEsqlIndicatorType = (indicatorType: string): boolean =>
+  indicatorType === ESQL_INDICATOR_TYPE;
+
+export { ESQL_INDICATOR_TYPE, isEsqlIndicatorType };
 
 export type {
   Indicator,
@@ -29,4 +38,5 @@ export type {
   APMTransactionDurationIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  EsqlCustomIndicator,
 };
