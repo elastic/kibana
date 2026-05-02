@@ -6,7 +6,15 @@
  */
 
 import type { FC } from 'react';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useEvent from 'react-use/lib/useEvent';
 import moment from 'moment';
@@ -70,7 +78,19 @@ export const SyntheticsRefreshContextProvider: FC<
     setLastRefresh(refreshTime);
   }, [setLastRefresh]);
 
+  // We initialize `lastRefresh` to `Date.now()` above, so this effect's only
+  // job is reacting to `refreshPaused` *toggling* off — calling `refreshApp()`
+  // on the very first run would mutate `lastRefresh` a second time during the
+  // mount sequence, fanning out a duplicate fetch to every consumer hook that
+  // depends on it (filters, overview status, histograms, trends, …). The
+  // initial-mount guard skips that redundant bump while still kicking off a
+  // refresh when the user later un-pauses the auto-refresh switch.
+  const isInitialPauseEffectRun = useRef(true);
   useEffect(() => {
+    if (isInitialPauseEffectRun.current) {
+      isInitialPauseEffectRun.current = false;
+      return;
+    }
     if (!refreshPaused) {
       refreshApp();
     }

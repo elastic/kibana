@@ -19,7 +19,6 @@ export type {
   AgentBuilderPluginStart,
   ToolsSetup,
   ToolsStart,
-  SmlStart,
   ConversationsStart,
   ReadOnlyConversationClient,
 } from './types';
@@ -35,9 +34,12 @@ export type {
   SmlListItem,
   SmlSearchResult,
   SmlIndexAttachmentParams,
-} from './services/sml';
+} from '@kbn/agent-context-layer-plugin/server';
 
-export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+export {
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+} from '@kbn/agent-context-layer-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
