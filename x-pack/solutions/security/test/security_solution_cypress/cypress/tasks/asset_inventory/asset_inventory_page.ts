@@ -6,13 +6,16 @@
  */
 
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
-import {
-  ENTITY_STORE_ROUTES,
-  API_VERSIONS,
-  getLatestEntitiesIndexName,
-} from '@kbn/entity-store/common';
 import { rootRequest } from '../api_calls/common';
 import { setKibanaSetting } from '../api_calls/kibana_advanced_settings';
+
+// Inlined constants from `@kbn/entity-store/common` to avoid pulling the package
+// into the cypress tsconfig. Public API contract values, safe to duplicate here.
+const ENTITY_STORE_INSTALL_ROUTE = '/api/security/entity_store/install';
+const ENTITY_STORE_PUBLIC_API_VERSION = '2023-10-31';
+// Stable write-alias for v2 latest entities. Invariant under entity-store
+// MAPPING_VERSION bumps (which only change the concrete index suffix).
+const getEntitiesLatestAlias = (namespace: string) => `entities-latest-${namespace}`;
 
 const timestamp = Date.now();
 const date = new Date(timestamp);
@@ -356,10 +359,10 @@ export const createMockAsset = (indexName: string) => {
 export const installEntityStoreV2ApiCall = () => {
   return rootRequest({
     method: 'POST',
-    url: ENTITY_STORE_ROUTES.public.INSTALL,
+    url: ENTITY_STORE_INSTALL_ROUTE,
     headers: {
       'kbn-xsrf': 'xxxx',
-      'elastic-api-version': API_VERSIONS.public.v1,
+      'elastic-api-version': ENTITY_STORE_PUBLIC_API_VERSION,
       'x-elastic-internal-origin': 'kibana',
     },
     body: {},
@@ -384,13 +387,14 @@ export const waitForAssetInventoryReady = (timeoutMs = 30000) => {
   cy.get(ALL_ASSETS_TITLE_TEST_ID, { timeout: timeoutMs }).should('be.visible');
 };
 
-// Indexes a v2 entity document directly into the underlying latest entity index that backs the
-// `entities-latest-{namespace}` alias. We bypass the live extraction transforms so UI tests don't
-// depend on the entity store extraction cadence.
+// Indexes a v2 entity document directly through the `entities-latest-{namespace}` write-alias.
+// We bypass the live extraction tasks so UI tests don't depend on the entity store extraction
+// cadence. Writing through the alias keeps this resilient to mapping-version bumps in the
+// underlying concrete index name.
 export const createMockEntityV2 = (entityDoc: Record<string, unknown>, namespace = 'default') => {
   return rootRequest({
     method: 'POST',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${getLatestEntitiesIndexName(
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${getEntitiesLatestAlias(
       namespace
     )}/_doc?refresh=wait_for`,
     body: entityDoc,
