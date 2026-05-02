@@ -14,31 +14,37 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const UpdateEvaluationDatasetRequestParams = lazySchema(() =>
+  z.object({
+    datasetId: z.string(),
+  })
+);
 export type UpdateEvaluationDatasetRequestParams = z.infer<
   typeof UpdateEvaluationDatasetRequestParams
 >;
-export const UpdateEvaluationDatasetRequestParams = z.object({
-  datasetId: z.string(),
-});
 export type UpdateEvaluationDatasetRequestParamsInput = z.input<
   typeof UpdateEvaluationDatasetRequestParams
 >;
 
+export const UpdateEvaluationDatasetRequestBody = lazySchema(() =>
+  z.object({
+    description: z.string(),
+  })
+);
 export type UpdateEvaluationDatasetRequestBody = z.infer<typeof UpdateEvaluationDatasetRequestBody>;
-export const UpdateEvaluationDatasetRequestBody = z.object({
-  description: z.string(),
-});
 export type UpdateEvaluationDatasetRequestBodyInput = z.input<
   typeof UpdateEvaluationDatasetRequestBody
 >;
 
+export const UpdateEvaluationDatasetResponse = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+);
 export type UpdateEvaluationDatasetResponse = z.infer<typeof UpdateEvaluationDatasetResponse>;
-export const UpdateEvaluationDatasetResponse = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
