@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
-import { EuiBadge, type EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  useEuiTheme,
+  type EuiThemeComputed,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConfigKey } from '../../../common/runtime_types';
+import type { ScheduleUnit } from '../../../common/runtime_types/monitor_management/monitor_configs';
 import {
   MonitorTypeEnum,
   SourceType,
@@ -211,5 +218,131 @@ export const MonitorTypeChip: React.FC<MonitorTypeChipProps> = ({ type }) => {
     >
       {label}
     </EuiBadge>
+  );
+};
+
+interface MonitorStatusDotProps {
+  status: MonitorAgentStatus;
+}
+
+/**
+ * Small filled circle in the status accent color, intended to sit
+ * immediately before the canvas title — mirrors the role of
+ * `MetricItemIcon` on the Synthetics Overview tile (status signal in
+ * the upper-left), but without the popover / animation / heartbeat-
+ * dependent variants. The dot is purely decorative; the textual
+ * status caption underneath the title remains the source of truth for
+ * screen readers, hence `aria-hidden`.
+ */
+export const MonitorStatusDot: React.FC<MonitorStatusDotProps> = ({ status }) => {
+  const { euiTheme } = useEuiTheme();
+  const color = getStatusAccentColor(status, euiTheme);
+  return (
+    <span
+      role="presentation"
+      aria-hidden={true}
+      data-test-subj={`syntheticsMonitorAttachmentStatusDot-${status}`}
+      css={css`
+        display: inline-block;
+        width: ${euiTheme.size.s};
+        height: ${euiTheme.size.s};
+        border-radius: 50%;
+        background-color: ${color};
+        flex-shrink: 0;
+      `}
+    />
+  );
+};
+
+const formatScheduleLabel = (
+  schedule: { number: string; unit: ScheduleUnit } | undefined
+): string => {
+  if (!schedule) {
+    return i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.scheduleUnset', {
+      defaultMessage: 'Schedule not set',
+    });
+  }
+  return i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.scheduleValue', {
+    defaultMessage: 'Every {number} {unit}',
+    values: { number: schedule.number, unit: schedule.unit },
+  });
+};
+
+const formatLocationLabel = (location: {
+  id: string;
+  label?: string;
+  isServiceManaged?: boolean;
+}): string => {
+  const labelText = location.label ?? location.id;
+  if (location.isServiceManaged) {
+    return i18n.translate(
+      'xpack.synthetics.agentBuilder.monitor.canvas.locations.elasticManagedLabel',
+      {
+        defaultMessage: '{label} (Elastic-managed)',
+        values: { label: labelText },
+      }
+    );
+  }
+  return labelText;
+};
+
+interface MonitorChipRowProps {
+  data: MonitorAttachmentData;
+}
+
+/**
+ * Compact "what's in this monitor" chip row. Mirrors `MetricItemBody`
+ * on the Synthetics Overview tile (type chip + tags + location badges),
+ * with two agent-side additions: a schedule chip and a "Paused" badge
+ * for explicitly disabled saved monitors. The Overview tile gets these
+ * implicitly from heartbeat data; we have to communicate them
+ * explicitly because we don't have heartbeat status to lean on.
+ *
+ * Deliberately stateless and router-free, so this component can render
+ * inside the canvas `<Metric>` `body` slot without dragging
+ * `react-router-dom` / Redux into the agent_builder canvas chunk.
+ */
+export const MonitorChipRow: React.FC<MonitorChipRowProps> = ({ data }) => {
+  const status = inferMonitorStatus(data);
+  const locations = data[ConfigKey.LOCATIONS] ?? [];
+  const tags = data[ConfigKey.TAGS] ?? [];
+  return (
+    <EuiBadgeGroup
+      gutterSize="xs"
+      data-test-subj="syntheticsMonitorAttachmentCanvasMeta"
+    >
+      <MonitorTypeChip type={data[ConfigKey.MONITOR_TYPE]} />
+      <EuiBadge color="hollow" iconType="clock">
+        {formatScheduleLabel(data[ConfigKey.SCHEDULE])}
+      </EuiBadge>
+      {locations.map((location) => (
+        <EuiBadge key={location.id} color="hollow" iconType="visMapCoordinate">
+          {formatLocationLabel(location)}
+        </EuiBadge>
+      ))}
+      {locations.length === 0 ? (
+        <EuiBadge color="hollow" iconType="visMapCoordinate">
+          {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.locationsUnset', {
+            defaultMessage: 'No locations selected',
+          })}
+        </EuiBadge>
+      ) : null}
+      {tags.map((tag) => (
+        <EuiBadge key={tag} color="hollow">
+          {tag}
+        </EuiBadge>
+      ))}
+      {!data[ConfigKey.ENABLED] && status !== 'cli-managed' ? (
+        <EuiBadge
+          color="default"
+          iconType="pause"
+          data-test-subj="syntheticsMonitorAttachmentCanvasPausedBadge"
+        >
+          {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.pausedBadge', {
+            defaultMessage: 'Paused',
+          })}
+        </EuiBadge>
+      ) : null}
+    </EuiBadgeGroup>
   );
 };

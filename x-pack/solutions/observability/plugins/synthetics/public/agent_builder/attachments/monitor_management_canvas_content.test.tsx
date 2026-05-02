@@ -101,31 +101,37 @@ const getActionLabels = (): string[] =>
     .map((button) => button.textContent?.trim() ?? '');
 
 describe('MonitorManagementCanvasContent — header + details panel', () => {
-  it('renders title, status, type chip, caption, and the description list', () => {
+  it('renders the tile wrapper, status dot, title, URL link, caption, and chip-row details', () => {
     mount(buildMonitor());
     expect(screen.getByTestId('syntheticsMonitorAttachmentCanvas')).toHaveAttribute(
       'data-test-status',
       'proposed'
     );
+    // Fixed-height tile wrapper that hosts the status-tinted card.
+    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasTile')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('syntheticsMonitorAttachmentStatusDot-proposed')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasTitle')).toHaveTextContent(
       'Smoke check'
     );
-    expect(
-      screen.getByTestId('syntheticsMonitorAttachmentCanvasStatus-proposed')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('syntheticsMonitorAttachmentType')).toHaveTextContent('HTTP');
+    // URL is rendered as a real link in the subtitle line; the `href`
+    // attribute is the source of truth for navigation.
+    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasUrl')).toHaveAttribute(
+      'href',
+      'https://example.com'
+    );
     expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasCaption')).toHaveTextContent(
       'Draft monitor — not yet saved to Synthetics.'
     );
-    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasDetails')).toHaveTextContent(
-      'https://example.com'
+    // The chip row lives in the tile's details block (single render, no
+    // hidden duplicates now that we no longer go through `<Metric>`).
+    const details = screen.getByTestId('syntheticsMonitorAttachmentCanvasDetails');
+    expect(within(details).getByTestId('syntheticsMonitorAttachmentType')).toHaveTextContent(
+      'HTTP'
     );
-    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasDetails')).toHaveTextContent(
-      'Every 5 m'
-    );
-    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasDetails')).toHaveTextContent(
-      'US Central (Elastic-managed)'
-    );
+    expect(details).toHaveTextContent('Every 5 m');
+    expect(details).toHaveTextContent('US Central (Elastic-managed)');
   });
 
   it('renders the CLI-managed callout for project-origin monitors and only a "View" action', () => {

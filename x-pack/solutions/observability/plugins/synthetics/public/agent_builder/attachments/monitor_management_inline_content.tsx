@@ -7,69 +7,25 @@
 
 import React from 'react';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConfigKey } from '../../../common/runtime_types';
-import type { ScheduleUnit } from '../../../common/runtime_types/monitor_management/monitor_configs';
 import type { MonitorAttachmentData } from '../../../common/agent_builder';
 import {
-  MonitorTypeChip,
-  STATUS_BADGE_COLORS,
+  MonitorChipRow,
+  MonitorStatusDot,
   getStatusAccentColor,
-  getStatusLabel,
+  getStatusBackgroundColor,
+  getStatusCaption,
   inferMonitorStatus,
 } from './monitor_management_status';
-
-interface MetaItemProps {
-  iconType: string;
-  label: string;
-  value: string;
-  testSubj: string;
-}
-
-const MetaItem = ({ iconType, label, value, testSubj }: MetaItemProps) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiFlexItem grow={false} data-test-subj={testSubj}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={iconType}
-            size="s"
-            color={euiTheme.colors.subduedText}
-            aria-hidden={true}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{label}</strong> {value}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-};
-
-const formatSchedule = (schedule: { number: string; unit: ScheduleUnit } | undefined): string => {
-  if (!schedule) {
-    return i18n.translate('xpack.synthetics.agentBuilder.monitor.scheduleNotSet', {
-      defaultMessage: 'not set',
-    });
-  }
-  return i18n.translate('xpack.synthetics.agentBuilder.monitor.scheduleValue', {
-    defaultMessage: 'every {number}{unit}',
-    values: { number: schedule.number, unit: schedule.unit },
-  });
-};
 
 export interface MonitorManagementInlineContentProps {
   data: MonitorAttachmentData;
@@ -78,31 +34,29 @@ export interface MonitorManagementInlineContentProps {
 /**
  * Inline card body for the `MONITOR_MANAGEMENT_ATTACHMENT_TYPE` attachment.
  *
- * Visual conventions intentionally borrow from the Synthetics Overview
- * tile (`MetricItem`) without inheriting its data dependencies:
+ * This is the compact card the agent_builder framework renders inside
+ * the chat message body. Visual conventions are kept deliberately
+ * close to the canvas tile (`MonitorManagementCanvasContent`) so that
+ * the inline preview and the canvas preview read as the same object:
  *
- * - The left accent strip mirrors the Overview tile's status-coloured
- *   panel background, but mapped onto our agent-side statuses
- *   (`proposed` / `enabled` / `disabled` / `cli-managed`) which don't
- *   correspond 1:1 to up/down heartbeat states.
- * - `MonitorTypeChip` reproduces the Overview's `MonitorTypeBadge`
- *   visual without dragging in router / Redux.
+ * - Status accent strip on the left (`getStatusAccentColor`).
+ * - Status-tinted background (`getStatusBackgroundColor`).
+ * - Status dot + monitor name as a compact header.
+ * - Optional URL on a single subtitle line.
+ * - `MonitorChipRow` (type / schedule / locations / tags / paused) as
+ *   the body — the *same* component the canvas uses, so the two stay
+ *   in lockstep when fields are added or renamed.
  *
- * What we deliberately **don't** render here (kept for the canvas, T7):
- * sparkline trend, last-status icon, latency metric, error popover,
- * actions popover, location flags. All of those depend on heartbeat
- * data that doesn't exist for proposed monitors and would require
- * pulling in `@elastic/charts` + the synthetics Redux store.
+ * Heading: we render the monitor name ourselves rather than relying
+ * on the framework's attachment label slot, because the framework
+ * label uses `getLabel()` which falls back to "New Synthetics monitor"
+ * for unnamed drafts — fine in the menu, but reads oddly on the
+ * inline card. Showing the actual draft name directly is clearer.
  *
- * No heading is rendered — the agent_builder framework already renders
- * the attachment label/icon above the inline content slot, so a heading
- * here would double up.
- *
- * Tree-shake hygiene: this file imports only `@elastic/eui`,
- * `@emotion/react`, `@kbn/i18n`, types from `common/`, and the shared
- * `monitor_management_status` helpers in the same folder. **Do not**
- * pull in monitor-form or anything from `apps/synthetics/components/` —
- * those would balloon the inline chunk.
+ * Tree-shake hygiene: imports only `@elastic/eui`, `@emotion/react`,
+ * `@kbn/i18n`, types from `common/`, and the shared
+ * `monitor_management_status` helpers in this folder. Stays out of
+ * `apps/synthetics/components/` to keep the inline chunk small.
  */
 export const MonitorManagementInlineContent: React.FC<MonitorManagementInlineContentProps> = ({
   data,
@@ -110,16 +64,14 @@ export const MonitorManagementInlineContent: React.FC<MonitorManagementInlineCon
   const { euiTheme } = useEuiTheme();
   const status = inferMonitorStatus(data);
   const accentColor = getStatusAccentColor(status, euiTheme);
-  const locations = data[ConfigKey.LOCATIONS] ?? [];
-  const tags = data[ConfigKey.TAGS] ?? [];
+  const tileBg = getStatusBackgroundColor(status, euiTheme);
+  const monitorName = data[ConfigKey.NAME];
   const url = data[ConfigKey.URLS];
-  const schedule = data[ConfigKey.SCHEDULE];
-  const monitorType = data[ConfigKey.MONITOR_TYPE];
-
-  const locationsLabel = i18n.translate('xpack.synthetics.agentBuilder.monitor.locationsCount', {
-    defaultMessage: '{count, plural, one {# location} other {# locations}}',
-    values: { count: locations.length },
-  });
+  const caption = getStatusCaption(status);
+  const placeholderName = i18n.translate(
+    'xpack.synthetics.agentBuilder.monitor.canvas.placeholderName',
+    { defaultMessage: 'Untitled monitor' }
+  );
 
   return (
     <div
@@ -127,66 +79,59 @@ export const MonitorManagementInlineContent: React.FC<MonitorManagementInlineCon
       data-test-status={status}
       css={css`
         border-left: ${euiTheme.border.width.thick} solid ${accentColor};
+        background-color: ${tileBg};
+        border-radius: ${euiTheme.border.radius.medium};
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
       `}
     >
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            color={STATUS_BADGE_COLORS[status]}
-            data-test-subj={`syntheticsMonitorAttachmentStatus-${status}`}
-          >
-            {getStatusLabel(status)}
-          </EuiBadge>
+          <MonitorStatusDot status={status} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MonitorTypeChip type={monitorType} />
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4 data-test-subj="syntheticsMonitorAttachmentInlineTitle">
+              {monitorName && monitorName.length > 0 ? monitorName : placeholderName}
+            </h4>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <EuiFlexGroup gutterSize="m" wrap responsive={false}>
-        <MetaItem
-          iconType="clock"
-          testSubj="syntheticsMonitorAttachmentSchedule"
-          label={i18n.translate('xpack.synthetics.agentBuilder.monitor.scheduleLabel', {
-            defaultMessage: 'Schedule:',
-          })}
-          value={formatSchedule(schedule)}
-        />
-        <MetaItem
-          iconType="visMapCoordinate"
-          testSubj="syntheticsMonitorAttachmentLocations"
-          label={i18n.translate('xpack.synthetics.agentBuilder.monitor.locationsLabel', {
-            defaultMessage: 'Locations:',
-          })}
-          value={locationsLabel}
-        />
+      <EuiText
+        size="xs"
+        color="subdued"
+        data-test-subj="syntheticsMonitorAttachmentInlineSubtitle"
+        css={css`
+          margin-top: ${euiTheme.size.xs};
+        `}
+      >
         {url ? (
-          <MetaItem
-            iconType="link"
-            testSubj="syntheticsMonitorAttachmentUrl"
-            label={i18n.translate('xpack.synthetics.agentBuilder.monitor.urlLabel', {
-              defaultMessage: 'URL:',
-            })}
-            value={url}
-          />
-        ) : null}
-      </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="link" size="s" color="subdued" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              `}
+            >
+              <span data-test-subj="syntheticsMonitorAttachmentInlineUrl">{url}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <span>{caption}</span>
+        )}
+      </EuiText>
 
-      {tags.length > 0 ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiBadgeGroup data-test-subj="syntheticsMonitorAttachmentTags">
-            {tags.map((tag) => (
-              <EuiBadge key={tag} color="hollow">
-                {tag}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        </>
-      ) : null}
+      <div
+        css={css`
+          margin-top: ${euiTheme.size.s};
+        `}
+      >
+        <MonitorChipRow data={data} />
+      </div>
     </div>
   );
 };

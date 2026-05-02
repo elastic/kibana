@@ -7,14 +7,11 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -29,20 +26,25 @@ import { i18n } from '@kbn/i18n';
 import { type ActionButton, ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 import { ConfigKey } from '../../../common/runtime_types';
-import type { ScheduleUnit } from '../../../common/runtime_types/monitor_management/monitor_configs';
 import type { MonitorAttachmentData } from '../../../common/agent_builder';
 import {
-  MonitorTypeChip,
-  STATUS_BADGE_COLORS,
+  MonitorChipRow,
+  MonitorStatusDot,
+  getStatusAccentColor,
   getStatusBackgroundColor,
   getStatusCaption,
-  getStatusLabel,
   inferMonitorStatus,
 } from './monitor_management_status';
 import {
   useMonitorCanvasActions,
   type MonitorCanvasSaveState,
 } from './use_monitor_canvas_actions';
+
+/**
+ * Fixed height of the tile area, mirroring `METRIC_ITEM_HEIGHT` from
+ * the Synthetics Overview tile. Keeps the visual rhyme exact.
+ */
+const METRIC_TILE_HEIGHT = 180;
 
 export interface MonitorManagementCanvasContentProps {
   /** The current attachment payload. */
@@ -63,38 +65,6 @@ export interface MonitorManagementCanvasContentProps {
   /** Framework canvas callback — closes the flyout. */
   closeCanvas: () => void;
 }
-
-const formatScheduleLabel = (
-  schedule: { number: string; unit: ScheduleUnit } | undefined
-): string => {
-  if (!schedule) {
-    return i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.scheduleUnset', {
-      defaultMessage: 'Schedule not set',
-    });
-  }
-  return i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.scheduleValue', {
-    defaultMessage: 'Every {number} {unit}',
-    values: { number: schedule.number, unit: schedule.unit },
-  });
-};
-
-const formatLocationLabel = (location: {
-  id: string;
-  label?: string;
-  isServiceManaged?: boolean;
-}): string => {
-  const labelText = location.label ?? location.id;
-  if (location.isServiceManaged) {
-    return i18n.translate(
-      'xpack.synthetics.agentBuilder.monitor.canvas.locations.elasticManagedLabel',
-      {
-        defaultMessage: '{label} (Elastic-managed)',
-        values: { label: labelText },
-      }
-    );
-  }
-  return labelText;
-};
 
 interface ActionFooterProps {
   buttons: ActionButton[];
@@ -169,39 +139,37 @@ const ActionFooter: React.FC<ActionFooterProps> = ({ buttons, isSaving }) => {
 /**
  * Canvas body for the `MONITOR_MANAGEMENT_ATTACHMENT_TYPE` attachment.
  *
- * Visual treatment intentionally mirrors the Synthetics Overview tile
- * (`MetricItem`): the panel itself is washed with a status-tinted
- * background, the title sits prominent at the top, and the type chip
- * + tags ride in a dedicated chip row. We deliberately do **not**
- * inherit the heavy bits of `MetricItem` — sparkline trend chart,
- * latency metric, errors popover, actions popover — because:
+ * Visual treatment is hand-built to mirror the Synthetics Overview
+ * tile (`MetricItem`) without going through `@elastic/charts`'s
+ * `<Metric>` component. We tried `<Chart><Metric/></Chart>` first
+ * because it's how the Overview itself draws the tile, but Metric's
+ * "no value, no trend" rendering branch falls back to a text-only
+ * mode that drops the status-tinted card background and the
+ * fixed-height layout — exactly the visual treatment we wanted to
+ * inherit. Without heartbeat data (which we don't fetch in v1; see
+ * F11 in `followups.md`), Metric has nothing to draw and gracefully
+ * degrades into something that doesn't read as a tile at all. So we
+ * rebuild the tile directly from EUI primitives:
  *
- * - Those depend on heartbeat data + Redux selectors that have no
- *   meaning for a `proposed` (unsaved) monitor.
- * - The flyout context is detail-oriented; cramming a sparkline into
- *   it duplicates the Synthetics Overview without adding new info.
+ * | Tile slot       | Implementation                                    |
+ * | --------------- | ------------------------------------------------- |
+ * | Card            | Fixed-height `EuiPanel`, status-tinted bg         |
+ * | Status accent   | `MonitorStatusDot` (top-left)                     |
+ * | Title           | `EuiTitle size="m"` (monitor name)                |
+ * | Subtitle        | `EuiText size="s" color="subdued"` (caption + URL)|
+ * | Chip row        | `MonitorChipRow` (type / schedule / locations…)   |
+ * | Sparkline       | Deferred to F12 (heartbeat fetch).                |
  *
- * Read-only by design: the user mutates the attachment via chat
- * (re-running `manage_synthetics_monitor` operations), then commits
- * the result via the action footer. Editing inline here would
- * require duplicating the synthetics monitor form and its validation
- * surface, which is out of scope for v1.
+ * Below the tile we keep our own structure: optional callouts (CLI-
+ * managed banner, save-error, location warnings) followed by the
+ * action footer with Create / Update / View buttons.
  *
- * Action placement (T7 hot-fix #4): the Create / Update / View
- * buttons live **inside the panel footer**, not in the framework's
- * flyout header. That decision is rationalised in the
- * `useMonitorCanvasActions` doc comment. We still call
- * `registerActionButtons([])` once per mount to clear any header
- * buttons the framework may have carried over from a previous
- * canvas attachment.
- *
- * Tree-shake hygiene: like the inline content body, this file only
- * imports `@elastic/eui`, `@emotion/react`, `@kbn/i18n`,
- * `@kbn/agent-builder-browser`, `@kbn/core/public`, types from
- * `common/`, and the shared `monitor_management_status` /
- * `monitor_management_actions` / `use_monitor_canvas_actions`
- * helpers in this folder. **Do not** pull in monitor-form or anything
- * from `apps/synthetics/components/`.
+ * Tree-shake hygiene: imports `@elastic/eui`, `@emotion/react`,
+ * `@kbn/i18n`, `@kbn/agent-builder-browser`, `@kbn/core/public`,
+ * types from `common/`, and the shared
+ * `monitor_management_status` / `use_monitor_canvas_actions` helpers
+ * in this folder. **Do not** pull in monitor-form, anything from
+ * `apps/synthetics/components/`, or `@elastic/charts`.
  */
 export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasContentProps> = ({
   data,
@@ -214,6 +182,7 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
   const { euiTheme } = useEuiTheme();
   const status = inferMonitorStatus(data);
   const tileBg = getStatusBackgroundColor(status, euiTheme);
+  const accentColor = getStatusAccentColor(status, euiTheme);
 
   const capabilities = application.capabilities;
   const canEdit = capabilities.uptime?.save === true;
@@ -247,212 +216,193 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
 
   const monitorName = data[ConfigKey.NAME];
   const url = data[ConfigKey.URLS];
+  const placeholderName = i18n.translate(
+    'xpack.synthetics.agentBuilder.monitor.canvas.placeholderName',
+    { defaultMessage: 'Untitled monitor' }
+  );
+  const tileTitle = monitorName && monitorName.length > 0 ? monitorName : placeholderName;
+  const caption = getStatusCaption(status);
 
   return (
-    <div data-test-subj="syntheticsMonitorAttachmentCanvas" data-test-status={status}>
-      <EuiPanel
-        paddingSize="l"
-        hasBorder
-        hasShadow={false}
-        css={css`
-          background-color: ${tileBg};
-        `}
+    <div
+      data-test-subj="syntheticsMonitorAttachmentCanvas"
+      data-test-status={status}
+      // The agent_builder flyout body only sets `padding-top: m` (see
+      // `canvas_flyout.tsx`'s `flyoutBodyStyles`), so without our own
+      // wrapper the tile + action footer would sit flush against the
+      // flyout edges. Pad uniformly so the tile reads as a card with
+      // breathing room and the footer doesn't kiss the right edge.
+      css={css`
+        padding: 0 ${euiTheme.size.m} ${euiTheme.size.m};
+      `}
+    >
+      {/*
+        Outer fixed-height shell mirrors the Overview tile (`MetricItem`):
+        180px tall panel, the status-tinted background fills the entire
+        card surface so the status reads at a glance.
+
+        We add a thicker left accent strip (`MonitorStatusDot` plus a
+        `border-left` on the panel) so the status colour reads even when
+        the background tint is subtle (proposed → backgroundBasePrimary
+        is very light in light mode).
+      */}
+      <div
+        data-test-subj="syntheticsMonitorAttachmentCanvasTile"
+        style={{ height: METRIC_TILE_HEIGHT }}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              color={STATUS_BADGE_COLORS[status]}
-              data-test-subj={`syntheticsMonitorAttachmentCanvasStatus-${status}`}
-            >
-              {getStatusLabel(status)}
-            </EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <MonitorTypeChip type={data[ConfigKey.MONITOR_TYPE]} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        <EuiTitle size="m">
-          <h2 data-test-subj="syntheticsMonitorAttachmentCanvasTitle">
-            {monitorName && monitorName.length > 0
-              ? monitorName
-              : i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.placeholderName', {
-                  defaultMessage: 'Untitled monitor',
-                })}
-          </h2>
-        </EuiTitle>
-
-        <EuiSpacer size="xs" />
-
-        <EuiText
-          size="s"
-          color="subdued"
-          data-test-subj="syntheticsMonitorAttachmentCanvasCaption"
+        <EuiPanel
+          paddingSize="l"
+          hasBorder
+          hasShadow={false}
+          css={css`
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background-color: ${tileBg};
+            border-left: ${euiTheme.border.width.thick} solid ${accentColor};
+          `}
         >
-          {getStatusCaption(status)}
-        </EuiText>
-
-        {status === 'cli-managed' ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              size="s"
-              color="warning"
-              iconType="warning"
-              announceOnMount
-              data-test-subj="syntheticsMonitorAttachmentCanvasCliManagedCallout"
-              title={i18n.translate(
-                'xpack.synthetics.agentBuilder.monitor.canvas.cliManagedTitle',
-                { defaultMessage: 'CLI-managed monitor' }
-              )}
-            >
-              <p>
-                {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.cliManagedBody', {
-                  defaultMessage:
-                    'This monitor was created via the synthetics CLI and is read-only here. To edit it, update the project source and re-push with `@elastic/synthetics push`.',
-                })}
-              </p>
-            </EuiCallOut>
-          </>
-        ) : null}
-
-        {saveState.saveError ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              size="s"
-              color="danger"
-              iconType="error"
-              announceOnMount
-              data-test-subj="syntheticsMonitorAttachmentCanvasSaveError"
-              title={i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.saveErrorTitle', {
-                defaultMessage: 'Save failed',
-              })}
-            >
-              <p>{saveState.saveError.message}</p>
-            </EuiCallOut>
-          </>
-        ) : null}
-
-        {saveState.locationWarnings.length > 0 ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              size="s"
-              color="warning"
-              iconType="warning"
-              announceOnMount
-              data-test-subj="syntheticsMonitorAttachmentCanvasLocationWarnings"
-              title={i18n.translate(
-                'xpack.synthetics.agentBuilder.monitor.canvas.locationWarningsTitle',
-                {
-                  defaultMessage:
-                    'Saved, but {count, plural, one {# location} other {# locations}} reported errors.',
-                  values: { count: saveState.locationWarnings.length },
-                }
-              )}
-            >
-              <ul>
-                {saveState.locationWarnings.map((warning) => (
-                  <li key={warning.locationId}>
-                    <strong>{warning.locationId}</strong>: {warning.message}
-                  </li>
-                ))}
-              </ul>
-            </EuiCallOut>
-          </>
-        ) : null}
-
-        <EuiSpacer size="m" />
-
-        {/*
-         * Body layout intentionally mirrors `MetricItemBody` from the
-         * Synthetics Overview tile: prominent target (URL), then a
-         * single chip row that aggregates schedule + locations + tags
-         * + paused-state. Avoids the visual weight of a description
-         * list while still surfacing every field the user needs to
-         * sanity-check before clicking Create.
-         */}
-        <div data-test-subj="syntheticsMonitorAttachmentCanvasDetails">
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-            data-test-subj="syntheticsMonitorAttachmentCanvasUrl"
-          >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="link" size="s" color="subdued" aria-hidden={true} />
+              <MonitorStatusDot status={status} />
             </EuiFlexItem>
-            <EuiFlexItem>
-              {url ? (
-                <EuiLink
-                  href={url}
-                  external
-                  target="_blank"
-                  data-test-subj="syntheticsMonitorAttachmentCanvasUrlLink"
+            <EuiFlexItem
+              css={css`
+                min-width: 0;
+              `}
+            >
+              <EuiTitle size="m">
+                <h2
+                  data-test-subj="syntheticsMonitorAttachmentCanvasTitle"
+                  css={css`
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  `}
                 >
-                  {url}
-                </EuiLink>
-              ) : (
-                <EuiText size="s" color="subdued">
-                  {i18n.translate(
-                    'xpack.synthetics.agentBuilder.monitor.canvas.fields.urlUnset',
-                    { defaultMessage: 'No URL set' }
-                  )}
-                </EuiText>
-              )}
+                  {tileTitle}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
 
-          <EuiBadgeGroup
-            gutterSize="xs"
-            data-test-subj="syntheticsMonitorAttachmentCanvasMeta"
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj="syntheticsMonitorAttachmentCanvasCaption"
           >
-            <EuiBadge color="hollow" iconType="clock">
-              {formatScheduleLabel(data[ConfigKey.SCHEDULE])}
-            </EuiBadge>
-            {(data[ConfigKey.LOCATIONS] ?? []).map((location) => (
-              <EuiBadge key={location.id} color="hollow" iconType="visMapCoordinate">
-                {formatLocationLabel(location)}
-              </EuiBadge>
-            ))}
-            {(data[ConfigKey.LOCATIONS] ?? []).length === 0 ? (
-              <EuiBadge color="hollow" iconType="visMapCoordinate">
-                {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.locationsUnset', {
-                  defaultMessage: 'No locations selected',
-                })}
-              </EuiBadge>
-            ) : null}
-            {(data[ConfigKey.TAGS] ?? []).map((tag) => (
-              <EuiBadge key={tag} color="hollow">
-                {tag}
-              </EuiBadge>
-            ))}
-            {!data[ConfigKey.ENABLED] && status !== 'cli-managed' ? (
-              <EuiBadge
-                color="default"
-                iconType="pause"
-                data-test-subj="syntheticsMonitorAttachmentCanvasPausedBadge"
-              >
-                {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.pausedBadge', {
-                  defaultMessage: 'Paused',
-                })}
-              </EuiBadge>
-            ) : null}
-          </EuiBadgeGroup>
-        </div>
+            <p
+              css={css`
+                margin: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              `}
+            >
+              {caption}
+              {url ? (
+                <>
+                  {' · '}
+                  <EuiLink
+                    href={url}
+                    external
+                    target="_blank"
+                    data-test-subj="syntheticsMonitorAttachmentCanvasUrl"
+                  >
+                    <EuiIcon type="link" size="s" aria-hidden={true} /> {url}
+                  </EuiLink>
+                </>
+              ) : null}
+            </p>
+          </EuiText>
 
-        {actionButtons.length > 0 ? (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <ActionFooter buttons={actionButtons} isSaving={saveState.isSaving} />
-          </>
-        ) : null}
-      </EuiPanel>
+          <EuiSpacer size="m" />
+
+          <div data-test-subj="syntheticsMonitorAttachmentCanvasDetails">
+            <MonitorChipRow data={data} />
+          </div>
+        </EuiPanel>
+      </div>
+
+      {status === 'cli-managed' ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            announceOnMount
+            data-test-subj="syntheticsMonitorAttachmentCanvasCliManagedCallout"
+            title={i18n.translate(
+              'xpack.synthetics.agentBuilder.monitor.canvas.cliManagedTitle',
+              { defaultMessage: 'CLI-managed monitor' }
+            )}
+          >
+            <p>
+              {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.cliManagedBody', {
+                defaultMessage:
+                  'This monitor was created via the synthetics CLI and is read-only here. To edit it, update the project source and re-push with `@elastic/synthetics push`.',
+              })}
+            </p>
+          </EuiCallOut>
+        </>
+      ) : null}
+
+      {saveState.saveError ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            size="s"
+            color="danger"
+            iconType="error"
+            announceOnMount
+            data-test-subj="syntheticsMonitorAttachmentCanvasSaveError"
+            title={i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.saveErrorTitle', {
+              defaultMessage: 'Save failed',
+            })}
+          >
+            <p>{saveState.saveError.message}</p>
+          </EuiCallOut>
+        </>
+      ) : null}
+
+      {saveState.locationWarnings.length > 0 ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            announceOnMount
+            data-test-subj="syntheticsMonitorAttachmentCanvasLocationWarnings"
+            title={i18n.translate(
+              'xpack.synthetics.agentBuilder.monitor.canvas.locationWarningsTitle',
+              {
+                defaultMessage:
+                  'Saved, but {count, plural, one {# location} other {# locations}} reported errors.',
+                values: { count: saveState.locationWarnings.length },
+              }
+            )}
+          >
+            <ul>
+              {saveState.locationWarnings.map((warning) => (
+                <li key={warning.locationId}>
+                  <strong>{warning.locationId}</strong>: {warning.message}
+                </li>
+              ))}
+            </ul>
+          </EuiCallOut>
+        </>
+      ) : null}
+
+      {actionButtons.length > 0 ? (
+        <>
+          <EuiSpacer size="m" />
+          <ActionFooter buttons={actionButtons} isSaving={saveState.isSaving} />
+        </>
+      ) : null}
     </div>
   );
 };

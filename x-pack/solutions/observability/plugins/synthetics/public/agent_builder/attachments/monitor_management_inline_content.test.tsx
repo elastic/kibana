@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { ConfigKey } from '../../../common/runtime_types';
 import {
   MonitorTypeEnum,
@@ -28,13 +28,15 @@ const buildData = (overrides: Partial<MonitorAttachmentData> = {}): MonitorAttac
 });
 
 describe('MonitorManagementInlineContent', () => {
-  describe('status badge', () => {
-    it('renders a "Proposed" badge when there is no config_id', () => {
+  describe('header (status dot + title)', () => {
+    it('renders the status dot for proposed monitors', () => {
       render(<MonitorManagementInlineContent data={buildData()} />);
-      expect(screen.getByTestId('syntheticsMonitorAttachmentStatus-proposed')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('syntheticsMonitorAttachmentStatusDot-proposed')
+      ).toBeInTheDocument();
     });
 
-    it('renders an "Enabled" badge when saved + enabled', () => {
+    it('renders the status dot for saved+enabled monitors', () => {
       render(
         <MonitorManagementInlineContent
           data={buildData({
@@ -43,10 +45,12 @@ describe('MonitorManagementInlineContent', () => {
           })}
         />
       );
-      expect(screen.getByTestId('syntheticsMonitorAttachmentStatus-enabled')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('syntheticsMonitorAttachmentStatusDot-enabled')
+      ).toBeInTheDocument();
     });
 
-    it('renders a "Disabled" badge when saved + disabled', () => {
+    it('renders the status dot for saved+disabled monitors', () => {
       render(
         <MonitorManagementInlineContent
           data={buildData({
@@ -55,10 +59,12 @@ describe('MonitorManagementInlineContent', () => {
           })}
         />
       );
-      expect(screen.getByTestId('syntheticsMonitorAttachmentStatus-disabled')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('syntheticsMonitorAttachmentStatusDot-disabled')
+      ).toBeInTheDocument();
     });
 
-    it('renders a "CLI-managed" badge for project-origin monitors regardless of enabled flag', () => {
+    it('renders the status dot for CLI-managed monitors regardless of enabled flag', () => {
       render(
         <MonitorManagementInlineContent
           data={buildData({
@@ -69,16 +75,57 @@ describe('MonitorManagementInlineContent', () => {
         />
       );
       expect(
-        screen.getByTestId('syntheticsMonitorAttachmentStatus-cli-managed')
+        screen.getByTestId('syntheticsMonitorAttachmentStatusDot-cli-managed')
       ).toBeInTheDocument();
+    });
+
+    it('shows the monitor name in the title', () => {
+      render(<MonitorManagementInlineContent data={buildData()} />);
+      expect(screen.getByTestId('syntheticsMonitorAttachmentInlineTitle')).toHaveTextContent(
+        'Test monitor'
+      );
+    });
+
+    it('falls back to a placeholder title when name is empty', () => {
+      render(
+        <MonitorManagementInlineContent
+          data={buildData({ [ConfigKey.NAME]: '' as unknown as string })}
+        />
+      );
+      expect(screen.getByTestId('syntheticsMonitorAttachmentInlineTitle')).toHaveTextContent(
+        'Untitled monitor'
+      );
     });
   });
 
-  describe('type chip', () => {
-    it('renders an HTTP chip for HTTP monitors', () => {
+  describe('subtitle row', () => {
+    it('shows the URL when present', () => {
       render(<MonitorManagementInlineContent data={buildData()} />);
-      const chip = screen.getByTestId('syntheticsMonitorAttachmentType');
-      expect(chip).toHaveTextContent('HTTP');
+      expect(screen.getByTestId('syntheticsMonitorAttachmentInlineUrl')).toHaveTextContent(
+        'https://example.com'
+      );
+    });
+
+    it('falls back to the lifecycle caption when URL is missing', () => {
+      const partial = { ...buildData() } as MonitorAttachmentData;
+      delete (partial as Partial<MonitorAttachmentData>)[ConfigKey.URLS];
+      render(<MonitorManagementInlineContent data={partial} />);
+      expect(screen.queryByTestId('syntheticsMonitorAttachmentInlineUrl')).not.toBeInTheDocument();
+      expect(screen.getByTestId('syntheticsMonitorAttachmentInlineSubtitle')).toHaveTextContent(
+        'Draft monitor — not yet saved to Synthetics.'
+      );
+    });
+  });
+
+  describe('chip row (MonitorChipRow)', () => {
+    it('renders the type chip, schedule, and location badges', () => {
+      render(<MonitorManagementInlineContent data={buildData()} />);
+      const chipRow = screen.getByTestId('syntheticsMonitorAttachmentCanvasMeta');
+      expect(within(chipRow).getByTestId('syntheticsMonitorAttachmentType')).toHaveTextContent(
+        'HTTP'
+      );
+      expect(chipRow).toHaveTextContent('Every 5 m');
+      expect(chipRow).toHaveTextContent('US Central (Elastic-managed)');
     });
 
     // v1's `MonitorAttachmentData` schema is HTTP-only
@@ -102,11 +149,37 @@ describe('MonitorManagementInlineContent', () => {
       );
     });
 
-    it('falls back to a generic "Monitor" label when the type is missing', () => {
+    it('falls back to a generic "Monitor" type chip when the type is missing', () => {
       const partial = { ...buildData() } as MonitorAttachmentData;
       delete (partial as Partial<MonitorAttachmentData>)[ConfigKey.MONITOR_TYPE];
       render(<MonitorManagementInlineContent data={partial} />);
       expect(screen.getByTestId('syntheticsMonitorAttachmentType')).toHaveTextContent('Monitor');
+    });
+
+    it('renders one chip per tag', () => {
+      render(
+        <MonitorManagementInlineContent
+          data={buildData({ [ConfigKey.TAGS]: ['team-a', 'prod', 'staging'] })}
+        />
+      );
+      const chipRow = screen.getByTestId('syntheticsMonitorAttachmentCanvasMeta');
+      expect(chipRow).toHaveTextContent('team-a');
+      expect(chipRow).toHaveTextContent('prod');
+      expect(chipRow).toHaveTextContent('staging');
+    });
+
+    it('renders a "Paused" badge for saved+disabled monitors', () => {
+      render(
+        <MonitorManagementInlineContent
+          data={buildData({
+            [ConfigKey.CONFIG_ID]: 'config-uuid',
+            [ConfigKey.ENABLED]: false,
+          })}
+        />
+      );
+      expect(
+        screen.getByTestId('syntheticsMonitorAttachmentCanvasPausedBadge')
+      ).toBeInTheDocument();
     });
   });
 
@@ -132,77 +205,6 @@ describe('MonitorManagementInlineContent', () => {
         'data-test-status',
         'disabled'
       );
-    });
-  });
-
-  describe('meta block', () => {
-    it('renders schedule, locations, and url', () => {
-      render(<MonitorManagementInlineContent data={buildData()} />);
-
-      expect(screen.getByTestId('syntheticsMonitorAttachmentSchedule')).toHaveTextContent(
-        'every 5m'
-      );
-      expect(screen.getByTestId('syntheticsMonitorAttachmentLocations')).toHaveTextContent(
-        '1 location'
-      );
-      expect(screen.getByTestId('syntheticsMonitorAttachmentUrl')).toHaveTextContent(
-        'https://example.com'
-      );
-    });
-
-    it('pluralizes locations correctly', () => {
-      render(
-        <MonitorManagementInlineContent
-          data={buildData({
-            [ConfigKey.LOCATIONS]: [
-              { id: 'us_central', isServiceManaged: true },
-              { id: 'eu_west', isServiceManaged: true },
-            ],
-          })}
-        />
-      );
-      expect(screen.getByTestId('syntheticsMonitorAttachmentLocations')).toHaveTextContent(
-        '2 locations'
-      );
-    });
-
-    it('renders "not set" when schedule is missing', () => {
-      const partial = {
-        ...buildData(),
-      } as MonitorAttachmentData;
-      // simulate an in-flight draft promoted to attachment-shape: schedule missing
-      delete (partial as Partial<MonitorAttachmentData>)[ConfigKey.SCHEDULE];
-      render(<MonitorManagementInlineContent data={partial} />);
-      expect(screen.getByTestId('syntheticsMonitorAttachmentSchedule')).toHaveTextContent(
-        'not set'
-      );
-    });
-
-    it('omits the URL row when urls is empty', () => {
-      const partial = { ...buildData() } as MonitorAttachmentData;
-      delete (partial as Partial<MonitorAttachmentData>)[ConfigKey.URLS];
-      render(<MonitorManagementInlineContent data={partial} />);
-      expect(screen.queryByTestId('syntheticsMonitorAttachmentUrl')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('tags', () => {
-    it('does not render the tag row when tags is empty', () => {
-      render(<MonitorManagementInlineContent data={buildData()} />);
-      expect(screen.queryByTestId('syntheticsMonitorAttachmentTags')).not.toBeInTheDocument();
-    });
-
-    it('renders one badge per tag', () => {
-      render(
-        <MonitorManagementInlineContent
-          data={buildData({ [ConfigKey.TAGS]: ['team-a', 'prod', 'staging'] })}
-        />
-      );
-      const tagsContainer = screen.getByTestId('syntheticsMonitorAttachmentTags');
-      expect(tagsContainer).toBeInTheDocument();
-      expect(tagsContainer).toHaveTextContent('team-a');
-      expect(tagsContainer).toHaveTextContent('prod');
-      expect(tagsContainer).toHaveTextContent('staging');
     });
   });
 
