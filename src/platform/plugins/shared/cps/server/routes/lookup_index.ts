@@ -10,6 +10,11 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
+// 2x the current caller's worst-case chunk (kbn-index-editor flattens 500
+// action/source pairs to 1000 entries). Independent of the client chunker by
+// design: this is a server-side input contract, not a mirror of one consumer.
+export const BULK_OPERATIONS_MAX_SIZE = 2000;
+
 export const registerLookupIndexRoutes = (
   router: IRouter,
   { logger }: PluginInitializerContext
@@ -22,11 +27,9 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
-          // `operations` is an Elasticsearch bulk payload: action/source line pairs
-          // with heterogeneous shapes (index, create, update, delete, doc body),
-          // so the per-element schema stays `schema.any()`. The cap bounds the
-          // request and prevents an unbounded array from being forwarded to ES.
-          operations: schema.arrayOf(schema.any(), { maxSize: 1000 }),
+          // ES bulk payload: heterogeneous action/source pairs, so per-element
+          // stays `schema.any()`. Cap bounds the request before it hits ES.
+          operations: schema.arrayOf(schema.any(), { maxSize: BULK_OPERATIONS_MAX_SIZE }),
         }),
       },
       security: {

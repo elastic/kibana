@@ -9,7 +9,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 
-import { registerLookupIndexRoutes } from './lookup_index';
+import { BULK_OPERATIONS_MAX_SIZE, registerLookupIndexRoutes } from './lookup_index';
 
 describe('lookup_index routes', () => {
   const getUpdateRouteValidate = () => {
@@ -28,19 +28,25 @@ describe('lookup_index routes', () => {
   };
 
   describe('POST /internal/esql/lookup_index/{indexName}/update body validation', () => {
-    it('accepts an operations array within the maxSize cap', () => {
+    it('accepts an operations array within the maxSize limit', () => {
       const validate = getUpdateRouteValidate();
-      const operations = Array.from({ length: 1000 }, (_, i) => ({ index: { _id: String(i) } }));
+      const operations = Array.from({ length: BULK_OPERATIONS_MAX_SIZE }, (_, i) => ({
+        index: { _id: String(i) },
+      }));
 
       expect(() => validate.body.validate({ operations })).not.toThrow();
     });
 
-    it('rejects an operations array that exceeds the maxSize cap', () => {
+    it('rejects an operations array that exceeds the maxSize limit', () => {
       const validate = getUpdateRouteValidate();
-      const operations = Array.from({ length: 1001 }, (_, i) => ({ index: { _id: String(i) } }));
+      const operations = Array.from({ length: BULK_OPERATIONS_MAX_SIZE + 1 }, (_, i) => ({
+        index: { _id: String(i) },
+      }));
 
       expect(() => validate.body.validate({ operations })).toThrow(
-        /array size is \[1001\], but cannot be greater than \[1000\]/
+        new RegExp(
+          `array size is \\[${BULK_OPERATIONS_MAX_SIZE + 1}\\], but cannot be greater than \\[${BULK_OPERATIONS_MAX_SIZE}\\]`
+        )
       );
     });
   });
