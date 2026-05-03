@@ -6,21 +6,16 @@
  */
 
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
 import { cleanFleet } from '../../../tasks/api_calls/fleet';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
-  ADD_INTEGRATION_BTN,
-  SKIP_AGENT_INSTALLATION_BTN,
-  SAVE_AND_CONTINUE_BTN,
-} from '../../../screens/integrations';
-import {
-  RULE_SWITCH,
-  MODAL_CONFIRMATION_CANCEL_BTN,
-} from '../../../screens/alerts_detection_rules';
+  installIntegrationFromBrowsePage,
+  visitPromotionRulesTab,
+} from '../../../tasks/promotion_rules';
+import { RULE_SWITCH } from '../../../screens/alerts_detection_rules';
 
+const CROWDSTRIKE_INTEGRATION_NAME = 'crowdstrike';
 const CROWDSTRIKE_RULE_NAME = 'CrowdStrike External Alerts';
-const CONFIGURATIONS_INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
 
 const PROMOTION_RULES_BOOTSTRAP_TIMEOUT = 120_000; // 2 minutes
 
@@ -36,24 +31,16 @@ describe('Promotion Rules', { tags: '@serverless' }, () => {
   });
 
   beforeEach(() => {
-    login('admin');
+    // Uses platform_engineer as a proxy for _search_ai_lake_soc_manager because
+    // the Cypress SAML auth provider does not yet support tier-specific roles.
+    // See: x-pack/solutions/security/test/security_solution_cypress/cypress/support/saml_auth.ts
+    login('platform_engineer');
   });
 
   it('installs and displays the CrowdStrike promotion rule after integration install', () => {
-    // Install CrowdStrike integration via the UI
-    visit(CONFIGURATIONS_INTEGRATIONS_URL);
+    installIntegrationFromBrowsePage(CROWDSTRIKE_INTEGRATION_NAME);
 
-    cy.get('[data-test-subj="integration-card:epr:crowdstrike"]').click();
-    cy.get(ADD_INTEGRATION_BTN).click();
-    cy.get(SKIP_AGENT_INSTALLATION_BTN).click();
-    cy.get(SAVE_AND_CONTINUE_BTN).click();
-    cy.get('[data-test-subj="postInstallAddAgentModal"]', { timeout: 30_000 }).should('be.visible');
-    cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
-
-    // Navigate to the Rules tab
-    visit(CONFIGURATIONS_INTEGRATIONS_URL);
-    cy.contains('.euiTab', 'Rules').click();
-    cy.url().should('include', '/configurations/basic_rules');
+    visitPromotionRulesTab();
 
     // Verify the CrowdStrike promotion rule appears in the table
     cy.contains(CROWDSTRIKE_RULE_NAME, { timeout: PROMOTION_RULES_BOOTSTRAP_TIMEOUT }).should(
