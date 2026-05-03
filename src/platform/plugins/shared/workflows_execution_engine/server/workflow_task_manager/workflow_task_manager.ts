@@ -48,8 +48,7 @@ export class WorkflowTaskManager {
 
   /**
    * Returns true if Task Manager has at least one task for this execution scope that could still
-   * run (idle, claiming, or running). Used to decide whether cancel can be finalized in ES when
-   * there is no cooperative runtime to observe `cancelRequested`.
+   * run (idle, claiming, or running)
    */
   async hasActiveTaskForExecution(workflowExecutionId: string): Promise<boolean> {
     const { docs } = await this.taskManager.fetch({
@@ -57,7 +56,7 @@ export class WorkflowTaskManager {
       size: 1,
       query: {
         bool: {
-          must: [
+          filter: [
             {
               terms: {
                 'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],

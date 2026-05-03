@@ -187,7 +187,7 @@ describe('WorkflowTaskManager', () => {
         size: 1,
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 terms: {
                   'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
