@@ -212,14 +212,13 @@ test.describe(
     });
 
     test('OTel (semconv): loads OpenTelemetry schema, waffle map, and node metrics', async ({
-      page,
       pageObjects: { inventoryPage },
     }) => {
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
       await expect(inventoryPage.datePickerInput).toHaveValue(DATE_WITH_SEMCONV_DATA);
 
       await test.step('schema selector reflects OTel / semconv', async () => {
-        await expect(page.getByTestId('infraSchemaSelect')).toContainText('OpenTelemetry');
+        await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry');
       });
 
       await test.step('waffle map shows each semconv host with a metric value', async () => {
