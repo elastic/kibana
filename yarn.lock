@@ -26099,10 +26099,10 @@ launchdarkly-eventsource@2.2.0:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.2.0.tgz#dcabc7264d9dee05a60dcf5fca9fd0cefcc82d22"
   integrity sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==
 
-launchdarkly-js-client-sdk@3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.9.0.tgz#92a769389c495ff87035540e79c15fe3551deb3d"
-  integrity sha512-uPL9il6dOZrVQqEcpjDYc2c7HtBTlKpLJb1Q0187i4UokBVZwBXWKjTnNk9hkwaDD5PGD4puoe7POikrR8ACwQ==
+launchdarkly-js-client-sdk@3.9.1:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.9.1.tgz#c2246b625deadc29907a121acde8879400acf172"
+  integrity sha512-5mq/eHZxOoxptTJMgpHKHVHrSNZ3GsNv4Kn493UIMt6hRXfHrX0QjBRWACOCTWMt/MkGdKvtN4LOqEHIttKMbA==
   dependencies:
     escape-string-regexp "^4.0.0"
     launchdarkly-js-sdk-common "5.8.0"
