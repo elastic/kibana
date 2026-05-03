@@ -67,5 +67,6 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
   ],
 });
 
+export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
 export { buildCreateRuleData } from '../../common/builders';
 export * as testData from '../../common/constants';

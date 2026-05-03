@@ -32,6 +32,6 @@ export const test = baseTest.extend<AlertingTestFixtures, UiWorkerFixtures>({
   ],
 });
 
-export { ALL_ROLE, READ_ROLE } from '../../common/roles';
+export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
 export { buildCreateRuleData } from '../../common/builders';
 export * as testData from '../../common/constants';

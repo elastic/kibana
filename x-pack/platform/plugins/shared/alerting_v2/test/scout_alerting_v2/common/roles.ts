@@ -51,3 +51,24 @@ export const READ_ROLE: KibanaRole = {
     },
   ],
 };
+
+/**
+ * Role with no alerting_v2 privileges. Used to assert that endpoints reject
+ * users that lack the required `alerting_v2_*` feature privileges (typically
+ * with a `403`).
+ */
+export const NO_ACCESS_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};

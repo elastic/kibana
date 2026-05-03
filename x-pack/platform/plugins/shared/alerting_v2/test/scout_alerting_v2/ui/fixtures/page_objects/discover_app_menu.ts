@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 /**
  * Page object for the alerting_v2 entries inside Discover's app-menu.
@@ -52,27 +51,17 @@ export class DiscoverAppMenu {
       return;
     }
 
-    // Dismiss any stale popovers from a previous interaction.
+    // Dismiss any stale popovers from a previous interaction so the next click
+    // opens the overflow rather than closing it.
     if (await this.overflowPopover.isVisible()) {
       await this.overflowButton.click();
-      await expect(this.overflowPopover).toBeHidden();
+      await this.overflowPopover.waitFor({ state: 'hidden' });
     }
 
-    await expect(this.overflowButton).toBeVisible();
+    await this.overflowButton.waitFor({ state: 'visible' });
     await this.overflowButton.click();
-
-    // The first click can be consumed by closing a stale overlay; retry once
-    // if the popover hasn't actually opened.
-    const popoverOpened = await this.overflowPopover
-      .waitFor({ state: 'visible', timeout: 2_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!popoverOpened) {
-      await this.overflowButton.click();
-    }
-
-    await expect(this.overflowPopover).toBeVisible();
-    await expect(this.alertsTrigger).toBeVisible();
+    await this.overflowPopover.waitFor({ state: 'visible' });
+    await this.alertsTrigger.waitFor({ state: 'visible' });
     await this.alertsTrigger.click();
   }
 
