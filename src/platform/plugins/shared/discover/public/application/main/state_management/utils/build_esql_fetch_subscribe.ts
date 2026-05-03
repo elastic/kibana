@@ -169,7 +169,9 @@ export const buildEsqlFetchSubscribe = ({
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
 
     const appStateColumns = getCurrentTab().appState.columns ?? [];
-    const nextSelectedColumns = appStateColumns.filter((column) => nextAllColumns.includes(column));
+    const nextSelectedColumns = appStateColumns.filter(
+      (column) => responseColumns?.includes(column) ?? true
+    );
     const changeSelectedColumns = !isInitialFetch && !isEqual(nextSelectedColumns, appStateColumns);
 
     const { viewMode } = getCurrentTab().appState;
