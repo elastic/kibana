@@ -513,6 +513,7 @@
     "name",
     "package_assets",
     "pending_upgrade_review",
+    "previous_dependency_versions",
     "previous_version",
     "verification_key_id",
     "verification_status",

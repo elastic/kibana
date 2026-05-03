@@ -6,8 +6,11 @@
  */
 
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-import { ALERT_EPISODE_FIELDS } from './episodes_query';
-import { buildRelatedBaseQuery, finishRelatedEpisodesQuery } from './related_episodes_query';
+import {
+  buildRelatedBaseQuery,
+  finishRelatedEpisodesQuery,
+  RELATED_EPISODE_FIELDS,
+} from './related_episodes_query';
 
 describe('buildRelatedBaseQuery', () => {
   it('selects from the alert events stream, filters by rule and excludes an episode', () => {
@@ -43,7 +46,7 @@ describe('finishRelatedEpisodesQuery', () => {
     expect(queryString).toContain(TIME_FIELD);
     expect(queryString).toMatch(/sort.*desc/i);
     expect(queryString).toContain('LIMIT 5');
-    for (const field of ALERT_EPISODE_FIELDS) {
+    for (const field of RELATED_EPISODE_FIELDS) {
       expect(queryString).toContain(field);
     }
   });
