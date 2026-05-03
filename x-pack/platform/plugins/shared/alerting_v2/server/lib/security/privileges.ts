@@ -8,6 +8,7 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AppCategory } from '@kbn/core/types';
 import { APP_ID } from '../constants';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const ALERTS_FEATURE_ID = 'alerting_v2_alerts';
 const RULES_FEATURE_ID = 'alerting_v2_rules';
@@ -32,11 +33,22 @@ export const ALERTING_V2_API_PRIVILEGES = {
   },
 } as const;
 
+/**
+ * Saved-object types managed by the alerting_v2 plugin via request-scoped
+ * clients (see `bind_services.ts`). The user must hold a privilege on each of
+ * these types or the security wrapper around the SO client will silently
+ * filter them out — empty grids and tag aggregations are the symptom.
+ */
+const ALERTING_V2_SAVED_OBJECT_TYPES = [
+  RULE_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+] as const;
+
 const getPrivileges = () => ({
   all: {
     app: [APP_ID],
     savedObject: {
-      all: [],
+      all: [...ALERTING_V2_SAVED_OBJECT_TYPES],
       read: [],
     },
     ui: [],
@@ -55,7 +67,7 @@ const getPrivileges = () => ({
     app: [APP_ID],
     savedObject: {
       all: [],
-      read: [],
+      read: [...ALERTING_V2_SAVED_OBJECT_TYPES],
     },
     ui: [],
     api: [
