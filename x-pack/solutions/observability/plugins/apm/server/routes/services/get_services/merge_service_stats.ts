@@ -7,7 +7,7 @@
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import type { SloStatus } from '../../../../common/service_inventory';
-import type { ServiceHealthStatusesResponse } from './get_health_statuses';
+import type { ServiceAnomalyScoresResponse } from './get_service_anomaly_scores';
 import type { ServiceAlertsResponse } from './get_service_alerts';
 import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
@@ -23,6 +23,7 @@ export interface MergedServiceStat {
   transactionErrorRate?: number;
   throughput?: number;
   healthStatus?: ServiceHealthStatus;
+  anomalyScore?: number;
   alertsCount?: number;
   sloStatus?: SloStatus;
   sloCount?: number;
@@ -30,20 +31,20 @@ export interface MergedServiceStat {
 
 export function mergeServiceStats({
   serviceStats,
-  healthStatuses,
+  anomalyScores,
   alertCounts,
   sloStats,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
-  healthStatuses: ServiceHealthStatusesResponse;
+  anomalyScores: ServiceAnomalyScoresResponse;
   alertCounts: ServiceAlertsResponse;
   sloStats: ServiceSloStatsResponse;
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  // Make sure to exclude health statuses, alerts, and SLO stats from services
+  // Make sure to exclude anomaly scores, alerts, and SLO stats from services
   // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
-  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+  const matchedAnomalyScores = anomalyScores.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
@@ -58,7 +59,7 @@ export function mergeServiceStats({
   return joinByKey(
     asMutableArray([
       ...serviceStats,
-      ...matchedHealthStatuses,
+      ...matchedAnomalyScores,
       ...matchedAlertCounts,
       ...matchedSloStats,
     ] as const),

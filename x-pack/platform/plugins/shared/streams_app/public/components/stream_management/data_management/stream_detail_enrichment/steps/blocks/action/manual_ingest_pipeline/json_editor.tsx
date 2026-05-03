@@ -133,7 +133,9 @@ export const JsonEditor = () => {
       triggerCharacters: ['"'],
       provideCompletionItems: async (
         model: monaco.editor.ITextModel,
-        position: monaco.Position
+        position: monaco.Position,
+        _context: monaco.languages.CompletionContext,
+        token: monaco.CancellationToken
       ): Promise<monaco.languages.CompletionList> => {
         const response = await loadProcessorSuggestions().catch(
           (): ProcessorSuggestionsResponse => ({
@@ -141,6 +143,10 @@ export const JsonEditor = () => {
             propertiesByProcessor: {},
           })
         );
+
+        if (model.isDisposed() || token.isCancellationRequested) {
+          return { suggestions: [] };
+        }
 
         const lineContentAfter = model.getValueInRange({
           startLineNumber: position.lineNumber,

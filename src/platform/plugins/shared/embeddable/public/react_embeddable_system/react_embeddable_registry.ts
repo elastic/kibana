@@ -53,13 +53,6 @@ export const getReactEmbeddableFactory = async <
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   key: string
-): Promise<EmbeddableFactory<SerializedState, Api>> => {
-  if (registry[key] === undefined)
-    throw new Error(
-      i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
-        defaultMessage: 'No embeddable factory found for type: {key}',
-        values: { key },
-      })
-    );
-  return registry[key]();
+): Promise<EmbeddableFactory<SerializedState, Api> | undefined> => {
+  return registry[key]?.();
 };
