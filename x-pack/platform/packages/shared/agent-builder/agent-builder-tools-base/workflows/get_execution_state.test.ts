@@ -155,7 +155,12 @@ describe('getExecutionState', () => {
           ],
         },
         stepExecutions: [
-          { stepId: 'approve', status: ExecutionStatus.WAITING_FOR_INPUT, scopeStack: [] },
+          {
+            id: 'step-exec-approve',
+            stepId: 'approve',
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            scopeStack: [],
+          },
         ],
       });
 
@@ -167,7 +172,7 @@ describe('getExecutionState', () => {
 
       expect(state?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
       expect(state?.waiting_input).toEqual({
-        waiting_step_id: 'approve',
+        step_execution_id: 'step-exec-approve',
         message: 'Please approve this request',
         schema: {
           type: 'object',
@@ -197,7 +202,12 @@ describe('getExecutionState', () => {
           ],
         },
         stepExecutions: [
-          { stepId: 'ask', status: ExecutionStatus.WAITING_FOR_INPUT, scopeStack: [] },
+          {
+            id: 'step-exec-ask',
+            stepId: 'ask',
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            scopeStack: [],
+          },
         ],
       });
 
@@ -208,7 +218,7 @@ describe('getExecutionState', () => {
       });
 
       expect(state?.waiting_input).toEqual({
-        waiting_step_id: 'ask',
+        step_execution_id: 'step-exec-ask',
         message: 'Provide input',
       });
     });
@@ -237,7 +247,12 @@ describe('getExecutionState', () => {
           ],
         },
         stepExecutions: [
-          { stepId: 'nested_ask', status: ExecutionStatus.WAITING_FOR_INPUT, scopeStack: [] },
+          {
+            id: 'step-exec-nested',
+            stepId: 'nested_ask',
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            scopeStack: [],
+          },
         ],
       });
 
@@ -248,7 +263,7 @@ describe('getExecutionState', () => {
       });
 
       expect(state?.waiting_input).toEqual({
-        waiting_step_id: 'nested_ask',
+        step_execution_id: 'step-exec-nested',
         message: 'Approve item',
       });
     });
