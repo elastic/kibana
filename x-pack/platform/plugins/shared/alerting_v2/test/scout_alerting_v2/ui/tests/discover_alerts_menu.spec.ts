@@ -22,11 +22,6 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      // The role only grants alerting_v2 privileges (no v1). Each entry inside
-      // the Alerts popover is gated independently by its own capability, so
-      // this user should see only the v2 ES|QL rule entry — the v1 entries
-      // ("Manage rules and connectors", "Create search threshold rule") must
-      // remain hidden.
       await browserAuth.loginWithCustomRole(READ_ROLE);
       await pageObjects.discover.goto();
       await pageObjects.discover.writeAndSubmitEsqlQuery(
