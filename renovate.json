@@ -2120,14 +2120,6 @@
       "enabled": true
     },
     {
-      "groupName": "Cytoscape",
-      "matchDepNames": ["cytoscape", "cytoscape-dagre"],
-      "reviewers": ["team:ml-ui"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "hdr-histogram-js",
       "matchDepNames": ["hdr-histogram-js"],
       "reviewers": ["team:obs-presentation-team"],
@@ -2514,15 +2506,6 @@
       "matchDepNames": ["chrome-remote-interface", "@types/chrome-remote-interface"],
       "reviewers": ["team:obs-knowledge-team"],
       "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "canvas-confetti",
-      "matchDepNames": ["canvas-confetti", "@types/canvas-confetti"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:SharedUX", "release_note:skip", "backport:previous-minor"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },

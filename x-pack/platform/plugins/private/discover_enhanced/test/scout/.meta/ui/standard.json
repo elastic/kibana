@@ -1,5 +1,5 @@
 {
-  "sha1": "34c40bba529e52331e9259aa23f1c7a192051ec8",
+  "sha1": "86785119c44764298ec9ebc273445a4f7a15acaa",
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
@@ -51,7 +51,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 96,
+        "line": 95,
         "column": 9
       }
     },

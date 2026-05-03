@@ -391,5 +391,12 @@ module.exports = {
         message: 'For client-side, please use `useEuiTheme` instead.',
       },
     ],
+
+    /**
+     * a11y-related rules:
+     * all existing violations were fixed; keep this as error to prevent new ones.
+     */
+    '@elastic/eui/prefer-eui-icon-tip': 'error',
+    '@elastic/eui/sr-output-disabled-tooltip': 'error',
   },
 };
