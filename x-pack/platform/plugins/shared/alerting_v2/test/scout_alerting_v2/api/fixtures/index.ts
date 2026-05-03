@@ -10,18 +10,18 @@ import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '../../common/constants';
 import {
   getDataStreamApiService,
+  getInsightsApiService,
   getRulesApiService,
-  getSettingsApiService,
   type DataStreamApiService,
+  type InsightsApiService,
   type RulesApiService,
-  type SettingsApiService,
 } from '../services';
 
 export interface AlertingApiServices {
   rules: RulesApiService;
-  settings: SettingsApiService;
   ruleEvents: DataStreamApiService;
   alertActions: DataStreamApiService;
+  insights: InsightsApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -43,7 +43,6 @@ export const buildAlertingApiServices = ({
   log: ScoutLogger;
 }): AlertingApiServices => ({
   rules: getRulesApiService({ kbnClient, log }),
-  settings: getSettingsApiService({ kbnClient, log }),
   ruleEvents: getDataStreamApiService({
     esClient,
     log,
@@ -54,6 +53,7 @@ export const buildAlertingApiServices = ({
     log,
     dataStreamName: ALERT_ACTIONS_DATA_STREAM,
   }),
+  insights: getInsightsApiService({ esClient, log }),
 });
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({

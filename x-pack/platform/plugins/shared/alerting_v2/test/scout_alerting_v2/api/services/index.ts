@@ -8,8 +8,8 @@
 export type { RulesApiService } from './rules_api_service';
 export { getRulesApiService } from './rules_api_service';
 
-export type { SettingsApiService } from './settings_api_service';
-export { getSettingsApiService } from './settings_api_service';
-
 export type { DataStreamApiService } from './data_stream_api_service';
 export { getDataStreamApiService } from './data_stream_api_service';
+
+export type { InsightsApiService, InsightSeed } from './insights_api_service';
+export { getInsightsApiService } from './insights_api_service';

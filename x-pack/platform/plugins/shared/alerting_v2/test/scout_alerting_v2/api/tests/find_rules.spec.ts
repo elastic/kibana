@@ -20,11 +20,29 @@ import {
 const getRuleNames = (items: Array<{ metadata: { name: string } }>) =>
   items.map((rule) => rule.metadata.name);
 
+/**
+ * Build a `?key=value&...` query string for the find-rules endpoint. Using
+ * `URLSearchParams` ensures every value is URL-encoded correctly without
+ * sprinkling `encodeURIComponent` calls through the test bodies.
+ */
+const findRulesUrl = (
+  params: Record<string, string | number | boolean | undefined> = {}
+): string => {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `${testData.RULE_API_PATH}?${qs}` : testData.RULE_API_PATH;
+};
+
 apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
+  let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
+    adminHeaders = { ...adminCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -40,8 +58,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
     }
 
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?search=HighCpu&perPage=100`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(findRulesUrl({ search: 'HighCpu', perPage: 100 }), {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
@@ -62,8 +80,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       );
     }
 
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?search=memory&perPage=100`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(findRulesUrl({ search: 'memory', perPage: 100 }), {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
@@ -84,9 +102,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       );
     }
 
-    const search = encodeURIComponent('cpu production');
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?search=${search}&perPage=100`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(findRulesUrl({ search: 'cpu production', perPage: 100 }), {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
@@ -102,8 +119,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({ metadata: { name: 'HighCpuAlert' } })
       );
 
-      const response = await apiClient.get(`${testData.RULE_API_PATH}?search=highcpu&perPage=100`, {
-        headers: { ...adminCredentials.apiKeyHeader },
+      const response = await apiClient.get(findRulesUrl({ search: 'highcpu', perPage: 100 }), {
+        headers: adminHeaders,
         responseType: 'json',
       });
 
@@ -124,12 +141,13 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       // to either parse-error or return arbitrary matches. The server escapes
       // operators so the request always succeeds.
       for (const search of ['(unterminated', '+leading', 'with|pipe']) {
-        const response = await apiClient.get(
-          `${testData.RULE_API_PATH}?search=${encodeURIComponent(search)}&perPage=100`,
-          { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-        );
-
-        expect(response).toHaveStatusCode(200);
+        await apiTest.step(`search="${search}" returns 200`, async () => {
+          const response = await apiClient.get(findRulesUrl({ search, perPage: 100 }), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+        });
       }
     }
   );
@@ -141,10 +159,10 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({ metadata: { name: 'some-rule' } })
       );
 
-      const response = await apiClient.get(
-        `${testData.RULE_API_PATH}?search=nonexistent&perPage=100`,
-        { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-      );
+      const response = await apiClient.get(findRulesUrl({ search: 'nonexistent', perPage: 100 }), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.items).toHaveLength(0);
@@ -161,23 +179,27 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
         );
       }
 
-      const firstPage = await apiClient.get(`${testData.RULE_API_PATH}?page=1&perPage=2`, {
-        headers: { ...adminCredentials.apiKeyHeader },
-        responseType: 'json',
+      await apiTest.step('first page returns the first slice', async () => {
+        const firstPage = await apiClient.get(findRulesUrl({ page: 1, perPage: 2 }), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+
+        expect(firstPage).toHaveStatusCode(200);
+        expect(firstPage.body).toMatchObject({ page: 1, perPage: 2, total: 5 });
+        expect(firstPage.body.items).toHaveLength(2);
       });
 
-      expect(firstPage).toHaveStatusCode(200);
-      expect(firstPage.body).toMatchObject({ page: 1, perPage: 2, total: 5 });
-      expect(firstPage.body.items).toHaveLength(2);
+      await apiTest.step('last page returns the remaining items', async () => {
+        const lastPage = await apiClient.get(findRulesUrl({ page: 3, perPage: 2 }), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
 
-      const lastPage = await apiClient.get(`${testData.RULE_API_PATH}?page=3&perPage=2`, {
-        headers: { ...adminCredentials.apiKeyHeader },
-        responseType: 'json',
+        expect(lastPage).toHaveStatusCode(200);
+        expect(lastPage.body).toMatchObject({ page: 3, perPage: 2, total: 5 });
+        expect(lastPage.body.items).toHaveLength(1);
       });
-
-      expect(lastPage).toHaveStatusCode(200);
-      expect(lastPage.body).toMatchObject({ page: 3, perPage: 2, total: 5 });
-      expect(lastPage.body.items).toHaveLength(1);
     }
   );
 
@@ -188,8 +210,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({ metadata: { name: 'only-rule' } })
       );
 
-      const response = await apiClient.get(`${testData.RULE_API_PATH}?page=99&perPage=10`, {
-        headers: { ...adminCredentials.apiKeyHeader },
+      const response = await apiClient.get(findRulesUrl({ page: 99, perPage: 10 }), {
+        headers: adminHeaders,
         responseType: 'json',
       });
 
@@ -199,42 +221,6 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?perPage=1001`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: should reject perPage below the minimum', async ({ apiClient }) => {
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?perPage=0`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: should reject page values below 1', async ({ apiClient }) => {
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?page=0`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: should reject non-numeric page values', async ({ apiClient }) => {
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?page=abc`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
   apiTest(
     'sort: should sort rules by name in ascending order',
     async ({ apiClient, apiServices }) => {
@@ -243,8 +229,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       }
 
       const response = await apiClient.get(
-        `${testData.RULE_API_PATH}?sortField=name&sortOrder=asc&perPage=100`,
-        { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        findRulesUrl({ sortField: 'name', sortOrder: 'asc', perPage: 100 }),
+        { headers: adminHeaders, responseType: 'json' }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -260,42 +246,12 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       }
 
       const response = await apiClient.get(
-        `${testData.RULE_API_PATH}?sortField=name&sortOrder=desc&perPage=100`,
-        { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        findRulesUrl({ sortField: 'name', sortOrder: 'desc', perPage: 100 }),
+        { headers: adminHeaders, responseType: 'json' }
       );
 
       expect(response).toHaveStatusCode(200);
       expect(getRuleNames(response.body.items)).toStrictEqual(['c-rule', 'b-rule', 'a-rule']);
-    }
-  );
-
-  apiTest('validation: should reject unknown sortField values', async ({ apiClient }) => {
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?sortField=unknown-field`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: should reject unknown sortOrder values', async ({ apiClient }) => {
-    const response = await apiClient.get(
-      `${testData.RULE_API_PATH}?sortField=name&sortOrder=ascending`,
-      { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-    );
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest(
-    'validation: should reject empty search after trimming whitespace',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${testData.RULE_API_PATH}?search=${encodeURIComponent('   ')}`,
-        { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-      );
-
-      expect(response).toHaveStatusCode(400);
     }
   );
 
@@ -310,30 +266,32 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
     );
 
     await apiClient.post(`${testData.RULE_API_PATH}/_bulk_disable`, {
-      headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { ids: [ruleToDisable.id] },
       responseType: 'json',
     });
 
-    const enabledFilter = encodeURIComponent('enabled: true');
-    const enabledResponse = await apiClient.get(
-      `${testData.RULE_API_PATH}?filter=${enabledFilter}&perPage=100`,
-      { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-    );
+    await apiTest.step('filter=enabled:true returns only the enabled rule', async () => {
+      const response = await apiClient.get(
+        findRulesUrl({ filter: 'enabled: true', perPage: 100 }),
+        { headers: adminHeaders, responseType: 'json' }
+      );
 
-    expect(enabledResponse).toHaveStatusCode(200);
-    expect(enabledResponse.body.items).toHaveLength(1);
-    expect(enabledResponse.body.items[0].metadata.name).toBe('rule-stays-enabled');
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('rule-stays-enabled');
+    });
 
-    const disabledFilter = encodeURIComponent('enabled: false');
-    const disabledResponse = await apiClient.get(
-      `${testData.RULE_API_PATH}?filter=${disabledFilter}&perPage=100`,
-      { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-    );
+    await apiTest.step('filter=enabled:false returns only the disabled rule', async () => {
+      const response = await apiClient.get(
+        findRulesUrl({ filter: 'enabled: false', perPage: 100 }),
+        { headers: adminHeaders, responseType: 'json' }
+      );
 
-    expect(disabledResponse).toHaveStatusCode(200);
-    expect(disabledResponse.body.items).toHaveLength(1);
-    expect(disabledResponse.body.items[0].metadata.name).toBe('rule-becomes-disabled');
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('rule-becomes-disabled');
+    });
   });
 
   apiTest('filter: should filter rules by metadata.tags', async ({ apiClient, apiServices }) => {
@@ -344,11 +302,10 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
       buildCreateRuleData({ metadata: { name: 'dev-rule', tags: ['development'] } })
     );
 
-    const filter = encodeURIComponent('metadata.tags: "production"');
-    const response = await apiClient.get(`${testData.RULE_API_PATH}?filter=${filter}&perPage=100`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
+    const response = await apiClient.get(
+      findRulesUrl({ filter: 'metadata.tags: "production"', perPage: 100 }),
+      { headers: adminHeaders, responseType: 'json' }
+    );
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.items).toHaveLength(1);
@@ -368,12 +325,12 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({ metadata: { name: 'rule-c', tags: ['development'] } })
       );
 
-      const filter = encodeURIComponent(
-        'metadata.tags: "production" AND NOT metadata.name: "rule-a"'
-      );
       const response = await apiClient.get(
-        `${testData.RULE_API_PATH}?filter=${filter}&perPage=100`,
-        { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        findRulesUrl({
+          filter: 'metadata.tags: "production" AND NOT metadata.name: "rule-a"',
+          perPage: 100,
+        }),
+        { headers: adminHeaders, responseType: 'json' }
       );
 
       expect(response).toHaveStatusCode(200);
@@ -383,7 +340,7 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'filter: should not return rules when the filter references unknown fields',
+    'filter: should reject filters that reference unknown fields with a 400',
     async ({ apiClient, apiServices }) => {
       // Seed a rule so a 200 response with an empty list would be a regression —
       // the request must fail rather than silently match nothing.
@@ -391,14 +348,93 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({ metadata: { name: 'should-not-match' } })
       );
 
-      const filter = encodeURIComponent('unknown_field: "value"');
       const response = await apiClient.get(
-        `${testData.RULE_API_PATH}?filter=${filter}&perPage=100`,
-        { headers: { ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        findRulesUrl({ filter: 'unknown_field: "value"', perPage: 100 }),
+        { headers: adminHeaders, responseType: 'json' }
       );
 
-      expect(response.statusCode).toBeGreaterThanOrEqual(400);
-      expect(response.body.items).toBeUndefined();
+      expect(response).toHaveStatusCode(400);
+      expect(response.body).toMatchObject({
+        statusCode: 400,
+        error: 'Bad Request',
+        // `stringContaining('')` matches any string — the Scout API expect
+        // doesn't expose `expect.any(String)`. We just want to assert that the
+        // server returned a human-readable message field.
+        message: expect.stringContaining(''),
+      });
+    }
+  );
+
+  apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ perPage: 1001 }), {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+  });
+
+  apiTest('validation: should reject perPage below the minimum', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ perPage: 0 }), {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+  });
+
+  apiTest('validation: should reject page values below 1', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ page: 0 }), {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+  });
+
+  apiTest('validation: should reject non-numeric page values', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ page: 'abc' }), {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+  });
+
+  apiTest('validation: should reject unknown sortField values', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ sortField: 'unknown-field' }), {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+  });
+
+  apiTest('validation: should reject unknown sortOrder values', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      findRulesUrl({ sortField: 'name', sortOrder: 'ascending' }),
+      { headers: adminHeaders, responseType: 'json' }
+    );
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+  });
+
+  apiTest(
+    'validation: should reject empty search after trimming whitespace',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ search: '   ' }), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -411,8 +447,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
 
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.get(`${testData.RULE_API_PATH}?perPage=100`, {
-        headers: { ...readerCredentials.apiKeyHeader },
+      const response = await apiClient.get(findRulesUrl({ perPage: 100 }), {
+        headers: readerCredentials.apiKeyHeader,
         responseType: 'json',
       });
 
@@ -431,8 +467,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
 
       const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
 
-      const response = await apiClient.get(`${testData.RULE_API_PATH}?perPage=100`, {
-        headers: { ...writerCredentials.apiKeyHeader },
+      const response = await apiClient.get(findRulesUrl({ perPage: 100 }), {
+        headers: writerCredentials.apiKeyHeader,
         responseType: 'json',
       });
 
@@ -450,8 +486,8 @@ apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
 
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.get(`${testData.RULE_API_PATH}?perPage=100`, {
-        headers: { ...noAccessCredentials.apiKeyHeader },
+      const response = await apiClient.get(findRulesUrl({ perPage: 100 }), {
+        headers: noAccessCredentials.apiKeyHeader,
         responseType: 'json',
       });
 
