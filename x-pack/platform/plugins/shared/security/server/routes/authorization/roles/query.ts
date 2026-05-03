@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
+import { queryRolesResponseSchema } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
 import { transformElasticsearchRoleToRole } from '../../../authorization';
@@ -86,6 +87,7 @@ export function defineQueryRolesRoutes({
           },
           response: {
             200: {
+              body: () => queryRolesResponseSchema,
               description: 'Indicates a successful call.',
             },
           },

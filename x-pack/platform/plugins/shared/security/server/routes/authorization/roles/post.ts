@@ -9,6 +9,7 @@ import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { roleGrantsSubFeaturePrivileges } from './lib';
 import {
+  bulkCreateOrUpdateRolesResponseSchema,
   getBulkCreateOrUpdatePayloadSchema,
   transformPutPayloadToElasticsearchRole,
 } from './model';
@@ -69,6 +70,7 @@ export function defineBulkCreateOrUpdateRolesRoutes({
           },
           response: {
             200: {
+              body: () => bulkCreateOrUpdateRolesResponseSchema,
               description: 'Indicates a successful call.',
             },
           },
