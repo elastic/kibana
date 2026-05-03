@@ -14,12 +14,7 @@ const SAMPLE_DATA_SET = 'ecommerce';
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.search,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.security.complete,
-    ],
+    tag: tags.stateful.classic,
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {
