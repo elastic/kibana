@@ -15,7 +15,7 @@ import type {
   FindRulesResponse,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { COMMON_HEADERS, RULE_API_PATH } from '../../common/constants';
+import { COMMON_HEADERS, RULE_API_PATH } from '../constants';
 
 export interface RulesApiService {
   create: (data: CreateRuleData, options?: { id?: string }) => Promise<RuleResponse>;
@@ -23,6 +23,7 @@ export interface RulesApiService {
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   cleanUp: () => Promise<void>;
 }
 
@@ -43,6 +44,17 @@ export const getRulesApiService = ({
       const response = await kbnClient.request<BulkOperationResponse>({
         method: 'POST',
         path: `${RULE_API_PATH}/_bulk_delete`,
+        headers: COMMON_HEADERS,
+        body: params,
+      });
+      return response.data;
+    });
+
+  const bulkDisable = (params: BulkOperationParams) =>
+    measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
+      const response = await kbnClient.request<BulkOperationResponse>({
+        method: 'POST',
+        path: `${RULE_API_PATH}/_bulk_disable`,
         headers: COMMON_HEADERS,
         body: params,
       });
@@ -95,6 +107,8 @@ export const getRulesApiService = ({
       }),
 
     bulkDelete,
+
+    bulkDisable,
 
     cleanUp: () =>
       measurePerformanceAsync(log, 'rules.cleanUp', async () => {
