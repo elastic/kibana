@@ -113,7 +113,8 @@ export const createManagementFooterItemsTree = (
                 renderAs: 'panelOpener' as const,
                 children: [
                   { link: 'management:rules' as const },
-                  { link: 'management:notification_policies' as const },
+                  { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
+                  { link: 'management:action_policies' as const },
                 ],
               },
             ]
@@ -123,7 +124,8 @@ export const createManagementFooterItemsTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
-              link: 'management:triggersActions',
+              id: 'stackRules',
+              link: 'rules',
               breadcrumbStatus: 'hidden',
             },
             {
@@ -137,6 +139,17 @@ export const createManagementFooterItemsTree = (
             {
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
+            },
+          ],
+        },
+        {
+          title: i18nStrings.projectPerformance.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:queryActivity',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
             },
           ],
         },

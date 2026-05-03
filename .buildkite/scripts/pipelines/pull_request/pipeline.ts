@@ -15,8 +15,6 @@
             }
         ] */
 
-import { execFileSync } from 'child_process';
-
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
@@ -26,8 +24,11 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  registerCancelKeys,
+  flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
   prHasFIPSLabel,
+  doAllChangesMatch,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -57,8 +58,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
-    if (onlyRunQuickChecks) {
+    if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline(pipeline);
@@ -71,22 +71,14 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    for (const stepKey of [
-      'pick_test_group_run_order',
-      'build_scout_tests',
-      'check_oas_snapshot',
-      'build_api_docs',
-    ]) {
-      execFileSync('buildkite-agent', [
-        'meta-data',
-        'set',
-        `cancel_on_gate_failure:${stepKey}`,
-        'true',
-      ]);
-    }
+    registerCancelKeys(['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
+    }
+
+    if (await doAnyChangesMatch([/^renovate\.json$/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', cancelable));
     }
 
     if (
@@ -244,11 +236,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc')
+      process.env.GITHUB_PR_TARGET_BRANCH?.match(/^main$/) &&
+      (GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc'))
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', cancelable)
@@ -354,7 +347,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/automatic_import\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
@@ -370,12 +362,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
-      );
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/automatic_import.yml',
-          cancelable
-        )
       );
       pipeline.push(
         getPipeline(
@@ -665,6 +651,21 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
+    if (
+      GITHUB_PR_LABELS.includes('ci:workflow-oom-test') ||
+      (await doAnyChangesMatch([
+        /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
+        /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
+        /^src\/platform\/packages\/shared\/workflows\//,
+        /^\.buildkite\/pipelines\/pull_request\/workflows_oom_testing\.yml/,
+      ]))
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/workflows_oom_testing.yml', cancelable)
+      );
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
     }
@@ -676,6 +677,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
+    flushCancelOnGateFailureMetadata();
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);

@@ -136,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({
           kind: 'alert',
-          metadata: { name: 'full-rule', owner: 'team-a', labels: ['critical', 'prod'] },
+          metadata: { name: 'full-rule', owner: 'team-a', tags: ['critical', 'prod'] },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           evaluation: {
@@ -152,7 +152,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.metadata).to.eql({
         name: 'full-rule',
         owner: 'team-a',
-        labels: ['critical', 'prod'],
+        tags: ['critical', 'prod'],
       });
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
       expect(response.body.evaluation).to.eql({

@@ -19,7 +19,10 @@ import type {
   GetRuleRequestParamsV1,
   GetRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/get';
-import { getRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/get';
+import {
+  getRuleRequestParamsSchemaV1,
+  getRuleParamsExamplesV1,
+} from '../../../../../common/routes/rule/apis/get';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 interface BuildGetRulesRouteParams {
@@ -98,6 +101,7 @@ export const getRuleRoute = (
       access: 'public',
       summary: `Get rule details`,
       tags: ['oas-tag:alerting'],
+      oasOperationObject: getRuleParamsExamplesV1,
     },
   });
 

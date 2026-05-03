@@ -9,6 +9,9 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowAccessDeniedLicenseActionParams,
+  ReportWorkflowAccessDeniedPrivilegesActionParams,
+  ReportWorkflowAccessDeniedServerlessTierActionParams,
   ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
@@ -20,6 +23,10 @@ export const workflowUIEventNames = {
   [WorkflowUIEventTypes.WorkflowListViewed]: 'Workflow list viewed',
   [WorkflowUIEventTypes.WorkflowDetailViewed]: 'Workflow detail viewed',
   [WorkflowUIEventTypes.WorkflowCreateOpened]: 'Workflow create opened',
+  [WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges]: 'Workflow access with missing privileges',
+  [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: 'Workflow access with invalid license',
+  [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]:
+    'Workflow access with invalid serverless tier',
 };
 
 const eventNameSchema: RootSchema<{ eventName: string }> = {
@@ -94,8 +101,21 @@ const workflowCreateOpenedSchema: RootSchema<ReportWorkflowCreateOpenedActionPar
   ...editorTypeSchema,
 };
 
+const workflowAccessDeniedPrivilegesSchema: RootSchema<ReportWorkflowAccessDeniedPrivilegesActionParams> =
+  { ...eventNameSchema };
+
+const workflowAccessDeniedLicenseSchema: RootSchema<ReportWorkflowAccessDeniedLicenseActionParams> =
+  { ...eventNameSchema };
+
+const workflowAccessDeniedServerlessTierSchema: RootSchema<ReportWorkflowAccessDeniedServerlessTierActionParams> =
+  { ...eventNameSchema };
+
 export const workflowUIEventSchemas = {
   [WorkflowUIEventTypes.WorkflowListViewed]: workflowListViewedSchema,
   [WorkflowUIEventTypes.WorkflowDetailViewed]: workflowDetailViewedSchema,
   [WorkflowUIEventTypes.WorkflowCreateOpened]: workflowCreateOpenedSchema,
+  [WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges]: workflowAccessDeniedPrivilegesSchema,
+  [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: workflowAccessDeniedLicenseSchema,
+  [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]:
+    workflowAccessDeniedServerlessTierSchema,
 };

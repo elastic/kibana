@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { StoreStatusEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
@@ -22,6 +23,7 @@ import {
 import { useEntityStoreTypes } from './use_enabled_entity_types';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
 import * as i18n from '../translations';
 import { useInvalidateRiskEngineSettingsQuery } from '../components/risk_score_management/hooks/use_risk_engine_settings_query';
 import {
@@ -72,15 +74,20 @@ export const useToggleEntityAnalytics = ({
   isSavingSettings,
 }: ToggleOptions): UseToggleEntityAnalyticsReturn => {
   const { addSuccess, addError } = useAppToasts();
+  const { uiSettings } = useKibana().services;
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const isEntityStoreV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const riskEngineStatusQuery = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
     structuralSharing: false,
   });
 
-  const entityStoreStatusQuery = useEntityStoreStatus();
+  const entityStoreStatusQuery = useEntityStoreStatus({
+    refetchInterval: TEN_SECONDS,
+    structuralSharing: false,
+  });
   const entityTypes = useEntityStoreTypes();
 
   const initRiskEngineMutation = useInitRiskEngineMutation({
@@ -122,6 +129,7 @@ export const useToggleEntityAnalytics = ({
     riskEngineStatus,
     entityStoreStatus,
     isEntityStoreFeatureFlagDisabled,
+    isEntityStoreV2Enabled,
     isMutationLoading: isLoading,
   });
 
@@ -139,8 +147,8 @@ export const useToggleEntityAnalytics = ({
 
   const enableEntityStore = useCallback(async () => {
     if (entityStoreStatus === StoreStatusEnum.not_installed) {
+      // install triggers server-side asyncSetup which starts the engine automatically
       await installEntityStoreMutation.mutateAsync();
-      await startEntityStoreMutation.mutateAsync();
     } else if (
       entityStoreStatus === StoreStatusEnum.stopped ||
       entityStoreStatus === StoreStatusEnum.error
@@ -157,35 +165,57 @@ export const useToggleEntityAnalytics = ({
     setIsToggling(true);
     try {
       const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
-      const storeOn =
-        !isEntityStoreFeatureFlagDisabled && entityStoreStatus === StoreStatusEnum.running;
-      const isCurrentlyEnabled = riskOn || storeOn;
+      const storeOn = isEntityStoreV2Enabled
+        ? entityStoreStatus === StoreStatusEnum.running
+        : !isEntityStoreFeatureFlagDisabled && entityStoreStatus === StoreStatusEnum.running;
 
-      if (isCurrentlyEnabled) {
-        const disablePromises: Promise<unknown>[] = [];
-        if (riskOn) {
-          disablePromises.push(disableRiskEngineMutation.mutateAsync(undefined));
-        }
+      if (isEntityStoreV2Enabled) {
         if (storeOn) {
-          disablePromises.push(stopEntityStore());
-        }
-        await Promise.all(disablePromises);
-        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
-      } else {
-        if (!isEntityStoreFeatureFlagDisabled) {
+          await stopEntityStore();
+          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
+        } else {
           await enableEntityStore();
-        }
 
-        if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
-          if (!selectedSettingsMatchSavedSettings) {
-            await onSaveSettings();
+          if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
+            if (!selectedSettingsMatchSavedSettings) {
+              await onSaveSettings();
+            }
+            await initRiskEngineMutation.mutateAsync(undefined);
+          } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
+            await enableRiskEngineMutation.mutateAsync(undefined);
           }
-          await initRiskEngineMutation.mutateAsync(undefined);
-        } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
-          await enableRiskEngineMutation.mutateAsync(undefined);
-        }
 
-        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
+          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
+        }
+      } else {
+        const isCurrentlyEnabled = riskOn || storeOn;
+
+        if (isCurrentlyEnabled) {
+          const disablePromises: Promise<unknown>[] = [];
+          if (riskOn) {
+            disablePromises.push(disableRiskEngineMutation.mutateAsync(undefined));
+          }
+          if (storeOn) {
+            disablePromises.push(stopEntityStore());
+          }
+          await Promise.all(disablePromises);
+          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
+        } else {
+          if (!isEntityStoreFeatureFlagDisabled) {
+            await enableEntityStore();
+          }
+
+          if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
+            if (!selectedSettingsMatchSavedSettings) {
+              await onSaveSettings();
+            }
+            await initRiskEngineMutation.mutateAsync(undefined);
+          } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
+            await enableRiskEngineMutation.mutateAsync(undefined);
+          }
+
+          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
+        }
       }
     } catch (e) {
       addError(e, { title: i18n.ENTITY_ANALYTICS_TOGGLE_ERROR, ...TOAST_OPTIONS });
@@ -197,6 +227,7 @@ export const useToggleEntityAnalytics = ({
     riskEngineStatus,
     entityStoreStatus,
     isEntityStoreFeatureFlagDisabled,
+    isEntityStoreV2Enabled,
     addSuccess,
     addError,
     disableRiskEngineMutation,

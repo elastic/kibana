@@ -53,15 +53,6 @@ describe(
   'Execution results table',
   {
     tags: ['@ess'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'newExecutionResultsTableEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   function () {
     before(() => {

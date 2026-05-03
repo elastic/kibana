@@ -66,6 +66,7 @@
             "lineNumber": 44,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "Version",
             "trackAdoption": false,
             "isRequired": true
           }

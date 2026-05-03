@@ -149,6 +149,15 @@ export async function saveRetentionChanges(page: ScoutPage): Promise<void> {
 }
 
 /**
+ * Saves failure store changes by waiting for the save button to be enabled and clicking it
+ */
+export async function saveFailureStoreChanges(page: ScoutPage): Promise<void> {
+  const saveButton = page.getByTestId('failureStoreModalSaveButton');
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+}
+
+/**
  * Sets custom DSL retention with specified value and unit
  */
 export async function setCustomRetention(
@@ -383,7 +392,7 @@ export async function setFailureStoreRetention(
     await dialog.getByTestId(`failureStoreDslUnitOption-${unit}`).click();
   }
 
-  await page.getByTestId('failureStoreModalSaveButton').click();
+  await saveFailureStoreChanges(page);
   await expect(page.getByRole('dialog')).toBeHidden();
 }
 
@@ -400,7 +409,7 @@ export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Pro
   // Wait for toggle to be enabled after modal opens
   await waitForElementToBeEnabled(page, 'enableFailureStoreToggle');
   await page.getByTestId('enableFailureStoreToggle').click();
-  await page.getByTestId('failureStoreModalSaveButton').click();
+  await saveFailureStoreChanges(page);
   await expect(page.getByRole('dialog')).toBeHidden();
 }
 

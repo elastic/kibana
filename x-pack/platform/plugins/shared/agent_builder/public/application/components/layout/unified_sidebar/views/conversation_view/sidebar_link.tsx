@@ -13,9 +13,15 @@ interface SidebarLinkProps {
   label: string;
   href: string;
   onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  hideIcon?: boolean;
 }
 
-export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }) => {
+export const SidebarLink: React.FC<SidebarLinkProps> = ({
+  label,
+  href,
+  onClick,
+  hideIcon = false,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const wrapperStyles = css`
@@ -50,14 +56,16 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }
     <div css={wrapperStyles}>
       <a href={href} onClick={onClick} css={linkStyles}>
         <EuiText size="s">{label}</EuiText>
-        <EuiIcon
-          type="arrowRight"
-          size="s"
-          aria-hidden={true}
-          css={css`
-            color: ${euiTheme.colors.textDisabled};
-          `}
-        />
+        {!hideIcon && (
+          <EuiIcon
+            type="arrowRight"
+            size="s"
+            aria-hidden={true}
+            css={css`
+              color: ${euiTheme.colors.textDisabled};
+            `}
+          />
+        )}
       </a>
     </div>
   );

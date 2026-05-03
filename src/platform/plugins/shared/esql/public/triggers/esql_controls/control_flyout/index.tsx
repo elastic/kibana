@@ -18,6 +18,7 @@ import {
   TelemetryControlCancelledReason,
   type ESQLControlVariable,
   type ControlTriggerSource,
+  isQueryESQLControl,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
@@ -126,11 +127,12 @@ export function ESQLControlsFlyout({
   );
 
   const areValuesValid = useMemo(() => {
-    const available = controlState?.available_options ?? [];
+    if (!controlState || isQueryESQLControl(controlState)) return true;
+    const available = controlState.available_options;
     return variableType === ESQLVariableType.TIME_LITERAL
       ? areValuesIntervalsValid(available.map((option) => option))
       : true;
-  }, [variableType, controlState?.available_options]);
+  }, [variableType, controlState]);
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -153,16 +155,17 @@ export function ESQLControlsFlyout({
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const variableExists =
       checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
+    const { available_options } = { available_options: [], ...controlState };
     setFormIsInvalid(
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
-        !controlState?.available_options?.length
+        !available_options.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
-    controlState?.available_options?.length,
+    controlState,
     esqlVariables,
     variableName,
     variableType,
@@ -173,7 +176,11 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
-    if (controlState && controlState.available_options?.length) {
+    if (
+      controlState &&
+      'available_options' in controlState &&
+      controlState.available_options.length
+    ) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);

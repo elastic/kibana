@@ -104,6 +104,20 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     );
   });
 
+  it('preserves attachmentId from viewProps for reference attachments (events, alerts)', async () => {
+    const refAttachmentId = 'event-id-123';
+    getAttachmentViewProps.mockReturnValue({ ...viewProps, attachmentId: refAttachmentId });
+
+    createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
+
+    expect(getAttachmentViewObject).toBeCalledWith(
+      expect.objectContaining({
+        savedObjectId: attachment.id,
+        attachmentId: refAttachmentId,
+      })
+    );
+  });
+
   it('builds the buttons correctly', async () => {
     const actions = [
       {

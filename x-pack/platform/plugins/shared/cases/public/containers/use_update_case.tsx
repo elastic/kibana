@@ -27,7 +27,7 @@ export const useUpdateCase = () => {
     (request: UpdateByKey) =>
       rebaseCaseMutationOnConflict({
         request,
-        staleCases: [request.caseData],
+        preRequestServerState: [request.caseData],
         executeRequest: (retryRequest) =>
           patchCase({
             caseId: retryRequest.caseData.id,

@@ -31,7 +31,7 @@ export const useReplaceCustomField = () => {
     (request: ReplaceCustomField) =>
       rebaseCaseMutationOnConflict({
         request,
-        staleCases: [request.caseData],
+        preRequestServerState: [request.caseData],
         executeRequest: ({ caseId, customFieldId, customFieldValue, caseVersion }) =>
           replaceCustomField({
             caseId,

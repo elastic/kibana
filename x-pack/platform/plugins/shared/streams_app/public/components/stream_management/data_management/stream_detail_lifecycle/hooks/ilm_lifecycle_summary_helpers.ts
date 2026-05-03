@@ -11,7 +11,7 @@ import type { DataStreamStats } from './use_data_stream_stats';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
 import type { AffectedResource } from '../downsampling/edit_policy_modal/edit_policy_modal';
 import { formatBytes } from '../helpers/format_bytes';
-import { getILMRatios } from '../helpers/helpers';
+import { getILMRatios } from '../../../../../util/ilm_policy_phases';
 import { ILM_PHASE_ORDER } from '../downsampling/edit_ilm_phases_flyout/constants';
 
 type IlmPhaseUiMeta = Record<PhaseName, { color: string; description: string }>;

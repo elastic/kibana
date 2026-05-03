@@ -86,3 +86,4 @@ jobs:
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
       with:
         category: "/language:${{matrix.language}}"
+        wait-for-processing: true

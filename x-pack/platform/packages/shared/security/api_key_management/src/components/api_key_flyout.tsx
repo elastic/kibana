@@ -186,8 +186,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const flyoutSize = isSmallScreen ? 'm' : 's';
+  const isFullWidth = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const flyoutSize = isFullWidth ? 'full' : 'm';
   const {
     services: { http, docLinks },
   } = useKibana();
@@ -427,7 +427,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs">
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="user" />
+                            <EuiIcon type="user" aria-hidden={true} />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>{apiKey.username}</EuiFlexItem>
                         </EuiFlexGroup>
@@ -486,7 +486,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   <>
                     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="gear" />
+                        <EuiIcon type="gear" aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle size="xs">
@@ -683,7 +683,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   <div style={{ paddingRight: euiTheme.size.s }}>
                     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="lock" />
+                        <EuiIcon type="lock" aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle size="xs">

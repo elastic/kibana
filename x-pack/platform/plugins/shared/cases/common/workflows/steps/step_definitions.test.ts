@@ -23,6 +23,23 @@ import { SetStatusStepTypeId, setStatusStepCommonDefinition } from './set_status
 import { SetTitleStepTypeId, setTitleStepCommonDefinition } from './set_title';
 import { UnassignCaseStepTypeId, unassignCaseStepCommonDefinition } from './unassign_case';
 import {
+  GetCasesByAlertIdStepTypeId,
+  getCasesByAlertIdStepCommonDefinition,
+} from './get_cases_by_alert_id';
+import {
+  GetAllAttachmentsStepTypeId,
+  getAllAttachmentsStepCommonDefinition,
+} from './get_all_attachments';
+import {
+  UpdateObservableStepTypeId,
+  updateObservableStepCommonDefinition,
+} from './update_observable';
+import {
+  DeleteObservableStepTypeId,
+  deleteObservableStepCommonDefinition,
+} from './delete_observable';
+import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
+import {
   addAlertsInputFixture,
   addCategoryInputFixture,
   addEventsInputFixture,
@@ -40,6 +57,15 @@ import {
   setStatusInputFixture,
   setTitleInputFixture,
   unassignCaseInputFixture,
+  getCasesByAlertIdInputFixture,
+  getCasesByAlertIdOutputFixture,
+  getAllAttachmentsInputFixture,
+  getAllAttachmentsOutputFixture,
+  updateObservableInputFixture,
+  deleteObservableInputFixture,
+  deleteObservableOutputFixture,
+  getCasesInputFixture,
+  getCasesOutputFixture,
 } from './test_fixtures';
 
 const singleCaseOutput = { case: createCaseResponseFixture };
@@ -129,6 +155,36 @@ const stepDefinitions = [
     input: addCategoryInputFixture,
     output: singleCaseOutput,
   },
+  {
+    typeId: GetCasesByAlertIdStepTypeId,
+    definition: getCasesByAlertIdStepCommonDefinition,
+    input: getCasesByAlertIdInputFixture,
+    output: getCasesByAlertIdOutputFixture,
+  },
+  {
+    typeId: GetAllAttachmentsStepTypeId,
+    definition: getAllAttachmentsStepCommonDefinition,
+    input: getAllAttachmentsInputFixture,
+    output: getAllAttachmentsOutputFixture,
+  },
+  {
+    typeId: UpdateObservableStepTypeId,
+    definition: updateObservableStepCommonDefinition,
+    input: updateObservableInputFixture,
+    output: singleCaseOutput,
+  },
+  {
+    typeId: DeleteObservableStepTypeId,
+    definition: deleteObservableStepCommonDefinition,
+    input: deleteObservableInputFixture,
+    output: deleteObservableOutputFixture,
+  },
+  {
+    typeId: GetCasesStepTypeId,
+    definition: getCasesStepCommonDefinition,
+    input: getCasesInputFixture,
+    output: getCasesOutputFixture,
+  },
 ] as const;
 
 describe('cases common step definitions', () => {
@@ -142,5 +198,14 @@ describe('cases common step definitions', () => {
 
   it.each(stepDefinitions)('accepts valid output payload for $typeId', ({ definition, output }) => {
     expect(definition.outputSchema.safeParse(output).success).toBe(true);
+  });
+
+  it('rejects non built-in observable type keys for addObservables', () => {
+    expect(
+      addObservablesStepCommonDefinition.inputSchema.safeParse({
+        ...addObservablesInputFixture,
+        observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+      }).success
+    ).toBe(false);
   });
 });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
-import React from 'react';
-import styled from '@emotion/styled';
+import React, { useMemo } from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 /**
@@ -25,35 +25,6 @@ const tableHeight = 282;
  *
  * Hide the empty message when we don't yet have any items and are still not initiated.
  */
-const OverviewTableContainerDiv = styled.div<{
-  fixedHeight?: boolean;
-  isEmptyAndNotInitiated: boolean;
-  shouldUseMobileLayout: boolean;
-}>`
-  ${({ fixedHeight, shouldUseMobileLayout }) =>
-    shouldUseMobileLayout || !fixedHeight
-      ? ''
-      : `
-  min-height: ${tableHeight}px;
-  display: flex;
-  flex-direction: column;
-
-  .euiBasicTable {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-
-    /* Align the pagination to the bottom of the card */
-    > :last-child {
-      margin-top: auto;
-    }
-  `}
-
-  .euiTableRowCell {
-    visibility: ${({ isEmptyAndNotInitiated }) => (isEmptyAndNotInitiated ? 'hidden' : 'visible')};
-  }
-`;
-
 export function OverviewTableContainer({
   children,
   fixedHeight,
@@ -65,13 +36,53 @@ export function OverviewTableContainer({
 }) {
   const { isMedium } = useBreakpoints();
 
-  return (
-    <OverviewTableContainerDiv
-      fixedHeight={fixedHeight}
-      isEmptyAndNotInitiated={isEmptyAndNotInitiated}
-      shouldUseMobileLayout={isMedium}
-    >
-      {children}
-    </OverviewTableContainerDiv>
-  );
+  const containerCss = useMemo(() => {
+    const useFixedLayout = Boolean(fixedHeight && !isMedium);
+
+    return css`
+      min-inline-size: 0;
+
+      ${useFixedLayout
+        ? css`
+            min-height: ${tableHeight}px;
+            display: flex;
+            flex-direction: column;
+          `
+        : undefined}
+
+      .euiBasicTable {
+        min-inline-size: 0;
+
+        ${useFixedLayout
+          ? css`
+              display: flex;
+              flex-direction: column;
+              flex-grow: 1;
+
+              /* Align the pagination to the bottom of the card */
+              > :last-child {
+                margin-top: auto;
+              }
+            `
+          : undefined}
+      }
+
+      /*
+       * Flex items default to min-width: auto, so wide tables clip instead of scrolling.
+       * Match EuiTable scrollableInline behavior with a classic overflow-x fallback and
+       * stable scrollbar gutter so horizontal scroll is discoverable.
+       */
+      .euiBasicTable div:has(> table.euiTable) {
+        min-inline-size: 0;
+        overflow-x: auto;
+        scrollbar-gutter: stable;
+      }
+
+      .euiTableRowCell {
+        visibility: ${isEmptyAndNotInitiated ? 'hidden' : 'visible'};
+      }
+    `;
+  }, [fixedHeight, isEmptyAndNotInitiated, isMedium]);
+
+  return <div css={containerCss}>{children}</div>;
 }

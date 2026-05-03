@@ -171,7 +171,7 @@ const migrateLensComment = ({
       if (isLensMarkdownNode(comment)) {
         // casting here because ts complains that comment isn't serializable because LensMarkdownNode
         // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-        return migrate(comment as SerializableRecord) as LensMarkdownNode;
+        return migrate(comment as unknown as SerializableRecord) as unknown as LensMarkdownNode;
       }
 
       return comment;

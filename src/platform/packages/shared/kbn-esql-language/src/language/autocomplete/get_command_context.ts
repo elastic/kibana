@@ -15,7 +15,6 @@ import type { ParameterHint } from '../../..';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { parametersFromHintsResolvers } from '../../commands/definitions/utils/autocomplete/parameters_from_hints';
 import type { ICommandContext } from '../../commands/registry/types';
-import { esqlCommandRegistry } from '../../commands/registry';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 export const getCommandContext = async (
@@ -53,10 +52,7 @@ export const getCommandContext = async (
         recommendedQueries: [],
         recommendedFields: [],
       };
-      const fromCommand = esqlCommandRegistry.getCommandByName('from');
-      // TODO: remove this once views support is on Technical Preview
-      const viewsSupport = fromCommand?.metadata?.viewsSupport ?? false;
-      const views = viewsSupport ? await callbacks?.getViews?.() : undefined;
+      const views = await callbacks?.getViews?.();
       context = {
         sources: await getSources(),
         editorExtensions,

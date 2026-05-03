@@ -117,7 +117,7 @@ export function DependencyEditor({
       data-test-subj="sloBurnRateRuleAddDependencyButton"
       color={'primary'}
       size="s"
-      iconType={'plusInCircleFilled'}
+      iconType={'plusCircle'}
       onClick={handleOpenPopover}
       aria-label={i18n.translate('xpack.slo.rules.addDependencyAriaLabel', {
         defaultMessage: 'Add dependency',

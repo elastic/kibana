@@ -178,6 +178,18 @@ describe('<InvestigationSection />', () => {
     });
   });
 
+  it('should not render investigation guide when document is a remote alert', async () => {
+    const { queryByTestId } = renderInvestigationSection({
+      ...panelContextValue,
+      indexName: 'remote-cluster:index-name',
+      searchHit: { ...panelContextValue.searchHit, _index: 'remote-cluster:index-name' },
+    });
+
+    await act(async () => {
+      expect(queryByTestId(INVESTIGATION_GUIDE_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
+
   it('should not render investigation guide when document is not signal', async () => {
     const mockGetFieldsData = (field: string) => {
       switch (field) {

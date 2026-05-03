@@ -9,7 +9,8 @@ import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xst
 import { setup, assign, fromObservable, fromEventObservable } from 'xstate';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { SampleDocument, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -20,6 +21,7 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import { processCondition } from '../../utils';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
+import type { PartitionableDefinition } from './types';
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
@@ -34,17 +36,17 @@ export type DocumentMatchFilterOptions = 'matched' | 'unmatched';
 
 export interface RoutingSamplesInput {
   condition?: Condition;
-  definition: Streams.WiredStream.GetResponse;
+  definition: PartitionableDefinition;
   documentMatchFilter: DocumentMatchFilterOptions;
 }
 
 export interface RoutingSamplesContext {
   condition?: Condition;
-  definition: Streams.WiredStream.GetResponse;
+  definition: PartitionableDefinition;
   documents: SampleDocument[];
   documentsError?: Error;
-  approximateMatchingPercentage?: number | null;
-  approximateMatchingPercentageError?: Error;
+  approximateMatchRatio?: number | null;
+  approximateMatchRatioError?: Error;
   documentMatchFilter: DocumentMatchFilterOptions;
   selectedPreview?:
     | { type: 'suggestion'; name: string; index: number }
@@ -103,11 +105,11 @@ export const routingSamplesMachine = setup({
       documentsError: params.error,
     })),
     storeDocumentCounts: assign((_, params: { count?: number | null }) => ({
-      approximateMatchingPercentage: params.count,
-      approximateMatchingPercentageError: undefined,
+      approximateMatchRatio: params.count,
+      approximateMatchRatioError: undefined,
     })),
     storeDocumentCountsError: assign((_, params: { error: Error }) => ({
-      approximateMatchingPercentageError: params.error,
+      approximateMatchRatioError: params.error,
     })),
     setDocumentMatchFilter: assign((_, params: { filter: DocumentMatchFilterOptions }) => ({
       documentMatchFilter: params.filter,
@@ -142,10 +144,10 @@ export const routingSamplesMachine = setup({
   context: ({ input }) => ({
     condition: input.condition,
     definition: input.definition,
-    approximateMatchingPercentage: undefined,
+    approximateMatchRatio: undefined,
     documents: [],
     documentsError: undefined,
-    approximateMatchingPercentageError: undefined,
+    approximateMatchRatioError: undefined,
     selectedPreview: undefined,
     documentMatchFilter: 'matched',
   }),
@@ -357,14 +359,16 @@ function collectDocuments({
     let registerFetchLatency: () => void = () => {};
 
     const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal, retrieveResults: true })
+      .search({ params }, { abortSignal: abortController.signal, returnIntermediateResults: true })
       .pipe(
         tap({
           subscribe: () => {
             if (telemetryClient) {
               registerFetchLatency = telemetryClient.startTrackingPartitioningSamplesFetchLatency({
                 stream_name: input.definition.stream.name,
-                stream_type: 'wired',
+                stream_type: Streams.WiredStream.Definition.is(input.definition.stream)
+                  ? 'wired'
+                  : 'classic',
               });
             }
           },
@@ -484,14 +488,20 @@ const getAbsoluteTimestamps = (data: DataPublicPluginStart) => {
  * ingest in the painless condition checks.
  */
 function getRuntimeMappings(
-  definition: Streams.WiredStream.GetResponse,
+  definition: PartitionableDefinition,
   condition?: Condition
 ): MappingRuntimeFields {
   if (!condition) return {};
 
+  if (!Streams.WiredStream.Definition.is(definition.stream)) {
+    return {};
+  }
+
+  const wiredDefinition = definition as Streams.WiredStream.GetResponse;
+
   const mappedFields = Object.keys({
-    ...definition.inherited_fields,
-    ...definition.stream.ingest.wired.fields,
+    ...wiredDefinition.inherited_fields,
+    ...wiredDefinition.stream.ingest.wired.fields,
   });
 
   return Object.fromEntries(

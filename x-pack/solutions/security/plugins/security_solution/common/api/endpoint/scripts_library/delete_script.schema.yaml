@@ -5,7 +5,7 @@ info:
 paths:
   /api/endpoint/scripts_library/{script_id}:
     delete:
-      summary: Delete a scripts
+      summary: Delete a script
       operationId: EndpointScriptLibraryDeleteScript
       description: Delete a script
       x-codegen-enabled: false
@@ -33,5 +33,5 @@ paths:
               examples:
                 response:
                   summary: Delete script response example.
-                  value:
+                  value: {}
 

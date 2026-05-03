@@ -63,7 +63,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       ? process.env.SCOUT_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build_scout_tests'];
+      : ['build_scout_tests', 'build'];
 
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
@@ -111,9 +111,10 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   // so a concurrent gate failure can cancel or short-circuit them immediately.
   // We register child step keys (not the group key) because `buildkite-agent step cancel`
   // does not work on group keys.
-  for (const { key } of scoutCiRunGroups) {
-    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
-  }
+  bk.setMetadata(
+    'cancel_on_gate_failure_batch:scout',
+    JSON.stringify(scoutCiRunGroups.map(({ key }) => key))
+  );
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);

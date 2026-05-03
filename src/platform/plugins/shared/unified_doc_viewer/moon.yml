@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/restorable-state'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod

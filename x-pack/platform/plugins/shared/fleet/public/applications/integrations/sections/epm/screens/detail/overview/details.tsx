@@ -16,6 +16,7 @@ import {
   EuiNotificationBadge,
   EuiLink,
   EuiPortal,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -33,7 +34,12 @@ import type {
   RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useConfig, useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+import {
+  useConfig,
+  useGetCategoriesQuery,
+  useGetPackageDependencies,
+  useStartServices,
+} from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
@@ -75,6 +81,12 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     isLoading: isChangelogLoading,
     error: changelogError,
   } = useChangelog(packageInfo.name, packageInfo.version);
+
+  const { data: dependenciesData } = useGetPackageDependencies(
+    packageInfo.name,
+    packageInfo.version,
+    { enabled: (packageInfo.requires?.content?.length ?? 0) > 0 }
+  );
 
   const mergedCategories: Array<string | undefined> = useMemo(() => {
     let allCategories: Array<string | undefined> = [];
@@ -331,6 +343,35 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       ),
     });
 
+    const dependencies = dependenciesData?.items;
+    if (dependencies && dependencies.length > 0) {
+      items.push({
+        title: (
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.epm.dependenciesLabel"
+              defaultMessage="Dependencies"
+            />
+            &nbsp;
+            <EuiIconTip
+              type="info"
+              content={i18n.translate('xpack.fleet.epm.dependenciesTooltip', {
+                defaultMessage:
+                  'The integration requires the listed dependencies. They will be installed with the integration.',
+              })}
+            />
+          </EuiTextColor>
+        ),
+        description: (
+          <>
+            {dependencies.map((dep) => (
+              <p key={dep.name}>{dep.title}</p>
+            ))}
+          </>
+        ),
+      });
+    }
+
     return items;
   }, [
     changelog,
@@ -341,6 +382,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     packageInfo.license,
     packageInfo.licensePath,
     packageInfo.notice,
+    dependenciesData,
     packageInfo.source?.license,
     packageInfo.owner.type,
     packageInfo.version,

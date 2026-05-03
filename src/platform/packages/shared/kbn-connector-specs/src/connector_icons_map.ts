@@ -112,6 +112,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
   [
+    '.azure-blob',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureBlob" */ './specs/azure_blob/icon')),
+  ],
+  [
     '.firecrawl',
     lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
   ],
@@ -151,10 +155,18 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
   ],
   [
+    '.gcp_cloud_functions',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpCloudFunctions" */ './specs/gcp_cloud_functions/icon'
+        )
+    ),
+  ],
+  [
     '.amazon_s3',
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
-
   [
     '.sharepoint-server',
     lazy(
@@ -179,5 +191,10 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
         )
     ),
+  ],
+
+  [
+    '.snowflake',
+    lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
   ],
 ]);

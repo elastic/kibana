@@ -219,7 +219,15 @@
             "tags": [],
             "label": "type",
             "description": [
-              "Event type {@link UserActivityEventType}."
+              "Event type ",
+              {
+                "pluginId": "@kbn/core-user-activity-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUserActivityServerPluginApi",
+                "section": "def-server.UserActivityEventType",
+                "text": "UserActivityEventType"
+              },
+              "."
             ],
             "signature": [
               "\"info\" | \"error\" | \"start\" | \"end\" | \"user\" | \"group\" | \"allowed\" | \"indicator\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
@@ -419,6 +427,7 @@
                 "lineNumber": 104,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "TrackUserActionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -479,6 +488,7 @@
                 "lineNumber": 117,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "TrackUserActionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -498,7 +508,15 @@
         "tags": [],
         "label": "UserActivityActionId",
         "description": [
-          "Closed union derived from the keys of {@link userActivityActions}. @public"
+          "Closed union derived from the keys of ",
+          {
+            "pluginId": "@kbn/core-user-activity-server",
+            "scope": "server",
+            "docId": "kibKbnCoreUserActivityServerPluginApi",
+            "section": "def-server.userActivityActions",
+            "text": "userActivityActions"
+          },
+          ". @public"
         ],
         "signature": [
           "\"log_in_user\" | \"log_out_user\""

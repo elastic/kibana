@@ -51,6 +51,7 @@
             "lineNumber": 60,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DocOverrides",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -90,6 +91,7 @@
             "lineNumber": 26,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "DocOverrides",
             "trackAdoption": false,
             "isRequired": true
           }

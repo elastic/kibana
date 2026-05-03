@@ -77,6 +77,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
       case 'onFetchItemsError': {
         return {
           ...state,
+          hasInitialFetchReturned: true,
           isFetchingItems: false,
           items: [],
           totalItems: 0,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormTestProvider } from '../../components/test_utils';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 import type { RenderResult } from '@testing-library/react';
@@ -43,6 +43,32 @@ const renderWithSecretFields = ({
 };
 
 describe('EncryptedFieldsCallout', () => {
+  it('omits hidden secrets fields (e.g. fixed OAuth URLs) from the create callout copy', () => {
+    const { getByText, queryByText } = render(
+      <FormTestProvider>
+        <UseField
+          path="secrets.authorizationUrl"
+          config={{ label: 'Authorization URL', type: FIELD_TYPES.HIDDEN }}
+        />
+        <UseField
+          path="secrets.tokenUrl"
+          config={{ label: 'Token URL', type: FIELD_TYPES.HIDDEN }}
+        />
+        <UseField path="secrets.scope" config={{ label: 'Scope', type: FIELD_TYPES.HIDDEN }} />
+        <UseField path="secrets.clientId" config={{ label: 'Client ID' }} />
+        <UseField path="secrets.clientSecret" config={{ label: 'Client secret' }} />
+        <EncryptedFieldsCallout isEdit={false} isMissingSecrets={false} />
+      </FormTestProvider>
+    );
+
+    expect(
+      getByText(
+        'Remember your Client ID and Client secret values. You must reenter them each time you edit the connector.'
+      )
+    ).toBeInTheDocument();
+    expect(queryByText(/Authorization URL/)).not.toBeInTheDocument();
+  });
+
   const isCreateTests: Array<[number, string]> = [
     [1, 'Remember your label0 value. You must reenter it each time you edit the connector.'],
     [

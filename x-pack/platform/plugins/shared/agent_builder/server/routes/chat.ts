@@ -20,15 +20,20 @@ import {
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
   createBadRequestError,
+  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import {
+  ConnectorOrInferenceIdConflictError,
+  resolveConnectorOrInferenceId,
+} from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { AgentExecutionService } from '../services/execution';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 
 export function registerChatRoutes({
@@ -47,11 +52,24 @@ export function registerChatRoutes({
       },
     }),
     connector_id: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Optional connector ID for the agent to use for external integrations.',
-        },
-      })
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional connector ID for the agent to use for model routing. Mutually exclusive with `inference_id`; omit or use only one.',
+          },
+        })
+      )
+    ),
+    inference_id: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.',
+          },
+        })
+      )
     ),
     conversation_id: schema.maybe(
       schema.string({
@@ -210,6 +228,20 @@ export function registerChatRoutes({
     }
   };
 
+  const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
+    try {
+      return resolveConnectorOrInferenceId({
+        connectorId: payload.connector_id,
+        inferenceId: payload.inference_id,
+      });
+    } catch (e) {
+      if (e instanceof ConnectorOrInferenceIdConflictError) {
+        throw createBadRequestError(e.message);
+      }
+      throw e;
+    }
+  };
+
   const validateConfigurationOverrides = async ({
     payload,
     request,
@@ -244,7 +276,6 @@ export function registerChatRoutes({
   }) => {
     const {
       agent_id: agentId,
-      connector_id: connectorId,
       conversation_id: conversationId,
       input,
       prompts,
@@ -256,10 +287,13 @@ export function registerChatRoutes({
       _execution_mode: executionMode,
     } = payload;
 
+    const connectorId = resolveConnectorIdFromPayload(payload);
+
     const useTaskManager =
       executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
 
     const { events$ } = await executionService.executeAgent({
+      mode: AgentExecutionMode.conversation,
       request,
       abortSignal,
       useTaskManager,
@@ -345,10 +379,10 @@ export function registerChatRoutes({
           body: {
             conversation_id: convId,
             round_id: round.id,
-            ...omit(round, ['id', 'input', 'response', 'pending_prompt', 'state']),
+            ...omit(round, ['id', 'input', 'response', 'pending_prompts', 'state']),
             response: {
               ...round.response,
-              prompt: round.pending_prompt,
+              prompts: round.pending_prompts,
             },
           },
         });
@@ -405,20 +439,7 @@ export function registerChatRoutes({
         });
 
         return response.ok({
-          headers: {
-            // cloud compress text/* types, loosing chunking capabilities which we need for SSE
-            'Content-Type': cloud?.isCloudEnabled
-              ? 'application/octet-stream'
-              : 'text/event-stream',
-            // another attempt at disabling compression
-            'Content-Encoding': 'identity',
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-            'Transfer-Encoding': 'chunked',
-            'X-Content-Type-Options': 'nosniff',
-            // This disables response buffering on proxy servers
-            'X-Accel-Buffering': 'no',
-          },
+          headers: getSSEResponseHeaders(cloud?.isCloudEnabled ?? false),
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {

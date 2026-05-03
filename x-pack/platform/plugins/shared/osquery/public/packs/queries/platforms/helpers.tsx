@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { SUPPORTED_PLATFORMS } from './constants';
 
-import linuxSvg from './logos/linux.svg';
-import windowsSvg from './logos/windows.svg';
-import macosSvg from './logos/macos.svg';
+import { LinuxIcon } from './logos/linux';
+import { MacOsIcon } from './logos/macos';
+import { WindowsIcon } from './logos/windows';
 import { PlatformType } from './types';
 
-export const getPlatformIconModule = (platform: string) => {
+export const getPlatformIconModule = (platform: string): IconType => {
   switch (platform) {
     case 'darwin':
-      return macosSvg;
+      return MacOsIcon;
     case 'linux':
-      return linuxSvg;
+      return LinuxIcon;
     case 'windows':
-      return windowsSvg;
+      return WindowsIcon;
     default:
-      return `${platform}`;
+      return 'empty';
   }
 };
 

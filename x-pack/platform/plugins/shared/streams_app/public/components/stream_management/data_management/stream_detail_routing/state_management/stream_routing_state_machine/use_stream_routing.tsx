@@ -148,6 +148,27 @@ export const useStreamRoutingEvents = () => {
       saveQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
         service.send({ type: 'queryStream.save', name, esqlQuery });
       },
+      editQueryStream: (name: string) => {
+        service.send({ type: 'queryStream.edit', name });
+      },
+      cancelQueryStreamEdit: () => {
+        service.send({ type: 'queryStream.cancelEdit' });
+      },
+      updateQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
+        service.send({ type: 'queryStream.update', name, esqlQuery });
+      },
+      deleteQueryStream: async () => {
+        service.send({ type: 'queryStream.delete' });
+        const snapshot = await waitFor(
+          service,
+          (s) =>
+            s.matches({ ready: { queryMode: 'idle' } }) ||
+            s.matches({ ready: { queryMode: { editing: 'changing' } } })
+        );
+        if (snapshot.matches({ ready: { queryMode: { editing: 'changing' } } })) {
+          throw new Error('Failed to delete stream');
+        }
+      },
     };
   }, [service]);
 };
@@ -198,9 +219,7 @@ export const useStreamSamplesSelector = <T,>(
   const routingSamplesRef = useStreamSamplesRef();
 
   if (!routingSamplesRef) {
-    throw new Error(
-      'useStreamSamplesSelector must be used within a StreamEnrichmentContextProvider'
-    );
+    throw new Error('useStreamSamplesSelector must be used within a StreamRoutingContextProvider');
   }
 
   return useSelector(routingSamplesRef, selector);

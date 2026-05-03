@@ -227,6 +227,16 @@ describe('<UserDetails />', () => {
   });
 
   describe('Related hosts', () => {
+    it('renders related hosts table when attack cell actions are used without DocumentDetailsContext', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <UserDetails {...defaultProps} isAttackDetails={true} />
+        </TestProviders>
+      );
+      expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID)).toBeInTheDocument();
+    });
+
     it('should render the related host table with correct dates and indices', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({

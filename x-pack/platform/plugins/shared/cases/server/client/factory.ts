@@ -80,6 +80,11 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  closeReasonValidator?: (
+    closeReason: string,
+    owner: string,
+    request: KibanaRequest
+  ) => Promise<boolean>;
 }
 
 /**
@@ -158,6 +163,10 @@ export class CasesClientFactory {
     const userInfo = await this.getUserInfo(request);
 
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
+    const { closeReasonValidator } = this.options;
+    const boundCloseReasonValidator = closeReasonValidator
+      ? (closeReason: string, owner: string) => closeReasonValidator(closeReason, owner, request)
+      : undefined;
 
     return createCasesClient({
       services,
@@ -178,6 +187,7 @@ export class CasesClientFactory {
       fileService,
       usageCounter: this.options.usageCounter,
       config: this.options.config,
+      closeReasonValidator: boundCloseReasonValidator,
     });
   }
 

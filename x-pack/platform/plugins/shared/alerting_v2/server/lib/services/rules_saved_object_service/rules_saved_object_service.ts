@@ -56,10 +56,19 @@ export interface RulesSavedObjectServiceContract {
   ): Promise<BulkUpdateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
-  find(params: { page: number; perPage: number; filter?: string; search?: string }): Promise<{
+  find(params: {
+    page: number;
+    perPage: number;
+    filter?: string;
+    search?: string;
+    searchFields?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
     total: number;
   }>;
+  findTags(): Promise<string[]>;
 }
 
 @injectable()
@@ -217,21 +226,46 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     perPage,
     filter,
     search,
+    searchFields,
+    sortField = 'updatedAt',
+    sortOrder = 'desc',
   }: {
     page: number;
     perPage: number;
     filter?: string;
     search?: string;
+    searchFields?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
   }) {
-    const trimmedSearch = search?.trim();
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      sortField: 'updatedAt',
-      sortOrder: 'desc',
-      ...(trimmedSearch ? { search: trimmedSearch, searchFields: ['metadata.name'] } : {}),
+      sortField,
+      sortOrder,
       ...(filter ? { filter } : {}),
+      ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
     });
+  }
+
+  public async findTags(): Promise<string[]> {
+    const result = await this.client.find<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      aggs: {
+        tags: {
+          terms: {
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
+            size: 10000,
+            order: { _key: 'asc' },
+          },
+        },
+      },
+    });
+
+    const aggs = result.aggregations as { tags?: { buckets: Array<{ key: string }> } } | undefined;
+
+    return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
   }
 }

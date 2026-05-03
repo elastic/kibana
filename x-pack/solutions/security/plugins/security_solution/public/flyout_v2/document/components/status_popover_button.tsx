@@ -47,6 +47,11 @@ interface StatusPopoverButtonProps {
    * Optional callback to refresh the hosting flyout after a status mutation.
    */
   onStatusUpdated?: () => void;
+  /**
+   * When true, suppresses the status-change popover regardless of user permissions.
+   * Use this when status mutations are not possible (e.g. remote/CCS documents).
+   */
+  disabled: boolean;
 }
 
 const getFieldFormat = (field?: { format?: string | SerializedFieldFormat }) =>
@@ -63,6 +68,7 @@ export const StatusPopoverButton = memo(
     enrichedFieldInfo,
     scopeId,
     onStatusUpdated,
+    disabled,
   }: StatusPopoverButtonProps) => {
     const popoverTitleId = useGeneratedHtmlId();
 
@@ -83,9 +89,13 @@ export const StatusPopoverButton = memo(
       [actionItems, actionItemsPanels]
     );
 
-    // statusPopoverVisible includes the logic for the visibility of the popover in
-    // case actionItems is an empty array ( ex, when user has read access ).
-    const statusPopoverVisible = useMemo(() => actionItems.length > 0, [actionItems]);
+    // statusPopoverVisible controls popover availability: requires both write-capable
+    // action items (i.e. user has update permissions) and the component not being disabled
+    // (e.g. remote/CCS documents where status mutations are not possible).
+    const statusPopoverVisible = useMemo(
+      () => actionItems.length > 0 && !disabled,
+      [actionItems, disabled]
+    );
 
     const button = useMemo(
       () => (

@@ -12,9 +12,12 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const gridContainer = css`
-    min-height: 400px;
     display: flex;
     flex-direction: column;
+  `;
+
+  const gridContainerLoading = css`
+    min-height: 400px;
   `;
 
   const gridProgressBar = css`
@@ -89,6 +92,7 @@ export const useStyles = () => {
   return {
     gridStyle,
     gridContainer,
+    gridContainerLoading,
     gridProgressBar,
   };
 };

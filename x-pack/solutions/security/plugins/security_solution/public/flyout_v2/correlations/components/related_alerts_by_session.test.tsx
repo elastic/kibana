@@ -16,7 +16,7 @@ import {
 } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../../document/hooks/use_fetch_related_alerts_by_session';
-import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -26,7 +26,7 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../document/hooks/use_fetch_related_alerts_by_session');
-jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../common/hooks/is_in_security_app');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 

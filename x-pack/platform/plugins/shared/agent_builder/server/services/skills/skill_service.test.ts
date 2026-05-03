@@ -21,7 +21,7 @@ jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
   isAllowedBuiltinSkill: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../runner/store/volumes/skills/utils', () => ({
+jest.mock('../execution/runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
 

@@ -74,7 +74,12 @@ export const AutoRefresh: Story = {
     settings: {
       roundRelativeTime: true,
       timePrecision: 's',
-      autoRefresh: { isEnabled: true, isPaused: false, interval: 10_000 },
+      autoRefresh: {
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 's',
+      },
     },
     showTimeWindowButtons: true,
     timeZone: 'Europe/Amsterdam',

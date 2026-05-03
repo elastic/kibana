@@ -8,14 +8,14 @@
 export type { CommunicatesWithIntegrationConfig } from './types';
 
 import { awsCloudTrailIntegration } from './aws_cloudtrail';
-import { azureSigninLogsIntegration } from './azure_signinlogs';
+import { azureAuditLogsIntegration } from './azure_auditlogs';
 import { oktaIntegration } from './okta';
 import { jamfProIntegration } from './jamf_pro';
 import type { CommunicatesWithIntegrationConfig } from './types';
 
 export const INTEGRATION_CONFIGS: CommunicatesWithIntegrationConfig[] = [
   awsCloudTrailIntegration,
-  azureSigninLogsIntegration,
+  azureAuditLogsIntegration,
   oktaIntegration,
   jamfProIntegration,
 ];

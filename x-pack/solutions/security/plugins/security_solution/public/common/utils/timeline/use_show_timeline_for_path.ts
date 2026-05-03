@@ -7,7 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 
+import { ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS } from '../../../management/common/constants';
 import type { NormalizedLink } from '../../links';
 import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
@@ -19,7 +21,11 @@ const useHiddenTimelineRoutes = () => {
     () =>
       Object.values(normalizedLinks).reduce((acc: string[], link: NormalizedLink) => {
         if (link.hideTimeline) {
-          acc.push(link.path);
+          if (link.id === SecurityPageName.artifacts) {
+            acc.push(...ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS);
+          } else {
+            acc.push(link.path);
+          }
         }
         return acc;
       }, []),

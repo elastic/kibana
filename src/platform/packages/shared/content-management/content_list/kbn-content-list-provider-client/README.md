@@ -19,9 +19,10 @@ Use this provider when:
 This adapter is designed for easy migration from `TableListView`. It:
 
 - **Passes only `searchQuery`** to your existing `findItems` function (matching `TableListView` behavior).
-- **Applies client-side sorting and pagination** on the returned results — your `findItems` fetches all matching items, and the adapter sorts and paginates in memory.
+- **Caches the server response by `searchQuery`** — changing filters, sort, or page reuses the cached items and does not trigger a new server round-trip.
+- **Applies client-side filtering, sorting, and pagination** in memory on the cached items. Your `findItems` returns all matching items; the adapter narrows them.
 - **Does not forward** `sort`, `page`, or `filters` parameters to your `findItems` implementation.
-- **Caches by `searchQuery`** — React Query caches results based on the search query. Changing sort or page reuses cached data.
+- **Exposes `onInvalidate`** on the data source so the core provider can force a fresh server fetch after mutations (e.g. delete). The consumer never calls this directly — it happens automatically.
 
 ## Usage
 
@@ -64,27 +65,6 @@ const findItems = useCallback(
 >
   <MyDashboardList />
 </ContentListClientProvider>
-```
-
-### Using the Adapter Function Directly
-
-If you need more control, you can use the adapter function directly:
-
-```tsx
-import { createFindItemsFn } from '@kbn/content-list-provider-client';
-import { ContentListProvider } from '@kbn/content-list-provider';
-
-// Wrap your existing findItems.
-const findItems = createFindItemsFn(myExistingFindItems);
-
-// Use with the base provider.
-<ContentListProvider
-  id="dashboard"
-  labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-  dataSource={{ findItems }}
->
-  <MyListComponent />
-</ContentListProvider>;
 ```
 
 ## Props
@@ -132,8 +112,9 @@ This is the same signature expected by `TableListView.findItems`.
 export { ContentListClientProvider } from './provider';
 export type { ContentListClientProviderProps } from './provider';
 
-// Adapter for direct usage.
-export { createFindItemsFn } from './strategy';
+// Strategy.
+export { createClientStrategy } from './strategy';
+export type { ClientStrategy } from './strategy';
 
 // Types.
 export type {

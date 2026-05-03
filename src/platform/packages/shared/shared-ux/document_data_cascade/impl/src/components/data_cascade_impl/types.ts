@@ -12,7 +12,10 @@ import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@el
 import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
-import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
+import type {
+  CascadeVirtualizerProps,
+  CascadeRootVirtualizerReturnValue,
+} from '../../lib/core/virtualizer';
 import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
 import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
@@ -76,7 +79,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets collapsed, possibly to clean up any data associated with the leaf node or cancel any pending requests if necessary.
    */
   onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
-  getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
+  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
@@ -192,7 +195,7 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
   /**
    * Accessor for the parent cascade virtualizer instance.
    */
-  getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
+  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
 }
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<

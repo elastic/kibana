@@ -7,12 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { PROJECT_ROUTING, ProjectRoutingAccess, type ICPSManager } from '@kbn/cps-utils';
+
+export const createCpsManagerMock = (): jest.Mocked<ICPSManager> => ({
+  whenReady: jest.fn().mockResolvedValue(undefined),
+  fetchProjects: jest.fn().mockResolvedValue(null),
+  getTotalProjectCount: jest.fn().mockReturnValue(1),
+  getProjectRouting$: jest.fn(() => of(undefined)),
+  setProjectRouting: jest.fn(),
+  getProjectRouting: jest.fn(() => undefined),
+  getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+  updateDefaultProjectRouting: jest.fn(),
+  getProjectPickerAccess$: jest.fn(() => of(ProjectRoutingAccess.DISABLED)),
+  registerAppAccess: jest.fn(),
+});
 
 let mockProjectRoutingSubject: BehaviorSubject<string | undefined> | undefined;
 
 export const cpsServiceMock = {
   cpsManager: {
+    ...createCpsManagerMock(),
     getProjectRouting: jest.fn(() => undefined),
     setProjectRouting: jest.fn((value: string | undefined) => {
       if (!mockProjectRoutingSubject) {

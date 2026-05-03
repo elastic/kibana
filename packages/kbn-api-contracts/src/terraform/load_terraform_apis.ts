@@ -15,6 +15,7 @@ export interface TerraformApi {
   path: string;
   methods: string[];
   resource: string;
+  owners: string[];
 }
 
 export interface TerraformApisConfig {

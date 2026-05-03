@@ -7,30 +7,27 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+import type { PhaseName } from '@kbn/streams-schema';
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
 
 export interface DeleteSearchableSnapshotToggleFieldProps {
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   phaseName: PhaseName | undefined;
   dataTestSubj: string;
 }
 
 export const DeleteSearchableSnapshotToggleField = ({
-  form,
   phaseName,
   dataTestSubj,
 }: DeleteSearchableSnapshotToggleFieldProps) => {
   const path = `_meta.delete.deleteSearchableSnapshotEnabled`;
-  useFormData({ form, watch: path });
+  const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
+  useWatch({ control, name: path });
+
+  const { field } = useController({ control, name: path });
 
   if (phaseName !== 'delete') return null;
-
-  const field = form.getFields()[path];
-  if (!field) return null;
 
   const deleteSearchableSnapshotValue = Boolean(field.value);
 
@@ -45,7 +42,7 @@ export const DeleteSearchableSnapshotToggleField = ({
           })}
           data-test-subj={`${dataTestSubj}DeleteSearchableSnapshotCheckbox`}
           onChange={(e) => {
-            field.onChange(e);
+            field.onChange(e.target.checked);
           }}
         />
       </EuiFlexItem>

@@ -38,7 +38,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ebt-tools'
   - '@kbn/core-analytics-server'
-  - '@kbn/storybook'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-common'
   - '@kbn/core-http-browser'

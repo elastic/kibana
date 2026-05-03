@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/std'
   - '@kbn/io-ts-utils'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package

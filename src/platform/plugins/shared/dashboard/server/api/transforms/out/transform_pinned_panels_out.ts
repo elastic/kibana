@@ -15,13 +15,13 @@ import type {
 import { flow } from 'lodash';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import type { DashboardState } from '../../types';
+import type { DashboardState, Warnings } from '../../types';
 
 import type {
   DashboardPinnedPanelsState as DashboardControlsState,
   DashboardPinnedPanelsState,
 } from '../../../../common';
-import { embeddableService, logger } from '../../../kibana_services';
+import { embeddableService } from '../../../kibana_services';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
@@ -30,7 +30,7 @@ export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[]
-): DashboardState['pinned_panels'] {
+): { panels: DashboardState['pinned_panels']; warnings: Warnings } {
   if (pinnedPanels) {
     /**
      * >=9.4, pinned panels are stored in the SO under the key `pinned_panels` without any JSON bucketing
@@ -44,7 +44,7 @@ export function transformPinnedPanelsOut(
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
      * This was before pinned panels were transformed to be generic - they **only** stored controls
      */
-    const controls = controlGroupInput.panelsJSON
+    const { warnings, panels: controls } = controlGroupInput.panelsJSON
       ? injectPinnedPanelReferences(
           flow(
             JSON.parse,
@@ -53,7 +53,7 @@ export function transformPinnedPanelsOut(
           )(controlGroupInput.panelsJSON),
           containerReferences
         )
-      : [];
+      : { warnings: [], panels: [] };
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
     const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
       controlGroupInput.ignoreParentSettingsJSON
@@ -76,9 +76,9 @@ export function transformPinnedPanelsOut(
         },
       }));
     }
-    return controls;
+    return { warnings, panels: controls };
   }
-  return [];
+  return { warnings: [], panels: [] };
 }
 
 /**
@@ -106,7 +106,7 @@ export function transformPinnedPanelProperties(
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ id, type, grow, width, ...rest }) => {
       return {
-        uid: id,
+        id,
         type: transformType(type),
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
@@ -121,8 +121,10 @@ export function transformPinnedPanelProperties(
 function injectPinnedPanelReferences(
   controls: PinnedPanelsState,
   containerReferences: Reference[]
-): DashboardPinnedPanelsState {
+): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedControls: DashboardControlsState = [];
+  const warnings: Warnings = [];
+
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
     const { config, ...rest } = control;
@@ -130,17 +132,19 @@ function injectPinnedPanelReferences(
       try {
         transformedControls.push({
           ...rest,
-          config: transforms.transformOut(config, [], containerReferences, control.uid),
+          config: transforms.transformOut(config, [], containerReferences, control.id),
         } as DashboardControlsState[number]);
-      } catch (transformOutError) {
-        // do not prevent read on transformOutError
-        logger.warn(
-          `Unable to transform "${control.type}" embeddable state on read. Error: ${transformOutError.message}`
-        );
+      } catch (e) {
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: control.type,
+          panel_config: control.config,
+          message: `Unable to transform pinned panel config. Error: ${e.message}`,
+        });
       }
     } else {
       transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
     }
   });
-  return transformedControls;
+  return { warnings, panels: transformedControls };
 }
