@@ -6,8 +6,33 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { getExcludeTasksFilter } from './get_exclude_tasks_filter';
+import {
+  UiamApiKeyProvisioningEntityType,
+  UiamApiKeyProvisioningStatus,
+} from '@kbn/uiam-api-keys-provisioning-status';
+import { NON_CLOUD_USER_API_KEY_CREATOR_ERROR, GET_STATUS_BATCH_SIZE } from '../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
+import { getExcludeTasksFilter } from './get_exclude_tasks_filter';
+
+function createStatusSavedObject(
+  entityId: string,
+  status: UiamApiKeyProvisioningStatus = UiamApiKeyProvisioningStatus.COMPLETED,
+  message?: string
+) {
+  return {
+    id: entityId,
+    type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+    attributes: {
+      entityId,
+      entityType: UiamApiKeyProvisioningEntityType.TASK,
+      status,
+      ...(message ? { message } : {}),
+    },
+    references: [],
+    score: 1,
+    namespaces: ['default'],
+  };
+}
 
 describe('getExcludeTasksFilter', () => {
   it('returns empty when there are no status docs', async () => {
@@ -27,27 +52,84 @@ describe('getExcludeTasksFilter', () => {
     const client = savedObjectsRepositoryMock.create();
     client.find.mockResolvedValueOnce({
       saved_objects: [
-        {
-          id: '1',
-          type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-          attributes: { entityId: 't1', entityType: 'task', status: 'skipped' },
-          references: [],
-          score: 0,
-          namespaces: ['default'],
-        },
-        {
-          id: '2',
-          type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-          attributes: { entityId: 't2', entityType: 'task', status: 'completed' },
-          references: [],
-          score: 0,
-          namespaces: ['default'],
-        },
+        createStatusSavedObject('t1', UiamApiKeyProvisioningStatus.SKIPPED),
+        createStatusSavedObject('t2', UiamApiKeyProvisioningStatus.COMPLETED),
       ],
       total: 2,
       per_page: 500,
       page: 1,
     } as never);
+
+    const result = await getExcludeTasksFilter(client);
+    expect(result.sort()).toEqual(['t1', 't2']);
+  });
+
+  it('includes failed non-Cloud-user conversion errors in the exclusion query', async () => {
+    const client = savedObjectsRepositoryMock.create();
+    client.find.mockResolvedValue({
+      saved_objects: [
+        createStatusSavedObject(
+          'task-1',
+          UiamApiKeyProvisioningStatus.FAILED,
+          NON_CLOUD_USER_API_KEY_CREATOR_ERROR
+        ),
+      ],
+      total: 1,
+      per_page: 500,
+      page: 1,
+    });
+
+    const result = await getExcludeTasksFilter(client);
+    expect(result).toBeDefined();
+
+    const findFilter = client.find.mock.calls[0][0].filter;
+    expect(findFilter.function).toBe('and');
+    expect(findFilter.arguments[0].function).toBe('or');
+    expect(findFilter.arguments[0].arguments).toContainEqual(
+      expect.objectContaining({
+        function: 'and',
+        arguments: expect.arrayContaining([
+          expect.objectContaining({
+            function: 'is',
+            arguments: expect.arrayContaining([
+              expect.objectContaining({
+                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.status`,
+              }),
+              expect.objectContaining({ value: UiamApiKeyProvisioningStatus.FAILED }),
+            ]),
+          }),
+          expect.objectContaining({
+            function: 'is',
+            arguments: expect.arrayContaining([
+              expect.objectContaining({
+                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.message`,
+              }),
+              expect.objectContaining({
+                type: 'wildcard',
+                value: expect.stringContaining(NON_CLOUD_USER_API_KEY_CREATOR_ERROR),
+              }),
+            ]),
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('paginates through multiple pages of status docs', async () => {
+    const client = savedObjectsRepositoryMock.create();
+    client.find
+      .mockResolvedValueOnce({
+        saved_objects: [createStatusSavedObject('t1')],
+        total: 501,
+        per_page: GET_STATUS_BATCH_SIZE,
+        page: 1,
+      } as never)
+      .mockResolvedValueOnce({
+        saved_objects: [createStatusSavedObject('t2')],
+        total: 501,
+        per_page: GET_STATUS_BATCH_SIZE,
+        page: 2,
+      } as never);
 
     const result = await getExcludeTasksFilter(client);
     expect(result.sort()).toEqual(['t1', 't2']);

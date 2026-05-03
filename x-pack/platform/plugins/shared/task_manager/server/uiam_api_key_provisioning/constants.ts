@@ -31,4 +31,7 @@ export const FETCH_BATCH_SIZE = 500;
  */
 export const GET_STATUS_BATCH_SIZE = 500;
 
+export const NON_CLOUD_USER_API_KEY_CREATOR_ERROR =
+  'Elasticsearch API key creator is not a Cloud user';
+
 export const TAGS = ['serverless', 'task-manager', 'uiam-api-key-provisioning', 'background-task'];
