@@ -85,13 +85,44 @@ When the user just wants to **list** monitors matching a keyword, summarize the 
 ## After a Successful Tool Call
 
 The tool returns a structured result with:
-- \`status\`: one of \`proposed\` (new), \`updated\` (existing), \`incomplete\` (still missing required fields), \`cli_managed\` (rejected — project-origin).
-- \`attachment_id\`: reuse this on follow-up calls to update the same draft.
+- \`status\`: what the **tool** just did to the conversation attachment record. One of \`proposed\` (created a new draft), \`updated\` (mutated an existing record — note: this can be either a draft OR a saved monitor), \`incomplete\` (still missing required fields), \`cli_managed\` (rejected — project-origin).
+- \`lifecycle\`: what the **monitor itself** is right now. One of \`draft\` (no \`config_id\` — not yet in Synthetics) or \`saved\` (has \`config_id\` — already persisted). **This is what controls the Create-vs-Update wording you give the user**, not \`status\`.
+- \`attachment_id\`: reuse this on follow-up calls to update the same record.
 - \`saveable\`: \`true\` when the draft has all of name + url + schedule + locations.
 - \`missing_fields\`: present when \`saveable: false\` — list the LLM should address with further \`operations[]\` calls or by asking the user.
-- \`monitor\`: a small summary (name, type, schedule, url, locations_count, enabled, origin) — use this in the natural-language reply, not the full attachment.
+- \`monitor\`: a small summary (name, type, schedule, url, locations_count, enabled, origin, config_id) — use this in the natural-language reply, not the full attachment.
 
-Render the monitor attachment inline in the final assistant turn so the user sees the proposed state with Create/Update buttons. Do **not** render the same attachment multiple times in one turn.
+Render the monitor attachment in the final assistant turn so the user can review it. Do **not** render the same attachment multiple times in one turn.
+
+### Choose Create vs Update strictly from \`lifecycle\` (not \`status\`)
+
+\`status: 'updated'\` only means "the tool mutated an existing attachment record". That record can still be a draft (no \`config_id\`) — for example, a draft the agent composed in a previous turn that the user has never clicked **Create** on. Telling the user to "click Update" in that case is wrong: the canvas will show **Create**, the user will be confused, and the action will create a duplicate row.
+
+The correct mapping is:
+
+- \`lifecycle: 'draft'\` → tell the user to click **Create**. Examples: "Click **Create** in the canvas to save the monitor to Synthetics." / "Open the preview and click **Create** when you're ready."
+- \`lifecycle: 'saved'\` → tell the user to click **Update**. Examples: "Click **Update** in the canvas to push your changes." / "Open the preview and click **Update** to apply."
+- \`status: 'incomplete'\` (regardless of lifecycle) → do **not** point the user at Create/Update at all. List the \`missing_fields\` and either call \`manage_synthetics_monitor\` again with the missing operations or ask the user for the missing input.
+- \`status: 'cli_managed'\` → the monitor is read-only; explain it's CLI-managed and do not offer Create/Update.
+
+### Where the Create / Update buttons live (do not get this wrong)
+
+The chat shows a **read-only inline preview card** for the attachment. The **Create** / **Update** button lives in the **canvas flyout** that opens when the user clicks the inline preview (or that is already open from a previous turn). The flyout's position depends on the user's layout: it may dock to the right of the chat, appear as a sidebar, or open full-screen on narrow viewports — so its **direction relative to the chat is not guaranteed**.
+
+Phrase the call-to-action in a layout-agnostic way:
+
+- **Good:** "Click **Create** in the canvas to save the monitor to Synthetics."
+- **Good:** "Click **Update** in the preview panel to push your changes."
+- **Good:** "Open the monitor preview and click **Create** to save it."
+- **Bad:** "Click Create in the card above" — the canvas may be to the side or below.
+- **Bad:** "Click Create in the card below" — same problem.
+- **Bad:** "Click Create in the inline card" — the inline card has no buttons.
+
+### Avoid creating duplicate drafts
+
+Before calling \`manage_synthetics_monitor\` **without** \`monitor_attachment_id\`, check whether the conversation already carries a \`${MONITOR_MANAGEMENT_ATTACHMENT_TYPE}\` attachment that matches the user's reference (by name, URL, or \`config_id\`). If yes, reuse that attachment's id — creating a fresh draft when an existing attachment is in scope leaves the user with two cards (one saved, one draft) and the canvas will open on the new draft, hiding the saved monitor's **Update** button.
+
+When the user references an existing monitor by name (e.g. "update Last monitor"), prefer the attachment whose \`monitor.config_id\` is set — that is the persisted monitor; an attachment without \`config_id\` is a never-saved draft and would be the wrong target for an "update" request.
 
 ## Edge Cases
 

@@ -7,6 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/logging';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -17,6 +19,7 @@ import {
   type MonitorAttachmentData,
 } from '../../../../common/agent_builder';
 import { ConfigKey } from '../../../../common/runtime_types';
+import { fetchMonitorAttachmentData } from '../../internal/monitor_attachment_data';
 import { monitorOperationSchema } from './operations';
 import {
   MonitorOperationValidationError,
@@ -71,8 +74,28 @@ Use \`operations[]\` (in order) to:
 
 Look up location ids via the \`monitor-management\` skill's SML search before calling \`set_locations\`. Project-origin (CLI-managed) monitors are read-only via this tool.`;
 
+/**
+ * Two orthogonal axes the LLM needs to keep separate when narrating
+ * results back to the user:
+ *
+ * - `status` — what the **tool** just did to the conversation
+ *   attachment record: created it (`proposed`), mutated an existing
+ *   one (`updated`), refused (`cli_managed`), or bailed because the
+ *   draft is missing required fields (`incomplete`).
+ * - `lifecycle` — what the **monitor** itself actually is right now:
+ *   `draft` (no `config_id` yet — the user must click **Create** to
+ *   write it to Synthetics) or `saved` (already persisted — the user
+ *   clicks **Update** to push the agent's changes).
+ *
+ * Without `lifecycle`, the LLM was conflating "tool action = updated"
+ * with "monitor is saved", and would tell the user "Click Update"
+ * even when the underlying attachment was still a draft (no
+ * `config_id`). Splitting the two lets the skill prompt wire the
+ * Create-vs-Update wording strictly to `lifecycle`.
+ */
 interface ToolResultPayload {
   status: 'proposed' | 'updated' | 'incomplete' | 'cli_managed';
+  lifecycle: 'draft' | 'saved';
   attachment_id: string;
   saveable: boolean;
   missing_fields?: string[];
@@ -96,6 +119,13 @@ const summarizeMonitor = (
   status: ToolResultPayload['status']
 ): ToolResultPayload => ({
   status,
+  // Lifecycle keys off `config_id` exclusively — same heuristic the
+  // canvas's `inferMonitorStatus` uses (sans the project/CLI branch
+  // which is already surfaced via `status: 'cli_managed'` and the
+  // `monitor.origin` field). Keeping the two in lockstep means the
+  // LLM and the canvas always agree on whether the user should see
+  // **Create** or **Update**.
+  lifecycle: data[ConfigKey.CONFIG_ID] ? 'saved' : 'draft',
   attachment_id: attachmentId,
   saveable,
   missing_fields: missingFields,
@@ -116,6 +146,15 @@ const summarizeMonitor = (
   },
 });
 
+/**
+ * Read the latest in-memory snapshot of an existing monitor attachment.
+ *
+ * Pure projection of `attachments.getAttachmentRecord(id)` — does not
+ * touch ES / SOs. The freshness layering (when to trust this snapshot
+ * vs. re-resolve from the saved object) lives in
+ * {@link resolveMonitorAttachmentData} so the snapshot reader stays
+ * cheap and synchronous.
+ */
 const retrieveExistingMonitorAttachment = (
   attachmentRecord: VersionedAttachment | undefined,
   attachmentId: string
@@ -137,6 +176,94 @@ const retrieveExistingMonitorAttachment = (
   return latest?.data;
 };
 
+/**
+ * Resolve the monitor data the agent should mutate.
+ *
+ * This is intentionally *not* the same as just reading the conversation
+ * attachment's latest version. Sequence we have to handle:
+ *
+ *   1. Tool composes a draft (no `config_id`, no `origin`).
+ *   2. User clicks Create in the canvas → `POST /api/synthetics/monitors`
+ *      returns the new SO id → canvas calls `updateOrigin(id)`. The
+ *      framework writes the origin onto the attachment record but
+ *      does **not** re-resolve the data — the in-memory snapshot
+ *      still has no `config_id`.
+ *   3. Agent calls this tool again to update something (e.g. swap a
+ *      location). If we trust the in-memory snapshot, we send back a
+ *      result with `status: 'updated'`, but the canvas's
+ *      `inferMonitorStatus` reads `config_id` to decide between
+ *      proposed / enabled / disabled — without it, the canvas keeps
+ *      showing **Create** instead of **Update**, and the action is
+ *      silently a no-op against the saved monitor.
+ *
+ * Heuristic: when the attachment has an `origin` set (i.e. it has
+ * been linked to a saved monitor) but the in-memory data is missing
+ * `config_id`, refresh from the saved object via
+ * `fetchMonitorAttachmentData`. The lookup is the same one the
+ * attachment type's `resolve` uses, scoped to the user's request via
+ * the tool context's `savedObjectsClient`.
+ *
+ * If the SO read fails (e.g. the monitor was deleted out-of-band),
+ * fall back to the in-memory snapshot and warn — the operation will
+ * still proceed and the eventual canvas Save will surface a
+ * structured error. This mirrors the attachment type's
+ * "warn-not-throw" posture for resolve failures.
+ */
+const resolveMonitorAttachmentData = async ({
+  attachmentRecord,
+  inMemoryData,
+  savedObjectsClient,
+  logger,
+  attachmentId,
+}: {
+  attachmentRecord: VersionedAttachment | undefined;
+  inMemoryData: MonitorAttachmentData | undefined;
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  attachmentId: string;
+}): Promise<MonitorAttachmentData | undefined> => {
+  // We log every branch — including the no-ops — at debug because the
+  // post-Create refresh is invisible from the UI side and field
+  // debugging hinges on knowing *why* it did or didn't fire.
+  // Production logs typically run at info, so this stays quiet by
+  // default; flip the synthetics logger to debug to inspect.
+  if (!inMemoryData || !attachmentRecord?.origin) {
+    logger.debug(
+      `manage_synthetics_monitor.refresh: skip attachment='${attachmentId}' reason='no-origin-or-no-data' hasOrigin=${Boolean(
+        attachmentRecord?.origin
+      )} hasInMemoryData=${Boolean(inMemoryData)}`
+    );
+    return inMemoryData;
+  }
+  if (inMemoryData[ConfigKey.CONFIG_ID]) {
+    logger.debug(
+      `manage_synthetics_monitor.refresh: skip attachment='${attachmentId}' reason='already-has-config-id' origin='${attachmentRecord.origin}'`
+    );
+    return inMemoryData;
+  }
+  logger.info(
+    `manage_synthetics_monitor.refresh: fetch attachment='${attachmentId}' origin='${attachmentRecord.origin}' (in-memory snapshot has no config_id; refreshing from saved object)`
+  );
+  const fetched = await fetchMonitorAttachmentData({
+    soClient: savedObjectsClient,
+    configId: attachmentRecord.origin,
+    logger,
+    context: 'manage_synthetics_monitor.refreshAfterSave',
+  });
+  if (!fetched) {
+    logger.warn(
+      `manage_synthetics_monitor.refresh: miss attachment='${attachmentId}' origin='${attachmentRecord.origin}' — falling back to in-memory snapshot (canvas will still render as a draft until the SO is reachable)`
+    );
+    return inMemoryData;
+  }
+  logger.info(
+    `manage_synthetics_monitor.refresh: hit attachment='${attachmentId}' origin='${
+      attachmentRecord.origin
+    }' resolvedConfigId='${fetched.data[ConfigKey.CONFIG_ID] ?? 'none'}'`
+  );
+  return fetched.data;
+};
+
 export const manageSyntheticsMonitorTool = (): BuiltinSkillBoundedTool<
   typeof manageSyntheticsMonitorSchema
 > => ({
@@ -146,14 +273,23 @@ export const manageSyntheticsMonitorTool = (): BuiltinSkillBoundedTool<
   schema: manageSyntheticsMonitorSchema,
   handler: async (
     { monitor_attachment_id: previousAttachmentId, operations },
-    { logger, attachments }
+    { logger, attachments, savedObjectsClient }
   ) => {
     try {
       const attachmentRecord = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
         : undefined;
-      const previousData = previousAttachmentId
+      const inMemoryData = previousAttachmentId
         ? retrieveExistingMonitorAttachment(attachmentRecord, previousAttachmentId)
+        : undefined;
+      const previousData = previousAttachmentId
+        ? await resolveMonitorAttachmentData({
+            attachmentRecord,
+            inMemoryData,
+            savedObjectsClient,
+            logger,
+            attachmentId: previousAttachmentId,
+          })
         : undefined;
 
       // Project-origin (CLI-managed) monitors are read-only via this
@@ -221,8 +357,11 @@ export const manageSyntheticsMonitorTool = (): BuiltinSkillBoundedTool<
 
       const missingFields = saveability.saveable ? undefined : saveability.missing;
 
+      const lifecycle = draft[ConfigKey.CONFIG_ID] ? 'saved' : 'draft';
       logger.info(
-        `${TOOL_ID}: ${status} attachment '${attachmentId}' (saveable=${saveability.saveable}, ops=${operations.length})`
+        `${TOOL_ID}: ${status} attachment '${attachmentId}' lifecycle=${lifecycle} configId='${
+          draft[ConfigKey.CONFIG_ID] ?? 'none'
+        }' (saveable=${saveability.saveable}, ops=${operations.length})`
       );
 
       return {

@@ -118,15 +118,31 @@ const createAttachmentsMock = (records: Map<string, MonitorAttachment>) => {
   return { mock, addedInputs, updatedInputs };
 };
 
-const buildContext = (attachmentsMock: AttachmentStateManager) => {
+/**
+ * Stub `savedObjectsClient` whose `bulkGet` always returns a not-found
+ * response. Used by the bulk of the tests, which never trigger the
+ * post-Create refresh path (because `attachmentRecord.origin` is
+ * undefined or the in-memory data already has `config_id`). The Jest
+ * `not.toHaveBeenCalled()` checks below ensure we don't silently start
+ * relying on this stub returning anything meaningful.
+ */
+const buildSilentSavedObjectsClient = () => ({
+  bulkGet: jest.fn(async () => ({ saved_objects: [] })),
+});
+
+const buildContext = (
+  attachmentsMock: AttachmentStateManager,
+  options: { savedObjectsClient?: { bulkGet: jest.Mock } } = {}
+) => {
   const logger = loggerMock.create();
+  const savedObjectsClient = options.savedObjectsClient ?? buildSilentSavedObjectsClient();
   const ctx = {
     logger,
     attachments: attachmentsMock,
     request: {} as never,
     spaceId: 'default',
     esClient: {} as never,
-    savedObjectsClient: {} as never,
+    savedObjectsClient: savedObjectsClient as never,
     modelProvider: {} as never,
     toolProvider: {} as never,
     runner: {} as never,
@@ -139,7 +155,7 @@ const buildContext = (attachmentsMock: AttachmentStateManager) => {
     toolManager: {} as never,
     runContext: {} as never,
   };
-  return { ctx, logger };
+  return { ctx, logger, savedObjectsClient };
 };
 
 describe('manageSyntheticsMonitorTool', () => {
@@ -179,6 +195,9 @@ describe('manageSyntheticsMonitorTool', () => {
       expect(first.type).toBe(ToolResultType.other);
       const data = first.data as Record<string, unknown>;
       expect(data.status).toBe('proposed');
+      // Brand-new draft → no `config_id` → lifecycle must be 'draft'
+      // so the LLM picks the **Create** wording, not **Update**.
+      expect(data.lifecycle).toBe('draft');
       expect(data.saveable).toBe(true);
       expect(data.missing_fields).toBeUndefined();
     });
@@ -228,6 +247,10 @@ describe('manageSyntheticsMonitorTool', () => {
       if (!('results' in result)) throw new Error('expected standard return');
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.status).toBe('updated');
+      // Existing attachment seeded with `config_id` (via
+      // `buildSavedAttachmentData`) → lifecycle stays 'saved'
+      // through the operation, so the LLM picks **Update**.
+      expect(data.lifecycle).toBe('saved');
       expect(data.saveable).toBe(true);
     });
 
@@ -360,10 +383,10 @@ describe('manageSyntheticsMonitorTool', () => {
   });
 
   describe('no-persistence guarantee', () => {
-    it('never reaches a Synthetics service or saved-objects client', async () => {
+    it('never reaches the saved-objects client when composing a fresh draft (no monitor_attachment_id)', async () => {
       const records = new Map<string, MonitorAttachment>();
       const { mock: attachments } = createAttachmentsMock(records);
-      const { ctx } = buildContext(attachments);
+      const { ctx, savedObjectsClient } = buildContext(attachments);
 
       await tool.handler(
         {
@@ -380,9 +403,220 @@ describe('manageSyntheticsMonitorTool', () => {
         ctx
       );
 
-      // savedObjectsClient is the surface we'd use to write monitors —
-      // assert that nothing about it was touched.
-      expect(ctx.savedObjectsClient).toEqual({});
+      // The "no SO refresh" guarantee for the new-draft path: we only
+      // touch the saved-objects client when re-resolving an attachment
+      // that already has an `origin` and lacks `config_id` (the
+      // post-Create refresh in `resolveMonitorAttachmentData`). For a
+      // fresh draft neither precondition holds, so `bulkGet` must
+      // remain untouched.
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refresh after Save (origin set, in-memory data missing config_id)', () => {
+    /**
+     * Reproduces the post-Create UX bug: the framework's `updateOrigin`
+     * sets `attachment.origin` after a successful Save, but never
+     * re-resolves the in-memory data. The next tool call would then
+     * read a snapshot with no `config_id` and the canvas would keep
+     * showing **Create** instead of **Update** for what is in fact a
+     * saved monitor. The fix re-fetches the live SO and overlays the
+     * fresh data before applying operations, so the round-tripped
+     * attachment again carries `config_id`.
+     */
+    const buildSavedMonitorSO = (
+      configId: string,
+      overrides: Partial<MonitorAttachmentData> = {}
+    ) => ({
+      type: 'synthetics-monitor-multi-space',
+      id: configId,
+      attributes: buildSavedAttachmentData({
+        [ConfigKey.CONFIG_ID]: configId,
+        ...overrides,
+      }),
+      updated_at: '2026-05-02T20:00:00.000Z',
+      created_at: '2026-05-02T19:00:00.000Z',
+    });
+
+    it("refreshes data from the SO when origin is set but the in-memory snapshot has no config_id, so the next save round-trips as 'updated'", async () => {
+      const records = new Map<string, MonitorAttachment>();
+      // Stale snapshot — what `attachmentStateManager` holds right
+      // after `updateOrigin('config-uuid')`: the data the agent
+      // composed pre-Save (no `config_id`), with the new origin
+      // grafted on by the framework.
+      const staleData = buildSavedAttachmentData({
+        [ConfigKey.NAME]: 'Last monitor',
+      });
+      delete staleData[ConfigKey.CONFIG_ID];
+      records.set('mon-1', buildAttachmentRecord('mon-1', staleData, 'config-uuid'));
+      const { mock: attachments, updatedInputs } = createAttachmentsMock(records);
+
+      // SO bulkGet returns the saved monitor with `config_id` populated
+      // — `fetchMonitorAttachmentData` returns the first SO that has
+      // attributes (the legacy SO type entry is null in this scenario).
+      const bulkGet = jest.fn(async () => ({
+        saved_objects: [
+          buildSavedMonitorSO('config-uuid', { [ConfigKey.NAME]: 'Last monitor' }),
+          null,
+        ],
+      }));
+      const { ctx } = buildContext(attachments, {
+        savedObjectsClient: { bulkGet } as { bulkGet: jest.Mock },
+      });
+
+      const result = await tool.handler(
+        {
+          monitor_attachment_id: 'mon-1',
+          operations: [
+            {
+              operation: 'set_locations',
+              locations: [{ id: 'eu_west', label: 'EU West', isServiceManaged: true }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      // Refresh hit the SO once with both type variants — same call
+      // shape as the attachment type's `resolve` hook.
+      expect(bulkGet).toHaveBeenCalledTimes(1);
+
+      // The persisted attachment now carries `config_id`, so the
+      // canvas's `inferMonitorStatus` will resolve to `'enabled'`
+      // and render the **Update** button instead of **Create**.
+      const newData = updatedInputs[0].input.data as MonitorAttachmentData;
+      expect(newData[ConfigKey.CONFIG_ID]).toBe('config-uuid');
+      // Operation still applied on top of the refreshed snapshot.
+      expect(newData[ConfigKey.LOCATIONS]).toEqual([
+        { id: 'eu_west', label: 'EU West', isServiceManaged: true },
+      ]);
+
+      if (!('results' in result)) throw new Error('expected standard return');
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.status).toBe('updated');
+      // Lifecycle reports the **monitor's** state, not the tool
+      // action's: refresh resolved a `config_id`, so the LLM should
+      // see `lifecycle: 'saved'` and tell the user to click
+      // **Update** (not **Create**) — this is the precise signal that
+      // was missing in the original "Update button still says Create"
+      // bug report.
+      expect(data.lifecycle).toBe('saved');
+      expect(data.monitor).toMatchObject({ config_id: 'config-uuid' });
+    });
+
+    it('does NOT refresh when origin is unset (proposed draft path stays SO-free)', async () => {
+      const records = new Map<string, MonitorAttachment>();
+      const staleData = buildSavedAttachmentData();
+      delete staleData[ConfigKey.CONFIG_ID];
+      // No origin — this is the proposed-draft path.
+      records.set('mon-1', buildAttachmentRecord('mon-1', staleData));
+      const { mock: attachments } = createAttachmentsMock(records);
+      const { ctx, savedObjectsClient } = buildContext(attachments);
+
+      await tool.handler(
+        {
+          monitor_attachment_id: 'mon-1',
+          operations: [{ operation: 'set_enabled', enabled: false }],
+        },
+        ctx
+      );
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it("reports lifecycle='draft' when updating a never-saved draft (status='updated' alone is NOT enough to claim 'Update' wording)", async () => {
+      // Reproduces the "Click Update — but the canvas still shows
+      // Create" symptom we hit in field testing. The agent passed
+      // `monitor_attachment_id` for an existing **draft** attachment
+      // (no origin, no config_id). The tool correctly returns
+      // `status: 'updated'` (we did mutate an existing record), but
+      // the canvas's `inferMonitorStatus` ignores `status` — it keys
+      // off `config_id`. The new `lifecycle` field collapses both
+      // signals into one for the LLM.
+      const records = new Map<string, MonitorAttachment>();
+      const draftData = buildSavedAttachmentData();
+      delete draftData[ConfigKey.CONFIG_ID];
+      records.set('mon-draft', buildAttachmentRecord('mon-draft', draftData));
+      const { mock: attachments, updatedInputs } = createAttachmentsMock(records);
+      const { ctx } = buildContext(attachments);
+
+      const result = await tool.handler(
+        {
+          monitor_attachment_id: 'mon-draft',
+          operations: [
+            {
+              operation: 'set_locations',
+              locations: [{ id: 'eu_west', label: 'EU West', isServiceManaged: true }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const newData = updatedInputs[0].input.data as MonitorAttachmentData;
+      expect(newData[ConfigKey.CONFIG_ID]).toBeUndefined();
+
+      if (!('results' in result)) throw new Error('expected standard return');
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.status).toBe('updated');
+      // The contract that matters for the user: lifecycle === 'draft'
+      // tells the LLM to point at **Create** (matching what the
+      // canvas will actually render), not **Update**.
+      expect(data.lifecycle).toBe('draft');
+    });
+
+    it('does NOT refresh when the in-memory snapshot already has config_id (steady state)', async () => {
+      const records = new Map<string, MonitorAttachment>();
+      // Already-fresh snapshot — buildSavedAttachmentData seeds CONFIG_ID.
+      records.set(
+        'mon-1',
+        buildAttachmentRecord('mon-1', buildSavedAttachmentData(), 'config-uuid')
+      );
+      const { mock: attachments } = createAttachmentsMock(records);
+      const { ctx, savedObjectsClient } = buildContext(attachments);
+
+      await tool.handler(
+        {
+          monitor_attachment_id: 'mon-1',
+          operations: [{ operation: 'set_enabled', enabled: false }],
+        },
+        ctx
+      );
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the in-memory snapshot and warns when the SO refresh returns nothing (deleted out-of-band)', async () => {
+      const records = new Map<string, MonitorAttachment>();
+      const staleData = buildSavedAttachmentData();
+      delete staleData[ConfigKey.CONFIG_ID];
+      records.set('mon-1', buildAttachmentRecord('mon-1', staleData, 'gone-uuid'));
+      const { mock: attachments, updatedInputs } = createAttachmentsMock(records);
+
+      // Both SO type variants come back as null — `fetchMonitorAttachmentData`
+      // logs a warn and returns `undefined`, which our resolver then
+      // also warns on before falling back to the in-memory data.
+      const bulkGet = jest.fn(async () => ({ saved_objects: [null, null] }));
+      const { ctx, logger } = buildContext(attachments, {
+        savedObjectsClient: { bulkGet } as { bulkGet: jest.Mock },
+      });
+
+      await tool.handler(
+        {
+          monitor_attachment_id: 'mon-1',
+          operations: [{ operation: 'set_enabled', enabled: false }],
+        },
+        ctx
+      );
+
+      expect(bulkGet).toHaveBeenCalledTimes(1);
+      const newData = updatedInputs[0].input.data as MonitorAttachmentData;
+      // Still no config_id — operations applied to the stale snapshot.
+      expect(newData[ConfigKey.CONFIG_ID]).toBeUndefined();
+      expect(newData[ConfigKey.ENABLED]).toBe(false);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/manage_synthetics_monitor\.refresh: miss attachment='mon-1'/)
+      );
     });
   });
 });

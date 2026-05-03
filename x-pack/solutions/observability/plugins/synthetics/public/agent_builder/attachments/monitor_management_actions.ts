@@ -8,6 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import { SYNTHETICS_API_URLS } from '../../../common/constants/synthetics/rest_api';
 import { INITIAL_REST_VERSION } from '../../../common/constants/ui';
+import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorAttachmentData } from '../../../common/agent_builder';
 
 /**
@@ -15,34 +16,50 @@ import type { MonitorAttachmentData } from '../../../common/agent_builder';
  *
  * 1. **Clean success** — a `SyntheticsMonitorWithId` (the saved monitor
  *    fields, plus top-level `id`, `created_at`, `updated_at`).
- * 2. **Partial-failure** — `ServiceLocationErrorsResponse`: the monitor
- *    saved-object **was** created, but one or more locations failed to
- *    start. The shape is `{ attributes: { message, errors, id? } }`. The
- *    `attributes.id` is set when the SO landed; absent only when the
- *    request never made it past pre-write validation, in which case
- *    `http.post` throws before this code runs.
+ * 2. **Partial-failure** — the SO **was** created/updated, but the push
+ *    to the global Synthetics service failed for one or more
+ *    Elastic-managed locations. The actual server shape is
+ *    `{ message, attributes: { errors }, id? }` — `message` and `id`
+ *    are at the **top level** (not nested under `attributes`), and
+ *    `id` is present on create (the new SO id) but omitted on update
+ *    (the caller already has the configId). Each entry of
+ *    `attributes.errors` is `{ locationId, error?: { reason, status, … } }`.
  *
- * We deliberately keep these types narrow / local instead of importing
- * the runtime-types codec — the SPA's exported codec brings several
- * megabytes of decoder graph along with it, and the two fields we care
- * about (`id` for `updateOrigin`, location warnings for the UI callout)
- * are stable across versions.
+ * NOTE: The runtime-types codec
+ * (`ServiceLocationErrorsResponse` in
+ * `common/runtime_types/monitor_management/locations.ts`) declares the
+ * shape as `{ attributes: { message, errors, id? } }` — but the actual
+ * server in `add_monitor.ts` / `edit_monitor.ts` returns `message` and
+ * `id` at the top level. The existing Synthetics SPA reads the actual
+ * shape (see `apps/synthetics/components/getting_started/use_simple_monitor.ts`
+ * for the precedent). We mirror that here, deliberately ignoring the
+ * codec to avoid importing several megabytes of decoder graph for two
+ * fields.
+ *
+ * `error?` is genuinely optional per entry: low-level network
+ * failures (TLS cert expiry, DNS, connection refused) reach the
+ * server-side `axios` `catchError` *before* `err.response` exists, so
+ * the entry is `{ locationId, error: undefined }`. We surface the
+ * location id with a generic message in that case.
  */
 interface UpsertMonitorSuccessResponse {
   id: string;
 }
 
-interface ServiceLocationErrorEntry {
+interface ServiceLocationSyncErrorBody {
+  reason?: string;
+  status?: number;
+}
+
+interface ServiceLocationSyncError {
   locationId: string;
-  error?: { message: string };
+  error?: ServiceLocationSyncErrorBody;
 }
 
 interface ServiceLocationErrorsResponse {
-  attributes: {
-    message: string;
-    errors: ServiceLocationErrorEntry[];
-    id?: string;
-  };
+  message?: string;
+  attributes: { errors: ServiceLocationSyncError[] };
+  id?: string;
 }
 
 type UpsertMonitorResponse = UpsertMonitorSuccessResponse | ServiceLocationErrorsResponse;
@@ -71,16 +88,48 @@ export class MonitorSaveError extends Error {
   }
 }
 
-const narrowSaveResponse = (response: UpsertMonitorResponse): MonitorSaveOutcome => {
+/**
+ * Format a per-location push error into a single human-readable string
+ * for the warnings callout. Mirrors the shape of
+ * `apps/synthetics/components/monitors_page/management/show_sync_errors.tsx`
+ * but flattened to one line — the callout already provides the
+ * `locationId` heading.
+ */
+const formatLocationErrorMessage = (error: ServiceLocationSyncError['error']): string => {
+  if (error == null) {
+    return 'Could not reach this location (no response from the synthetics service).';
+  }
+  const status = typeof error.status === 'number' ? `${error.status}` : null;
+  const reason = typeof error.reason === 'string' && error.reason.length > 0 ? error.reason : null;
+  if (status && reason) return `${status} — ${reason}`;
+  if (reason) return reason;
+  if (status) return `Status ${status}`;
+  return 'Unknown location error';
+};
+
+/**
+ * Narrow the upsert response into a `MonitorSaveOutcome`.
+ *
+ * `fallbackId` is used by `updateMonitor` to recover when the partial-
+ * failure response omits the `id` (edits don't echo it back; the
+ * caller already passed it in the URL path).
+ */
+const narrowSaveResponse = (
+  response: UpsertMonitorResponse,
+  fallbackId?: string
+): MonitorSaveOutcome => {
   if (isPartialFailureResponse(response)) {
-    if (!response.attributes.id) {
-      throw new MonitorSaveError(response.attributes.message);
+    const resolvedId = response.id ?? fallbackId;
+    if (!resolvedId) {
+      // No id anywhere — the SO write itself failed (validation,
+      // permissions). Surface the top-level message verbatim.
+      throw new MonitorSaveError(response.message ?? 'Save failed');
     }
     return {
-      id: response.attributes.id,
+      id: resolvedId,
       locationWarnings: response.attributes.errors.map((entry) => ({
         locationId: entry.locationId,
-        message: entry.error?.message ?? 'Unknown location error',
+        message: formatLocationErrorMessage(entry.error),
       })),
     };
   }
@@ -129,9 +178,49 @@ const extractServerErrorMessage = (error: unknown, op: 'create' | 'update'): str
 };
 
 /**
+ * Strip Saved-Object metadata / storage-only keys before sending the
+ * attachment to the monitor CRUD endpoints. The server's
+ * `normalizeAPIConfig` builds its allow-list from
+ * `Object.keys(DEFAULT_FIELDS[type])` and rejects anything not on it
+ * with `Invalid monitor key(s) for {type} type: …`.
+ *
+ * Three keys are present on attachment data after a Save (because
+ * `mapSavedObjectToMonitor` copies them off the SO and our Zod schema
+ * permits them so the same shape covers both proposed + saved
+ * monitors), but **none** of them appear in `DEFAULT_FIELDS`:
+ *
+ * - `created_at`, `updated_at` — SO meta added by
+ *   `mapSavedObjectToMonitor`. Pure read-only.
+ * - `revision` — stored on the SO attributes (see
+ *   `synthetics_monitor_config.ts`), bumped server-side on every
+ *   write. Echoing it back as part of the request body trips the
+ *   same validator.
+ *
+ * Echoing any of them produces a 400 from the route — observed in
+ * manual smoke as a "Save failed — Invalid monitor key(s) for http
+ * type: created_at | updated_at" callout right after a successful
+ * Create followed by an Update via the canvas. Bug write-up: F15 in
+ * `notes/01-monitor-management/followups.md`.
+ *
+ * Other server-managed keys (`config_id`, `monitor_query_id`,
+ * `config_hash`) **are** in `DEFAULT_FIELDS` and the server is
+ * idempotent on them, so they don't need stripping.
+ */
+const stripReadOnlyMonitorKeys = (monitor: MonitorAttachmentData): MonitorAttachmentData => {
+  const {
+    created_at: _createdAt,
+    updated_at: _updatedAt,
+    [ConfigKey.REVISION]: _revision,
+    ...rest
+  } = monitor;
+  return rest as MonitorAttachmentData;
+};
+
+/**
  * POST `/api/synthetics/monitors` with the user's session.
  *
- * The body is the current `MonitorAttachmentData`. The server runs
+ * The body is the current `MonitorAttachmentData` minus read-only
+ * keys (see {@link stripReadOnlyMonitorKeys}). The server runs
  * `normalizeAPIConfig` → `validateMonitor`, which fills in `DEFAULT_FIELDS`
  * and rejects malformed payloads — so the client doesn't need to mirror
  * those defaults.
@@ -149,7 +238,7 @@ export const createMonitor = async (
     const response = await http.post<UpsertMonitorResponse>(
       SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
       {
-        body: JSON.stringify(monitor),
+        body: JSON.stringify(stripReadOnlyMonitorKeys(monitor)),
         version: INITIAL_REST_VERSION,
         query: { internal: true },
       }
@@ -163,9 +252,10 @@ export const createMonitor = async (
 /**
  * PUT `/api/synthetics/monitors/{configId}` with the user's session.
  *
- * Same body / versioning rules as `createMonitor`. The full attachment
- * payload is sent — the server's normalizer is idempotent for unchanged
- * fields, so re-saving without modifications is a no-op write.
+ * Same body / versioning rules as `createMonitor`, including the
+ * read-only-key strip. The full attachment payload is sent — the
+ * server's normalizer is idempotent for unchanged fields, so
+ * re-saving without modifications is a no-op write.
  */
 export const updateMonitor = async (
   http: HttpStart,
@@ -176,12 +266,12 @@ export const updateMonitor = async (
     const response = await http.put<UpsertMonitorResponse>(
       `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${encodeURIComponent(configId)}`,
       {
-        body: JSON.stringify(monitor),
+        body: JSON.stringify(stripReadOnlyMonitorKeys(monitor)),
         version: INITIAL_REST_VERSION,
         query: { internal: true },
       }
     );
-    return narrowSaveResponse(response);
+    return narrowSaveResponse(response, configId);
   } catch (error) {
     throw new MonitorSaveError(extractServerErrorMessage(error, 'update'));
   }

@@ -19,6 +19,38 @@ import {
 } from './monitor_management_actions';
 import { inferMonitorStatus, type MonitorAgentStatus } from './monitor_management_status';
 
+/**
+ * Snapshot captured immediately after a successful Create. Lets the
+ * canvas overlay the freshly-assigned `config_id` onto the in-memory
+ * attachment data so the next render flips to **Update** + **View**
+ * instead of staying on **Create**.
+ *
+ * Why we need this at all: the framework's `updateOrigin` writes the
+ * `origin` onto the conversation attachment record but does **not**
+ * refresh the data snapshot through the type's `resolve` hook (see
+ * followup F14). Without this overlay the canvas would keep showing
+ * **Create** even after a successful Save — and clicking Create
+ * again would re-POST the same monitor and fail with the server's
+ * duplicate-name error. The overlay also keeps the status dot,
+ * caption, and tile background in sync with reality (saved → green +
+ * "Saved monitor — currently running on its schedule").
+ *
+ * Why we tie it to `name` + `url` rather than blindly applying the
+ * `configId`: a single canvas component instance may be re-used for a
+ * different attachment if the framework opens the flyout on a fresh
+ * monitor without remounting. Without an identity guard, the previous
+ * monitor's `configId` would leak onto the new attachment and a Save
+ * click would `PUT` the new monitor's data over the old monitor's
+ * saved object. Matching on `name` + `url` is the cheapest stable
+ * identity we have without dragging the framework attachment id into
+ * the body component (it isn't passed in props today).
+ */
+export interface MonitorCanvasLastSavedSnapshot {
+  configId: string;
+  name?: string;
+  url?: string;
+}
+
 export interface MonitorCanvasSaveState {
   /** True while a Create / Update is in flight. */
   isSaving: boolean;
@@ -26,6 +58,13 @@ export interface MonitorCanvasSaveState {
   saveError: Error | null;
   /** Per-location warnings from the most recent save (partial-failure path). */
   locationWarnings: MonitorLocationWarning[];
+  /**
+   * Set after a clean OR partial-failure **Create** call. See
+   * {@link MonitorCanvasLastSavedSnapshot} for the rationale.
+   * Update calls leave this untouched (the configId already lives
+   * in the in-memory data on that path).
+   */
+  lastSaved?: MonitorCanvasLastSavedSnapshot;
 }
 
 export interface UseMonitorCanvasActionsParams {
@@ -57,6 +96,37 @@ export interface UseMonitorCanvasActionsParams {
    */
   setSaveState: (next: MonitorCanvasSaveState) => void;
 }
+
+/**
+ * Project the in-memory attachment data through the most-recent
+ * Create snapshot, if any. Returns the original `data` when no
+ * overlay applies — either because the data already carries
+ * `config_id` (the framework refreshed it, or the agent's tool
+ * server-side refresh did) or because `lastSaved` doesn't match the
+ * current monitor's `name` + `url` (different attachment, drop the
+ * stale snapshot).
+ *
+ * Exported because the canvas body needs to drive `inferMonitorStatus`
+ * + the chip row + the action buttons off of the **same** projection,
+ * so the visual treatment stays in lockstep with the available
+ * actions.
+ */
+export const projectMonitorWithLastSaved = (
+  data: MonitorAttachmentData,
+  lastSaved: MonitorCanvasLastSavedSnapshot | undefined
+): MonitorAttachmentData => {
+  if (data[ConfigKey.CONFIG_ID]) {
+    return data;
+  }
+  if (
+    !lastSaved ||
+    lastSaved.name !== data[ConfigKey.NAME] ||
+    lastSaved.url !== data[ConfigKey.URLS]
+  ) {
+    return data;
+  }
+  return { ...data, [ConfigKey.CONFIG_ID]: lastSaved.configId };
+};
 
 const writeDisabledReason = (
   canEdit: boolean,
@@ -166,6 +236,21 @@ export const useMonitorCanvasActions = ({
           isSaving: false,
           saveError: null,
           locationWarnings: outcome.locationWarnings,
+          // On `create` we capture the just-assigned configId (plus
+          // the identifying name/url tuple — see
+          // `MonitorCanvasLastSavedSnapshot` for why). On `update` the
+          // configId already lives in the in-memory data so there is
+          // nothing to overlay; leave `lastSaved` undefined so we
+          // don't accidentally pin the canvas to a stale snapshot
+          // from a previous create.
+          lastSaved:
+            mode === 'create'
+              ? {
+                  configId: outcome.id,
+                  name: monitor[ConfigKey.NAME],
+                  url: monitor[ConfigKey.URLS],
+                }
+              : undefined,
         });
 
         // Only auto-close on a fully clean save. Partial-failure

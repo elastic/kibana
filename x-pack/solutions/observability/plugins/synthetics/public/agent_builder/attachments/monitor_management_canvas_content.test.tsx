@@ -109,9 +109,7 @@ describe('MonitorManagementCanvasContent — header + details panel', () => {
     );
     // Fixed-height tile wrapper that hosts the status-tinted card.
     expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasTile')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('syntheticsMonitorAttachmentStatusDot-proposed')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsMonitorAttachmentStatusDot-proposed')).toBeInTheDocument();
     expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasTitle')).toHaveTextContent(
       'Smoke check'
     );
@@ -232,11 +230,14 @@ describe('MonitorManagementCanvasContent — proposed monitor (Create)', () => {
   });
 
   it('renders the location-warnings callout on partial-failure save and keeps canvas open', async () => {
+    // Mirrors the actual `add_monitor.ts` response shape: top-level
+    // `message` and `id`, errors nested under `attributes.errors`,
+    // per-entry `error: { reason, status }` (NOT `{ message }`).
     const post = jest.fn(async () => ({
+      message: 'error pushing monitor to the service',
+      id: 'partial-id',
       attributes: {
-        message: 'Some locations failed',
-        id: 'partial-id',
-        errors: [{ locationId: 'us_east', error: { message: 'Fleet agent offline' } }],
+        errors: [{ locationId: 'us_east', error: { reason: 'Fleet agent offline', status: 503 } }],
       },
     }));
     const updateOrigin = jest.fn(async () => undefined);
@@ -257,8 +258,33 @@ describe('MonitorManagementCanvasContent — proposed monitor (Create)', () => {
     await waitFor(() => {
       expect(
         screen.getByTestId('syntheticsMonitorAttachmentCanvasLocationWarnings')
-      ).toHaveTextContent('Fleet agent offline');
+      ).toHaveTextContent('503 — Fleet agent offline');
     });
+  });
+});
+
+describe('MonitorManagementCanvasContent — close button (F13 workaround)', () => {
+  /**
+   * The framework's `AttachmentHeader` bails out (`return null`) when
+   * `actionButtons.length === 0`, taking the close X with it. We
+   * register `[]` on the framework header to keep it clean
+   * (T7 hot-fix #4), so we render our own close button at the top of
+   * the canvas body to keep the affordance discoverable. Tracked as
+   * F13 in `followups.md` — the proper fix is in the platform's
+   * `attachment_header.tsx`.
+   */
+  it('renders a close button that invokes closeCanvas', async () => {
+    const closeCanvas = jest.fn();
+    mount(buildMonitor(), { closeCanvas });
+
+    const closeButton = screen.getByTestId('syntheticsMonitorAttachmentCanvasCloseButton');
+    expect(closeButton).toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(closeButton);
+    });
+
+    expect(closeCanvas).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -309,6 +335,106 @@ describe('MonitorManagementCanvasContent — saved monitor (Update + View)', () 
 
     expect(navigateToUrl).toHaveBeenCalledWith('/app/synthetics/monitor/saved-config-id');
     expect(closeCanvas).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('MonitorManagementCanvasContent — post-Save state (no duplicate-name retries)', () => {
+  /**
+   * Pins the user-visible fix for the "click Save → canvas keeps
+   * showing Create" bug. The framework's `updateOrigin` only writes
+   * the origin onto the attachment record; it does not refresh
+   * `data` (followup F14). Without the local `lastSaved` overlay in
+   * the canvas, the next render would still infer `'proposed'` and
+   * the user would click **Create** again, hitting the server's
+   * duplicate-name error.
+   */
+  const buildPartialFailureHttp = (configId: string): HttpStart =>
+    buildHttp({
+      post: jest.fn(async () => ({
+        message: 'error pushing monitor to the service',
+        id: configId,
+        attributes: {
+          errors: [
+            { locationId: 'us_central', error: { reason: 'Fleet agent offline', status: 503 } },
+          ],
+        },
+      })),
+    });
+
+  const clickAction = async (testSubj: string) => {
+    await act(async () => {
+      await userEvent.click(screen.getByTestId(testSubj));
+    });
+  };
+
+  it("after a successful Create with partial-failure (canvas stays open), swaps Create for Update + View, flips status to 'enabled', and PUTs to the captured configId on Update click", async () => {
+    const put = jest.fn(async () => ({ id: 'persisted-config-id' }));
+    const http = {
+      ...buildPartialFailureHttp('persisted-config-id'),
+      put,
+    } as unknown as HttpStart;
+    const closeCanvas = jest.fn();
+
+    mount(buildMonitor(), { http, closeCanvas });
+
+    // Sanity: pre-Save state is the proposed draft.
+    expect(getActionLabels()).toEqual(['Create']);
+    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvas')).toHaveAttribute(
+      'data-test-status',
+      'proposed'
+    );
+
+    await clickAction('syntheticsMonitorAttachmentCanvasAction-save');
+
+    // Partial-failure path keeps the canvas open and the warning
+    // callout visible — the user needs to see the location error
+    // before deciding whether to retry.
+    expect(closeCanvas).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('syntheticsMonitorAttachmentCanvasLocationWarnings')
+      ).toBeInTheDocument();
+    });
+
+    // Buttons must swap. If they don't, the next click round-trips
+    // to a duplicate-name `POST` against Synthetics.
+    expect(getActionLabels()).toEqual(['Update', 'View in Synthetics']);
+    // And the visual treatment must flip — same heuristic the
+    // status dot / caption / tile background all key off.
+    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvas')).toHaveAttribute(
+      'data-test-status',
+      'enabled'
+    );
+    expect(screen.getByTestId('syntheticsMonitorAttachmentStatusDot-enabled')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvasCaption')).toHaveTextContent(
+      'Saved monitor — currently running on its schedule.'
+    );
+
+    // Now Update — must `PUT` to the captured configId, not `POST`
+    // again. The `POST` mock was already exhausted by the Create
+    // click; the `put` mock is the one that should fire.
+    await clickAction('syntheticsMonitorAttachmentCanvasAction-save');
+
+    expect(put).toHaveBeenCalledWith(
+      `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/persisted-config-id`,
+      expect.any(Object)
+    );
+  });
+
+  it('does NOT carry the lastSaved overlay across attachments — a different monitor (different name + url) still renders Create', () => {
+    // The overlay is keyed on the saved monitor's name + url so a
+    // different attachment that happens to share the canvas instance
+    // doesn't accidentally inherit a stale configId. We can't easily
+    // re-mount with a new prop in this canvas component (its data is
+    // injected by the framework), so instead we cover the projector
+    // contract directly via a render with mismatched data — same as
+    // what the canvas would render after a prop swap.
+    mount(buildMonitor({ [ConfigKey.NAME]: 'A different monitor' }));
+    expect(getActionLabels()).toEqual(['Create']);
+    expect(screen.getByTestId('syntheticsMonitorAttachmentCanvas')).toHaveAttribute(
+      'data-test-status',
+      'proposed'
+    );
   });
 });
 

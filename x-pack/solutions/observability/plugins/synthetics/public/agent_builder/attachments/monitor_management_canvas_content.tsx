@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,6 +37,7 @@ import {
   inferMonitorStatus,
 } from './monitor_management_status';
 import {
+  projectMonitorWithLastSaved,
   useMonitorCanvasActions,
   type MonitorCanvasSaveState,
 } from './use_monitor_canvas_actions';
@@ -180,9 +182,6 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
   closeCanvas,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const status = inferMonitorStatus(data);
-  const tileBg = getStatusBackgroundColor(status, euiTheme);
-  const accentColor = getStatusAccentColor(status, euiTheme);
 
   const capabilities = application.capabilities;
   const canEdit = capabilities.uptime?.save === true;
@@ -195,8 +194,26 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
     locationWarnings: [],
   });
 
+  // After a successful Create the framework's `updateOrigin` writes
+  // the new origin onto the attachment record but **does not refresh
+  // the data snapshot** (see followup F14). Without this projection
+  // the canvas would keep inferring `'proposed'` from the stale data
+  // and the user would see **Create** even though Synthetics already
+  // owns the monitor — a second click would round-trip to the
+  // duplicate-name error. `projectMonitorWithLastSaved` overlays the
+  // captured `config_id` only when the name + url still match the
+  // saved monitor, so the override doesn't bleed across attachments.
+  const effectiveData = useMemo(
+    () => projectMonitorWithLastSaved(data, saveState.lastSaved),
+    [data, saveState.lastSaved]
+  );
+
+  const status = inferMonitorStatus(effectiveData);
+  const tileBg = getStatusBackgroundColor(status, euiTheme);
+  const accentColor = getStatusAccentColor(status, euiTheme);
+
   const actionButtons = useMonitorCanvasActions({
-    monitor: data,
+    monitor: effectiveData,
     canEdit,
     canUseElasticManaged,
     http,
@@ -214,8 +231,8 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
     registerActionButtons([]);
   }, [registerActionButtons]);
 
-  const monitorName = data[ConfigKey.NAME];
-  const url = data[ConfigKey.URLS];
+  const monitorName = effectiveData[ConfigKey.NAME];
+  const url = effectiveData[ConfigKey.URLS];
   const placeholderName = i18n.translate(
     'xpack.synthetics.agentBuilder.monitor.canvas.placeholderName',
     { defaultMessage: 'Untitled monitor' }
@@ -236,6 +253,38 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
         padding: 0 ${euiTheme.size.m} ${euiTheme.size.m};
       `}
     >
+      {/*
+        Local close affordance.
+
+        The framework's `AttachmentHeader` (which normally renders the
+        flyout title + close X) bails out with `return null` when
+        `actionButtons.length === 0` — and we register an empty array so
+        the framework header stays clean while we render the
+        Create / Update / View buttons in our own body footer
+        (T7 hot-fix #4 in `tasks.md`). Side effect: no framework
+        header → no framework close X → users can only escape via
+        outside-click / Escape, which isn't discoverable. Add a small
+        close button at the top of the body so the affordance is
+        always visible. Tracked as F13 in `followups.md` — the proper
+        fix is in the platform's `attachment_header.tsx` to always
+        render the close X.
+      */}
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            data-test-subj="syntheticsMonitorAttachmentCanvasCloseButton"
+            aria-label={i18n.translate(
+              'xpack.synthetics.agentBuilder.monitor.canvas.closeAriaLabel',
+              { defaultMessage: 'Close monitor preview' }
+            )}
+            iconType="cross"
+            color="text"
+            size="xs"
+            onClick={closeCanvas}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       {/*
         Outer fixed-height shell mirrors the Overview tile (`MetricItem`):
         180px tall panel, the status-tinted background fills the entire
@@ -321,7 +370,7 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
           <EuiSpacer size="m" />
 
           <div data-test-subj="syntheticsMonitorAttachmentCanvasDetails">
-            <MonitorChipRow data={data} />
+            <MonitorChipRow data={effectiveData} />
           </div>
         </EuiPanel>
       </div>
@@ -335,10 +384,9 @@ export const MonitorManagementCanvasContent: React.FC<MonitorManagementCanvasCon
             iconType="warning"
             announceOnMount
             data-test-subj="syntheticsMonitorAttachmentCanvasCliManagedCallout"
-            title={i18n.translate(
-              'xpack.synthetics.agentBuilder.monitor.canvas.cliManagedTitle',
-              { defaultMessage: 'CLI-managed monitor' }
-            )}
+            title={i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.cliManagedTitle', {
+              defaultMessage: 'CLI-managed monitor',
+            })}
           >
             <p>
               {i18n.translate('xpack.synthetics.agentBuilder.monitor.canvas.cliManagedBody', {
