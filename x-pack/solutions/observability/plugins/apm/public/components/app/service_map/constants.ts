@@ -81,6 +81,7 @@ export const MOCK_EUI_THEME = {
     textPrimary: '#1a1c21',
     emptyShade: '#fff',
     backgroundBasePlain: '#fff',
+    backgroundBaseHighlighted: '#F6F9FC',
     textParagraph: '#343741',
     text: '#343741',
     lightShade: '#D3DAE6',

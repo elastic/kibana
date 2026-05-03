@@ -5150,6 +5150,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-page@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-page":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-provider-client@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client":
   version "0.0.0"
   uid ""
@@ -15120,11 +15124,12 @@
     "@types/prop-types" "*"
     "@types/react" "*"
 
-"@types/react-recompose@0.33.4":
-  version "0.33.4"
-  resolved "https://registry.yarnpkg.com/@types/react-recompose/-/react-recompose-0.33.4.tgz#bf47388b644c3b0a30226870e216d78564a41624"
-  integrity sha512-66LAtWIrfT5yvw01xB4jFNeYuP6b4QTdFrrkvD6OlfGaLGqMNGXSia5VJa/wV4dH4z0gU8KnveQl/4Oi2e/vIg==
+"@types/react-recompose@0.33.6":
+  version "0.33.6"
+  resolved "https://registry.yarnpkg.com/@types/react-recompose/-/react-recompose-0.33.6.tgz#370c743aa8eb9cdbfeb23b6bd8bb07d067ea3ca5"
+  integrity sha512-sEJsTPkdMa0QuI7gtfz2+u99dbTjIr34I84DgYZR+8Fs4tdHO3Efuf2Wi0gTK4L4KkfjFh+xgB/nuuDmaWesig==
   dependencies:
+    "@types/prop-types" "*"
     "@types/react" "*"
 
 "@types/react-redux@^7.1.20":
@@ -16859,10 +16864,10 @@ atomically@^2.0.3:
     stubborn-fs "^1.2.5"
     when-exit "^2.1.1"
 
-attr-accept@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.2.tgz#646613809660110749e92f2c10833b70968d929b"
-  integrity sha512-7prDjvt9HmqiZ0cl5CRjtS84sEyhsHP2coDkaZKRKVfCDo9s7iw7ChVmar78Gu9pC4SoR/28wFu/G5JJhTnqEg==
+attr-accept@^2.2.2, attr-accept@^2.2.4:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.5.tgz#d7061d958e6d4f97bf8665c68b75851a0713ab5e"
+  integrity sha512-0bDNnY/u6pPwHDMoF0FieU354oBi0a8rD9FcsLwzcGWbc8KS8KPIi7y+s13OlVY+gMWc/9xEMUgNE6Qm8ZllYQ==
 
 auto-bind@^5.0.1:
   version "5.0.1"
@@ -22100,6 +22105,13 @@ file-selector@^0.4.0:
   dependencies:
     tslib "^2.0.3"
 
+file-selector@^2.1.0:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/file-selector/-/file-selector-2.1.2.tgz#fe7c7ee9e550952dfbc863d73b14dc740d7de8b4"
+  integrity sha512-QgXo+mXTe8ljeqUFaX3QVHc5osSItJ/Km+xpocx0aSqWGMSCf6qYs/VnzZgS864Pjn5iceMRFigeAV7AfTlaig==
+  dependencies:
+    tslib "^2.7.0"
+
 filelist@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/filelist/-/filelist-1.0.4.tgz#f78978a1e944775ff9e62e744424f215e58352b5"
@@ -26102,10 +26114,10 @@ launchdarkly-eventsource@2.2.0:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.2.0.tgz#dcabc7264d9dee05a60dcf5fca9fd0cefcc82d22"
   integrity sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==
 
-launchdarkly-js-client-sdk@3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.9.0.tgz#92a769389c495ff87035540e79c15fe3551deb3d"
-  integrity sha512-uPL9il6dOZrVQqEcpjDYc2c7HtBTlKpLJb1Q0187i4UokBVZwBXWKjTnNk9hkwaDD5PGD4puoe7POikrR8ACwQ==
+launchdarkly-js-client-sdk@3.9.1:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.9.1.tgz#c2246b625deadc29907a121acde8879400acf172"
+  integrity sha512-5mq/eHZxOoxptTJMgpHKHVHrSNZ3GsNv4Kn493UIMt6hRXfHrX0QjBRWACOCTWMt/MkGdKvtN4LOqEHIttKMbA==
   dependencies:
     escape-string-regexp "^4.0.0"
     launchdarkly-js-sdk-common "5.8.0"
@@ -26693,10 +26705,15 @@ lru-cache@10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.2.0.tgz#0bd445ca57363465900f4d1f9bd8db343a4d95c3"
   integrity sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==
 
-lru-cache@11.2.6, lru-cache@^11.0.0, lru-cache@^11.2.4:
+lru-cache@11.2.6:
   version "11.2.6"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.6.tgz#356bf8a29e88a7a2945507b31f6429a65a192c58"
   integrity sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==
+
+lru-cache@11.3.5, lru-cache@^11.0.0, lru-cache@^11.2.4:
+  version "11.3.5"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.3.5.tgz#29047d348c0b2793e3112a01c739bb7c6d855637"
+  integrity sha512-NxVFwLAnrd9i7KUBxC4DrUhmgjzOs+1Qm50D3oF1/oL+r1NpZ4gA7xvG0/zJ8evR7zIKn4vLf7qTNduWFtCrRw==
 
 lru-cache@^10.2.0:
   version "10.4.3"
@@ -28087,10 +28104,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.12.13:
-  version "2.12.13"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.13.tgz#a31499607337148d059ad8b4e2977bfbabfd353d"
-  integrity sha512-9CV2mXT9+z0J26MQDfEZZkj/psJ5Er/w0w+t95FWdaGH/DTlhNZBx8vBO5jSYv8AZEnl3ouX+AaTT68KXdAIag==
+msw@2.12.14:
+  version "2.12.14"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.14.tgz#98c018182e0800277bb327025c5487861a239cbf"
+  integrity sha512-4KXa4nVBIBjbDbd7vfQNuQ25eFxug0aropCQFoI0JdOBuJWamkT1yLVIWReFI8SiTRc+H1hKzaNk+cLk2N9rtQ==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.41.2"
@@ -30844,7 +30861,16 @@ react-dom@18.2.0, "react-dom@^17.0.0 || ^18.2.0 || ^19.2.1":
   dependencies:
     scheduler "^0.25.0"
 
-react-dropzone@11.7.1, react-dropzone@^11.7.1:
+react-dropzone@15.0.0:
+  version "15.0.0"
+  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-15.0.0.tgz#bd03c7c2b14fe4ea9db1a9c74502b85339f2e505"
+  integrity sha512-lGjYV/EoqEjEWPnmiSvH4v5IoIAwQM2W4Z1C0Q/Pw2xD0eVzKPS359BQTUMum+1fa0kH2nrKjuavmTPOGhpLPg==
+  dependencies:
+    attr-accept "^2.2.4"
+    file-selector "^2.1.0"
+    prop-types "^15.8.1"
+
+react-dropzone@^11.7.1:
   version "11.7.1"
   resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-11.7.1.tgz#3851bb75b26af0bf1b17ce1449fd980e643b9356"
   integrity sha512-zxCMwhfPy1olUEbw3FLNPLhAm/HnaYH5aELIEglRbqabizKAdHs0h+WuyOpmA+v1JXn0++fpQDdNfUagWt5hJQ==
@@ -34802,7 +34828,7 @@ tslib@1.14.1, tslib@^1.11.1, tslib@^1.9.0, tslib@^1.9.3:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@2, tslib@2.8.1, tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.5.0, tslib@^2.6.2, tslib@^2.8.0, tslib@^2.8.1, tslib@~2.8.1:
+tslib@2, tslib@2.8.1, tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.5.0, tslib@^2.6.2, tslib@^2.7.0, tslib@^2.8.0, tslib@^2.8.1, tslib@~2.8.1:
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
   integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
