@@ -33,12 +33,6 @@ export const ALERTING_V2_API_PRIVILEGES = {
   },
 } as const;
 
-/**
- * Saved-object types managed by the alerting_v2 plugin via request-scoped
- * clients (see `bind_services.ts`). The user must hold a privilege on each of
- * these types or the security wrapper around the SO client will silently
- * filter them out — empty grids and tag aggregations are the symptom.
- */
 const ALERTING_V2_SAVED_OBJECT_TYPES = [
   RULE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
