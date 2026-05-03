@@ -13,9 +13,6 @@
       "developerExamples",
       "navigation",
       "unifiedSearch"
-    ],
-    "requiredBundles": [
-      "kibanaUtils"
     ]
   }
 }

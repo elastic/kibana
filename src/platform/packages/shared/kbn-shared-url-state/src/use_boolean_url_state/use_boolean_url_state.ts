@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 export type UseBooleanUrlStateResult = [boolean, (next: boolean) => void];
+
+const readParam = (search: string, paramName: string): boolean =>
+  new URLSearchParams(search).get(paramName) === 'true';
 
 /**
  * Binds a boolean value to a URL query parameter via the app's scoped history so
@@ -24,47 +25,40 @@ export type UseBooleanUrlStateResult = [boolean, (next: boolean) => void];
 export const useBooleanUrlState = (paramName: string): UseBooleanUrlStateResult => {
   const history = useHistory();
 
-  // Compute storage as null when history is missing so every hook below registers
-  // unconditionally on every render. The misuse is surfaced via the throw at the end.
-  const urlStateStorage = useMemo(
-    () => (history ? createKbnUrlStateStorage({ useHash: false, history }) : null),
-    [history]
+  // React hooks must register unconditionally on every render. If history is missing, initial value is false.
+  const [value, setValue] = useState<boolean>(() =>
+    history ? readParam(history.location.search, paramName) : false
   );
-
-  const readFromUrl = useCallback(
-    () => urlStateStorage?.get<boolean>(paramName) === true,
-    [urlStateStorage, paramName]
-  );
-
-  const [value, setValue] = useState<boolean>(readFromUrl);
 
   useEffect(() => {
-    if (!urlStateStorage) return;
-    const sub = urlStateStorage.change$<boolean>(paramName).subscribe((next) => {
-      setValue(next === true);
+    if (!history) return;
+    setValue(readParam(history.location.search, paramName));
+    return history.listen((location) => {
+      setValue(readParam(location.search, paramName));
     });
-    return () => sub.unsubscribe();
-  }, [urlStateStorage, paramName]);
+  }, [history, paramName]);
 
   const setUrlValue = useCallback(
     (next: boolean) => {
-      if (!urlStateStorage) return;
-      setValue(next);
+      if (!history) return;
+      const params = new URLSearchParams(history.location.search);
       if (next) {
-        urlStateStorage.set(paramName, true, { replace: false });
+        params.set(paramName, 'true');
       } else {
-        // Remove the key from the hash-query entirely rather than writing rison-null,
-        // so the URL stays clean after closing.
-        urlStateStorage.kbnUrlControls.updateAsync(
-          (currentUrl) =>
-            replaceUrlHashQuery(currentUrl, ({ [paramName]: _omit, ...rest }) => rest),
-          true
-        );
+        params.delete(paramName);
+      }
+      const serialized = params.toString();
+      const target = { ...history.location, search: serialized ? `?${serialized}` : '' };
+      if (next) {
+        history.push(target);
+      } else {
+        history.replace(target);
       }
     },
-    [urlStateStorage, paramName]
+    [history, paramName]
   );
 
+  // If history is missing, this is a misuse of the hook. We must throw after internal hooks are registered.
   if (!history) {
     throw new Error('useBooleanUrlState must be called inside a <Router>.');
   }

@@ -34,7 +34,7 @@ describe('useBooleanUrlState', () => {
   });
 
   it('returns true when the URL has the param set to true', () => {
-    const history = createMemoryHistory({ initialEntries: [`/#?${PARAM}=!t`] });
+    const history = createMemoryHistory({ initialEntries: [`/?${PARAM}=true`] });
     const { result } = renderWithHistory(history);
 
     expect(result.current[0]).toBe(true);
@@ -51,11 +51,11 @@ describe('useBooleanUrlState', () => {
 
     expect(result.current[0]).toBe(true);
     expect(history.length).toBe(startLength + 1);
-    expect(history.location.hash).toContain(`${PARAM}=!t`);
+    expect(history.location.search).toContain(`${PARAM}=true`);
   });
 
   it('replaces (does not push a new entry) and removes the param when set to false', async () => {
-    const history = createMemoryHistory({ initialEntries: [`/#?${PARAM}=!t`] });
+    const history = createMemoryHistory({ initialEntries: [`/?${PARAM}=true`] });
     const startLength = history.length;
     const { result } = renderWithHistory(history);
 
@@ -65,7 +65,7 @@ describe('useBooleanUrlState', () => {
 
     expect(result.current[0]).toBe(false);
     expect(history.length).toBe(startLength);
-    expect(history.location.hash).not.toContain(PARAM);
+    expect(history.location.search).not.toContain(PARAM);
   });
 
   it('leaves the URL clean after an open-then-close cycle', async () => {
@@ -79,7 +79,7 @@ describe('useBooleanUrlState', () => {
       result.current[1](false);
     });
 
-    expect(history.location.hash).not.toContain(PARAM);
+    expect(history.location.search).toBe('');
   });
 
   it('re-syncs state when the user navigates back', async () => {

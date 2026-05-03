@@ -6,7 +6,7 @@ Hooks that bind UI state to URL query parameters via Kibana's scoped history, so
 
 Binds a boolean value to a URL query parameter. Useful anywhere you'd persist a "shown / hidden" or "on / off" state across navigation — flyouts, modals, panels, drawers, expanded filter sections, debug toggles, and so on.
 
-Must be called inside a `<Router>`. Consumers must declare `"kibanaUtils"` in their plugin's `requiredBundles` (or `requiredPlugins`) in `kibana.jsonc`, because the hook transitively imports from `@kbn/kibana-utils-plugin/public`.
+Must be called inside a `<Router>`.
 
 Opening pushes a history entry so Back closes; closing replaces the entry and removes the param from the URL.
 

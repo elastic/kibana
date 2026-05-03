@@ -17,7 +17,6 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/shared/kbn-shared-url-state
 dependsOn:
-  - '@kbn/kibana-utils-plugin'
   - '@kbn/shared-ux-router'
 tags:
   - shared-browser
