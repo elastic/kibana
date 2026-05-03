@@ -376,8 +376,14 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              {/* Switches to control flyout options */}
-              <FlyoutTypeSwitch title={title} flyoutType={flyoutType} onChange={setFlyoutType} />
+              {/* Switches to control flyout options. Disabled while open: the imperative
+                  overlays.openSystemFlyout API bakes these options in at open time. */}
+              <FlyoutTypeSwitch
+                title={title}
+                flyoutType={flyoutType}
+                onChange={setFlyoutType}
+                disabled={isFlyoutOpen}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {/* Switch for ownFocus behavior */}
@@ -385,7 +391,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
-                disabled={flyoutType === 'push'}
+                disabled={isFlyoutOpen || flyoutType === 'push'}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
