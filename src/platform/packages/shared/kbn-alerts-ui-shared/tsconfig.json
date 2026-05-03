@@ -26,7 +26,6 @@
     "@kbn/data-plugin",
     "@kbn/search-types",
     "@kbn/utility-types",
-    "@kbn/safer-lodash-set",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
@@ -40,6 +39,7 @@
     "@kbn/kql",
     "@kbn/es-ui-shared-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/test-jest-helpers"
   ]
 }

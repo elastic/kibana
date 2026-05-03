@@ -25,7 +25,9 @@ import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
 import { useIntegrationForm } from '../../forms/integration_form';
 
-export const DataStreams = React.memo<{ integrationId?: string }>(() => {
+export const DataStreams = React.memo<{
+  onDataStreamReanalyzeSuccess?: () => void;
+}>(({ onDataStreamReanalyzeSuccess }) => {
   const {
     isCreateDataStreamFlyoutOpen,
     openCreateDataStreamFlyout,
@@ -126,7 +128,11 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
       )}
 
       {hasDataStreams && integration?.dataStreams && integrationId && (
-        <DataStreamsTable integrationId={integrationId} items={integration.dataStreams} />
+        <DataStreamsTable
+          integrationId={integrationId}
+          items={integration.dataStreams}
+          onReanalyzeSuccess={onDataStreamReanalyzeSuccess}
+        />
       )}
 
       {isCreateDataStreamFlyoutOpen && (

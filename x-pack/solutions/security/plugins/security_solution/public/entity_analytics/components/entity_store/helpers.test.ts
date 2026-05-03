@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getEntityType, sanitizeEntityRecordForUpsert, sourceFieldToText } from './helpers';
+import {
+  getEntityRecordRiskForListDisplay,
+  getEntityType,
+  sanitizeEntityRecordForUpsert,
+  sourceFieldToText,
+} from './helpers';
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import type {
@@ -271,6 +276,50 @@ describe('helpers', () => {
     });
   });
 
+  describe('getEntityRecordRiskForListDisplay', () => {
+    it('returns entity.risk fields for Entity Store v2 host documents', () => {
+      const hostEntity: HostEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        host: { name: 'my-host' },
+        entity: {
+          id: 'host:1',
+          name: 'my-host',
+          risk: {
+            calculated_level: 'High',
+            calculated_score_norm: 77.5,
+          },
+        },
+      };
+
+      expect(getEntityRecordRiskForListDisplay(hostEntity)).toEqual({
+        calculated_level: 'High',
+        calculated_score_norm: 77.5,
+      });
+    });
+
+    it('falls back to host.risk when entity.risk is absent', () => {
+      const hostEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        host: {
+          name: 'my-host',
+          risk: {
+            calculated_level: 'Low',
+            calculated_score_norm: 12,
+          },
+        },
+        entity: {
+          id: 'host:1',
+          name: 'my-host',
+        },
+      } as unknown as HostEntity;
+
+      expect(getEntityRecordRiskForListDisplay(hostEntity)).toEqual({
+        calculated_level: 'Low',
+        calculated_score_norm: 12,
+      });
+    });
+  });
+
   describe('sourceFieldToText', () => {
     it("should return 'Events' if the value isn't risk or asset", () => {
       const { container } = render(sourceFieldToText('anything'), {
@@ -294,6 +343,22 @@ describe('helpers', () => {
       });
 
       expect(container).toHaveTextContent('Asset Criticality');
+    });
+
+    it('should accept keyword values returned as a single-element array', () => {
+      const { container } = render(sourceFieldToText(['risk-score.risk-score-default']), {
+        wrapper: TestProviders,
+      });
+
+      expect(container).toHaveTextContent('Risk');
+    });
+
+    it("should return 'Events' for non-string shapes without throwing", () => {
+      const { container } = render(sourceFieldToText({ notAString: true }), {
+        wrapper: TestProviders,
+      });
+
+      expect(container).toHaveTextContent('Events');
     });
   });
 });

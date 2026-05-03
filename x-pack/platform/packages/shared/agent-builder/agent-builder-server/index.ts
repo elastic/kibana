@@ -73,6 +73,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  SubAgentExecutor,
+  SubAgentExecution,
 } from './agents';
 export type {
   AgentBuilderHooks,

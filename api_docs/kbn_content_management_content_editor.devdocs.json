@@ -120,6 +120,160 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-public.Item",
+        "type": "Interface",
+        "tags": [],
+        "label": "Item",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-public.Item.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_editor/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-editor",
         "id": "def-public.SavedObjectsReference",
         "type": "Interface",
         "tags": [],
@@ -178,6 +332,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-public.CustomValidators",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomValidators",
+        "description": [],
+        "signature": [
+          "{ description?: Validator<string>[] | undefined; title?: Validator<string>[] | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_editor/src/components/use_metadata_form.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-editor",
         "id": "def-public.OpenContentEditorParams",
         "type": "Type",
         "tags": [],
@@ -185,9 +356,21 @@
         "description": [],
         "signature": [
           "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
-          "Item",
+          {
+            "pluginId": "@kbn/content-management-content-editor",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-public.Item",
+            "text": "Item"
+          },
           "; entityName: string; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; customValidators?: ",
-          "CustomValidators",
+          {
+            "pluginId": "@kbn/content-management-content-editor",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-public.CustomValidators",
+            "text": "CustomValidators"
+          },
           " | undefined; appendRows?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",

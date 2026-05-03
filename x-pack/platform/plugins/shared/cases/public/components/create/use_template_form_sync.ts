@@ -10,6 +10,7 @@ import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/for
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
+import { getFieldSnakeKey } from '../../../common/utils';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
 
 interface UseTemplateFormSyncReturn {
@@ -71,7 +72,7 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
     const newAppliedFields: string[] = [];
     if (template.definition.fields) {
       for (const field of template.definition.fields) {
-        const fieldPath = `${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`;
+        const fieldPath = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(field.name, field.type)}`;
         const defaultValue = getYamlDefaultAsString(field.metadata?.default);
         setFieldValue(fieldPath, defaultValue);
         newAppliedFields.push(fieldPath);

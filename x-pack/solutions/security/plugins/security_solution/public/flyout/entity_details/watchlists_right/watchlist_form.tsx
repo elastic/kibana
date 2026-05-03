@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiFieldText,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -24,6 +25,7 @@ import {
   WATCHLIST_DESCRIPTION_LABEL,
   WATCHLIST_NAME_LABEL,
   WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
+  WATCHLIST_RISK_SCORE_WEIGHTING_ERROR,
   WATCHLIST_CSV_DATA_SOURCE_TITLE,
   WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION,
 } from './translations';
@@ -38,10 +40,12 @@ export interface WatchlistFormProps {
   isEditMode: boolean;
   isNameTooLong: boolean;
   isDescriptionTooLong: boolean;
+  isRiskModifierInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  onSourceValidationChange: (valid: boolean) => void;
 }
 
 const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
@@ -60,14 +64,16 @@ export const WatchlistForm = ({
   isEditMode,
   isNameTooLong,
   isDescriptionTooLong,
+  isRiskModifierInvalid,
   onFieldChange,
+  onSourceValidationChange,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
   const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
   const isDescriptionDisabled = isEditMode && !canUpdateWatchlistField('description', isManaged);
 
   return (
-    <EuiForm component="form" fullWidth>
+    <EuiForm component="form" fullWidth onSubmit={(e) => e.preventDefault()}>
       <EuiFormRow
         label={WATCHLIST_NAME_LABEL}
         isInvalid={isNameTooLong}
@@ -110,14 +116,19 @@ export const WatchlistForm = ({
           disabled={isDescriptionDisabled}
         />
       </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}>
+      <EuiFormRow
+        label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}
+        isInvalid={isRiskModifierInvalid}
+        error={isRiskModifierInvalid ? [WATCHLIST_RISK_SCORE_WEIGHTING_ERROR] : undefined}
+      >
         <EuiRange
           min={0}
           max={2}
           step={0.5}
           showTicks
           showInput
-          value={watchlist.riskModifier}
+          isInvalid={isRiskModifierInvalid}
+          value={Number.isFinite(watchlist.riskModifier) ? watchlist.riskModifier : ''}
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>
@@ -141,13 +152,18 @@ export const WatchlistForm = ({
         </>
       )}
       <EuiSpacer size="m" />
-      {watchlist.managed && <ManagedWatchlistSourceInput watchlist={watchlist} />}
+      {watchlist.managed && (
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <ManagedWatchlistSourceInput watchlist={watchlist} />
+        </Suspense>
+      )}
       <RuleBasedSourceInput
         watchlistName={watchlist.name}
         isEditMode={isEditMode}
         isManaged={watchlist.managed}
         onFieldChange={onFieldChange}
         initialEntitySources={watchlist.entitySources}
+        onSourceValidationChange={onSourceValidationChange}
       />
     </EuiForm>
   );

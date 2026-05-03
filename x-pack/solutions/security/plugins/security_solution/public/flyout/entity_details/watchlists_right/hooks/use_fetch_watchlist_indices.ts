@@ -9,9 +9,8 @@ import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 
 /**
- * Fetches indices that contain entity-related fields (user.name, host.name,
- * host.id, service.name, user.email, entity.id) for use in watchlist
- * index pattern selection.
+ * Fetches index names (via cat indices, open and hidden) for watchlist index pattern selection.
+ * Results are limited server-side; optional search string narrows the name wildcard.
  */
 export const useFetchWatchlistIndices = (query: string | undefined) => {
   const { searchWatchlistIndices } = useEntityAnalyticsRoutes();

@@ -26,6 +26,7 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/component
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useUiSetting } from '../../common/lib/kibana';
+import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export type CloudPostureEntityIdentifier =
   | Extract<
@@ -41,12 +42,14 @@ export const EntityInsight = <T,>({
   isPreviewMode,
   openDetailsPanel,
   entityType,
+  entityRecord,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
   entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
@@ -54,15 +57,21 @@ export const EntityInsight = <T,>({
   const insightContent: React.ReactElement[] = [];
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi, {
+  const {
+    hasMisconfigurationFindings: showMisconfigurationsPreview,
+    passedFindings,
+    failedFindings,
+  } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       entityStoreV2Enabled,
+      legacyIdentityFields: identityFields,
     })
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi, {
+    buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       entityStoreV2Enabled,
+      legacyIdentityFields: identityFields,
     })
   );
 
@@ -73,6 +82,7 @@ export const EntityInsight = <T,>({
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
     identityFields,
+    entityRecord,
     entityType,
     to,
     from,
@@ -95,8 +105,9 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <MisconfigurationsPreview
-          identityFields={identityFields}
           isPreviewMode={isPreviewMode}
+          passedFindings={passedFindings}
+          failedFindings={failedFindings}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -107,6 +118,7 @@ export const EntityInsight = <T,>({
       <>
         <VulnerabilitiesPreview
           identityFields={identityFields}
+          entityRecord={entityRecord}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />

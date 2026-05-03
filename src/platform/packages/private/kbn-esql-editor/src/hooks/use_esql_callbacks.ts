@@ -14,7 +14,6 @@ import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from 
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ILicense } from '@kbn/licensing-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
@@ -223,7 +222,7 @@ export const useEsqlCallbacks = ({
   );
 
   const getInferenceEndpointsCallback = useCallback(
-    async (taskType: InferenceTaskType) => {
+    async (taskType: string) => {
       return (await getInferenceEndpoints(core.http, taskType)) || [];
     },
     [core.http]

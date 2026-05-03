@@ -43,6 +43,7 @@ export const ElasticInferenceServiceModelsHeader = () => {
         ...(cloud?.isCloudEnabled && billingUrl
           ? [
               <EuiButton
+                data-test-subj="searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton"
                 href={billingUrl}
                 target="_blank"
                 iconType="external"

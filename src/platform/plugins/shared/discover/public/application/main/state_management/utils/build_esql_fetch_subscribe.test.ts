@@ -197,6 +197,32 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
+  test('should keep resetId stable when a transformational fetch requests a columns reset', async () => {
+    const { toolkit, dataState } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+
+    const prevDefaultProfileState = toolkit.getCurrentTab().defaultProfileState;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field1' },
+    });
+
+    const nextDefaultProfileState = toolkit.getCurrentTab().defaultProfileState;
+
+    expect(nextDefaultProfileState.fieldsToReset).toEqual(['columns']);
+    expect(nextDefaultProfileState.resetId).toBe(prevDefaultProfileState.resetId);
+  });
+
   test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
@@ -730,5 +756,63 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result2,
     });
     expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
+  });
+
+  const makeEsqlCols = (names: string[]) =>
+    names.map((name) => ({ id: name, name, meta: { type: 'string' as const } }));
+
+  test('should clear stale columns from a STATS query to a zero-result query', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        { id: '1', raw: { count: 1, bucket: 'a' }, flattened: {} } as unknown as DataTableRecord,
+      ],
+      esqlQueryColumns: makeEsqlCols(['count', 'bucket']),
+      query: { esql: 'from the-data-view-title | stats count=count(*) by bucket' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['count', 'bucket'] },
+    });
+    replaceUrlState.mockClear();
+
+    const manyFields = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: manyFields,
+      query: { esql: 'from the-data-view-title | where field1 > 9999999' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({ tabId, appState: { columns: [] } });
+  });
+
+  test('should not change columns for the same non-transformational query returning 0 rows', async () => {
+    const { replaceUrlState, dataState } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    const manyEsqlCols = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    const manyRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6 };
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [{ id: '1', raw: manyRaw, flattened: manyRaw } as unknown as DataTableRecord],
+      esqlQueryColumns: manyEsqlCols,
+      query: { esql: 'from the-data-view-title' },
+    });
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: manyEsqlCols,
+      query: { esql: 'from the-data-view-title' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 });

@@ -10,11 +10,9 @@ import { useQuery } from '@kbn/react-query';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 interface StreamsFetchResult {
   streams: ListStreamDetail[];
-  canReadFailureStore: boolean;
 }
 
 export function useFetchStreams(
@@ -29,7 +27,6 @@ export function useFetchStreams(
       },
     },
   } = useKibana();
-  const { timeState } = useTimefilter();
   const showFetchErrorToast = useFetchErrorToast();
 
   const fetchStreams = async ({ signal }: QueryFunctionContext): Promise<StreamsFetchResult> => {
@@ -37,7 +34,7 @@ export function useFetchStreams(
   };
 
   return useQuery<StreamsFetchResult, Error>({
-    queryKey: ['streamList', timeState.start, timeState.end],
+    queryKey: ['streamList'],
     queryFn: fetchStreams,
     onError: showFetchErrorToast,
     select: options?.select,

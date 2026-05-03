@@ -525,3 +525,171 @@ describe('assembly.parseChildren', () => {
     warnSpy.mockRestore();
   });
 });
+
+describe('resolveSkeleton', () => {
+  const asm = defineAssembly({ name: 'SkeletonTest' });
+
+  interface ColumnPresets {
+    name: { width?: string };
+    actions: { count?: number };
+    sort: { dir: string };
+  }
+
+  interface ColumnOutput {
+    field: string;
+  }
+
+  interface ColumnContext {
+    theme: 'light' | 'dark';
+  }
+
+  const column = asm.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
+    name: 'column',
+  });
+
+  column.createPreset({
+    name: 'name',
+    resolve: () => ({ field: 'title' }),
+    skeleton: (attrs) => ({ shape: 'text', width: attrs.width ?? '40%' }),
+  });
+
+  column.createPreset({
+    name: 'actions',
+    resolve: () => ({ field: 'actions' }),
+    skeleton: (attrs) => ({
+      shape: 'rectangle',
+      width: `${(attrs.count ?? 2) * 32}px`,
+      height: 24,
+    }),
+  });
+
+  // No skeleton callback: resolveSkeleton should return `undefined` so the
+  // renderer can fall back to its own inference.
+  column.createPreset({
+    name: 'sort',
+    resolve: () => ({ field: 'sort' }),
+  });
+
+  interface CustomColumnProps {
+    field: string;
+    width?: string;
+  }
+
+  column.createComponent<CustomColumnProps>({
+    resolve: (attrs) => ({ field: attrs.field }),
+    skeleton: (attrs) => ({ shape: 'rectangle', width: attrs.width ?? '100%' }),
+  });
+
+  it('dispatches to the preset skeleton callback', () => {
+    const part = {
+      type: 'part' as const,
+      part: 'column',
+      preset: 'name',
+      instanceId: 'name',
+      attributes: { width: '50%' },
+    };
+    const result = column.resolveSkeleton(part, { theme: 'light' });
+    expect(result).toEqual({ shape: 'text', width: '50%' });
+  });
+
+  it('passes attributes and context to the skeleton callback', () => {
+    const part = {
+      type: 'part' as const,
+      part: 'column',
+      preset: 'actions',
+      instanceId: 'actions',
+      attributes: { count: 3 },
+    };
+    const result = column.resolveSkeleton(part, { theme: 'light' });
+    expect(result).toEqual({ shape: 'rectangle', width: '96px', height: 24 });
+  });
+
+  it('returns `undefined` for presets without a skeleton callback (when no custom component skeleton is registered)', () => {
+    // Isolated assembly — no createComponent skeleton fallback registered.
+    const asm2 = defineAssembly({ name: 'IsolatedSkeletonTest' });
+    const part2 = asm2.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
+      name: 'column',
+    });
+    part2.createPreset({ name: 'sort', resolve: () => ({ field: 'sort' }) });
+
+    const part = {
+      type: 'part' as const,
+      part: 'column',
+      preset: 'sort',
+      instanceId: 'sort',
+      attributes: { dir: 'asc' },
+    };
+    expect(part2.resolveSkeleton(part, { theme: 'light' })).toBeUndefined();
+  });
+
+  it('falls back to the custom component skeleton resolver for a preset without its own skeleton, mirroring `resolve`', () => {
+    // `sort` preset has no `skeleton` callback, but the part has a
+    // createComponent skeleton registered — the fallback applies, matching
+    // the precedence of `resolve`.
+    const part = {
+      type: 'part' as const,
+      part: 'column',
+      preset: 'sort',
+      instanceId: 'sort',
+      attributes: { field: 'sort' },
+    };
+    const result = column.resolveSkeleton(part, { theme: 'light' });
+    expect(result).toEqual({ shape: 'rectangle', width: '100%' });
+  });
+
+  it('falls back to the custom component skeleton resolver for parts without a preset', () => {
+    const part = {
+      type: 'part' as const,
+      part: 'column',
+      preset: undefined,
+      instanceId: 'custom',
+      attributes: { field: 'bytes', width: '80px' },
+    };
+    const result = column.resolveSkeleton(part, { theme: 'light' });
+    expect(result).toEqual({ shape: 'rectangle', width: '80px' });
+  });
+
+  it('returns `undefined` (without warning) when no resolver is registered', () => {
+    const bareAsm = defineAssembly({ name: 'BareAssembly' });
+    const barePart = bareAsm.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
+      name: 'column',
+    });
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const part = {
+      type: 'part' as const,
+      part: 'column',
+      preset: undefined,
+      instanceId: 'never',
+      attributes: {},
+    };
+
+    expect(barePart.resolveSkeleton(part, { theme: 'light' })).toBeUndefined();
+    // Absence of a skeleton resolver is the expected case — no dev warning.
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('supports the `{ node }` escape-hatch output shape', () => {
+    const asm2 = defineAssembly({ name: 'SkeletonNode' });
+    const part = asm2.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
+      name: 'column',
+    });
+    part.createPreset({
+      name: 'name',
+      skeleton: () => ({ node: createElement('span', { 'data-testid': 'custom' }) }),
+    });
+    const result = part.resolveSkeleton(
+      {
+        type: 'part',
+        part: 'column',
+        preset: 'name',
+        instanceId: 'name',
+        attributes: {},
+      },
+      { theme: 'light' }
+    );
+    expect(result).toBeDefined();
+    expect(result && 'node' in result).toBe(true);
+  });
+});

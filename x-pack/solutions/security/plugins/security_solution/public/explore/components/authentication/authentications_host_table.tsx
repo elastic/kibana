@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
 
@@ -41,6 +43,41 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
   deleteQuery,
 }) => {
   const dispatch = useDispatch();
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  const openUserFlyout = useCallback(
+    (userName: string) => {
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
+
+  const openHostFlyout = useCallback(
+    (hostName: string) => {
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -68,8 +105,8 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
 
   const columns =
     type === hostsModel.HostsType.details
-      ? getHostDetailsAuthenticationColumns()
-      : getHostsPageAuthenticationColumns();
+      ? getHostDetailsAuthenticationColumns(openUserFlyout)
+      : getHostsPageAuthenticationColumns(openUserFlyout, openHostFlyout);
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>

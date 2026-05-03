@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import path from 'path';
-import { findTestPluginPaths } from '@kbn/test';
 import { createStatefulFeatureFlagTestConfig } from '../../default_configs/feature_flag.stateful.config.base';
 
 export default createStatefulFeatureFlagTestConfig({
   testFiles: [require.resolve('./platform.alerting_v2.index.ts')],
-  kbnServerArgs: [
-    '--xpack.alerting_v2.enabled=true',
-    ...findTestPluginPaths(path.resolve(__dirname, '../../plugins')),
-  ],
+  kbnServerArgs: ['--xpack.alerting_v2.enabled=true'],
   junit: {
     reportName: 'Platform Stateful - Deployment-agnostic Alerting V2 API Integration Tests',
   },

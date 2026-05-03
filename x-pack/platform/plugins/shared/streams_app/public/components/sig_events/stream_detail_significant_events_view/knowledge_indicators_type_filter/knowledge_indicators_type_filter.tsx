@@ -21,6 +21,11 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
+import {
+  getKnowledgeIndicatorType,
+  MATCH_QUERY_TYPE,
+  STATS_QUERY_TYPE,
+} from '../utils/get_knowledge_indicator_type';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -61,11 +66,7 @@ export function KnowledgeIndicatorsTypeFilter({
       ) {
         return;
       }
-      if (ki.kind === 'feature') {
-        types.add(ki.feature.type);
-      } else {
-        types.add('query');
-      }
+      types.add(getKnowledgeIndicatorType(ki));
     });
 
     return Array.from(types).sort((left, right) => left.localeCompare(right));
@@ -86,7 +87,7 @@ export function KnowledgeIndicatorsTypeFilter({
         return;
       }
 
-      const type = ki.kind === 'feature' ? ki.feature.type : 'query';
+      const type = getKnowledgeIndicatorType(ki);
       counts[type] = (counts[type] ?? 0) + 1;
     });
 
@@ -102,7 +103,12 @@ export function KnowledgeIndicatorsTypeFilter({
       ...availableTypes.map((type) => ({
         key: type,
         checked: selectedTypes.includes(type) ? ('on' as const) : undefined,
-        label: type === 'query' ? KNOWLEDGE_INDICATOR_QUERY_TYPE_LABEL : upperFirst(type),
+        label:
+          type === MATCH_QUERY_TYPE
+            ? MATCH_QUERY_TYPE_LABEL
+            : type === STATS_QUERY_TYPE
+            ? STATS_QUERY_TYPE_LABEL
+            : upperFirst(type),
         append: <EuiBadge>{typeCounts[type] ?? 0}</EuiBadge>,
       })),
     ],
@@ -167,10 +173,17 @@ const KNOWLEDGE_INDICATOR_TYPE_FILTER_GROUP_LABEL = i18n.translate(
   }
 );
 
-const KNOWLEDGE_INDICATOR_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.knowledgeIndicatorType.query',
+const MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorType.matchQuery',
   {
-    defaultMessage: 'Query',
+    defaultMessage: 'Match query',
+  }
+);
+
+const STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorType.statsQuery',
+  {
+    defaultMessage: 'Stats query',
   }
 );
 

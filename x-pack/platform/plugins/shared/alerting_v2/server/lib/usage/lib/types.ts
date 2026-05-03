@@ -30,21 +30,21 @@ export type AlertStatsResults = Pick<
   | 'alerts_index_size_bytes'
 >;
 
-export interface NotificationPolicyStatsAggregations {
+export interface ActionPolicyStatsAggregations {
   unique_workflow_count: { value: number };
   count_by_throttle_interval: { buckets: TermsBucket[] };
   count_with_group_by: { doc_count: number };
   avg_group_by_fields_count: { value: number | null };
   count_with_matcher: { doc_count: number };
 }
-export type NotificationPolicyStatsResults = Pick<
+export type ActionPolicyStatsResults = Pick<
   LatestTaskStateSchema,
-  | 'notification_policies_count'
-  | 'notification_policies_unique_workflow_count'
-  | 'notification_policies_count_with_matcher'
-  | 'notification_policies_count_with_group_by'
-  | 'notification_policies_avg_group_by_fields_count'
-  | 'notification_policies_count_by_throttle_interval'
+  | 'action_policies_count'
+  | 'action_policies_unique_workflow_count'
+  | 'action_policies_count_with_matcher'
+  | 'action_policies_count_with_group_by'
+  | 'action_policies_avg_group_by_fields_count'
+  | 'action_policies_count_by_throttle_interval'
 >;
 
 export interface ExecutionStatsAggregations {

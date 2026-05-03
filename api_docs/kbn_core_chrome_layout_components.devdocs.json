@@ -37,6 +37,7 @@
             "lineNumber": 30,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ChromeLayoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -80,6 +81,7 @@
             "lineNumber": 85,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "LayoutConfigProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -7,15 +7,15 @@
 
 import { useService } from '@kbn/core-di-browser';
 import { useQuery } from '@kbn/react-query';
-import { NotificationPoliciesApi } from '../services/notification_policies_api';
+import { ActionPoliciesApi } from '../services/action_policies_api';
 import { matcherSuggestionKeys } from './query_key_factory';
 
 export const useFetchDataFields = () => {
-  const notificationPoliciesApi = useService(NotificationPoliciesApi);
+  const actionPoliciesApi = useService(ActionPoliciesApi);
 
   return useQuery<string[], Error>({
     queryKey: matcherSuggestionKeys.dataFields(),
-    queryFn: () => notificationPoliciesApi.fetchDataFields(),
+    queryFn: () => actionPoliciesApi.fetchDataFields(),
     refetchOnWindowFocus: false,
     staleTime: 30 * 1000, // 30 seconds
   });

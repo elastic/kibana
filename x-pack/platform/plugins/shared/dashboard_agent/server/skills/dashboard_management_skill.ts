@@ -16,20 +16,22 @@ export const dashboardManagementSkill = defineSkillType({
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
   description:
-    'Compose and update in-memory Kibana dashboards using ordered operations, visualization attachments, and inline visualization editing.',
+    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
   content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
 - A user asks to create a dashboard from one or more visualizations.
-- A user asks to update an in-memory dashboard created earlier in the conversation.
+- A user asks to update a dashboard created earlier in the conversation.
 - A request involves dashboard metadata, markdown, panel, or section changes.
 
 Do **not** use this skill when:
-- The user asks for a standalone visualization rather than a dashboard.
+- The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
 ## Core Instructions
+
+Every dashboard MUST have a non-empty \`title\`. If the attached dashboard's title is empty, missing, or \`"User Dashboard"\`, your first operation MUST be \`set_metadata\` with a title you invent from its contents.
 
 For dashboard discovery:
 - When a user asks what dashboards are available, search for existing saved dashboards with \`platform.core.sml_search\`.
@@ -79,7 +81,7 @@ Supported operations:
 - \`remove_panels\`: remove existing panels by \`id\`.
 
 After a successful call:
-- Render the dashboard attachment inline so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition - only the final dashboard attachment should be rendered.
+- Render only the final dashboard attachment inline, as the last part of your response, after any text. Never render individual visualization attachments during dashboard composition.
 - Remember \`data.dashboardAttachment.id\` for follow-up updates.
 - Use returned \`id\` values for future panel removals.
 - Use returned \`sectionId\` values for future section-targeted changes.

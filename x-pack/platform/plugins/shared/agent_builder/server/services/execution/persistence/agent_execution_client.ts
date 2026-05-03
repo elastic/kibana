@@ -7,15 +7,21 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import type { AgentExecution, SerializedExecutionError, FindExecutionsOptions } from '../types';
-import { ExecutionStatus } from '../types';
+import type { ChatEvent, SerializedExecutionError } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { agentExecutionIndexName, createStorage } from './agent_execution_storage';
 
 type CreateExecutionParams = Pick<
   AgentExecution,
-  'executionId' | 'agentId' | 'spaceId' | 'agentParams' | 'metadata'
+  | 'executionId'
+  | 'agentId'
+  | 'spaceId'
+  | 'agentParams'
+  | 'metadata'
+  | 'executionMode'
+  | 'parentExecutionId'
 >;
 
 /**
@@ -34,13 +40,15 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     '@timestamp': source['@timestamp'],
     status: source.status,
     agentId: source.agent_id,
+    executionMode: source.execution_mode ?? AgentExecutionMode.conversation,
+    ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
     ...(source.error ? { error: source.error } : {}),
     ...(source.metadata ? { metadata: source.metadata } : {}),
-  };
+  } as AgentExecution;
 };
 
 /**
@@ -116,6 +124,8 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     spaceId,
     agentParams,
     metadata,
+    executionMode,
+    parentExecutionId,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -131,11 +141,13 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       '@timestamp': now,
       status: ExecutionStatus.scheduled,
       agent_id: agentId,
+      execution_mode: executionMode,
+      parent_execution_id: parentExecutionId,
       space_id: spaceId,
       agent_params: agentParams,
       event_count: 0,
       events: [],
-      ...(metadata ? { metadata } : {}),
+      metadata: metadata ?? {},
     };
 
     await this.storage.getClient().index({
@@ -143,17 +155,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       document,
     });
 
-    return {
-      executionId,
-      '@timestamp': now,
-      status: ExecutionStatus.scheduled,
-      agentId,
-      spaceId,
-      agentParams,
-      eventCount: 0,
-      events: [],
-      ...(metadata ? { metadata } : {}),
-    };
+    return fromEs(document);
   }
 
   async get(executionId: string): Promise<AgentExecution | undefined> {

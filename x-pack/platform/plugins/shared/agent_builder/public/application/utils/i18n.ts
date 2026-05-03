@@ -94,6 +94,14 @@ export const labels = {
     toolIdLabel: i18n.translate('xpack.agentBuilder.tools.idLabel', { defaultMessage: 'ID' }),
     tagsLabel: i18n.translate('xpack.agentBuilder.tools.tagsLabel', { defaultMessage: 'Labels' }),
     toolsLabel: i18n.translate('xpack.agentBuilder.tools.toolsLabel', { defaultMessage: 'Tools' }),
+    selectToolColumnHeader: i18n.translate('xpack.agentBuilder.tools.selectToolColumnHeader', {
+      defaultMessage: 'Select tool',
+    }),
+    selectToolCheckboxAriaLabel: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.tools.selectToolCheckboxAriaLabel', {
+        defaultMessage: 'Select tool {toolId}',
+        values: { toolId },
+      }),
 
     // Tool types
     esqlLabel: i18n.translate('xpack.agentBuilder.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
@@ -1670,6 +1678,16 @@ export const labels = {
         defaultMessage: 'Click to authorize via OAuth',
       }
     ),
+    statusEarsDisabled: i18n.translate('xpack.agentBuilder.connectors.status.earsDisabled', {
+      defaultMessage: 'Disabled',
+    }),
+    statusEarsDisabledTooltip: i18n.translate(
+      'xpack.agentBuilder.connectors.status.earsDisabledTooltip',
+      {
+        defaultMessage:
+          'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+      }
+    ),
     statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {
       defaultMessage: 'Status',
     }),
@@ -1929,6 +1947,12 @@ export const labels = {
     editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
       defaultMessage: 'Edit agent settings',
     }),
+    readMore: i18n.translate('xpack.agentBuilder.overview.description.readMore', {
+      defaultMessage: 'Read more',
+    }),
+    readLess: i18n.translate('xpack.agentBuilder.overview.description.readLess', {
+      defaultMessage: 'Read less',
+    }),
     capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
       defaultMessage: 'Capabilities',
     }),
@@ -2053,6 +2077,9 @@ export const labels = {
         defaultMessage: 'Save instructions',
       }
     ),
+    createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
+      defaultMessage: 'Elastic',
+    }),
     byAuthor: (author: string) =>
       i18n.translate('xpack.agentBuilder.overview.byAuthor', {
         defaultMessage: 'By {author}',

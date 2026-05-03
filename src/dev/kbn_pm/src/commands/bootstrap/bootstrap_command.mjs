@@ -64,6 +64,9 @@ export const command = {
   },
   async run({ args, log, time }) {
     const offline = args.getBooleanValue('offline') ?? false;
+    if (offline) {
+      process.env.CI_STATS_DISABLED = 'true';
+    }
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
@@ -136,6 +139,20 @@ export const command = {
       shouldInstall
         ? time('run install scripts', async () => {
             await runInstallScripts(log, { quiet });
+          })
+        : undefined,
+      shouldInstall
+        ? time('apply node_modules patches', async () => {
+            log.info('applying node_modules patches via patch-package');
+            // The patch-package command is used to apply patches to the node_modules directory.
+            // At the time of writing, the following packages are patched:
+            // - zod@4.3.6 => memory regression introduced in 4.x (see https://github.com/colinhacks/zod/issues/5760)
+            // The libraries above should not be updated, as doing so would break the patches.
+            await run('node', ['node_modules/.bin/patch-package', '--error-on-fail'], {
+              pipe: !quiet,
+              description: 'patch-package',
+            });
+            log.success('node_modules patches applied');
           })
         : undefined,
     ]);

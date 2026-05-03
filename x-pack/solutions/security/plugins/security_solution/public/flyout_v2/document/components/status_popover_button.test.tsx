@@ -48,6 +48,7 @@ const props = {
   },
   scopeId: 'alerts-page',
   handleOnEventClosed: jest.fn(),
+  disabled: false,
 };
 
 type AlertsPriveleges = Partial<ReturnType<typeof useAlertsPrivileges>>;
@@ -89,6 +90,19 @@ describe('StatusPopoverButton', () => {
     expect(container.querySelector('.euiBadge__icon')).not.toBeNull();
     getByText('Mark as acknowledged');
     getByText('Mark as closed');
+  });
+
+  test('does not open the popover when disabled, even with write privileges', () => {
+    (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    const { getByText, queryByRole } = render(
+      <TestProviders>
+        <StatusPopoverButton {...props} disabled={true} />
+      </TestProviders>
+    );
+
+    getByText('open').click();
+
+    expect(queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   test('Status should be text when user does not have write priveleges', () => {

@@ -75,7 +75,7 @@ describe('runInvalidate', () => {
     },
     {
       type: 'api_key_to_invalidate',
-      encrypted: false,
+      encrypted: true,
       savedObjectTypes: [
         { type: 'task', apiKeyAttributePath: 'task.attributes.userScope.apiKeyId' },
       ],

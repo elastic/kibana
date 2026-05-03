@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getKibanaTranslationFilesMock = jest.fn();
+export const getAllKibanaTranslationFilesMock = jest.fn();
 jest.doMock('./get_kibana_translation_files', () => ({
-  getKibanaTranslationFiles: getKibanaTranslationFilesMock,
+  getAllKibanaTranslationFiles: getAllKibanaTranslationFilesMock,
 }));
 
 export const initTranslationsMock = jest.fn();

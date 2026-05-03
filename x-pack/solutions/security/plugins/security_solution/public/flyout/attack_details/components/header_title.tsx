@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';

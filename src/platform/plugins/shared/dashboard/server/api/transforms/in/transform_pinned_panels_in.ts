@@ -15,16 +15,17 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
 import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
-import { embeddableService, logger } from '../../../kibana_services';
+import { embeddableService } from '../../../kibana_services';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
+import { TransformPanelInError, TransformPanelsInError } from './transform_panels_in_error';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
-export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
-  pinnedPanels?: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
+  pinnedPanels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
   references: Reference[];
 } {
-  if (!pinnedPanels) return { references: [] };
+  const panelErrors: TransformPanelInError[] = [];
 
   let references: Reference[] = [];
   const updatedPinnedPanels = Object.fromEntries(
@@ -35,6 +36,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
       let transformedControlState = { ...controlState } as Partial<
         Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
       >;
+
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
@@ -60,10 +62,13 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
             config: controlState.config,
           };
         }
-      } catch (transformInError) {
-        // do not prevent save if transformIn throws
-        logger.warn(
-          `Unable to transform "${type}" embeddable state on save. Error: ${transformInError.message}`
+      } catch (e) {
+        panelErrors.push(
+          new TransformPanelInError(
+            `Transform error: ${e.message}`,
+            controlState.type,
+            controlState.config
+          )
         );
       }
 
@@ -81,6 +86,12 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
     })
   );
 
+  if (panelErrors.length) {
+    throw new TransformPanelsInError(
+      `Unable to transform ${panelErrors.length} pinned panels`,
+      panelErrors
+    );
+  }
   return {
     pinnedPanels: updatedPinnedPanels,
     references,
