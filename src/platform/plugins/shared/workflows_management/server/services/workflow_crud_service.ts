@@ -50,28 +50,69 @@ import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
+  async getWorkflowDocumentSource(
+    id: string,
+    spaceId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<WorkflowProperties | null> {
+    const { must, must_not } = workflowSpaceFilter(spaceId, {
+      includeDeleted: options?.includeDeleted ?? false,
+    });
+    must.push({ ids: { values: [id] } });
+    const searchResponse = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      size: 1,
+      track_total_hits: false,
+    });
+
+    const hit = searchResponse.hits.hits[0];
+    return (hit?._source as WorkflowProperties | undefined) ?? null;
+  }
+
+  async indexWorkflowDocument(id: string, document: WorkflowProperties): Promise<void> {
+    await this.deps.workflowStorage.getClient().index({
+      id,
+      document,
+      refresh: true,
+    });
+  }
+
+  async getManagedWorkflowDocuments(
+    spaceId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<Array<{ id: string; source: WorkflowProperties }>> {
+    const { must, must_not } = workflowSpaceFilter(spaceId, {
+      includeDeleted: options?.includeDeleted ?? false,
+    });
+    must.push({ term: { managed: true } });
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      size: 1000,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+        Boolean(hit._id && hit._source)
+      )
+      .map((hit) => ({
+        id: hit._id,
+        source: hit._source,
+      }));
+  }
+
   async getWorkflow(
     id: string,
     spaceId: string,
     options?: { includeDeleted?: boolean }
   ): Promise<WorkflowDetailDto | null> {
     try {
-      const { must, must_not } = workflowSpaceFilter(spaceId, {
-        includeDeleted: options?.includeDeleted ?? false,
-      });
-      must.push({ ids: { values: [id] } });
-      const response = await this.deps.workflowStorage.getClient().search({
-        query: { bool: { must, must_not } },
-        size: 1,
-        track_total_hits: false,
-      });
-
-      if (response.hits.hits.length === 0) {
+      const source = await this.getWorkflowDocumentSource(id, spaceId, options);
+      if (!source) {
         return null;
       }
-
-      const document = response.hits.hits[0];
-      return transformStorageDocumentToWorkflowDto(document._id, document._source);
+      return transformStorageDocumentToWorkflowDto(id, source);
     } catch (error) {
       if (isNotFoundError(error)) {
         return null;
@@ -180,11 +221,7 @@ export class WorkflowCrudService {
       );
     }
 
-    await this.deps.workflowStorage.getClient().index({
-      id,
-      document: workflowData,
-      refresh: true,
-    });
+    await this.indexWorkflowDocument(id, workflowData);
 
     await scheduleWorkflowTriggers({
       workflowId: id,
@@ -389,11 +426,7 @@ export class WorkflowCrudService {
         finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
       }
 
-      await this.deps.workflowStorage.getClient().index({
-        id,
-        document: finalData,
-        refresh: true,
-      });
+      await this.indexWorkflowDocument(id, finalData);
 
       const taskScheduler = this.deps.getTaskScheduler();
       if (shouldUpdateScheduler && taskScheduler) {
@@ -488,23 +521,13 @@ export class WorkflowCrudService {
     id: string,
     spaceId: string
   ): Promise<{ source: WorkflowProperties }> {
-    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
-    must.push({ ids: { values: [id] } });
-    const searchResponse = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must } },
-      size: 1,
-      track_total_hits: false,
+    const source = await this.getWorkflowDocumentSource(id, spaceId, {
+      includeDeleted: true,
     });
-
-    if (searchResponse.hits.hits.length === 0) {
+    if (!source) {
       throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
     }
-
-    const hit = searchResponse.hits.hits[0];
-    if (!hit._source) {
-      throw new Error(`Workflow with id ${id} not found`);
-    }
-    return { source: hit._source as WorkflowProperties };
+    return { source };
   }
 
   private async resolveAndDeduplicateBulkIds(

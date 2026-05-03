@@ -8,6 +8,52 @@
  */
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import type { ManagedWorkflowId } from '../managed';
+
+export interface ManagedWorkflowOperationOptions {
+  spaceId?: string;
+}
+
+export interface ExecuteManagedWorkflowOptions extends ManagedWorkflowOperationOptions {
+  inputs?: Record<string, unknown>;
+  triggeredBy?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface RegisteredManagedWorkflowsLifecycleApi {
+  install: (id: ManagedWorkflowId, options?: ManagedWorkflowOperationOptions) => Promise<void>;
+  uninstall: (id: ManagedWorkflowId, options?: ManagedWorkflowOperationOptions) => Promise<void>;
+}
+
+export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
+  execute: (id: ManagedWorkflowId, options?: ExecuteManagedWorkflowOptions) => Promise<string>;
+}
+
+export interface ManagedWorkflowsApi {
+  install: (
+    pluginId: string,
+    id: ManagedWorkflowId,
+    options?: ManagedWorkflowOperationOptions
+  ) => Promise<void>;
+  uninstall: (
+    pluginId: string,
+    id: ManagedWorkflowId,
+    options?: ManagedWorkflowOperationOptions
+  ) => Promise<void>;
+  execute: (
+    pluginId: string,
+    id: ManagedWorkflowId,
+    options?: ExecuteManagedWorkflowOptions
+  ) => Promise<string>;
+}
+
+export interface PluginScopedManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
+  execute: (
+    request: KibanaRequest,
+    id: ManagedWorkflowId,
+    options?: ExecuteManagedWorkflowOptions
+  ) => Promise<string>;
+}
 
 /**
  * The workflows client.
@@ -17,6 +63,7 @@ import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/serve
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
   emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  managedWorkflows: ManagedWorkflowsApi;
 }
 
 // Exporting using Kibana naming convention
@@ -27,3 +74,6 @@ export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 export type WorkflowsClientProvider = (request: KibanaRequest) => Promise<WorkflowsClient>;
+export type ManagedWorkflowsSystemApiProvider = (
+  pluginId: string
+) => Promise<RegisteredManagedWorkflowsLifecycleApi>;

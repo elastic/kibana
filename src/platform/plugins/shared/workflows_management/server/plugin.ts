@@ -23,7 +23,10 @@ import { defineRoutes } from './api/routes';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
-import { createWorkflowsClientProvider } from './client/workflows_client';
+import {
+  createManagedWorkflowsSystemApiProvider,
+  createWorkflowsClientProvider,
+} from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -56,6 +59,7 @@ export class WorkflowsPlugin
   private config: WorkflowsManagementConfig;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private workflowsService: WorkflowsService | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -78,6 +82,7 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Creating workflows service');
 
     const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
+    this.workflowsService = workflowsService;
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
@@ -96,6 +101,9 @@ export class WorkflowsPlugin
     // Register public workflows client provider to allow any external plugin use it via the workflowsExtensions plugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+    );
+    plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
+      createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
     );
 
     const spaces = plugins.spaces.spacesService;
@@ -122,6 +130,17 @@ export class WorkflowsPlugin
         api: this.api,
         logger: this.logger,
       });
+    }
+
+    if (this.workflowsService) {
+      const managedWorkflowPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      void this.workflowsService
+        .reconcileManagedWorkflowOrphans(managedWorkflowPluginIds)
+        .catch((error) => {
+          this.logger.warn('Workflows Management: Failed to reconcile managed workflow orphans', {
+            error,
+          });
+        });
     }
 
     this.logger.debug('Workflows Management: Started');

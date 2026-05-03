@@ -365,6 +365,11 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
+  managed?: boolean;
+  managedBy?: string | null;
+  definitionHash?: string | null;
+  originSystemWorkflowId?: string | null;
+  lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
   lastUpdatedAt: string;
@@ -384,6 +389,8 @@ export interface WorkflowListItemDto {
   name: string;
   description: string;
   enabled: boolean;
+  managed?: boolean;
+  managedBy?: string | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];

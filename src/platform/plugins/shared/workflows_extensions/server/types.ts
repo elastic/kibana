@@ -12,6 +12,9 @@ import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/serve
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
+  ManagedWorkflowsSystemApiProvider,
+  PluginScopedManagedWorkflowsApi,
+  RegisteredManagedWorkflowsLifecycleApi,
   WorkflowsApiRequestHandlerContext,
   WorkflowsClient,
   WorkflowsClientProvider,
@@ -55,6 +58,19 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if provider is already registered
    */
   registerWorkflowsClientProvider(provider: WorkflowsClientProvider): void;
+
+  /**
+   * Register a requestless managed workflows provider for startup/system operations.
+   *
+   * @param provider - The managed workflows system API provider
+   * @throws Error if provider is already registered
+   */
+  registerManagedWorkflowsSystemApiProvider(provider: ManagedWorkflowsSystemApiProvider): void;
+
+  /**
+   * Register plugin id as a managed workflows owner during setup.
+   */
+  registerManagedWorkflowOwner(pluginId: string): void;
 }
 
 /**
@@ -80,6 +96,23 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The workflows client
      */
     getClient(request: KibanaRequest): Promise<WorkflowsClient>;
+
+    /**
+     * Get the requestless managed workflows client for startup/system operations.
+     * @returns Lifecycle API scoped to the plugin id
+     */
+    getManagedWorkflowsClient(pluginId: string): Promise<RegisteredManagedWorkflowsLifecycleApi>;
+
+    /**
+     * Initialize a plugin-scoped managed workflows client. The plugin id is bound once
+     * and reused for install/uninstall/execute.
+     */
+    initManagedWorkflowsClient(pluginId: string): Promise<PluginScopedManagedWorkflowsApi>;
+
+    /**
+     * Returns all plugin ids registered as managed workflow owners during setup.
+     */
+    getManagedWorkflowPluginIds(): string[];
   };
 
 /**

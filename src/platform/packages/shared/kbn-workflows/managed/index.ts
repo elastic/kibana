@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowManagement,
+  ResolvedManagedWorkflowDefinition,
+} from './types';
+import {
+  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW,
+  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
+} from './workflows';
+
+export type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowManagement,
+  ResolvedManagedWorkflowDefinition,
+};
+
+const defaultManagementPolicy: Required<ManagedWorkflowManagement> = {
+  lifecycle: 'static',
+  versionStrategy: 'auto',
+  enablement: 'restorable',
+  defaultEnabled: true,
+};
+
+export const managedWorkflowDefinitions = [WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW] as const;
+
+export type ManagedWorkflowId = (typeof managedWorkflowDefinitions)[number]['id'];
+
+export const getManagedWorkflowDefinition = (
+  id: string
+): ResolvedManagedWorkflowDefinition | undefined => {
+  const workflow = managedWorkflowDefinitions.find((definition) => definition.id === id);
+  if (!workflow) {
+    return undefined;
+  }
+
+  return {
+    ...workflow,
+    management: {
+      ...defaultManagementPolicy,
+      ...workflow.management,
+    },
+  };
+};
+
+export const getManagedWorkflowDefinitions = (): ResolvedManagedWorkflowDefinition[] => {
+  return managedWorkflowDefinitions.map((workflow) => ({
+    ...workflow,
+    management: {
+      ...defaultManagementPolicy,
+      ...workflow.management,
+    },
+  }));
+};
+
+export { WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID };
