@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -130,8 +130,26 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
   const [sortField, setSortField] = useState<keyof EventDocument>('criticality');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'eventDetailFlyout' });
+  const returnFocusRef = useRef<Element | null>(null);
 
-  const closeFlyout = useCallback(() => setSelectedEvent(null), []);
+  const closeFlyout = useCallback(() => {
+    setSelectedEvent(null);
+    requestAnimationFrame(() => {
+      (returnFocusRef.current as HTMLElement | null)?.focus();
+    });
+  }, []);
+
+  const toggleEvent = useCallback(
+    (item: EventDocument) => {
+      if (selectedEvent?.event_id === item.event_id) {
+        closeFlyout();
+      } else {
+        returnFocusRef.current = document.activeElement;
+        setSelectedEvent(item);
+      }
+    },
+    [selectedEvent, closeFlyout]
+  );
 
   const onTableChange = useCallback(({ sort }: Criteria<EventDocument>) => {
     if (sort) {
@@ -152,9 +170,30 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
     })
     .slice(0, 5);
 
-  const toggleEvent = useCallback((item: EventDocument) => {
-    setSelectedEvent((current) => (current && current.event_id === item.event_id ? null : item));
-  }, []);
+  useEffect(() => {
+    if (!selectedEvent) return;
+
+    // Focus the close button inside the flyout once it renders
+    const timerId = setTimeout(() => {
+      const flyout = document.querySelector<HTMLElement>('[data-test-subj="eventDetailFlyout"]');
+      const closeBtn = flyout?.querySelector<HTMLElement>(
+        '[data-test-subj="euiFlyoutCloseButton"]'
+      );
+      closeBtn?.focus();
+    }, 50);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeFlyout();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(timerId);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedEvent, closeFlyout]);
 
   const columns: Array<EuiBasicTableColumn<EventDocument>> = [
     {

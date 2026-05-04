@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -17,8 +17,6 @@ import {
   EuiFlyoutHeader,
   EuiLink,
   EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -109,14 +107,53 @@ export function OtherPromotedEvents({ events, onRemediate }: OtherPromotedEvents
   const [sortField, setSortField] = useState<SortableField>('severity');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'otherPromotedEventFlyout' });
+  const returnFocusRef = useRef<Element | null>(null);
 
-  const closeFlyout = useCallback(() => setSelectedEvent(null), []);
-
-  const toggleEvent = useCallback((item: LatestSignificantEventData) => {
-    setSelectedEvent((current) =>
-      current && current.raw.event_id === item.raw.event_id ? null : item
-    );
+  const closeFlyout = useCallback(() => {
+    setSelectedEvent(null);
+    requestAnimationFrame(() => {
+      (returnFocusRef.current as HTMLElement | null)?.focus();
+    });
   }, []);
+
+  const toggleEvent = useCallback(
+    (item: LatestSignificantEventData) => {
+      if (selectedEvent?.raw.event_id === item.raw.event_id) {
+        closeFlyout();
+      } else {
+        returnFocusRef.current = document.activeElement;
+        setSelectedEvent(item);
+      }
+    },
+    [selectedEvent, closeFlyout]
+  );
+
+  useEffect(() => {
+    if (!selectedEvent) return;
+
+    // Focus the close button inside the flyout once it renders
+    const timerId = setTimeout(() => {
+      const flyout = document.querySelector<HTMLElement>(
+        '[data-test-subj="otherPromotedEventDetailFlyout"]'
+      );
+      const closeBtn = flyout?.querySelector<HTMLElement>(
+        '[data-test-subj="euiFlyoutCloseButton"]'
+      );
+      closeBtn?.focus();
+    }, 50);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeFlyout();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(timerId);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedEvent, closeFlyout]);
 
   const onTableChange = useCallback(({ sort }: Criteria<OtherPromotedEventRow>) => {
     if (sort) {

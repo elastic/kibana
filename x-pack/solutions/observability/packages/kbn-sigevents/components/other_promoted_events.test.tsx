@@ -79,7 +79,9 @@ describe('OtherPromotedEvents', () => {
   it('renders the section heading', () => {
     renderWithIntl(<OtherPromotedEvents events={[makeEvent()]} />);
     expect(screen.getByTestId('sigeventsOverviewOtherPromotedEvents')).toBeInTheDocument();
-    expect(screen.getByText('Other promoted events')).toBeInTheDocument();
+    expect(
+      screen.getByText('Additional significant events that were promoted')
+    ).toBeInTheDocument();
   });
 
   it('renders nothing when there are no events', () => {
@@ -140,5 +142,29 @@ describe('OtherPromotedEvents', () => {
 
     fireEvent.click(screen.getByTestId('otherPromotedEventTitleLink-evt-1'));
     expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
+  });
+
+  it('closes the flyout when Escape is pressed', () => {
+    const events = [makeEvent({ mainEventTitle: 'Payment failures' })];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+
+    fireEvent.click(screen.getByTestId('otherPromotedEventExpandRow-evt-1'));
+    expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByTestId('otherPromotedEventDetailFlyout')).not.toBeInTheDocument();
+  });
+
+  it('returns focus to the trigger element when the flyout is closed', () => {
+    const events = [makeEvent({ mainEventTitle: 'Payment failures' })];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+
+    const expandBtn = screen.getByTestId('otherPromotedEventExpandRow-evt-1');
+    expandBtn.focus();
+    fireEvent.click(expandBtn);
+    expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByTestId('otherPromotedEventDetailFlyout')).not.toBeInTheDocument();
   });
 });

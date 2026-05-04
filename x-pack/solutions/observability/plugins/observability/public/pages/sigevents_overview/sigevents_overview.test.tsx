@@ -206,5 +206,15 @@ describe('SigeventsOverviewPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /close/i }));
       expect(screen.queryByTestSubject('obltSigeventsDetailFlyout')).not.toBeInTheDocument();
     });
+
+    it('closes the flyout when Escape is pressed', () => {
+      renderWithProviders();
+
+      fireEvent.click(screen.getByTestSubject('mockSigeventsViewDetailsButton'));
+      expect(screen.getByTestSubject('obltSigeventsDetailFlyout')).toBeInTheDocument();
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByTestSubject('obltSigeventsDetailFlyout')).not.toBeInTheDocument();
+    });
   });
 });

@@ -261,4 +261,28 @@ describe('LowerPriorityEvents', () => {
       screen.queryByTestId('sigeventsOverviewRecommendationsPlanRemediate')
     ).not.toBeInTheDocument();
   });
+
+  it('closes the flyout when Escape is pressed', () => {
+    const events = [makeEvent({ event_id: 'e-1', title: 'Escape Event' })];
+    renderWithIntl(<LowerPriorityEvents events={events} />);
+
+    fireEvent.click(screen.getByTestId('eventExpandRow-e-1'));
+    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByTestId('eventDetailFlyout')).not.toBeInTheDocument();
+  });
+
+  it('returns focus to the trigger element when the flyout is closed', () => {
+    const events = [makeEvent({ event_id: 'e-1', title: 'Focus Event' })];
+    renderWithIntl(<LowerPriorityEvents events={events} />);
+
+    const expandBtn = screen.getByTestId('eventExpandRow-e-1');
+    expandBtn.focus();
+    fireEvent.click(expandBtn);
+    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByTestId('eventDetailFlyout')).not.toBeInTheDocument();
+  });
 });
