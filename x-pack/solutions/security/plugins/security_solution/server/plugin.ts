@@ -19,7 +19,6 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
-import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
@@ -62,8 +61,7 @@ import {
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
-import { validateEndpointAttachmentMetadata } from './cases/attachments/endpoint_metadata_schema';
-import { getEventAttachmentType } from './cases/attachments/event';
+import { registerCaseAttachments } from './cases/attachments/register';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -530,20 +528,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    plugins.cases.attachmentFramework.registerUnified({
-      id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-      schemaValidator: validateEndpointAttachmentMetadata,
-    });
-    // Back-compat: keep the legacy `endpoint` external-reference type registered so
-    // existing API clients that still POST `{ type: 'externalReference',
-    // externalReferenceAttachmentTypeId: 'endpoint', ... }` are not rejected with
-    // 400 "Attachment type endpoint is not registered." after this PR. The cases
-    // server already converts legacy-shape SOs to the unified `security.endpoint`
-    // shape on read via `externalReferenceAttachmentTransformer.toUnifiedSchema`.
-    plugins.cases.attachmentFramework.registerExternalReference({
-      id: 'endpoint',
-    });
-    plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
+    registerCaseAttachments(plugins.cases.attachmentFramework);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
