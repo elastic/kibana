@@ -627,10 +627,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmUseUnifiedTraceWaterfall': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:profilingShowErrorFrames': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -734,12 +730,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Significant events discovery in Streams.',
-    },
-  },
-  'observability:streamsEnableAttachments': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams attachments tab.',
     },
   },
   'observability:streamsEnableContentPacks': {
