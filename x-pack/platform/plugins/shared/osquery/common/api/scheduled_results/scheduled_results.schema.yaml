@@ -261,11 +261,10 @@ paths:
             application/json:
               schema:
                 description: >
-                  A single JSON array containing all result rows. All rows are
-                  held in memory before writing; prefer `ndjson` for large exports.
-                type: array
-                items:
-                  $ref: '../export/export_results.schema.yaml#/components/schemas/ExportResultRow'
+                  A JSON object with `_meta` (export metadata) and `results` (all
+                  result rows). Rows are held in memory before writing; prefer
+                  `ndjson` for large exports.
+                $ref: '../export/export_results.schema.yaml#/components/schemas/ExportJsonResponse'
             text/csv:
               schema:
                 description: >

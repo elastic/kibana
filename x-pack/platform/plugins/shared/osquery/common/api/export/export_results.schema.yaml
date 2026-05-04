@@ -115,6 +115,75 @@ components:
               nullable: true
               example: 17384
 
+    ExportMetadata:
+      description: >
+        Metadata block produced for every export. Included as `_meta` in the JSON
+        response body and as the first NDJSON line.
+      type: object
+      required:
+        - action_id
+        - timestamp
+        - exported_by
+        - format
+      properties:
+        action_id:
+          description: The action ID (live query) or schedule ID (scheduled query) that produced the results.
+          type: string
+          example: 'e88d7652-fc3e-4544-b0e0-3d5df2be454c'
+        query:
+          description: The SQL query text, if it could be resolved from action details.
+          type: string
+          nullable: true
+          example: 'SELECT * FROM users;'
+        timestamp:
+          description: ISO 8601 timestamp of when the export was initiated.
+          type: string
+          format: date-time
+          example: '2026-04-30T09:12:00.000Z'
+        exported_by:
+          description: Username of the Kibana user who triggered the export.
+          type: string
+          example: elastic
+        format:
+          $ref: '#/components/schemas/ExportFormat'
+        total_results:
+          description: Total number of result rows included in this export.
+          type: integer
+          nullable: true
+          example: 64
+        execution_count:
+          description: >
+            For scheduled query exports only: the execution counter of the
+            scheduled run that produced the results.
+          type: integer
+          nullable: true
+          example: 17384
+        csv_columns:
+          description: >
+            For CSV exports with ECS mapping and zero hits: the column header row
+            so an empty export is not a 0-byte file.
+          type: array
+          nullable: true
+          items:
+            type: string
+
+    ExportJsonResponse:
+      description: >
+        JSON export response body. The `_meta` field contains export metadata;
+        `results` contains all result rows. Prefer `ndjson` for large exports
+        since rows are streamed individually rather than held in memory.
+      type: object
+      required:
+        - _meta
+        - results
+      properties:
+        _meta:
+          $ref: '#/components/schemas/ExportMetadata'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportResultRow'
+
     ExportResultRow:
       description: >
         A single result row from an NDJSON or JSON export. Fields follow the
