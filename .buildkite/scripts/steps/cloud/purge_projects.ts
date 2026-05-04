@@ -22,7 +22,7 @@ async function getPrProjects() {
         projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
         projectRequest.get('/api/v1/serverless/projects/security'),
         projectRequest.get('/api/v1/serverless/projects/observability'),
-        // TODO handle the new 'vectordb' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
+        // TODO handle the new 'workplaceai' and 'vectordb' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
       ])
     )
       .map((response) => response.data.items)
