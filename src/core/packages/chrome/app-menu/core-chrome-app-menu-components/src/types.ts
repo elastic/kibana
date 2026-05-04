@@ -51,7 +51,7 @@ type BaseSplitProps = Pick<
   | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
-  | 'notifcationIndicatorTooltipContent'
+  | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {

@@ -211,7 +211,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'chevronSingleDown',
-      notifcationIndicatorTooltipContent: 'You have unsaved changes',
+      notificationIndicatorTooltipContent: 'You have unsaved changes',
       showNotificationIndicator: true,
       items: [
         {

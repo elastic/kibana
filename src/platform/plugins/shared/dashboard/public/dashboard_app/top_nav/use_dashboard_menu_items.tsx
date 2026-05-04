@@ -410,7 +410,7 @@ export const useDashboardMenuItems = ({
           secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonFill: true,
           isSecondaryButtonDisabled: isSaveInProgress,
-          notifcationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
+          notificationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
           showNotificationIndicator: hasUnsavedChanges,
         },
       } as AppMenuPrimaryActionItem,

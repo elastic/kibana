@@ -12,10 +12,6 @@ import { upperFirst } from 'lodash';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import {
-  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-  APP_MENU_NOTIFICATION_INDICATOR_TOP,
-} from '../constants';
 import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import { SplitButtonWithNotification } from './split_button_with_notification';
@@ -108,8 +104,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     href,
     target: href ? target : undefined,
     isLoading,
-    size: 's' as const,
-    iconSize: 'm' as const,
     'aria-haspopup': (hasSplitItems ? 'menu' : undefined) as 'menu' | undefined,
     fullWidth,
   };
@@ -142,17 +136,9 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       <SplitButtonWithNotification
         {...otherSplitButtonProps}
         {...commonProps}
-        secondaryButtonFill={false}
         onSecondaryButtonClick={handleSecondaryButtonClick}
-        color="text"
         isSelected={isPopoverOpen}
         css={splitButtonCss}
-        notificationIndicatorPosition={{
-          top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
-          left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-        }}
-        notificationIndicatorSize="m"
-        notificationIndicatorColor="primary"
       >
         {itemText}
       </SplitButtonWithNotification>
@@ -161,6 +147,8 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiButton
         {...commonProps}
+        size="s"
+        iconSize="m"
         iconSide="left"
         isSelected={isPopoverOpen}
         css={buttonCss}

@@ -343,7 +343,7 @@ export const useTopNavLinks = ({
               }
             : {
                 showNotificationIndicator: hasUnsavedChanges,
-                notifcationIndicatorTooltipContent: hasUnsavedChanges
+                notificationIndicatorTooltipContent: hasUnsavedChanges
                   ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
                       defaultMessage: 'You have unsaved changes',
                     })

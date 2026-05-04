@@ -8,31 +8,22 @@
  */
 
 import React, { type MouseEventHandler } from 'react';
-import {
-  EuiSplitButton,
-  EuiIconTip,
-  euiButtonSizeMap,
-  useEuiTheme,
-  type EuiButtonProps,
-  type IconColor,
-  type IconSize,
-  type IconType,
-} from '@elastic/eui';
+import { EuiSplitButton, EuiIconTip, useEuiTheme, type IconType } from '@elastic/eui';
 import { css, type Interpolation, type Theme } from '@emotion/react';
+import {
+  APP_MENU_NOTIFICATION_INDICATOR_TOP,
+  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
+} from '../constants';
 
 export interface SplitButtonWithNotificationProps {
   children?: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   iconType?: IconType;
-  iconSize?: EuiButtonProps['iconSize'];
   isDisabled?: boolean;
-  disabled?: boolean;
   isLoading?: boolean;
   isMainButtonLoading?: boolean;
   isMainButtonDisabled?: boolean;
   isSelected?: boolean;
-  color?: EuiButtonProps['color'];
-  size?: EuiButtonProps['size'];
   href?: string;
   target?: string;
   id?: string;
@@ -42,32 +33,17 @@ export interface SplitButtonWithNotificationProps {
   'aria-haspopup'?: 'menu';
 
   secondaryButtonIcon: IconType;
-  secondaryButtonAriaLabel?: string;
+  secondaryButtonAriaLabel: string;
   secondaryButtonTitle?: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
   isSecondaryButtonLoading?: boolean;
   isSecondaryButtonDisabled?: boolean;
-  /** @deprecated Ignored — EuiSplitButton manages fill state uniformly. Kept for type compatibility. */
-  secondaryButtonFill?: boolean;
 
   showNotificationIndicator?: boolean;
-  notificationIndicatorColor?: IconColor;
-  notificationIndicatorSize?: IconSize;
-  /** @note Intentional typo kept for backwards compatibility */
-  notifcationIndicatorTooltipContent?: string;
-  notificationIndicatorPosition?: {
-    top?: number;
-    right?: number;
-    left?: number;
-    bottom?: number;
-  };
-  notificationIndicatorHasStroke?: boolean;
+  notificationIndicatorTooltipContent?: string;
 }
 
 export const SplitButtonWithNotification = ({
-  color = 'primary',
-  size = 'm',
-  disabled = false,
   isDisabled = false,
   isLoading = false,
   'data-test-subj': dataTestSubj,
@@ -77,7 +53,6 @@ export const SplitButtonWithNotification = ({
   children,
   onClick,
   iconType,
-  iconSize,
   isMainButtonLoading = false,
   isMainButtonDisabled = false,
   isSelected,
@@ -94,20 +69,9 @@ export const SplitButtonWithNotification = ({
   isSecondaryButtonDisabled,
 
   showNotificationIndicator = false,
-  notificationIndicatorColor = 'primary',
-  notificationIndicatorSize = 'l',
-  notifcationIndicatorTooltipContent,
-  notificationIndicatorPosition,
-  notificationIndicatorHasStroke = true,
+  notificationIndicatorTooltipContent,
 }: SplitButtonWithNotificationProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-
-  const buttonSizes = euiButtonSizeMap(euiThemeContext);
-  const secondaryButtonWidth = buttonSizes[size]?.height;
-
-  const isEffectivelyDisabled = disabled || isDisabled;
-  const disableIndicatorOnClick = isEffectivelyDisabled || isLoading;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <div
@@ -118,9 +82,9 @@ export const SplitButtonWithNotification = ({
       }}
     >
       <EuiSplitButton
-        color={color}
-        size={size}
-        isDisabled={isEffectivelyDisabled}
+        color="text"
+        size="s"
+        isDisabled={isDisabled}
         isLoading={isLoading}
         css={[
           fullWidth &&
@@ -136,7 +100,7 @@ export const SplitButtonWithNotification = ({
           id={id}
           onClick={onClick as MouseEventHandler}
           iconType={iconType}
-          iconSize={iconSize}
+          iconSize="m"
           isDisabled={isMainButtonDisabled}
           isLoading={isMainButtonLoading}
           isSelected={isSelected}
@@ -150,7 +114,7 @@ export const SplitButtonWithNotification = ({
         <EuiSplitButton.ActionSecondary
           data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
           iconType={secondaryButtonIcon}
-          aria-label={secondaryButtonAriaLabel ?? ''}
+          aria-label={secondaryButtonAriaLabel}
           title={secondaryButtonTitle}
           onClick={onSecondaryButtonClick}
           isDisabled={isSecondaryButtonDisabled}
@@ -162,29 +126,28 @@ export const SplitButtonWithNotification = ({
           data-test-subj="split-button-notification-indicator"
           css={{
             position: 'absolute' as const,
-            top: notificationIndicatorPosition?.top ?? -10,
-            right: notificationIndicatorPosition?.right ?? secondaryButtonWidth,
-            left: notificationIndicatorPosition?.left,
-            bottom: notificationIndicatorPosition?.bottom,
-            zIndex: euiTheme.levels.flyout,
+            top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
+            left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
+            zIndex: 1,
             pointerEvents: 'none',
-            ...(notificationIndicatorHasStroke && {
-              '& svg': {
-                stroke: 'white',
-                strokeWidth: '2px',
-                paintOrder: 'stroke fill',
-              },
-            }),
+            '& svg': {
+              stroke: euiTheme.colors.backgroundBasePlain,
+              strokeWidth: euiTheme.size.xxs,
+              paintOrder: 'stroke fill',
+            },
           }}
         >
           <span css={{ pointerEvents: 'auto' }}>
             <EuiIconTip
               type="dot"
-              size={notificationIndicatorSize}
-              color={notificationIndicatorColor}
-              content={notifcationIndicatorTooltipContent}
+              size="m"
+              color="primary"
+              content={notificationIndicatorTooltipContent}
               iconProps={{
-                onClick: disableIndicatorOnClick ? undefined : (onClick as MouseEventHandler),
+                onClick:
+                  isDisabled || isLoading || isMainButtonDisabled || isMainButtonLoading
+                    ? undefined
+                    : (onClick as MouseEventHandler),
               }}
             />
           </span>
