@@ -67,6 +67,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConsoleWorkerProxyService",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -373,6 +374,7 @@
                 "lineNumber": 28,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "PainlessContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -555,6 +557,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EditorStateService",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -806,6 +809,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1660,7 +1664,15 @@
             "tags": [],
             "label": "customContextMenuActions",
             "description": [
-              "\nIf the custom context menu is enable through {@link enableCustomContextMenu},\nthis prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions."
+              "\nIf the custom context menu is enable through ",
+              {
+                "pluginId": "@kbn/code-editor",
+                "scope": "common",
+                "docId": "kibKbnCodeEditorPluginApi",
+                "section": "def-common.enableCustomContextMenu",
+                "text": "enableCustomContextMenu"
+              },
+              ",\nthis prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions."
             ],
             "signature": [
               "ContextMenuAction",
@@ -1955,6 +1967,7 @@
                 "lineNumber": 47,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConsoleParserReviver",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2321,6 +2334,7 @@
                 "lineNumber": 21,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3140,6 +3154,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UndoRedoElement",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3695,7 +3710,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.ID",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "ID",
             "description": [],
             "signature": [
@@ -3762,7 +3779,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.onLanguage",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "onLanguage",
             "description": [],
             "signature": [
@@ -3780,7 +3799,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.languageThemeResolver",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "languageThemeResolver",
             "description": [],
             "signature": [
@@ -3804,7 +3825,7 @@
                 "id": "def-common.ConsoleLang.languageThemeResolver.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ colorMode, euiTheme, ...rest }",
                 "description": [],
                 "signature": [
                   "UseEuiTheme",
@@ -3814,6 +3835,7 @@
                 "lineNumber": 30,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               }
             ]
@@ -3822,7 +3844,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.getSuggestionProvider",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "getSuggestionProvider",
             "description": [],
             "signature": [
@@ -3907,6 +3931,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MutableRefObject",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3935,7 +3960,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleOutputLang.ID",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "ID",
             "description": [],
             "signature": [
@@ -3951,7 +3978,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleOutputLang.lexerRules",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "lexerRules",
             "description": [],
             "signature": [
@@ -3968,7 +3997,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleOutputLang.languageConfiguration",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "languageConfiguration",
             "description": [],
             "signature": [
@@ -4104,7 +4135,7 @@
                 "id": "def-common.defaultThemesResolvers.CODE_EDITOR_DEFAULT_THEME_ID.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ euiTheme }",
                 "description": [],
                 "signature": [
                   "UseEuiTheme",
@@ -4114,6 +4145,7 @@
                 "lineNumber": 14,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               },
               {
@@ -4170,6 +4202,7 @@
                 "lineNumber": 113,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               }
             ]
@@ -4250,7 +4283,7 @@
                 "id": "def-common.ESQLLang.languageThemeResolver.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  euiTheme,\n  colorMode,\n}",
                 "description": [],
                 "signature": [
                   "UseEuiTheme",
@@ -4260,6 +4293,7 @@
                 "lineNumber": 13,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               }
             ]
@@ -4425,6 +4459,7 @@
                 "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLCallbacks",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -4509,6 +4544,7 @@
                 "lineNumber": 116,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4562,6 +4598,7 @@
                 "lineNumber": 147,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4619,6 +4656,7 @@
                 "lineNumber": 180,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLCallbacks",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4672,6 +4710,7 @@
                 "lineNumber": 207,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4725,6 +4764,7 @@
                 "lineNumber": 334,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5099,6 +5139,7 @@
                 "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "PainlessContext",
                 "trackAdoption": false
               },
               {

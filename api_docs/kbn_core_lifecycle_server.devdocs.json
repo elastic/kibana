@@ -34,7 +34,13 @@
             "tags": [],
             "label": "analytics",
             "description": [
-              "{@link AnalyticsServicePreboot}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.AnalyticsServicePreboot",
+                "text": "AnalyticsServicePreboot"
+              }
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
@@ -68,7 +74,13 @@
             "tags": [],
             "label": "elasticsearch",
             "description": [
-              "{@link ElasticsearchServicePreboot}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.ElasticsearchServicePreboot",
+                "text": "ElasticsearchServicePreboot"
+              }
             ],
             "signature": [
               "ElasticsearchServicePreboot"
@@ -86,7 +98,13 @@
             "tags": [],
             "label": "http",
             "description": [
-              "{@link HttpServicePreboot}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.HttpServicePreboot",
+                "text": "HttpServicePreboot"
+              }
             ],
             "signature": [
               "HttpServicePreboot",
@@ -107,7 +125,13 @@
             "tags": [],
             "label": "preboot",
             "description": [
-              "{@link PrebootServicePreboot}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.PrebootServicePreboot",
+                "text": "PrebootServicePreboot"
+              }
             ],
             "signature": [
               "PrebootServicePreboot"
@@ -147,7 +171,13 @@
             "tags": [],
             "label": "analytics",
             "description": [
-              "{@link AnalyticsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              }
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
@@ -181,7 +211,13 @@
             "tags": [],
             "label": "capabilities",
             "description": [
-              "{@link CapabilitiesSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CapabilitiesSetup",
+                "text": "CapabilitiesSetup"
+              }
             ],
             "signature": [
               "CapabilitiesSetup"
@@ -199,7 +235,13 @@
             "tags": [],
             "label": "customBranding",
             "description": [
-              "{@link CustomBrandingSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CustomBrandingSetup",
+                "text": "CustomBrandingSetup"
+              }
             ],
             "signature": [
               "CustomBrandingSetup"
@@ -217,7 +259,13 @@
             "tags": [],
             "label": "docLinks",
             "description": [
-              "{@link DocLinksServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.DocLinksServiceSetup",
+                "text": "DocLinksServiceSetup"
+              }
             ],
             "signature": [
               "DocLinksServiceSetup"
@@ -235,7 +283,13 @@
             "tags": [],
             "label": "elasticsearch",
             "description": [
-              "{@link ElasticsearchServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.ElasticsearchServiceSetup",
+                "text": "ElasticsearchServiceSetup"
+              }
             ],
             "signature": [
               "ElasticsearchServiceSetup"
@@ -253,7 +307,13 @@
             "tags": [],
             "label": "executionContext",
             "description": [
-              "{@link ExecutionContextSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
             ],
             "signature": [
               "ExecutionContextSetup"
@@ -271,7 +331,13 @@
             "tags": [],
             "label": "featureFlags",
             "description": [
-              "{@link FeatureFlagsSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              }
             ],
             "signature": [
               "FeatureFlagsSetup"
@@ -289,7 +355,13 @@
             "tags": [],
             "label": "http",
             "description": [
-              "{@link HttpServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.HttpServiceSetup",
+                "text": "HttpServiceSetup"
+              }
             ],
             "signature": [
               "HttpServiceSetup",
@@ -312,7 +384,13 @@
             "tags": [],
             "label": "i18n",
             "description": [
-              "{@link I18nServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.I18nServiceSetup",
+                "text": "I18nServiceSetup"
+              }
             ],
             "signature": [
               "I18nServiceSetup"
@@ -330,7 +408,13 @@
             "tags": [],
             "label": "logging",
             "description": [
-              "{@link LoggingServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.LoggingServiceSetup",
+                "text": "LoggingServiceSetup"
+              }
             ],
             "signature": [
               "LoggingServiceSetup"
@@ -348,7 +432,13 @@
             "tags": [],
             "label": "metrics",
             "description": [
-              "{@link MetricsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.MetricsServiceSetup",
+                "text": "MetricsServiceSetup"
+              }
             ],
             "signature": [
               "MetricsServiceSetup"
@@ -366,7 +456,13 @@
             "tags": [],
             "label": "savedObjects",
             "description": [
-              "{@link SavedObjectsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.SavedObjectsServiceSetup",
+                "text": "SavedObjectsServiceSetup"
+              }
             ],
             "signature": [
               "SavedObjectsServiceSetup"
@@ -384,7 +480,13 @@
             "tags": [],
             "label": "status",
             "description": [
-              "{@link StatusServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.StatusServiceSetup",
+                "text": "StatusServiceSetup"
+              }
             ],
             "signature": [
               "StatusServiceSetup"
@@ -402,7 +504,13 @@
             "tags": [],
             "label": "uiSettings",
             "description": [
-              "{@link UiSettingsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UiSettingsServiceSetup",
+                "text": "UiSettingsServiceSetup"
+              }
             ],
             "signature": [
               "UiSettingsServiceSetup"
@@ -420,7 +528,13 @@
             "tags": [],
             "label": "userSettings",
             "description": [
-              "{@link UserSettingsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UserSettingsServiceSetup",
+                "text": "UserSettingsServiceSetup"
+              }
             ],
             "signature": [
               "UserSettingsServiceSetup"
@@ -438,7 +552,13 @@
             "tags": [],
             "label": "deprecations",
             "description": [
-              "{@link DeprecationsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.DeprecationsServiceSetup",
+                "text": "DeprecationsServiceSetup"
+              }
             ],
             "signature": [
               "DeprecationsServiceSetup"
@@ -456,7 +576,13 @@
             "tags": [],
             "label": "userActivity",
             "description": [
-              "{@link UserActivityServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UserActivityServiceSetup",
+                "text": "UserActivityServiceSetup"
+              }
             ],
             "signature": [
               "UserActivityServiceSetup"
@@ -474,7 +600,13 @@
             "tags": [],
             "label": "getStartServices",
             "description": [
-              "{@link StartServicesAccessor}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.StartServicesAccessor",
+                "text": "StartServicesAccessor"
+              }
             ],
             "signature": [
               "() => Promise<[",
@@ -496,7 +628,13 @@
             "tags": [],
             "label": "createRequestHandlerContext",
             "description": [
-              "{@link RequestHandlerContextFactory}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.RequestHandlerContextFactory",
+                "text": "RequestHandlerContextFactory"
+              }
             ],
             "signature": [
               "(request: ",
@@ -527,6 +665,7 @@
                 "lineNumber": 122,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -538,7 +677,13 @@
             "tags": [],
             "label": "plugins",
             "description": [
-              "{@link PluginsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.PluginsServiceSetup",
+                "text": "PluginsServiceSetup"
+              }
             ],
             "signature": [
               "PluginsServiceSetup"
@@ -556,7 +701,13 @@
             "tags": [],
             "label": "pricing",
             "description": [
-              "{@link PricingServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.PricingServiceSetup",
+                "text": "PricingServiceSetup"
+              }
             ],
             "signature": [
               "PricingServiceSetup"
@@ -574,7 +725,13 @@
             "tags": [],
             "label": "security",
             "description": [
-              "{@link SecurityServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              }
             ],
             "signature": [
               "SecurityServiceSetup"
@@ -592,7 +749,13 @@
             "tags": [],
             "label": "userProfile",
             "description": [
-              "{@link UserProfileServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              }
             ],
             "signature": [
               "UserProfileServiceSetup"
@@ -610,7 +773,13 @@
             "tags": [],
             "label": "injection",
             "description": [
-              "{@link CoreDiServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreDiServiceSetup",
+                "text": "CoreDiServiceSetup"
+              }
             ],
             "signature": [
               "CoreDiServiceSetup"
@@ -628,7 +797,13 @@
             "tags": [],
             "label": "dataStreams",
             "description": [
-              "{@link DataStreamSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.DataStreamSetup",
+                "text": "DataStreamSetup"
+              }
             ],
             "signature": [
               "DataStreamsSetup"
@@ -664,7 +839,13 @@
             "tags": [],
             "label": "analytics",
             "description": [
-              "{@link AnalyticsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              }
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
@@ -688,7 +869,13 @@
             "tags": [],
             "label": "capabilities",
             "description": [
-              "{@link CapabilitiesStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CapabilitiesStart",
+                "text": "CapabilitiesStart"
+              }
             ],
             "signature": [
               "CapabilitiesStart"
@@ -706,7 +893,13 @@
             "tags": [],
             "label": "customBranding",
             "description": [
-              "{@link CustomBrandingStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CustomBrandingStart",
+                "text": "CustomBrandingStart"
+              }
             ],
             "signature": [
               "CustomBrandingStart"
@@ -724,7 +917,13 @@
             "tags": [],
             "label": "docLinks",
             "description": [
-              "{@link DocLinksServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.DocLinksServiceStart",
+                "text": "DocLinksServiceStart"
+              }
             ],
             "signature": [
               "DocLinksServiceSetup"
@@ -742,7 +941,13 @@
             "tags": [],
             "label": "elasticsearch",
             "description": [
-              "{@link ElasticsearchServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.ElasticsearchServiceStart",
+                "text": "ElasticsearchServiceStart"
+              }
             ],
             "signature": [
               "ElasticsearchServiceStart"
@@ -760,7 +965,13 @@
             "tags": [],
             "label": "executionContext",
             "description": [
-              "{@link ExecutionContextStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.ExecutionContextStart",
+                "text": "ExecutionContextStart"
+              }
             ],
             "signature": [
               "ExecutionContextSetup"
@@ -778,7 +989,13 @@
             "tags": [],
             "label": "featureFlags",
             "description": [
-              "{@link FeatureFlagsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              }
             ],
             "signature": [
               "FeatureFlagsStart"
@@ -796,7 +1013,13 @@
             "tags": [],
             "label": "http",
             "description": [
-              "{@link HttpServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.HttpServiceStart",
+                "text": "HttpServiceStart"
+              }
             ],
             "signature": [
               "HttpServiceStart"
@@ -814,7 +1037,13 @@
             "tags": [],
             "label": "metrics",
             "description": [
-              "{@link MetricsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.MetricsServiceStart",
+                "text": "MetricsServiceStart"
+              }
             ],
             "signature": [
               "MetricsServiceSetup"
@@ -832,7 +1061,13 @@
             "tags": [],
             "label": "savedObjects",
             "description": [
-              "{@link SavedObjectsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              }
             ],
             "signature": [
               "SavedObjectsServiceStart"
@@ -850,7 +1085,13 @@
             "tags": [],
             "label": "uiSettings",
             "description": [
-              "{@link UiSettingsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UiSettingsServiceStart",
+                "text": "UiSettingsServiceStart"
+              }
             ],
             "signature": [
               "UiSettingsServiceStart"
@@ -868,7 +1109,13 @@
             "tags": [],
             "label": "userActivity",
             "description": [
-              "{@link UserActivityServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UserActivityServiceStart",
+                "text": "UserActivityServiceStart"
+              }
             ],
             "signature": [
               "UserActivityServiceStart"
@@ -886,7 +1133,13 @@
             "tags": [],
             "label": "plugins",
             "description": [
-              "{@link PluginsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.PluginsServiceStart",
+                "text": "PluginsServiceStart"
+              }
             ],
             "signature": [
               "PluginsServiceStart"
@@ -904,7 +1157,13 @@
             "tags": [],
             "label": "pricing",
             "description": [
-              "{@link PricingServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.PricingServiceStart",
+                "text": "PricingServiceStart"
+              }
             ],
             "signature": [
               "PricingServiceStart"
@@ -922,7 +1181,13 @@
             "tags": [],
             "label": "security",
             "description": [
-              "{@link SecurityServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.SecurityServiceStart",
+                "text": "SecurityServiceStart"
+              }
             ],
             "signature": [
               "SecurityServiceStart"
@@ -940,7 +1205,13 @@
             "tags": [],
             "label": "userProfile",
             "description": [
-              "{@link UserProfileServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.UserProfileServiceStart",
+                "text": "UserProfileServiceStart"
+              }
             ],
             "signature": [
               "UserProfileService"
@@ -958,7 +1229,13 @@
             "tags": [],
             "label": "injection",
             "description": [
-              "{@link CoreDiServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreDiServiceStart",
+                "text": "CoreDiServiceStart"
+              }
             ],
             "signature": [
               "CoreDiServiceStart"
@@ -976,7 +1253,13 @@
             "tags": [],
             "label": "dataStreams",
             "description": [
-              "{@link DataStreamsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.DataStreamsStart",
+                "text": "DataStreamsStart"
+              }
             ],
             "signature": [
               "DataStreamsStart"

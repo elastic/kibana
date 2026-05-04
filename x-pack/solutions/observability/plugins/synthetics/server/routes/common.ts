@@ -61,6 +61,7 @@ export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 export const OverviewStatusSchema = schema.object({
   ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
+  groupByMonitor: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;

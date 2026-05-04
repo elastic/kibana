@@ -116,8 +116,12 @@ export const buildEsqlFetchSubscribe = ({
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
-    if (next.result?.length) {
-      nextAllColumns = Object.keys(next.result[0].raw);
+    const responseColumns =
+      next.esqlQueryColumns?.map((c) => c.name) ??
+      (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
+
+    if (responseColumns !== undefined) {
+      nextAllColumns = responseColumns;
 
       if (
         hasTransformationalCommand(nextQuery.esql) ||

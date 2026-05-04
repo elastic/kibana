@@ -5,6 +5,74 @@
     "functions": [
       {
         "parentPluginId": "share",
+        "id": "def-public.convertRelativeTimeStringToAbsoluteTimeString",
+        "type": "Function",
+        "tags": [],
+        "label": "convertRelativeTimeStringToAbsoluteTimeString",
+        "description": [],
+        "signature": [
+          "(dateString?: string | undefined, options?: { roundUp?: boolean | undefined; } | undefined) => string | undefined"
+        ],
+        "path": "src/platform/plugins/shared/share/public/lib/time_utils.tsx",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.convertRelativeTimeStringToAbsoluteTimeString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dateString",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/share/public/lib/time_utils.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.convertRelativeTimeStringToAbsoluteTimeString.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/share/public/lib/time_utils.tsx",
+            "lineNumber": 61,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.convertRelativeTimeStringToAbsoluteTimeString.$2.roundUp",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "roundUp",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/plugins/shared/share/public/lib/time_utils.tsx",
+                "lineNumber": 61,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-public.downloadFileAs",
         "type": "Function",
         "tags": [],
@@ -70,6 +138,7 @@
             "lineNumber": 24,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "DownloadableContent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -129,6 +198,7 @@
             "lineNumber": 35,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -210,6 +280,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -228,6 +299,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LocatorGetUrlParams",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -245,6 +317,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -312,15 +385,39 @@
             "section": "def-common.LocatorPublic",
             "text": "LocatorPublic"
           },
-          "<any>; params: ",
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">; params: ",
           {
             "pluginId": "share",
             "scope": "public",
             "docId": "kibSharePluginApi",
-            "section": "def-public.ShareableUrlLocatorParams",
-            "text": "ShareableUrlLocatorParams"
+            "section": "def-public.ShareableLocatorParams",
+            "text": "ShareableLocatorParams"
           },
-          "; } | undefined; sharingData: { [key: string]: unknown; }; isDirty: boolean; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; onSave?: (() => Promise<void>) | undefined; }"
+          "; } | undefined; sharingData: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> & Record<string, unknown>; isDirty: boolean; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; onSave?: (() => Promise<void>) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
         "lineNumber": 69,
@@ -342,6 +439,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -359,6 +457,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "G",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -385,11 +484,19 @@
             "section": "def-public.ExportShare",
             "text": "ExportShare"
           },
-          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Promise<{ name?: string | undefined; icon?: ",
+          "<S> extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ShareActionConfigArgs",
+            "text": "ShareActionConfigArgs"
+          },
+          "<S>) => Promise<{ name?: string | undefined; icon?: ",
           "IconType",
           " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButtonLabel?: React.ReactNode; generateAssetExport: (args: ",
           "ExportGenerationOpts",
-          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; renderTotalHitsSizeWarning?: ((totalHits?: number | undefined) => React.ReactNode) | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
+          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; supportsAbsoluteTime?: boolean | undefined; renderTotalHitsSizeWarning?: ((totalHits?: number | undefined) => React.ReactNode) | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
           "ExportGenerationOpts",
           ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; })>; prerequisiteCheck?: ((args: { capabilities: ",
           "Capabilities",
@@ -404,7 +511,7 @@
           " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 131,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -420,7 +527,7 @@
               "\"export\""
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 179,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -445,7 +552,31 @@
             "section": "def-public.ExportShareDerivatives",
             "text": "ExportShareDerivatives"
           },
-          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Promise<{ label: React.FC<{ openFlyout: () => void; }>; toolTipContent?: React.ReactNode; flyoutContent: React.FC<{ closeFlyout: () => void; flyoutRef: React.RefObject<HTMLDivElement>; }>; flyoutSizing?: Pick<",
+          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ShareActionConfigArgs",
+            "text": "ShareActionConfigArgs"
+          },
+          "<",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>) => Promise<{ label: React.FC<{ openFlyout: () => void; }>; toolTipContent?: React.ReactNode; flyoutContent: React.FC<{ closeFlyout: () => void; flyoutRef: React.RefObject<HTMLDivElement>; }>; flyoutSizing?: Pick<",
           "EuiFlyoutProps",
           "<\"div\" | \"nav\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
           {
@@ -468,7 +599,7 @@
           " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 182,
+        "lineNumber": 190,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -484,7 +615,7 @@
               "\"exportDerivatives\""
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 201,
+            "lineNumber": 209,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -646,6 +777,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -737,6 +869,7 @@
                 "lineNumber": 69,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -779,6 +912,7 @@
                 "lineNumber": 82,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -799,6 +933,7 @@
                 "lineNumber": 82,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -841,6 +976,7 @@
                 "lineNumber": 91,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -861,6 +997,7 @@
                 "lineNumber": 91,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetRedirectUrlOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -903,6 +1040,7 @@
                 "lineNumber": 101,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -923,6 +1061,7 @@
                 "lineNumber": 101,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -965,6 +1104,7 @@
                 "lineNumber": 111,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -985,6 +1125,7 @@
                 "lineNumber": 111,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1025,6 +1166,7 @@
                 "lineNumber": 117,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1043,6 +1185,7 @@
                 "lineNumber": 117,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1060,6 +1203,7 @@
                 "lineNumber": 117,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "DependencyList",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1139,83 +1283,23 @@
       },
       {
         "parentPluginId": "share",
-        "id": "def-public.RegisterShareIntegrationArgs",
+        "id": "def-public.ShareContext",
         "type": "Interface",
         "tags": [],
-        "label": "RegisterShareIntegrationArgs",
+        "label": "ShareContext",
         "description": [],
         "signature": [
           {
             "pluginId": "share",
             "scope": "public",
             "docId": "kibSharePluginApi",
-            "section": "def-public.RegisterShareIntegrationArgs",
-            "text": "RegisterShareIntegrationArgs"
+            "section": "def-public.ShareContext",
+            "text": "ShareContext"
           },
-          "<I> extends Pick<I, \"id\" | \"groupId\" | \"prerequisiteCheck\">"
+          "<S>"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 266,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.RegisterShareIntegrationArgs.getShareIntegrationConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "getShareIntegrationConfig",
-            "description": [],
-            "signature": [
-              "I[\"config\"]"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 268,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.RegisterShareIntegrationArgs.getShareIntegrationConfig.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "ctx",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "share",
-                    "scope": "public",
-                    "docId": "kibSharePluginApi",
-                    "section": "def-public.ShareContext",
-                    "text": "ShareContext"
-                  },
-                  " & Pick<",
-                  "ShareRegistryApiStart",
-                  ", \"anonymousAccessServiceProvider\" | \"urlService\">"
-                ],
-                "path": "src/platform/plugins/shared/share/public/types.ts",
-                "lineNumber": 73,
-                "columnNumber": 16,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.ShareContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShareContext",
-        "description": [],
-        "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 303,
+        "lineNumber": 337,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1230,7 +1314,7 @@
               "\nThe type of the object to share. for example lens, dashboard, etc."
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 313,
+            "lineNumber": 347,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1248,7 +1332,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 317,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1270,7 +1354,7 @@
               "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>; }"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 321,
+            "lineNumber": 355,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1288,7 +1372,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 330,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1306,7 +1390,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 334,
+            "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1324,7 +1408,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 344,
+            "lineNumber": 378,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -1359,18 +1443,26 @@
                 "section": "def-common.LocatorPublic",
                 "text": "LocatorPublic"
               },
-              "<any>; params: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">; params: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareableUrlLocatorParams",
-                "text": "ShareableUrlLocatorParams"
+                "section": "def-public.ShareableLocatorParams",
+                "text": "ShareableLocatorParams"
               },
               "; } | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 348,
+            "lineNumber": 382,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1378,15 +1470,15 @@
           {
             "parentPluginId": "share",
             "id": "def-public.ShareContext.sharingData",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "sharingData",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; }"
+              "S"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 352,
+            "lineNumber": 386,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1399,7 +1491,7 @@
             "label": "isDirty",
             "description": [],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 353,
+            "lineNumber": 387,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1415,7 +1507,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 354,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1445,7 +1537,7 @@
           ", \"name\">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 357,
+        "lineNumber": 391,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1458,7 +1550,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 365,
+            "lineNumber": 399,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1474,7 +1566,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 366,
+            "lineNumber": 400,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1500,7 +1592,7 @@
           " extends ShareMenuItemBase"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 380,
+        "lineNumber": 414,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1517,7 +1609,62 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 381,
+            "lineNumber": 415,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.SharingData",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharingData",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<P> extends Record<string, unknown>"
+        ],
+        "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 279,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.SharingData.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.SharingData.locatorParams",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "locatorParams",
+            "description": [],
+            "signature": [
+              "{ id: string; params: P; version?: string | undefined; } | { id: string; params: P; version?: string | undefined; }[]"
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1540,7 +1687,7 @@
             "section": "def-public.ShowShareMenuOptions",
             "text": "ShowShareMenuOptions"
           },
-          " extends Omit<",
+          "<P, S> extends Omit<",
           {
             "pluginId": "share",
             "scope": "public",
@@ -1548,10 +1695,18 @@
             "section": "def-public.ShareContext",
             "text": "ShareContext"
           },
-          ", \"onClose\">"
+          "<",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<P> & S>, \"onClose\">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 398,
+        "lineNumber": 432,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1567,7 +1722,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 400,
+            "lineNumber": 443,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1583,7 +1738,7 @@
               "HTMLElement | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 401,
+            "lineNumber": 444,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1596,7 +1751,7 @@
             "label": "allowShortUrl",
             "description": [],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 402,
+            "lineNumber": 445,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1612,7 +1767,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 403,
+            "lineNumber": 446,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1630,7 +1785,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 404,
+            "lineNumber": 447,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1646,7 +1801,7 @@
               "(() => Promise<void>) | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "lineNumber": 405,
+            "lineNumber": 448,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1673,7 +1828,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 294,
+        "lineNumber": 328,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1763,16 +1918,32 @@
             "section": "def-public.ExportShare",
             "text": "ExportShare"
           },
-          ", \"config\"> & { config: { name?: string | undefined; icon?: ",
+          "<",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>, \"config\"> & { config: { name?: string | undefined; icon?: ",
           "IconType",
           " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButtonLabel?: React.ReactNode; generateAssetExport: (args: ",
           "ExportGenerationOpts",
-          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; renderTotalHitsSizeWarning?: ((totalHits?: number | undefined) => React.ReactNode) | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
+          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; supportsAbsoluteTime?: boolean | undefined; renderTotalHitsSizeWarning?: ((totalHits?: number | undefined) => React.ReactNode) | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
           "ExportGenerationOpts",
           ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; }); }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 208,
+        "lineNumber": 216,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1780,13 +1951,97 @@
       },
       {
         "parentPluginId": "share",
-        "id": "def-public.ShareableUrlLocatorParams",
+        "id": "def-public.RegisterShareIntegrationArgs",
         "type": "Type",
         "tags": [],
-        "label": "ShareableUrlLocatorParams",
+        "label": "RegisterShareIntegrationArgs",
+        "description": [
+          "\nRegistration payload for a share integration.\nWe infer sharing-data `S` from `I` instead of constraining `I extends ShareIntegration` (defaults on\n`ShareIntegration` use `SharingData`, and `config`'s `ctx` is contravariant in `S`, so\n`ExportShare<ReportingCSVSharingData>` is not assignable to the default `ShareIntegration`)."
+        ],
+        "signature": [
+          "I extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ShareActionConfigArgs",
+            "text": "ShareActionConfigArgs"
+          },
+          "<infer S extends ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>) => Promise<infer P extends Record<string, unknown>>; prerequisiteCheck?: ((args: { capabilities: ",
+          "Capabilities",
+          "; objectType: string; license?: ",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.ILicense",
+            "text": "ILicense"
+          },
+          " | undefined; }) => boolean) | undefined; } ? P extends Record<string, unknown> ? S extends ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharingData",
+            "text": "SharingData"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> ? Pick<I, \"id\" | \"groupId\" | \"prerequisiteCheck\"> & { getShareIntegrationConfig: (ctx: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ShareActionConfigArgs",
+            "text": "ShareActionConfigArgs"
+          },
+          "<S>) => ReturnType<I[\"config\"]>; } : never : never : never"
+        ],
+        "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 287,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.ShareableLocatorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ShareableLocatorParams",
         "description": [],
         "signature": [
-          "{ timeRange: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          " & { timeRange: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1794,10 +2049,36 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; } & Record<string, unknown>"
+          " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
-        "lineNumber": 299,
+        "lineNumber": 333,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.ShareActionConfigArgs",
+        "type": "Type",
+        "tags": [],
+        "label": "ShareActionConfigArgs",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ShareContext",
+            "text": "ShareContext"
+          },
+          "<S> & Pick<",
+          "ShareRegistryApiStart",
+          ", \"anonymousAccessServiceProvider\" | \"urlService\">"
+        ],
+        "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1822,17 +2103,7 @@
         },
         " extends { register: (value: ",
         "ShareMenuProviderLegacy",
-        ") => void; registerShareIntegration: <I extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Promise<Record<string, unknown>>; prerequisiteCheck?: ((args: { capabilities: ",
-        "Capabilities",
-        "; objectType: string; license?: ",
-        {
-          "pluginId": "@kbn/licensing-types",
-          "scope": "common",
-          "docId": "kibKbnLicensingTypesPluginApi",
-          "section": "def-common.ILicense",
-          "text": "ILicense"
-        },
-        " | undefined; }) => boolean) | undefined; }>(...args: [string, ",
+        ") => void; registerShareIntegration: <I>(...args: [string, ",
         {
           "pluginId": "share",
           "scope": "public",
@@ -1928,6 +2199,7 @@
               "lineNumber": 41,
               "columnNumber": 12,
               "deprecated": false,
+              "docsReferencedTypeName": "RedirectOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2007,7 +2279,15 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ") => Promise<void>; getExportHandler: (options: Omit<",
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
         {
           "pluginId": "share",
           "scope": "public",
@@ -2015,7 +2295,15 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
         "IntlShape",
         ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
         {
@@ -2025,7 +2313,15 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
         {
           "pluginId": "share",
           "scope": "public",
@@ -2204,6 +2500,7 @@
             "lineNumber": 22,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Duration",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2324,6 +2621,7 @@
             "lineNumber": 24,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "Duration",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2868,6 +3166,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2886,6 +3185,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LocatorGetUrlParams",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -2903,6 +3203,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3115,6 +3416,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3206,6 +3508,7 @@
                 "lineNumber": 69,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3248,6 +3551,7 @@
                 "lineNumber": 82,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3268,6 +3572,7 @@
                 "lineNumber": 82,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3310,6 +3615,7 @@
                 "lineNumber": 91,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3330,6 +3636,7 @@
                 "lineNumber": 91,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetRedirectUrlOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3372,6 +3679,7 @@
                 "lineNumber": 101,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3392,6 +3700,7 @@
                 "lineNumber": 101,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3434,6 +3743,7 @@
                 "lineNumber": 111,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3454,6 +3764,7 @@
                 "lineNumber": 111,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3494,6 +3805,7 @@
                 "lineNumber": 117,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3512,6 +3824,7 @@
                 "lineNumber": 117,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -3529,6 +3842,7 @@
                 "lineNumber": 117,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "DependencyList",
                 "trackAdoption": false,
                 "isRequired": false
               }

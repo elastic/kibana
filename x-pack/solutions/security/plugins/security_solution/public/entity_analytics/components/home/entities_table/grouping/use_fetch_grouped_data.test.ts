@@ -32,6 +32,31 @@ describe('parseTargetMetadataHits', () => {
       name: 'alice',
       type: EntityType.user,
       riskScore: 85.5,
+      individualRiskScore: null,
+    });
+  });
+
+  it('extracts individualRiskScore from entity.risk.calculated_score_norm', () => {
+    const hits = [
+      {
+        _source: {
+          entity: {
+            id: 'user:solo@okta',
+            name: 'solo',
+            EngineMetadata: { Type: EntityType.user },
+            risk: { calculated_score_norm: 67.25 },
+          },
+        },
+      },
+    ];
+
+    const result = parseTargetMetadataHits(hits);
+
+    expect(result.get('user:solo@okta')).toEqual({
+      name: 'solo',
+      type: EntityType.user,
+      riskScore: null,
+      individualRiskScore: 67.25,
     });
   });
 
@@ -67,11 +92,13 @@ describe('parseTargetMetadataHits', () => {
       name: 'alice',
       type: EntityType.user,
       riskScore: null,
+      individualRiskScore: null,
     });
     expect(result.get('host:srv-01')).toEqual({
       name: 'srv-01',
       type: EntityType.host,
       riskScore: 42.0,
+      individualRiskScore: null,
     });
   });
 

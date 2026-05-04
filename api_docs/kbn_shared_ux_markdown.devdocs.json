@@ -51,6 +51,7 @@
             "lineNumber": 51,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "MarkdownProps",
             "trackAdoption": false,
             "isRequired": true
           }

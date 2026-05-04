@@ -294,6 +294,103 @@ describe('Create Insights Route Handler', () => {
     });
   });
 
+  describe('telemetry', () => {
+    it('reports scan_triggered event on successful scan', async () => {
+      const reportEventMock = jest.fn();
+      (mockEndpointContext.service.getTelemetryService as jest.Mock).mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      await callRoute({
+        insightTypes: ['incompatible_antivirus'],
+        endpointIds: ['endpoint-1'],
+        connectorId: 'my-connector',
+      });
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'endpoint_workflow_insights_scan_triggered_event',
+        {
+          insightTypes: ['incompatible_antivirus'],
+          endpointCount: 1,
+          hasConnectorId: true,
+          newExecutions: 1,
+          deduplicatedExecutions: 0,
+          failures: 0,
+        }
+      );
+    });
+
+    it('reports correct counts when some executions are deduplicated', async () => {
+      const reportEventMock = jest.fn();
+      (mockEndpointContext.service.getTelemetryService as jest.Mock).mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        {
+          executionId: 'existing-exec-id',
+          status: ExecutionStatus.running,
+          metadata: {
+            source: AUTOMATIC_TROUBLESHOOTING_TAG,
+            insightType: 'incompatible_antivirus',
+            endpointId: 'endpoint-1',
+          },
+          '@timestamp': '2024-01-01T00:00:00Z',
+          agentId: 'agent-1',
+          spaceId: 'default',
+          agentParams: { conversationId: 'existing-conv-id' },
+          eventCount: 0,
+          events: [],
+        },
+      ]);
+
+      await callRoute({
+        insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+        endpointIds: ['endpoint-1'],
+      });
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'endpoint_workflow_insights_scan_triggered_event',
+        {
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          endpointCount: 1,
+          hasConnectorId: false,
+          newExecutions: 1,
+          deduplicatedExecutions: 1,
+          failures: 0,
+        }
+      );
+    });
+
+    it('reports failure count when executions fail to start', async () => {
+      const reportEventMock = jest.fn();
+      (mockEndpointContext.service.getTelemetryService as jest.Mock).mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      mockAgentBuilder.execution.executeAgent
+        .mockResolvedValueOnce({ executionId: 'exec-1', events$: EMPTY })
+        .mockRejectedValueOnce(new Error('connector not configured'));
+
+      await callRoute({
+        insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+        endpointIds: ['endpoint-1'],
+      });
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'endpoint_workflow_insights_scan_triggered_event',
+        {
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          endpointCount: 1,
+          hasConnectorId: false,
+          newExecutions: 1,
+          deduplicatedExecutions: 0,
+          failures: 1,
+        }
+      );
+    });
+  });
+
   describe('authorization', () => {
     it('returns forbidden when user lacks canWriteWorkflowInsights', async () => {
       await callRoute(
