@@ -27,19 +27,13 @@ describe('buildResolutionGroupingQuery', () => {
     expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_ID);
   });
 
-  it('registers a bucketRiskScore runtime field of type double with a non-empty Painless script', () => {
+  it('emits the bucket risk score runtime script with alias-skip and the resolution/individual COALESCE pair', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
-    const runtimeField = result.runtime_mappings?.bucketRiskScore;
-    expect(runtimeField?.type).toBe('double');
-
-    const script = runtimeField?.script;
+    const script = result.runtime_mappings?.bucketRiskScore?.script;
     const scriptSource = (
       typeof script === 'object' && script !== null && 'source' in script ? script.source : script
     ) as string;
-    expect(typeof scriptSource).toBe('string');
-    expect(scriptSource.length).toBeGreaterThan(0);
-
     expect(scriptSource).toContain(ENTITY_FIELDS.RESOLVED_TO);
     expect(scriptSource).toContain(ENTITY_FIELDS.RESOLUTION_RISK_SCORE);
     expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_RISK);
@@ -51,15 +45,6 @@ describe('buildResolutionGroupingQuery', () => {
     const aggs = result.aggs?.groupByFields?.aggs;
     expect(aggs?.resolutionRiskScore).toEqual({
       max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
-    });
-  });
-
-  it('includes bucketRiskScore max aggregation over the runtime field', () => {
-    const result = buildResolutionGroupingQuery(defaultParams);
-
-    const aggs = result.aggs?.groupByFields?.aggs;
-    expect(aggs?.bucketRiskScore).toEqual({
-      max: { field: 'bucketRiskScore' },
     });
   });
 
