@@ -12,6 +12,8 @@ import { useEuiTheme } from '@elastic/eui';
 import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { DependencyNodeData } from '../../../../../common/service_map';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -27,9 +29,11 @@ const meta: Meta<typeof DependencyNode> = {
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
-          <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
-            <Story />
-          </div>
+          <ServiceMapSearchProvider>
+            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+              <Story />
+            </div>
+          </ServiceMapSearchProvider>
         </ReactFlowProvider>
       </MockApmPluginStorybook>
     ),
@@ -193,4 +197,54 @@ export const AllExternalTypes: StoryObj = {
       </div>
     );
   },
+};
+
+export const SearchHighlight: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <DependencyNode
+          {...createNodeProps({
+            id: 'no-highlight',
+            label: 'no-highlight',
+            isService: false,
+            spanType: 'db',
+            spanSubtype: 'postgresql',
+          })}
+        />
+        <LabelText>No highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight matchNodeIds={new Set(['match-only'])} activeMatchNodeId={null}>
+          <DependencyNode
+            {...createNodeProps({
+              id: 'match-only',
+              label: 'match-only',
+              isService: false,
+              spanType: 'db',
+              spanSubtype: 'redis',
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Search match (inactive)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['active-match'])}
+          activeMatchNodeId="active-match"
+        >
+          <DependencyNode
+            {...createNodeProps({
+              id: 'active-match',
+              label: 'active-match',
+              isService: false,
+              spanType: 'external',
+              spanSubtype: 'http',
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Active search match</LabelText>
+      </div>
+    </div>
+  ),
 };

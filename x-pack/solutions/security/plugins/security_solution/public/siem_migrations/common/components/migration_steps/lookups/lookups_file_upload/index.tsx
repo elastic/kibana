@@ -42,6 +42,10 @@ const CONFIGS: Record<MigrationSource, { prompt: string; label: string }> = {
     prompt: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_PROMPT,
     label: i18n.REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_LABEL,
   },
+  [MigrationSource.SENTINEL]: {
+    prompt: i18n.WATCHLISTS_DATA_INPUT_FILE_UPLOAD_PROMPT,
+    label: i18n.WATCHLISTS_DATA_INPUT_FILE_UPLOAD_LABEL,
+  },
 };
 
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
