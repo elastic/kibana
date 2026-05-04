@@ -17,7 +17,7 @@ import {
   workflowTools,
 } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 const clientDiagnosticSchema = z.object({
   severity: z.enum(['error', 'warning']),
@@ -181,7 +181,7 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
 });
 
 export function registerWorkflowYamlAttachment(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.attachments.registerType(
