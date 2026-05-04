@@ -27,15 +27,20 @@ import {
   getAffectedPackages,
   listChangedFiles,
   filterFilesByPackages,
-  SELECTIVE_TESTS_LABEL,
+  PREVENT_SELECTIVE_TESTS_LABEL,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   touchedCriticalFiles,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
 } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
-// TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
-const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
+const prLabels =
+  process.env.GITHUB_PR_LABELS?.split(',')
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+const isPrBuild = Boolean(process.env.GITHUB_PR_NUMBER);
+const preventSelectiveTesting = prLabels.includes(PREVENT_SELECTIVE_TESTS_LABEL);
+const USE_SELECTIVE_TESTING = isPrBuild && !preventSelectiveTesting;
 
 const SHARD_ANNOTATION_SEP = '||shard=';
 /**

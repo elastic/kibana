@@ -7,6 +7,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe(
   'Service inventory',
@@ -35,8 +36,8 @@ test.describe(
       });
 
       await test.step('shows a list of environments', async () => {
-        const environmentEntrySelector = page.locator('td:has-text("production")');
-        await expect(environmentEntrySelector).toHaveCount(5);
+        const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
+        await expect(environmentEntrySelector).toHaveCount(6);
       });
     });
 
