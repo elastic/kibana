@@ -7,7 +7,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 47881
+  alertingVTwo: 76778
   apm: 27979
   apmSourcesAccess: 2278
   automaticImport: 18629
@@ -21,7 +21,7 @@ pageLoadAssetSize:
   cloudDefend: 8146
   cloudExperiments: 103984
   cloudFullStory: 4752
-  cloudLinks: 36333
+  cloudLinks: 42432
   cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
