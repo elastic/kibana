@@ -387,6 +387,8 @@ export const RiskInputsTab = <T extends EntityType>({
       {hasResolutionScore && (
         <>
           <EuiButtonGroup
+            color="primary"
+            isFullWidth
             legend={i18n.translate(
               'xpack.securitySolution.flyout.entityDetails.riskInputs.scoreViewLegend',
               { defaultMessage: 'Risk score view' }
