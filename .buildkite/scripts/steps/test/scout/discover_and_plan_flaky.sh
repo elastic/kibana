@@ -17,16 +17,16 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
-if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
-  SCOUT_DISCOVERY_TARGET="local"
-else
-  SCOUT_DISCOVERY_TARGET="local-stateful-only"
-fi
+# `SCOUT_DISCOVERY_TARGET` is computed at pipeline-generation time in
+# .buildkite/pipelines/flaky_tests/pipeline.ts (see RELEASE_BRANCH_REGEX) and
+# injected as step-level env. Hard-require it here so a missing value fails
+# loudly instead of silently defaulting to a wrong target.
+: "${SCOUT_DISCOVERY_TARGET:?SCOUT_DISCOVERY_TARGET must be set by the flaky pipeline generator}"
 
 echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
-echo '--- Discover Playwright Configs'
+echo "--- Discover Playwright Configs (target=$SCOUT_DISCOVERY_TARGET)"
 node scripts/scout discover-playwright-configs --include-custom-servers --target "$SCOUT_DISCOVERY_TARGET" --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"

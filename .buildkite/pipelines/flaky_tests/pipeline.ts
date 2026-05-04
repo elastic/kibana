@@ -40,6 +40,18 @@ const MAX_JOBS = 500;
 // they request too many repetitions for a single config.
 const MAX_SCOUT_COUNT_PER_CONFIG = 50;
 
+// Scout discovery target for the flaky-setup step. The regular Scout pipeline keys this off
+// `BUILDKITE_PULL_REQUEST_BASE_BRANCH == 'main'`, but flaky builds are typically triggered
+// from the BK UI without PR context — so a feature branch destined for main would otherwise
+// be misclassified as a release branch and silently lose serverless coverage. Instead, we
+// detect Kibana's release-branch naming (e.g. `8.19`, `9.0`, `8.x`) directly. Anything else
+// (main, feature branches) is treated as main-equivalent.
+const RELEASE_BRANCH_REGEX = /^[0-9]+\.([0-9]+|x)$/;
+const isReleaseBranchBuild =
+  RELEASE_BRANCH_REGEX.test(process.env.BUILDKITE_BRANCH ?? '') ||
+  RELEASE_BRANCH_REGEX.test(process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH ?? '');
+const scoutDiscoveryTarget = isReleaseBranchBuild ? 'local-stateful-only' : 'local';
+
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -192,6 +204,7 @@ if (hasScoutSuites) {
       SCOUT_FLAKY_CONCURRENCY: String(concurrency),
       SCOUT_FLAKY_CONCURRENCY_GROUP: process.env.UUID ?? '',
       SCOUT_FLAKY_RESERVED_JOBS: String(reservedJobsForPlanner),
+      SCOUT_DISCOVERY_TARGET: scoutDiscoveryTarget,
     },
     retry: {
       automatic: [{ exit_status: '-1', limit: 3 }],
