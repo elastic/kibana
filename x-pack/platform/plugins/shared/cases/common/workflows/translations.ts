@@ -609,7 +609,7 @@ export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const PUSH_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.pushCase.label', {
-  defaultMessage: 'Cases - Push case',
+  defaultMessage: 'Cases - Push cases',
 });
 
 export const PUSH_CASE_STEP_DESCRIPTION = i18n.translate(
