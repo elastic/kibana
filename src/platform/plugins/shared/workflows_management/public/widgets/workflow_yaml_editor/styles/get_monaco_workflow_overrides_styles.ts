@@ -138,10 +138,10 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
     }
 
     /* Equal spacing on both sides of fold chevrons */
-    .monaco-editor .margin-view-overlays .codicon-folding-collapsed,
-    .monaco-editor .margin-view-overlays .codicon-folding-expanded,
-    .monaco-editor .margin-view-overlays .codicon-folding-manual-collapsed,
-    .monaco-editor .margin-view-overlays .codicon-folding-manual-expanded {
+    .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-collapsed,
+    .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-expanded,
+    .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-collapsed,
+    .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-expanded {
       padding-left: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.s};
       margin-left: 0;
