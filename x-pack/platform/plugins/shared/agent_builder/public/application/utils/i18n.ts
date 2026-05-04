@@ -94,6 +94,14 @@ export const labels = {
     toolIdLabel: i18n.translate('xpack.agentBuilder.tools.idLabel', { defaultMessage: 'ID' }),
     tagsLabel: i18n.translate('xpack.agentBuilder.tools.tagsLabel', { defaultMessage: 'Labels' }),
     toolsLabel: i18n.translate('xpack.agentBuilder.tools.toolsLabel', { defaultMessage: 'Tools' }),
+    selectToolColumnHeader: i18n.translate('xpack.agentBuilder.tools.selectToolColumnHeader', {
+      defaultMessage: 'Select tool',
+    }),
+    selectToolCheckboxAriaLabel: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.tools.selectToolCheckboxAriaLabel', {
+        defaultMessage: 'Select tool {toolId}',
+        values: { toolId },
+      }),
 
     // Tool types
     esqlLabel: i18n.translate('xpack.agentBuilder.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
