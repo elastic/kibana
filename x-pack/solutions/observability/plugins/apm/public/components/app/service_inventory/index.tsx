@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Foo } from '@kbn/apm-ui-shared';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
 import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -23,7 +24,10 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import {
+  callApmApi as callApmApi2,
+  type APIReturnType,
+} from '../../../services/rest/create_call_apm_api';
 import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
@@ -301,6 +305,7 @@ export function ServiceInventory() {
 
   return (
     <>
+      <Foo callApmApi={callApmApi2} />
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
         <EuiFlexItem style={{ minWidth: 0 }}>
