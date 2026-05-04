@@ -2004,8 +2004,10 @@ describe('TaskManagerRunner', () => {
       expect(wasCancelled).toBeTruthy();
     });
 
-    test('stops the heartbeat timer before processResult to prevent version conflicts on recurring tasks', async () => {
-      const callOrder: string[] = [];
+    test('does not run heartbeat updates while processing recurring task result', async () => {
+      let sawProcessResultUpdate = false;
+      let heartbeatUpdateCount = 0;
+      let heartbeatCountBeforeProcessResult: number | undefined;
       const { runner, store } = await readyToRunStageSetup({
         instance: {
           id: 'foo',
@@ -2032,9 +2034,14 @@ describe('TaskManagerRunner', () => {
 
       store.partialUpdate.mockImplementation(async (doc) => {
         if (doc.retryAt && !doc.status) {
-          callOrder.push('heartbeat');
-        } else if (doc.status === TaskStatus.Idle) {
-          callOrder.push('processResult');
+          heartbeatUpdateCount += 1;
+        }
+
+        if (doc.status === TaskStatus.Idle) {
+          sawProcessResultUpdate = true;
+          heartbeatCountBeforeProcessResult = heartbeatUpdateCount;
+          // If heartbeat timer is still running while processResult persists task state,
+          // advancing time here will trigger an additional retryAt update.
           jest.advanceTimersByTime(60000);
         }
         return mockInstance({
@@ -2045,10 +2052,10 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      const lastHeartbeatIndex = callOrder.lastIndexOf('heartbeat');
-      const processResultIndex = callOrder.indexOf('processResult');
-      expect(processResultIndex).toBeGreaterThan(-1);
-      expect(lastHeartbeatIndex).toBeLessThan(processResultIndex);
+      expect(sawProcessResultUpdate).toBe(true);
+      expect(heartbeatUpdateCount).toBeGreaterThan(0);
+      expect(heartbeatCountBeforeProcessResult).toBeDefined();
+      expect(heartbeatUpdateCount).toBe(heartbeatCountBeforeProcessResult);
     });
 
     describe('TaskEvents', () => {
