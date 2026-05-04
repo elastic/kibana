@@ -9,6 +9,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+import {
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+} from '../../../common/constants';
 
 import type { PivotGroupByConfig } from '.';
 
@@ -400,7 +404,7 @@ describe('Transform: Common', () => {
   test('getCreateTransformSettingsRequestBody() skips default settings for pivot', () => {
     const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: null,
-      transformSettingsMaxPageSearchSize: 5000,
+      transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     };
 
     const request = getCreateTransformSettingsRequestBody(transformDetailsState);
@@ -411,10 +415,13 @@ describe('Transform: Common', () => {
   test('getCreateTransformSettingsRequestBody() skips default settings for latest', () => {
     const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: null,
-      transformSettingsMaxPageSearchSize: 5000,
+      transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
     };
 
-    const request = getCreateTransformSettingsRequestBody(transformDetailsState, 5000);
+    const request = getCreateTransformSettingsRequestBody(
+      transformDetailsState,
+      DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+    );
 
     expect(request).toEqual({});
   });
