@@ -12,7 +12,7 @@ import { compositeSloMemberSummarySchema, compositeStatusSchema } from './compos
  * Flat summary fields persisted on composite summary index documents (see task `buildSummaryDoc`).
  * Other top-level keys (`spaceId`, `summaryUpdatedAt`, `compositeSlo`, …) are ignored by decode.
  */
-const compositeSloSummaryIndexSummaryFieldsSchema = z.object({
+const storedCompositeSloSummarySchema = z.object({
   sliValue: z.number(),
   status: compositeStatusSchema,
   errorBudgetInitial: z.number(),
@@ -26,8 +26,8 @@ const compositeSloSummaryIndexSummaryFieldsSchema = z.object({
 });
 
 type CompositeSloSummaryIndexSummaryFields = z.infer<
-  typeof compositeSloSummaryIndexSummaryFieldsSchema
+  typeof storedCompositeSloSummarySchema
 >;
 
-export { compositeSloSummaryIndexSummaryFieldsSchema };
+export { storedCompositeSloSummarySchema };
 export type { CompositeSloSummaryIndexSummaryFields };

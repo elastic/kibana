@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOMemberSummary, CompositeSLOSummary } from '@kbn/slo-schema';
-import { compositeSloSummaryIndexSummaryFieldsSchema } from '@kbn/slo-schema';
+import { storedCompositeSloSummarySchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
 
 export interface PersistedCompositeSummary {
@@ -18,7 +18,7 @@ export interface PersistedCompositeSummary {
 export function mapCompositeSummaryIndexSource(
   source: unknown
 ): PersistedCompositeSummary | undefined {
-  const decoded = compositeSloSummaryIndexSummaryFieldsSchema.safeParse(source);
+  const decoded = storedCompositeSloSummarySchema.safeParse(source);
   if (!decoded.success) {
     return undefined;
   }
