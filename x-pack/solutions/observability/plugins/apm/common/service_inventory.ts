@@ -14,6 +14,7 @@ export type SloStatus = keyof GroupedStatsResult['summary'];
 export interface ServiceListItem {
   serviceName: string;
   healthStatus?: ServiceHealthStatus;
+  anomalyScore?: number;
   transactionType?: string;
   agentName?: AgentName;
   throughput?: number;
@@ -29,6 +30,7 @@ export interface ServiceListItem {
 export enum ServiceInventoryFieldName {
   ServiceName = 'serviceName',
   HealthStatus = 'healthStatus',
+  AnomalyScore = 'anomalyScore',
   Environments = 'environments',
   TransactionType = 'transactionType',
   Throughput = 'throughput',
