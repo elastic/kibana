@@ -124,10 +124,7 @@ export function normalizeExecuteConnectorSubActionArgs(
     out.params = mergedParams;
   }
 
-  if (
-    !isNonEmptyString(out.connectorId) &&
-    isNonEmptyString(options.loneConnectorId)
-  ) {
+  if (!isNonEmptyString(out.connectorId) && isNonEmptyString(options.loneConnectorId)) {
     out.connectorId = options.loneConnectorId;
   }
 
