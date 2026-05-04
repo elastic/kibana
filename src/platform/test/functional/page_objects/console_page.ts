@@ -247,7 +247,7 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
-  public async waitForRequestToComplete() {
+  public async clickPlayAndWaitForResults() {
     const hadStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
     const initialStatusText = hadStatusBadge
       ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
@@ -255,7 +255,10 @@ export class ConsolePageObject extends FtrService {
     const hadOutput = await this.testSubjects.exists('consoleMonacoOutput');
     const initialOutputText = hadOutput ? await this.getOutputText() : '';
 
-    // Wait for a visual "request started" signal.
+    await this.clickPlay();
+
+    // Wait for the UI to reflect request progress or completion.
+    // We capture state before clicking to correctly detect "already done" results.
     await this.retry.try(async () => {
       const loadingIndicatorsVisible =
         (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
@@ -275,6 +278,10 @@ export class ConsolePageObject extends FtrService {
     });
 
     // Wait for the request to finish: loading indicators go away and output/status are present.
+    await this.waitForRequestToComplete();
+  }
+
+  public async waitForRequestToComplete() {
     await this.retry.try(async () => {
       const inProgress =
         (await this.testSubjects.exists('consoleEditorContentSpinner')) ||

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
-  describe('Console App CCS', function describeIndexTests() {
+  describe.only('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
@@ -42,9 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
-        await PageObjects.console.clickPlay();
-
-        await PageObjects.console.waitForRequestToComplete();
+        await PageObjects.console.clickPlayAndWaitForResults();
 
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getOutputText();
