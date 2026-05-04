@@ -56,9 +56,11 @@ export const isSplayWithinMax = (state: SplayFormState): boolean => {
   if (!Number.isInteger(value) || value <= 0) {
     return false;
   }
+
   if (!(unit in SECONDS_PER_UNIT)) {
     return false;
   }
+
   return splayInSeconds(state) <= MAX_SPLAY_SECONDS;
 };
 
@@ -80,9 +82,7 @@ export const serializeSplay = (state: SplayFormState): string => {
   }
 
   if (splayInSeconds(state) > MAX_SPLAY_SECONDS) {
-    throw new Error(
-      `Splay duration must not exceed ${MAX_SPLAY_SECONDS} seconds (1 hour)`
-    );
+    throw new Error(`Splay duration must not exceed ${MAX_SPLAY_SECONDS} seconds (1 hour)`);
   }
 
   return `${value}${suffix}`;

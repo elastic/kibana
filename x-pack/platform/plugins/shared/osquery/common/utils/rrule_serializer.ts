@@ -53,8 +53,7 @@ const WEEKDAY_TO_STRING: Record<Weekday, WeekdayStr> = {
   [Weekday.SU]: 'SU',
 };
 
-const isPositiveInteger = (value: number): boolean =>
-  Number.isInteger(value) && value > 0;
+const isPositiveInteger = (value: number): boolean => Number.isInteger(value) && value > 0;
 
 /**
  * Serialize {@link RRuleFields} into an RFC 5545 RRULE string consumable by
@@ -78,6 +77,7 @@ export const serializeRRule = (fields: RRuleFields): string => {
     if (!isPositiveInteger(interval)) {
       throw new Error(`RRULE INTERVAL must be a positive integer, got ${interval}`);
     }
+
     parts.push(`INTERVAL=${interval}`);
   }
 

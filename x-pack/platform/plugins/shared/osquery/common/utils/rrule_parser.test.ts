@@ -85,11 +85,7 @@ describe('parseRRule', () => {
         _unknown: { BYHOUR: '9', WKST: 'MO', COUNT: '10' },
       });
       // Insertion order is preserved by Object.entries.
-      expect(Object.keys(parsed._unknown ?? {})).toEqual([
-        'BYHOUR',
-        'WKST',
-        'COUNT',
-      ]);
+      expect(Object.keys(parsed._unknown ?? {})).toEqual(['BYHOUR', 'WKST', 'COUNT']);
     });
 
     it('round-trips an RRULE containing unknown parts losslessly', () => {
@@ -123,30 +119,18 @@ describe('parseRRule', () => {
     });
 
     it('throws when INTERVAL is not a positive integer', () => {
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=0')).toThrowError(
-        /positive integer/
-      );
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=-1')).toThrowError(
-        /positive integer/
-      );
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=1.5')).toThrowError(
-        /positive integer/
-      );
-      expect(() => parseRRule('FREQ=DAILY;INTERVAL=abc')).toThrowError(
-        /positive integer/
-      );
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=0')).toThrowError(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=-1')).toThrowError(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=1.5')).toThrowError(/positive integer/);
+      expect(() => parseRRule('FREQ=DAILY;INTERVAL=abc')).toThrowError(/positive integer/);
     });
 
     it('throws when BYDAY contains an invalid weekday', () => {
-      expect(() => parseRRule('FREQ=WEEKLY;BYDAY=MO,XX')).toThrowError(
-        /Invalid RRULE BYDAY/
-      );
+      expect(() => parseRRule('FREQ=WEEKLY;BYDAY=MO,XX')).toThrowError(/Invalid RRULE BYDAY/);
     });
 
     it('throws when BYMONTHDAY contains a non-integer', () => {
-      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,abc')).toThrowError(
-        /Invalid integer/
-      );
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,abc')).toThrowError(/Invalid integer/);
     });
 
     it('throws when input is not a string', () => {

@@ -48,9 +48,9 @@ describe('serializeRRule', () => {
     });
 
     it('serializes monthly with BYMONTHDAY', () => {
-      expect(
-        serializeRRule({ freq: Frequency.MONTHLY, bymonthday: [1] })
-      ).toBe('FREQ=MONTHLY;BYMONTHDAY=1');
+      expect(serializeRRule({ freq: Frequency.MONTHLY, bymonthday: [1] })).toBe(
+        'FREQ=MONTHLY;BYMONTHDAY=1'
+      );
     });
 
     it('serializes yearly with BYMONTH and BYMONTHDAY', () => {
@@ -66,9 +66,7 @@ describe('serializeRRule', () => {
 
   describe('output ordering and minimization', () => {
     it('omits INTERVAL when value is 1 (RFC default)', () => {
-      expect(
-        serializeRRule({ freq: Frequency.MINUTELY, interval: 1 })
-      ).toBe('FREQ=MINUTELY');
+      expect(serializeRRule({ freq: Frequency.MINUTELY, interval: 1 })).toBe('FREQ=MINUTELY');
     });
 
     it('omits INTERVAL when undefined', () => {
@@ -110,27 +108,27 @@ describe('serializeRRule', () => {
 
   describe('validation', () => {
     it('throws on invalid frequency', () => {
-      expect(() =>
-        serializeRRule({ freq: 999 as unknown as Frequency })
-      ).toThrowError(/Invalid RRULE frequency/);
+      expect(() => serializeRRule({ freq: 999 as unknown as Frequency })).toThrowError(
+        /Invalid RRULE frequency/
+      );
     });
 
     it('throws on non-integer INTERVAL', () => {
-      expect(() =>
-        serializeRRule({ freq: Frequency.HOURLY, interval: 1.5 })
-      ).toThrowError(/INTERVAL must be a positive integer/);
+      expect(() => serializeRRule({ freq: Frequency.HOURLY, interval: 1.5 })).toThrowError(
+        /INTERVAL must be a positive integer/
+      );
     });
 
     it('throws on zero INTERVAL', () => {
-      expect(() =>
-        serializeRRule({ freq: Frequency.HOURLY, interval: 0 })
-      ).toThrowError(/INTERVAL must be a positive integer/);
+      expect(() => serializeRRule({ freq: Frequency.HOURLY, interval: 0 })).toThrowError(
+        /INTERVAL must be a positive integer/
+      );
     });
 
     it('throws on negative INTERVAL', () => {
-      expect(() =>
-        serializeRRule({ freq: Frequency.DAILY, interval: -2 })
-      ).toThrowError(/INTERVAL must be a positive integer/);
+      expect(() => serializeRRule({ freq: Frequency.DAILY, interval: -2 })).toThrowError(
+        /INTERVAL must be a positive integer/
+      );
     });
   });
 

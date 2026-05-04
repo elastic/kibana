@@ -17,6 +17,7 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
   EuiAccordion,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +26,7 @@ import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
 import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
@@ -38,11 +40,40 @@ import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
 import { overflowCss } from '../utils';
+import { ScheduleSection } from '../../components/schedule_section';
+import type { ScheduleFormData } from '../../components/schedule_section';
+import {
+  deserializeSchedule,
+  getDefaultScheduleFormValues,
+  serializeSchedule,
+} from './schedule_serializer';
 
-type PackFormData = Omit<PackItem, 'id' | 'queries'> & {
-  queries: PackQueryFormData[];
-  pack_type: string;
-};
+type PackFormData = Omit<PackItem, 'id' | 'queries'> &
+  ScheduleFormData & {
+    queries: PackQueryFormData[];
+    pack_type: string;
+  };
+
+/**
+ * ScheduleSection-only fields that participate in form state but must not be
+ * sent to the create/update pack route. The active values are re-emitted via
+ * {@link serializeSchedule} as `schedule_type` + (`interval` | `rrule_schedule`).
+ */
+const SCHEDULE_FORM_ONLY_FIELDS: readonly (keyof ScheduleFormData)[] = [
+  'schedule_type',
+  'interval',
+  'start_date',
+  'end_date_enabled',
+  'end_date',
+  'splay_enabled',
+  'splay_value',
+  'splay_unit',
+  'frequency',
+  'repeat_every',
+  'byweekday',
+  'bymonthday',
+  'bymonth',
+];
 
 const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiAccordion__button': {
@@ -80,6 +111,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     `packs/${editMode ? packId ?? defaultValue?.id : ''}`
   );
 
+  const isRRuleSchedulingEnabled = useIsExperimentalFeatureEnabled('rruleScheduling');
+
   const { mutateAsync: createAsync } = useCreatePack({
     withRedirect: true,
   });
@@ -87,14 +120,21 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const deserializer = (payload: PackItem) => {
+  const deserializer = (payload: PackItem): Omit<PackFormData, 'pack_type'> => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
       (policyId) => payload.shards?.[policyId] == null
     );
 
+    const scheduleFields = deserializeSchedule({
+      schedule_type: payload.schedule_type,
+      interval: payload.interval,
+      rrule_schedule: payload.rrule_schedule,
+    });
+
     return {
       ...payload,
+      ...scheduleFields,
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
@@ -113,6 +153,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           enabled: true,
           queries: [],
           pack_type: 'policy',
+          ...getDefaultScheduleFormValues(),
         },
   });
 
@@ -163,8 +204,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         pack_type: __,
         policy_ids: payloadAgentPolicyIds,
         queries,
-        ...restPayload
+        ...restWithSchedule
       }: PackFormData) => {
+        // ScheduleSection-only fields are peeled off here so they don't leak
+        // into the request body. The `interval` form field is the active
+        // interval-mode value and is consumed by `serializeSchedule` below.
+        const restPayload = omit(restWithSchedule, SCHEDULE_FORM_ONLY_FIELDS);
+
         const mappedShards = !isEmpty(shards)
           ? (filter(
               map(shards, (shard, key) => {
@@ -176,8 +222,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           : [];
         const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
+        const schedulePayload = isRRuleSchedulingEnabled ? serializeSchedule(values) : {};
+
         return {
           ...restPayload,
+          ...schedulePayload,
           policy_ids: policies ?? [],
           queries: convertSOQueriesToPack(queries),
           shards: getShards() ?? {},
@@ -193,7 +242,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.saved_object_id, editMode, getShards, shards, updateAsync]
+    [
+      createAsync,
+      defaultValue?.saved_object_id,
+      editMode,
+      getShards,
+      isRRuleSchedulingEnabled,
+      shards,
+      updateAsync,
+    ]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -305,6 +362,23 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
+          </>
+        )}
+
+        {isRRuleSchedulingEnabled && (
+          <>
+            <EuiSpacer size="xl" />
+            <EuiHorizontalRule />
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.osquery.pack.form.scheduleSectionTitle"
+                  defaultMessage="Schedule"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <ScheduleSection isDisabled={isReadOnly} />
           </>
         )}
 

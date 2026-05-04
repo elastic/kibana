@@ -16,11 +16,15 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiCallOut,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FormProvider } from 'react-hook-form';
+import { FormProvider, useController } from 'react-hook-form';
 
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import {
@@ -42,27 +46,66 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { overflowCss } from '../utils';
+import { ScheduleSection } from '../../components/schedule_section';
+import type { ScheduleFormData } from '../../components/schedule_section';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
+  /**
+   * Pack-level schedule used to seed per-query schedule defaults and to surface
+   * the "Using pack schedule" indicator when the user hasn't overridden it.
+   */
+  packDefaultSchedule?: ScheduleFormData;
   onSave: (payload: PackSOQueryFormData) => void;
   onClose: () => void;
 }
 
+const OverridePackScheduleField: React.FC<{ isDisabled?: boolean }> = ({ isDisabled }) => {
+  const {
+    field: { value, onChange },
+  } = useController<{ override_pack_schedule: boolean }, 'override_pack_schedule'>({
+    name: 'override_pack_schedule',
+    defaultValue: false,
+  });
+
+  const handleToggle = useCallback(
+    (event: EuiSwitchEvent) => onChange(event.target.checked),
+    [onChange]
+  );
+
+  return (
+    <EuiSwitch
+      label={i18n.translate('xpack.osquery.queryFlyoutForm.overridePackScheduleLabel', {
+        defaultMessage: 'Override pack schedule for this query',
+      })}
+      checked={value}
+      onChange={handleToggle}
+      disabled={isDisabled}
+      data-test-subj="osquery-query-override-pack-schedule"
+    />
+  );
+};
+
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   uniqueQueryIds,
   defaultValue,
+  packDefaultSchedule,
   onSave,
   onClose,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const isRRuleSchedulingEnabled = useIsExperimentalFeatureEnabled('rruleScheduling');
   const [isEditMode] = useState(!!defaultValue);
   const { serializer, idSet, ...hooksForm } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
+    packDefaultSchedule,
   });
+
+  const overridePackSchedule = hooksForm.watch('override_pack_schedule');
 
   const {
     handleSubmit,
@@ -91,6 +134,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
         resetField('removed', { defaultValue: savedQuery.removed });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
+        // Saved queries don't carry RRULE config, so picking one always resets
+        // the per-query override back to the inherited pack schedule.
+        resetField('override_pack_schedule', { defaultValue: false });
       }
     },
     [resetField]
@@ -133,13 +179,57 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiSpacer />
           <CodeEditorField />
           <EuiSpacer />
+          {isRRuleSchedulingEnabled && (
+            <>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.osquery.queryFlyoutForm.scheduleSectionTitle"
+                    defaultMessage="Schedule"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {packDefaultSchedule && !overridePackSchedule && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    iconType="iInCircle"
+                    title={i18n.translate('xpack.osquery.queryFlyoutForm.usingPackScheduleTitle', {
+                      defaultMessage: 'Using pack schedule',
+                    })}
+                  >
+                    <EuiText size="xs">
+                      <FormattedMessage
+                        id="xpack.osquery.queryFlyoutForm.usingPackScheduleDescription"
+                        defaultMessage="This query inherits the pack-level schedule. Toggle the override below to set a different schedule for this query."
+                      />
+                    </EuiText>
+                  </EuiCallOut>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              <OverridePackScheduleField />
+              {overridePackSchedule && (
+                <>
+                  <EuiSpacer size="m" />
+                  <ScheduleSection />
+                </>
+              )}
+              <EuiSpacer />
+            </>
+          )}
           <EuiFlexGroup>
             <EuiFlexItem>
-              <IntervalField
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{ append: 's' }}
-              />
-              <EuiSpacer />
+              {!isRRuleSchedulingEnabled && (
+                <>
+                  <IntervalField
+                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                    euiFieldProps={{ append: 's' }}
+                  />
+                  <EuiSpacer />
+                </>
+              )}
               <VersionField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{

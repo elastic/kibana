@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  isSplayWithinMax,
-  parseSplay,
-  serializeSplay,
-  splayInSeconds,
-} from './splay_utils';
+import { isSplayWithinMax, parseSplay, serializeSplay, splayInSeconds } from './splay_utils';
 
 describe('splayInSeconds', () => {
   it('converts seconds, minutes, and hours', () => {
@@ -58,30 +53,24 @@ describe('serializeSplay', () => {
   });
 
   it('throws on non-positive values', () => {
-    expect(() => serializeSplay({ value: 0, unit: 'seconds' })).toThrowError(
-      /positive integer/
-    );
-    expect(() => serializeSplay({ value: -1, unit: 'minutes' })).toThrowError(
-      /positive integer/
-    );
+    expect(() => serializeSplay({ value: 0, unit: 'seconds' })).toThrowError(/positive integer/);
+    expect(() => serializeSplay({ value: -1, unit: 'minutes' })).toThrowError(/positive integer/);
   });
 
   it('throws on non-integer values', () => {
-    expect(() => serializeSplay({ value: 1.5, unit: 'minutes' })).toThrowError(
-      /positive integer/
-    );
+    expect(() => serializeSplay({ value: 1.5, unit: 'minutes' })).toThrowError(/positive integer/);
   });
 
   it('throws on unknown units', () => {
-    expect(() =>
-      serializeSplay({ value: 5, unit: 'days' as unknown as 'seconds' })
-    ).toThrowError(/Invalid splay unit/);
+    expect(() => serializeSplay({ value: 5, unit: 'days' as unknown as 'seconds' })).toThrowError(
+      /Invalid splay unit/
+    );
   });
 
   it('throws when the duration exceeds the 1-hour cap', () => {
-    expect(() =>
-      serializeSplay({ value: 3601, unit: 'seconds' })
-    ).toThrowError(/must not exceed 3600 seconds/);
+    expect(() => serializeSplay({ value: 3601, unit: 'seconds' })).toThrowError(
+      /must not exceed 3600 seconds/
+    );
     expect(() => serializeSplay({ value: 2, unit: 'hours' })).toThrowError(
       /must not exceed 3600 seconds/
     );

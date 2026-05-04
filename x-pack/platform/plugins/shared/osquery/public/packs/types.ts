@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { RRuleScheduleConfig, ScheduleType } from '../../common';
 import type { Shard } from '../../common/utils/converters';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
@@ -22,6 +23,22 @@ export interface PackSavedObject {
   updated_by_profile_uid?: string;
   policy_ids: string[];
   references: Array<{ name: string; id: string; type: string }>;
+  /**
+   * Pack-level schedule type discriminator. Absent on legacy packs (per-query
+   * interval behavior). Present once a pack has been saved with the RRULE
+   * scheduling feature flag enabled.
+   */
+  schedule_type?: ScheduleType;
+  /**
+   * Pack-level interval (seconds). Set when `schedule_type === 'interval'`.
+   * Mutually exclusive with `rrule_schedule`.
+   */
+  interval?: number;
+  /**
+   * Pack-level RRULE config. Set when `schedule_type === 'rrule'`. Mutually
+   * exclusive with `interval`.
+   */
+  rrule_schedule?: RRuleScheduleConfig;
 }
 
 export type PackItem = PackSavedObject & {

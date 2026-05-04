@@ -39,6 +39,7 @@ const parseIntegerList = (value: string, partName: string): number[] => {
     if (!Number.isInteger(parsed)) {
       throw new Error(`Invalid integer "${item}" in RRULE ${partName}`);
     }
+
     return parsed;
   });
 };
@@ -53,6 +54,7 @@ const parseWeekdays = (value: string): Weekday[] =>
       if (weekday === undefined) {
         throw new Error(`Invalid RRULE BYDAY value: "${item}"`);
       }
+
       return weekday;
     });
 
@@ -105,17 +107,21 @@ export const parseRRule = (rrule: string): RRuleFields => {
         if (parsed === undefined) {
           throw new Error(`Invalid RRULE FREQ value: "${rawValue}"`);
         }
+
         freq = parsed;
         break;
       }
+
       case 'INTERVAL': {
         const parsed = Number(rawValue);
         if (!Number.isInteger(parsed) || parsed <= 0) {
           throw new Error(`RRULE INTERVAL must be a positive integer, got "${rawValue}"`);
         }
+
         interval = parsed;
         break;
       }
+
       case 'BYDAY':
         byweekday = parseWeekdays(rawValue);
         break;

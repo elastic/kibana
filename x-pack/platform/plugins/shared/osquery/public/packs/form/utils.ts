@@ -8,12 +8,37 @@
 import { pick, reduce } from 'lodash';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
+/**
+ * Subset of {@link PackQueryFormData} that round-trips through the field
+ * array. Schedule UI-only fields (`frequency`, `byweekday`, ...) are filled
+ * in by the flyout's deserializer when the user opens a query for edit, so
+ * we only carry the SO-shape fields here.
+ */
+type FieldArrayQueryValue = Pick<
+  PackQueryFormData,
+  | 'id'
+  | 'query'
+  | 'interval'
+  | 'timeout'
+  | 'snapshot'
+  | 'removed'
+  | 'platform'
+  | 'version'
+  | 'ecs_mapping'
+  | 'schedule_type'
+  | 'rrule_schedule'
+>;
+
 export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFormData, 'id'>>) =>
   reduce(
     queries,
     (acc, value, key) => {
-      acc.push({
+      const projected: FieldArrayQueryValue = {
         id: key,
+        // `schedule_type` and `rrule_schedule` are pulled through here so a
+        // pack loaded for editing keeps any per-query override the user (or a
+        // previous server-side migration) saved. The flyout's deserializer
+        // converts them back into flat ScheduleSection form state.
         ...pick(value, [
           'query',
           'interval',
@@ -23,8 +48,18 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
           'platform',
           'version',
           'ecs_mapping',
+          'schedule_type',
+          'rrule_schedule',
         ]),
-      });
+      };
+
+      // The field array is typed as `PackQueryFormData[]` upstream because the
+      // form is hybrid (form-state + SO-shape), but the values we push in here
+      // are the SO-shape projection — the flat ScheduleSection fields
+      // (`frequency`, `byweekday`, `start_date`, ...) are filled in by the
+      // flyout's deserializer when the user opens a query for edit, not at
+      // load time. The cast keeps the public type compatible.
+      acc.push(projected as unknown as PackQueryFormData);
 
       return acc;
     },

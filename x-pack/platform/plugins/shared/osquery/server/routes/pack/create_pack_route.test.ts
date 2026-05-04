@@ -225,3 +225,198 @@ describe('createPackRoute — Phase 4 RRULE scheduling', () => {
     expect(client.create).not.toHaveBeenCalled();
   });
 });
+
+describe('createPackRoute — Phase 7 Fleet config fan-out integration', () => {
+  const buildPackagePolicy = (overrides: Record<string, unknown> = {}) => ({
+    id: 'osquery-pp-1',
+    policy_id: 'agent-policy-1',
+    policy_ids: ['agent-policy-1'],
+    package: { name: 'osquery_manager', version: '1.0.0' },
+    inputs: [{ type: 'osquery', enabled: true, streams: [] }],
+    ...overrides,
+  });
+
+  const setupRouteWithFleet = (
+    bodyOverrides: Record<string, unknown>,
+    {
+      experimentalFeatures = { rruleScheduling: true },
+      packSavedObjectAttributes = {},
+    }: {
+      experimentalFeatures?: Partial<ExperimentalFeatures>;
+      packSavedObjectAttributes?: Record<string, unknown>;
+    } = {}
+  ) => {
+    const client = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'pack-so-id',
+        attributes: {
+          name: 'pack-fleet',
+          description: 'desc',
+          queries: bodyOverrides.queries ?? {},
+          enabled: true,
+          shards: [],
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+          ...packSavedObjectAttributes,
+        },
+      }),
+    };
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(client);
+
+    const packagePolicy = buildPackagePolicy();
+    const updateMock = jest.fn();
+
+    const osqueryContext = {
+      logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+      experimentalFeatures: { ...allowedExperimentalValues, ...experimentalFeatures },
+      security: {},
+      service: {
+        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        getAgentPolicyService: jest.fn().mockReturnValue({
+          getByIds: jest
+            .fn()
+            .mockResolvedValue([{ id: 'agent-policy-1', name: 'Agent Policy 1', agents: 0 }]),
+        }),
+        getPackagePolicyService: jest.fn().mockReturnValue({
+          list: jest.fn().mockResolvedValue({ items: [packagePolicy] }),
+          update: updateMock,
+        }),
+      },
+      getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+    } as unknown as OsqueryAppContext;
+
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    const handler = setupRoute(osqueryContext);
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        name: 'pack-fleet',
+        description: 'desc',
+        enabled: true,
+        policy_ids: ['agent-policy-1'],
+        ...bodyOverrides,
+      },
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    return { handler, request, response, updateMock, client };
+  };
+
+  /**
+   * Pull the fanned-out per-query map from the `packagePolicyService.update`
+   * call. Mirrors what the route writes to
+   * `inputs[0].config.osquery.value.packs.<spaceId>--<packName>.queries`.
+   */
+  const getFleetQueriesFromUpdateCall = (updateMock: jest.Mock) => {
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    const updatedPolicy = updateMock.mock.calls[0][3];
+    const packKey = 'default--pack-fleet';
+    const packEntry = updatedPolicy.inputs?.[0]?.config?.osquery?.value?.packs?.[packKey];
+    expect(packEntry).toBeDefined();
+
+    return packEntry.queries as Record<string, Record<string, unknown>>;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('creates a pack with pack-level RRULE and fans it out onto every query (interval stripped)', async () => {
+    const packRrule = {
+      rrule: 'FREQ=WEEKLY;BYDAY=MO,WE,FR',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+
+    const { handler, request, response, updateMock } = setupRouteWithFleet(
+      {
+        queries: {
+          q1: { query: 'SELECT 1', interval: 3600 },
+          q2: { query: 'SELECT 2', interval: 7200 },
+        },
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      },
+      { packSavedObjectAttributes: { schedule_type: 'rrule', rrule_schedule: packRrule } }
+    );
+
+    await handler(buildContext(), request, response);
+
+    expect(response.ok).toHaveBeenCalled();
+    const fleetQueries = getFleetQueriesFromUpdateCall(updateMock);
+
+    expect(fleetQueries.q1).toMatchObject({ query: 'SELECT 1', rrule_schedule: packRrule });
+    expect(fleetQueries.q2).toMatchObject({ query: 'SELECT 2', rrule_schedule: packRrule });
+    expect(fleetQueries.q1).not.toHaveProperty('interval');
+    expect(fleetQueries.q2).not.toHaveProperty('interval');
+    expect(fleetQueries.q1).not.toHaveProperty('schedule_type');
+    expect(fleetQueries.q2).not.toHaveProperty('schedule_type');
+  });
+
+  it('creates a pack with pack-level interval and fans it out onto every query (rrule_schedule absent)', async () => {
+    const { handler, request, response, updateMock } = setupRouteWithFleet(
+      {
+        queries: {
+          q1: { query: 'SELECT 1', interval: 3600 },
+          q2: { query: 'SELECT 2', interval: 7200 },
+        },
+        schedule_type: 'interval',
+        interval: 1800,
+      },
+      { packSavedObjectAttributes: { schedule_type: 'interval', interval: 1800 } }
+    );
+
+    await handler(buildContext(), request, response);
+
+    expect(response.ok).toHaveBeenCalled();
+    const fleetQueries = getFleetQueriesFromUpdateCall(updateMock);
+
+    expect(fleetQueries.q1).toMatchObject({ query: 'SELECT 1', interval: 1800 });
+    expect(fleetQueries.q2).toMatchObject({ query: 'SELECT 2', interval: 1800 });
+    expect(fleetQueries.q1).not.toHaveProperty('rrule_schedule');
+    expect(fleetQueries.q2).not.toHaveProperty('rrule_schedule');
+  });
+
+  it('creates a pack with pack RRULE + one per-query interval override and emits a mixed Fleet config', async () => {
+    const packRrule = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+
+    const { handler, request, response, updateMock } = setupRouteWithFleet(
+      {
+        queries: {
+          inherits: { query: 'SELECT 1', interval: 3600 },
+          override: {
+            query: 'SELECT 2',
+            interval: 300,
+            schedule_type: 'interval',
+          },
+        },
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      },
+      { packSavedObjectAttributes: { schedule_type: 'rrule', rrule_schedule: packRrule } }
+    );
+
+    await handler(buildContext(), request, response);
+
+    expect(response.ok).toHaveBeenCalled();
+    const fleetQueries = getFleetQueriesFromUpdateCall(updateMock);
+
+    expect(fleetQueries.inherits).toMatchObject({
+      query: 'SELECT 1',
+      rrule_schedule: packRrule,
+    });
+    expect(fleetQueries.inherits).not.toHaveProperty('interval');
+
+    expect(fleetQueries.override).toMatchObject({
+      query: 'SELECT 2',
+      interval: 300,
+    });
+    expect(fleetQueries.override).not.toHaveProperty('rrule_schedule');
+    expect(fleetQueries.override).not.toHaveProperty('schedule_type');
+  });
+});

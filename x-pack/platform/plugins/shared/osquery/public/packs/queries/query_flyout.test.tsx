@@ -54,12 +54,15 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
 }));
 
 import { QueryFlyout } from './query_flyout';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 
 const renderFlyout = (props: Partial<React.ComponentProps<typeof QueryFlyout>> = {}) =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <QueryFlyout uniqueQueryIds={[]} onSave={jest.fn()} onClose={jest.fn()} {...props} />
+        <ExperimentalFeaturesProvider>
+          <QueryFlyout uniqueQueryIds={[]} onSave={jest.fn()} onClose={jest.fn()} {...props} />
+        </ExperimentalFeaturesProvider>
       </IntlProvider>
     </EuiProvider>
   );
