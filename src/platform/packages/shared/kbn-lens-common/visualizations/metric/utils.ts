@@ -19,8 +19,9 @@ import type {
  * Infers the active style template by comparing the given layout fields against
  * the known presets. Returns the matching preset id, or 'custom' if no preset matches.
  *
- * `secondaryAlign` is included only when it is set on state; if it is absent, it does not
- * affect which preset matches. `valueFontMode` and `iconAlign` must match shared defaults.
+ * All absent fields are treated as their shared default values for comparison purposes.
+ * `valueFontMode` and `iconAlign` are not preset-specific — they must equal the shared
+ * defaults for any preset to match (i.e. non-default values always produce 'custom').
  */
 export function inferStyleTemplate(state: {
   primaryPosition?: PrimaryMetricPosition;
@@ -44,7 +45,7 @@ export function inferStyleTemplate(state: {
     const primaryAlignMatch =
       (state.primaryAlign ?? LENS_METRIC_STATE_DEFAULTS.primaryAlign) === preset.primaryAlign;
     const secondaryAlignMatch =
-      state.secondaryAlign == null || state.secondaryAlign === preset.secondaryAlign;
+      (state.secondaryAlign ?? LENS_METRIC_STATE_DEFAULTS.secondaryAlign) === preset.secondaryAlign;
 
     const valueFontModeMatch =
       (state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode) ===
