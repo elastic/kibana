@@ -14,6 +14,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+import { ALL_SPACES_LABEL } from '../../monitor_add_edit/fields/monitor_spaces';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
@@ -42,7 +43,31 @@ export const SpaceSelector = <T extends FieldValues>({
 
   const prevAgentPolicyId = usePrevious(selectedAgentPolicyId);
 
+  const hasAgentPolicyField = selectedAgentPolicyId !== undefined;
+
+  // When there is no agent policy field (e.g. Project API Keys), load all spaces unconditionally
   useEffect(() => {
+    if (hasAgentPolicyField || !data?.spacesDataPromise) return;
+    let cancelled = false;
+
+    data.spacesDataPromise.then(({ spacesMap }) => {
+      if (cancelled) return;
+      const allSpacesOption = { id: ALL_SPACES_ID, label: ALL_SPACES_LABEL };
+      const spaceOptions = [...spacesMap].map(([spaceId, spaceData]) => ({
+        id: spaceId,
+        label: spaceData.name,
+      }));
+      setSpacesList([allSpacesOption, ...spaceOptions]);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasAgentPolicyField, data?.spacesDataPromise]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     if (
       selectedAgentPolicyId !== prevAgentPolicyId &&
       selectedAgentPolicyId &&
@@ -52,28 +77,47 @@ export const SpaceSelector = <T extends FieldValues>({
       if (isDisabled) return;
       const selectedPolicy = agentPolicies.find((policy) => policy.id === selectedAgentPolicyId);
       if (!selectedPolicy) {
-        throw new Error('Selected agent policy not found, this should never happen');
+        return;
       }
 
       data.spacesDataPromise.then(({ spacesMap }) => {
+        if (cancelled) return;
+
         const policySpaceIds = selectedPolicy.spaceIds || [];
-        const spaceOptions: { id: string; label: string }[] = [];
         const spaceOptionBySpaceId: Record<string, { id: string; label: string }> = {};
         spacesMap.forEach((spaceData, spaceId) => {
           spaceOptionBySpaceId[spaceId] = { id: spaceId, label: spaceData.name };
         });
 
-        // If the policy belongs to all spaces or fleet agent policies are not space aware, show all spaces
+        let spaceOptions: Array<{ id: string; label: string }>;
         if (policySpaceIds.includes(ALL_SPACES_ID) || !policySpaceIds.length) {
-          spaceOptions.push(...Object.values(spaceOptionBySpaceId));
+          spaceOptions = Object.values(spaceOptionBySpaceId);
+          setSpacesList([
+            ...spaceOptions,
+            ...(policySpaceIds.includes(ALL_SPACES_ID)
+              ? [
+                  {
+                    id: ALL_SPACES_ID,
+                    label: ALL_SPACES_LABEL,
+                  },
+                ]
+              : []),
+          ]);
         } else {
-          spaceOptions.push(...policySpaceIds.map((spaceId) => spaceOptionBySpaceId[spaceId]));
+          spaceOptions = policySpaceIds
+            .map((spaceId) => spaceOptionBySpaceId[spaceId])
+            .filter(Boolean);
+          setSpacesList(spaceOptions);
         }
-        setSpacesList(spaceOptions);
         setValue(NAMESPACES_NAME, spaceOptions.map((space) => space.id) as PathValue<T, Path<T>>);
       });
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    NAMESPACES_NAME,
     agentPolicies,
     data?.spacesDataPromise,
     isDisabled,
