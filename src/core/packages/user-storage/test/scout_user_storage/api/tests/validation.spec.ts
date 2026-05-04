@@ -34,41 +34,39 @@ apiTest.describe('User Storage - Schema Validation', { tag: [...tags.stateful.cl
     }
   );
 
-  apiTest.describe('nested object validation', () => {
-    apiTest('rejects invalid enum value', async ({ apiClient }) => {
-      const response = await h.put(apiClient, 'test:object_key', {
-        theme: 'neon',
-        sidebar: { collapsed: false, width: 250 },
-        pinnedItems: [],
-      });
-      expect(response).toHaveStatusCode(400);
+  apiTest('PUT rejects invalid enum value in object key', async ({ apiClient }) => {
+    const response = await h.put(apiClient, 'test:object_key', {
+      theme: 'neon',
+      sidebar: { collapsed: false, width: 250 },
+      pinnedItems: [],
     });
+    expect(response).toHaveStatusCode(400);
+  });
 
-    apiTest('rejects missing required field', async ({ apiClient }) => {
-      const response = await h.put(apiClient, 'test:object_key', {
-        theme: 'light',
-        pinnedItems: [],
-      });
-      expect(response).toHaveStatusCode(400);
+  apiTest('PUT rejects missing required field in object key', async ({ apiClient }) => {
+    const response = await h.put(apiClient, 'test:object_key', {
+      theme: 'light',
+      pinnedItems: [],
     });
+    expect(response).toHaveStatusCode(400);
+  });
 
-    apiTest('rejects out-of-range number', async ({ apiClient }) => {
-      const response = await h.put(apiClient, 'test:object_key', {
-        theme: 'light',
-        sidebar: { collapsed: false, width: 999 },
-        pinnedItems: [],
-      });
-      expect(response).toHaveStatusCode(400);
+  apiTest('PUT rejects out-of-range number in object key', async ({ apiClient }) => {
+    const response = await h.put(apiClient, 'test:object_key', {
+      theme: 'light',
+      sidebar: { collapsed: false, width: 999 },
+      pinnedItems: [],
     });
+    expect(response).toHaveStatusCode(400);
+  });
 
-    apiTest('rejects array exceeding max length', async ({ apiClient }) => {
-      const response = await h.put(apiClient, 'test:object_key', {
-        theme: 'dark',
-        sidebar: { collapsed: true, width: 200 },
-        pinnedItems: Array.from({ length: 11 }, (_, i) => `item-${i}`),
-      });
-      expect(response).toHaveStatusCode(400);
+  apiTest('PUT rejects array exceeding max length in object key', async ({ apiClient }) => {
+    const response = await h.put(apiClient, 'test:object_key', {
+      theme: 'dark',
+      sidebar: { collapsed: true, width: 200 },
+      pinnedItems: Array.from({ length: 11 }, (_, i) => `item-${i}`),
     });
+    expect(response).toHaveStatusCode(400);
   });
 
   apiTest('PUT rejects array with wrong element type', async ({ apiClient }) => {
@@ -81,34 +79,32 @@ apiTest.describe('User Storage - Schema Validation', { tag: [...tags.stateful.cl
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest.describe('edge cases', () => {
-    apiTest('PUT preserves empty string', async ({ apiClient }) => {
-      expect(await h.put(apiClient, 'test:string_key', '')).toHaveStatusCode(200);
-      const response = await h.get(apiClient);
-      expect(response.body['test:string_key']).toBe('');
-    });
+  apiTest('PUT preserves empty string', async ({ apiClient }) => {
+    expect(await h.put(apiClient, 'test:string_key', '')).toHaveStatusCode(200);
+    const response = await h.get(apiClient);
+    expect(response.body['test:string_key']).toBe('');
+  });
 
-    apiTest('PUT preserves zero', async ({ apiClient }) => {
-      expect(await h.put(apiClient, 'test:number_key', 0)).toHaveStatusCode(200);
-      const response = await h.get(apiClient);
-      expect(response.body['test:number_key']).toBe(0);
-    });
+  apiTest('PUT preserves zero', async ({ apiClient }) => {
+    expect(await h.put(apiClient, 'test:number_key', 0)).toHaveStatusCode(200);
+    const response = await h.get(apiClient);
+    expect(response.body['test:number_key']).toBe(0);
+  });
 
-    apiTest('PUT preserves negative number', async ({ apiClient }) => {
-      expect(await h.put(apiClient, 'test:number_key', -10)).toHaveStatusCode(200);
-      const response = await h.get(apiClient);
-      expect(response.body['test:number_key']).toBe(-10);
-    });
+  apiTest('PUT preserves negative number', async ({ apiClient }) => {
+    expect(await h.put(apiClient, 'test:number_key', -10)).toHaveStatusCode(200);
+    const response = await h.get(apiClient);
+    expect(response.body['test:number_key']).toBe(-10);
+  });
 
-    apiTest('PUT preserves empty array', async ({ apiClient }) => {
-      expect(await h.put(apiClient, 'test:array_key', [])).toHaveStatusCode(200);
-      const response = await h.get(apiClient);
-      expect(response.body['test:array_key']).toStrictEqual([]);
-    });
+  apiTest('PUT preserves empty array', async ({ apiClient }) => {
+    expect(await h.put(apiClient, 'test:array_key', [])).toHaveStatusCode(200);
+    const response = await h.get(apiClient);
+    expect(response.body['test:array_key']).toStrictEqual([]);
+  });
 
-    apiTest('DELETE on a key that was never set is a no-op', async ({ apiClient }) => {
-      const response = await h.del(apiClient, 'test:string_key');
-      expect(response).toHaveStatusCode(200);
-    });
+  apiTest('DELETE on a key that was never set is a no-op', async ({ apiClient }) => {
+    const response = await h.del(apiClient, 'test:string_key');
+    expect(response).toHaveStatusCode(200);
   });
 });

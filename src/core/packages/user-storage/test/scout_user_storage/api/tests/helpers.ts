@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 import { INTERNAL_HEADERS } from '../fixtures';
 
 export const ALL_KEYS = [
@@ -30,43 +29,62 @@ export const DEFAULT_VALUES: Record<string, unknown> = {
   'test:array_key': [],
 };
 
+interface ApiClientOptions {
+  headers?: Record<string, string>;
+  body?: unknown;
+  responseType?: 'json' | 'text' | 'buffer';
+}
+
+interface ApiClientResponse {
+  statusCode: number;
+  statusMessage: string;
+  headers: Record<string, string | string[]>;
+  body: any;
+}
+
+interface ApiClient {
+  get(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  put(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  delete(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+}
+
 export const createHelpers = (headersGetter: () => Record<string, string>) => {
   const headers = () => ({ ...INTERNAL_HEADERS, ...headersGetter() });
 
   return {
-    put: (apiClient: ApiClientFixture, key: string, value: unknown) =>
+    put: (apiClient: ApiClient, key: string, value: unknown) =>
       apiClient.put(`internal/user_storage/${key}`, {
         headers: headers(),
         body: { value },
         responseType: 'json',
       }),
 
-    get: (apiClient: ApiClientFixture) =>
+    get: (apiClient: ApiClient) =>
       apiClient.get('internal/user_storage', {
         headers: headers(),
         responseType: 'json',
       }),
 
-    del: (apiClient: ApiClientFixture, key: string) =>
+    del: (apiClient: ApiClient, key: string) =>
       apiClient.delete(`internal/user_storage/${key}`, {
         headers: headers(),
         responseType: 'json',
       }),
 
-    putInSpace: (apiClient: ApiClientFixture, spaceId: string, key: string, value: unknown) =>
+    putInSpace: (apiClient: ApiClient, spaceId: string, key: string, value: unknown) =>
       apiClient.put(`s/${spaceId}/internal/user_storage/${key}`, {
         headers: headers(),
         body: { value },
         responseType: 'json',
       }),
 
-    getInSpace: (apiClient: ApiClientFixture, spaceId: string) =>
+    getInSpace: (apiClient: ApiClient, spaceId: string) =>
       apiClient.get(`s/${spaceId}/internal/user_storage`, {
         headers: headers(),
         responseType: 'json',
       }),
 
-    delInSpace: (apiClient: ApiClientFixture, spaceId: string, key: string) =>
+    delInSpace: (apiClient: ApiClient, spaceId: string, key: string) =>
       apiClient.delete(`s/${spaceId}/internal/user_storage/${key}`, {
         headers: headers(),
         responseType: 'json',
