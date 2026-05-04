@@ -158,6 +158,8 @@ const EntityAnalyticsHomePageContent = () => {
     generate,
     isScheduled,
     toggleSchedule,
+    readPermissionError: leadsReadPermissionError,
+    writePermissionError: leadsWritePermissionError,
   } = useHuntingLeads(connectorId, leadGenerationEnabled);
   const openAgentBuilderWithLead = useLeadAttachment();
 
@@ -288,7 +290,7 @@ const EntityAnalyticsHomePageContent = () => {
         <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
       ) : (
         <EuiFlexGroup direction="column" gutterSize="l">
-          {leadGenerationEnabled && (
+          {leadGenerationEnabled && !leadsReadPermissionError && (
             <EuiFlexItem>
               <TopThreatHuntingLeads
                 leads={leads}
@@ -307,6 +309,7 @@ const EntityAnalyticsHomePageContent = () => {
                 hasValidConnector={hasValidConnector}
                 onConnectorIdSelected={safeSetConnectorId}
                 isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
+                hasWritePermissionError={leadsWritePermissionError}
               />
             </EuiFlexItem>
           )}

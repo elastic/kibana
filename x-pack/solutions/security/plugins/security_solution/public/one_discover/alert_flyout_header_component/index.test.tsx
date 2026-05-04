@@ -18,6 +18,7 @@ import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -177,6 +178,46 @@ describe('AlertFlyoutHeader', () => {
     });
 
     expect(mockDocumentHeader).toHaveBeenCalledWith(expect.objectContaining({ hit }));
+  });
+
+  it('passes a Discover-aware cell action renderer to the header', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+          columns={['host.name']}
+          filter={jest.fn()}
+          onAddColumn={jest.fn()}
+          onRemoveColumn={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    expect(mockDocumentHeader).toHaveBeenCalledWith(
+      expect.objectContaining({
+        renderCellActions: expect.any(Function),
+      })
+    );
+
+    const lastCall = mockDocumentHeader.mock.calls[mockDocumentHeader.mock.calls.length - 1];
+    const lastProps = lastCall?.[0] as { renderCellActions?: unknown } | undefined;
+    const renderCellActions = lastProps?.renderCellActions;
+    expect(renderCellActions).not.toBe(noopCellActionRenderer);
   });
 
   it('opens notes in a nested system flyout from Discover header', async () => {

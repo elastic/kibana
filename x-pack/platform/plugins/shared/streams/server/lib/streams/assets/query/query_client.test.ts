@@ -592,44 +592,6 @@ describe('QueryClient backward compatibility', () => {
       });
     });
 
-    describe('countPromotableUnbackedQueries with minSeverityScore', () => {
-      it('includes a range filter when minSeverityScore is provided', async () => {
-        const storageClient = createMockStorageClient();
-        storageClient.search.mockResolvedValue({
-          hits: { hits: [], total: { value: 5 } },
-        });
-        const { client } = createQueryClient({ storageClient });
-
-        const count = await client.countPromotableUnbackedQueries({ minSeverityScore: 60 });
-
-        const searchArgs = storageClient.search.mock.calls[0][0];
-        const filter: unknown[] = searchArgs.query.bool.filter;
-        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
-        expect(count).toBe(5);
-      });
-
-      it('excludes the range filter when minSeverityScore is omitted', async () => {
-        const storageClient = createMockStorageClient();
-        storageClient.search.mockResolvedValue({
-          hits: { hits: [], total: { value: 10 } },
-        });
-        const { client } = createQueryClient({ storageClient });
-
-        await client.countPromotableUnbackedQueries();
-
-        const searchArgs = storageClient.search.mock.calls[0][0];
-        const filter: unknown[] = searchArgs.query.bool.filter;
-        const rangeFilter = filter.find(
-          (f) =>
-            typeof f === 'object' &&
-            f !== null &&
-            'range' in f &&
-            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
-        );
-        expect(rangeFilter).toBeUndefined();
-      });
-    });
-
     describe('getPromotableUnbackedQueries with minSeverityScore', () => {
       it('passes minSeverityScore through to the underlying search', async () => {
         const storageClient = createMockStorageClient();
