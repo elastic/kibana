@@ -232,6 +232,34 @@ export const expectedQradarReferenceSets = [
   { type: 'lookup', name: 'Malicious Hosts' },
 ];
 
+/**
+ * Sentinel ARM template resources containing one Scheduled rule referencing a watchlist.
+ * Mirrors the export shape produced by Microsoft Sentinel.
+ */
+export const sentinelArmResourcesWithWatchlist = {
+  resources: [
+    {
+      id: '/subscriptions/abc/resourceGroups/rg/providers/Microsoft.SecurityInsights/alertRules/rule-1',
+      name: 'rule-1',
+      kind: 'Scheduled',
+      type: 'Microsoft.SecurityInsights/alertRules',
+      properties: {
+        displayName: 'Suspicious sign-in from watchlisted account',
+        description: 'Detects sign-ins from accounts on the high-value watchlist',
+        query: "SigninLogs | where AccountName in (_GetWatchlist('HighValueAccounts'))",
+        severity: 'Medium',
+        tactics: ['InitialAccess'],
+        techniques: ['T1078'],
+      },
+    },
+  ],
+};
+
+/**
+ * Expected watchlist resources identified from sentinelArmResourcesWithWatchlist.
+ */
+export const expectedSentinelWatchlists = [{ type: 'lookup', name: 'HighValueAccounts' }];
+
 export const executeTaskInBatches = async <T>({
   items,
   batchSize,

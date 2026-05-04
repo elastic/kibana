@@ -34,7 +34,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: [],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -58,7 +58,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: ['ep-1'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -102,7 +102,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: ['dup'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );

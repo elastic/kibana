@@ -23,7 +23,8 @@ const DOCS_LIMIT = 2;
 const CCS_TEST_LOGS_INDEX = 'ccs-test-logs';
 const FROM_DATE = '2026-02-25T10:00:00Z';
 const TO_DATE = '2026-02-25T12:00:00Z';
-const MAX_DATE_OF_UPDATES = '2026-02-25T12:10:01Z';
+// CCS writes entities with @timestamp = now + Nms; use a future date so local extraction picks them up
+const MAX_DATE_OF_UPDATES = new Date(Date.now() + 5 * 60_000).toISOString();
 
 async function createCcsTestLogsIndex(esClient: EsClient) {
   await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
@@ -547,6 +548,7 @@ apiTest.describe(
               ],
             },
           },
+          sort: 'entity.id:asc',
         });
 
         expect(latestSearchResponse.hits.hits).toHaveLength(2);
@@ -556,6 +558,112 @@ apiTest.describe(
 
         expect(get(hits[1], ['_source', 'entity', 'id'])).toBe('gen-2');
         expect(get(hits[1], ['_source', 'entity', 'name'])).toBe('Generic Two');
+      }
+    );
+
+    apiTest(
+      'Should paginate correctly across outer log-slice loop and inner entity-page loop',
+      async ({ apiClient, esClient }) => {
+        await createCcsTestLogsIndex(esClient);
+
+        // 6 distinct hosts: one doc each. With maxLogsPerPage=3 and docsLimit=2:
+        // - Outer loop: 2 slices (3 raw docs each)
+        // - Inner loop: 2 entity pages per slice (2 + 1 entities each)
+        // Total: count=6, pages=4
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:00:00Z',
+          host: { name: 'pagination-host-1' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:01:00Z',
+          host: { name: 'pagination-host-2' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:02:00Z',
+          host: { name: 'pagination-host-3' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:03:00Z',
+          host: { name: 'pagination-host-4' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:04:00Z',
+          host: { name: 'pagination-host-5' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:05:00Z',
+          host: { name: 'pagination-host-6' },
+        });
+
+        const extractResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {
+              indexPatterns: [CCS_TEST_LOGS_INDEX],
+              fromDateISO: FROM_DATE,
+              toDateISO: TO_DATE,
+              docsLimit: DOCS_LIMIT,
+              maxLogsPerPage: 3,
+            },
+          }
+        );
+        expect(extractResponse.statusCode).toBe(200);
+        expect(extractResponse.body).toMatchObject({ count: 6, pages: 4 });
+
+        const logExtractionResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {
+              fromDateISO: TO_DATE,
+              toDateISO: MAX_DATE_OF_UPDATES,
+            },
+          }
+        );
+        expect(logExtractionResponse.statusCode).toBe(200);
+        expect(logExtractionResponse.body.success).toBe(true);
+
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+
+        const latestSearchResponse = await esClient.search({
+          index: LATEST_ALIAS,
+          size: 100,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'entity.EngineMetadata.Type': 'host' } },
+                {
+                  terms: {
+                    'entity.id': [
+                      'host:pagination-host-1',
+                      'host:pagination-host-2',
+                      'host:pagination-host-3',
+                      'host:pagination-host-4',
+                      'host:pagination-host-5',
+                      'host:pagination-host-6',
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(latestSearchResponse.hits.hits).toHaveLength(6);
+        const entityIds = latestSearchResponse.hits.hits.map((h) =>
+          get(h._source, ['entity', 'id'])
+        );
+        expect(entityIds.sort()).toStrictEqual([
+          'host:pagination-host-1',
+          'host:pagination-host-2',
+          'host:pagination-host-3',
+          'host:pagination-host-4',
+          'host:pagination-host-5',
+          'host:pagination-host-6',
+        ]);
       }
     );
   }
