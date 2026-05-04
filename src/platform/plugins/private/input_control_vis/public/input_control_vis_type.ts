@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { VisGroups } from '@kbn/visualizations-plugin/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
 import type { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
