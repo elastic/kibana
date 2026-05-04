@@ -35,16 +35,13 @@ engine:
     # Force reasoning on
     - -c
     - model_supports_reasoning_summaries=true
-    # Reasoning effort: minimal | low | medium | high.
-    - -c
-    - model_reasoning_effort=medium
     # Reasoning summary verbosity: auto | concise | detailed | none.
     - -c
     - model_reasoning_summary=auto
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1/responses
+    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
