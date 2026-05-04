@@ -39,8 +39,11 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: () => ({ conversations: [], isLoading: false, refresh: jest.fn() }),
 }));
 
-jest.mock('../../../hooks/use_feature_flags', () => ({
-  useFeatureFlags: () => ({ experimental: false }),
+jest.mock('../../../hooks/use_route_access_config', () => ({
+  useRouteAccessConfig: () => ({
+    featureFlags: { experimental: false },
+    capabilities: { isUIAMEnabled: false },
+  }),
 }));
 
 jest.mock('./shared/sidebar_header', () => ({
