@@ -15,6 +15,7 @@ import {
   alertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
 const MAX_DATA_FIELDS = 100;
@@ -107,7 +108,7 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(): Promise<string[]> {
+  async getDataFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
@@ -121,6 +122,7 @@ export class MatcherSuggestionsService {
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
               { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
         },

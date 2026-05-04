@@ -111,8 +111,15 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async fetchDataFields() {
-    return this.http.get<string[]>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`);
+  public async fetchDataFields(matcher?: string) {
+    return this.http.get<string[]>(
+      `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+      {
+        query: {
+          matcher: matcher || undefined,
+        },
+      }
+    );
   }
 
   public async fetchTags(params?: { search?: string }) {

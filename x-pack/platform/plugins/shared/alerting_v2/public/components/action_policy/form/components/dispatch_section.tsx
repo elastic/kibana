@@ -33,7 +33,8 @@ export const DispatchSection = () => {
   const groupBy = useWatch({ control, name: 'groupBy' });
   const throttleStrategy = useWatch({ control, name: 'throttleStrategy' });
   const throttleInterval = useWatch({ control, name: 'throttleInterval' });
-  const { data: dataFieldNames } = useFetchDataFields();
+  const matcher = useWatch({ control, name: 'matcher' });
+  const { data: dataFieldNames } = useFetchDataFields(matcher);
 
   useEffect(() => {
     if (needsInterval(getValues('throttleStrategy')) && !getValues('throttleInterval')) {
