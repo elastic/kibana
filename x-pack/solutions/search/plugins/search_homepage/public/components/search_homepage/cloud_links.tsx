@@ -64,6 +64,9 @@ export const CloudLinks = () => {
           href={`${baseUrl}/home`}
           target="_blank"
           external={false}
+          aria-label={i18n.translate('xpack.searchHomepage.cloudLinks.homeAriaLabel', {
+            defaultMessage: 'Elastic Cloud home',
+          })}
           data-test-subj="searchHomepageCloudLink-home"
         >
           <EuiIcon type="logoCloud" size="m" aria-hidden={true} />
