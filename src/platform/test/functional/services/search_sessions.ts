@@ -146,7 +146,7 @@ export class SearchSessionsService extends FtrService {
     expect(await this.hasErrorsOrWarnings()).to.be(false);
   }
 
-  private async hasErrorsOrWarnings() {
+  public async hasErrorsOrWarnings() {
     const messages = [
       // Warnings
       'Your background search is still running',
