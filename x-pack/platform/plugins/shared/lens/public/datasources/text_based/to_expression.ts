@@ -94,6 +94,7 @@ function getExpressionForLayer(
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
+      ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
     });
 
     textBasedQueryToAst.chain.push({

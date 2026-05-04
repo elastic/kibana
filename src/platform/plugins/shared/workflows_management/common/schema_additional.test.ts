@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { StepCategory } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import {
   createMockConnectorInstance,
   createMockConnectorTypeInfo,
@@ -20,6 +22,7 @@ import {
   getCachedDynamicConnectorTypes,
   getDeprecatedStepMetadataMap,
 } from './schema';
+import { stepSchemas } from './step_schemas';
 
 describe('schema - additional coverage', () => {
   describe('getAllConnectorsInternal', () => {
@@ -306,6 +309,51 @@ describe('schema - additional coverage', () => {
       const connector = map?.get('lookup-test');
       expect(connector).toBeDefined();
       expect(connector?.summary).toBe('Lookup Test');
+    });
+  });
+
+  describe('registered step definitions (public)', () => {
+    const longDescription =
+      'Transform an array of items by applying a step to each one. Useful for shaping data.';
+    const publicStepDefinition = {
+      id: 'data.test_map',
+      label: 'Map Collection',
+      description: longDescription,
+      category: StepCategory.Data,
+      inputSchema: z.object({}),
+      outputSchema: z.any(),
+    };
+
+    let originalGetAll: typeof stepSchemas.getAllRegisteredStepDefinitions;
+    let originalGetByType: typeof stepSchemas.getStepDefinition;
+
+    beforeAll(() => {
+      originalGetAll = stepSchemas.getAllRegisteredStepDefinitions.bind(stepSchemas);
+      originalGetByType = stepSchemas.getStepDefinition.bind(stepSchemas);
+
+      stepSchemas.getAllRegisteredStepDefinitions = () => [publicStepDefinition] as never;
+      stepSchemas.getStepDefinition = (stepTypeId: string) =>
+        stepTypeId === publicStepDefinition.id ? (publicStepDefinition as never) : undefined;
+
+      // Force the all-connectors cache to be rebuilt with the registered step.
+      stepSchemas.setAllConnectorsCache(null);
+      stepSchemas.setAllConnectorsMapCache(null);
+    });
+
+    afterAll(() => {
+      stepSchemas.getAllRegisteredStepDefinitions = originalGetAll;
+      stepSchemas.getStepDefinition = originalGetByType;
+      stepSchemas.setAllConnectorsCache(null);
+      stepSchemas.setAllConnectorsMapCache(null);
+    });
+
+    it('exposes the short label as `summary` and the long description as `description`', () => {
+      const connectors = getAllConnectorsInternal();
+      const registered = connectors.find((c) => c.type === publicStepDefinition.id);
+
+      expect(registered).toBeDefined();
+      expect(registered?.summary).toBe('Map Collection');
+      expect(registered?.description).toBe(longDescription);
     });
   });
 });
