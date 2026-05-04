@@ -510,8 +510,12 @@ const persistQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<PersistQueriesResult> => {
+    // API-key callers (workflows, Task Manager, user keys) get cloned keys
+    // so the rule survives even if the caller's key is revoked or expires.
+    const cloneApiKeysOnCreate = !!request.headers.authorization?.toString().startsWith('ApiKey ');
     const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
+      rulesClientOptions: { cloneApiKeysOnCreate },
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
