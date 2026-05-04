@@ -10,6 +10,7 @@ import React from 'react';
 import { Header } from './header';
 import { generateMockIndicator } from '../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../common/mock';
+import { noopCellActionRenderer } from '../shared/components/cell_actions';
 import { getTabsDisplayed } from './tabs';
 import {
   IOC_DETAILS_TITLE_TEST_ID,
@@ -20,7 +21,7 @@ import {
 } from './test_ids';
 
 const mockIndicator = generateMockIndicator();
-const tabs = getTabsDisplayed({ indicator: mockIndicator, onViewAllFieldsInTable: jest.fn() });
+const tabs = getTabsDisplayed({ indicator: mockIndicator, onViewAllFieldsInTable: jest.fn(), renderCellActions: noopCellActionRenderer });
 
 describe('<Header />', () => {
   it('should render title and subtitle', () => {
@@ -31,6 +32,7 @@ describe('<Header />', () => {
           tabs={tabs}
           selectedTabId="overview"
           setSelectedTabId={jest.fn()}
+          renderCellActions={noopCellActionRenderer}
         />
       </TestProviders>
     );
@@ -47,6 +49,7 @@ describe('<Header />', () => {
           tabs={tabs}
           selectedTabId="overview"
           setSelectedTabId={jest.fn()}
+          renderCellActions={noopCellActionRenderer}
         />
       </TestProviders>
     );
@@ -65,6 +68,7 @@ describe('<Header />', () => {
           tabs={tabs}
           selectedTabId="overview"
           setSelectedTabId={setSelectedTabId}
+          renderCellActions={noopCellActionRenderer}
         />
       </TestProviders>
     );
