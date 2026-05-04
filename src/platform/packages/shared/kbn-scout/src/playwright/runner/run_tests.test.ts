@@ -78,7 +78,7 @@ describe('hasTestsInPlaywrightConfig', () => {
     );
 
     expect(execPromiseMock).toHaveBeenCalledWith(
-      'playwright test pwArgs --list --pass-with-no-tests',
+      'playwright test pwArgs --list',
       expect.objectContaining({
         env: expect.objectContaining({
           SCOUT_REPORTER_ENABLED: 'false',
@@ -92,13 +92,8 @@ describe('hasTestsInPlaywrightConfig', () => {
     expect(exitCode).toEqual(0);
   });
 
-  it(`should return '0' when a config legitimately has zero tests (--pass-with-no-tests)`, async () => {
-    execPromiseMock.mockImplementationOnce(() =>
-      Promise.resolve({
-        stdout: 'Listing tests:\nTotal: 0 tests in 0 files\n',
-        stderr: '',
-      })
-    );
+  it(`should log an error and return '1' when no tests are found`, async () => {
+    execPromiseMock.mockRejectedValueOnce(new Error('No tests found'));
 
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
@@ -107,12 +102,11 @@ describe('hasTestsInPlaywrightConfig', () => {
       'configPath/playwright.config.ts'
     );
 
-    expect(execPromiseMock).toHaveBeenCalledWith(
-      'playwright test pwArgs --list --pass-with-no-tests',
-      expect.any(Object)
+    expect(mockLog.info).toHaveBeenCalledWith('scout: Validate Playwright config has tests');
+    expect(mockLog.error).toHaveBeenCalledWith(
+      expect.stringMatching(/^scout: No tests found in \[configPath\/playwright\.config\.ts\]\./)
     );
-    expect(mockLog.error).not.toHaveBeenCalled();
-    expect(exitCode).toEqual(0);
+    expect(exitCode).toEqual(1);
   });
 
   it(`should log an error and return '1' when test command throws error`, async () => {
@@ -132,10 +126,8 @@ describe('hasTestsInPlaywrightConfig', () => {
     expect(exitCode).toEqual(1);
   });
 
-  it(`should log an error and return '1' when discovery fails (e.g. syntax error)`, async () => {
-    execPromiseMock.mockRejectedValueOnce(
-      new Error(`SyntaxError: Unexpected token 'export'`)
-    );
+  it(`should log an error and return '1' when unknown error occurs`, async () => {
+    execPromiseMock.mockRejectedValueOnce(new Error(`unknown error`));
 
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
@@ -146,9 +138,7 @@ describe('hasTestsInPlaywrightConfig', () => {
 
     expect(mockLog.info).toHaveBeenCalledWith('scout: Validate Playwright config has tests');
     expect(mockLog.error).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^scout: Failed to discover tests in \[configPath\/playwright\.config\.ts\]\..*SyntaxError/s
-      )
+      expect.stringMatching(/^scout: Unknown error occurred\./)
     );
     expect(exitCode).toEqual(1);
   });

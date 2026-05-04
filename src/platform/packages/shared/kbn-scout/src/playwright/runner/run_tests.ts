@@ -82,10 +82,7 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    // `--pass-with-no-tests` lets a config with zero tests exit cleanly (code 0) so any
-    // rejection here unambiguously signals a real discovery failure (e.g. a syntax error
-    // during Playwright transpilation). See https://github.com/elastic/kibana/issues/262787.
-    const validationCmd = [cmd, ...cmdArgs, '--list', '--pass-with-no-tests'].join(' ');
+    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
 
     const result = await execPromise(validationCmd, {
       env: withKibanaBabelRegister({
@@ -96,21 +93,24 @@ export async function hasTestsInPlaywrightConfig(
     const lastLine = result.stdout.trim().split('\n').pop() || '';
 
     log.info(`scout: ${lastLine}`);
-    return 0; // success (covers both "tests found" and "legitimately zero tests")
+    return 0; // success
   } catch (err) {
     const errorMessage = (err as Error).message || String(err);
+
+    if (errorMessage.includes('No tests found')) {
+      log.error(
+        `scout: No tests found in [${configPath}]. ` +
+          `Run 'npx playwright test --list --config ${configPath}' to see Playwright errors.`
+      );
+      return 1;
+    }
 
     if (errorMessage.includes(`unknown command 'test'`)) {
       log.error(`scout: Playwright CLI is probably broken.\n${errorMessage}`);
       return 1;
     }
 
-    log.error(
-      `scout: Failed to discover tests in [${configPath}]. ` +
-        `This usually means the config has a real error (e.g. a syntax/transpilation error) ` +
-        `rather than legitimately zero tests. ` +
-        `See https://github.com/elastic/kibana/issues/262787 for context.\n${errorMessage}`
-    );
+    log.error(`scout: Unknown error occurred.\n${errorMessage}`);
     return 1;
   }
 }
