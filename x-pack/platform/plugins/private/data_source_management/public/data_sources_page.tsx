@@ -11,9 +11,6 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiPageSection,
   EuiSpacer,
@@ -231,39 +228,18 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                     </EuiButton>
                   ) : undefined,
                 toolsRight: (
-                  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="primary"
-                        data-test-subj="dataSourceManagementCreateButton"
-                        iconType="plusInCircle"
-                        onClick={() => {
-                          setCreateFlyoutOpen(true);
-                        }}
-                      >
-                        {i18n.translate('dataSourceManagement.addButtonLabel', {
-                          defaultMessage: 'Add',
-                        })}
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="primary"
-                        display="fill"
-                        iconType="refresh"
-                        aria-label={i18n.translate('dataSourceManagement.refreshButtonAriaLabel', {
-                          defaultMessage: 'Refresh',
-                        })}
-                        data-test-subj="dataSourceManagementRefreshButton"
-                        onClick={() => {
-                          void (async () => {
-                            setItems(await dataClient.get());
-                            setSelectedItems([]);
-                          })();
-                        }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="dataSourceManagementCreateButton"
+                    iconType="plusInCircle"
+                    onClick={() => {
+                      setCreateFlyoutOpen(true);
+                    }}
+                  >
+                    {i18n.translate('dataSourceManagement.addButtonLabel', {
+                      defaultMessage: 'Add',
+                    })}
+                  </EuiButton>
                 ),
               }}
               rowHeader="name"
@@ -318,43 +294,16 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                   },
                 },
                 toolsRight: (
-                  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="primary"
-                        data-test-subj="dataSourceManagementSetsCreateButton"
-                        iconType="plusInCircle"
-                        onClick={() => setCreateDatasetFlyoutOpen(true)}
-                      >
-                        {i18n.translate('dataSourceManagement.dataSetsAddButtonLabel', {
-                          defaultMessage: 'Add',
-                        })}
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="primary"
-                        display="fill"
-                        iconType="refresh"
-                        aria-label={i18n.translate(
-                          'dataSourceManagement.dataSetsRefreshButtonAriaLabel',
-                          {
-                            defaultMessage: 'Refresh data sets',
-                          }
-                        )}
-                        data-test-subj="dataSourceManagementSetsRefreshButton"
-                        onClick={() => {
-                          void (async () => {
-                            try {
-                              setDataSetItems(await dataSetsClient.get());
-                            } catch {
-                              setDataSetItems([]);
-                            }
-                          })();
-                        }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="dataSourceManagementSetsCreateButton"
+                    iconType="plusInCircle"
+                    onClick={() => setCreateDatasetFlyoutOpen(true)}
+                  >
+                    {i18n.translate('dataSourceManagement.dataSetsAddButtonLabel', {
+                      defaultMessage: 'Add',
+                    })}
+                  </EuiButton>
                 ),
               }}
               rowHeader="name"
@@ -377,7 +326,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         ),
       },
     ],
-    [columns, dataClient, dataSetColumns, dataSetItems, dataSetsClient, items, selectedItems]
+    [columns, dataClient, dataSetColumns, dataSetItems, items, selectedItems]
   );
 
   return (
