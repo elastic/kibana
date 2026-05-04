@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { useServiceMapSearchHighlight } from '../../shared/service_map/service_map_search_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
@@ -46,6 +47,14 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
 jest.mock('./use_service_map_alerts_tab_href', () => ({
   useServiceMapAlertsTabHref: jest.fn(() => '/app/apm/services/Test%20Service/alerts'),
   useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
+}));
+
+jest.mock('../../shared/service_map/service_map_search_context', () => ({
+  ...jest.requireActual('../../shared/service_map/service_map_search_context'),
+  useServiceMapSearchHighlight: jest.fn(() => ({
+    isSearchMatch: false,
+    isActiveSearchMatch: false,
+  })),
 }));
 
 // Mock getServiceHealthStatusColor
@@ -229,6 +238,49 @@ describe('ServiceNode', () => {
       renderServiceNode(createServiceNodeData({ alertsCount: 2 }));
       fireEvent.click(screen.getByTestId('serviceMapNodeAlertsBadge'));
       expect(navigateCb).toHaveBeenCalled();
+    });
+  });
+
+  describe('search highlight', () => {
+    const getSearchHighlightWrapper = () => {
+      const node = screen.getByTestId('serviceMapNode-service-test-service');
+      return node.closest('[data-search-match]') ?? node.parentElement;
+    };
+
+    afterEach(() => {
+      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+        isSearchMatch: false,
+        isActiveSearchMatch: false,
+      });
+    });
+
+    it('does not set search data attributes when there is no search match', () => {
+      renderServiceNode();
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).not.toHaveAttribute('data-search-match');
+      expect(wrapper).not.toHaveAttribute('data-search-active-match');
+    });
+
+    it('sets data-search-match when the node is an inactive search match', () => {
+      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+        isSearchMatch: true,
+        isActiveSearchMatch: false,
+      });
+      renderServiceNode();
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).toHaveAttribute('data-search-match', 'true');
+      expect(wrapper).not.toHaveAttribute('data-search-active-match');
+    });
+
+    it('sets both data attributes when the node is the active search match', () => {
+      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+        isSearchMatch: true,
+        isActiveSearchMatch: true,
+      });
+      renderServiceNode();
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).toHaveAttribute('data-search-match', 'true');
+      expect(wrapper).toHaveAttribute('data-search-active-match', 'true');
     });
   });
 });
