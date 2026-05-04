@@ -40,19 +40,18 @@ export const resolveCpsData = async (
       })
       .catch(() => undefined);
 
-    return {
-      resolvedExpression,
-      linkedProjects: tagsResponse?.linked_projects
-        ? Object.values(tagsResponse.linked_projects).map(
-            ({ _id, _alias, _type, _organisation }) => ({
-              id: _id,
-              alias: _alias,
-              type: _type,
-              organization: _organisation,
-            })
-          )
-        : [],
-    };
+    const linkedProjects = tagsResponse?.linked_projects
+      ? Object.values(tagsResponse.linked_projects).map(
+          ({ _id, _alias, _type, _organisation }) => ({
+            id: _id,
+            alias: _alias,
+            type: _type,
+            organization: _organisation,
+          })
+        )
+      : [];
+
+    return { resolvedExpression, linkedProjects };
   } catch (e) {
     logger.warn(`Failed to resolve CPS data: ${e instanceof Error ? e.message : String(e)}`);
     return { linkedProjects: [] };
