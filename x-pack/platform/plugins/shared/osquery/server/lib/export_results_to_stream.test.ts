@@ -102,6 +102,7 @@ describe('exportResultsToStream', () => {
         {
           index: 'logs-osquery_manager.result-default',
           keep_alive: '5m',
+          ignore_unavailable: true,
         },
         { signal: expect.any(AbortSignal) }
       );
@@ -1204,6 +1205,69 @@ describe('exportResultsToStream', () => {
 
       expect(result.destroyed).toBe(true);
       expect(logger.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('PIT tolerance flags', () => {
+    it('returns a stream (not an error) when openPointInTime resolves normally and search returns 0 hits', async () => {
+      // Simulates a namespace that exists but has no documents (empty namespace).
+      // openPointInTime must pass allow_no_indices/ignore_unavailable so ES does not
+      // reject the PIT open with a 404 when the index pattern resolves to nothing.
+      (esClient.openPointInTime as jest.Mock).mockResolvedValueOnce({ id: 'empty-ns-pit' });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'logs-osquery_manager.result-empty-namespace',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata,
+        aborted$,
+        logger,
+      });
+
+      // Must be a stream, not an error object
+      expect('statusCode' in result).toBe(false);
+
+      const output = await collectStream(result as NodeJS.ReadableStream);
+      // NDJSON mock formatter emits _meta line on opening; stream is non-empty
+      expect(output).toContain('_meta');
+
+      // PIT must have been opened with the tolerance flag
+      expect(esClient.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ignore_unavailable: true,
+        }),
+        expect.anything()
+      );
+    });
+
+    it('passes ignore_unavailable to openPointInTime for CSV format', async () => {
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'logs-osquery_manager.result-*',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata: { ...metadata, format: 'csv' },
+        aborted$,
+        logger,
+      });
+
+      expect('statusCode' in result).toBe(false);
+      await collectStream(result as NodeJS.ReadableStream);
+
+      expect(esClient.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ignore_unavailable: true,
+        }),
+        expect.anything()
+      );
     });
   });
 

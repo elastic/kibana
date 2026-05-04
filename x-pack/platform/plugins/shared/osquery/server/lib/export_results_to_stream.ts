@@ -128,10 +128,13 @@ export async function exportResultsToStream({
   };
 
   try {
+    // ignore_unavailable mirrors query.all_results.dsl.ts so that empty or
+    // unresolved namespaces yield an empty export instead of a 500.
     const pitResponse = await esClient.openPointInTime(
       {
         index,
         keep_alive: '5m',
+        ignore_unavailable: true,
       },
       { signal: abortController.signal }
     );
