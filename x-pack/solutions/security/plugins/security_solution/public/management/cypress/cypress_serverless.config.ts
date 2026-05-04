@@ -16,5 +16,10 @@ export default defineCypressConfig(
 
       grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     },
+    e2e: {
+      // TEMP: narrow flaky-test-runner to the spec we are stabilizing — revert before merge.
+      specPattern:
+        'public/management/cypress/e2e/automated_response_actions/automated_response_actions.cy.ts',
+    },
   })
 );
