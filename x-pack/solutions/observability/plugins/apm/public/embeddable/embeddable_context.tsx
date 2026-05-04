@@ -29,6 +29,12 @@ export interface ApmEmbeddableContextProps {
   kuery?: string;
 }
 
+function buildHistoryEntry(rangeFrom: string, rangeTo: string, kuery: string) {
+  return `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
+    kuery
+  )}&comparisonEnabled=false`;
+}
+
 /** Providers for dashboard/flyout embeddables. Uses `I18nProvider` for react-intl but omits Core `i18n.Context` (`EuiContext`) and `KibanaThemeProvider` so the DOM stays shallow for flyout flex layout; theme/CSS still comes from the host `KibanaRenderContextProvider`. */
 export function ApmEmbeddableContext({
   rangeFrom = 'now-15m',
@@ -46,20 +52,12 @@ export function ApmEmbeddableContext({
   const history = useRef<MemoryHistory | null>(null);
   if (history.current === null) {
     history.current = createMemoryHistory({
-      initialEntries: [
-        `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
-          kuery
-        )}&comparisonEnabled=false`,
-      ],
+      initialEntries: [buildHistoryEntry(rangeFrom, rangeTo, kuery)],
     });
   }
 
   useEffect(() => {
-    history.current?.replace(
-      `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
-        kuery
-      )}&comparisonEnabled=false`
-    );
+    history.current?.replace(buildHistoryEntry(rangeFrom, rangeTo, kuery));
   }, [history, rangeFrom, rangeTo, kuery]);
 
   const services = {
