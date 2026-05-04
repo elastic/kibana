@@ -1569,9 +1569,344 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getEmitterWorkflowExecutionIdFromRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "getEmitterWorkflowExecutionIdFromRequest",
+        "description": [
+          "Workflow execution id for chain context recovery on HTTP emit paths."
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>) => string | undefined"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getEmitterWorkflowExecutionIdFromRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getEventChainContext",
+        "type": "Function",
+        "tags": [],
+        "label": "getEventChainContext",
+        "description": [
+          "\nReturns the event-chain context for the request.\n\nTwo trusted paths:\n 1. In-process (fakeRequest): the execution engine called setWorkflowEventChainContext before\n    any step runs, so the Symbol is present and takes precedence.\n 2. Inbound HTTP from kibana.request step: no Symbol exists, but the step marks its outbound\n    call with x-elastic-internal-origin so request.isInternalApiRequest is true. Only then are\n    the event-chain headers parsed.\n\nNote: isInternalApiRequest is derived from the presence of the x-elastic-internal-origin request\nheader (see KibanaRequest constructor). It is not enforced at the network layer, so a\nsufficiently informed external caller could set it. This gate stops naive spoofing but should\nnot be treated as a hard trust boundary."
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>) => ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.EventChainContext",
+            "text": "EventChainContext"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 178,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getEventChainContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 193,
+            "columnNumber": 38,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getEventChainDepthFromHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "getEventChainDepthFromHeaders",
+        "description": [],
+        "signature": [
+          "(headers: ",
+          "Headers",
+          ") => number | undefined"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 161,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getEventChainDepthFromHeaders.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              "Headers"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getOutboundEventChainHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "getOutboundEventChainHeaders",
+        "description": [
+          "\nReturns headers that should be added to outbound HTTP requests to Kibana\nwhen the request is made from a workflow step (e.g. kibana.request).\nEnables the server to restore event-chain context and enforce depth limits.\n"
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, emitterWorkflowExecutionId: string | undefined) => Record<string, string>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 230,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getOutboundEventChainHeaders.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 238,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getOutboundEventChainHeaders.$2",
+            "type": "string",
+            "tags": [],
+            "label": "emitterWorkflowExecutionId",
+            "description": [
+              "- Current workflow run id for routes that load chain state from ES."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.setWorkflowEventChainContext",
+        "type": "Function",
+        "tags": [],
+        "label": "setWorkflowEventChainContext",
+        "description": [
+          "\nSets the event-chain context on the request. Called by the execution engine\nat the start of a workflow run so that any emitEvent call using this request\n(e.g. in-process with the fakeRequest) will have the correct depth and sourceExecutionId."
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, context: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.EventChainContext",
+            "text": "EventChainContext"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 218,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.setWorkflowEventChainContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.setWorkflowEventChainContext.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.EventChainContext",
+                "text": "EventChainContext"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "EventChainContext",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EventChainContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventChainContext",
+        "description": [
+          "\nContext attached to the request when a workflow runs, so that when code\nin that workflow emits an event (e.g. via emitEvent), we can infer the\nevent-chain depth and enforce a cap to prevent infinite loops.\nDepth is incremented for every step in the chain (any workflow); the trigger\nevent handler caps scheduling when depth exceeds the configured max.\n\n`depth` may be `-1` when the execution has no persisted chain depth yet."
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.EventChainContext.depth",
+            "type": "number",
+            "tags": [],
+            "label": "depth",
+            "description": [],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.EventChainContext.visitedWorkflowIds",
+            "type": "Array",
+            "tags": [],
+            "label": "visitedWorkflowIds",
+            "description": [
+              "Workflow ids that already ran earlier in this event chain (cycle guard)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.EventChainContext.sourceExecutionId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceExecutionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "workflowsExtensions",
         "id": "def-server.ServerStepDefinition",
@@ -2057,6 +2392,82 @@
     "misc": [
       {
         "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_DEPTH_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_DEPTH_HEADER",
+        "description": [
+          "\nHTTP header name used when a workflow step (e.g. kibana.request) makes an outbound request\nto Kibana. The execution engine sets this to the current event-chain depth so the server\ncan restore context on the incoming request and enforce the event-chain depth cap."
+        ],
+        "signature": [
+          "\"x-kibana-event-chain-depth\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER",
+        "description": [
+          "\nWorkflow execution id of the run that issued an outbound kibana.request so emit routes can\nload chain state from the persisted execution when headers are incomplete."
+        ],
+        "signature": [
+          "\"x-kibana-workflow-execution-id\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_SOURCE_EXECUTION_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_SOURCE_EXECUTION_HEADER",
+        "description": [
+          "\nHTTP header for the workflow execution id associated with the current chain hop. Set on outbound\nrequests so the server can restore `sourceExecutionId` on the incoming request."
+        ],
+        "signature": [
+          "\"x-kibana-event-chain-source-execution-id\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER",
+        "description": [
+          "\nBase64url JSON array of visited workflow ids (bounded length) for HTTP emit recovery."
+        ],
+        "signature": [
+          "\"x-kibana-event-chain-visited-workflows\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
         "id": "def-server.OnCancelHandler",
         "type": "Type",
         "tags": [],
@@ -2203,6 +2614,32 @@
       },
       {
         "parentPluginId": "workflowsExtensions",
+        "id": "def-server.WORKFLOW_EVENT_CHAIN_CONTEXT",
+        "type": "Uncategorized",
+        "tags": [],
+        "label": "WORKFLOW_EVENT_CHAIN_CONTEXT",
+        "description": [
+          "\nSymbol used to attach event-chain context to a KibanaRequest."
+        ],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.WORKFLOW_EVENT_CHAIN_CONTEXT",
+            "text": "WORKFLOW_EVENT_CHAIN_CONTEXT"
+          }
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
         "id": "def-server.WORKFLOW_EXECUTION_FAILED_TRIGGER_ID",
         "type": "string",
         "tags": [],
@@ -2231,6 +2668,43 @@
         "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
         "lineNumber": 134,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.WorkflowsExtensionsRequestHandlerContext",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowsExtensionsRequestHandlerContext",
+        "description": [],
+        "signature": [
+          "RequestHandlerContext",
+          " & { workflows: Promise<",
+          "WorkflowsClient",
+          ">; }"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "type": "string",
+        "tags": [],
+        "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "description": [],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

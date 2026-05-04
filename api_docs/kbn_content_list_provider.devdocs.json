@@ -524,6 +524,124 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.derivePhase",
+        "type": "Function",
+        "tags": [],
+        "label": "derivePhase",
+        "description": [
+          "\nPure derivation of the render phase from Content List state.\n\nExported separately from the hook for straightforward unit testing and\nfor reuse in tests that want to assert phase behavior without a React\ntree.\n\nPrecedence (earliest match wins):\n1. `isLoading` → `'initialLoad'`.\n2. `hasNoItems` → `'empty'`.\n3. `hasNoResults` → `'filtered'`.\n4. `isFetching && hasActiveQuery` → `'filtering'`.\n5. Otherwise → `'populated'`.\n\n`hasNoItems` and `hasNoResults` are derived from the latest **settled**\nquery data and held stable during background refetches (`keepPreviousData`),\nso they do not reset on every in-flight fetch. The `'filtering'` branch is\ntherefore reachable when the user has applied a filter/search and the\nupdated results have not yet resolved — the previous data is still showing\nand neither empty-state condition applies to it."
+        ],
+        "signature": [
+          "(input: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DerivePhaseInput",
+            "text": "DerivePhaseInput"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListPhase",
+            "text": "ContentListPhase"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.derivePhase.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DerivePhaseInput",
+                "text": "DerivePhaseInput"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 56,
+            "columnNumber": 29,
+            "deprecated": false,
+            "docsReferencedTypeName": "DerivePhaseInput",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.derivePhaseFromState",
+        "type": "Function",
+        "tags": [],
+        "label": "derivePhaseFromState",
+        "description": [
+          "\nConvenience adapter: derive a phase directly from a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListState",
+            "text": "ContentListState"
+          },
+          "."
+        ],
+        "signature": [
+          "(state: ",
+          "ContentListState",
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListPhase",
+            "text": "ContentListPhase"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+        "lineNumber": 75,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.derivePhaseFromState.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "ContentListState"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 75,
+            "columnNumber": 38,
+            "deprecated": false,
+            "docsReferencedTypeName": "ContentListState",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
         "id": "def-public.getCreatorKey",
         "type": "Function",
         "tags": [],
@@ -1136,16 +1254,16 @@
             "section": "def-public.ContentListItem",
             "text": "ContentListItem"
           },
-          "<Record<string, unknown>>[]; totalItems: number; isLoading: boolean; isFetching: boolean; error: Error | undefined; refetch: () => Promise<void>; }"
+          "<Record<string, unknown>>[]; totalItems: number; isLoading: boolean; isFetching: boolean; error: Error | undefined; hasNoItems: boolean; hasNoResults: boolean; hasActiveQuery: boolean; refetch: () => Promise<void>; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/use_content_list_items.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
         "returnComment": [
-          "Object containing items, totalItems, isLoading, isFetching, error, and refetch."
+          "Object containing items, totalItems, isLoading, isFetching, error,\nhasNoItems, hasNoResults, hasActiveQuery, and refetch."
         ],
         "initialIsOpen": false
       },
@@ -1178,6 +1296,38 @@
         "children": [],
         "returnComment": [
           "Object containing pagination state and control functions."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useContentListPhase",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useContentListPhase",
+        "description": [
+          "\nHook to access the current render phase of the Content List.\n\nUse this to decide what a section renders without chaining multiple\n`isLoading` / `isFetching` / `hasNoItems` / `hasNoResults` checks.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListPhase",
+            "text": "ContentListPhase"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "The current phase; one of\n`'initialLoad' | 'empty' | 'filtering' | 'filtered' | 'populated'`."
         ],
         "initialIsOpen": false
       },
@@ -1563,6 +1713,111 @@
         "returnComment": [
           "A toggle callback `(id, type?) => void`."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsEmpty",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsEmpty",
+        "description": [
+          "\n`true` when the content type has zero objects and no filter is active.\nMost sections return `null` in this phase so the empty state can take\nover the region."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsFiltered",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsFiltered",
+        "description": [
+          "\n`true` when a filter or search is active and returned zero matches. The\ntable renders its built-in \"no items message\"; footer hides; toolbar\nstays visible."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsFiltering",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsFiltering",
+        "description": [
+          "\n`true` when a filter or search is active and a fetch is currently in\nflight. Toolbar typically shows a subtle loading indicator; the table\nkeeps stale rows and passes `loading` to its `EuiBasicTable`."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsInitialLoad",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsInitialLoad",
+        "description": [
+          "\n`true` when no fetch has completed yet. Sections typically render a\nskeleton in this phase."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsPopulated",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsPopulated",
+        "description": [
+          "\n`true` when items are loaded and the list is in its normal state."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2544,6 +2799,83 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListQueryData.hasNoItems",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoItems",
+            "description": [
+              "\n`true` when the content type has no objects in Elasticsearch and no query\nis active. Use this to render a full-page CTA prompt (\"Create your first\n{entity}\"). Mutually exclusive with ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.hasNoResults",
+                "text": "hasNoResults"
+              },
+              ".\n\nDerived from the latest **settled** query data and held stable during\nbackground refetches (`keepPreviousData`). It does not reset to `false`\non every in-flight fetch — only when the newly resolved result contains\nitems or an active query is detected."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListQueryData.hasNoResults",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoResults",
+            "description": [
+              "\n`true` when a search or filter is active and returned zero hits. Use this\nto render a \"no matching results\" message inside the table. Mutually\nexclusive with ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.hasNoItems",
+                "text": "hasNoItems"
+              },
+              ".\n\nLike ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.hasNoItems",
+                "text": "hasNoItems"
+              },
+              ", this is derived from settled data and held stable\nduring background refetches. It transitions to `false` only when the\nresolved result contains hits or the query is cleared."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListQueryData.hasActiveQuery",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasActiveQuery",
+            "description": [
+              "\n`true` when at least one search term, flag, or field filter is active.\n\nDerived from the parsed `activeFilters` rather than `queryText` so it is\nnot confused by whitespace or formatting variations. Drives the\n`'filtering'` branch in ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.derivePhase",
+                "text": "derivePhase"
+              },
+              "."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3368,6 +3700,107 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DerivePhaseInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "DerivePhaseInput",
+        "description": [
+          "\nInputs used to derive the render phase. A subset of ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListState",
+            "text": "ContentListState"
+          },
+          "\nso this function can be tested without constructing a full state object."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [
+              "`true` only on the first fetch before any data has been received."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.isFetching",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFetching",
+            "description": [
+              "`true` during any fetch, including background refetches."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.hasNoItems",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoItems",
+            "description": [
+              "`true` when the content type has zero objects and no query is active."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.hasNoResults",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoResults",
+            "description": [
+              "`true` when a search or filter is active and returned zero hits."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.hasActiveQuery",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasActiveQuery",
+            "description": [
+              "\n`true` when at least one search term, flag, or field filter is active.\n\nComputed once from the parsed `activeFilters` so phase derivation does\nnot have to re-interpret raw `queryText`."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5597,6 +6030,25 @@
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
         "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListPhase",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentListPhase",
+        "description": [
+          "\nMutually-exclusive render phase for a Content List.\n\nEvery Content List is in exactly one phase at a time. Sections (toolbar,\ntable, footer, custom children) branch on the phase to decide what to\nrender: skeletons during `'initialLoad'`, `null` during `'empty'`, normal\nUI during `'populated'`, and nuanced in-flight / no-match variants during\n`'filtering'` / `'filtered'`.\n\nPhase transitions:\n- `'initialLoad'` → `'empty' | 'filtered' | 'populated'` (first fetch completes).\n- `'populated'` ↔ `'filtering'` (user applies a filter/search).\n- `'filtering'` → `'filtered' | 'populated'` (filtered fetch completes).\n- `'filtered'` → `'filtering' | 'populated' | 'empty'` (filter changes or\n  is cleared).\n\nA refetch that does not involve a filter change stays in the current\nphase; it does NOT re-enter `'initialLoad'`."
+        ],
+        "signature": [
+          "\"empty\" | \"initialLoad\" | \"filtering\" | \"filtered\" | \"populated\""
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/types.ts",
+        "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
