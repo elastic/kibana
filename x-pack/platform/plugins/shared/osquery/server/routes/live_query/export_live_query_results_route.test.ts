@@ -241,7 +241,9 @@ describe('exportLiveQueryResultsRoute', () => {
     await registeredHandler(context, request, response);
 
     expect(response.notFound).toHaveBeenCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ message: 'Live query action not found' }) })
+      expect.objectContaining({
+        body: expect.objectContaining({ message: 'Live query action not found' }),
+      })
     );
     expect(mockHandler).not.toHaveBeenCalled();
   });
