@@ -20,7 +20,7 @@ import {
   HeaderTopBanner,
   ChromelessHeader,
   AppMenuBar,
-  ChromeAppHeader,
+  ChromeAppHeaderRenderer,
   Sidebar,
   useHasAppMenu,
   useHasInlineAppHeader,
@@ -106,12 +106,12 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
   const layoutConfigKey =
     chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
 
-  const hasFallbackContent = useHasChromeAppHeaderContent();
-  const needsFallbackBar = nextChrome && !hasInlineAppHeader && hasFallbackContent;
+  const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
+  const needsChromeAppHeader = nextChrome && !hasInlineAppHeader && hasChromeAppHeaderContent;
 
   const layoutConfig: ChromeLayoutConfig = {
     ...layoutConfigs[layoutConfigKey],
-    ...(needsFallbackBar && { applicationTopBarHeight: APPLICATION_TOP_BAR_MIN_HEIGHT_PX }),
+    ...(needsChromeAppHeader && { applicationTopBarHeight: APPLICATION_TOP_BAR_MIN_HEIGHT_PX }),
     sidebarWidth,
     navigationWidth,
   };
@@ -133,7 +133,7 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
       ...base,
       header: <GlobalHeader />,
       navigation: <GridLayoutProjectSideNav />,
-      applicationTopBar: needsFallbackBar ? <ChromeAppHeader /> : undefined,
+      applicationTopBar: needsChromeAppHeader ? <ChromeAppHeaderRenderer /> : undefined,
     };
   }
 

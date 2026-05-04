@@ -8,4 +8,4 @@
  */
 
 export { ProjectHeader } from './header';
-export { ChromeAppHeader, useHasChromeAppHeaderContent } from './chrome_app_header';
+export { ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './chrome_app_header';

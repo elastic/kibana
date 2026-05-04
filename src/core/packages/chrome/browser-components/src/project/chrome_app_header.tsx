@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import type { AppHeaderBack } from '@kbn/app-header';
@@ -64,16 +64,51 @@ function useFallbackProps(): FallbackProps {
   }, [breadcrumbs, appMenu, hasLegacyActionMenu]);
 }
 
-export function useHasChromeAppHeaderContent(): boolean {
-  return useFallbackProps().hasContent;
+function useAppHeaderConfig(): AppHeaderConfig | undefined {
+  const chrome = useChromeService();
+  const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  return useObservable(config$, undefined);
 }
 
-export const ChromeAppHeader = React.memo(() => {
-  const { hasContent, back, menu } = useFallbackProps();
+function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boolean {
+  if (!config) return false;
+  return (
+    config.title !== undefined ||
+    config.back !== undefined ||
+    !!config.tabs?.length ||
+    !!config.badges?.length ||
+    config.menu !== undefined ||
+    config.onShare !== undefined ||
+    config.favorite !== undefined
+  );
+}
 
+export function useHasChromeAppHeaderContent(): boolean {
+  const config = useAppHeaderConfig();
+  const fallback = useFallbackProps();
+  return hasExplicitAppHeaderContent(config) || fallback.hasContent;
+}
+
+export const ChromeAppHeaderRenderer = React.memo(() => {
+  const config = useAppHeaderConfig();
+  const fallback = useFallbackProps();
+
+  const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
   if (!hasContent) return null;
 
-  return <AppHeaderView back={back} menu={menu} sticky={false} padding="m" />;
+  return (
+    <AppHeaderView
+      title={config?.title}
+      back={config?.back ?? fallback.back}
+      tabs={config?.tabs}
+      badges={config?.badges}
+      menu={config?.menu ?? fallback.menu}
+      onShare={config?.onShare}
+      favorite={config?.favorite}
+      sticky={false}
+      padding="m"
+    />
+  );
 });
 
-ChromeAppHeader.displayName = 'ChromeAppHeader';
+ChromeAppHeaderRenderer.displayName = 'ChromeAppHeaderRenderer';
