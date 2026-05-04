@@ -47,7 +47,7 @@ describe('shouldIdentifyFeatures', () => {
 
     expect(featureClient.getFeatures).toHaveBeenCalledWith(streamName, {
       type: [...INFERRED_FEATURE_TYPES],
-      limit: expect.any(Number),
+      limit: 1,
       sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
     });
   });

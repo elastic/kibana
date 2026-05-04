@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/streams-schema/src/feature';
+import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
 import {
   createGetFeatureQueryFromToolArgs,
   createGetFeatureTypesFromToolArgs,
