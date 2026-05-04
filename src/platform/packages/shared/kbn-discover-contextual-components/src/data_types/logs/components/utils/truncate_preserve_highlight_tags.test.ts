@@ -46,7 +46,7 @@ describe('truncateAndPreserveHighlightTags', () => {
 
     describe('and text is longer than or equal to maxLength', () => {
       it('should truncate and strip the array spans', () => {
-        expect(truncateAndPreserveHighlightTags(ARRAY_LONG, MAX_LENGTH)).toBe('[elast...beat]');
+        expect(truncateAndPreserveHighlightTags(ARRAY_LONG, MAX_LENGTH)).toBe('[elas...beat]');
       });
     });
   });
