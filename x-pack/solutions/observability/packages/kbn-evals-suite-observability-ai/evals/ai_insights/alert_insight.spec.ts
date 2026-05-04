@@ -26,7 +26,8 @@ for (const scenario of scenarios) {
 
 function createScenarioTest(scenario: AlertScenario) {
   const scenarioLabel = `Alert AI Insights - ${scenario.id} (${scenario.snapshotName})`;
-  const isTransactionDurationRule = scenario.alertRule.ruleParams.rule_type_id === 'apm.transaction_duration';
+  const isTransactionDurationRule =
+    scenario.alertRule.ruleParams.rule_type_id === 'apm.transaction_duration';
 
   evaluate.describe(scenarioLabel, { tag: tags.serverless.observability.complete }, () => {
     let ruleId: string;
