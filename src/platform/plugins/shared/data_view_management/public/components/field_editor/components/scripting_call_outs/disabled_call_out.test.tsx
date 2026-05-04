@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-
 import { ScriptingDisabledCallOut } from './disabled_call_out';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
