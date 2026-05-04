@@ -46,6 +46,7 @@
             "lineNumber": 14,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "MappingTypeMapping",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -87,6 +88,7 @@
             "lineNumber": 14,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "EsqlResponse",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1230,6 +1232,7 @@
             "lineNumber": 24,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "MappingTypeMapping",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1277,6 +1280,7 @@
             "lineNumber": 94,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "GenerateEsqlParams",
             "trackAdoption": false,
             "isRequired": true
           }

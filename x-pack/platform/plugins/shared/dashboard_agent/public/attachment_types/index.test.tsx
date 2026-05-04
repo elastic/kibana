@@ -9,7 +9,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';

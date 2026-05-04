@@ -95,6 +95,7 @@
                 "lineNumber": 58,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -118,6 +119,7 @@
                 "lineNumber": 59,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientDetails",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -141,6 +143,7 @@
                 "lineNumber": 60,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "McpClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -291,6 +294,7 @@
                 "lineNumber": 189,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "CallToolParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1119,6 +1123,7 @@
             "lineNumber": 21,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestInit",
             "trackAdoption": false
           }
         ],

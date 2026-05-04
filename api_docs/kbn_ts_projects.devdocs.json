@@ -328,6 +328,7 @@
                 "lineNumber": 196,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -363,6 +364,7 @@
                 "lineNumber": 198,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProjectOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }

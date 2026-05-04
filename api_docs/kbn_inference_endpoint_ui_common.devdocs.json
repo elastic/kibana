@@ -109,6 +109,7 @@
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -212,6 +213,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -229,6 +231,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IToasts",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -305,6 +308,7 @@
             "lineNumber": 22,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -322,6 +326,7 @@
             "lineNumber": 22,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "IToasts",
             "trackAdoption": false,
             "isRequired": true
           }

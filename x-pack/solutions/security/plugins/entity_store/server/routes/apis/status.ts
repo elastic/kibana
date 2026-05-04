@@ -20,11 +20,14 @@ import { ENTITY_STORE_STATUS } from '../../domain/constants';
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
-type LogExtractionStateForV1 = Omit<
-  LogExtractionConfig,
-  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
->;
-interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
+interface LegacyEngineDescriptorV1 {
+  filter: '';
+  delay: string;
+  timeout: string;
+  frequency: string;
+  lookbackPeriod: string;
+  fieldHistoryLength: number;
+  maxLogsPerPage: number;
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
@@ -56,13 +59,13 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
+  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, maxLogsPerPage } =
     logsExtractionConfig;
 
   return {
     ...rest,
     // TODO: Remove the legacy fields once we stop supporting V1.
-    filter,
+    filter: '',
     delay,
     timeout,
     frequency,

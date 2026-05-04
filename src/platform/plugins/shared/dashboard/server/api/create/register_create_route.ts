@@ -69,6 +69,7 @@ export function registerCreateRoute(
             ctx,
             getCachedDashboardStateSchema(),
             req.body,
+            req.serverTiming,
             isDashboardAppRequest
           );
           try {

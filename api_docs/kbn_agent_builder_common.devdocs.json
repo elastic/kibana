@@ -331,7 +331,23 @@
         "tags": [],
         "label": "collectReferencedContentRefineIssues",
         "description": [
-          "\nPure validation for referenced_content items beyond per-field Zod checks.\nUsed by {@link skillCreateRequestSchema} / {@link skillUpdateRequestSchema} and the Agent Builder skill form."
+          "\nPure validation for referenced_content items beyond per-field Zod checks.\nUsed by ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.skillCreateRequestSchema",
+            "text": "skillCreateRequestSchema"
+          },
+          " / ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.skillUpdateRequestSchema",
+            "text": "skillUpdateRequestSchema"
+          },
+          " and the Agent Builder skill form."
         ],
         "signature": [
           "(items: readonly { name: string; relativePath: string; }[]) => ",
@@ -364,6 +380,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReadonlyArray",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -431,6 +448,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderErrorCode",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -465,6 +483,7 @@
             "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -613,6 +632,7 @@
             "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -783,6 +803,7 @@
             "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HookLifecycle",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -823,6 +844,7 @@
             "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HookExecutionMode",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -840,6 +862,7 @@
             "lineNumber": 362,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -901,6 +924,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1049,6 +1073,7 @@
             "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1512,6 +1537,7 @@
             "lineNumber": 225,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VersionedAttachment",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1865,7 +1891,14 @@
         "tags": [],
         "label": "isAgentExecutionError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderInternalError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderInternalError",
+            "text": "AgentBuilderInternalError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -1920,7 +1953,14 @@
         "tags": [],
         "label": "isAgentNotFoundError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderInternalError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderInternalError",
+            "text": "AgentBuilderInternalError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -2108,6 +2148,7 @@
             "lineNumber": 350,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2166,6 +2207,7 @@
             "lineNumber": 206,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConversationRoundStep",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2180,7 +2222,14 @@
         "tags": [],
         "label": "isBadRequestError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderInternalError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderInternalError",
+            "text": "AgentBuilderInternalError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -2271,6 +2320,7 @@
             "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2285,7 +2335,22 @@
         "tags": [],
         "label": "isByIdsToolSelection",
         "description": [
-          "\nCheck if a given {@link ToolSelection} is a {@link ByIdsToolSelection}"
+          "\nCheck if a given ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolSelection",
+            "text": "ToolSelection"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ByIdsToolSelection",
+            "text": "ByIdsToolSelection"
+          }
         ],
         "signature": [
           "(toolSelection: ",
@@ -2331,6 +2396,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolSelection",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2390,6 +2456,7 @@
             "lineNumber": 335,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2449,6 +2516,7 @@
             "lineNumber": 315,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2507,6 +2575,7 @@
             "lineNumber": 196,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ConversationRoundStep",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2621,6 +2690,7 @@
             "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2635,7 +2705,14 @@
         "tags": [],
         "label": "isConversationNotFoundError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderConversationNotFoundError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderConversationNotFoundError",
+            "text": "AgentBuilderConversationNotFoundError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -2726,6 +2803,7 @@
             "lineNumber": 280,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2740,7 +2818,14 @@
         "tags": [],
         "label": "isHooksExecutionError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderHooksExecutionError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderHooksExecutionError",
+            "text": "AgentBuilderHooksExecutionError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -2825,7 +2910,14 @@
         "tags": [],
         "label": "isInternalError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderInternalError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderInternalError",
+            "text": "AgentBuilderInternalError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -2916,6 +3008,7 @@
             "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2975,6 +3068,7 @@
             "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2989,7 +3083,14 @@
         "tags": [],
         "label": "isPluginNotFoundError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderPluginNotFoundError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderPluginNotFoundError",
+            "text": "AgentBuilderPluginNotFoundError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -3074,6 +3175,7 @@
             "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3133,6 +3235,7 @@
             "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3191,6 +3294,7 @@
             "lineNumber": 173,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ConversationRoundStep",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3205,7 +3309,14 @@
         "tags": [],
         "label": "isRequestAbortedError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderRequestAbortedError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderRequestAbortedError",
+            "text": "AgentBuilderRequestAbortedError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -3372,6 +3483,7 @@
             "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3386,7 +3498,14 @@
         "tags": [],
         "label": "isSkillNotFoundError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderSkillNotFoundError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderSkillNotFoundError",
+            "text": "AgentBuilderSkillNotFoundError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -3477,6 +3596,7 @@
             "lineNumber": 221,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3536,6 +3656,7 @@
             "lineNumber": 56,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3594,6 +3715,7 @@
             "lineNumber": 146,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ConversationRoundStep",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3608,7 +3730,14 @@
         "tags": [],
         "label": "isToolNotFoundError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderToolNotFoundError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderToolNotFoundError",
+            "text": "AgentBuilderToolNotFoundError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -3699,6 +3828,7 @@
             "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3758,6 +3888,7 @@
             "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3818,6 +3949,7 @@
             "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderEvent",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3835,6 +3967,7 @@
             "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TEvent",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3849,7 +3982,14 @@
         "tags": [],
         "label": "isWorkflowAbortedError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderWorkflowAbortedError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderWorkflowAbortedError",
+            "text": "AgentBuilderWorkflowAbortedError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -3895,7 +4035,14 @@
         "tags": [],
         "label": "isWorkflowExecutionError",
         "description": [
-          "\nChecks if the given error is a {@link AgentBuilderWorkflowExecutionError}"
+          "\nChecks if the given error is a ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderWorkflowExecutionError",
+            "text": "AgentBuilderWorkflowExecutionError"
+          }
         ],
         "signature": [
           "(err: unknown) => err is ",
@@ -4025,6 +4172,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolSelectionRelevantFields",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4048,6 +4196,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolSelection",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -10382,6 +10531,20 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.EffortLevels",
+        "type": "Enum",
+        "tags": [],
+        "label": "EffortLevels",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/model_provider.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.EsqlToolFieldType",
         "type": "Enum",
         "tags": [],
@@ -11829,6 +11992,23 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.EffortLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "EffortLevel",
+        "description": [],
+        "signature": [
+          "\"high\" | \"medium\" | \"low\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/model_provider.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.ErrorResult",
         "type": "Type",
         "tags": [],
@@ -12222,7 +12402,15 @@
         "tags": [],
         "label": "PublicSkillSummary",
         "description": [
-          "\nLightweight version of {@link PublicSkillDefinition} used for listing.\nOmits heavy `content` and `referenced_content` fields; carries only the count."
+          "\nLightweight version of ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.PublicSkillDefinition",
+            "text": "PublicSkillDefinition"
+          },
+          " used for listing.\nOmits heavy `content` and `referenced_content` fields; carries only the count."
         ],
         "signature": [
           "Omit<",
@@ -13408,6 +13596,7 @@
                 "lineNumber": 73,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               }
             ]
@@ -13441,7 +13630,7 @@
                 "id": "def-common.AgentBuilderErrorUtils.createToolNotFoundError.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  toolId,\n  customMessage,\n  meta = {},\n}",
                 "description": [],
                 "signature": [
                   "{ toolId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
@@ -13483,7 +13672,7 @@
                 "id": "def-common.AgentBuilderErrorUtils.createSkillNotFoundError.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  skillId,\n  customMessage,\n  meta = {},\n}",
                 "description": [],
                 "signature": [
                   "{ skillId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
@@ -13525,7 +13714,7 @@
                 "id": "def-common.AgentBuilderErrorUtils.createAgentNotFoundError.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  agentId,\n  customMessage,\n  meta = {},\n}",
                 "description": [],
                 "signature": [
                   "{ agentId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
@@ -13567,7 +13756,7 @@
                 "id": "def-common.AgentBuilderErrorUtils.createConversationNotFoundError.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  conversationId,\n  customMessage,\n  meta = {},\n}",
                 "description": [],
                 "signature": [
                   "{ conversationId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
@@ -13609,7 +13798,7 @@
                 "id": "def-common.AgentBuilderErrorUtils.createPluginNotFoundError.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  pluginId,\n  customMessage,\n  meta = {},\n}",
                 "description": [],
                 "signature": [
                   "{ pluginId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
@@ -13794,6 +13983,7 @@
                 "lineNumber": 331,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrCode",
                 "trackAdoption": false
               },
               {
@@ -13810,6 +14000,7 @@
                 "lineNumber": 332,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionErrorMetaOf",
                 "trackAdoption": false
               }
             ]
@@ -13887,6 +14078,7 @@
                 "lineNumber": 359,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "HookLifecycle",
                 "trackAdoption": false
               },
               {
@@ -13922,6 +14114,7 @@
                 "lineNumber": 361,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "HookExecutionMode",
                 "trackAdoption": false
               },
               {
@@ -13938,6 +14131,7 @@
                 "lineNumber": 362,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               }
             ]
@@ -14504,7 +14698,9 @@
             "type": "string",
             "tags": [],
             "label": "[AgentVisibility.Public]",
-            "description": [],
+            "description": [
+              "Map from agent visibility to the icon used in the UI."
+            ],
             "signature": [
               "\"globe\""
             ],
@@ -14520,7 +14716,9 @@
             "type": "string",
             "tags": [],
             "label": "[AgentVisibility.Shared]",
-            "description": [],
+            "description": [
+              "Map from agent visibility to the icon used in the UI."
+            ],
             "signature": [
               "\"users\""
             ],
@@ -14536,7 +14734,9 @@
             "type": "string",
             "tags": [],
             "label": "[AgentVisibility.Private]",
-            "description": [],
+            "description": [
+              "Map from agent visibility to the icon used in the UI."
+            ],
             "signature": [
               "\"lock\""
             ],

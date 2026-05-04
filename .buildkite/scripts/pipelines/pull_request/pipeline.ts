@@ -71,7 +71,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    registerCancelKeys(['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']);
+    registerCancelKeys([
+      'pick_test_group_run_order',
+      'build_scout_tests',
+      'build_api_docs',
+      'verify_rspack_build',
+    ]);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
@@ -236,11 +241,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc')
+      process.env.GITHUB_PR_TARGET_BRANCH?.match(/^main$/) &&
+      (GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
+        GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc'))
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', cancelable)
@@ -671,6 +677,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
+      );
     }
 
     // post_build is not cancelable — cleanup/reporting should always run
