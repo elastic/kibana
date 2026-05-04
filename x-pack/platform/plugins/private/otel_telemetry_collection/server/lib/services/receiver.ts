@@ -289,7 +289,7 @@ export class OtelTelemetryReceiver {
                   terms: { field: 'scope.name', size: SCOPE_NAMES_AGG_SIZE },
                 },
                 upstream_cluster: {
-                  terms: { field: 'attributes.upstream.cluster', size: TERMS_AGG_SIZE },
+                  terms: { field: 'resource.attributes.upstream.cluster', size: TERMS_AGG_SIZE },
                 },
               },
             },
