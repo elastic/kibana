@@ -15,7 +15,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseTestConfig.getAll(),
     kbnTestServer: {
       ...kbnTestServer,
-      serverArgs: [...kbnTestServer.serverArgs, '--xpack.reporting.csv.scroll.duration=10m'],
+      serverArgs: [
+        ...kbnTestServer.serverArgs,
+        '--xpack.reporting.csv.scroll.duration=10m',
+        '--xpack.reporting.queue.timeout=600000',
+        '--elasticsearch.requestTimeout=600000',
+      ],
     },
     testFiles: [require.resolve('../../test_suites/discover/x_pack_reporting')],
     junit: {
