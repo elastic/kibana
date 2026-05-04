@@ -142,14 +142,6 @@ const renderTable = ({
     />
   );
 
-const getRowByText = (text: string) => {
-  const row = screen.getByText(text).closest('tr');
-
-  if (!row) throw new Error(`Unable to find row for ${text}`);
-
-  return row;
-};
-
 describe('Table', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
