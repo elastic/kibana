@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export { attachmentTypeInstructions } from './attachments';
-export { formatDate } from './helpers';
-export { customInstructionsBlock } from './custom_instructions';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+
+export const config = {
+  schema: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+};
