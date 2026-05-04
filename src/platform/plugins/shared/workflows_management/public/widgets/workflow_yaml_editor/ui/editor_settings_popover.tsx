@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
@@ -26,6 +27,7 @@ interface EditorSettingsPopoverProps {
 }
 
 export function EditorSettingsPopover({ editorRef }: EditorSettingsPopoverProps) {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showIndentGuides, setShowIndentGuides] = useState(true);
   const [showWhitespace, setShowWhitespace] = useState(false);
@@ -62,7 +64,7 @@ export function EditorSettingsPopover({ editorRef }: EditorSettingsPopoverProps)
 
   return (
     <EuiPopover
-      css={{ marginLeft: '8px' }}
+      css={{ marginLeft: euiTheme.size.xs }}
       data-test-subj="workflowYamlEditorSettingsPopover"
       aria-labelledby={popoverTitleId}
       isOpen={isOpen}
@@ -88,7 +90,7 @@ export function EditorSettingsPopover({ editorRef }: EditorSettingsPopoverProps)
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
-        css={{ padding: '8px 12px 12px' }}
+        css={{ padding: `${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.s}` }}
         responsive={false}
       >
         <EuiFlexItem>
