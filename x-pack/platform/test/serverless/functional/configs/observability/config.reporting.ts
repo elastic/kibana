@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.reporting.csv.scroll.duration=10m',
       ],
     },
-    testFiles: [require.resolve('../../test_suites/discover/x_pack/reporting')],
+    testFiles: [require.resolve('../../test_suites/discover/x_pack_reporting')],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Reporting',
     },
