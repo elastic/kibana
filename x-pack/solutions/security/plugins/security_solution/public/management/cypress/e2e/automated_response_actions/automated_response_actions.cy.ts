@@ -82,12 +82,17 @@ describe(
       visitRuleAlerts(ruleName);
       closeAllToasts();
       waitForAlertsToPopulate(1, 2000, 120000);
+
+      cy.intercept('POST', '/internal/search/privateRuleRegistryAlertsSearchStrategy*').as(
+        'filteredAlertsSearch'
+      );
       changeAlertsFilter(
         `agent.id: "${createdHost.agentId}" and process.name: "sshd" and kibana.alert.rule.uuid: "${ruleId}"`
       );
+      cy.wait('@filteredAlertsSearch');
       waitForAlertsToPopulate(1, 2000, 120000);
 
-      cy.getByTestSubj('expand-event').first().click();
+      cy.getByTestSubj('expand-event', { timeout: 120000 }).first().should('be.visible').click();
       cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
       cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
