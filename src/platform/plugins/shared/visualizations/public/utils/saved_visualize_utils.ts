@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import { asyncMap } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -50,7 +51,7 @@ const getDefaults = (opts: GetVisOptions) => ({
   version: 1,
 });
 
-function mapHitSource(
+async function mapHitSource(
   visTypes: Pick<TypesStart, 'get'>,
   { attributes, id, references, updatedAt, managed }: VisualizationSavedObject
 ) {
@@ -91,13 +92,13 @@ function mapHitSource(
     return newAttributes;
   }
 
-  newAttributes.type = visTypes.get(typeName as string);
+  newAttributes.type = await visTypes.get(typeName as string);
   newAttributes.savedObjectType = 'visualization';
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
   newAttributes.editor = { editUrl: `/edit/${id}` };
-  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
+  newAttributes.readOnly = Boolean(newAttributes.type?.disableEdit);
 
   return newAttributes;
 }
@@ -179,7 +180,7 @@ export async function findListItems(
 
   return {
     total,
-    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
+    hits: await asyncMap(savedObjects, async (savedObject: VisualizationSavedObject) => {
       const config = extensionByType[savedObject.type];
 
       if (config) {
@@ -191,7 +192,7 @@ export async function findListItems(
           references: savedObject.references,
         };
       } else {
-        return mapHitSource(visTypes, savedObject);
+        return await mapHitSource(visTypes, savedObject);
       }
     }),
   };

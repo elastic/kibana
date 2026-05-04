@@ -50,13 +50,19 @@ describe('AggBasedSelection', () => {
   ] as BaseVisType[];
 
   const visTypes: TypesStart = {
-    get<T extends VisParams>(id: string): BaseVisType<T> {
+    async get<T extends VisParams>(id: string) {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
-    all: () => _visTypes,
+    all: async () => {
+      return _visTypes as unknown as BaseVisType[];
+    },
     getAliases: () => [],
     unRegisterAlias: () => [],
-    getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
+    getByGroup: async (group: VisGroups) => {
+      return _visTypes.filter((type) => {
+        return type.group === group;
+      }) as unknown as BaseVisType[];
+    },
   };
 
   beforeAll(() => {
@@ -86,7 +92,7 @@ describe('AggBasedSelection', () => {
   });
 
   describe('filter for visualization types', () => {
-    it('should render as expected', () => {
+    it('should render as expected', async () => {
       const wrapper = mountWithIntl(
         <AggBasedSelection
           visTypesRegistry={visTypes}
@@ -94,6 +100,9 @@ describe('AggBasedSelection', () => {
           onVisTypeSelected={jest.fn()}
         />
       );
+
+      await new Promise((resolve) => process.nextTick(resolve));
+      
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });
       expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
