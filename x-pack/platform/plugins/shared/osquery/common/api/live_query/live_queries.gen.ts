@@ -25,7 +25,7 @@ import {
 } from '../model/schema/common_attributes.gen';
 import { FindLiveQueryResponse, FindLiveQueryDetailsResponse } from './find_live_query.gen';
 import { CreateLiveQueryRequestBody, CreateLiveQueryResponse } from './create_live_query.gen';
-import { ExportFormat, ExportRequestBody, ExportResultRow } from '../export/export_results.gen';
+import { ExportFormat, ExportRequestBody, ExportJsonResponse } from '../export/export_results.gen';
 import { GetLiveQueryResultsResponse } from './get_live_query_results.gen';
 
 export const OsqueryCreateLiveQueryRequestBody = lazySchema(() => CreateLiveQueryRequestBody);
@@ -79,10 +79,10 @@ export type OsqueryExportLiveQueryResultsRequestBodyInput = z.input<
 >;
 
 /**
-* A single JSON array containing all result rows. All rows are held in memory before writing; prefer `ndjson` for large exports.
+* A JSON object with `_meta` (export metadata) and `results` (all result rows). Rows are held in memory before writing; prefer `ndjson` for large exports.
 
 */
-export const OsqueryExportLiveQueryResultsResponse = lazySchema(() => z.array(ExportResultRow));
+export const OsqueryExportLiveQueryResultsResponse = lazySchema(() => ExportJsonResponse);
 export type OsqueryExportLiveQueryResultsResponse = z.infer<
   typeof OsqueryExportLiveQueryResultsResponse
 >;

@@ -93,8 +93,61 @@ export const ExportNdjsonMetaRow = lazySchema(() =>
 export type ExportNdjsonMetaRow = z.infer<typeof ExportNdjsonMetaRow>;
 
 /**
+  * Metadata block produced for every export. Included as `_meta` in the JSON response body and as the first NDJSON line.
+
+  */
+export const ExportMetadata = lazySchema(() =>
+  z.object({
+    /**
+     * The action ID (live query) or schedule ID (scheduled query) that produced the results.
+     */
+    action_id: z.string(),
+    /**
+     * The SQL query text, if it could be resolved from action details.
+     */
+    query: z.string().nullable().optional(),
+    /**
+     * ISO 8601 timestamp of when the export was initiated.
+     */
+    timestamp: z.string().datetime(),
+    /**
+     * Username of the Kibana user who triggered the export.
+     */
+    exported_by: z.string(),
+    format: ExportFormat,
+    /**
+     * Total number of result rows included in this export.
+     */
+    total_results: z.number().int().nullable().optional(),
+    /**
+      * For scheduled query exports only: the execution counter of the scheduled run that produced the results.
+
+      */
+    execution_count: z.number().int().nullable().optional(),
+    /**
+      * For CSV exports with ECS mapping and zero hits: the column header row so an empty export is not a 0-byte file.
+
+      */
+    csv_columns: z.array(z.string()).nullable().optional(),
+  })
+);
+export type ExportMetadata = z.infer<typeof ExportMetadata>;
+
+/**
   * A single result row from an NDJSON or JSON export. Fields follow the Elastic Common Schema (ECS) mapping defined on the originating query when available; otherwise raw osquery column names are used under the `osquery.*` namespace.
 
   */
 export const ExportResultRow = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ExportResultRow = z.infer<typeof ExportResultRow>;
+
+/**
+  * JSON export response body. The `_meta` field contains export metadata; `results` contains all result rows. Prefer `ndjson` for large exports since rows are streamed individually rather than held in memory.
+
+  */
+export const ExportJsonResponse = lazySchema(() =>
+  z.object({
+    _meta: ExportMetadata,
+    results: z.array(ExportResultRow),
+  })
+);
+export type ExportJsonResponse = z.infer<typeof ExportJsonResponse>;
