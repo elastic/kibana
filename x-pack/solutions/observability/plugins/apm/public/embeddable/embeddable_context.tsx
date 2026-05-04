@@ -56,7 +56,13 @@ export function ApmEmbeddableContext({
     });
   }
 
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     history.current?.replace(buildHistoryEntry(rangeFrom, rangeTo, kuery));
   }, [history, rangeFrom, rangeTo, kuery]);
 
