@@ -26,6 +26,7 @@ export const transformFormDataToMcpTool = (data: McpToolFormData): McpToolDefini
     id: data.toolId,
     description: data.description,
     readonly: false,
+    experimental: false,
     configuration: {
       connector_id: data.connectorId,
       tool_name: data.mcpToolName,
@@ -37,10 +38,10 @@ export const transformFormDataToMcpTool = (data: McpToolFormData): McpToolDefini
 
 // Form data → Create API payload
 export const transformMcpFormDataForCreate = (data: McpToolFormData): CreateToolPayload => {
-  return omit(transformFormDataToMcpTool(data), ['readonly']);
+  return omit(transformFormDataToMcpTool(data), ['readonly', 'experimental']);
 };
 
 // Form data → Update API payload
 export const transformMcpFormDataForUpdate = (data: McpToolFormData): UpdateToolPayload => {
-  return omit(transformFormDataToMcpTool(data), ['id', 'type', 'readonly']);
+  return omit(transformFormDataToMcpTool(data), ['id', 'type', 'readonly', 'experimental']);
 };

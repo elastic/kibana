@@ -31,6 +31,7 @@ export const transformFormDataToWorkflowTool = (
     id: data.toolId,
     description: data.description,
     readonly: false,
+    experimental: false,
     configuration: {
       workflow_id: data.workflow_id,
       wait_for_completion: data.wait_for_completion,
@@ -43,11 +44,11 @@ export const transformFormDataToWorkflowTool = (
 export const transformWorkflowFormDataForCreate = (
   data: WorkflowToolFormData
 ): CreateToolPayload => {
-  return omit(transformFormDataToWorkflowTool(data), ['readonly']);
+  return omit(transformFormDataToWorkflowTool(data), ['readonly', 'experimental']);
 };
 
 export const transformWorkflowFormDataForUpdate = (
   data: WorkflowToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToWorkflowTool(data), ['id', 'type', 'readonly']);
+  return omit(transformFormDataToWorkflowTool(data), ['id', 'type', 'readonly', 'experimental']);
 };

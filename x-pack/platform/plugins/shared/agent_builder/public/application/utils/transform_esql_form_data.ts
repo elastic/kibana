@@ -52,6 +52,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
     id: data.toolId,
     description: data.description,
     readonly: false,
+    experimental: false,
     configuration: {
       query: data.esql,
       params: data.params
@@ -83,7 +84,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
  * @returns The payload for the create tools API.
  */
 export const transformEsqlFormDataForCreate = (data: EsqlToolFormData): CreateToolPayload => {
-  return omit(transformFormDataToEsqlTool(data), ['readonly']);
+  return omit(transformFormDataToEsqlTool(data), ['readonly', 'experimental']);
 };
 
 /**
@@ -92,5 +93,5 @@ export const transformEsqlFormDataForCreate = (data: EsqlToolFormData): CreateTo
  * @returns The payload for the update tool API.
  */
 export const transformEsqlFormDataForUpdate = (data: EsqlToolFormData): UpdateToolPayload => {
-  return omit(transformFormDataToEsqlTool(data), ['id', 'type', 'readonly']);
+  return omit(transformFormDataToEsqlTool(data), ['id', 'type', 'readonly', 'experimental']);
 };
