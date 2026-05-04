@@ -26,9 +26,9 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
     }
   });
 
-  it('does NOT enable bucketTargetsByAccessCount on any communicates_with config (flat targets list)', () => {
+  it('does NOT enable bucketTargetByThreshold on any communicates_with config (flat targets list)', () => {
     for (const config of COMMUNICATES_WITH_ENGINE_CONFIGS) {
-      expect(config.bucketTargetsByAccessCount).toBeUndefined();
+      expect(config.bucketTargetByThreshold).toBeUndefined();
     }
   });
 

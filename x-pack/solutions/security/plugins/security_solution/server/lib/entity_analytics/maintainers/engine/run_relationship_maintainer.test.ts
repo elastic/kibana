@@ -55,7 +55,7 @@ const baseConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
-  bucketTargetsByAccessCount: {
+  bucketTargetByThreshold: {
     threshold: 4,
     aboveThresholdRelationship: 'accesses_frequently',
     belowThresholdRelationship: 'accesses_infrequently',

@@ -23,7 +23,7 @@ const COMM_COLUMNS = [
 const ACCESSES_CONFIG = {
   id: 'elastic_defend',
   relationshipType: 'accesses' as const,
-  bucketTargetsByAccessCount: {
+  bucketTargetByThreshold: {
     threshold: 4,
     aboveThresholdRelationship: 'accesses_frequently',
     belowThresholdRelationship: 'accesses_infrequently',
@@ -103,7 +103,7 @@ describe('parseTargetsPerActorRows — accesses', () => {
     const ownsConfig = {
       id: 'hypothetical_owns_bucketed',
       relationshipType: 'accesses' as const,
-      bucketTargetsByAccessCount: {
+      bucketTargetByThreshold: {
         threshold: 4,
         aboveThresholdRelationship: 'owns',
         belowThresholdRelationship: 'owns_inferred',

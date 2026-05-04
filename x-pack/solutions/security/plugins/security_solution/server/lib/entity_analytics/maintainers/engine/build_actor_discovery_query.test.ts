@@ -19,7 +19,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-test-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
-  bucketTargetsByAccessCount: {
+  bucketTargetByThreshold: {
     threshold: 4,
     aboveThresholdRelationship: 'accesses_frequently',
     belowThresholdRelationship: 'accesses_infrequently',

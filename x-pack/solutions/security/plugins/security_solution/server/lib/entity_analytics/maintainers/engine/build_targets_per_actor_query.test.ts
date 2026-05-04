@@ -19,7 +19,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
-  bucketTargetsByAccessCount: {
+  bucketTargetByThreshold: {
     threshold: 4,
     aboveThresholdRelationship: 'accesses_frequently',
     belowThresholdRelationship: 'accesses_infrequently',
@@ -107,7 +107,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
         buildTargetsPerActorQuery(
           {
             ...accessesConfig,
-            bucketTargetsByAccessCount: {
+            bucketTargetByThreshold: {
               threshold: 10,
               aboveThresholdRelationship: 'accesses_frequently',
               belowThresholdRelationship: 'accesses_infrequently',
@@ -123,7 +123,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       // the engine reads keys from config, not from a baked-in literal.
       const ownsBucketed: RelationshipIntegrationConfig = {
         ...accessesConfig,
-        bucketTargetsByAccessCount: {
+        bucketTargetByThreshold: {
           threshold: 7,
           aboveThresholdRelationship: 'owns',
           belowThresholdRelationship: 'owns_inferred',

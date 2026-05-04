@@ -7,7 +7,7 @@
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
-import { runGenericMaintainer } from '../engine/run_maintainer';
+import { runGenericMaintainer } from '../engine/run_relationship_maintainer';
 import { ACCESSES_ENGINE_CONFIGS } from './configs';
 
 export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {

@@ -34,7 +34,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
 
   it('opts every accesses config into bucket classification (accesses_frequently / accesses_infrequently)', () => {
     for (const config of ACCESSES_ENGINE_CONFIGS) {
-      expect(config.bucketTargetsByAccessCount).toEqual({
+      expect(config.bucketTargetByThreshold).toEqual({
         threshold: expect.any(Number),
         aboveThresholdRelationship: 'accesses_frequently',
         belowThresholdRelationship: 'accesses_infrequently',
@@ -108,7 +108,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
   );
 
   it('declares a single shared threshold across all four accesses configs (declarative, not magical)', () => {
-    const thresholds = ACCESSES_ENGINE_CONFIGS.map((c) => c.bucketTargetsByAccessCount?.threshold);
+    const thresholds = ACCESSES_ENGINE_CONFIGS.map((c) => c.bucketTargetByThreshold?.threshold);
     expect(new Set(thresholds).size).toBe(1);
   });
 

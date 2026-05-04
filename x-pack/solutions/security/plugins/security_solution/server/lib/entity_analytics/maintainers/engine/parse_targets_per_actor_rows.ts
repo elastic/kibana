@@ -35,7 +35,7 @@ function toStringArray(value: unknown): string[] {
  */
 type ParseConfig = Pick<
   RelationshipIntegrationConfig,
-  'id' | 'relationshipType' | 'bucketTargetsByAccessCount' | 'esqlQueryOverride'
+  'id' | 'relationshipType' | 'bucketTargetByThreshold' | 'esqlQueryOverride'
 >;
 
 function warnIfOverrideColumnsMissing(
@@ -45,11 +45,11 @@ function warnIfOverrideColumnsMissing(
 ): void {
   if (!config.esqlQueryOverride) return;
   const colNames = new Set(columns.map((c) => c.name));
-  const expected = config.bucketTargetsByAccessCount
+  const expected = config.bucketTargetByThreshold
     ? [
         'actorUserId',
-        config.bucketTargetsByAccessCount.aboveThresholdRelationship,
-        config.bucketTargetsByAccessCount.belowThresholdRelationship,
+        config.bucketTargetByThreshold.aboveThresholdRelationship,
+        config.bucketTargetByThreshold.belowThresholdRelationship,
       ]
     : ['actorUserId', config.relationshipType];
   const missing = expected.filter((n) => !colNames.has(n));
@@ -79,9 +79,9 @@ export const parseTargetsPerActorRows = (
     const actorUserId = record.actorUserId != null ? String(record.actorUserId) : null;
 
     // TODO(follow-up): entityType hardcoded to 'user' — use actorEntityType from config.
-    if (config.bucketTargetsByAccessCount) {
+    if (config.bucketTargetByThreshold) {
       const { aboveThresholdRelationship: above, belowThresholdRelationship: below } =
-        config.bucketTargetsByAccessCount;
+        config.bucketTargetByThreshold;
       return {
         entityId: actorUserId,
         entityType: 'user' as const,

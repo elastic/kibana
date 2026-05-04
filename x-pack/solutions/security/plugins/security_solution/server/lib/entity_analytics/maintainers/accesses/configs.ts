@@ -34,7 +34,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    bucketTargetsByAccessCount: ACCESSES_BUCKETING,
+    bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
     esqlWhereClause: `event.action == "log_on"
     AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")
@@ -50,7 +50,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    bucketTargetsByAccessCount: ACCESSES_BUCKETING,
+    bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
     esqlWhereClause: `event.module == "aws"
     AND event.action IN ("StartSession", "SendSSHPublicKey")
@@ -66,7 +66,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-system.auth-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    bucketTargetsByAccessCount: ACCESSES_BUCKETING,
+    bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
     esqlWhereClause: `event.category IN ("authentication", "session")
     AND event.action == "ssh_login"
@@ -82,7 +82,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-system.security-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    bucketTargetsByAccessCount: ACCESSES_BUCKETING,
+    bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")

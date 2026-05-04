@@ -96,13 +96,13 @@ export interface RelationshipIntegrationConfig {
    * - actor / target EUID existence filters
    * - getFieldEvaluationsEsql / getEuidEvaluation helpers (future source-field changes
    *   will not propagate automatically)
-   * - bucketTargetsByAccessCount access-count classification
+   * - bucketTargetByThreshold access-count classification
    * - LIMIT COMPOSITE_PAGE_SIZE ceiling
    *
    * Column contract — the query MUST emit these exact column names or results will be
    * silently empty:
    * - `actorUserId` (string) — the actor's full EUID, e.g. "user:alice@okta"
-   * - when bucketTargetsByAccessCount is set:
+   * - when bucketTargetByThreshold is set:
    *     `accesses_frequently` and `accesses_infrequently` (string | string[])
    * - otherwise:
    *     a column named after `relationshipType` (e.g. `communicates_with`) (string | string[])
@@ -125,7 +125,7 @@ export interface RelationshipIntegrationConfig {
    *    members of the entity store's `EntityRelationshipKey` union (TypeScript
    *    enforces this).
    */
-  bucketTargetsByAccessCount?: {
+  bucketTargetByThreshold?: {
     threshold: number;
     aboveThresholdRelationship: EntityRelationshipKey;
     belowThresholdRelationship: EntityRelationshipKey;

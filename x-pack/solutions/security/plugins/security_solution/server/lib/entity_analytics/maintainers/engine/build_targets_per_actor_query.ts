@@ -30,13 +30,13 @@ function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace:
     ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
     : '';
 
-  const statsClause = config.bucketTargetsByAccessCount
+  const statsClause = config.bucketTargetByThreshold
     ? (() => {
         const {
           threshold,
           aboveThresholdRelationship: above,
           belowThresholdRelationship: below,
-        } = config.bucketTargetsByAccessCount;
+        } = config.bucketTargetByThreshold;
         return `| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
     access_count >= ${threshold}, "${above}",
@@ -76,7 +76,7 @@ ${statsClause}
  * If esqlQueryOverride is provided, delegates to it directly.
  * NOTE: overrides must emit columns named `actorUserId` plus either
  * `<aboveThresholdRelationship>` + `<belowThresholdRelationship>` (when
- * bucketTargetsByAccessCount is set) or `<relationshipType>` (e.g. `communicates_with`)
+ * bucketTargetByThreshold is set) or `<relationshipType>` (e.g. `communicates_with`)
  * otherwise. Mismatched column names produce silent empty results.
  */
 export const buildTargetsPerActorQuery = (
