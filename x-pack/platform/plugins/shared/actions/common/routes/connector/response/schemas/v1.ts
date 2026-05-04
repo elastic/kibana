@@ -205,3 +205,26 @@ export const connectorExecuteResponseSchema = schema.object({
     })
   ),
 });
+
+export const connectorAuthStatusResponseSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    user_auth_status: schema.oneOf(
+      [
+        schema.literal('connected'),
+        schema.literal('not_connected'),
+        schema.literal('not_applicable'),
+      ],
+      {
+        meta: {
+          description: 'The authentication status of the current user for this connector.',
+        },
+      }
+    ),
+  }),
+  {
+    meta: {
+      description: 'A map of connector IDs to their user authentication status.',
+    },
+  }
+);
