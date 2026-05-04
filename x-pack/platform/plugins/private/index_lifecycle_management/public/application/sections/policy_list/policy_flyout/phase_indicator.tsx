@@ -8,10 +8,15 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { usePhaseColors } from '@kbn/data-lifecycle-phases';
+import { EuiIcon } from '@elastic/eui';
 import type { Phase } from '../../../../../common/types';
 
 export const PhaseIndicator = ({ phase }: { phase: Phase }) => {
   const phaseToIndicatorColors = usePhaseColors();
+
+  if (phase === 'delete') {
+    return <EuiIcon type="trash" size="m" aria-hidden={true} />;
+  }
 
   return (
     <div
