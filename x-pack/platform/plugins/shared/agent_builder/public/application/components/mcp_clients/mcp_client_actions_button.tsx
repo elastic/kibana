@@ -13,7 +13,7 @@ export interface McpClientActionsMenuProps {
   clientId: string;
 }
 
-// TODO: Implement as part of https://github.com/elastic/search-team/issues/13413
+// TODO: Implement as part of "[Agent Builder] OAuth Client registration and management flows"
 export const McpClientActionsMenu = ({ clientId }: McpClientActionsMenuProps) => (
   <EuiButtonIcon
     iconType="boxesVertical"

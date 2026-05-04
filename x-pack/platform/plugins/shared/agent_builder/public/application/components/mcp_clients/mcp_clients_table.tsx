@@ -110,7 +110,7 @@ export const McpClientsTable = memo(() => {
               icon={<EuiImage src={illustrationGenai} alt="No MCP clients" size="150px" />}
               title={<h2>{labels.tools.mcpClients.noMcpClientsPromptTitle}</h2>}
               body={<p>{labels.tools.mcpClients.noMcpClientsPromptBody}</p>}
-              // TODO: Implement as part of https://github.com/elastic/search-team/issues/13413
+              // TODO: Implement as part of "[Agent Builder] OAuth Client registration and management flows"
               // actions={[
               //   <EuiButton>{labels.tools.mcpClients.addMcpClientButtonLabel}</EuiButton>,
               //   <EuiLink href={'#'} target="_blank">
