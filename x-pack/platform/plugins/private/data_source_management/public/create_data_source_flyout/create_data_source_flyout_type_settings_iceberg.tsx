@@ -11,7 +11,7 @@ import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { DataSourceWithSecrets } from '../common/datasource_types';
+import type { DataSourceWithSecrets } from '../../common/datasource_types';
 
 export function CreateDataSourceFlyoutTypeSettingsIceberg({
   control,

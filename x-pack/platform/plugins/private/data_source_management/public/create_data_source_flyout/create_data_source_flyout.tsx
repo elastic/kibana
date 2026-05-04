@@ -25,12 +25,12 @@ import {
 } from '@elastic/eui';
 import { useController, useForm } from 'react-hook-form';
 
-import type { DataSourceWithSecrets } from '../common';
-import { ALL_DATA_SOURCE_TYPES } from '../common';
-import type { DataSourceType } from '../common/datasource_types';
+import type { DataSourceWithSecrets } from '../../common';
+import { ALL_DATA_SOURCE_TYPES } from '../../common';
+import type { DataSourceType } from '../../common/datasource_types';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { getDataSourceTypeLabel } from './get_data_source_type_label';
+import { getDataSourceTypeLabel } from '../get_data_source_type_label';
 
 export interface CreateDataSourceFlyoutProps {
   onClose: () => void;

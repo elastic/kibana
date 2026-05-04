@@ -7,7 +7,7 @@
 
 import type { DataSourceWithSecrets } from '../common';
 import type { DataSourceType } from '../common/datasource_types';
-import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout/create_data_source_flyout_form_state';
 
 const s = (v: string): string | undefined => {
   const t = v.trim();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataSourceType } from '../common/datasource_types';
+import type { DataSourceType } from '../../common/datasource_types';
 
 /**
  * In-memory form values for the create flyout, keyed by data source type.

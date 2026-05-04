@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
-import type { DataSourceType, DataSourceWithSecrets } from '../common/datasource_types';
+import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
 import { CreateDataSourceFlyoutTypeSettingsAzureBlob } from './create_data_source_flyout_type_settings_azure_blob';
 import { CreateDataSourceFlyoutTypeSettingsFlight } from './create_data_source_flyout_type_settings_flight';
 import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
