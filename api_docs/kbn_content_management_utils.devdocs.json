@@ -86,6 +86,7 @@
                 "lineNumber": 110,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "SOContentStorageConstructorParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -138,6 +139,7 @@
                 "lineNumber": 173,
                 "columnNumber": 52,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -464,6 +466,7 @@
                 "lineNumber": 236,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -549,6 +552,7 @@
                 "lineNumber": 289,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -633,6 +637,7 @@
                 "lineNumber": 353,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -734,6 +739,7 @@
                 "lineNumber": 419,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -837,6 +843,7 @@
                 "lineNumber": 430,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -860,6 +867,7 @@
                 "lineNumber": 431,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SearchQuery",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -921,6 +929,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsCreateOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -974,6 +983,7 @@
             "lineNumber": 125,
             "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1059,6 +1069,7 @@
             "lineNumber": 51,
             "columnNumber": 72,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1208,6 +1219,7 @@
             "lineNumber": 31,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1277,6 +1289,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchIn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1370,6 +1383,7 @@
             "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1387,6 +1401,7 @@
             "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "M",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1508,6 +1523,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsUpdateOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2504,7 +2520,15 @@
             "tags": [],
             "label": "initialNamespaces",
             "description": [
-              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
+              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              ".\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
@@ -2876,7 +2900,15 @@
             "tags": [],
             "label": "pit",
             "description": [
-              "\nSearch against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}."
+              "\nSearch against a specific Point In Time (PIT) that you've opened with ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.SavedObjectsClient.openPointInTimeForType",
+                "text": "SavedObjectsClient.openPointInTimeForType"
+              },
+              "."
             ],
             "signature": [
               "SavedObjectsPitParams",
@@ -5026,6 +5058,7 @@
                 "lineNumber": 119,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }

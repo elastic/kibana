@@ -21,6 +21,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
+import { QuickFilters } from './components/quick_filters';
 import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
@@ -45,7 +46,7 @@ export const ActionPolicyForm = () => {
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
-                defaultMessage="Basic information"
+                defaultMessage="Policy name and description"
               />
             </h3>
           </EuiTitle>
@@ -139,14 +140,14 @@ export const ActionPolicyForm = () => {
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
-                defaultMessage="Match conditions"
+                defaultMessage="Policy scope"
               />
             </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-              defaultMessage="Define conditions that must be met for this policy to trigger. Leave empty to match all alert episodes."
+              defaultMessage="Define which alerts this policy applies to."
             />
           </EuiText>
         </EuiSplitPanel.Inner>
@@ -155,25 +156,35 @@ export const ActionPolicyForm = () => {
             name="matcher"
             control={control}
             render={({ field }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                  defaultMessage: 'Matcher',
-                })}
-                labelAppend={optionalLabel}
-                fullWidth
-              >
-                <MatcherInput
-                  value={field.value}
-                  onChange={field.onChange}
+              <>
+                <QuickFilters matcher={field.value} onChange={field.onChange} />
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
+                    defaultMessage: 'Match conditions',
+                  })}
+                  labelAppend={optionalLabel}
+                  helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher.helpText', {
+                    defaultMessage:
+                      'A KQL expression that defines which alert episodes meet the conditions for this policy. Leave empty to apply the policy to all episodes in the space.',
+                  })}
                   fullWidth
-                  data-test-subj="matcherInput"
-                  dataFieldNames={dataFieldNames}
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                    { defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"' }
-                  )}
-                />
-              </EuiFormRow>
+                >
+                  <MatcherInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    fullWidth
+                    data-test-subj="matcherInput"
+                    dataFieldNames={dataFieldNames}
+                    placeholder={i18n.translate(
+                      'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
+                      {
+                        defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
+                      }
+                    )}
+                  />
+                </EuiFormRow>
+              </>
             )}
           />
         </EuiSplitPanel.Inner>
@@ -187,14 +198,14 @@ export const ActionPolicyForm = () => {
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.dispatch.title"
-                defaultMessage="Dispatch"
+                defaultMessage="Notification controls"
               />
             </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.actionPolicy.form.dispatch.description"
-              defaultMessage="How should matched episodes be grouped, and how often should they be dispatched?"
+              defaultMessage="Controls how matching episodes are grouped and how often notifications are sent."
             />
           </EuiText>
         </EuiSplitPanel.Inner>

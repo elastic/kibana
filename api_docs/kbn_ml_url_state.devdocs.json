@@ -113,6 +113,7 @@
                 "lineNumber": 230,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -168,6 +169,7 @@
                 "lineNumber": 241,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -334,6 +336,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -500,6 +503,7 @@
             "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessor",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -779,6 +783,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessor",
             "trackAdoption": false
           },
           {

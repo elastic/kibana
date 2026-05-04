@@ -103,6 +103,7 @@
             "lineNumber": 29,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateSchemaFromFieldMapOpts",
             "trackAdoption": false,
             "isRequired": true
           }

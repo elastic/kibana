@@ -78,6 +78,7 @@
                 "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -126,6 +127,7 @@
                 "lineNumber": 52,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -143,6 +145,7 @@
                 "lineNumber": 52,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "NavigationPublicSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -190,6 +193,7 @@
                 "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -207,6 +211,7 @@
                 "lineNumber": 62,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "NavigationPublicStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -297,6 +302,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TopNavMenuProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -406,6 +412,7 @@
             "lineNumber": 28,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TopNavMenuItemsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -552,6 +559,7 @@
                 "lineNumber": 17,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false
               }
             ]
@@ -1228,6 +1236,7 @@
               "lineNumber": 25,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "RegisteredTopNavMenuData",
               "trackAdoption": false
             }
           ]
@@ -1373,6 +1382,7 @@
               "lineNumber": 52,
               "columnNumber": 27,
               "deprecated": false,
+              "docsReferencedTypeName": "AddSolutionNavigationArg",
               "trackAdoption": false,
               "isRequired": true
             }

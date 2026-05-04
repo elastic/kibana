@@ -7,13 +7,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup } from '@elastic/eui';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
+import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 
 export const QuickFilters = () => {
   const { statusFilter } = useGetUrlParams();
   const [_, updateUrlParams] = useUrlParams();
-  const { status } = useOverviewStatus({ scopeStatusByLocation: true });
+  const { status } = useOverviewStatusState();
 
   const handleFilterUpdate = (monitorStatus: string) => {
     updateUrlParams({ statusFilter: statusFilter !== monitorStatus ? monitorStatus : undefined });

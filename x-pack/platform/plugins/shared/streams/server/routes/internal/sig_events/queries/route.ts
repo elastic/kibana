@@ -477,7 +477,7 @@ const generateQueriesRoute = createServerRoute({
     server,
     logger,
     telemetry,
-  }): Promise<SignificantEventsQueriesGenerationResult> => {
+  }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
     const {
       streamsClient,
       inferenceClient,
@@ -496,7 +496,7 @@ const generateQueriesRoute = createServerRoute({
 
     const [featureClient, queryClient] = await Promise.all([getFeatureClient(), getQueryClient()]);
 
-    const { queries, tokensUsed } = await generateKIQueries(
+    const result = await generateKIQueries(
       { streamName, connectorId, maxExistingQueriesForContext },
       {
         streamsClient,
@@ -514,7 +514,11 @@ const generateQueriesRoute = createServerRoute({
       }
     );
 
-    return { queries, tokensUsed };
+    return {
+      queries: result.queries,
+      tokensUsed: result.tokensUsed,
+      connectorId: result.connectorId,
+    };
   },
 });
 

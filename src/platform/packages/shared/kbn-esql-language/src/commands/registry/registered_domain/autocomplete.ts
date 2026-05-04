@@ -16,9 +16,7 @@ import {
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
 } from '../complete_items';
-
-const ASSIGNMENT_AT_END_REGEX = /=\s*$/;
-const TRAILING_SPACE_REGEX = /\s$/;
+import { endsWithAssignment, endsWithWhitespace } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -33,16 +31,11 @@ export async function autocomplete(
   const hasAssignment = command.args.some((arg) => !Array.isArray(arg) && isAssignment(arg));
   const hasTargetFieldName = !!targetField?.name?.trim().length;
 
-  if (
-    hasAssignment &&
-    expression &&
-    !expression.incomplete &&
-    !ASSIGNMENT_AT_END_REGEX.test(innerText)
-  ) {
+  if (hasAssignment && expression && !expression.incomplete && !endsWithAssignment(innerText)) {
     return [pipeCompleteItem];
   }
 
-  if (hasAssignment && ASSIGNMENT_AT_END_REGEX.test(innerText)) {
+  if (hasAssignment && endsWithAssignment(innerText)) {
     const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) ?? [];
 
     return fieldSuggestions.map((suggestion) =>
@@ -53,7 +46,7 @@ export async function autocomplete(
     );
   }
 
-  if (hasTargetFieldName && TRAILING_SPACE_REGEX.test(innerText)) {
+  if (hasTargetFieldName && endsWithWhitespace(innerText)) {
     return [assignCompletionItem];
   }
 

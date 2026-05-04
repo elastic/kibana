@@ -283,6 +283,7 @@
                 "lineNumber": 34,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "EMSConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -587,6 +588,7 @@
                 "lineNumber": 34,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "EMSConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },

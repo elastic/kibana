@@ -15,6 +15,7 @@ import { type ISuggestionItem, type ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.appendSeparatorDoc', {
@@ -44,7 +45,7 @@ export async function autocomplete(
   }
 
   // DISSECT field/
-  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
+  if (commandArgs.length === 1 && endsWithWhitespace(innerText)) {
     return buildConstantsDefinitions(
       ['"%{firstWord}"'],
       i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
