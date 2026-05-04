@@ -14,7 +14,8 @@ const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
 
 const { SERVICE_MAP_TEST_SERVICE, SERVICE_MAP_TEST_ENVIRONMENT_STAGING } = testData;
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/265639
+test.describe.skip(
   'Service map embeddable',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
