@@ -92,7 +92,7 @@ describe(
       cy.wait('@filteredAlertsSearch');
       waitForAlertsToPopulate(1, 2000, 120000);
 
-      cy.getByTestSubj('expand-event', { timeout: 120000 }).first().should('be.visible').click();
+      cy.getByTestSubj('expand-event', { timeout: 120000 }).first().scrollIntoView().click();
       cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
       cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
