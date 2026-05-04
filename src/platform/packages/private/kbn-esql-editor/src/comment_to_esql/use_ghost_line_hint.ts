@@ -68,7 +68,7 @@ export const useGhostLineHint = ({
   const ghostLineHintStyle = useMemo(
     () => css`
       .${GHOST_HINT_CLASS}::after {
-        content: '${ghostHintText}';
+        content: '${JSON.stringify(ghostHintText)}';
         opacity: 0.4;
         font-style: italic;
         pointer-events: none;
