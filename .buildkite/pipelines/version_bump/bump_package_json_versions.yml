@@ -7,3 +7,5 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n4-standard-4
+    env:
+      DRY_RUN: 'true'
