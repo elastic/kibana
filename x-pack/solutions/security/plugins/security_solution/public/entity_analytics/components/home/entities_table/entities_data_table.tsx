@@ -457,7 +457,7 @@ export const EntitiesDataTable = ({
       [ENTITY_FIELDS.ENTITY_SOURCE]: ({ row }: DataGridCellValueElementProps) => {
         const values = toEntitySourceArray(row.flattened[ENTITY_FIELDS.ENTITY_SOURCE]);
         if (values.length === 0) return getEmptyTagValue();
-        return <EntitySourceValue values={values} />;
+        return <EntitySourceValue values={values} textSize="xs" />;
       },
       [ENTITY_FIELDS.ASSET_CRITICALITY]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ASSET_CRITICALITY] as
