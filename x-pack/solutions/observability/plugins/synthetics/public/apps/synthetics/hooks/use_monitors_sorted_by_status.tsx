@@ -15,7 +15,7 @@ import { useGetUrlParams } from './use_url_params';
 
 export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
   const { statusFilter } = useGetUrlParams();
-  const { status, disabledConfigs } = useSelector(selectOverviewStatus);
+  const { status, disabledConfigs, allConfigs } = useSelector(selectOverviewStatus);
 
   const {
     pageState: { sortOrder, sortField },
@@ -26,6 +26,13 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
       return [];
     }
 
+    // When the server returns a paginated response (configs array), the data
+    // is already sorted, filtered by status, and sliced to the requested page.
+    if (status.configs) {
+      return allConfigs ?? [];
+    }
+
+    // Legacy non-paginated path: sort and filter client-side.
     let result: OverviewStatusMetaData[] = [];
 
     const { downConfigs, pendingConfigs, upConfigs } = status;
@@ -72,22 +79,15 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         });
         return sortOrder === 'asc' ? result : result.reverse();
       case 'urls': {
-        // Monitors without a URL (e.g. ICMP/TCP, or browser checks where the
-        // url field is empty) are always sorted last regardless of direction —
-        // an alphabetical run that ends with a wall of "—" is more useful for
-        // triage than letting empty strings flip to the top in desc order.
         const withUrl = result.filter((m) => m.urls);
         const withoutUrl = result.filter((m) => !m.urls);
         withUrl.sort((a, b) => (a.urls ?? '').localeCompare(b.urls ?? ''));
         return [...(sortOrder === 'asc' ? withUrl : withUrl.reverse()), ...withoutUrl];
       }
       case 'type.keyword':
-        // Group same-type monitors together (asc gives browser → http → icmp
-        // → tcp). `localeCompare` is overkill for short type tokens but keeps
-        // behaviour consistent with the other alphabetical sorts.
         result = result.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? ''));
         return sortOrder === 'asc' ? result : result.reverse();
     }
     return result;
-  }, [disabledConfigs, sortField, sortOrder, status, statusFilter]);
+  }, [allConfigs, disabledConfigs, sortField, sortOrder, status, statusFilter]);
 }

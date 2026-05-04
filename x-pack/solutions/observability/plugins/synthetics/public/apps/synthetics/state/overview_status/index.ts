@@ -9,7 +9,7 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import type {
   OverviewStatusMetaData,
-  OverviewStatusState,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import type { IHttpSerializedFetchError } from '..';
 import {
@@ -22,11 +22,12 @@ import {
 export interface OverviewStatusStateReducer {
   loading: boolean;
   loaded: boolean;
-  status: OverviewStatusState | null;
+  status: PaginatedOverviewStatus | null;
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
   isInitialLoad: boolean;
+  total?: number;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -43,18 +44,24 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.status = null;
       state.loading = true;
     })
-    .addCase(quietFetchOverviewStatusAction.get, (_state) => {
-      // intentionally no loading state for quiet/background refreshes
+    .addCase(quietFetchOverviewStatusAction.get, (state) => {
+      state.loading = true;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
 
-      state.allConfigs = Object.values({
-        ...state.status.upConfigs,
-        ...state.status.downConfigs,
-        ...state.status.pendingConfigs,
-        ...state.status.disabledConfigs,
-      });
+      if (action.payload.configs) {
+        state.allConfigs = action.payload.configs;
+        state.total = action.payload.total;
+      } else {
+        state.allConfigs = Object.values({
+          ...state.status.upConfigs,
+          ...state.status.downConfigs,
+          ...state.status.pendingConfigs,
+          ...state.status.disabledConfigs,
+        });
+        state.total = state.allConfigs.length;
+      }
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
       state.loading = false;

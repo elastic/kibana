@@ -100,6 +100,10 @@ export class OverviewStatusService {
     >,
     statusResult: Map<string, LocationStatus>
   ) {
+    const params = this.routeContext.request.query || {};
+    const { page, perPage } = params;
+    const isPaginated = page != null && perPage != null;
+
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
       this.processOverviewStatus(allConfigs, statusResult);
 
@@ -112,6 +116,34 @@ export class OverviewStatusService {
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
 
+    if (!isPaginated) {
+      return {
+        allIds,
+        allMonitorsCount: allConfigs.length,
+        disabledMonitorsCount,
+        projectMonitorsCount,
+        enabledMonitorQueryIds,
+        disabledMonitorQueryIds,
+        disabledCount,
+        up,
+        down,
+        pending,
+        upConfigs,
+        downConfigs,
+        pendingConfigs,
+        disabledConfigs,
+      };
+    }
+
+    const {
+      configs,
+      total,
+      pageUpConfigs,
+      pageDownConfigs,
+      pagePendingConfigs,
+      pageDisabledConfigs,
+    } = this.paginateConfigs({ upConfigs, downConfigs, pendingConfigs, disabledConfigs });
+
     return {
       allIds,
       allMonitorsCount: allConfigs.length,
@@ -123,11 +155,139 @@ export class OverviewStatusService {
       up,
       down,
       pending,
-      upConfigs,
-      downConfigs,
-      pendingConfigs,
-      disabledConfigs,
+      upConfigs: pageUpConfigs,
+      downConfigs: pageDownConfigs,
+      pendingConfigs: pagePendingConfigs,
+      disabledConfigs: pageDisabledConfigs,
+      configs,
+      total,
+      page,
+      perPage,
     };
+  }
+
+  paginateConfigs({
+    upConfigs,
+    downConfigs,
+    pendingConfigs,
+    disabledConfigs,
+  }: {
+    upConfigs: Record<string, OverviewStatusMetaData>;
+    downConfigs: Record<string, OverviewStatusMetaData>;
+    pendingConfigs: Record<string, OverviewStatusMetaData>;
+    disabledConfigs: Record<string, OverviewStatusMetaData>;
+  }) {
+    const params = this.routeContext.request.query || {};
+    const {
+      page = 1,
+      perPage = 20,
+      sortField = 'status',
+      sortOrder = 'asc',
+      statusFilter,
+    } = params;
+
+    let allConfigs: OverviewStatusMetaData[];
+
+    if (statusFilter) {
+      switch (statusFilter) {
+        case 'down':
+          allConfigs = Object.values(downConfigs);
+          break;
+        case 'up':
+          allConfigs = Object.values(upConfigs);
+          break;
+        case 'disabled':
+          allConfigs = Object.values(disabledConfigs);
+          break;
+        case 'pending':
+          allConfigs = Object.values(pendingConfigs);
+          break;
+        default:
+          allConfigs = [];
+      }
+    } else {
+      const upAndDown =
+        sortOrder === 'asc'
+          ? [...Object.values(downConfigs), ...Object.values(upConfigs)]
+          : [...Object.values(upConfigs), ...Object.values(downConfigs)];
+      allConfigs = [
+        ...upAndDown,
+        ...Object.values(disabledConfigs),
+        ...Object.values(pendingConfigs),
+      ];
+    }
+
+    this.sortConfigs(allConfigs, sortField, sortOrder);
+
+    const total = allConfigs.length;
+    const start = (page - 1) * perPage;
+    const pageConfigs = allConfigs.slice(start, start + perPage);
+
+    const pageUpConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageDownConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pagePendingConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageDisabledConfigs: Record<string, OverviewStatusMetaData> = {};
+
+    for (const config of pageConfigs) {
+      const key = config.configId;
+      switch (config.overallStatus) {
+        case MONITOR_STATUS_ENUM.DOWN:
+          pageDownConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.UP:
+          pageUpConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.DISABLED:
+          pageDisabledConfigs[key] = config;
+          break;
+        default:
+          pagePendingConfigs[key] = config;
+      }
+    }
+
+    return {
+      configs: pageConfigs,
+      total,
+      pageUpConfigs,
+      pageDownConfigs,
+      pagePendingConfigs,
+      pageDisabledConfigs,
+    };
+  }
+
+  private sortConfigs(
+    configs: OverviewStatusMetaData[],
+    sortField: string | undefined,
+    sortOrder: string | undefined
+  ) {
+    const dir = sortOrder === 'desc' ? -1 : 1;
+
+    switch (sortField) {
+      case 'name.keyword':
+        configs.sort((a, b) => dir * a.name.localeCompare(b.name));
+        break;
+      case 'updated_at':
+        configs.sort((a, b) => {
+          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+          return dir * (aTime - bTime);
+        });
+        break;
+      case 'urls': {
+        const withUrl = configs.filter((m) => m.urls);
+        const withoutUrl = configs.filter((m) => !m.urls);
+        withUrl.sort((a, b) => dir * (a.urls ?? '').localeCompare(b.urls ?? ''));
+        configs.length = 0;
+        configs.push(...withUrl, ...withoutUrl);
+        break;
+      }
+      case 'type.keyword':
+        configs.sort((a, b) => dir * (a.type ?? '').localeCompare(b.type ?? ''));
+        break;
+      case 'status':
+      default:
+        break;
+    }
   }
 
   async getEsDataFilters() {

@@ -8,16 +8,16 @@ import { createAction } from '@reduxjs/toolkit';
 import type { MonitorOverviewPageState } from '..';
 import { createAsyncAction } from '../utils/actions';
 
-import type { OverviewStatus } from '../../../../../common/runtime_types';
+import type { PaginatedOverviewStatus } from '../../../../../common/runtime_types';
 
 export const fetchOverviewStatusAction = createAsyncAction<
-  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean },
-  OverviewStatus
+  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
+  PaginatedOverviewStatus
 >('fetchOverviewStatusAction');
 
 export const quietFetchOverviewStatusAction = createAsyncAction<
-  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean },
-  OverviewStatus
+  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
+  PaginatedOverviewStatus
 >('quietFetchOverviewStatusAction');
 
 export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');

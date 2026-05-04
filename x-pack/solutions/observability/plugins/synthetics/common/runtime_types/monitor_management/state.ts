@@ -44,6 +44,9 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
 
 export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   ...FetchMonitorQueryArgsCommon,
+  page: t.number,
+  perPage: t.number,
+  statusFilter: t.string,
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

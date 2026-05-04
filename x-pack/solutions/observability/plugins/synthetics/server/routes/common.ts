@@ -62,6 +62,18 @@ export const OverviewStatusSchema = schema.object({
   ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
   groupByMonitor: schema.maybe(schema.boolean()),
+  page: schema.maybe(schema.number({ min: 1 })),
+  perPage: schema.maybe(schema.number({ min: 1, max: 500 })),
+  sortField: MonitorSortFieldSchema,
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+  statusFilter: schema.maybe(
+    schema.oneOf([
+      schema.literal('up'),
+      schema.literal('down'),
+      schema.literal('pending'),
+      schema.literal('disabled'),
+    ])
+  ),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;

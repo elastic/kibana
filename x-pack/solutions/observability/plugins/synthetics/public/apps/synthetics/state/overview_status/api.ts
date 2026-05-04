@@ -9,9 +9,9 @@ import type { MonitorOverviewPageState } from '..';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type {
   FetchMonitorOverviewQueryArgs,
-  OverviewStatus,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
-import { OverviewStatusCodec } from '../../../../../common/runtime_types';
+import { PaginatedOverviewStatusCodec } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export function toStatusOverviewQueryArgs(
@@ -28,20 +28,26 @@ export function toStatusOverviewQueryArgs(
     showFromAllSpaces: pageState.showFromAllSpaces,
     searchFields: [],
     useLogicalAndFor: pageState.useLogicalAndFor,
+    page: pageState.page,
+    perPage: pageState.perPage,
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
   };
 }
 
 export const fetchOverviewStatus = async ({
   pageState,
   scopeStatusByLocation,
+  statusFilter,
 }: {
   pageState: MonitorOverviewPageState;
   scopeStatusByLocation?: boolean;
-}): Promise<OverviewStatus> => {
+  statusFilter?: string;
+}): Promise<PaginatedOverviewStatus> => {
   const params = toStatusOverviewQueryArgs(pageState);
   return apiService.get(
     SYNTHETICS_API_URLS.OVERVIEW_STATUS,
-    { ...params, scopeStatusByLocation },
-    OverviewStatusCodec
+    { ...params, scopeStatusByLocation, ...(statusFilter ? { statusFilter } : {}) },
+    PaginatedOverviewStatusCodec
   );
 };
