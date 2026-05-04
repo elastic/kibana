@@ -100,7 +100,7 @@ function DocumentationFlyout({
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h3>
+              <h3 id="esqlInlineDocumentationFlyout">
                 {i18n.translate('languageDocumentation.documentationFlyoutTitle', {
                   defaultMessage: 'ES|QL quick reference',
                 })}
