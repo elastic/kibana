@@ -9,8 +9,9 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 const rowStyles = css({ marginTop: '0px !important' });
 
@@ -20,17 +21,23 @@ export const ControlSettingTooltipLabel = ({
 }: {
   label: string;
   tooltip: string;
-}) => {
-  const labelId = useGeneratedHtmlId();
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <span id={labelId}>{label}</span>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={rowStyles}>
-        <EuiIconTip content={tooltip} position="right" aria-labelledby={labelId} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+    <EuiFlexItem grow={false} css={rowStyles}>
+      <EuiIconTip
+        content={tooltip}
+        position="right"
+        aria-label={i18n.translate(
+          'controls.controlGroup.controlSettingTooltipLabel.tooltipAriaLabel',
+          {
+            defaultMessage: 'More about {label}',
+            values: {
+              label,
+            },
+          }
+        )}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
