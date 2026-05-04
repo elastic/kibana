@@ -124,7 +124,11 @@ export const backfillScheduleIds = async ({
                   set(
                     draft,
                     `${packPath}.queries`,
-                    convertSOQueriesToPackConfig(updatedQueries, spaceId)
+                    convertSOQueriesToPackConfig(updatedQueries, spaceId, {
+                      schedule_type: packSO.attributes.schedule_type,
+                      interval: packSO.attributes.interval,
+                      rrule_schedule: packSO.attributes.rrule_schedule,
+                    })
                   );
 
                   return draft;

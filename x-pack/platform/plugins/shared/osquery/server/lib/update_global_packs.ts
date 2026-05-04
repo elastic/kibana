@@ -78,7 +78,11 @@ export const updateGlobalPacksCreateCallback = async (
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
-          queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId),
+          queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId, {
+            schedule_type: pack.schedule_type,
+            interval: pack.interval,
+            rrule_schedule: pack.rrule_schedule,
+          }),
         });
       });
 

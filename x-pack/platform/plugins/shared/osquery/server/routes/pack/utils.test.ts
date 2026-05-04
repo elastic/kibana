@@ -10,6 +10,7 @@ import {
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
 } from './utils';
+import type { RRuleScheduleConfig } from '../../../common';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
   [packName]: {
@@ -159,6 +160,271 @@ describe('Pack utils', () => {
         schedule_id: 'uuid-xyz',
         start_date: '2024-06-15T12:00:00.000Z',
       });
+    });
+  });
+
+  describe('convertSOQueriesToPackConfig — schedule fan-out', () => {
+    const packRrule: RRuleScheduleConfig = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+    const queryRrule: RRuleScheduleConfig = {
+      rrule: 'FREQ=WEEKLY;BYDAY=MO,WE,FR',
+      start_date: '2024-02-01T00:00:00.000Z',
+    };
+
+    const baseQuery = {
+      query: 'SELECT 1',
+    };
+
+    test('pack RRULE is inherited by queries without overrides (interval stripped)', () => {
+      const queries = {
+        q1: { ...baseQuery, interval: 3600 },
+        q2: { ...baseQuery, interval: 7200 },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      });
+
+      expect(result.q1).toEqual({
+        query: 'SELECT 1',
+        rrule_schedule: packRrule,
+      });
+      expect(result.q2).toEqual({
+        query: 'SELECT 1',
+        rrule_schedule: packRrule,
+      });
+      expect(result.q1).not.toHaveProperty('interval');
+      expect(result.q2).not.toHaveProperty('interval');
+    });
+
+    test('per-query RRULE override takes precedence over pack RRULE', () => {
+      const queries = {
+        inherits: { ...baseQuery, interval: 3600 },
+        overrides: {
+          ...baseQuery,
+          interval: 3600,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: queryRrule,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      });
+
+      expect(result.inherits.rrule_schedule).toEqual(packRrule);
+      expect(result.overrides.rrule_schedule).toEqual(queryRrule);
+      expect(result.overrides).not.toHaveProperty('interval');
+    });
+
+    test('per-query interval override takes precedence over pack RRULE', () => {
+      const queries = {
+        inherits: { ...baseQuery, interval: 3600 },
+        overrides: {
+          ...baseQuery,
+          interval: 900,
+          schedule_type: 'interval' as const,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      });
+
+      expect(result.inherits).toEqual({ query: 'SELECT 1', rrule_schedule: packRrule });
+      expect(result.overrides).toEqual({ query: 'SELECT 1', interval: 900 });
+      expect(result.overrides).not.toHaveProperty('rrule_schedule');
+    });
+
+    test('pack-level interval is inherited by queries without overrides', () => {
+      const queries = {
+        q1: { ...baseQuery, interval: 3600 },
+        q2: { ...baseQuery, interval: 7200 },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'interval',
+        interval: 1800,
+      });
+
+      expect(result.q1).toEqual({ query: 'SELECT 1', interval: 1800 });
+      expect(result.q2).toEqual({ query: 'SELECT 1', interval: 1800 });
+      expect(result.q1).not.toHaveProperty('rrule_schedule');
+    });
+
+    test('per-query RRULE override takes precedence over pack interval', () => {
+      const queries = {
+        inherits: { ...baseQuery, interval: 3600 },
+        overrides: {
+          ...baseQuery,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: queryRrule,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'interval',
+        interval: 1800,
+      });
+
+      expect(result.inherits).toEqual({ query: 'SELECT 1', interval: 1800 });
+      expect(result.overrides).toEqual({ query: 'SELECT 1', rrule_schedule: queryRrule });
+      expect(result.overrides).not.toHaveProperty('interval');
+    });
+
+    test('legacy pack (no packSchedule) preserves query interval unchanged', () => {
+      const queries = {
+        q1: { ...baseQuery, interval: 3600 },
+        q2: { ...baseQuery, interval: 7200 },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries);
+
+      expect(result.q1).toEqual({ query: 'SELECT 1', interval: 3600 });
+      expect(result.q2).toEqual({ query: 'SELECT 1', interval: 7200 });
+    });
+
+    test('mixed: pack RRULE + one RRULE override + one interval override', () => {
+      const queries = {
+        inherits: { ...baseQuery, interval: 3600 },
+        rrule_override: {
+          ...baseQuery,
+          interval: 3600,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: queryRrule,
+        },
+        interval_override: {
+          ...baseQuery,
+          interval: 300,
+          schedule_type: 'interval' as const,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, 'my-space', {
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      });
+
+      expect(result.inherits).toEqual({
+        query: 'SELECT 1',
+        rrule_schedule: packRrule,
+        space_id: 'my-space',
+      });
+      expect(result.rrule_override).toEqual({
+        query: 'SELECT 1',
+        rrule_schedule: queryRrule,
+        space_id: 'my-space',
+      });
+      expect(result.interval_override).toEqual({
+        query: 'SELECT 1',
+        interval: 300,
+        space_id: 'my-space',
+      });
+    });
+
+    test('mutual exclusivity: fanned-out query never has both interval and rrule_schedule', () => {
+      const cases = [
+        {
+          label: 'pack RRULE + query has stale interval',
+          packSchedule: { schedule_type: 'rrule' as const, rrule_schedule: packRrule },
+          query: { ...baseQuery, interval: 3600 },
+        },
+        {
+          label: 'pack interval + query has stale rrule_schedule (no discriminator)',
+          packSchedule: { schedule_type: 'interval' as const, interval: 1800 },
+          query: { ...baseQuery, interval: 3600, rrule_schedule: queryRrule },
+        },
+        {
+          label: "query schedule_type='rrule' overriding pack interval",
+          packSchedule: { schedule_type: 'interval' as const, interval: 1800 },
+          query: {
+            ...baseQuery,
+            interval: 3600,
+            schedule_type: 'rrule' as const,
+            rrule_schedule: queryRrule,
+          },
+        },
+        {
+          label: "query schedule_type='interval' overriding pack rrule",
+          packSchedule: { schedule_type: 'rrule' as const, rrule_schedule: packRrule },
+          query: {
+            ...baseQuery,
+            interval: 3600,
+            schedule_type: 'interval' as const,
+            rrule_schedule: queryRrule,
+          },
+        },
+      ];
+
+      for (const { label, packSchedule, query } of cases) {
+        const result = convertSOQueriesToPackConfig({ q: query }, undefined, packSchedule);
+        const hasInterval = 'interval' in result.q;
+        const hasRrule = 'rrule_schedule' in result.q;
+        expect({ label, hasInterval, hasRrule, bothSet: hasInterval && hasRrule }).toEqual({
+          label,
+          hasInterval,
+          hasRrule,
+          bothSet: false,
+        });
+      }
+    });
+
+    test('does not leak schedule_type into Fleet output', () => {
+      const queries = {
+        q1: {
+          ...baseQuery,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: queryRrule,
+        },
+        q2: {
+          ...baseQuery,
+          schedule_type: 'interval' as const,
+          interval: 600,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries);
+
+      expect(result.q1).not.toHaveProperty('schedule_type');
+      expect(result.q2).not.toHaveProperty('schedule_type');
+    });
+
+    test('per-query schedule_type="rrule" without rrule_schedule falls through to pack schedule', () => {
+      const queries = {
+        q1: {
+          ...baseQuery,
+          interval: 3600,
+          schedule_type: 'rrule' as const,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'interval',
+        interval: 1800,
+      });
+
+      expect(result.q1).toEqual({ query: 'SELECT 1', interval: 1800 });
+    });
+
+    test('per-query schedule_type="interval" without interval falls through to pack schedule', () => {
+      const queries = {
+        q1: {
+          ...baseQuery,
+          schedule_type: 'interval' as const,
+        },
+      };
+
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      });
+
+      expect(result.q1).toEqual({ query: 'SELECT 1', rrule_schedule: packRrule });
     });
   });
 });

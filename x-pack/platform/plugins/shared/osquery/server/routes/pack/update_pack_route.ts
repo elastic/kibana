@@ -289,7 +289,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         pack_id: updatedPackSO.id,
                         queries: convertSOQueriesToPackConfig(
                           updatedPackSO.attributes.queries,
-                          spaceId
+                          spaceId,
+                          {
+                            schedule_type: updatedPackSO.attributes.schedule_type,
+                            interval: updatedPackSO.attributes.interval,
+                            rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                          }
                         ),
                       });
 
@@ -373,7 +378,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       pack_id: updatedPackSO.id,
                       queries: convertSOQueriesToPackConfig(
                         updatedPackSO.attributes.queries,
-                        spaceId
+                        spaceId,
+                        {
+                          schedule_type: updatedPackSO.attributes.schedule_type,
+                          interval: updatedPackSO.attributes.interval,
+                          rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                        }
                       ),
                     });
 
@@ -407,7 +417,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       pack_id: updatedPackSO.id,
                       queries: convertSOQueriesToPackConfig(
                         updatedPackSO.attributes.queries,
-                        spaceId
+                        spaceId,
+                        {
+                          schedule_type: updatedPackSO.attributes.schedule_type,
+                          interval: updatedPackSO.attributes.interval,
+                          rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                        }
                       ),
                     });
 

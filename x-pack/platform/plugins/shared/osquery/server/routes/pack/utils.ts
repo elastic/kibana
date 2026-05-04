@@ -128,9 +128,34 @@ export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, P
     {} as Record<string, PackQueryInput>
   );
 
+/**
+ * Converts stored pack queries into the Fleet-facing config each policy ships
+ * to osquerybeat. This is also where the pack-level schedule (interval or
+ * RRULE) is "fanned out" onto each query.
+ *
+ * Fan-out priority (per query):
+ *
+ * 1. Per-query override with `schedule_type === 'rrule'` wins — emit the
+ *    query's own `rrule_schedule`, strip `interval`.
+ * 2. Per-query override with `schedule_type === 'interval'` wins — emit the
+ *    query's own `interval`, strip `rrule_schedule`.
+ * 3. No per-query override, pack is on RRULE — stamp pack's `rrule_schedule`
+ *    onto the query, strip `interval`.
+ * 4. No per-query override, pack is on interval — stamp pack's `interval`
+ *    onto the query, strip `rrule_schedule`.
+ * 5. Legacy (no pack schedule, no per-query override) — preserve the query's
+ *    own `interval`, unchanged.
+ *
+ * Mutual exclusivity: a fanned-out query always has `interval` XOR
+ * `rrule_schedule`, never both.
+ *
+ * `schedule_type` is an internal Kibana discriminator and is intentionally not
+ * emitted to Fleet — osquerybeat only checks for `rrule_schedule` presence.
+ */
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
-  spaceId?: string
+  spaceId?: string,
+  packSchedule?: PackSchedule
 ) =>
   reduce(
     queries as SOPackQuery[],
@@ -141,8 +166,30 @@ export const convertSOQueriesToPackConfig = (
     ) => {
       const resultType = snapshot === false ? { removed, snapshot } : {};
       const index = queryId ? queryId : key;
+
+      const {
+        interval: queryInterval,
+        schedule_type: querySchedule,
+        rrule_schedule: queryRrule,
+        ...remaining
+      } = rest;
+
+      let scheduleFields: Record<string, unknown>;
+      if (querySchedule === 'rrule' && queryRrule) {
+        scheduleFields = { rrule_schedule: queryRrule };
+      } else if (querySchedule === 'interval' && queryInterval != null) {
+        scheduleFields = { interval: queryInterval };
+      } else if (packSchedule?.schedule_type === 'rrule' && packSchedule.rrule_schedule) {
+        scheduleFields = { rrule_schedule: packSchedule.rrule_schedule };
+      } else if (packSchedule?.schedule_type === 'interval' && packSchedule.interval != null) {
+        scheduleFields = { interval: packSchedule.interval };
+      } else {
+        scheduleFields = queryInterval != null ? { interval: queryInterval } : {};
+      }
+
       acc[index] = {
-        ...rest,
+        ...remaining,
+        ...scheduleFields,
         query: removeMultilines(query),
         ...(!isEmpty(ecs_mapping)
           ? isArray(ecs_mapping)
