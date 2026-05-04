@@ -85,6 +85,7 @@ packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-moon @elastic/kibana-operations
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
+packages/kbn-perf-page-load @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-check @elastic/appex-sharedux
@@ -95,9 +96,12 @@ packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-rspack-optimizer @elastic/kibana-operations
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
+packages/kbn-swc-config @elastic/kibana-operations
+packages/kbn-transpiler-config @elastic/kibana-operations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-tsconfig/base @elastic/kibana-operations
@@ -439,10 +443,12 @@ src/platform/packages/shared/content-management/access_control/access_control_se
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-docs @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-footer @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-page @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-table @elastic/appex-sharedux
@@ -736,7 +742,6 @@ src/platform/packages/shared/shared-ux/column-presets @elastic/eui @elastic/appe
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/document_data_cascade/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/feedback_snippet @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/context @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_picker/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_upload/impl @elastic/appex-sharedux
@@ -1123,6 +1128,7 @@ x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
+x-pack/platform/plugins/shared/agent_context_layer @elastic/workchat-eng
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
@@ -2716,6 +2722,16 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/fixtures/es_archives/rule_keyword_family @elastic/security-detection-rule-management
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/detections.gen.ts @elastic/security-detection-engine @elastic/security-detection-rule-management
+
+# Security Solution initialization
+/x-pack/solutions/security/plugins/security_solution/common/api/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/create_list_indices @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_prebuilt_rules @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_endpoint_protection @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_ai_prompts @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_detection_rule_monitoring @elastic/security-detection-rule-management
 
 # Security Solution sub teams
 

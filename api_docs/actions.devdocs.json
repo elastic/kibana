@@ -5636,7 +5636,7 @@
           "(result: unknown) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
-        "lineNumber": 67,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5652,7 +5652,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5904,7 +5904,7 @@
         "label": "ActionsPublicConfigType",
         "description": [],
         "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
-        "lineNumber": 78,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5920,7 +5920,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6268,6 +6268,38 @@
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionTypeExecutorResult.errorName",
+            "type": "string",
+            "tags": [],
+            "label": "errorName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionTypeExecutorResult.errorMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "errorMeta",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6914,7 +6946,7 @@
           "<Data> & { error?: Error | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
-        "lineNumber": 63,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

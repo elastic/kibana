@@ -40,7 +40,7 @@
           "<Context>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -55,7 +55,7 @@
               "\nID that uniquely identifies this object."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -70,7 +70,7 @@
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -88,7 +88,7 @@
               "React.FC<{ context: Context; }> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -103,10 +103,12 @@
               "\nOptional EUI icon type that can be displayed along with the title."
             ],
             "signature": [
-              "(context: Context) => string | undefined"
+              "(context: Context) => ",
+              "IconType",
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -122,7 +124,7 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 36,
+                "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "Context",
@@ -145,7 +147,7 @@
               "(context: Context) => string"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -161,7 +163,7 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 41,
+                "lineNumber": 42,
                 "columnNumber": 18,
                 "deprecated": false,
                 "docsReferencedTypeName": "Context",
@@ -184,7 +186,7 @@
               "((context: Context) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -200,7 +202,7 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 47,
+                "lineNumber": 48,
                 "columnNumber": 26,
                 "deprecated": false,
                 "docsReferencedTypeName": "Context",
@@ -223,7 +225,7 @@
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -239,7 +241,7 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 54,
+                "lineNumber": 55,
                 "columnNumber": 12,
                 "deprecated": false,
                 "docsReferencedTypeName": "Context",
@@ -262,7 +264,7 @@
               "(context: Context) => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -278,7 +280,7 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 16,
                 "deprecated": false,
                 "docsReferencedTypeName": "Context",
@@ -308,7 +310,7 @@
               "<Context> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -342,7 +344,7 @@
           "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -355,7 +357,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -384,7 +386,7 @@
           "<Context>[]"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

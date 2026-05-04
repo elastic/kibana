@@ -47,6 +47,10 @@ export const LABEL_MAPPING: Record<string, Record<string, string>> = {
   [FIPS_GH_LABELS[FIPS_VERSION.THREE]]: {
     TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.THREE,
   },
+  // [rspack-transition] Remove this mapping when the legacy optimizer is removed.
+  'ci:build-with-rspack-optimizer': {
+    KBN_USE_RSPACK: 'true',
+  },
 };
 
 /**
