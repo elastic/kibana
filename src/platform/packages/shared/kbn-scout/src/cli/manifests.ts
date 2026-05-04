@@ -31,7 +31,7 @@ const manifestUpdateReporter = path.join(
 async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
   // `passWithNoTests` lets configs with zero tests exit cleanly (code 0) so we can
   // unambiguously treat any non-zero exit as a real discovery failure (e.g. a syntax
-  // error during Playwright transpilation). See https://github.com/elastic/kibana/issues/262787.
+  // error during Playwright transpilation).
   const result = await playwrightCLI.test(
     {
       config: configPath,
@@ -49,8 +49,7 @@ async function generateScoutConfigManifest(configPath: string, log?: ToolingLog)
       `Failed to discover tests for Scout config at '${configPath}': ` +
         `playwright --list exited with code ${result.exitCode}. ` +
         `This usually means the config has a real error (e.g. a syntax/transpilation error) ` +
-        `rather than legitimately zero tests. ` +
-        `See https://github.com/elastic/kibana/issues/262787 for context.`
+        `rather than legitimately zero tests.`
     );
   }
 
