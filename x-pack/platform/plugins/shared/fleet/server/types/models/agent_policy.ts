@@ -171,6 +171,7 @@ export const AgentPolicyBaseSchema = {
           ),
         })
       ),
+      cluster_id: schema.maybe(schema.string()),
     })
   ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),

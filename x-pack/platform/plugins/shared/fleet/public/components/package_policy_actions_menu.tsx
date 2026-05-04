@@ -15,6 +15,7 @@ import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import {
   useAgentPolicyRefresh,
   useAuthz,
+  useGetOneAgentPolicy,
   useLink,
   useStartServices,
   useUpgradeReviewActions,
@@ -62,6 +63,13 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
   const isAgentlessPolicy = packagePolicy.supports_agentless;
 
+  // For agentless policies the agentPolicies prop may be empty (the parent hook doesn't always
+  // fetch them). Fetch the agent policy directly so we can include cluster_id in the support bundle.
+  const agentlessPolicyId =
+    isAgentlessPolicy && !agentPolicy ? packagePolicy.policy_ids[0] : undefined;
+  const { data: agentlessPolicyData } = useGetOneAgentPolicy(agentlessPolicyId);
+  const effectiveAgentPolicy = agentPolicy ?? agentlessPolicyData?.item;
+
   const supportBundleText = useMemo(() => {
     if (!isAgentlessPolicy) return '';
     return [
@@ -72,13 +80,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       !cloud?.isServerlessEnabled && cloud?.deploymentId
         ? `deployment_id=${cloud.deploymentId}`
         : null,
-      agentPolicy?.agentless?.cluster_id ? `cluster_id=${agentPolicy.agentless.cluster_id}` : null,
-      agentPolicy?.id ? `policy_id=${agentPolicy.id}` : null,
+      effectiveAgentPolicy?.agentless?.cluster_id
+        ? `cluster_id=${effectiveAgentPolicy.agentless.cluster_id}`
+        : null,
+      effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]
+        ? `policy_id=${effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]}`
+        : null,
       packagePolicy.package?.name ? `integration=${packagePolicy.package.name}` : null,
     ]
       .filter(Boolean)
       .join('\n');
-  }, [isAgentlessPolicy, cloud, agentPolicy, packagePolicy.package?.name]);
+  }, [
+    isAgentlessPolicy,
+    cloud,
+    effectiveAgentPolicy,
+    packagePolicy.policy_ids,
+    packagePolicy.package?.name,
+  ]);
 
   const isAddAgentVisible =
     showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
