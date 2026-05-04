@@ -117,7 +117,7 @@ describe('dashboard OAS schema hash', () => {
         ],
         Array [
           "kbn-dashboard-panel-type-image",
-          "7537b2e1839275897bcd15a11431cf68ce98606f2bfad9edd2f650be6958fb83",
+          "63a2a53025f6e95df145baaa834b5cd26bf7ec672a3039c2f4e609a708ea0e2f",
         ],
         Array [
           "kbn-dashboard-panel-type-markdown",
@@ -161,7 +161,7 @@ describe('dashboard OAS schema hash', () => {
         ],
         Array [
           "kbn-dashboard-panel-type-vis",
-          "01efe3ba75c98e102df449b2aff36babe382625761590a2802a1193b144e4dc1",
+          "06256f09fc8e99a5c68b107444332bee2a1bef2b7393a80a3b39fd3a311b3cb0",
         ],
       ]
     `);
