@@ -141,6 +141,14 @@ describe('useServiceMapBadges()', () => {
       expect(result.current.nodes).toBe(defaultParams.nodes);
     });
 
+    it('nodesStatus is NOT_INITIATED', () => {
+      const { result } = renderHook(() =>
+        useServiceMapBadges({ ...defaultParams, nodesStatus: FETCH_STATUS.NOT_INITIATED })
+      );
+
+      expect(result.current.nodes).toBe(defaultParams.nodes);
+    });
+
     it('nodesStatus is LOADING', () => {
       const { result } = renderHook(() =>
         useServiceMapBadges({ ...defaultParams, nodesStatus: FETCH_STATUS.LOADING })
