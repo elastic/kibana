@@ -21,10 +21,11 @@ describe('emitCommentAddedEvent', () => {
 
     emitCommentAddedEvent(clientArgs, updatedCase, ['comment-1']);
 
-    expect(clientArgs.casesEventBus.emitCommentAdded).toHaveBeenCalledWith(
-      clientArgs.request,
-      { caseId: 'case-1', caseCommentIds: ['comment-1'], owner: 'securitySolution' }
-    );
+    expect(clientArgs.casesEventBus.emitCommentAdded).toHaveBeenCalledWith(clientArgs.request, {
+      caseId: 'case-1',
+      caseCommentIds: ['comment-1'],
+      owner: 'securitySolution',
+    });
   });
 
   it('does nothing when casesEventBus is absent', () => {
