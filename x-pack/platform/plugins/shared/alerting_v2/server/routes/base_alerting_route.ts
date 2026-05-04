@@ -43,7 +43,11 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected onError(e: Boom.Boom | Error): IKibanaResponse {
     const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
 
-    this.ctx.logger.debug(`${this.routeName} error: ${boom.message}`);
+    if (boom.output.statusCode >= 500) {
+      this.ctx.logger.error(`${this.routeName} error: ${boom.message}`, { error: e });
+    } else {
+      this.ctx.logger.debug(`${this.routeName} error: ${boom.message}`);
+    }
 
     return this.ctx.response.customError({
       statusCode: boom.output.statusCode,
