@@ -147,6 +147,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
+    if (!conversationId) return;
 
     setIsPopoverOpen(false);
     onCloseSidebar?.();
