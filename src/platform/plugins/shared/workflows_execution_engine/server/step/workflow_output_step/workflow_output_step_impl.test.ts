@@ -230,7 +230,7 @@ describe('WorkflowOutputStepImpl', () => {
     });
     const workflowRuntime = createWorkflowRuntime();
     workflowRuntime.getWorkflowExecution.mockImplementation(() => {
-      throw 'string error';
+      throw new Error('string error');
     });
     const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
     const step = new WorkflowOutputStepImpl(

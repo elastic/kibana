@@ -237,15 +237,10 @@ describe('ConnectorStepImpl', () => {
     });
 
     const step = {
-      name: 'gen-ai-step',
-      stepId: 'gen-ai-step',
-      type: 'gen-ai',
+      name: 'http-step',
+      stepId: 'http-step',
+      type: 'http',
     };
-
-    // Mock SystemConnectorsMap to have an entry for .gen-ai
-    jest.mock('@kbn/workflows/common/constants', () => ({
-      SystemConnectorsMap: new Map([['.gen-ai', '.gen-ai']]),
-    }));
 
     const impl = new ConnectorStepImpl(
       step,
@@ -256,8 +251,22 @@ describe('ConnectorStepImpl', () => {
     );
 
     const result = await (impl as any)._run({});
-    // Either system connector was used or it threw an error about missing connector ID
-    expect(result.error !== undefined || result.output !== undefined).toBe(true);
+
+    expect(connectorExecutor.executeSystemConnector).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: '.http-system',
+        input: expect.objectContaining({
+          fetcher: expect.objectContaining({
+            max_content_length: expect.any(Number),
+          }),
+        }),
+      })
+    );
+    expect(result).toEqual({
+      input: {},
+      output: { response: 'ok' },
+      error: undefined,
+    });
   });
 
   it('injects max_content_length for http connector type', async () => {

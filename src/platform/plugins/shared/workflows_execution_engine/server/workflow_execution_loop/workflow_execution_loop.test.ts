@@ -76,23 +76,11 @@ describe('workflowExecutionLoop', () => {
     expect(params.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(testError);
   });
 
-  it('updates execution state when task abort fires before the loop starts', () => {
+  it('updates execution state when task abort is signaled during workflow execution', async () => {
     const params = createParams();
-    // Abort before calling workflowExecutionLoop, so the listener is not registered yet.
-    // Instead, register listener manually and then abort:
-    const taskAbortController = params.taskAbortController;
-
-    // Manually trigger what the loop does internally:
-    taskAbortController.signal.addEventListener('abort', () => {
-      params.workflowExecutionState.updateWorkflowExecution({
-        cancelRequested: true,
-        cancelledAt: expect.any(String),
-        cancellationReason: 'Task aborted',
-        status: ExecutionStatus.CANCELLED,
-      });
-    });
-
-    taskAbortController.abort();
+    const loopPromise = workflowExecutionLoop(params as any);
+    params.taskAbortController.abort();
+    await loopPromise;
 
     expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
       expect.objectContaining({
