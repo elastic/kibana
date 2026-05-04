@@ -44,13 +44,13 @@ spaceTest.describe('Workflows management API availability (serverless tiers)', (
     async () => {
       const response = await workflowsApi.rawGetWorkflow('non-existent-id', {
         retries: 0,
-        ignoreErrors: [404],
+        ignoreErrors: [403],
       });
       expect(response.data).toMatchObject({
-        // Route not registered
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Not Found`,
+        statusCode: 403,
+        error: 'Forbidden',
+        message:
+          'Your project does not have Workflows available. Please upgrade your tier subscription.',
       });
     }
   );
@@ -68,18 +68,18 @@ spaceTest.describe('Workflows management API availability (serverless tiers)', (
   );
 
   spaceTest(
-    'observability logs essentials: workflow API is not available',
-    { tag: [...tags.serverless.observability.logs_essentials] },
+    'security essentials: workflow API is not available',
+    { tag: [...tags.serverless.security.essentials] },
     async () => {
       const response = await workflowsApi.rawGetWorkflow('non-existent-id', {
         retries: 0,
-        ignoreErrors: [403],
+        ignoreErrors: [404],
       });
       expect(response.data).toMatchObject({
-        statusCode: 403,
-        error: 'Forbidden',
-        message:
-          'Your project does not have Workflows available. Please upgrade your tier subscription.',
+        // Route not registered
+        statusCode: 404,
+        error: 'Not Found',
+        message: `Not Found`,
       });
     }
   );
