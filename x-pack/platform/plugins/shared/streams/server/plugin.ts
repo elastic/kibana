@@ -22,7 +22,7 @@ import {
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
@@ -153,7 +153,7 @@ export class StreamsPlugin
       rulesClientOptions,
     }: {
       request: KibanaRequest;
-      rulesClientOptions?: { cloneApiKeysOnCreate?: boolean };
+      rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
