@@ -6,9 +6,6 @@
  */
 
 import type { CasesPublicSetupDependencies } from '../../types';
-import { caseCreatedTriggerPublicDefinition } from './case_created';
-import { caseUpdatedTriggerPublicDefinition } from './case_updated';
-import { commentAddedTriggerPublicDefinition } from './comment_added';
 
 export function registerCasesTriggerDefinitions(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
@@ -17,7 +14,13 @@ export function registerCasesTriggerDefinitions(
     return;
   }
 
-  workflowsExtensions.registerTriggerDefinition(caseCreatedTriggerPublicDefinition);
-  workflowsExtensions.registerTriggerDefinition(caseUpdatedTriggerPublicDefinition);
-  workflowsExtensions.registerTriggerDefinition(commentAddedTriggerPublicDefinition);
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./case_created').then((m) => m.caseCreatedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./case_updated').then((m) => m.caseUpdatedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./comment_added').then((m) => m.commentAddedTriggerPublicDefinition)
+  );
 }
