@@ -27,7 +27,6 @@ const defaultManagementPolicy: Required<ManagedWorkflowManagement> = {
   lifecycle: 'static',
   versionStrategy: 'auto',
   enablement: 'restorable',
-  defaultEnabled: true,
 };
 
 export const managedWorkflowDefinitions = [WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW] as const;

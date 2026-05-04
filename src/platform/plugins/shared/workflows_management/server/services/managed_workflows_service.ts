@@ -18,7 +18,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { ExecuteManagedWorkflowOptions } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import { parseYamlToJSONWithoutValidation, updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { computeDefinitionHash, getTriggerTypesFromDefinition } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -96,10 +96,7 @@ export class ManagedWorkflowsService {
       return;
     }
 
-    const enabled =
-      definition.management.enablement === 'enforced'
-        ? definition.management.defaultEnabled
-        : existing.enabled;
+    const enabled = definition.management.enablement === 'enforced' ? undefined : existing.enabled;
     const document = this.buildManagedWorkflowDocument({
       definition,
       spaceId,
@@ -200,16 +197,24 @@ export class ManagedWorkflowsService {
       }
     }
 
-    const resolvedEnabled = params.enabled ?? definition.management.defaultEnabled;
+    const yamlDefinedEnabled = workflowModel?.enabled ?? true;
+    const resolvedEnabled = params.enabled ?? yamlDefinedEnabled;
+    const resolvedYaml = updateYamlField(definition.yaml, 'enabled', resolvedEnabled);
+    const resolvedDefinition = workflowModel?.definition
+      ? {
+          ...workflowModel.definition,
+          enabled: resolvedEnabled,
+        }
+      : null;
 
     return {
       name: workflowModel?.name ?? definition.id,
       description: workflowModel?.description,
       enabled: resolvedEnabled,
       tags: workflowModel?.tags ?? [],
-      triggerTypes: getTriggerTypesFromDefinition(workflowModel?.definition),
-      yaml: definition.yaml,
-      definition: workflowModel?.definition ?? null,
+      triggerTypes: getTriggerTypesFromDefinition(resolvedDefinition ?? undefined),
+      yaml: resolvedYaml,
+      definition: resolvedDefinition,
       createdBy: MANAGED_WORKFLOW_SYSTEM_USER,
       lastUpdatedBy: MANAGED_WORKFLOW_SYSTEM_USER,
       spaceId,

@@ -11,7 +11,6 @@ export interface ManagedWorkflowManagement {
   lifecycle?: 'static' | 'dynamic';
   versionStrategy?: 'auto' | 'on_adopt';
   enablement?: 'enforced' | 'restorable';
-  defaultEnabled?: boolean;
 }
 
 export interface ManagedWorkflowDefinition {

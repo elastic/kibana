@@ -17,6 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
@@ -44,6 +45,8 @@ import type {
 } from './types';
 import { registerUISettings } from './ui_settings';
 import { stepSchemas } from '../common/step_schemas';
+
+const WORKFLOWS_MANAGEMENT_PLUGIN_ID = 'workflowsManagement';
 
 export class WorkflowsPlugin
   implements
@@ -105,6 +108,7 @@ export class WorkflowsPlugin
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
     );
+    plugins.workflowsExtensions.registerManagedWorkflowOwner(WORKFLOWS_MANAGEMENT_PLUGIN_ID);
 
     const spaces = plugins.spaces.spacesService;
 
@@ -142,6 +146,8 @@ export class WorkflowsPlugin
           });
         });
     }
+
+    void this.initializeManagedWorkflowsOnStart();
 
     this.logger.debug('Workflows Management: Started');
     return {};
@@ -214,6 +220,20 @@ export class WorkflowsPlugin
           `Workflows Management: Failed to wire SML indexing with Agent Context Layer: ${message}`
         );
       });
+  }
+
+  private async initializeManagedWorkflowsOnStart(): Promise<void> {
+    try {
+      await this.workflowsService?.installManagedWorkflow(
+        WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
+        { isStartupReconcile: true },
+        WORKFLOWS_MANAGEMENT_PLUGIN_ID
+      );
+    } catch (error) {
+      this.logger.warn('Workflows Management: Failed to initialize managed workflows on start', {
+        error,
+      });
+    }
   }
 
   public stop() {

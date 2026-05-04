@@ -18,7 +18,9 @@ export const WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW: ManagedWorkflowDefiniti
   yaml: `name: Workflows Management Health Check
 enabled: true
 triggers:
-  - type: manual
+  - type: scheduled
+    with:
+      every: 21m
 steps:
   - name: echo
     type: console
@@ -29,6 +31,5 @@ steps:
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'restorable',
-    defaultEnabled: true,
   },
 };
