@@ -37,3 +37,7 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
 }
+
+export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';
+
+export type ConnectorAuthStatusMap = Record<string, { userAuthStatus: ConnectorUserAuthStatus }>;
