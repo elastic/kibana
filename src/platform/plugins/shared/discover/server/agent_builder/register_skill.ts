@@ -41,9 +41,10 @@ This skill operates only in ES|QL mode. Before anything else, read the screen_co
 - If it is "kuery" or "lucene", respond exactly: "I can only analyze data when you're in ES|QL mode. Switch to ES|QL from the query bar toggle to use this feature." Do NOT generate, modify, or run queries. Do NOT call any tools. Stop.
 
 ### Shape-Specific Playbook
-If the ES|QL query results attachment contains a "Shape Profile" block, treat it as authoritative shape guidance:
-- Use its "Characteristic fields present" list as priority candidates for STATS BY (still respecting the rule of grouping by at most 2 fields).
-- Apply its "Guidance" paragraph when choosing which 2-3 aggregations to run in Path A.
+If the ES|QL query results attachment contains a "Shape Profile" block, its "Guidance" paragraph is AUTHORITATIVE and OVERRIDES any conflicting examples or defaults elsewhere in this skill:
+- Any source-command rules in the Guidance (e.g. "use TS, never FROM") take precedence over the FROM-style examples in Path A. If the Guidance says to use TS, every aggregation and drill-down query you produce MUST start with TS.
+- Any "first run X to discover schema" instruction in the Guidance (e.g. \`TS_INFO\`) MUST be executed BEFORE the Path A aggregations. Treat that discovery query as the first of your 2-3 query budget, not as an extra step you can skip.
+- Use the "Characteristic fields present" list as priority candidates for STATS BY (still cap at 2 grouping fields).
 - Phrase the Drill-Down Queries section using the "Interesting signals" entries when present.
 If no Shape Profile block is present, infer analysis strategy from the column names and types as before. Never invent fields not listed in the Columns section of the attachment.
 
