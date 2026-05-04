@@ -24,7 +24,7 @@ export const ControlSettingTooltipLabel = ({
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false} css={rowStyles}>
-      <EuiIconTip content={tooltip} position="right" />
+      <EuiIconTip content={tooltip} position="right" aria-label={`${label} - ${tooltip}`} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
