@@ -33,9 +33,9 @@ import { RulesApp } from './rules_app';
 import { RuleDoctorApp } from './rule_doctor_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
+import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
-import { ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH } from '../constants';
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -208,17 +208,35 @@ export const mountActionPoliciesApp = async ({
   return () => ReactDOM.unmountComponentAtNode(element);
 };
 
-export const mountExecutionHistoryRedirect = async ({
+export const mountExecutionHistoryApp = async ({
   params,
+  container,
   coreStart,
 }: {
   params: AlertingV2MountParams;
+  container: Container;
   coreStart: CoreStart;
 }): Promise<AppUnmount> => {
-  await coreStart.application.navigateToApp('management', {
-    path: `${ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH}/execution-history`,
-    replace: true,
-  });
+  const { element, history, setBreadcrumbs } = params;
 
-  return () => {};
+  const queryClient = new QueryClient();
+
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+            <I18nProvider>
+              <Router history={history}>
+                <ExecutionHistoryApp />
+              </Router>
+            </I18nProvider>
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -149,8 +149,12 @@ export const module = new ContainerModule(({ bind }) => {
       order: 5,
       async mount(params) {
         const [coreStart] = await getStartServices();
-        const { mountExecutionHistoryRedirect } = await import('./application/mount');
-        return mountExecutionHistoryRedirect({ params, coreStart });
+        const { mountExecutionHistoryApp } = await import('./application/mount');
+        return mountExecutionHistoryApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
       },
     });
   });
