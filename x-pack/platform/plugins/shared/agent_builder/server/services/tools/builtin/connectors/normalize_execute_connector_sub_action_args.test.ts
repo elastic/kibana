@@ -140,9 +140,12 @@ describe('normalizeExecuteConnectorSubActionArgs', () => {
 
   it('fills connectorId from loneConnectorId when missing', () => {
     expect(
-      normalizeExecuteConnectorSubActionArgs({ subAction: 'getMessage', params: { id: '1' } }, {
-        loneConnectorId: 'only-connector',
-      })
+      normalizeExecuteConnectorSubActionArgs(
+        { subAction: 'getMessage', params: { id: '1' } },
+        {
+          loneConnectorId: 'only-connector',
+        }
+      )
     ).toEqual({
       connectorId: 'only-connector',
       subAction: 'getMessage',

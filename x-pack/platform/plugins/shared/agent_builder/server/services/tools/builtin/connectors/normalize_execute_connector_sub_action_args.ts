@@ -31,6 +31,24 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;
 }
 
+/** Maps `connector_id` / `sub_action` to camelCase; prefers existing camel keys over snake_case. */
+function aliasConnectorSnakeCaseFields(record: Record<string, unknown>) {
+  if ('connector_id' in record && 'connectorId' in record) {
+    delete record.connector_id;
+  }
+  if ('sub_action' in record && 'subAction' in record) {
+    delete record.sub_action;
+  }
+  if ('connector_id' in record && !('connectorId' in record)) {
+    record.connectorId = record.connector_id;
+    delete record.connector_id;
+  }
+  if ('sub_action' in record && !('subAction' in record)) {
+    record.subAction = record.sub_action;
+    delete record.sub_action;
+  }
+}
+
 /**
  * Structural normalization for `platform.core.execute_connector_sub_action` tool arguments.
  *
@@ -57,22 +75,7 @@ export function normalizeExecuteConnectorSubActionArgs(
   }
 
   const src: Record<string, unknown> = { ...input };
-
-  if ('connector_id' in src && 'connectorId' in src) {
-    delete src.connector_id;
-  }
-  if ('sub_action' in src && 'subAction' in src) {
-    delete src.sub_action;
-  }
-
-  if ('connector_id' in src && !('connectorId' in src)) {
-    src.connectorId = src.connector_id;
-    delete src.connector_id;
-  }
-  if ('sub_action' in src && !('subAction' in src)) {
-    src.subAction = src.sub_action;
-    delete src.sub_action;
-  }
+  aliasConnectorSnakeCaseFields(src);
 
   let paramsObj: Record<string, unknown>;
   if (isPlainObject(src.params)) {
@@ -81,14 +84,7 @@ export function normalizeExecuteConnectorSubActionArgs(
     paramsObj = {};
   }
 
-  if ('connector_id' in paramsObj && !('connectorId' in paramsObj)) {
-    paramsObj.connectorId = paramsObj.connector_id;
-    delete paramsObj.connector_id;
-  }
-  if ('sub_action' in paramsObj && !('subAction' in paramsObj)) {
-    paramsObj.subAction = paramsObj.sub_action;
-    delete paramsObj.sub_action;
-  }
+  aliasConnectorSnakeCaseFields(paramsObj);
 
   if (!isNonEmptyString(src.connectorId)) {
     if (isNonEmptyString(paramsObj.connectorId)) {

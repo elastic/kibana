@@ -11,6 +11,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
@@ -45,6 +46,8 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from './utils/prepare_conversation';
+import { normalizeExecuteConnectorSubActionArgs } from '../../tools/builtin/connectors/normalize_execute_connector_sub_action_args';
+import { getLoneConnectorIdFromProcessedConversation } from './utils/get_lone_connector_id';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -76,6 +79,9 @@ export const createAgentGraph = ({
   backgroundExecutionService?: BackgroundExecutionService;
   roundId: string;
 }) => {
+  /** One lookup per graph; attachment set for this round is stable for the whole run. */
+  const loneConnectorId = getLoneConnectorIdFromProcessedConversation(processedConversation);
+
   const init = async () => {
     return {};
   };
@@ -181,7 +187,19 @@ export const createAgentGraph = ({
 
     lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
-    const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
+    const normalizedToolCalls = lastAction.tool_calls.map((toolCall) => {
+      if (toolCall.toolName !== platformCoreTools.executeConnectorSubAction) {
+        return toolCall;
+      }
+      return {
+        ...toolCall,
+        args: normalizeExecuteConnectorSubActionArgs(toolCall.args, {
+          loneConnectorId,
+        }) as Record<string, unknown>,
+      };
+    });
+
+    const toolCallMessage = createToolCallMessage(normalizedToolCalls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const actions = processToolNodeResponse(toolNodeResult);
 

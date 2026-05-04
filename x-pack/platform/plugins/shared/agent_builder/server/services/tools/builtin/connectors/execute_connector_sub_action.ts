@@ -13,8 +13,9 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
+import { normalizeExecuteConnectorSubActionArgs } from './normalize_execute_connector_sub_action_args';
 
-const executeConnectorSubActionSchema = z.object({
+const executeConnectorSubActionArgsSchema = z.object({
   connectorId: z.string().min(1).describe('The ID of the connector instance to execute against'),
   subAction: z
     .string()
@@ -34,6 +35,17 @@ const executeConnectorSubActionSchema = z.object({
 });
 
 /**
+ * Structural normalization (aliases, hoist, flatten) with **no** `loneConnectorId`.
+ * Graph execution runs the same normalizer first with lone-id context; this preprocess
+ * still runs so non-graph callers (e.g. HTTP / tests invoking the tool schema directly)
+ * get identical structural fixes. Second pass on graph-shaped payloads is cheap and idempotent.
+ */
+const executeConnectorSubActionSchema = z.preprocess(
+  (raw) => normalizeExecuteConnectorSubActionArgs(raw, {}),
+  executeConnectorSubActionArgsSchema
+);
+
+/**
  * Creates the execute_connector_sub_action tool.
  *
  * This tool allows agents to execute any connector sub-action directly,
@@ -41,7 +53,7 @@ const executeConnectorSubActionSchema = z.object({
  */
 export const createExecuteConnectorSubActionTool = ({
   getActions,
-}: ConnectorToolsOptions): BuiltinToolDefinition<typeof executeConnectorSubActionSchema> => ({
+}: ConnectorToolsOptions): BuiltinToolDefinition<typeof executeConnectorSubActionArgsSchema> => ({
   id: platformCoreTools.executeConnectorSubAction,
   type: ToolType.builtin,
   description:
@@ -49,7 +61,7 @@ export const createExecuteConnectorSubActionTool = ({
     'IMPORTANT: Before calling this tool, you MUST read the connector attachment to find the exact sub-action names, ' +
     'required parameters, and the connectorId. Do not guess sub-action names or parameters. ' +
     'The connector attachment lists all available sub-actions with their parameter schemas.',
-  schema: executeConnectorSubActionSchema,
+  schema: executeConnectorSubActionSchema as unknown as typeof executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
   availability: {
     cacheMode: 'global',

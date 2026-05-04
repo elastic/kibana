@@ -73,6 +73,48 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(tool.tags).toEqual(['connector', 'sub-action']);
   });
 
+  describe('schema structural normalization', () => {
+    it('parses flattened top-level sub-action parameters into params', () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = tool.schema.safeParse({
+        connectorId: 'conn-123',
+        subAction: 'searchMessages',
+        messageId: 'm1',
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({
+          connectorId: 'conn-123',
+          subAction: 'searchMessages',
+          params: { messageId: 'm1' },
+        });
+      }
+    });
+
+    it('parses snake_case root keys via preprocess', () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = tool.schema.safeParse({
+        connector_id: 'conn-123',
+        sub_action: 'searchMessages',
+        params: { query: 'hi' },
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({
+          connectorId: 'conn-123',
+          subAction: 'searchMessages',
+          params: { query: 'hi' },
+        });
+      }
+    });
+
+    it('rejects input that is still invalid after normalization', () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = tool.schema.safeParse({ messageId: '123' });
+      expect(result.success).toBe(false);
+    });
+  });
+
   it('executes a sub-action successfully', async () => {
     mockExecute.mockResolvedValue({
       status: 'ok',
