@@ -32,7 +32,7 @@
       "maintenanceWindows",
       "eventLog"
     ],
-    "optionalPlugins": ["usageCollection"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
     "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }
