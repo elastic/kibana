@@ -46,6 +46,7 @@ import { QuickSearchVisor } from './editor_visor';
 import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
+import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -545,6 +546,8 @@ const ESQLEditorInternal = function ESQLEditor({
     suppressSuggestionsRef,
   });
 
+  const isNlToEsqlEnabled = useNlToEsqlCheck();
+
   const {
     commentToEsqlStyle,
     generateFromComment: onGenerateFromComment,
@@ -554,6 +557,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorModel,
     http: core.http,
     notifications: core.notifications,
+    isEnabled: isNlToEsqlEnabled,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -563,6 +567,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     isReviewActiveRef,
+    isEnabled: isNlToEsqlEnabled,
   });
 
   const {
@@ -707,11 +712,17 @@ const ESQLEditorInternal = function ESQLEditor({
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
-                placeholder={i18n.translate('esqlEditor.placeholder', {
-                  defaultMessage:
-                    "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
-                  values: { commandKey: isMac ? '⌘' : 'Ctrl' },
-                })}
+                placeholder={
+                  isNlToEsqlEnabled
+                    ? i18n.translate('esqlEditor.placeholder', {
+                        defaultMessage:
+                          "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
+                        values: { commandKey: isMac ? '⌘' : 'Ctrl' },
+                      })
+                    : i18n.translate('esqlEditor.placeholder.basic', {
+                        defaultMessage: 'Start typing ES|QL',
+                      })
+                }
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}

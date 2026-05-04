@@ -42,16 +42,22 @@ interface UseGhostLineHintParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   isReviewActiveRef: MutableRefObject<object | null>;
+  isEnabled: boolean;
 }
 
 export const useGhostLineHint = ({
   editorRef,
   editorModel,
   isReviewActiveRef,
+  isEnabled,
 }: UseGhostLineHintParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Mirror isEnabled in a ref so the cursor listener — registered once at editor mount —
+  // sees the latest value when the async license check resolves.
+  const isEnabledRef = useRef(isEnabled);
+  isEnabledRef.current = isEnabled;
 
   const commandKey = isMac ? '⌘' : 'Ctrl';
   const ghostHintText = i18n.translate('esqlEditor.ghostLineHint', {
@@ -113,6 +119,7 @@ export const useGhostLineHint = ({
           clearTimer();
 
           debounceTimerRef.current = setTimeout(() => {
+            if (!isEnabledRef.current) return;
             if (isReviewActiveRef.current) return;
 
             const model = editorModel.current;

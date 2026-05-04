@@ -43,6 +43,7 @@ interface UseCommentToEsqlParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   http: HttpStart;
   notifications: NotificationsStart;
+  isEnabled: boolean;
 }
 
 export const useCommentToEsql = ({
@@ -50,6 +51,7 @@ export const useCommentToEsql = ({
   editorModel,
   http,
   notifications,
+  isEnabled,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -255,6 +257,7 @@ export const useCommentToEsql = ({
   );
 
   const generateFromComment = useCallback(async () => {
+    if (!isEnabled) return;
     const editor = editorRef.current;
     const model = editorModel.current;
     if (!editor || !model) return;
@@ -341,7 +344,7 @@ export const useCommentToEsql = ({
       generatedLineEnd,
       replacedLineNumber,
     });
-  }, [editorRef, editorModel, cleanup, clearCommentAnchor, generateESQL, showReview]);
+  }, [editorRef, editorModel, cleanup, clearCommentAnchor, generateESQL, showReview, isEnabled]);
 
   return {
     commentToEsqlStyle,

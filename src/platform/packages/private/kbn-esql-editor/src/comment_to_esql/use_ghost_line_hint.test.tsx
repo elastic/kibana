@@ -84,6 +84,7 @@ describe('useGhostLineHint', () => {
     overrides: {
       model?: monaco.editor.ITextModel;
       isReviewActive?: boolean;
+      isEnabled?: boolean;
     } = {}
   ) => {
     const { model } = overrides.model ? { model: overrides.model } : buildModel(['FROM logs', '']);
@@ -91,16 +92,24 @@ describe('useGhostLineHint', () => {
     const editorRef = { current: stubs.editor };
     const editorModel = { current: model };
     const isReviewActiveRef = { current: overrides.isReviewActive ? {} : null };
+    const isEnabled = overrides.isEnabled ?? true;
 
-    const { result } = renderHook(() =>
-      useGhostLineHint({ editorRef, editorModel, isReviewActiveRef })
+    const { result, rerender } = renderHook(
+      (props: { isEnabled: boolean }) =>
+        useGhostLineHint({
+          editorRef,
+          editorModel,
+          isReviewActiveRef,
+          isEnabled: props.isEnabled,
+        }),
+      { initialProps: { isEnabled } }
     );
 
     act(() => {
       result.current.setupGhostLineHint(stubs.editor);
     });
 
-    return stubs;
+    return { ...stubs, rerender };
   };
 
   beforeEach(() => {
@@ -151,5 +160,27 @@ describe('useGhostLineHint', () => {
     });
 
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
+  });
+
+  it('does not show the hint when the feature is disabled, and starts showing it once enabled', () => {
+    const stubs = renderGhostHint({ isEnabled: false });
+
+    act(() => {
+      stubs.fireCursorChange();
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+    });
+    expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
+
+    // Async license check resolves later in the same editor session — the listener
+    // registered at mount must pick up the new value via the ref.
+    act(() => {
+      stubs.rerender({ isEnabled: true });
+    });
+
+    act(() => {
+      stubs.fireCursorChange();
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+    });
+    expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
   });
 });

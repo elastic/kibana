@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { css } from '@emotion/css';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
