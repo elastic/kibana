@@ -14,70 +14,78 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString, ScreenContext, PromptIds } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
+export const ExecuteConnectorRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * If true, the response will not include content references.
+     */
+    content_references_disabled: BooleanFromString.optional().default(false),
+  })
+);
 export type ExecuteConnectorRequestQuery = z.infer<typeof ExecuteConnectorRequestQuery>;
-export const ExecuteConnectorRequestQuery = z.object({
-  /**
-   * If true, the response will not include content references.
-   */
-  content_references_disabled: BooleanFromString.optional().default(false),
-});
 export type ExecuteConnectorRequestQueryInput = z.input<typeof ExecuteConnectorRequestQuery>;
 
+export const ExecuteConnectorRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The connector's `id` value.
+     */
+    connectorId: z.string(),
+  })
+);
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
-export const ExecuteConnectorRequestParams = z.object({
-  /**
-   * The connector's `id` value.
-   */
-  connectorId: z.string(),
-});
 export type ExecuteConnectorRequestParamsInput = z.input<typeof ExecuteConnectorRequestParams>;
 
+export const ExecuteConnectorRequestBody = lazySchema(() =>
+  z.object({
+    conversationId: NonEmptyString.optional(),
+    message: z.string().optional(),
+    model: z.string().optional(),
+    subAction: z.enum(['invokeAI', 'invokeStream']),
+    actionTypeId: z.string(),
+    alertsIndexPattern: z.string().optional(),
+    allow: z.array(z.string()).optional(),
+    allowReplacement: z.array(z.string()).optional(),
+    replacements: Replacements,
+    size: z.number().optional(),
+    langSmithProject: z.string().optional(),
+    langSmithApiKey: z.string().optional(),
+    screenContext: ScreenContext.optional(),
+    /**
+     * System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
+     */
+    promptIds: PromptIds.optional(),
+  })
+);
 export type ExecuteConnectorRequestBody = z.infer<typeof ExecuteConnectorRequestBody>;
-export const ExecuteConnectorRequestBody = z.object({
-  conversationId: NonEmptyString.optional(),
-  message: z.string().optional(),
-  model: z.string().optional(),
-  subAction: z.enum(['invokeAI', 'invokeStream']),
-  actionTypeId: z.string(),
-  alertsIndexPattern: z.string().optional(),
-  allow: z.array(z.string()).optional(),
-  allowReplacement: z.array(z.string()).optional(),
-  replacements: Replacements,
-  size: z.number().optional(),
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
-  screenContext: ScreenContext.optional(),
-  /**
-   * System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
-   */
-  promptIds: PromptIds.optional(),
-});
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
 
+export const ExecuteConnectorResponse = lazySchema(() =>
+  z.object({
+    data: z.string(),
+    connector_id: z.string(),
+    status: z.string(),
+    /**
+     * Trace Data
+     */
+    trace_data: z
+      .object({
+        /**
+         * Could be any string, not necessarily a UUID
+         */
+        transactionId: z.string().optional(),
+        /**
+         * Could be any string, not necessarily a UUID
+         */
+        traceId: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 export type ExecuteConnectorResponse = z.infer<typeof ExecuteConnectorResponse>;
-export const ExecuteConnectorResponse = z.object({
-  data: z.string(),
-  connector_id: z.string(),
-  status: z.string(),
-  /**
-   * Trace Data
-   */
-  trace_data: z
-    .object({
-      /**
-       * Could be any string, not necessarily a UUID
-       */
-      transactionId: z.string().optional(),
-      /**
-       * Could be any string, not necessarily a UUID
-       */
-      traceId: z.string().optional(),
-    })
-    .optional(),
-});

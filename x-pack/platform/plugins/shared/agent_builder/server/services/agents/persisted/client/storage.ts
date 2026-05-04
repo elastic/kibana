@@ -32,6 +32,7 @@ const storageSettings = {
         properties: {
           workflow_ids: types.keyword({}),
           plugin_ids: types.keyword({}),
+          skill_ids: types.keyword({}),
         },
         dynamic: false,
       }),

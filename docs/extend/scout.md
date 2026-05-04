@@ -9,18 +9,19 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 ## Start here [scout-start-here]
 
 - [Getting started](./scout/getting-started.md)
-- [Best practices](./scout/best-practices.md)
+- [Best practices](./scout/best-practices.md) (see also [UI](./scout/ui-best-practices.md) and [API](./scout/api-best-practices.md) test best practices)
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
 
 ## Scout benefits [scout-main-features]
 
 - **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
+- **Selective testing**: PR builds run only the Scout tests scoped to changed modules, cutting CI time.
 - **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
 - **Deployment-agnostic**: write tests once, then use [tags](./scout/deployment-tags.md) to declare where they should run (stateful/serverless).
 - **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
-- **Reporting**: we capture test events that power our dashboards (for example, skipped tests, flaky tests, and more).
+- **Reporting**: we provide you with dashboards to track skipped tests, flaky tests, and more.
 - **Reusability**: reuse or write reusable fixtures, page objects and API helpers to reduce duplication.
 - **Follows modern best practices**: check out our [Scout best practices](./scout/best-practices.md).
 
@@ -66,19 +67,23 @@ We welcome contributions to one of the Scout packages.
 
 #### Q: Does Scout prevent flaky tests? [scout-faq-flakes]
 
-No—good test design still matters.
+No, good test design still matters.
 
 #### Q: Is Scout designed to be _just_ a Playwright UI test runner? [scout-faq-ui-only]
 
-No. Scout supports both UI and API testing with Playwright.
+No. Scout supports both [UI](./scout/ui-testing.md) and [API](./scout/api-testing.md) testing with Playwright.
 
 #### Q: Are test runs going to be faster? [scout-faq-faster]
 
-Often, yes—especially with [parallel test execution](./scout/parallelism.md).
+Often yes, especially with [parallel test execution](./scout/parallelism.md) and selective testing.
+
+#### Q: What is selective testing? [scout-faq-selective-testing]
+
+In PR builds, Scout automatically detects which modules changed and runs only the relevant tests, reducing CI time. You can confirm your tests ran by looking for the `affected Scout:` prefix on Buildkite steps. See PR [#261510](https://github.com/elastic/kibana/pull/261510) for details.
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
-It’s easier to iterate and maintain, and it can enable smarter test selection in the future.
+It’s easier to iterate and maintain, and it enables selective testing: PR builds automatically run only the Scout tests for affected modules.
 
 #### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
 
@@ -87,6 +92,10 @@ Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 #### Q: What happens to FTR tests? [scout-faq-ftr-tests]
 
 Existing FTR tests continue to run, and teams can migrate them to Scout incrementally over time.
+
+#### Q: Should I migrate every FTR test to Scout? [scout-faq-migrate-ftr-to-scout]
+
+_It, depends_: [pick the right test type](./scout/best-practices.md#pick-the-right-test-type) before migrating a test.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 

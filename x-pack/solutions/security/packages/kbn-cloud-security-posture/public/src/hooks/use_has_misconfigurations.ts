@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { useMisconfigurationPreview } from './use_misconfiguration_preview';
 
-export const useHasMisconfigurations = (field: string, value: string) => {
-  const { data } = useMisconfigurationPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
+export const useHasMisconfigurations = (options: UseCspOptions) => {
+  const { data } = useMisconfigurationPreview(options);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;

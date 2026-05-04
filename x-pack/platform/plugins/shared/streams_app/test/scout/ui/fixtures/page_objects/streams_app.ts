@@ -16,13 +16,14 @@ import {
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
+import type { FieldTypeOption } from '../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly dateProcessorFormatsComboBox;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
@@ -60,6 +61,10 @@ export class StreamsApp {
       this.page,
       'streamsAppProcessorTypeSelector'
     );
+    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppDateProcessorFormatsComboBox'
+    );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
       this.page,
       'streamsAppFieldFormTypeSelect'
@@ -85,7 +90,7 @@ export class StreamsApp {
     );
     this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
     this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated successfully');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
@@ -120,6 +125,10 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'dataQuality');
   }
 
+  async gotoOverviewTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'overview');
+  }
+
   async gotoProcessingTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'processing');
   }
@@ -133,7 +142,10 @@ export class StreamsApp {
   }
 
   async gotoAdvancedTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'advanced');
+    // Navigate to a stable tab first, then open Advanced to avoid races from direct URL nav
+    await this.gotoDataRetentionTab(streamName);
+    await this.page.getByRole('tab', { name: 'Advanced' }).click();
+    await this.page.waitForURL(/\/advanced/);
   }
 
   async gotoAttachmentsTab(streamName: string) {
@@ -649,7 +661,7 @@ export class StreamsApp {
   async getConditionAddStepMenuButton(pos: number) {
     const conditions = await this.getConditionsListItems();
     const targetCondition = conditions[pos];
-    return targetCondition.getByRole('button', { name: 'Create nested step' });
+    return targetCondition.getByRole('button', { name: 'Create nested step' }).first();
   }
 
   async getConditionContextMenuButton(pos: number) {
@@ -738,7 +750,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -899,23 +911,30 @@ export class StreamsApp {
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
+  /**
+   * Asserts a preview grid cell eventually contains `value`.
+   * Uses a high default timeout so the simulation preview has time to refresh
+   * after transient stale values (e.g. literal "null" from a Set processor).
+   */
   async expectCellValueContains({
     columnName,
     rowIndex,
     value,
     invertCondition = false,
+    timeout = 30_000,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
     invertCondition?: boolean;
+    timeout?: number;
   }) {
     const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
-      await expect(cellLocator).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value, { timeout });
     } else {
-      await expect(cellLocator).toContainText(value);
+      await expect(cellLocator).toContainText(value, { timeout });
     }
   }
 
@@ -1082,14 +1101,6 @@ export class StreamsApp {
     await acceptButton.click();
   }
 
-  async regenerateSuggestions() {
-    const regenerateButton = this.page
-      .getByTestId('streamsAppGenerateSuggestionButton')
-      .filter({ hasText: 'Regenerate all' });
-    await expect(regenerateButton).toBeVisible();
-    await regenerateButton.click();
-  }
-
   async expectConfirmationModalVisible() {
     const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
     await expect(modal).toBeVisible();
@@ -1160,7 +1171,9 @@ export class StreamsApp {
 
   // Attachments utility methods
   async expectAttachmentsEmptyPromptVisible() {
-    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible({
+      timeout: 15000, // the button may take longer to render due to environment slowness
+    });
   }
 
   async clickAddAttachmentsButton() {
@@ -1307,7 +1320,7 @@ export class StreamsApp {
   }
 
   async clickQueryStreamFormCreateButton() {
-    await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
   }
 
   async clickQueryStreamLink(streamName: string) {
@@ -1332,5 +1345,50 @@ export class StreamsApp {
 
   async clickDeleteQueryStreamModalDeleteButton() {
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
+  }
+
+  async clickQueryStreamEditButton(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEditButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamFormSaveButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
+  }
+
+  async clickQueryStreamFormDeleteButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
+  }
+
+  async createRootQueryStream(name: string, esqlQuery: string) {
+    await this.clickCreateQueryStreamButton();
+    await this.fillRoutingRuleName(name);
+    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.clickQueryStreamFlyoutSaveButton();
+  }
+
+  async openCreateChildQueryStreamForm() {
+    await this.clickQueryModeCreateQueryStreamButton();
+    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+  }
+
+  async fillAndSaveChildQueryStream(childName: string, esqlQuery: string) {
+    await this.fillRoutingRuleName(childName);
+    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.clickQueryStreamFormCreateButton();
+  }
+
+  async createChildQueryStreamFromPartitioningTab(childName: string, esqlQuery: string) {
+    await this.openCreateChildQueryStreamForm();
+    await this.fillAndSaveChildQueryStream(childName, esqlQuery);
+  }
+
+  async deleteQueryStreamFromAdvancedTab(streamName: string) {
+    await this.clickStreamNameLink(streamName);
+    await this.clickQueryStreamDetailsTab('advanced');
+    await this.clickDeleteQueryStreamButton();
+    await this.fillDeleteQueryStreamModalInput(streamName);
+    await this.clickDeleteQueryStreamModalDeleteButton();
+    await this.queryStreamDeletedSuccessToast.waitFor({ state: 'visible' });
   }
 }

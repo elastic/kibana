@@ -19,13 +19,12 @@ import {
 const DASHBOARD_NAME_PREFIX = 'Panel time range';
 
 const createDashboard = async (pageObjects: PageObjects, dashboardName: string) => {
-  await pageObjects.dashboard.goto();
   await pageObjects.dashboard.openNewDashboard();
   await pageObjects.dashboard.saveDashboard(dashboardName);
 };
 
 const addByValueLensPanel = async (pageObjects: PageObjects) => {
-  await pageObjects.dashboard.openNewLensPanel();
+  await pageObjects.dashboard.addNewPanel('Lens');
   await pageObjects.lens.configureXYDimensions();
   await pageObjects.lens.saveAndReturn();
 };

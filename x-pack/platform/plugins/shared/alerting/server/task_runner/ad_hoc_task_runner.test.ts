@@ -595,6 +595,7 @@ describe('Ad Hoc Task Runner', () => {
 
   test('passes consumer metrics to AlertingEventLogger', async () => {
     const consumerMetrics = {
+      matched_indices_count: 3,
       alerts_candidate_count: 100,
       total_enrichment_duration_ms: 50,
     };

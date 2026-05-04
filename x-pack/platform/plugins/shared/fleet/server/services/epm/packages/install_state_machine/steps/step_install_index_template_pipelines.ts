@@ -10,6 +10,7 @@ import { getNormalizedDataStreams } from '../../../../../../common/services';
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import type { RegistryDataStream } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
 import { deletePrerequisiteAssets, splitESAssets, cleanupComponentTemplate } from '../../remove';
 import { INSTALL_STATES } from '../../../../../../common/types';
@@ -46,14 +47,21 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
     // we must use installed_es to infer which streams exist first then
     // we can install the new index templates
     logger.debug(`Package install - packageInfo.type: ${packageInfo.type}`);
-    const dataStreamNames = installedPkg.attributes.installed_es
-      .filter((ref) => ref.type === 'index_template')
-      // index templates are named {type}-{dataset}, remove everything before first hyphen
-      .map((ref) => ref.id.replace(/^[^-]+-/, ''));
-
-    const dataStreams = dataStreamNames.flatMap((dataStreamName) =>
-      getNormalizedDataStreams(packageInfo, dataStreamName)
+    const indexTemplateRefs = installedPkg.attributes.installed_es.filter(
+      (ref) => ref.type === 'index_template'
     );
+
+    const dataStreams = indexTemplateRefs
+      .flatMap((ref) => {
+        // Index templates are named {type}-{dataset}; split on the first hyphen only
+        // so dataset segments may contain hyphens. Pass encoded type into synthesis so
+        // dynamic_signal_types packages (no manifest type) still get a concrete type here.
+        const i = ref.id.indexOf('-');
+        const dataStreamType = i >= 0 ? ref.id.slice(0, i) : undefined;
+        const dataset = i >= 0 ? ref.id.slice(i + 1) : ref.id;
+        return getNormalizedDataStreams(packageInfo, dataset, dataStreamType);
+      })
+      .filter((ds): ds is RegistryDataStream => !!ds.type);
 
     if (dataStreams.length) {
       const { installedTemplates, esReferences: templateEsReferences } = await withPackageSpan(

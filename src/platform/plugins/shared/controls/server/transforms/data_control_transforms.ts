@@ -9,6 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
@@ -61,20 +62,37 @@ export function transformDataControlOut<
   /**
    * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
    */
-  const { title, use_global_filters, ignore_validations, field_name } =
+  const { title, use_global_filters, ignore_validations, field_name, data_view_id } =
     convertCamelCasedKeysToSnakeCase<LegacyStoredDataControlState>(
       state as LegacyStoredDataControlState
     );
 
-  return {
+  // get the data view ID from the reference, or fall back to an explicitly stored dataViewId
+  const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
+  const convertedState = {
+    ...DEFAULT_DATA_CONTROL_STATE,
     title,
-    data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
-    use_global_filters,
-    ignore_validations,
+    data_view_id: dataViewId,
+    ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
+    ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     field_name: field_name ?? '',
   };
+
+  // will throw if one of the required fields is the empty string
+  ensureRequiredFields(convertedState);
+
+  return convertedState;
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {
   return `controlGroup_${controlId}:${refName}`;
 }
+
+const ensureRequiredFields = (state: DataControlState) => {
+  if (!state.data_view_id.length) {
+    throw new Error('Must include a non-empty data view ID');
+  } else if (!state.field_name.length) {
+    throw new Error('Must include a non-empty field name ID');
+  }
+  return;
+};

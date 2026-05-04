@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "actions",
       "features",
+      "inference",
       "licensing",
       "management",
       "share",
@@ -24,6 +25,7 @@
       "cloudConnect",
       "console",
       "serverless",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact",

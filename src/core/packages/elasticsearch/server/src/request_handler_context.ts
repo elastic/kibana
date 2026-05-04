@@ -14,5 +14,8 @@ import type { IScopedClusterClient } from './client';
  * @public
  */
 export interface ElasticsearchRequestHandlerContext {
+  /**
+   * A pre-scoped {@link IScopedClusterClient} for the current request using origin-only routing.
+   */
   client: IScopedClusterClient;
 }

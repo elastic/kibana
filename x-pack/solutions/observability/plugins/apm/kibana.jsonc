@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": ["@elastic/obs-presentation-team"],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",
@@ -65,6 +65,7 @@
       "share",
       "agentBuilder",
       "slo",
+      "cps",
     ],
     "requiredBundles": [
       "fleet",

@@ -14,11 +14,8 @@ const createTestCases = (spaceId: string) => {
   return Object.values(cases);
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = exportTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     return createTestDefinitions(testCases, false);

@@ -11,12 +11,12 @@ export {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
   ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
-  getLatestEntitiesIndexName,
+  getEntitiesAlias,
+  ENTITY_LATEST,
 } from '../constants';
 
 export const MAX_ENTITIES_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
-export const DEFAULT_TABLE_SECTION_HEIGHT = 512;
 
 export const QUERY_KEY_GRID_DATA = 'entity_analytics_grid_data';
 export const QUERY_KEY_GROUPING_DATA = 'entity-analytics-grouping-data';
@@ -40,12 +40,14 @@ export const ENTITY_FIELDS = {
   ENTITY_SOURCE: 'entity.source',
   ENTITY_TYPE: 'entity.EngineMetadata.Type',
   ENTITY_RISK: 'entity.risk.calculated_score_norm',
+  RESOLUTION_RISK_SCORE: 'entity.relationships.resolution.risk.calculated_score_norm',
   RESOLVED_TO: 'entity.relationships.resolution.resolved_to',
   TIMESTAMP: '@timestamp',
 } as const;
 
 export const ENTITY_GROUPING_OPTIONS = {
   NONE: 'none',
+  RESOLUTION: ENTITY_FIELDS.RESOLVED_TO,
   ENTITY_TYPE: ENTITY_FIELDS.ENTITY_TYPE,
 };
 

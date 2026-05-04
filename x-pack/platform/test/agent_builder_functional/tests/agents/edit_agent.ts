@@ -13,8 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/247766
-  describe.skip('Edit agent', function () {
+  describe('Edit agent', function () {
     const { agents, agentsHooks } = setupAgents({ getPageObjects, getService });
     before(async function () {
       await agentsHooks.before();
@@ -26,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should navigate to agent edit form', async function () {
       await agentBuilder.clickAgentEdit(agent.id);
-      await browser.waitForUrlToBe(`/app/agent_builder/agents/${agent.id}`);
+      await browser.waitForUrlToBe(`/app/agent_builder/manage/agents/${agent.id}`);
     });
 
     it('should show agent name as page title', async function () {
@@ -56,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should clone agent', async function () {
       agent = agents[1];
       await agentBuilder.clickAgentClone(agent.id);
-      await browser.waitForUrlToBe(`/app/agent_builder/agents/new?source_id=${agent.id}`);
+      await browser.waitForUrlToBe(`/app/agent_builder/manage/agents/new?source_id=${agent.id}`);
       expect(await agentBuilder.getAgentFormDisplayName()).to.be(agent.name);
       const idInput = agentBuilder.getAgentIdInput();
       expect(await idInput.getValue()).to.be('test_agent_3');

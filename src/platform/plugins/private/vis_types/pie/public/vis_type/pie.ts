@@ -30,7 +30,7 @@ export const getPieVisTypeDefinition = ({
 }: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
-  icon: 'visPie',
+  icon: 'chartPie',
   description: i18n.translate('visTypePie.pie.pieDescription', {
     defaultMessage: 'Compare data in proportion to a whole.',
   }),

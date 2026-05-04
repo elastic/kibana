@@ -35,7 +35,7 @@ export function InfoBadge({
   const hasColor = Boolean(palette);
   const hasSingleColor = palette && palette.length === 1;
   const hasMultipleColors = palette && palette.length > 1;
-  const iconType = hasSingleColor ? 'stopFilled' : 'color';
+  const iconType = hasSingleColor ? 'stopFill' : 'color';
   return (
     <li
       key={`${title}-${dataView}-${index}`}
@@ -50,6 +50,7 @@ export function InfoBadge({
             <EuiIcon
               color={hasSingleColor ? palette[0] : undefined}
               type={iconType}
+              aria-hidden={true}
               data-test-subj={`${dataTestSubjPrefix}-${index}-icon`}
             />
           </EuiFlexItem>

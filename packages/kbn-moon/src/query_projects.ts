@@ -51,6 +51,10 @@ interface MoonQueryProjectsResponse {
   }>;
 }
 
+interface MoonChangedFilesInput {
+  files?: string[];
+}
+
 /** Options for resolving the affected base revision from git state. */
 export interface ResolveMoonAffectedBaseOptions {
   headRef?: string;
@@ -58,7 +62,17 @@ export interface ResolveMoonAffectedBaseOptions {
 
 export const ROOT_MOON_PROJECT_ID = 'kibana';
 
+// Module-level cache — acceptable for short-lived CLI processes, tests mock getMoonExecutablePath.
 let moonExecutablePath: string | undefined;
+
+const ROOT_MOON_PROJECT_TRIGGER_FILES = new Set([
+  'tsconfig.json',
+  'tsconfig.base.json',
+  'tsconfig.base.type_check.json',
+  'tsconfig.browser.json',
+  'tsconfig.refs.json',
+  'tsconfig.type_check.json',
+]);
 
 /** Normalizes repository-relative paths to POSIX separators for stable matching. */
 export const normalizeRepoRelativePath = (pathValue: string) =>
@@ -134,6 +148,39 @@ const parseMoonProjectsResponse = (stdout: string): MoonProject[] => {
   });
 };
 
+const parseChangedFilesInput = (changedFilesJson: string): string[] => {
+  const payload = JSON.parse(changedFilesJson) as MoonChangedFilesInput;
+
+  return (payload.files ?? []).map(normalizeRepoRelativePath);
+};
+
+const isRootMoonProjectTriggerFile = (repoRelPath: string) => {
+  if (repoRelPath.startsWith('typings/')) {
+    return true;
+  }
+
+  return !repoRelPath.includes('/') && ROOT_MOON_PROJECT_TRIGGER_FILES.has(repoRelPath);
+};
+
+const shouldIncludeRootMoonProject = ({
+  changedFilesJson,
+  projects,
+}: {
+  changedFilesJson: string;
+  projects: MoonProject[];
+}): boolean => {
+  if (projects.some((project) => project.id === ROOT_MOON_PROJECT_ID)) {
+    return false;
+  }
+
+  const changedFiles = parseChangedFilesInput(changedFilesJson);
+  if (changedFiles.length === 0) {
+    return false;
+  }
+
+  return changedFiles.some(isRootMoonProjectTriggerFile);
+};
+
 /**
  * Queries Moon for affected projects by piping pre-resolved changed files JSON
  * into `moon query projects --affected`.
@@ -164,7 +211,15 @@ export const getAffectedMoonProjectsFromChangedFiles = async ({
     },
   });
 
-  return parseMoonProjectsResponse(stdout);
+  const projects = parseMoonProjectsResponse(stdout);
+
+  // Moon currently omits the root `kibana` project for global TypeScript inputs owned by
+  // sourceRoot `.`, for example repo-root tsconfig files and `typings/**`.
+  if (shouldIncludeRootMoonProject({ changedFilesJson, projects })) {
+    return [...projects, { id: ROOT_MOON_PROJECT_ID, sourceRoot: '.' }];
+  }
+
+  return projects;
 };
 
 /** Summarizes affected Moon projects into non-root source roots and root-project flag. */

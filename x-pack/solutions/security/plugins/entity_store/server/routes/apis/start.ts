@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -16,14 +17,24 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions
 import { ENGINE_STATUS } from '../../domain/constants';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe('Entity types to start. Defaults to all installed types.'),
 });
 
 export function registerStart(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.START,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.START,
+      access: 'public',
+      summary: 'Start Entity Store engines',
+      description:
+        'Start previously stopped entity engines, resuming data processing for the specified entity types.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -31,11 +42,14 @@ export function registerStart(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_start.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

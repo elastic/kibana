@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/apm-utils",
     "@kbn/core-base-server-internal",
     "@kbn/core-feature-flags-server",
     "@kbn/logging",

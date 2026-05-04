@@ -26,12 +26,13 @@
       "stackConnectors",
       "data",
       "dataViews",
+      "kql",
       "fieldFormats",
       "unifiedSearch",
       "embeddable",
       "licensing"
     ],
-    "optionalPlugins": ["alerting", "serverless"],
-    "runtimePluginDependencies": ["agentBuilder"]
+    "optionalPlugins": ["alerting", "serverless", "cloud"],
+    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer"]
   }
 }

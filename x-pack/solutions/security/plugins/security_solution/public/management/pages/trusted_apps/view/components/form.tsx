@@ -368,7 +368,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.basicMode', {
             defaultMessage: 'Basic',
           }),
-          iconType: selectedFormType === 'basicMode' ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedFormType === 'basicMode' ? 'checkCircleFill' : 'empty',
           'data-test-subj': 'basicModeButton',
         },
         {
@@ -376,7 +376,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.advancedMode', {
             defaultMessage: 'Advanced',
           }),
-          iconType: selectedFormType === 'advancedMode' ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedFormType === 'advancedMode' ? 'checkCircleFill' : 'empty',
           'data-test-subj': 'advancedModeButton',
         },
       ],
@@ -735,7 +735,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         {
           id: 'trustedApps',
           label: <EuiText size="s">{TRUSTED_APPLICATIONS}</EuiText>,
-          iconType: isProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
+          iconType: isProcessDescendantsSelected ? 'empty' : 'checkCircleFill',
           'data-test-subj': 'trustedApps-filterEventsButton',
         },
         {
@@ -750,7 +750,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               />
             </EuiFlexGroup>
           ),
-          iconType: isProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
+          iconType: isProcessDescendantsSelected ? 'checkCircleFill' : 'empty',
           'data-test-subj': 'trustedApps-filterProcessDescendantsButton',
         },
       ],
@@ -891,7 +891,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiSpacer size="s" />
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warningFilled" size="s" color="warning" />
+                <EuiIcon type="warningFill" size="s" color="warning" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText

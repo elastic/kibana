@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSingleAstItem } from '@elastic/esql/types';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { isMap } from '@elastic/esql';
-import type { SupportedDataType } from '../../..';
+import type { ESQLMessage, SupportedDataType } from '../../..';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
 import { parseMapParams } from '../maps';

@@ -38,10 +38,10 @@ FTR tests are organized by type and deployment target to ensure proper test isol
 **Location**: `x-pack/platform/test/api_integration_basic/`
 **Use for**: API validation for Elastic Basic license
 
-#### `/automatic_import_api_integration` - Import APIs
+#### `/automatic_import_api_integration` - Automatic Import APIs
 
 **Location**: `x-pack/platform/test/automatic_import_api_integration/`
-**Use for**: Data import, migration, and transformation APIs
+**Use for**: Automatic Import integration and data stream APIs
 
 #### `/cases_api_integration` - Cases Management APIs
 

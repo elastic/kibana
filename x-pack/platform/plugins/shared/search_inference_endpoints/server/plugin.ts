@@ -8,6 +8,7 @@
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -19,7 +20,8 @@ import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getForFeature } from './inference_endpoints';
+import { getForFeature as getForFeatureFn } from './inference_endpoints';
+import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -69,7 +71,35 @@ export class SearchInferenceEndpointsPlugin
 
     core.savedObjects.registerType(createInferenceSettingsSavedObjectType());
 
-    defineRoutes({ logger: this.logger, router, featureRegistry: this.featureRegistry });
+    const featureRegistry = this.featureRegistry;
+
+    const getForFeature = async (featureId: string, request: KibanaRequest) => {
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const soClient = coreStart.savedObjects.createInternalRepository([
+        INFERENCE_SETTINGS_SO_TYPE,
+      ]);
+      const getConnectorById = (id: string) => pluginsStart.inference.getConnectorById(id, request);
+      return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
+    };
+
+    const getConnectorList = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorList(request);
+    };
+
+    const getConnectorById = async (id: string, request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorById(id, request);
+    };
+
+    defineRoutes({
+      logger: this.logger,
+      router,
+      featureRegistry: this.featureRegistry,
+      getForFeature,
+      getConnectorList,
+      getConnectorById,
+    });
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
@@ -80,7 +110,11 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+        modelManagement: [
+          ELASTIC_INFERENCE_SERVICE_APP_ID,
+          INFERENCE_ENDPOINTS_APP_ID,
+          MODEL_SETTINGS_APP_ID,
+        ],
       },
       privileges: {
         all: {
@@ -88,7 +122,7 @@ export class SearchInferenceEndpointsPlugin
           api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [
+            modelManagement: [
               ELASTIC_INFERENCE_SERVICE_APP_ID,
               INFERENCE_ENDPOINTS_APP_ID,
               MODEL_SETTINGS_APP_ID,
@@ -144,10 +178,30 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: (featureId: string) => {
-          const esClient = core.elasticsearch.client.asInternalUser;
+        getForFeature: async (featureId: string, request: KibanaRequest) => {
           const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
-          return getForFeature(featureRegistry, soClient, esClient, featureId);
+          const uiSettingsClient = core.uiSettings.asScopedToClient(
+            core.savedObjects.getScopedClient(request)
+          );
+          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+          const resolveFeatureEndpoints = (fId: string) =>
+            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
+          const getConnectorList = () => plugins.inference.getConnectorList(request);
+
+          const result = await resolveModelsForFeature({
+            getForFeature: resolveFeatureEndpoints,
+            getConnectorList,
+            getConnectorById,
+            uiSettingsClient,
+            featureId,
+            logger: this.logger,
+          });
+
+          return {
+            endpoints: result.connectors,
+            warnings: result.warnings,
+            soEntryFound: result.soEntryFound,
+          };
         },
       },
     };

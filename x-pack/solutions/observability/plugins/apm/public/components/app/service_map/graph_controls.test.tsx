@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceMapGraph } from './graph';
 import type { ServiceMapNode } from '../../../../common/service_map';
@@ -35,26 +35,20 @@ jest.mock('@xyflow/react', () => {
       <div data-test-subj="react-flow">{children}</div>
     ),
     Background: () => <div data-test-subj="react-flow-background" />,
+    Panel: ({ children }: { children?: React.ReactNode }) => (
+      <div data-test-subj="serviceMapOptionsPanelHost">{children}</div>
+    ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-test-subj="serviceMapControls">{children}</div>
     ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
-    ),
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
-    useReactFlow: jest.fn(() => ({ fitView: jest.fn() })),
+    useReactFlow: jest.fn(() => ({
+      fitView: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+      setCenter: jest.fn(),
+    })),
   };
 });
 
@@ -77,7 +71,7 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
@@ -234,5 +228,76 @@ describe('ServiceMapGraph - Controls', () => {
 
     expect(controls).toContainElement(viewFullMapButton);
     expect(controls).toContainElement(fullscreenButton);
+  });
+
+  it('focuses find in page on Ctrl+K when focus is on document body (e.g. after load)', async () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+
+    await act(async () => {
+      document.body.focus();
+    });
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('serviceMapControlsSearch')).toHaveFocus();
+    });
+  });
+
+  it('expands the options panel and focuses find on Ctrl+K when the panel was collapsed', async () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('serviceMapHideControlsButton'));
+    });
+    expect(screen.queryByTestId('serviceMapControlsSearch')).not.toBeInTheDocument();
+
+    await act(async () => {
+      document.body.focus();
+    });
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('serviceMapControlsSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('serviceMapControlsSearch')).toHaveFocus();
+    });
+  });
+
+  it('does not hijack Ctrl+K when focus is in an input outside the service map', async () => {
+    render(
+      <>
+        <input data-test-subj="outsideServiceMapField" aria-label="Outside field" />
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} />
+        </ReactFlowProvider>
+      </>
+    );
+
+    const outside = screen.getByTestId('outsideServiceMapField');
+
+    await act(async () => {
+      outside.focus();
+    });
+    expect(outside).toHaveFocus();
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    });
+
+    expect(outside).toHaveFocus();
+    expect(screen.getByTestId('serviceMapControlsSearch')).not.toHaveFocus();
   });
 });

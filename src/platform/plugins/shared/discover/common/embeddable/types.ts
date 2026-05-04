@@ -8,11 +8,12 @@
  */
 
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   SavedSearchAttributes,
   SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
-import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
+import type { DiscoverSessionEmbeddableState } from '../../server';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 // These are options that are not persisted in the saved object, but can be used by solutions
@@ -27,7 +28,7 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-type SearchEmbeddableBaseState = SerializedTitles &
+export type SearchEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &
   SerializedDrilldowns &
   EditableSavedSearchAttributes & {
@@ -44,6 +45,8 @@ export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
 };
 
 export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
+
+export type SearchEmbeddablePanelApiState = DiscoverSessionEmbeddableState | SearchEmbeddableState;
 
 export type StoredSearchEmbeddableByValueState = SearchEmbeddableByValueState;
 

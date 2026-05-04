@@ -12,6 +12,10 @@ export const queryKeys = {
       ['evals', 'datasets', 'list', filters] as const,
     detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
   },
+  remotes: {
+    all: ['evals', 'remotes'] as const,
+    list: () => ['evals', 'remotes', 'list'] as const,
+  },
   runs: {
     all: ['evals', 'runs'] as const,
     list: (filters?: {
@@ -25,6 +29,8 @@ export const queryKeys = {
     scores: (runId: string) => ['evals', 'runs', 'scores', runId] as const,
     datasetExamples: (runId: string, datasetId: string) =>
       ['evals', 'runs', 'datasets', 'examples', runId, datasetId] as const,
+    compare: (runIdA: string, runIdB: string) =>
+      ['evals', 'runs', 'compare', runIdA, runIdB] as const,
   },
   examples: {
     all: ['evals', 'examples'] as const,
@@ -33,5 +39,27 @@ export const queryKeys = {
   traces: {
     all: ['evals', 'traces'] as const,
     detail: (traceId: string) => ['evals', 'traces', 'detail', traceId] as const,
+  },
+  tracing: {
+    all: ['evals', 'tracing'] as const,
+    projects: (filters?: {
+      from?: string;
+      to?: string;
+      name?: string;
+      page?: number;
+      perPage?: number;
+    }) => ['evals', 'tracing', 'projects', filters] as const,
+    projectTraces: (
+      projectName: string,
+      filters?: {
+        from?: string;
+        to?: string;
+        name?: string;
+        sortField?: string;
+        sortOrder?: string;
+        page?: number;
+        perPage?: number;
+      }
+    ) => ['evals', 'tracing', 'projects', projectName, 'traces', filters] as const,
   },
 };

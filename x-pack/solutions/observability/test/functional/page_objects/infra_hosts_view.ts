@@ -19,6 +19,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(15000, async () => {
         await testSubjects.click('hostsView-flyout-button');
       });
+      await testSubjects.existOrFail('infraAssetDetailsFlyout', { timeout: 10000 });
     },
 
     async clickHostCheckbox(id: string, os: string) {
@@ -211,7 +212,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await browser.execute('arguments[0].click();', alertsTab);
     },
 
-    setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
+    async setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
       const buttons: Record<PublicAlertStatus | 'all', string> = {
         active: 'hostsView-alert-status-filter-active-button',
         recovered: 'hostsView-alert-status-filter-recovered-button',
@@ -221,7 +222,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
       const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
 
-      return testSubjects.click(buttonSubject);
+      // Use a scrollIntoView + JS click to bypass overlap detection: the alerts
+      // tab renders the filter button group above an async AlertSummaryWidget,
+      // and the sticky hosts filter header can also sit above the button once
+      // scrolled into view. Mirrors the pattern used by `visitAlertTab`.
+      const button = await testSubjects.find(buttonSubject);
+      await button.scrollIntoViewIfNecessary();
+      await browser.execute('arguments[0].click();', button);
     },
 
     // Query Bar

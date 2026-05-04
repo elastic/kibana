@@ -16,6 +16,26 @@ jest.mock('../edit_monitor', () => ({
   validatePermissions: jest.fn().mockResolvedValue(null),
 }));
 
+const mockMonitorPairWithLocations = (
+  id: string,
+  locations: Array<{ id: string; isServiceManaged: boolean }>
+) => ({
+  decryptedMonitor: {
+    id,
+    attributes: { locations, id },
+    type: 'synthetics-monitor',
+    references: [],
+  },
+  normalizedMonitor: {
+    id,
+    attributes: { locations, id },
+    type: 'synthetics-monitor',
+    references: [],
+    updated_at: '2026-01-01T00:00:00Z',
+    created_at: '2026-01-01T00:00:00Z',
+  },
+});
+
 const mockMonitorPair = (id: string) => ({
   decryptedMonitor: {
     id,
@@ -38,6 +58,17 @@ const mockMonitorPair = (id: string) => ({
     created_at: '2026-01-01T00:00:00Z',
   },
 });
+
+const createMockRouteContextWithFleet = (existingAgentPolicyIds: string[]) => {
+  const base = createMockRouteContext();
+  const getByIds = jest.fn().mockResolvedValue(existingAgentPolicyIds.map((id) => ({ id })));
+  base.routeContext.server = {
+    ...base.routeContext.server,
+    fleet: { agentPolicyService: { getByIds } },
+    coreStart: { savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) } },
+  } as any;
+  return { ...base, mocks: { ...base.mocks, getByIds } };
+};
 
 const createMockRouteContext = () => {
   const editMonitors = jest.fn().mockResolvedValue({
@@ -214,6 +245,56 @@ describe('ResetMonitorAPI', () => {
       expect(result).toHaveLength(1);
       expect(result[0].reset).toBe(false);
       expect(mocks.editMonitors).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('location filtering — getLocationIdsWithExistingAgentPolicy', () => {
+    const { getPrivateLocations } = jest.requireMock(
+      '../../../synthetics_service/get_private_locations'
+    );
+
+    beforeEach(() => {
+      const { validatePermissions } = jest.requireMock('../edit_monitor');
+      validatePermissions.mockResolvedValue(null);
+    });
+
+    afterEach(() => {
+      getPrivateLocations.mockResolvedValue([]);
+    });
+
+    it('excludes private locations whose agent policy no longer exists', async () => {
+      getPrivateLocations.mockResolvedValue([
+        { id: 'loc-valid', agentPolicyId: 'ap-1' },
+        { id: 'loc-deleted', agentPolicyId: 'ap-2' },
+      ]);
+      const { routeContext, mocks } = createMockRouteContextWithFleet(['ap-1']);
+      mocks.getDecrypted.mockResolvedValue(
+        mockMonitorPairWithLocations('mon-1', [
+          { id: 'loc-valid', isServiceManaged: false },
+          { id: 'loc-deleted', isServiceManaged: false },
+        ])
+      );
+
+      const api = new ResetMonitorAPI(routeContext);
+      await api.execute({ monitorIds: ['mon-1'] });
+
+      const passedLocations = mocks.editMonitors.mock.calls[0][0][0].monitor.locations;
+      expect(passedLocations).toHaveLength(1);
+      expect(passedLocations[0].id).toBe('loc-valid');
+    });
+
+    it('excludes private locations with no agentPolicyId', async () => {
+      getPrivateLocations.mockResolvedValue([{ id: 'loc-no-policy', agentPolicyId: null }]);
+      const { routeContext, mocks } = createMockRouteContextWithFleet([]);
+      mocks.getDecrypted.mockResolvedValue(
+        mockMonitorPairWithLocations('mon-1', [{ id: 'loc-no-policy', isServiceManaged: false }])
+      );
+
+      const api = new ResetMonitorAPI(routeContext);
+      await api.execute({ monitorIds: ['mon-1'] });
+
+      const passedLocations = mocks.editMonitors.mock.calls[0][0][0].monitor.locations;
+      expect(passedLocations).toHaveLength(0);
     });
   });
 

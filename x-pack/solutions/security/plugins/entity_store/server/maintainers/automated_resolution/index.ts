@@ -22,6 +22,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
   description: 'Automatically resolves entities using field-matching rules',
   interval: '5m',
   initialState,
+  minLicense: 'enterprise',
   run: async ({ status, abortController, logger, esClient }) => {
     const namespace = status.metadata.namespace;
     const state = status.state as AutomatedResolutionState;

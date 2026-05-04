@@ -19,10 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { validateStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsRoutingSelector } from '../data_management/stream_detail_routing/state_management/stream_routing_state_machine';
+import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   onChange?: (value: string) => void;
@@ -57,7 +57,8 @@ export const getErrorMessage = (
   isDotPresent: boolean,
   prefix: string,
   rootChild: string,
-  router: StatefulStreamsAppRouter
+  router: StatefulStreamsAppRouter,
+  checkRootChildExists: boolean = true
 ): ReactNode | string | undefined => {
   // Return base validation errors from the shared validator first
   if (baseValidationError) {
@@ -68,15 +69,21 @@ export const getErrorMessage = (
       defaultMessage: 'A stream with this name already exists',
     });
   }
-  if (isDotPresent && !rootChildExists) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
-      defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
-      values: {
-        rootChild: prefix + rootChild,
-      },
-    });
-  }
-  if (isDotPresent && rootChildExists) {
+  if (isDotPresent) {
+    // Query streams don't have a meaningful child-stream link to point at.
+    if (!checkRootChildExists) {
+      return i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple', {
+        defaultMessage: `Stream name cannot contain the "." character.`,
+      });
+    }
+    if (!rootChildExists) {
+      return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
+        defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
+        values: {
+          rootChild: prefix + rootChild,
+        },
+      });
+    }
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
@@ -110,17 +117,22 @@ interface ChildStreamInputHookResponse {
   errorMessage: ReactNode | string | undefined;
 }
 
+interface UseChildStreamInputOptions {
+  streamName: string;
+  readOnly?: boolean;
+  checkRootChildExists?: boolean;
+  additionalExistingNames?: readonly string[];
+}
+
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
  * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
- * @param streamName - The stream name to use for the local input field.
- * @param readOnly - Whether the input field is read only.
- * @returns An object containing local states, input validation flags, and help/error messages.
+ * @param options.checkRootChildExists - When true (default), surfaces a root-child existence error on dot. Set to false for query streams.
+ * @param options.additionalExistingNames - Extra full names for the duplicate check — covers siblings not present in the wired routing array.
  * @example
- * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput('logs.linux');
+ * const { setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
  * return (
  *   <StreamNameFormRow
- *     localStreamName={localStreamName}
  *     setLocalStreamName={setLocalStreamName}
  *     isStreamNameValid={isStreamNameValid}
  *     prefix={prefix}
@@ -130,11 +142,17 @@ interface ChildStreamInputHookResponse {
  *   />
  * );
  */
-export const useChildStreamInput = (
-  streamName: string,
-  readOnly: boolean = false
-): ChildStreamInputHookResponse => {
+export const useChildStreamInput = ({
+  streamName,
+  readOnly = false,
+  checkRootChildExists = true,
+  additionalExistingNames,
+}: UseChildStreamInputOptions): ChildStreamInputHookResponse => {
   const [localStreamName, setLocalStreamName] = useState(streamName);
+
+  useEffect(() => {
+    setLocalStreamName(streamName);
+  }, [streamName]);
 
   const router = useStreamsAppRouter();
   const parentStreamName = useStreamsRoutingSelector(
@@ -146,8 +164,10 @@ export const useChildStreamInput = (
   const partitionName = localStreamName.replace(prefix, '');
   const rootChild = partitionName.split('.')[0];
   const isDuplicatedName = useMemo(
-    () => routing.some((r) => r.destination === localStreamName && !r.isNew),
-    [routing, localStreamName]
+    () =>
+      routing.some((r) => r.destination === localStreamName && !r.isNew) ||
+      (additionalExistingNames?.includes(localStreamName) ?? false),
+    [routing, localStreamName, additionalExistingNames]
   );
   const rootChildExists = useMemo(
     () => routing.some((r) => r.destination === prefix + rootChild && !r.isNew),
@@ -157,13 +177,20 @@ export const useChildStreamInput = (
   // Use shared validation for basic stream name checks
   const baseValidation = validateStreamName(localStreamName);
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
-  // Base validation passes if the name is valid according to shared validator
-  // However, we also need to check if the partition (the part after the prefix) is empty
+
+  // `validateStreamName` only checks the start of the full name, so query-stream flows
+  // also validate the partition segment to catch e.g. "-x" under "logs.ecs.android".
+  const partitionValidation =
+    !checkRootChildExists && !isStreamNameEmpty ? validateStreamName(partitionName) : undefined;
+
   const baseValidationError =
-    !baseValidation.valid && !isStreamNameEmpty ? baseValidation.message : undefined;
+    (!baseValidation.valid && !isStreamNameEmpty && baseValidation.message) ||
+    (partitionValidation && !partitionValidation.valid && partitionValidation.message) ||
+    undefined;
 
   const helpText = getHelpText(isStreamNameEmpty, readOnly);
 
+  // Skip dot detection when read-only — the value is already persisted and unactionable.
   const isDotPresent = !readOnly && partitionName.includes('.');
 
   const errorMessage = getErrorMessage(
@@ -173,14 +200,19 @@ export const useChildStreamInput = (
     isDotPresent,
     prefix,
     rootChild,
-    router
+    router,
+    checkRootChildExists
   );
 
   return {
     localStreamName,
     setLocalStreamName,
     isStreamNameValid:
-      baseValidation.valid && !isStreamNameEmpty && !isDotPresent && !isDuplicatedName,
+      baseValidation.valid &&
+      (partitionValidation?.valid ?? true) &&
+      !isStreamNameEmpty &&
+      !isDotPresent &&
+      !isDuplicatedName,
     prefix,
     partitionName,
     helpText,
@@ -239,7 +271,7 @@ export function StreamNameFormRow({
           prefix ? (
             <EuiFormPrepend
               id={descriptionId}
-              iconLeft="streamsWired"
+              iconLeft="productStreamsWired"
               label={
                 <>
                   <EuiScreenReaderOnly>

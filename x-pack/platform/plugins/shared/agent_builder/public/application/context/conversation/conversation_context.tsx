@@ -25,6 +25,7 @@ interface ConversationContextValue {
   removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
+  setAgentId?: (agentId: string) => void;
   conversationActions: ConversationActions;
 }
 

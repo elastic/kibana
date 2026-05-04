@@ -19,20 +19,20 @@ import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
-  DEFAULT_ALERT_CLOSE_REASONS_KEY,
   DEFAULT_ALERTS_INDEX,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
-  getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
+  getSessionIDfromKibanaRequest,
 } from '../../../telemetry/insights';
 import {
-  setWorkflowStatusHandler,
   getUpdateSignalStatusScript,
+  setWorkflowStatusHandler,
 } from '../common/set_workflow_status_handler';
 
 export const setSignalsStatusRoute = (
@@ -73,7 +73,9 @@ export const setSignalsStatusRoute = (
 
         let reason;
         if (request.body.status === AlertStatusEnum.closed) {
-          const customReasons = await core.uiSettings.client.get(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+          const customReasons = await core.uiSettings.client.get(
+            DEFAULT_DETECTIONS_CLOSE_REASONS_KEY
+          );
           const validReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
           if (request.body.reason === undefined || validReasons.has(request.body.reason)) {
             reason = request.body.reason;

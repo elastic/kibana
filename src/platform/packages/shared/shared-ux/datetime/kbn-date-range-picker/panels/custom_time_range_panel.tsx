@@ -49,8 +49,7 @@ import {
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
-import { dateMathToRelativeParts } from '../format';
-import { getOptionShorthand } from '../utils';
+import { dateMathToRelativeParts, applyTimePrecision } from '../format';
 import type { DateType, DateOffset, TimeUnit } from '../types';
 import {
   DATE_TYPE_ABSOLUTE,
@@ -58,6 +57,7 @@ import {
   DATE_TYPE_NOW,
   DEFAULT_DATE_FORMAT,
   UNIT_SHORT_TO_FULL_MAP,
+  UNIT_DISPLAY_ABBREV,
   DATE_RANGE_INPUT_DELIMITER,
 } from '../constants';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
@@ -99,13 +99,27 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
   const tabGroupId = useGeneratedHtmlId({ prefix: 'datePartTab' });
   const fonts = useEuiFontSize('xs');
 
+  const sideLabel = side === 'start' ? 'Start' : 'End';
+
   const tabOptions = useMemo(
     () => [
-      { id: `${tabGroupId}_${DATE_TYPE_RELATIVE}`, label: customTimeRangePanelTexts.relativeTab },
-      { id: `${tabGroupId}_${DATE_TYPE_ABSOLUTE}`, label: customTimeRangePanelTexts.absoluteTab },
-      { id: `${tabGroupId}_${DATE_TYPE_NOW}`, label: customTimeRangePanelTexts.nowTab },
+      {
+        id: `${tabGroupId}_${DATE_TYPE_RELATIVE}`,
+        label: customTimeRangePanelTexts.relativeTab,
+        'data-test-subj': `dateRangePicker${sideLabel}RelativeTab`,
+      },
+      {
+        id: `${tabGroupId}_${DATE_TYPE_ABSOLUTE}`,
+        label: customTimeRangePanelTexts.absoluteTab,
+        'data-test-subj': `dateRangePicker${sideLabel}AbsoluteTab`,
+      },
+      {
+        id: `${tabGroupId}_${DATE_TYPE_NOW}`,
+        label: customTimeRangePanelTexts.nowTab,
+        'data-test-subj': `dateRangePicker${sideLabel}NowTab`,
+      },
     ],
-    [tabGroupId]
+    [tabGroupId, sideLabel]
   );
 
   const selectedTabId = `${tabGroupId}_${state.type}`;
@@ -155,7 +169,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
   const isStart = side === 'start';
 
   return (
-    <div>
+    <div data-test-subj={`dateRangePicker${side === 'start' ? 'Start' : 'End'}DatePart`}>
       <EuiFormFieldset legend={{ children: label }}>
         <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
           <EuiButtonGroup
@@ -176,6 +190,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
                   onChange={onCountChange}
                   min={0}
                   aria-label={customTimeRangePanelTexts.countAriaLabel}
+                  data-test-subj={`dateRangePicker${sideLabel}RelativeCount`}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -187,6 +202,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
                   }`}
                   onChange={onUnitDirectionChange}
                   aria-label={customTimeRangePanelTexts.unitDirectionAriaLabel}
+                  data-test-subj={`dateRangePicker${sideLabel}RelativeUnitDirection`}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -198,6 +214,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
               value={state.absoluteText}
               onChange={onAbsoluteTextChange}
               aria-label={customTimeRangePanelTexts.absoluteDateAriaLabel(label)}
+              data-test-subj={`dateRangePicker${sideLabel}AbsoluteInput`}
             />
           )}
 
@@ -289,6 +306,7 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
               onClick={copy}
               onBlur={() => setIsCopied(false)}
               disabled={isDisabled}
+              data-test-subj="dateRangePickerCopyShorthandButton"
             />
           </EuiToolTip>
         }
@@ -296,6 +314,7 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
         value={displayValue}
         readOnly
         aria-label={customTimeRangePanelTexts.shorthandLabel}
+        data-test-subj="dateRangePickerShorthandField"
       />
     </EuiFormRow>
   );
@@ -305,7 +324,9 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
  * Panel for specifying a custom absolute or relative time range.
  */
 export function CustomTimeRangePanel() {
-  const { timeRange, text, setText, applyRange, onPresetSave } = useDateRangePickerContext();
+  const { timeRange, text, setText, applyRange, onPresetSave, settings } =
+    useDateRangePickerContext();
+  const absoluteFormat = applyTimePrecision(DEFAULT_DATE_FORMAT, settings.timePrecision ?? 's');
   const formId = useGeneratedHtmlId({ prefix: 'customTimeRangeForm' });
   const saveCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
   const [saveAsPreset, setSaveAsPreset] = useState(false);
@@ -314,10 +335,10 @@ export function CustomTimeRangePanel() {
   const hasAppliedRef = useRef(false);
 
   const [startState, setStartState] = useState<DatePartState>(() =>
-    deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0])
+    deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0], absoluteFormat)
   );
   const [endState, setEndState] = useState<DatePartState>(() =>
-    deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1])
+    deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1], absoluteFormat)
   );
 
   const startDateString = useMemo(() => datePartStateToDateString(startState), [startState]);
@@ -331,8 +352,8 @@ export function CustomTimeRangePanel() {
     [startState, endState]
   );
   const shorthandValue = useMemo(
-    () => getOptionShorthand({ start: startDateString, end: endDateString }),
-    [startDateString, endDateString]
+    () => datePartStateToShorthand(startState, endState),
+    [startState, endState]
   );
 
   const isInternalChangeRef = useRef(false);
@@ -355,9 +376,20 @@ export function CustomTimeRangePanel() {
     }
     // Both bounds must be present; skip when input is partial or unparseable.
     if (!timeRange.start || !timeRange.end) return;
-    setStartState(deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0]));
-    setEndState(deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1]));
-  }, [timeRange.start, timeRange.end, timeRange.startDate, timeRange.endDate, timeRange.type]);
+    setStartState(
+      deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0], absoluteFormat)
+    );
+    setEndState(
+      deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1], absoluteFormat)
+    );
+  }, [
+    timeRange.start,
+    timeRange.end,
+    timeRange.startDate,
+    timeRange.endDate,
+    timeRange.type,
+    absoluteFormat,
+  ]);
 
   useEffect(() => {
     if (!isPanelDrivenChangeRef.current) return;
@@ -391,7 +423,7 @@ export function CustomTimeRangePanel() {
   );
 
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerCustomRangePanel">
       <PanelHeader>
         <SubPanelHeading onGoBack={handleGoBack}>
           {customTimeRangePanelTexts.heading}
@@ -399,7 +431,7 @@ export function CustomTimeRangePanel() {
       </PanelHeader>
       <PanelBody spacingSide="both">
         <PanelBodySection>
-          <form id={formId} onSubmit={onSubmit}>
+          <form id={formId} onSubmit={onSubmit} data-test-subj="dateRangePickerCustomRangeForm">
             <EuiFlexGroup gutterSize="l" direction="column" responsive={false}>
               <DatePartPicker
                 label={customTimeRangePanelTexts.startDateLabel}
@@ -424,7 +456,14 @@ export function CustomTimeRangePanel() {
       </PanelBody>
       <PanelFooter
         primaryAction={
-          <EuiButton size="s" fill type="submit" form={formId} disabled={timeRange.isInvalid}>
+          <EuiButton
+            size="s"
+            fill
+            type="submit"
+            form={formId}
+            disabled={timeRange.isInvalid}
+            data-test-subj="dateRangePickerCustomRangeApplyButton"
+          >
             {customTimeRangePanelTexts.applyButton}
           </EuiButton>
         }
@@ -435,6 +474,7 @@ export function CustomTimeRangePanel() {
             label={customTimeRangePanelTexts.saveAsPresetCheckbox}
             checked={saveAsPreset}
             onChange={(e) => setSaveAsPreset(e.target.checked)}
+            data-test-subj="dateRangePickerCustomRangeSaveCheckbox"
           />
         )}
       </PanelFooter>
@@ -447,10 +487,10 @@ CustomTimeRangePanel.PANEL_ID = 'custom-time-range-panel';
 function deriveInitialState(
   dateString: string,
   date: Date | null,
-  dateType: DateType
+  dateType: DateType,
+  absoluteFormat: string = DEFAULT_DATE_FORMAT
 ): DatePartState {
-  // TODO: temporary default format, will be refactored
-  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(DEFAULT_DATE_FORMAT);
+  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(absoluteFormat);
 
   if (dateType === DATE_TYPE_NOW) {
     return {
@@ -481,7 +521,7 @@ function deriveInitialState(
     type: DATE_TYPE_ABSOLUTE,
     relativeOffset: DEFAULT_RELATIVE,
     absoluteText: isValidDate
-      ? moment(date).format(DEFAULT_DATE_FORMAT)
+      ? moment(date).format(absoluteFormat)
       : dateString || formatAbsolute(null),
   };
 }
@@ -495,9 +535,36 @@ function deriveInitialState(
 function datePartStateToInputFragment(state: DatePartState): string {
   if (state.type === DATE_TYPE_NOW) return 'now';
   if (state.type === DATE_TYPE_RELATIVE) {
-    return datePartStateToDateString(state).replace(/^now/, '');
+    const { count, unit } = state.relativeOffset;
+    const operator = count >= 0 ? '+' : '-';
+    const displayUnit = UNIT_DISPLAY_ABBREV[unit] ?? unit;
+    return `${operator}${Math.abs(count)}${displayUnit}`;
   }
   return state.absoluteText;
+}
+
+/**
+ * Builds the shorthand string for the custom time range panel.
+ *
+ * - RELATIVE bounds produce compact offset notation (e.g. `-15m`, `+3d`).
+ * - ABSOLUTE bounds use the user's typed text as-is.
+ * - NOW collapses: when one side is NOW the other side's fragment stands alone.
+ * - Returns `null` when both sides are NOW (no meaningful shorthand).
+ */
+function datePartStateToShorthand(
+  startState: DatePartState,
+  endState: DatePartState
+): string | null {
+  const startIsNow = startState.type === DATE_TYPE_NOW;
+  const endIsNow = endState.type === DATE_TYPE_NOW;
+
+  if (startIsNow && endIsNow) return null;
+  if (startIsNow) return datePartStateToInputFragment(endState);
+  if (endIsNow) return datePartStateToInputFragment(startState);
+
+  return `${datePartStateToInputFragment(
+    startState
+  )} ${DATE_RANGE_INPUT_DELIMITER} ${datePartStateToInputFragment(endState)}`;
 }
 
 function datePartStateToDateString(state: DatePartState): string {

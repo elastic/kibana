@@ -24,6 +24,10 @@ import { ReqStatus } from '../../notes';
 import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
+jest.mock('./components/notes_remote_callout', () => ({
+  NotesRemoteCallout: () => null,
+}));
+
 jest.mock('./hooks/use_timeline_config');
 jest.mock('../../common/hooks/is_in_security_app');
 const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;
@@ -63,10 +67,10 @@ const mockTimelineConfig = {
 const mockStore = createMockStore(mockGlobalState);
 const mockHit = buildDataTableRecord({ _index: 'test', _id: 'test-id' } as EsHitRecord);
 
-const renderNotesDetails = (isTimelineFlyout = true) =>
+const renderNotesDetails = () =>
   render(
     <TestProviders store={mockStore}>
-      <NotesDetails hit={mockHit} isTimelineFlyout={isTimelineFlyout} />
+      <NotesDetails hit={mockHit} />
     </TestProviders>
   );
 
@@ -105,7 +109,7 @@ describe('NotesDetails', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -134,7 +138,7 @@ describe('NotesDetails', () => {
 
     const { getByText } = render(
       <TestProviders store={store}>
-        <NotesDetails hit={alertHit} isTimelineFlyout={true} />
+        <NotesDetails hit={alertHit} />
       </TestProviders>
     );
 
@@ -155,7 +159,7 @@ describe('NotesDetails', () => {
 
     const { getByText } = render(
       <TestProviders store={store}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -180,7 +184,7 @@ describe('NotesDetails', () => {
 
     render(
       <TestProviders store={store}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -259,7 +263,7 @@ describe('NotesDetails hideTimelineIcon prop', () => {
 
     const { getByTestId } = render(
       <TestProviders store={getNotesStoreWithTimelineNote()}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={false} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -271,7 +275,7 @@ describe('NotesDetails hideTimelineIcon prop', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={getNotesStoreWithTimelineNote()}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={false} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 

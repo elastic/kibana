@@ -171,6 +171,7 @@
                 "lineNumber": 43,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -228,6 +229,7 @@
                 "lineNumber": 63,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -387,6 +389,7 @@
                 "lineNumber": 33,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -444,6 +447,7 @@
                 "lineNumber": 47,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -622,6 +626,7 @@
                 "lineNumber": 100,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -679,6 +684,7 @@
                 "lineNumber": 113,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -848,6 +854,7 @@
                 "lineNumber": 68,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -905,6 +912,7 @@
                 "lineNumber": 83,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1006,7 +1014,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ description: any; \"data-test-subj\": any; title: any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
+          "{ description: any; title: any; \"data-test-subj\": any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "lineNumber": 20,

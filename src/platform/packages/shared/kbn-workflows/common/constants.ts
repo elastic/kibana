@@ -19,7 +19,6 @@ export const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
 export const WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID = 'workflows:ui:visualEditor:enabled';
 export const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID = 'workflows:ui:executionGraph:enabled';
 export const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:enabled';
-export const WORKFLOWS_AI_AGENT_SETTING_ID = 'workflows:aiAgent:enabled';
 
 /**
  * Feature flag ID for enabling / disabling the workflow execution stats bar UI

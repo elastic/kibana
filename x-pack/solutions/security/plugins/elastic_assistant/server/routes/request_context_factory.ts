@@ -142,6 +142,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
+      searchInferenceEndpoints: startPlugins.searchInferenceEndpoints,
       savedObjectsClient,
       telemetry: core.analytics,
 

@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
 import Papa from 'papaparse';
+import { cleanupDownloadedFile } from '../../helpers';
 
 const defaultSettings = {
   defaultIndex: 'logstash-*',
@@ -45,10 +46,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterEach(async () => {
-    if (downloadedFilePath && fs.existsSync(downloadedFilePath)) {
-      fs.unlinkSync(downloadedFilePath);
-      downloadedFilePath = null;
-    }
+    downloadedFilePath = cleanupDownloadedFile(downloadedFilePath);
   });
 
   test.afterAll(async ({ kbnClient }) => {

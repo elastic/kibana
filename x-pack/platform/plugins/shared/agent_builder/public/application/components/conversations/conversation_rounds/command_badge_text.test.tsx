@@ -21,7 +21,7 @@ describe('CommandBadgeText', () => {
     expect(screen.getByText('hello world')).toBeInTheDocument();
   });
 
-  it('renders a badge from serialized format', () => {
+  it('renders a badge from serialized format with truncated styling', () => {
     renderWithProvider(<CommandBadgeText text="[/Summarize](skill://skill-1)" />);
 
     expect(screen.getByText('/Summarize')).toBeInTheDocument();
@@ -45,5 +45,11 @@ describe('CommandBadgeText', () => {
     renderWithProvider(<CommandBadgeText text="[/Unknown](unknown://id-1)" />);
 
     expect(screen.getByText('[/Unknown](unknown://id-1)')).toBeInTheDocument();
+  });
+
+  it('renders SML badges with full type/title text', () => {
+    renderWithProvider(<CommandBadgeText text="[@dashboard/A](sml://chunk-1)" />);
+
+    expect(screen.getByText('@dashboard/A')).toBeInTheDocument();
   });
 });

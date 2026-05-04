@@ -6,28 +6,50 @@
  */
 
 import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceConnector } from '@kbn/inference-common';
 import {
   isSupportedConnector,
   connectorToInference,
   InferenceConnectorType,
 } from '@kbn/inference-common';
+import type { ActionsClientProvider } from '../types';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
-export const getConnectorList = async ({
-  actions,
-  request,
-  esClient,
-  logger,
-}: {
-  actions: ActionsPluginStart;
+interface GetConnectorListWithRequestOptions {
+  actions: ActionsClientProvider;
   request: KibanaRequest;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<InferenceConnector[]> => {
+}
+
+interface GetConnectorListWithActionsClientOptions {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+type GetConnectorListOptions =
+  | GetConnectorListWithRequestOptions
+  | GetConnectorListWithActionsClientOptions;
+
+const getActionsClient = async (
+  options: GetConnectorListOptions
+): Promise<PublicMethodsOf<ActionsClient>> => {
+  if ('actionsClient' in options) {
+    return options.actionsClient;
+  }
+  return options.actions.getActionsClientWithRequest(options.request);
+};
+
+export const getConnectorList = async (
+  options: GetConnectorListOptions
+): Promise<InferenceConnector[]> => {
+  const { esClient, logger } = options;
+
   const [connectorsResult, endpointsResult] = await Promise.allSettled([
-    getStackConnectors({ actions, request }),
+    getStackConnectors(options),
     getInferenceEndpoints({ esClient, taskType: 'chat_completion' }),
   ]);
 
@@ -56,26 +78,33 @@ export const getConnectorList = async ({
       .map((c) => [c.config?.inferenceId as string, c])
   );
 
-  const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
-    type: InferenceConnectorType.Inference,
-    name:
-      ep.metadata.display?.name ??
-      stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
-      ep.inferenceId,
-    connectorId: ep.inferenceId,
-    config: {
-      inferenceId: ep.inferenceId,
-      providerConfig: {
-        model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+  const inferenceEndpointConnectors: (InferenceConnector & { creator?: string })[] = endpoints.map(
+    (ep) => ({
+      ...ep,
+      type: InferenceConnectorType.Inference,
+      name:
+        ep.metadata.display?.name ??
+        stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
+        ep.inferenceId,
+      creator: ep.metadata.display?.creator,
+      connectorId: ep.inferenceId,
+      config: {
+        inferenceId: ep.inferenceId,
+        providerConfig: {
+          model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+        },
+        taskType: ep.taskType,
+        service: ep.service,
+        serviceSettings: ep.serviceSettings,
+        // temporary any until types are propagated in ES client
+        modelCreator: (ep.metadata as Record<string, any>)?.display?.model_creator,
       },
-      taskType: ep.taskType,
-      service: ep.service,
-      serviceSettings: ep.serviceSettings,
-    },
-    capabilities: {},
-    isInferenceEndpoint: true,
-    isPreconfigured: !!ep.metadata.display?.name,
-  }));
+      capabilities: {},
+      isInferenceEndpoint: true,
+      isPreconfigured: !!ep.metadata.display?.name,
+      isEis: ep.service === 'elastic',
+    })
+  );
 
   // Exclude .inference stack connectors that have a corresponding ES inference endpoint,
   // since the endpoint representation is preferred (includes native endpoints too).
@@ -89,14 +118,10 @@ export const getConnectorList = async ({
   return [...filteredConnectors, ...inferenceEndpointConnectors];
 };
 
-const getStackConnectors = async ({
-  actions,
-  request,
-}: {
-  actions: ActionsPluginStart;
-  request: KibanaRequest;
-}): Promise<InferenceConnector[]> => {
-  const actionClient = await actions.getActionsClientWithRequest(request);
+const getStackConnectors = async (
+  options: GetConnectorListOptions
+): Promise<InferenceConnector[]> => {
+  const actionClient = await getActionsClient(options);
 
   const allConnectors = await actionClient.getAll({
     includeSystemActions: false,

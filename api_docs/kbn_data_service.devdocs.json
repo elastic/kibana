@@ -61,6 +61,7 @@
             "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Hit",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -87,6 +88,7 @@
             "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -150,6 +152,7 @@
             "lineNumber": 18,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -202,6 +205,7 @@
             "lineNumber": 157,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -285,6 +289,7 @@
             "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -302,6 +307,7 @@
             "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TabifyDocsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -411,6 +417,7 @@
             "lineNumber": 20,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],

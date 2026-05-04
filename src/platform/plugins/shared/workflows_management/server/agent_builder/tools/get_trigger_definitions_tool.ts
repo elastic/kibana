@@ -8,11 +8,11 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { builtInTriggerDefinitions } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AlertEventSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 const LARGE_ENUM_THRESHOLD = 20;
 
@@ -55,18 +55,29 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
-export function registerGetTriggerDefinitionsTool(
-  agentBuilder: AgentBuilderPluginSetupContract
-): void {
+/**
+ * Returns the JSON Schema for `{{ event.* }}` variables available at runtime for a given trigger type.
+ * Alert triggers get the full alert event context (alerts array, rule, params);
+ * other built-in triggers only get `BaseEventSchema` (spaceId).
+ */
+function getEventContextSchema(triggerTypeId: string): unknown {
+  // TODO: support custom trigger event schemas
+  if (triggerTypeId === 'alert') {
+    return zodToJsonSchemaSafe(AlertEventSchema);
+  }
+  return zodToJsonSchemaSafe(BaseEventSchema);
+}
+
+export function registerGetTriggerDefinitionsTool(agentBuilder: AgentBuilderPluginSetup): void {
   agentBuilder.tools.register({
     id: workflowTools.getTriggerDefinitions,
     type: ToolType.builtin,
     description: `Get available workflow trigger types with schemas and YAML examples.
 
-**When to use:** To learn how to configure the \`triggers\` section of a workflow.
+**When to use:** To learn how to configure the \`triggers\` section of a workflow, or to understand what \`{{ event.* }}\` variables are available at runtime for a given trigger type.
 **When NOT to use:** For step definitions (use get_step_definitions) or connector instances (use get_connectors).
 
-Returns built-in trigger types (manual, scheduled, alert).`,
+Returns built-in trigger types (manual, scheduled, alert) including the event context schema that describes what \`{{ event.* }}\` contains at runtime.`,
     schema: z.object({
       triggerType: z
         .string()
@@ -76,7 +87,9 @@ Returns built-in trigger types (manual, scheduled, alert).`,
     tags: ['workflows', 'yaml', 'triggers'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
@@ -89,6 +102,10 @@ Returns built-in trigger types (manual, scheduled, alert).`,
         label: def.label,
         description: def.description,
         jsonSchema: zodToJsonSchemaSafe(def.schema),
+        eventContextSchema: getEventContextSchema(def.id),
+        eventContextNote:
+          'The event context is available via {{ event.* }} in Liquid templates. ' +
+          'NEVER use {{ triggers.event }} or {{ trigger.event }} — the correct variable is {{ event }}.',
         examples: def.documentation.examples,
       }));
 

@@ -18,7 +18,6 @@ import {
   CrawlAndWaitInputSchema,
   GetCrawlStatusInputSchema,
 } from './types';
-
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
 /** Max characters of markdown to include per page in crawlAndWait output. */
@@ -99,13 +98,8 @@ export const FirecrawlConnector: ConnectorSpec = {
   actions: {
     scrape: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.firecrawl.actions.scrape.description',
-        {
-          defaultMessage:
-            'Scrape a single URL and extract content (for example, markdown). Markdown is truncated to maxMarkdownLength (default 100000 chars) to avoid context overflow; only set a lower value if a previous scrape returned truncated output and you need to fit within a smaller context.',
-        }
-      ),
+      description:
+        'Scrape a single URL and extract content (for example, markdown). Markdown is truncated to maxMarkdownLength (default 100000 chars) to avoid context overflow; only set a lower value if a previous scrape returned truncated output and you need to fit within a smaller context.',
       input: ScrapeInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
@@ -135,12 +129,8 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     search: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.firecrawl.actions.search.description',
-        {
-          defaultMessage: 'Search the web and get full page content from results',
-        }
-      ),
+      description:
+        'Search the web and get full page content from results. Use when you need to find information across the web by keyword or natural-language query.',
       input: SearchInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/search`, {
@@ -153,9 +143,8 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     map: {
       isTool: true,
-      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.map.description', {
-        defaultMessage: 'Map a website to discover indexed URLs',
-      }),
+      description:
+        'Map a website to discover all indexed URLs. Use when you need to list or explore URLs on a site before deciding which pages to scrape or crawl.',
       input: MapInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/map`, {
@@ -170,9 +159,8 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     crawl: {
       isTool: true,
-      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.crawl.description', {
-        defaultMessage: 'Start an asynchronous crawl of a website; returns a job ID',
-      }),
+      description:
+        'Start an asynchronous crawl of a website; returns a job ID immediately without waiting for results. Use getCrawlStatus with that ID to check progress and retrieve results. Prefer this over crawlAndWait when the site may be large or the crawl duration is unpredictable.',
       input: CrawlInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, {
@@ -187,13 +175,8 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     crawlAndWait: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.firecrawl.actions.crawlAndWait.description',
-        {
-          defaultMessage:
-            'Start a crawl of a website and poll until complete or failed; returns final status and results',
-        }
-      ),
+      description:
+        'Synchronously crawl a website and block until the crawl is complete or fails; returns final status and results (url, title, and a markdown snippet per page, up to 30 pages). Use for small or well-known sites where the crawl is expected to finish quickly. For large or unpredictably sized sites, use crawl (async) and getCrawlStatus instead.',
       input: CrawlAndWaitInputSchema,
       handler: async (ctx, input) => {
         const startResponse = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, {
@@ -232,10 +215,8 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     getCrawlStatus: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.firecrawl.actions.getCrawlStatus.description',
-        { defaultMessage: 'Get the status and results of a crawl job' }
-      ),
+      description:
+        'Get the current status and results of an existing crawl job. Pass the job ID returned by a previous crawl call. Returns a slimmed result set (url, title, markdownSnippet per page). Poll this until status is "completed" or "failed".',
       input: GetCrawlStatusInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.get(`${FIRECRAWL_API_BASE}/v2/crawl/${input.id}`);
@@ -244,6 +225,11 @@ export const FirecrawlConnector: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'Common pattern: **map** a site to find relevant URLs, then **scrape** the specific ones you need.',
+    'Choose **crawlAndWait** for small or well-known sites; choose **crawl** + **getCrawlStatus** for large or unknown sites where duration is unpredictable.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.description', {

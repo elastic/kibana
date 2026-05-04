@@ -8,8 +8,10 @@
  */
 
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { useCurrentTabDataStateContainer } from '../../../../application/main/state_management/redux';
 
 export interface EnhancedAlertFlyoutHeaderProps extends DocViewRenderProps {
   providerServices: ProfileProviderServices;
@@ -22,12 +24,17 @@ export const EnhancedAlertFlyoutHeader = ({
   fallbackRenderHeader,
   ...docViewProps
 }: EnhancedAlertFlyoutHeaderProps) => {
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const alertFlyoutHeaderFeature = providerServices.discoverShared.features.registry.getById(
     'security-solution-alert-flyout-header-title'
   );
 
   const renderHeader = alertFlyoutHeaderFeature?.renderHeader;
+  const onAlertUpdated = useCallback(() => {
+    dataStateContainer.refetch$.next(undefined);
+  }, [dataStateContainer]);
+
   return renderHeader
-    ? renderHeader(hit)
+    ? renderHeader({ hit, ...docViewProps, onAlertUpdated })
     : fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null;
 };

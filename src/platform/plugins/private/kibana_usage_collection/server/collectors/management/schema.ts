@@ -41,9 +41,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'securitySolution:alertCloseReasons': {
+  'securitySolution:detectionsCloseReasons': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:excludedGapReasons': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Array of excluded gap reasons.' },
+    },
   },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
@@ -159,19 +166,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
     },
   },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableCloudConnector': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableAlertsAndAttacksAlignment': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -536,21 +539,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'agentBuilder:connectorsEnabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'dataSources:enabled': {
+  'agentContextLayer:experimentalFeatures': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'workflows:ui:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
-  },
-  'workflows:aiAgent:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Whether AI-powered workflow authoring assistance is enabled.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -629,10 +624,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableTransactionProfiling': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmUseUnifiedTraceWaterfall': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -723,6 +714,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Display the incremental id of a case in the relevant pages',
     },
   },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
+    },
+  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
@@ -733,12 +730,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Significant events discovery in Streams.',
-    },
-  },
-  'observability:streamsEnableAttachments': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams attachments tab.',
     },
   },
   'observability:streamsEnableContentPacks': {
@@ -757,6 +748,31 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
+    },
+  },
+  'observability:streamsEnableOverviewPage': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the Streams management Overview tab',
+    },
+  },
+  'observability:streamsEnableDraftStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
+  'observability:streamsSigEventsIndexPatterns': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+    },
+  },
+  'observability:streamsEnableMemory': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable memory in Streams',
     },
   },
   'observability:enableDiagnosticMode': {
@@ -792,10 +808,22 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
-  'elasticConsole:enabled': {
+  'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
       description: 'Non-default value of setting.',
+    },
+  },
+  'query_activity:minRunningTime': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
     },
   },
 };

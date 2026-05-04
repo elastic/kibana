@@ -17,6 +17,7 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { storageKeys } from '../storage_keys';
+import { useActiveSpaceId } from '../context/active_space_context';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
@@ -85,7 +86,8 @@ export const useConversationError = () => {
 };
 
 const useGetNewConversationAgentId = () => {
-  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const spaceId = useActiveSpaceId();
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
   const validateAgentId = useValidateAgentId();
 
   // Ensure we always return a string
@@ -101,25 +103,22 @@ const useGetNewConversationAgentId = () => {
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const context = useConversationContext();
-  const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
   const getNewConversationAgentId = useGetNewConversationAgentId();
 
-  if (agentId) {
-    return agentId;
-  }
-
-  if (context.agentId) {
-    return context.agentId;
-  }
-
-  // For new conversations, agent id must be defined
+  // For new conversations, URL (context.agentId) is the source of truth
   if (isNewConversation) {
-    return getNewConversationAgentId();
+    return context.agentId ?? getNewConversationAgentId();
   }
 
-  return undefined;
+  // For existing conversations, use the conversation's stored agent_id
+  if (conversation?.agent_id) {
+    return conversation.agent_id;
+  }
+
+  // Fallback to context (URL) for edge cases
+  return context.agentId;
 };
 
 export const useConversationTitle = () => {

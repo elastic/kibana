@@ -26,6 +26,7 @@ describe('useGoBack', () => {
     jest.clearAllMocks();
     mockLocationState = null;
     mockHistoryLength = 2;
+    sessionStorage.clear();
   });
 
   it('pushes to fallback path when location state has no fromHistory flag', () => {
@@ -80,5 +81,16 @@ describe('useGoBack', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/history');
     expect(mockGoBack).not.toHaveBeenCalled();
+  });
+
+  it('pushes fallback path with query string when provided by caller', () => {
+    const { result } = renderHook(() => useGoBack('/history?q=uptime&sources=live'));
+    const event = createMouseEvent();
+
+    act(() => {
+      result.current(event);
+    });
+
+    expect(mockPush).toHaveBeenCalledWith('/history?q=uptime&sources=live');
   });
 });

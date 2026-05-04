@@ -125,7 +125,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'index-pattern-tab',
-      prepend: !getIsIndexPatternTabOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
+      prepend: !getIsIndexPatternTabOk(diagnosticsBundle) && (
+        <EuiIcon type="warning" color="red" aria-hidden={true} />
+      ),
       href: router.link('/diagnostics/index-pattern-settings', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.index_pattern_settings', {
         defaultMessage: 'Index pattern settings',
@@ -135,7 +137,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'index-templates-tab',
-      prepend: !getIsIndexTemplateOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
+      prepend: !getIsIndexTemplateOk(diagnosticsBundle) && (
+        <EuiIcon type="warning" color="red" aria-hidden={true} />
+      ),
       href: router.link('/diagnostics/index-templates', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.index_templates', {
         defaultMessage: 'Index templates',
@@ -145,7 +149,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'data-streams-tab',
-      prepend: !getIsDataStreamTabOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
+      prepend: !getIsDataStreamTabOk(diagnosticsBundle) && (
+        <EuiIcon type="warning" color="red" aria-hidden={true} />
+      ),
       href: router.link('/diagnostics/data-streams', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
         defaultMessage: 'Data streams',
@@ -155,7 +161,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'indices-tab',
-      prepend: !getIsIndicesTabOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
+      prepend: !getIsIndicesTabOk(diagnosticsBundle) && (
+        <EuiIcon type="warning" color="red" aria-hidden={true} />
+      ),
       href: router.link('/diagnostics/indices', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.indices', {
         defaultMessage: 'Indices',
@@ -185,11 +193,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     <ApmMainTemplate
       data-test-subj="apmDiagnosticsTemplate"
       pageTitle="Diagnostics"
-      environmentFilter={false}
       showServiceGroupSaveButton={false}
-      selectedNavButton="serviceGroups"
       pageHeader={{
-        iconType: 'magnifyWithExclamation',
+        iconType: 'magnifyExclamation',
         rightSideItems: [<RefreshButton />],
         description: <TemplateDescription />,
         tabs,
@@ -205,14 +211,20 @@ function TemplateDescription() {
   if (isImported) {
     return (
       <EuiCallOut
-        title="Displaying results from the uploaded diagnostics report"
-        iconType="exportAction"
+        announceOnMount
+        title={i18n.translate(
+          'xpack.apm.templateDescription.euiCallOut.displayingResultsFromTheLabel',
+          { defaultMessage: 'Displaying results from the uploaded diagnostics report' }
+        )}
+        iconType="upload"
       >
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"
           onClick={() => setImportedDiagnosticsBundle(undefined)}
         >
-          Clear bundle
+          {i18n.translate('xpack.apm.templateDescription.clearBundleButtonLabel', {
+            defaultMessage: 'Clear bundle',
+          })}
         </EuiButton>
       </EuiCallOut>
     );
@@ -230,7 +242,7 @@ function RefreshButton() {
       fill
       onClick={refetch}
     >
-      Refresh
+      {i18n.translate('xpack.apm.refreshButton.refreshButtonLabel', { defaultMessage: 'Refresh' })}
     </EuiButton>
   );
 }

@@ -97,7 +97,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   const connectorSelectorButton = (
     <EuiButtonEmpty
-      iconType={isLoading ? undefined : 'arrowDown'}
+      iconType={isLoading ? undefined : 'chevronSingleDown'}
       iconSide="right"
       flush="both"
       onClick={togglePopover}

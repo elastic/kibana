@@ -24,7 +24,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
-import type { LogDocumentProfileProvider } from '../profile';
+import { OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID, type LogDocumentProfileProvider } from '../profile';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -41,6 +41,7 @@ export const createGetDocViewer =
     );
 
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
+    const cpsHasLinkedProjects = (services.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
 
     const indexes = {
       apm: {
@@ -66,6 +67,7 @@ export const createGetDocViewer =
                 logsAIAssistantFeature={logsAIAssistantFeature}
                 logsAIInsightFeature={logsAIInsightFeature}
                 streamsFeature={streamsFeature}
+                cpsHasLinkedProjects={cpsHasLinkedProjects}
                 indexes={indexes}
                 docViewActions={params.actions}
                 {...props}
@@ -84,6 +86,7 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
   streamsFeature: ObservabilityStreamsFeature | undefined;
+  cpsHasLinkedProjects: boolean;
   indexes: ObservabilityIndexes;
   docViewActions?: DocViewActions;
 }
@@ -93,6 +96,7 @@ const LogOverviewTab = ({
   logsAIAssistantFeature,
   logsAIInsightFeature,
   streamsFeature,
+  cpsHasLinkedProjects,
   indexes,
   docViewActions,
   ...props
@@ -101,6 +105,8 @@ const LogOverviewTab = ({
     null
   );
   useAccordionExpansionEffect(logOverviewContext$, logsOverviewApi, props.hit.id);
+
+  const renderCpsWarning = Boolean(streamsFeature) && cpsHasLinkedProjects && !props.hit.raw._index;
 
   return (
     <UnifiedDocViewerLogsOverview
@@ -111,7 +117,9 @@ const LogOverviewTab = ({
       renderAIInsight={logsAIInsightFeature?.render}
       renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
       renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+      renderCpsWarning={renderCpsWarning}
       indexes={indexes}
+      profileId={OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID}
     />
   );
 };

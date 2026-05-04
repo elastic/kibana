@@ -14,50 +14,87 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AgentIds, AgentId } from '../../model/schema/common.gen';
 
+/**
+ * Number of pending actions of this type.
+ */
+export const PendingActionDataType = lazySchema(() => z.number().int());
 export type PendingActionDataType = z.infer<typeof PendingActionDataType>;
-export const PendingActionDataType = z.number().int();
 
-export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
-export const PendingActionsSchema = z.union([
-  z.object({
-    isolate: PendingActionDataType.optional(),
-    unisolate: PendingActionDataType.optional(),
-    'kill-process': PendingActionDataType.optional(),
-    'suspend-process': PendingActionDataType.optional(),
-    'running-processes': PendingActionDataType.optional(),
-    'get-file': PendingActionDataType.optional(),
-    execute: PendingActionDataType.optional(),
-    upload: PendingActionDataType.optional(),
-    scan: PendingActionDataType.optional(),
-  }),
-  z.object({}).catchall(z.unknown()),
-]);
-
-export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
-export const ActionStatusSuccessResponse = z.object({
-  body: z.object({
-    data: z.object({
-      agent_id: AgentId,
-      pending_actions: PendingActionsSchema,
+export const PendingActionsSchema = lazySchema(() =>
+  z.union([
+    z.object({
+      /**
+       * Number of pending isolate actions.
+       */
+      isolate: PendingActionDataType.optional(),
+      /**
+       * Number of pending unisolate (release) actions.
+       */
+      unisolate: PendingActionDataType.optional(),
+      /**
+       * Number of pending kill-process actions.
+       */
+      'kill-process': PendingActionDataType.optional(),
+      /**
+       * Number of pending suspend-process actions.
+       */
+      'suspend-process': PendingActionDataType.optional(),
+      /**
+       * Number of pending running-processes (get processes) actions.
+       */
+      'running-processes': PendingActionDataType.optional(),
+      /**
+       * Number of pending get-file actions.
+       */
+      'get-file': PendingActionDataType.optional(),
+      /**
+       * Number of pending execute actions.
+       */
+      execute: PendingActionDataType.optional(),
+      /**
+       * Number of pending upload actions.
+       */
+      upload: PendingActionDataType.optional(),
+      /**
+       * Number of pending scan actions.
+       */
+      scan: PendingActionDataType.optional(),
     }),
-  }),
-});
+    z.object({}).catchall(z.unknown()),
+  ])
+);
+export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
 
+export const ActionStatusSuccessResponse = lazySchema(() =>
+  z.object({
+    body: z.object({
+      data: z.object({
+        agent_id: AgentId,
+        pending_actions: PendingActionsSchema,
+      }),
+    }),
+  })
+);
+export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
+
+export const EndpointGetActionsStatusRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * A list of agent IDs to get the action status for.
+     */
+    agent_ids: AgentIds,
+  })
+);
 export type EndpointGetActionsStatusRequestQuery = z.infer<
   typeof EndpointGetActionsStatusRequestQuery
 >;
-export const EndpointGetActionsStatusRequestQuery = z.object({
-  query: z.object({
-    agent_ids: AgentIds.optional(),
-  }),
-});
 export type EndpointGetActionsStatusRequestQueryInput = z.input<
   typeof EndpointGetActionsStatusRequestQuery
 >;
 
+export const EndpointGetActionsStatusResponse = lazySchema(() => ActionStatusSuccessResponse);
 export type EndpointGetActionsStatusResponse = z.infer<typeof EndpointGetActionsStatusResponse>;
-export const EndpointGetActionsStatusResponse = ActionStatusSuccessResponse;

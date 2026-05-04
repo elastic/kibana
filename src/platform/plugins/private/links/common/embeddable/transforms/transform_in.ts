@@ -12,15 +12,15 @@ import { extractReferences } from './references';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 
 export function transformIn(state: LinksEmbeddableState) {
-  if ((state as LinksByReferenceState).savedObjectId) {
-    const { savedObjectId, ...rest } = state as LinksByReferenceState;
+  if ((state as LinksByReferenceState).ref_id) {
+    const { ref_id, ...rest } = state as LinksByReferenceState;
     return {
       state: rest,
       references: [
         {
           name: 'savedObjectRef',
           type: LINKS_SAVED_OBJECT_TYPE,
-          id: savedObjectId,
+          id: ref_id,
         },
       ],
     };

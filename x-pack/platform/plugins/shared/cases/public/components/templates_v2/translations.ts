@@ -89,6 +89,59 @@ export const FAILED_TO_SAVE_TEMPLATE = i18n.translate(
   }
 );
 
+export const FIELD_REQUIRED = i18n.translate('xpack.cases.templates.fieldValidation.required', {
+  defaultMessage: 'Required',
+});
+
+export const FIELD_MIN_VALUE = (min: number) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.minValue', {
+    defaultMessage: 'Value must be at least {min}',
+    values: { min },
+  });
+
+export const FIELD_MAX_VALUE = (max: number) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.maxValue', {
+    defaultMessage: 'Value must be at most {max}',
+    values: { max },
+  });
+
+export const FIELD_MIN_LENGTH = (min: number) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.minLength', {
+    defaultMessage: 'Must be at least {min} characters',
+    values: { min },
+  });
+
+export const FIELD_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.maxLength', {
+    defaultMessage: 'Must be at most {max} characters',
+    values: { max },
+  });
+
+export const FIELD_PATTERN_MISMATCH = (regex: string) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.patternMismatch', {
+    defaultMessage: 'Value does not match pattern: {regex}',
+    values: { regex },
+  });
+
+export const FIELD_PATTERN_INVALID = i18n.translate(
+  'xpack.cases.templates.fieldValidation.patternInvalid',
+  {
+    defaultMessage: 'Pattern is not a valid regular expression',
+  }
+);
+
+export const INVALID_USER_PROFILES = (names: string[]) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.invalidUserProfiles', {
+    defaultMessage: 'The following users do not exist and must be removed: {names}',
+    values: { names: names.join(', ') },
+  });
+
+export const INVALID_USER_PICKER_DEFAULT = (name: string) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.invalidUserPickerDefault', {
+    defaultMessage: 'User "{name}" in default values was not found or has changed.',
+    values: { name },
+  });
+
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
 });

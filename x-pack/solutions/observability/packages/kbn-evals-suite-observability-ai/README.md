@@ -9,16 +9,20 @@ This package is separate from [`@kbn/evals-suite-obs-ai-assistant`](../kbn-evals
 
 ## Evaluations
 
-| Directory | Client | Description |
-|---|---|---|
-| `evals/ai_insights/` | `AiInsightClient` | Correctness of LLM-generated insight summaries for alerts and APM errors |
-| `evals/observability_agent/` | `AgentBuilderClient` | Observability Agent chat behavior |
+| Directory                    | Client               | Description                                                              |
+| ---------------------------- | -------------------- | ------------------------------------------------------------------------ |
+| `evals/ai_insights/`         | `AiInsightClient`    | Correctness of LLM-generated insight summaries for alerts and APM errors |
+| `evals/observability_agent/` | `AgentBuilderClient` | Observability Agent chat behavior                                        |
 
 ## Prerequisites
 
 ### Snapshot Data
 
-AI Insights evaluations replay observability data from a GCS snapshot repository (`obs-ai-datasets/otel-demo/payment-service-failures`).
+AI Insights evaluations replay observability data from GCS snapshot repositories:
+
+- `obs-ai-datasets/otel-demo/payment-service-failures` — payment service invalid token errors
+- `obs-ai-datasets/otel-demo/payment-unreachable` — payment service unreachable from checkout (via the `paymentUnreachable` feature flag in the OTel demo)
+- `obs-ai-datasets/otel-demo/ad-high-cpu` — high CPU in the ad service (OpenTelemetry Demo `adHighCpu` feature flag)
 
 Set `GCS_CREDENTIALS` before starting Scout. This must contain the full JSON service account credential string (not a file path):
 
@@ -151,21 +155,21 @@ node scripts/evals stop --service edot
 
 ### CLI Options
 
-| Flag | Description |
-|---|---|
-| `--suite` | Suite ID (`observability-ai`) |
-| `--judge` | Connector ID for the LLM judge (required) |
-| `--project` | Connector/model project to evaluate against |
-| `--repetitions` | Number of times to repeat each example |
+| Flag             | Description                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| `--suite`        | Suite ID (`observability-ai`)                                                          |
+| `--judge`        | Connector ID for the LLM judge (required)                                              |
+| `--project`      | Connector/model project to evaluate against                                            |
+| `--repetitions`  | Number of times to repeat each example                                                 |
 | `--trace-es-url` | Elasticsearch cluster for trace storage (e.g., `https://user:pass@trace-cluster:9200`) |
-| `--dry-run` | Preview without executing |
+| `--dry-run`      | Preview without executing                                                              |
 
 ## Collected Metrics
 
-| Metric | Description |
-|---|---|
+| Metric                       | Description                                                             |
+| ---------------------------- | ----------------------------------------------------------------------- |
 | **Quantitative Correctness** | Factuality, Relevance, and Sequence Accuracy scores from LLM-as-a-judge |
-| **Input Tokens** | Number of input tokens consumed per evaluation (trace-based) |
-| **Output Tokens** | Number of output tokens generated per evaluation (trace-based) |
-| **Cached Tokens** | Number of cached tokens used per evaluation (trace-based) |
-| **Latency** | Duration of the `ChatComplete` span (trace-based) |
+| **Input Tokens**             | Number of input tokens consumed per evaluation (trace-based)            |
+| **Output Tokens**            | Number of output tokens generated per evaluation (trace-based)          |
+| **Cached Tokens**            | Number of cached tokens used per evaluation (trace-based)               |
+| **Latency**                  | Duration of the `ChatComplete` span (trace-based)                       |

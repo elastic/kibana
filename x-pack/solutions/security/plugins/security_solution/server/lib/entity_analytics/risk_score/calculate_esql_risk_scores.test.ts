@@ -7,7 +7,12 @@
 
 import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import { buildRiskScoreBucket, getESQL } from './calculate_esql_risk_scores';
+import {
+  buildRiskScoreBucket,
+  getESQL,
+  getResolutionCompositeQuery,
+  getResolutionScoreESQL,
+} from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 
@@ -16,6 +21,50 @@ describe('Calculate risk scores with ESQL', () => {
     it('matches snapshot', () => {
       const q = getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500);
       expect(q).toMatchSnapshot();
+    });
+
+    it('builds resolution composite query for lookup index pagination', () => {
+      const query = getResolutionCompositeQuery(
+        '.entity_analytics.risk_score.lookup-default',
+        1000,
+        {
+          resolution_target_id: 'user:foo',
+        }
+      );
+
+      expect(query).toEqual({
+        index: '.entity_analytics.risk_score.lookup-default',
+        size: 0,
+        query: { exists: { field: 'resolution_target_id' } },
+        aggs: {
+          by_resolution_target: {
+            composite: {
+              size: 1000,
+              sources: [{ resolution_target_id: { terms: { field: 'resolution_target_id' } } }],
+              after: { resolution_target_id: 'user:foo' },
+            },
+          },
+        },
+      });
+    });
+
+    it('builds resolution ESQL query with lookup join and related entity aggregation', () => {
+      const query = getResolutionScoreESQL(
+        EntityType.user,
+        { lower: 'user:a', upper: 'user:z' },
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
+      );
+      expect(query).toContain('BY resolution_target_id');
+      expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+      expect(query).toContain('resolution_target_id > "user:a"');
+      expect(query).toContain('resolution_target_id <= "user:z"');
     });
   });
 

@@ -15,9 +15,7 @@ import { DateFormatEditor } from './date';
 
 const fieldType = 'date';
 const format = {
-  getConverterFor: jest
-    .fn()
-    .mockImplementation(() => (input: string) => `converted date for ${input}`),
+  reactConvert: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: 'MMMM Do YYYY, HH:mm:ss.SSS' };
   }),

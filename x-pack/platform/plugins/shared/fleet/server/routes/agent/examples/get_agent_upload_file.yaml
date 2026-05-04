@@ -1,0 +1,20 @@
+responses:
+  200:
+    description: 'Successful response — returns the uploaded file content'
+    content:
+      application/json:
+        examples:
+          getAgentUploadFileExample:
+            description: 'The uploaded file content as a stream'
+            value: '<binary file content>'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

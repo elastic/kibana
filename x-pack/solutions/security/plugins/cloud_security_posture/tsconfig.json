@@ -75,7 +75,8 @@
     "@kbn/shared-ux-card-no-data",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-query",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/entity-store"
   ],
   "exclude": ["target/**/*"]
 }

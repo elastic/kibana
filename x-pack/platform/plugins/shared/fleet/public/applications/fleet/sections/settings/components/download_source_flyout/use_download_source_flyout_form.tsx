@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -22,6 +22,12 @@ import type { DownloadSource, PostDownloadSourceRequest } from '../../../../type
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import type { DownloadSourceBase } from '../../../../../../../common/types';
+
+import {
+  validateSslPathInput,
+  validateSslPathInputSecret,
+  validateSslPathsCombo,
+} from '../ssl_form_validators';
 
 import { confirmUpdate } from './confirm_update';
 
@@ -77,19 +83,19 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     downloadSource?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     undefined
   );
   const sslCertificateInput = useInput(
     downloadSource?.ssl?.certificate ?? '',
-    undefined,
+    validateSslPathInput,
     undefined
   );
-  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', undefined, undefined);
+  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', validateSslPathInput, undefined);
 
   const sslKeySecretInput = useSecretInput(
     (downloadSource as DownloadSourceBase)?.secrets?.ssl?.key,
-    undefined,
+    validateSslPathInputSecret,
     undefined
   );
 
@@ -154,10 +160,32 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
 
+  const { setErrors: setUsernameErrors } = usernameInput;
+  const { setErrors: setPasswordErrors } = passwordInput;
+  const { cancelEdit: cancelPasswordSecretEdit } = passwordSecretInput;
+  const { setErrors: setApiKeyErrors } = apiKeyInput;
+  const { cancelEdit: cancelApiKeySecretEdit } = apiKeySecretInput;
+
+  useEffect(() => {
+    setUsernameErrors(undefined);
+    setPasswordErrors(undefined);
+    cancelPasswordSecretEdit();
+    setApiKeyErrors(undefined);
+    cancelApiKeySecretEdit();
+  }, [
+    authTypeInput.value,
+    setUsernameErrors,
+    setPasswordErrors,
+    cancelPasswordSecretEdit,
+    setApiKeyErrors,
+    cancelApiKeySecretEdit,
+  ]);
+
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const hostValid = hostInput.validate();
 
+    const sslCertificateAuthoritiesValid = sslCertificateAuthoritiesInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -212,6 +240,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     return (
       nameInputValid &&
       hostValid &&
+      sslCertificateAuthoritiesValid &&
       sslCertificateValid &&
       sslKeyValid &&
       sslKeySecretValid &&
@@ -226,6 +255,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   }, [
     nameInput,
     hostInput,
+    sslCertificateAuthoritiesInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -357,11 +387,26 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     validate,
   ]);
 
+  const authType = authTypeInput.value as AuthType;
+  const isAuthMissing =
+    (authType === 'username_password' &&
+      (!usernameInput.value || (!passwordInput.value && !passwordSecretInput.value))) ||
+    (authType === 'api_key' && !apiKeyInput.value && !apiKeySecretInput.value);
+
   return {
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || (downloadSource && !hasChanged) || isEditDisabled,
+    isDisabled:
+      isLoading ||
+      (downloadSource && !hasChanged) ||
+      isEditDisabled ||
+      !nameInput.value ||
+      !hostInput.value ||
+      isAuthMissing ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      (sslKeyInput.value ? sslKeyInput.props.isInvalid : sslKeySecretInput.props.isInvalid),
   };
 }
 

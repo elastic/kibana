@@ -19,7 +19,5 @@ export const ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';
 export const ES_SEARCH_SYNONYMS_ID = 'searchSynonyms';
 export const SEARCH_QUERY_RULES_ID = 'searchQueryRules';
 export const SEARCH_HOMEPAGE = 'searchHomepage';
-export const SEARCH_INDICES = 'elasticsearchIndices';
 export const SEARCH_INDEX_MANAGEMENT = 'elasticsearchIndexManagement';
-export const SEARCH_INDICES_CREATE_INDEX = 'createIndex';
 export const SEARCH_GETTING_STARTED = 'searchGettingStarted';

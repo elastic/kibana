@@ -53,6 +53,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
+import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -184,6 +185,11 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
+  /**
+   * Attachment format: 'legacy' (eventId/index) or 'unified' (attachmentId/metadata).
+   * Use 'unified' when consuming from the attachment registry (e.g. EventTabContent).
+   */
+  mode?: AttachmentMode;
 }
 
 /**
@@ -192,7 +198,7 @@ export interface GetParams {
  * @ignore
  */
 export const get = async (
-  { id, includeComments }: GetParams,
+  { id, includeComments, mode = 'legacy' }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
@@ -235,6 +241,7 @@ export const get = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
+      mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = flattenCaseSavedObject({
@@ -257,7 +264,7 @@ export const get = async (
  * @experimental
  */
 export const resolve = async (
-  { id, includeComments }: GetParams,
+  { id, includeComments, mode = 'legacy' }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
@@ -299,6 +306,7 @@ export const resolve = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
+      mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = {

@@ -10,11 +10,12 @@
 import React from 'react';
 
 import {
-  registerReactEmbeddableFactory,
+  registerEmbeddablePublicDefinition,
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
-import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 
 import { BehaviorSubject } from 'rxjs';
@@ -38,19 +39,19 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 const getTestEmbeddableFactory = () =>
   Promise.resolve({
-    type: 'testControl',
+    type: 'test_control',
     buildEmbeddable: async ({ initialState, finalizeApi }) => {
       const api = finalizeApi({
         serializeState: () => ({
           selection: initialState.selection,
         }),
+        applySerializedState: jest.fn(),
       });
       return {
         Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
         api: {
           ...api,
           hasUnsavedChanges$: new BehaviorSubject(false),
-          resetUnsavedChanges: jest.fn(),
         },
       };
     },
@@ -63,7 +64,8 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
-    registerReactEmbeddableFactory('testControl', getTestEmbeddableFactory);
+    setStubKibanaServices();
+    registerEmbeddablePublicDefinition('test_control', getTestEmbeddableFactory);
   });
 
   const mountControlGroupRenderer = async (
@@ -87,34 +89,37 @@ describe('control group renderer', () => {
     return { component, api: controlGroupApi! as ControlGroupRendererApi };
   };
 
-  test('calling `updateInput` forces each child to be reset', async () => {
+  test('calling `updateInput` applies the updated child state', async () => {
     const { api } = await mountControlGroupRenderer({
       getCreationOptions: jest.fn().mockResolvedValue({
         initialState: {
           initialChildControlState: {
             test: {
-              type: 'testControl',
+              type: 'test_control',
             },
           },
         },
       }),
     });
-    const resetSpy = jest.spyOn(
-      api.children$.getValue().test as PublishesUnsavedChanges,
-      'resetUnsavedChanges'
+    const applySpy = jest.spyOn(
+      api.children$.getValue().test as HasSerializableState,
+      'applySerializedState'
     );
     act(() =>
       api.updateInput({
         initialChildControlState: {
           test: {
-            type: 'testControl',
+            type: 'test_control',
             selection: 'test selection',
           },
         } as unknown as ControlPanelsState,
       })
     );
 
-    expect(resetSpy).toBeCalledTimes(1);
+    expect(applySpy).toBeCalledWith({
+      type: 'test_control',
+      selection: 'test selection',
+    });
   });
 
   test('filter changes are dispatched to control parent API if they are different', async () => {

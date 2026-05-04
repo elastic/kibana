@@ -10,9 +10,8 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
-import type { LensRuntimeState } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../common/constants';
+import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -36,9 +35,9 @@ import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
+): EmbeddableFactory<LensWireAPIConfig, LensApi> => {
   return {
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param uuid      a unique identifier for the embeddable panel
@@ -63,7 +62,7 @@ export const createLensEmbeddableFactory = (
     }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const initialRuntimeState = await deserializeState(services, initialState);
 
@@ -140,7 +139,7 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
+      const unsavedChangesApi = initializeUnsavedChanges<LensWireAPIConfig>({
         uuid,
         parentApi,
         serializeState: () => {

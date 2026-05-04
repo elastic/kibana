@@ -51,3 +51,10 @@ export const NODE_BORDER_WIDTH_SELECTED = 4;
 export const DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE = Math.ceil(
   DEPENDENCY_NODE_DIAMOND_SIZE * Math.SQRT2
 );
+
+// Dagre layout constants
+export const NODE_WIDTH = 200;
+export const NODE_HEIGHT = 80;
+export const RANK_SEPARATION = 120;
+export const NODE_SEPARATION = 80;
+export const GRAPH_MARGIN = 50;

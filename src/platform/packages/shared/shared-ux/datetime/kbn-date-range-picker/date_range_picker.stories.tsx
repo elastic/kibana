@@ -26,7 +26,7 @@ const meta: Meta<DateRangePickerProps> = {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
     onSettingsChange: action('onSettingsChange'),
-    settings: { roundRelativeTime: true },
+    settings: { roundRelativeTime: true, timePrecision: 's' },
   },
 };
 
@@ -42,12 +42,12 @@ export const Playground: Story = {
       { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
       { start: 'now/d', end: 'now/d', label: 'Today' },
       { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
-      { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-      { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+      { start: 'now-24h/h', end: 'now', label: 'Last 24 hours' },
+      { start: 'now-30d/d', end: 'now', label: 'Last 30 days' },
       { start: 'now-3M', end: 'now', label: 'Last 3 months' },
       { start: 'now-1y', end: 'now', label: 'Last 1 year' },
     ],
-    timeZone: 'Europe/Amsterdam',
+    timeZone: 'Browser',
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
@@ -73,11 +73,34 @@ export const AutoRefresh: Story = {
     defaultValue: 'last 15 minutes',
     settings: {
       roundRelativeTime: true,
-      autoRefresh: { isEnabled: true, isPaused: false, interval: 10_000 },
+      timePrecision: 's',
+      autoRefresh: {
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 's',
+      },
     },
     showTimeWindowButtons: true,
     timeZone: 'Europe/Amsterdam',
     onRefresh: fn(),
+  },
+  render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
+export const Collapsed: Story = {
+  args: {
+    defaultValue: 'last 15 minutes',
+    collapsed: true,
+    presets: [
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+      { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+      { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+      { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+    ],
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };

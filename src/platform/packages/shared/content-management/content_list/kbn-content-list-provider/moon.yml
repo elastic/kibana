@@ -18,10 +18,11 @@ project:
   sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-provider
 dependsOn:
   - '@kbn/react-query'
-  - '@kbn/content-list-mock-data'
   - '@kbn/i18n'
   - '@kbn/content-management-tags'
   - '@kbn/content-management-favorites-public'
+  - '@kbn/user-profile-components'
+  - '@kbn/content-management-user-profiles'
   - '@kbn/i18n'
 tags:
   - shared-browser
@@ -35,26 +36,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

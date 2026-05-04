@@ -57,6 +57,7 @@
             "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Ecs",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -80,6 +81,7 @@
             "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiTheme",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -139,6 +141,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -192,6 +195,7 @@
             "lineNumber": 17,
             "columnNumber": 15,
             "deprecated": false,
+            "docsReferencedTypeName": "PassedS",
             "trackAdoption": false
           },
           {

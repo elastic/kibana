@@ -23,7 +23,11 @@ import type {
 } from '../../schema/graph/v1';
 import { REACHED_NODES_LIMIT } from '../../schema/graph/v1';
 
-export { DOCUMENT_TYPE_ALERT, DOCUMENT_TYPE_EVENT } from '../../schema/graph/v1';
+export {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+} from '../../schema/graph/v1';
 
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
   query: { esQuery?: { bool: Partial<BoolQuery> } };

@@ -16,7 +16,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StepContext } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -28,6 +28,8 @@ interface ResumeExecutionButtonProps {
   resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
+  /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
+  waitingStepExecutionId?: string;
 }
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
@@ -35,8 +37,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   resumeMessage,
   resumeSchema,
   autoOpen = false,
+  waitingStepExecutionId,
 }) => {
-  const { http, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
+  const workflowsApi = useWorkflowsApi();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen);
@@ -47,6 +51,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   useEffect(() => {
     if (autoOpen) setIsModalOpen(true);
   }, [autoOpen]);
+
+  useEffect(() => {
+    setIsSubmitted(false);
+  }, [waitingStepExecutionId]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema) return undefined;
@@ -74,14 +82,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
   const handleSubmit = useCallback(
     async ({ stepInputs }: { stepInputs: Record<string, unknown> }) => {
-      if (!http) {
-        throw new Error('HTTP service is unavailable');
-      }
       setIsSubmitting(true);
       try {
-        await http.post(`/api/workflowExecutions/${executionId}/resume`, {
-          body: JSON.stringify({ input: stepInputs }),
-        });
+        await workflowsApi.resumeExecution(executionId, { input: stepInputs });
         notifications?.toasts.addSuccess({
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.successNotificationTitle',
@@ -101,7 +104,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         setIsSubmitting(false);
       }
     },
-    [executionId, http, notifications, closeModal]
+    [executionId, workflowsApi, notifications, closeModal]
   );
 
   return (

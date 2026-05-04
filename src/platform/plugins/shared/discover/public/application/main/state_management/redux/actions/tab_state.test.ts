@@ -246,6 +246,7 @@ describe('tab_state actions', () => {
         breakdownField: '',
         columns: ['field1', 'field2'],
         hideChart: false,
+        hideTable: false,
         rowHeight: undefined,
       });
 
@@ -278,6 +279,7 @@ describe('tab_state actions', () => {
         breakdownField: '',
         columns: [],
         hideChart: false,
+        hideTable: false,
         rowHeight: undefined,
       });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
@@ -339,6 +341,7 @@ describe('tab_state actions', () => {
         breakdownField: undefined,
         columns: undefined,
         hideChart: undefined,
+        hideTable: undefined,
         rowHeight: undefined,
       });
 
@@ -371,6 +374,7 @@ describe('tab_state actions', () => {
         breakdownField: undefined,
         columns: [],
         hideChart: undefined,
+        hideTable: undefined,
         rowHeight: undefined,
       });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);

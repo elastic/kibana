@@ -33,6 +33,7 @@ import {
   getVersionSpecificPoliciesUsage,
   type AgentOnVersionSpecificPolicy,
 } from './version_specific_policies_collector';
+import { getAgentUpgradeRollbacks } from './agent_upgrade_rollbacks';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -59,6 +60,7 @@ export interface FleetUsage extends Usage, AgentData {
   modified_ilms: string[];
   packages_with_agent_version_conditions: string[];
   agents_on_version_specific_policies_per_version: AgentOnVersionSpecificPolicy[];
+  agent_upgrade_rollbacks: number;
 }
 
 export const fetchFleetUsage = async (
@@ -98,6 +100,7 @@ export const fetchFleetUsage = async (
     modified_ilms: await getModifiedILMs(),
     agents_on_version_specific_policies_per_version,
     packages_with_agent_version_conditions,
+    ...(await getAgentUpgradeRollbacks(esClient)),
   };
   return usage;
 };

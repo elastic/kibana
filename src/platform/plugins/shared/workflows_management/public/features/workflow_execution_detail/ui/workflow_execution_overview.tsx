@@ -29,6 +29,7 @@ interface WorkflowExecutionOverviewProps {
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
+  waitingStepExecutionId?: string;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -60,6 +61,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
+    waitingStepExecutionId,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -110,7 +112,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   {isTestRun && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="beaker" size="s" color="subdued" aria-hidden={true} />
+                      <EuiIcon type="flask" size="s" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                   )}
                   {workflowExecutionDuration && (
@@ -199,6 +201,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 resumeMessage={resumeMessage}
                 resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}
+                waitingStepExecutionId={waitingStepExecutionId}
               />
             </EuiFlexItem>
           )}

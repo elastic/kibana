@@ -14,7 +14,7 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
+    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
     clientId: z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
@@ -47,6 +47,7 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
+        authType: 'oauth',
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,

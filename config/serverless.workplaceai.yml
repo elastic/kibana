@@ -15,7 +15,6 @@ uiSettings.overrides.defaultRoute: /app/workplace_ai
 ## Enable tech-preview pages
 uiSettings.overrides:
   workflows:ui:enabled: true
-  dataSources:enabled: true
 
 ## Enable workplace_ai plugins
 xpack.workplaceAIApp.enabled: true

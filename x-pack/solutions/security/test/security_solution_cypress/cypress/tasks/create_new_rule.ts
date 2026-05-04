@@ -470,7 +470,8 @@ export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
@@ -573,7 +574,8 @@ export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
 
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -622,7 +624,8 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
 export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
@@ -960,8 +963,16 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
       cy.get(COMBO_BOX_OPTION).should('contain.text', field);
     }
 
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
+    // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
+    cy.contains(COMBO_BOX_OPTION, field).click();
+    // Wait for the field to be selected as a pill before closing the dropdown,
+    // otherwise {esc} can race with {enter} and cancel the selection
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
+      .find('[data-test-subj="euiComboBoxPill"]')
+      .should('contain.text', field);
   });
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
 };
 
 export const clearAlertSuppressionFields = () => {

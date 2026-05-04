@@ -22,6 +22,7 @@ import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
   useBreakpoints: () => ({
@@ -190,27 +191,30 @@ function renderApmServicesTable({
   history,
   services = mockServices,
   status = FETCH_STATUS.SUCCESS,
-  displayHealthStatus = false,
+  displayAnomalies = false,
   displayAlerts = false,
   displaySlos = false,
 }: {
   history: MemoryHistory;
   services?: ServiceListItem[];
   status?: FETCH_STATUS;
-  displayHealthStatus?: boolean;
+  displayAnomalies?: boolean;
   displayAlerts?: boolean;
   displaySlos?: boolean;
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
+  // TODO: This should be replaced with renderWithKibanaRenderContext, which would eliminate
+  // the need for <EuiThemeProvider> and <IntlProvider> wrappers, but that's currently
+  // impossible with the way <MockApmPluginContextWrapper> is shaped
   return render(
-    <IntlProvider locale="en">
+    <EuiThemeProvider>
       <MockApmPluginContextWrapper history={history}>
         <ApmServicesTable
           status={status}
           items={services}
           comparisonDataLoading={false}
-          displayHealthStatus={displayHealthStatus}
+          displayAnomalies={displayAnomalies}
           displayAlerts={displayAlerts}
           displaySlos={displaySlos}
           initialSortField={ServiceInventoryFieldName.ServiceName}
@@ -221,7 +225,7 @@ function renderApmServicesTable({
           maxCountExceeded={false}
         />
       </MockApmPluginContextWrapper>
-    </IntlProvider>
+    </EuiThemeProvider>
   );
 }
 
@@ -283,7 +287,7 @@ describe('ApmServicesTable', () => {
               status={FETCH_STATUS.SUCCESS}
               items={mockServices}
               comparisonDataLoading={false}
-              displayHealthStatus={false}
+              displayAnomalies={false}
               displayAlerts={false}
               displaySlos={false}
               initialSortField={ServiceInventoryFieldName.ServiceName}
@@ -305,7 +309,7 @@ describe('ApmServicesTable', () => {
     it('returns correct number of columns with all features enabled', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -319,10 +323,10 @@ describe('ApmServicesTable', () => {
       expect(columns.length).toBe(9);
     });
 
-    it('hides health column when showHealthStatusColumn is false', () => {
+    it('hides anomalies column when showAnomaliesColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: false,
+        showAnomaliesColumn: false,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -333,14 +337,14 @@ describe('ApmServicesTable', () => {
         onSloBadgeClick: jest.fn(),
       });
 
-      const hasHealthColumn = columns.some((c) => c.field === 'healthStatus');
-      expect(hasHealthColumn).toBe(false);
+      const hasAnomaliesColumn = columns.some((c) => c.field === 'anomalyScore');
+      expect(hasAnomaliesColumn).toBe(false);
     });
 
     it('hides alerts column when showAlertsColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -358,7 +362,7 @@ describe('ApmServicesTable', () => {
     it('hides SLOs column when showSlosColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -376,7 +380,7 @@ describe('ApmServicesTable', () => {
     it('shows SLOs column when showSlosColumn is true', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -394,7 +398,7 @@ describe('ApmServicesTable', () => {
     it('hides transaction type column when showTransactionTypeColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: false,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -412,7 +416,7 @@ describe('ApmServicesTable', () => {
     it('hides environment column on large screens', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: false, isLarge: true, isXl: false } as Breakpoints,
@@ -451,7 +455,7 @@ describe('ApmServicesTable', () => {
         it('shows environment, transaction type and sparklines', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -496,7 +500,7 @@ describe('ApmServicesTable', () => {
         it('hides environment, transaction type and sparklines', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -531,7 +535,7 @@ describe('ApmServicesTable', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -575,7 +579,7 @@ describe('ApmServicesTable', () => {
         it('shows all columns including transaction type', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -845,21 +849,21 @@ describe('ApmServicesTable', () => {
     });
   });
 
-  describe('health column', () => {
-    it('renders health column when displayHealthStatus is true', async () => {
-      renderApmServicesTable({ history, displayHealthStatus: true });
+  describe('anomalies column', () => {
+    it('renders anomalies column when displayAnomalies is true', async () => {
+      renderApmServicesTable({ history, displayAnomalies: true });
 
       await screen.findByRole('table');
 
-      expect(screen.getByText('Health')).toBeInTheDocument();
+      expect(screen.getByText('Anomalies')).toBeInTheDocument();
     });
 
-    it('does not render health column when displayHealthStatus is false', async () => {
-      renderApmServicesTable({ history, displayHealthStatus: false });
+    it('does not render anomalies column when displayAnomalies is false', async () => {
+      renderApmServicesTable({ history, displayAnomalies: false });
 
       await screen.findByRole('table');
 
-      expect(screen.queryByText('Health')).not.toBeInTheDocument();
+      expect(screen.queryByText('Anomalies')).not.toBeInTheDocument();
     });
   });
 

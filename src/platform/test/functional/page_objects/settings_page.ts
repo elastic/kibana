@@ -20,6 +20,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickLinkText(text: string) {
@@ -577,7 +578,7 @@ export class SettingsPageObject extends FtrService {
         }
       );
 
-      await (await this.getSaveIndexPatternButton()).click();
+      await (await this.getSaveDataViewButtonActive()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -720,6 +721,7 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
+      await this.toasts.dismissAllWithChecks();
       await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
@@ -977,6 +979,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('toggling tow = ' + rowTestSubj);
     const row = await this.testSubjects.find(rowTestSubj);
     const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.scrollIntoViewIfNecessary();
     await rowToggle.click();
     return row;
   }
@@ -1106,7 +1109,9 @@ export class SettingsPageObject extends FtrService {
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
 
-    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    });
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');

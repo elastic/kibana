@@ -53,7 +53,11 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  ExportShareDerivatives,
+  SharePluginSetup,
+  SharePluginStart,
+} from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -73,7 +77,7 @@ import {
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
@@ -183,6 +187,14 @@ export class DashboardPlugin
           },
         })
       );
+      share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
+        id: 'exportJson',
+        groupId: 'exportDerivatives',
+        getShareIntegrationConfig: async () => {
+          const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
+          return exportJsonConfig;
+        },
+      });
     }
 
     const {
@@ -256,14 +268,17 @@ export class DashboardPlugin
         performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        const [{ mountApp }] = await Promise.all([
+        const [{ mountApp }, { initializeDashboardApiServices }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
           import('./dashboard_renderer/dashboard_module'),
           untilPluginStartServicesReady(),
         ]);
         appMounted();
 
-        const [coreStart] = await core.getStartServices();
+        const [[coreStart], _] = await Promise.all([
+          core.getStartServices(),
+          initializeDashboardApiServices(),
+        ]);
 
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,

@@ -4,7 +4,7 @@ steps:
     key: defend-workflows
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
@@ -22,9 +22,10 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     key: defend-workflows-serverless
+    if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
