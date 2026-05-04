@@ -16,6 +16,8 @@ import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
+import { CreateRulePage } from './create_rule_page';
+import { RuleDetailsPage } from './rule_details_page';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
@@ -27,6 +29,8 @@ export interface SecurityPageObjects extends PageObjects {
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
   serverlessProjectChromePage: ServerlessProjectChromePage;
+  createRulePage: CreateRulePage;
+  ruleDetailsPage: RuleDetailsPage;
 }
 
 export function extendPageObjects(
@@ -49,5 +53,7 @@ export function extendPageObjects(
     ),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
+    createRulePage: createLazyPageObject(CreateRulePage, page),
+    ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
   };
 }
