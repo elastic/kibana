@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema/src/feature';
+import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
 import {
   createGetFeatureQueryFromToolArgs,
   createGetFeatureTypesFromToolArgs,
@@ -17,11 +17,7 @@ import {
 } from '../../features/tool';
 
 export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
-  'infrastructure',
-  'technology',
-  'dependency',
-  'entity',
-  'schema',
+  ...INFERRED_FEATURE_TYPES,
   ...COMPUTED_FEATURE_TYPES,
 ] as const;
 
