@@ -13,6 +13,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -30,10 +31,9 @@ import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/con
 import type { WorkflowsManagementApi } from '../lib/workflows/workflow_execution_client';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
-export type GetScopedClients = ({
-  request,
-}: {
+export type GetScopedClients = (params: {
   request: KibanaRequest;
+  rulesClientOptions?: RulesClientCreateOptions;
 }) => Promise<RouteHandlerScopedClients>;
 
 export interface RouteHandlerScopedClients {
