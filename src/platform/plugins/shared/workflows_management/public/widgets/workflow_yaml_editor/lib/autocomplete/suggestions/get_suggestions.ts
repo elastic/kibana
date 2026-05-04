@@ -11,7 +11,6 @@ import type { monaco } from '@kbn/monaco';
 import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
-import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
 import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
@@ -19,6 +18,8 @@ import {
   createLiquidSyntaxCompletions,
 } from './liquid/liquid_completions';
 import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_suggestions';
+import { getStepPropertySuggestions } from './step_property/get_step_property_suggestions';
+import type { GetStepPropertyHandler } from './step_property/get_step_property_suggestions';
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerConditionKqlSuggestions } from './trigger_condition/get_trigger_condition_kql_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
@@ -27,7 +28,7 @@ import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_sug
 import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
 import type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
-import { getPropertyHandler } from '../../../../../../common/schema';
+import { getPropertyHandler as getPropertyHandlerFromSchema } from '../../../../../../common/schema';
 import type {
   AutocompleteContext,
   ExtendedAutocompleteContext,
@@ -161,7 +162,8 @@ async function handleMatchTypeSuggestions(
 
 export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext,
-  kqlServices?: WorkflowKqlCompletionServices
+  kqlServices?: WorkflowKqlCompletionServices,
+  getPropertyHandler?: GetStepPropertyHandler
 ): Promise<monaco.languages.CompletionItem[]> {
   if (
     kqlServices &&
@@ -204,10 +206,7 @@ export async function getSuggestions(
     return jsonSchemaSuggestions;
   }
 
-  // Custom property completion for steps registered via workflows_extensions
-  return getCustomPropertySuggestions(
-    autocompleteContext,
-    (stepType: string, scope: 'config' | 'input', key: string) =>
-      getPropertyHandler(stepType, scope, key)
-  );
+  // Step property completion (extension-registered steps and internal step editor handlers)
+  const resolvePropertyHandler = getPropertyHandler ?? getPropertyHandlerFromSchema;
+  return getStepPropertySuggestions(autocompleteContext, resolvePropertyHandler);
 }

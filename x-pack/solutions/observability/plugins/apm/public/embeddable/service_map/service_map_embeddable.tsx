@@ -191,6 +191,7 @@ export function ServiceMapEmbeddable({
         nodes={data.nodes}
         edges={data.edges}
         serviceName={serviceName}
+        highlightedServiceName={serviceName}
         environment={environment}
         kuery={kuery}
         start={start}
