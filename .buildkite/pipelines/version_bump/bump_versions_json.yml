@@ -1,11 +1,12 @@
 steps:
   - name: 'Bump versions.json'
     key: bump-versions-json
+    depends_on: bump-version
     command: .buildkite/scripts/steps/version_bump/bump_versions_json.sh
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4-standard-4
+      machineType: n2-standard-4
     env:
       DRY_RUN: 'true'
