@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OtherPromotedEvents } from './other_promoted_events';
 import type { LatestSignificantEventData } from '../hooks/use_fetch_latest_significant_event';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      http: { basePath: { prepend: (path: string) => path } },
+    },
+  }),
+}));
 
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
@@ -50,6 +58,18 @@ const makeEvent = (
     subtitle: 'logs.otel',
     severityLabel: 'High',
     severityColor: 'warning',
+    summary: 'Test summary',
+    rootCause: 'Root cause',
+    recommendations: [],
+    recommendedAction: 'escalate',
+    criticality: 70,
+    impact: 'high',
+    ruleNames: ['Rule A'],
+    streamNames: ['logs.otel'],
+    evidences: [],
+    dependencyEdges: [],
+    causeKis: [],
+    timestamp: '2026-04-30T19:30:00Z',
   },
   timestamp: '2026-04-30T19:30:00Z',
   ...overrides,
@@ -62,19 +82,32 @@ describe('OtherPromotedEvents', () => {
     expect(screen.getByText('Other promoted events')).toBeInTheDocument();
   });
 
-  it('renders each event with severity badge and title', () => {
+  it('renders nothing when there are no events', () => {
+    const { container } = renderWithIntl(<OtherPromotedEvents events={[]} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('renders each event as a row with severity and recommended action badges', () => {
     const events = [
       makeEvent({
         mainEventTitle: 'Payment failures',
         severityLabel: 'Critical',
         severityColor: 'danger',
-        raw: { ...makeEvent().raw, event_id: 'e-1' },
+        raw: {
+          ...makeEvent().raw,
+          event_id: 'e-1',
+          recommended_action: 'escalate',
+        },
       }),
       makeEvent({
         mainEventTitle: 'Frontend errors',
-        severityLabel: 'High',
-        severityColor: 'warning',
-        raw: { ...makeEvent().raw, event_id: 'e-2' },
+        severityLabel: 'Medium',
+        severityColor: 'primary',
+        raw: {
+          ...makeEvent().raw,
+          event_id: 'e-2',
+          recommended_action: 'monitor',
+        },
       }),
     ];
     renderWithIntl(<OtherPromotedEvents events={events} />);
@@ -82,47 +115,30 @@ describe('OtherPromotedEvents', () => {
     expect(screen.getByText('Payment failures')).toBeInTheDocument();
     expect(screen.getByText('Frontend errors')).toBeInTheDocument();
     expect(screen.getByText('Critical')).toBeInTheDocument();
-    expect(screen.getByText('High')).toBeInTheDocument();
-  });
-
-  it('renders event description when present', () => {
-    const events = [makeEvent({ description: 'A useful description' })];
-    renderWithIntl(<OtherPromotedEvents events={events} />);
-    expect(screen.getByText('A useful description')).toBeInTheDocument();
-  });
-
-  it('does not render description text when empty', () => {
-    const events = [makeEvent({ description: '' })];
-    renderWithIntl(<OtherPromotedEvents events={events} />);
-    // The title should still render but no extra description paragraph
-    expect(screen.getByText('Test event')).toBeInTheDocument();
-    // With empty description, only title and section header text nodes exist
-    const panels = screen.getByTestId('sigeventsOverviewOtherPromotedEvents');
-    expect(panels.querySelectorAll('h4')).toHaveLength(1);
-  });
-
-  it('renders severity badge colors correctly for all variants', () => {
-    const events = [
-      makeEvent({
-        severityLabel: 'Critical',
-        severityColor: 'danger',
-        raw: { ...makeEvent().raw, event_id: 'e-1' },
-      }),
-      makeEvent({
-        severityLabel: 'Medium',
-        severityColor: 'primary',
-        raw: { ...makeEvent().raw, event_id: 'e-2' },
-      }),
-      makeEvent({
-        severityLabel: 'Low',
-        severityColor: 'subdued',
-        raw: { ...makeEvent().raw, event_id: 'e-3' },
-      }),
-    ];
-    renderWithIntl(<OtherPromotedEvents events={events} />);
-
-    expect(screen.getByText('Critical')).toBeInTheDocument();
     expect(screen.getByText('Medium')).toBeInTheDocument();
-    expect(screen.getByText('Low')).toBeInTheDocument();
+    expect(screen.getByText('Escalate')).toBeInTheDocument();
+    expect(screen.getByText('Monitor')).toBeInTheDocument();
+  });
+
+  it('opens a detail flyout when an event row is expanded and toggles closed again', () => {
+    const events = [makeEvent({ mainEventTitle: 'Payment failures' })];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+
+    expect(screen.queryByTestId('otherPromotedEventDetailFlyout')).not.toBeInTheDocument();
+
+    const expandBtn = screen.getByTestId('otherPromotedEventExpandRow-evt-1');
+    fireEvent.click(expandBtn);
+    expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('otherPromotedEventExpandRow-evt-1'));
+    expect(screen.queryByTestId('otherPromotedEventDetailFlyout')).not.toBeInTheDocument();
+  });
+
+  it('opens the flyout when clicking the title link', () => {
+    const events = [makeEvent({ mainEventTitle: 'Payment failures' })];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+
+    fireEvent.click(screen.getByTestId('otherPromotedEventTitleLink-evt-1'));
+    expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
   });
 });

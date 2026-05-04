@@ -273,7 +273,7 @@ export function SigeventsOverview({
       {otherPromotedEvents && otherPromotedEvents.length > 0 && (
         <>
           <EuiSpacer size="l" />
-          <OtherPromotedEvents events={otherPromotedEvents} />
+          <OtherPromotedEvents events={otherPromotedEvents} onRemediate={onRemediateEvent} />
         </>
       )}
     </div>
