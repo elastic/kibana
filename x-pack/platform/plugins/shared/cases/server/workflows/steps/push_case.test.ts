@@ -31,9 +31,7 @@ describe('pushCasesStepDefinition', () => {
     expect(definition.id).toBe('cases.pushCases');
     expect(typeof definition.handler).toBe('function');
     expect(definition.inputSchema.safeParse({ case_ids: ['case-1'] }).success).toBe(true);
-    expect(
-      definition.inputSchema.safeParse({ case_ids: ['case-1', 'case-2'] }).success
-    ).toBe(true);
+    expect(definition.inputSchema.safeParse({ case_ids: ['case-1', 'case-2'] }).success).toBe(true);
   });
 
   it('pushes a single case when case_ids contains one id', async () => {
@@ -55,10 +53,7 @@ describe('pushCasesStepDefinition', () => {
     const pushedCase1 = { ...createCaseResponseFixture, id: 'case-1' };
     const pushedCase2 = { ...createCaseResponseFixture, id: 'case-2' };
     const get = jest.fn().mockResolvedValue(caseWithConnector);
-    const push = jest
-      .fn()
-      .mockResolvedValueOnce(pushedCase1)
-      .mockResolvedValueOnce(pushedCase2);
+    const push = jest.fn().mockResolvedValueOnce(pushedCase1).mockResolvedValueOnce(pushedCase2);
     const definition = pushCasesStepDefinition(makeCasesClient({ get, push }));
 
     const result = await definition.handler(createContext({ case_ids: ['case-1', 'case-2'] }));

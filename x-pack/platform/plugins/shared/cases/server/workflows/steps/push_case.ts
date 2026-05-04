@@ -7,10 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import {
-  pushCasesStepCommonDefinition,
-  type PushCasesStepInput,
-} from '../../../common/workflows/steps/push_case';
+import { pushCasesStepCommonDefinition } from '../../../common/workflows/steps/push_case';
 import type { CasesClient } from '../../client';
 import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
