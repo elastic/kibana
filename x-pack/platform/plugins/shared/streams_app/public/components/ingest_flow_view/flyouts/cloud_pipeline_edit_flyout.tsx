@@ -30,14 +30,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 
-// TODO: import from @kbn/streams-plugin/server once workstream B types are public
-interface OtlpEndpointConfig {
-  id: string;
-  name: string;
-  targetStreamName?: string;
-  createdAt: number;
-  updatedAt: number;
-}
 
 export interface CloudPipelineEditFlyoutProps {
   mode: 'create' | 'edit';
@@ -147,10 +139,12 @@ export const CloudPipelineEditFlyout: React.FC<CloudPipelineEditFlyoutProps> = (
 
       if (mode === 'create') {
         await streamsRepositoryClient.fetch('POST /internal/streams/_flow/cloud_pipelines', {
+          signal: null,
           params: { body },
         });
       } else {
         await streamsRepositoryClient.fetch('PUT /internal/streams/_flow/cloud_pipelines/{id}', {
+          signal: null,
           params: { path: { id: pipelineId! }, body },
         });
       }
@@ -185,6 +179,7 @@ export const CloudPipelineEditFlyout: React.FC<CloudPipelineEditFlyoutProps> = (
     setIsDeleting(true);
     try {
       await streamsRepositoryClient.fetch('DELETE /internal/streams/_flow/cloud_pipelines/{id}', {
+        signal: null,
         params: { path: { id: pipelineId } },
       });
       core.notifications.toasts.addSuccess(

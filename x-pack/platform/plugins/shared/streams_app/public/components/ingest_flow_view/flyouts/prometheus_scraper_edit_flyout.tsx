@@ -210,12 +210,14 @@ export const PrometheusScraperEditFlyout: React.FC<PrometheusScraperEditFlyoutPr
 
       if (mode === 'create') {
         await streamsRepositoryClient.fetch('POST /internal/streams/_flow/prometheus_scrapers', {
+          signal: null,
           params: { body },
         });
       } else {
         await streamsRepositoryClient.fetch(
           'PUT /internal/streams/_flow/prometheus_scrapers/{id}',
           {
+            signal: null,
             params: { path: { id: scraperId! }, body },
           }
         );
@@ -255,6 +257,7 @@ export const PrometheusScraperEditFlyout: React.FC<PrometheusScraperEditFlyoutPr
       await streamsRepositoryClient.fetch(
         'DELETE /internal/streams/_flow/prometheus_scrapers/{id}',
         {
+          signal: null,
           params: { path: { id: scraperId } },
         }
       );

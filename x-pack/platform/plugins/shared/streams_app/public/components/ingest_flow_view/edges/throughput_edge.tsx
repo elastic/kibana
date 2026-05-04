@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, type Edge, type EdgeProps } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FlowEdge } from '@kbn/streams-plugin/common';
 
-export type ThroughputEdgeData = Pick<FlowEdge, 'health' | 'throughput' | 'isMock' | 'kind'>;
+export type ThroughputEdgeData = Pick<FlowEdge, 'health' | 'throughput' | 'isMock' | 'kind'> &
+  Record<string, unknown>;
+
+export type ThroughputEdgeType = Edge<ThroughputEdgeData>;
 
 export const formatRate = (docsPerSec: number): string => {
   if (docsPerSec === 0) return '0/s';
@@ -36,7 +39,7 @@ const getEdgeColor = (
   }
 };
 
-export const ThroughputEdge: React.FC<EdgeProps<ThroughputEdgeData>> = ({
+export const ThroughputEdge: React.FC<EdgeProps<ThroughputEdgeType>> = ({
   id,
   sourceX,
   sourceY,

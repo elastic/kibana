@@ -13,7 +13,38 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+// Minimal fleet interfaces — avoids importing @kbn/fleet-plugin/server which pulls in
+// packages outside this plugin's rootDir via its transitive dependency chain.
+export interface FleetAgentClient {
+  listAgents(options: {
+    showAgentless?: boolean;
+    showInactive?: boolean;
+    perPage?: number;
+  }): Promise<{
+    agents: Array<{
+      id: string;
+      status: string;
+      policy_id?: string;
+      local_metadata?: { host?: { hostname?: string } };
+      agent?: { version?: string };
+    }>;
+    total: number;
+  }>;
+}
+
+export interface FleetAgentPolicyService {
+  list(
+    soClient: SavedObjectsClientContract,
+    options?: { kuery?: string; perPage?: number }
+  ): Promise<{
+    items: Array<{
+      id: string;
+      name: string;
+      supports_agentless?: boolean | null;
+      package_policies?: string[];
+    }>;
+  }>;
+}
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -56,8 +87,8 @@ export interface RouteHandlerScopedClients {
   streamsSettingsStorageClient: StreamsSettingsStorageClient;
   isSecurityEnabled: boolean;
   tuningConfig: SigEventsTuningConfig;
-  fleetAgentClient?: AgentClient;
-  fleetAgentPolicyService?: AgentPolicyServiceInterface;
+  fleetAgentClient?: FleetAgentClient;
+  fleetAgentPolicyService?: FleetAgentPolicyService;
   cloudPipelinesMock: CloudPipelinesMockClient;
   prometheusMock: PrometheusMockClient;
 }

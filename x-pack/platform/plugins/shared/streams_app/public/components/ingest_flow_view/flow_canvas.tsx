@@ -16,16 +16,16 @@ import {
   useEdgesState,
   useReactFlow,
   type Node,
-  type Edge,
   type NodeMouseHandler,
   type NodeTypes,
   type EdgeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FlowGraphPayload, FlowThroughputPayload, FlowNode } from '@kbn/streams-plugin/common';
-import { applyFlowLayout } from './layout';
-import { ThroughputEdge, type ThroughputEdgeData } from './edges/throughput_edge';
+import { applyFlowLayout, NODE_WIDTH, NODE_HEIGHT } from './layout';
+import { ThroughputEdge, type ThroughputEdgeType } from './edges/throughput_edge';
 import { AgentNode } from './nodes/agent_node';
 import { AgentPolicyGroupNode } from './nodes/agent_policy_group_node';
 import { AgentlessIntegrationNode } from './nodes/agentless_integration_node';
@@ -71,7 +71,7 @@ const payloadNodeToFlowNode = (node: FlowNode): Node<FlowNodeData> => ({
 
 const payloadEdgeToFlowEdge = (
   edge: FlowGraphPayload['edges'][number]
-): Edge<ThroughputEdgeData> => ({
+): ThroughputEdgeType => ({
   id: edge.id,
   source: edge.source,
   target: edge.target,
@@ -105,9 +105,9 @@ const mergeNodeThroughput = (
 };
 
 const mergeEdgeThroughput = (
-  edge: Edge<ThroughputEdgeData>,
+  edge: ThroughputEdgeType,
   throughput: FlowThroughputPayload | null
-): Edge<ThroughputEdgeData> => {
+): ThroughputEdgeType => {
   if (!throughput) return edge;
   const perEdge = throughput.perEdge[edge.id];
   if (!perEdge) return edge;
@@ -140,7 +140,7 @@ const FlowCanvasInner: React.FC<FlowCanvasInnerProps> = ({
   const { fitView } = useReactFlow();
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<FlowNodeData>>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<ThroughputEdgeData>>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<ThroughputEdgeType>([]);
 
   // Re-run layout only when the topology changes (not on throughput poll)
   const nodeCount = payload.nodes.length;

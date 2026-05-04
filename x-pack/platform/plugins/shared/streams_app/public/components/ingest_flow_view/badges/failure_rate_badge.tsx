@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRate } from '../edges/throughput_edge';
 
@@ -33,17 +33,23 @@ export const FailureRateBadge: React.FC<FailureRateBadgeProps> = ({
     },
   });
 
-  const badge = (
-    <EuiNotificationBadge
+  const ariaLabel = i18n.translate('xpack.streams.ingestFlow.failureRateBadge.ariaLabel', {
+    defaultMessage: '{rate} docs/sec failing ingest',
+    values: { rate: formatted },
+  });
+
+  const badge = onClickDiscover ? (
+    <EuiBadge
       color="danger"
-      onClick={onClickDiscover}
-      aria-label={i18n.translate('xpack.streams.ingestFlow.failureRateBadge.ariaLabel', {
-        defaultMessage: '{rate} docs/sec failing ingest',
-        values: { rate: formatted },
-      })}
+      onClick={() => onClickDiscover()}
+      onClickAriaLabel={ariaLabel}
     >
       {formatted}
-    </EuiNotificationBadge>
+    </EuiBadge>
+  ) : (
+    <EuiBadge color="danger" aria-label={ariaLabel}>
+      {formatted}
+    </EuiBadge>
   );
 
   return (

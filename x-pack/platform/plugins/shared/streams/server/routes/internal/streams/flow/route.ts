@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+// Inlined to avoid importing @kbn/fleet-plugin/* which pulls packages outside rootDir
+const AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { FlowGraphPayload, FlowThroughputPayload } from '../../../../../common/flow';
 import { createServerRoute } from '../../../create_server_route';
@@ -75,7 +76,6 @@ export const flowGraphRoute = createServerRoute({
           }),
           fleetAgentPolicyService.list(soClient, {
             perPage: 1000,
-            withPackagePolicies: true,
           }),
         ]);
 
@@ -96,7 +96,6 @@ export const flowGraphRoute = createServerRoute({
         const agentlessResult = await fleetAgentPolicyService.list(soClient, {
           kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
           perPage: 1000,
-          withPackagePolicies: true,
         });
         // Merge agentless policies into the list (avoid duplicates by id)
         const existingIds = new Set(agentPolicies.map((p) => p.id));
