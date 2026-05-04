@@ -313,25 +313,33 @@ describe('createExportRouteHandler', () => {
     expect(response.ok).toHaveBeenCalled();
   });
 
-  it('wraps the entire composed filter in outer parentheses to prevent KQL OR gate-bypass', async () => {
+  it('prevents KQL OR gate-bypass via outer parentheses', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
-    // A kuery that attempts to inject an OR clause to bypass the action_id gate.
-    // With outer parens the ES query will still be scoped to the base filter.
+    // Malicious kuery: tries to escape the action_id gate via a top-level OR.
+    // Without outer parens the composed filter `(action_id: "abc") AND host.name: "a" OR action_id: "other"`
+    // would compile with operator-precedence ambiguity. With them the user kuery is
+    // isolated as `((action_id: "abc") AND (host.name: "a" OR action_id: "other"))`.
     const request = createExportRequest({
       query: { format: 'ndjson' },
-      body: { kuery: 'host.name: "a"' },
+      body: { kuery: 'host.name: "a" OR action_id: "other"' },
     });
 
     await handler(createContext(), request, response, baseParams);
 
-    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
-    // The combined KQL is passed to getQueryFilter which compiles to an ES bool query.
-    // We verify the call succeeds (no bad-request) and the query object is defined,
-    // confirming the outer-parens do not break parsing.
     expect(response.badRequest).not.toHaveBeenCalled();
-    expect(esQueryArg).toBeDefined();
     expect(response.ok).toHaveBeenCalled();
+
+    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
+    const queryStr = JSON.stringify(esQueryArg);
+
+    // The base-filter value must survive in the compiled query.
+    expect(queryStr).toContain('"abc"');
+
+    // The malicious "other" action_id is NOT a top-level OR alternative —
+    // it is nested inside the user-kuery's inner should and scoped by the
+    // surrounding AND with the base filter.
+    expect(esQueryArg?.bool?.should).toBeUndefined();
   });
 
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {
