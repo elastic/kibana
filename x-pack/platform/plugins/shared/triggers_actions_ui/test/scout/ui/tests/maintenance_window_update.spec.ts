@@ -8,7 +8,20 @@
 import type { ScoutPage, KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, MAINTENANCE_WINDOWS_APP_PATH } from '../fixtures';
+
+// Native HTML <select> options carry the option's runtime `value` attribute
+// (e.g. rrule's Frequency.DAILY === 3). Rather than hard-coding enum values
+// that can drift, read the value off the option's DOM by its data-test-subj.
+const getNativeOptionValue = async (page: ScoutPage, optionTestSubj: string): Promise<string> => {
+  const value = await page
+    .locator(`option[data-test-subj="${optionTestSubj}"]`)
+    .getAttribute('value');
+  if (value === null) {
+    throw new Error(`Could not read value attribute on option [${optionTestSubj}]`);
+  }
+  return value;
+};
 
 const TABLE_LOADED_CSS =
   '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
@@ -60,22 +73,12 @@ const buildMwBody = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const getNativeOptionValue = async (page: ScoutPage, optionTestSubj: string): Promise<string> => {
-  const value = await page
-    .locator(`option[data-test-subj="${optionTestSubj}"]`)
-    .getAttribute('value');
-  if (value === null) {
-    throw new Error(`Could not read value attribute on option [${optionTestSubj}]`);
-  }
-  return value;
-};
-
 const openEditFlow = async (
   page: ScoutPage,
   kbnUrl: { get: (p: string) => string },
   name: string
 ) => {
-  await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/maintenanceWindows'));
+  await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
   await page.locator(TABLE_LOADED_CSS).waitFor();
 
   // The MW page renders a single search field; the unrelated

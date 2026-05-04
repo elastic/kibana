@@ -5,10 +5,33 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutPage } from '@kbn/scout';
+import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import type { ScoutPage } from '@kbn/scout';
+import { test, MAINTENANCE_WINDOWS_APP_PATH } from '../fixtures';
+
+// Native HTML <select> options carry the option's runtime `value` attribute
+// (e.g. rrule's Frequency.DAILY === 3). Rather than hard-coding enum values
+// that can drift, read the value off the option's DOM by its data-test-subj.
+const getNativeOptionValue = async (page: ScoutPage, optionTestSubj: string) => {
+  const value = await page
+    .locator(`option[data-test-subj="${optionTestSubj}"]`)
+    .getAttribute('value');
+  if (value === null) {
+    throw new Error(`Could not read value attribute on option [${optionTestSubj}]`);
+  }
+  return value;
+};
+
+const selectNativeOptionByTestSubj = async (
+  page: ScoutPage,
+  selectSubj: string,
+  optionSubj: string
+) => {
+  const value = await getNativeOptionValue(page, optionSubj);
+  await page.testSubj.locator(selectSubj).selectOption(value);
+};
 
 const CREATE_BUTTON = 'mw-create-button';
 const CREATE_FORM = 'createMaintenanceWindowForm';
@@ -22,24 +45,6 @@ const MULTIPLE_SOLUTIONS_WARNING = 'maintenanceWindowMultipleSolutionsRemovedWar
 interface MaintenanceWindowFindResponse {
   data: Array<{ id: string; title: string }>;
 }
-
-// Native HTML <select> options carry the option's runtime `value` attribute
-// (e.g. rrule's Frequency.DAILY === 3). Rather than hard-coding numeric or
-// string enum values that can drift, read the value off the option's DOM by
-// its data-test-subj and feed it back into selectOption.
-const selectNativeOptionByTestSubj = async (
-  page: ScoutPage,
-  selectSubj: string,
-  optionSubj: string
-) => {
-  const optionValue = await page
-    .locator(`option[data-test-subj="${optionSubj}"]`)
-    .getAttribute('value');
-  if (optionValue === null) {
-    throw new Error(`Could not read value attribute on option [${optionSubj}]`);
-  }
-  await page.testSubj.locator(selectSubj).selectOption(optionValue);
-};
 
 const getUniqueMaintenanceWindowName = (prefix: string) => `${prefix} ${Date.now()}`;
 
@@ -84,7 +89,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/maintenanceWindows'));
+    await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
     await page.testSubj.locator(CREATE_BUTTON).waitFor({ state: 'visible' });
   });
 

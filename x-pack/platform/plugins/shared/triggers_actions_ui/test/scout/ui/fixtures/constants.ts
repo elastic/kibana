@@ -7,37 +7,23 @@
 
 export const BIGGER_TIMEOUT = 20000 as const;
 export const SHORTER_TIMEOUT = 5000 as const;
+
 export const RULE_DETAILS_APP_PATH = 'management/insightsAndAlerting/triggersActions';
 export const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
+// Maintenance Windows is registered under Stack Management's `insightsAndAlerting` section,
+// not as a standalone app — `gotoApp` resolves to /app/<id>, which 404s for this page.
+export const MAINTENANCE_WINDOWS_APP_PATH =
+  '/app/management/insightsAndAlerting/maintenanceWindows';
 
+// Shared CSS selectors for the connectors list page. These couple to EUI's
+// internal class names; if the EUI version changes them, update here once.
+// Ideally the source component would expose dynamic data-test-subj attributes
+// (e.g. `actionsTable-loaded`) so we could drop the `:not(.euiBasicTable-loading)`
+// trick — file a ticket if this becomes a maintenance burden.
 export const CONNECTORS_LIST_SELECTORS = {
   SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
   TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
 } as const;
-
-export const makeEsQueryRule = (namePrefix: string) => ({
-  name: `${namePrefix}-rule-${Date.now()}`,
-  ruleTypeId: '.es-query',
-  consumer: 'stackAlerts',
-  params: {
-    searchType: 'esQuery' as const,
-    timeWindowSize: 5,
-    timeWindowUnit: 'm',
-    threshold: [0],
-    thresholdComparator: '>',
-    size: 100,
-    esQuery: '{"query":{"match_all":{}}}',
-    aggType: 'count',
-    groupBy: 'all',
-    termSize: 5,
-    excludeHitsFromPreviousRun: false,
-    sourceFields: [],
-    index: ['.kibana'],
-    timeField: '@timestamp',
-  },
-  schedule: { interval: '1m' },
-  tags: [namePrefix],
-});
 
 export const RULE_DETAILS_TEST_SUBJECTS = {
   RULE_DETAILS_TITLE: 'ruleDetailsTitle',
