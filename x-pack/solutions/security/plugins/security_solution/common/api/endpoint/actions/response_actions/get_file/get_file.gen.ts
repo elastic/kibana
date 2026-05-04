@@ -14,30 +14,32 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ResponseActionCreateSuccessResponse,
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
-export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
-export const GetFileRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.object({
-      /**
-       * The full file path to retrieve from the endpoint.
-       */
-      path: z.string(),
-    }),
-  })
+export const GetFileRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.object({
+        /**
+         * The full file path to retrieve from the endpoint.
+         */
+        path: z.string(),
+      }),
+    })
+  )
 );
+export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
 
+export const EndpointGetFileActionRequestBody = lazySchema(() => GetFileRouteRequestBody);
 export type EndpointGetFileActionRequestBody = z.infer<typeof EndpointGetFileActionRequestBody>;
-export const EndpointGetFileActionRequestBody = GetFileRouteRequestBody;
 export type EndpointGetFileActionRequestBodyInput = z.input<
   typeof EndpointGetFileActionRequestBody
 >;
 
+export const EndpointGetFileActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
 export type EndpointGetFileActionResponse = z.infer<typeof EndpointGetFileActionResponse>;
-export const EndpointGetFileActionResponse = ResponseActionCreateSuccessResponse;

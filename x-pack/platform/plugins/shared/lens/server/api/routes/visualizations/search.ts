@@ -7,6 +7,7 @@
 
 import { isBoom, boomify } from '@hapi/boom';
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
@@ -22,7 +23,7 @@ import { getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const searchRoute = router.get({
     path: LENS_VIS_API_PATH,
@@ -72,52 +73,53 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      // TODO fix IContentClient to type this client based on the actual
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        // TODO fix IContentClient to type this client based on the actual
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
+        const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
 
-      try {
-        // Note: these types are to enforce loose param typings of client methods
-        const query: LensSearchIn['query'] = {
-          text: q,
-          cursor: page.toString(),
-          limit: perPage,
-        };
-        const options: LensSearchIn['options'] = reqOptions;
+        try {
+          // Note: these types are to enforce loose param typings of client methods
+          const query: LensSearchIn['query'] = {
+            text: q,
+            cursor: page.toString(),
+            limit: perPage,
+          };
+          const options: LensSearchIn['options'] = reqOptions;
 
-        const {
-          result: { hits, pagination },
-        } = await client.search(query, options);
+          const {
+            result: { hits, pagination },
+          } = await client.search(query, options);
 
-        // TODO: see if this check is actually needed
-        const error = hits.find((item) => item.error);
-        if (error) {
-          throw error;
-        }
+          // TODO: see if this check is actually needed
+          const error = hits.find((item) => item.error);
+          if (error) {
+            throw error;
+          }
 
-        return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
-          body: {
-            data: hits.map((item) => {
-              return getLensResponseItem(builder, item);
-            }),
-            meta: {
-              page,
-              per_page: perPage,
-              total: pagination.total,
+          return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
+            body: {
+              data: hits.map((item) => {
+                return getLensResponseItem(builder, item);
+              }),
+              meta: {
+                page,
+                per_page: perPage,
+                total: pagination.total,
+              },
             },
-          },
-        });
-      } catch (error) {
-        if (isBoom(error) && error.output.statusCode === 403) {
-          return res.forbidden();
-        }
+          });
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return res.forbidden();
+          }
 
-        return boomify(error); // forward unknown error
-      }
-    }
+          return boomify(error); // forward unknown error
+        }
+      })
   );
 };

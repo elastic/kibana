@@ -87,6 +87,7 @@
                 "lineNumber": 22,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "Iterable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -159,6 +160,7 @@
                 "lineNumber": 59,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Package",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -281,6 +283,7 @@
                 "lineNumber": 71,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "LintTarget",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -339,6 +342,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackageFileMap",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -421,6 +425,7 @@
                 "lineNumber": 70,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProject",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -147,6 +147,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -435,6 +436,7 @@
             "lineNumber": 122,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "PackageRelativeImportReqOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -472,6 +474,7 @@
             "lineNumber": 82,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "RelativeImportReqOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -540,6 +543,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ImportType",
             "trackAdoption": false,
             "isRequired": true
           },

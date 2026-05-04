@@ -254,6 +254,27 @@ export const xyDataLayerSharedSchema = {
   ),
 };
 
+const legendSeriesHeaderSchema = schema.object(
+  {
+    visible: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, shows the legend table series header.' },
+      })
+    ),
+    text: schema.maybe(
+      schema.string({
+        meta: { description: 'Legend table series header text.' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyLegendSeriesHeader',
+      description: 'Legend table series header configuration.',
+    },
+  }
+);
+
 /**
  * Common legend configuration properties for positioning and statistics
  */
@@ -265,6 +286,7 @@ const sharedLegendSchema = {
       maxSize: statisticsOptionsSize,
     })
   ),
+  series_header: schema.maybe(legendSeriesHeaderSchema),
 };
 
 /**
@@ -585,28 +607,37 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema({
-        collapse_by: schema.maybe(collapseBySchema),
-        color: schema.maybe(colorMappingSchema),
-        aggregate_first: schema.maybe(
-          schema.boolean({
-            meta: { description: 'Whether to aggregate before splitting series' },
-          })
-        ),
-      })
+      mergeAllBucketsWithChartDimensionSchema(
+        {
+          collapse_by: schema.maybe(collapseBySchema),
+          color: schema.maybe(colorMappingSchema),
+          aggregate_first: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When `true`, aggregates data before splitting into series. Defaults to `false`.',
+              },
+            })
+          ),
+        },
+        'xyBreakdown'
+      )
     ),
     y: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-        axis: schema.maybe(yMetricOnAxisSchema),
-        color: schema.maybe(
-          schema.oneOf([staticColorSchema, autoColorSchema], {
-            defaultValue: AUTO_COLOR,
-          })
-        ),
-      }),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        {
+          axis: schema.maybe(yMetricOnAxisSchema),
+          color: schema.maybe(
+            schema.oneOf([staticColorSchema, autoColorSchema], {
+              defaultValue: AUTO_COLOR,
+            })
+          ),
+        },
+        'xyY'
+      ),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
-    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
+    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({}, 'xyX')),
   },
   {
     meta: {
@@ -744,7 +775,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
+      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared, 'xyRefLine'),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },

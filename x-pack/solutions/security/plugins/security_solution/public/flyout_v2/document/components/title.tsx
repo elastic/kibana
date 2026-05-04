@@ -10,7 +10,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { EventKind } from '../constants/event_kinds';
@@ -48,7 +48,7 @@ export const Title: FC<TitleProps> = memo(({ hit, hideLink = false }) => {
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const isRemoteDocument = useMemo(
-    () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
     [hit]
   );
 

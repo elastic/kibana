@@ -16,7 +16,7 @@ import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn(),
+  reactConvert: jest.fn(),
 };
 const formatParams = {
   colors: [{ ...DEFAULT_CONVERTER_COLOR }],

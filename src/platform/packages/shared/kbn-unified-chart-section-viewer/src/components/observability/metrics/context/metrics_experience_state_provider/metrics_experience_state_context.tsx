@@ -16,6 +16,7 @@ import {
 } from '../../../../../restorable_state';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
+  profileId: string;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
@@ -25,7 +26,13 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
 export const MetricsExperienceStateContext =
   createContext<MetricsExperienceStateContextValue | null>(null);
 
-export function MetricsExperienceStateProvider({ children }: { children: React.ReactNode }) {
+export function MetricsExperienceStateProvider({
+  children,
+  profileId,
+}: {
+  children: React.ReactNode;
+  profileId: string;
+}) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
@@ -56,6 +63,7 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   return (
     <MetricsExperienceStateContext.Provider
       value={{
+        profileId,
         currentPage,
         isFullscreen,
         searchTerm,

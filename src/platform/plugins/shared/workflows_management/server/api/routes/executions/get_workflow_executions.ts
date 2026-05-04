@@ -17,7 +17,7 @@ import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/rout
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const executionStatusSchema = schema.oneOf(
   ExecutionStatusValues.map((type) => schema.literal(type)) as [Type<ExecutionStatus>]
@@ -99,7 +99,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
           const { workflowId } = request.params;

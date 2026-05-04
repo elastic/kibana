@@ -17,9 +17,8 @@ import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiComboBox,
+  EuiSuperSelect,
   EuiRadioGroup,
-  type EuiComboBoxOptionOption,
   EuiButtonGroup,
   EuiSpacer,
   EuiSwitch,
@@ -106,19 +105,11 @@ export function ControlType({
   initialControlFlyoutType: EsqlControlType;
   onFlyoutTypeChange?: (flyoutType: EsqlControlType) => void;
 }) {
-  const controlFlyoutType = controlTypeOptions.find(
-    (option) => option.key === initialControlFlyoutType
-  )!;
-
-  const onTypeChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      const flyoutType = controlTypeOptions.find(
-        (option) => option.key === selectedOptions[0].key
-      )!;
-      onFlyoutTypeChange?.(flyoutType.key);
-    },
-    [onFlyoutTypeChange]
-  );
+  const superSelectOptions = controlTypeOptions.map((opt) => ({
+    value: opt.key,
+    inputDisplay: opt.label,
+    'data-test-subj': opt['data-test-subj'],
+  }));
 
   return (
     <>
@@ -138,23 +129,15 @@ export function ControlType({
           })}
           fullWidth
         >
-          <EuiComboBox
-            aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={controlTypeOptions}
-            selectedOptions={[controlFlyoutType]}
-            onChange={onTypeChange}
+          <EuiSuperSelect
+            options={superSelectOptions}
+            valueOfSelected={initialControlFlyoutType}
+            onChange={(value) => onFlyoutTypeChange?.(value)}
             fullWidth
-            isDisabled={isDisabled}
+            disabled={isDisabled}
             compressed
-            isClearable={false}
             data-test-subj="esqlControlTypeDropdown"
-            inputPopoverProps={{
+            popoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',
             }}
           />

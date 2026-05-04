@@ -73,7 +73,7 @@ export const searchWatchlistIndicesRoute = (
             include_unmapped: true,
             ignore_unavailable: true,
             allow_no_indices: true,
-            expand_wildcards: 'open',
+            expand_wildcards: ['open', 'hidden'],
             include_empty_fields: true,
             filters: '-parent',
           });

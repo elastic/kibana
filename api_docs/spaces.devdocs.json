@@ -45,6 +45,7 @@
                 "lineNumber": 40,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -128,6 +129,7 @@
                 "lineNumber": 55,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAllSpacesOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -266,6 +268,7 @@
                 "lineNumber": 75,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Space",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -316,6 +319,7 @@
                 "lineNumber": 82,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Space",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -366,6 +370,7 @@
                 "lineNumber": 98,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Space",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -953,6 +958,7 @@
             "lineNumber": 23,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1010,6 +1016,7 @@
             "lineNumber": 63,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1067,6 +1074,7 @@
             "lineNumber": 42,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1693,6 +1701,7 @@
                 "lineNumber": 69,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1765,6 +1774,7 @@
                 "lineNumber": 76,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2445,7 +2455,15 @@
             "tags": [],
             "label": "components",
             "description": [
-              "\nLazy-loadable {@link SpacesApiUiComponent | React components} to support the Spaces feature."
+              "\nLazy-loadable ",
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApiUiComponent",
+                "text": "React components"
+              },
+              " to support the Spaces feature."
             ],
             "signature": [
               {
@@ -2508,6 +2526,7 @@
                 "lineNumber": 53,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "RedirectLegacyUrlParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2603,6 +2622,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2648,6 +2668,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2693,6 +2714,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2738,6 +2760,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2783,6 +2806,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2828,6 +2852,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2873,6 +2898,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2912,6 +2938,7 @@
                 "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -2993,7 +3020,15 @@
             "tags": [],
             "label": "spacesMap",
             "description": [
-              "A map of each existing space's ID and its associated {@link SpacesDataEntry}."
+              "A map of each existing space's ID and its associated ",
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesDataEntry",
+                "text": "SpacesDataEntry"
+              },
+              "."
             ],
             "signature": [
               "Map<string, ",
@@ -3145,6 +3180,7 @@
                 "lineNumber": 34,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAllSpacesPurpose",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3297,6 +3333,7 @@
             "lineNumber": 27,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -3984,7 +4021,15 @@
             "tags": [],
             "label": "createSavedObjectFinder",
             "description": [
-              "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nsaved objects within the specified space."
+              "\nReturns a ",
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              " to help page through\nsaved objects within the specified space."
             ],
             "signature": [
               "(id: string) => ",
@@ -4338,6 +4383,7 @@
                 "lineNumber": 24,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4486,6 +4532,7 @@
                 "lineNumber": 47,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4529,6 +4576,7 @@
                 "lineNumber": 53,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4572,6 +4620,7 @@
                 "lineNumber": 59,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4623,6 +4672,7 @@
                 "lineNumber": 65,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5509,7 +5559,9 @@
             "type": "Object",
             "tags": [],
             "label": "public",
-            "description": [],
+            "description": [
+              "\nThe API version numbers used with the versioned router."
+            ],
             "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
             "lineNumber": 51,
             "columnNumber": 3,

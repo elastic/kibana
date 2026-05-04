@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { of } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
@@ -52,7 +53,13 @@ describe('AttacksPageContent', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        settings: {},
+        settings: {
+          client: {
+            get: jest.fn(),
+            get$: jest.fn().mockReturnValue(of(undefined)),
+            getUpdate$: jest.fn().mockReturnValue(of()),
+          },
+        },
         telemetry: {
           reportEvent,
         },

@@ -33,7 +33,8 @@ export const indicesOptionsSchema = schema.object({
         schema.literal('closed'),
         schema.literal('hidden'),
         schema.literal('none'),
-      ])
+      ]),
+      { maxSize: 10000 }
     )
   ),
   ignore_unavailable: schema.maybe(schema.boolean()),

@@ -47,12 +47,9 @@ export const useUnifiedHistogramCommon = ({
     });
   }, [currentTabId, layoutProps, localStorageKeyPrefix, runtimeStateManager]);
 
-  const renderCustomChartToggleActions = useCallback(
-    () => panelsToggle ?? undefined,
-    [panelsToggle]
-  );
+  const renderToggleActions = useCallback(() => panelsToggle ?? undefined, [panelsToggle]);
 
   return {
-    renderCustomChartToggleActions,
+    renderToggleActions,
   };
 };

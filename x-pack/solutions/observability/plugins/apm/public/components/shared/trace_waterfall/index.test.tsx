@@ -319,41 +319,41 @@ describe('TraceWaterfall', () => {
       expect(screen.getByRole('grid')).not.toHaveStyle({ height: 'auto' });
     });
 
-    it('passes scrollToIndex when scrollToHighlightedOnMount is true for parent strategy', () => {
+    it('passes scrollToIndex when scrollToContextOnMount is true for parent strategy', () => {
       renderTraceWaterfall({
         scrollStrategy: 'parent',
-        highlightedSpanId: 'span-1',
-        scrollToHighlightedOnMount: true,
+        contextSpanIds: ['span-1'],
+        scrollToContextOnMount: true,
       });
 
       // span-1 is at index 1 in the visible list (after the root trace-1)
       expect(mockListProps.scrollToIndex).toBe(1);
     });
 
-    it('does not pass scrollToIndex for window strategy even when highlightedSpanId is set', () => {
+    it('does not pass scrollToIndex for window strategy even when contextSpanIds is set', () => {
       renderTraceWaterfall({
         scrollStrategy: 'window',
-        highlightedSpanId: 'span-1',
+        contextSpanIds: ['span-1'],
       });
 
       expect(mockListProps.scrollToIndex).toBeUndefined();
     });
 
-    it('does not pass scrollToIndex when scrollToHighlightedOnMount is false', () => {
+    it('does not pass scrollToIndex when scrollToContextOnMount is false', () => {
       renderTraceWaterfall({
         scrollStrategy: 'parent',
-        highlightedSpanId: 'span-1',
-        scrollToHighlightedOnMount: false,
+        contextSpanIds: ['span-1'],
+        scrollToContextOnMount: false,
       });
 
       expect(mockListProps.scrollToIndex).toBeUndefined();
     });
 
-    it('does not pass scrollToIndex when highlightedSpanId is not in the trace', () => {
+    it('does not pass scrollToIndex when contextSpanIds is not in the trace', () => {
       renderTraceWaterfall({
         scrollStrategy: 'parent',
-        highlightedSpanId: 'nonexistent-span',
-        scrollToHighlightedOnMount: true,
+        contextSpanIds: ['nonexistent-span'],
+        scrollToContextOnMount: true,
       });
 
       expect(mockListProps.scrollToIndex).toBeUndefined();

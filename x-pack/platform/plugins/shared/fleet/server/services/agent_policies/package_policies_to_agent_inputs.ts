@@ -264,10 +264,10 @@ export const storedPackagePoliciesToAgentInputs = async (
       : undefined;
 
     const filteredGlobalDataTags = filterGlobalDataTags(globalDataTags, packageInfo);
-    const addFields =
-      filteredGlobalDataTags && filteredGlobalDataTags.length > 0
-        ? globalDataTagsToAddFields(filteredGlobalDataTags)
-        : undefined;
+    const packagePolicyTags =
+      filterGlobalDataTags(packagePolicy.global_data_tags ?? [], packageInfo) ?? [];
+    const allTags = [...(filteredGlobalDataTags ?? []), ...packagePolicyTags];
+    const addFields = allTags.length > 0 ? globalDataTagsToAddFields(allTags) : undefined;
 
     let packagePolicyWithUpdatedInputs = packagePolicy;
     // recompile inputs to apply agent version conditions

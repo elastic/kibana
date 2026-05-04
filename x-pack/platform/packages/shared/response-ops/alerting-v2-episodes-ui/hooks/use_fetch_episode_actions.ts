@@ -13,13 +13,16 @@ import { queryKeys } from '../query_keys';
 
 export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
-export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) =>
+export const useFetchEpisodeActions = ({
+  episodeIds,
+  expressions,
+}: UseFetchEpisodeActionsOptions) =>
   useQuery({
     queryKey: queryKeys.actions(episodeIds),
-    queryFn: ({ signal }) => fetchEpisodeActions({ episodeIds, abortSignal: signal, services }),
+    queryFn: ({ signal }) => fetchEpisodeActions({ episodeIds, abortSignal: signal, expressions }),
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
     select: (rows) => {
@@ -30,6 +33,8 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
           ruleId: row.rule_id ?? null,
           groupHash: row.group_hash ?? null,
           lastAckAction: row.last_ack_action ?? null,
+          lastAssigneeUid: row.last_assignee_uid ?? null,
+          lastAckActor: row.last_ack_actor ?? null,
         });
       }
       return map;

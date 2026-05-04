@@ -13,7 +13,7 @@ import { untilPluginStartServicesReady } from '../kibana_services';
 import type { MapEmbeddableState } from '../../common';
 
 export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
-  embeddableSetup.registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
+  embeddableSetup.registerEmbeddablePublicDefinition(MAP_SAVED_OBJECT_TYPE, async () => {
     const startServicesPromise = untilPluginStartServicesReady();
     const [, { mapEmbeddableFactory }] = await Promise.all([
       startServicesPromise,

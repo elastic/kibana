@@ -13,8 +13,8 @@ import {
   createRequestAbortedError,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
-import { ExecutionStatus } from './types';
 import {
   FOLLOW_EXECUTION_IDLE_TIMEOUT_MS,
   FOLLOW_EXECUTION_TIMEOUT_MS,
