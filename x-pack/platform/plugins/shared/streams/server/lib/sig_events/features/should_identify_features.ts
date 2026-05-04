@@ -9,8 +9,6 @@ import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
 import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 
-const MIN_INFERRED_FEATURES = 0;
-
 export interface ShouldIdentifyFeaturesResult {
   shouldIdentify: boolean;
 }
@@ -26,11 +24,11 @@ export async function shouldIdentifyFeatures({
 }): Promise<ShouldIdentifyFeaturesResult> {
   const { hits } = await featureClient.getFeatures(streamName, {
     type: [...INFERRED_FEATURE_TYPES],
-    limit: MIN_INFERRED_FEATURES + 1,
+    limit: 1,
     sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
   });
 
-  if (hits.length <= MIN_INFERRED_FEATURES) {
+  if (hits.length === 0) {
     return { shouldIdentify: true };
   }
 
