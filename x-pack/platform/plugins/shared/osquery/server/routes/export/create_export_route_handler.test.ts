@@ -44,12 +44,14 @@ const baseParams: ExportRouteParams = {
   fileNamePrefix: 'osquery-results-test',
 };
 
+const mockAsInternalUser = {};
+
 const createContext = () =>
   ({
     core: Promise.resolve({
       elasticsearch: {
         client: {
-          asCurrentUser: {},
+          asInternalUser: mockAsInternalUser,
         },
       },
       security: {
@@ -340,6 +342,21 @@ describe('createExportRouteHandler', () => {
     // it is nested inside the user-kuery's inner should and scoped by the
     // surrounding AND with the base filter.
     expect(esQueryArg?.bool?.should).toBeUndefined();
+  });
+
+  it('passes asInternalUser ES client to exportResultsToStream', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: mockAsInternalUser })
+    );
   });
 
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {

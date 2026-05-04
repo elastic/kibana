@@ -141,7 +141,8 @@ export const createExportRouteHandler =
     });
 
     const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    // Uses internal user — osquery_manager / fleet indices require it (matches search strategy in server/search_strategy/osquery/index.ts).
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
 
     const formatter = createFormatter(format);
     const timestamp = new Date().toISOString();
