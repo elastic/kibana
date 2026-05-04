@@ -42,3 +42,6 @@ fi
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "kibana-build-type.txt"
 cd -
+
+echo "--- Upload kibana-default to GCS regional buckets"
+upload_tmp_artifact "$KIBANA_DIR/target/kibana-default.tar.zst" kibana-default.tar.zst "$BUILDKITE_BUILD_ID"

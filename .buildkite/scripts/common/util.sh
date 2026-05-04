@@ -186,6 +186,41 @@ download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
 
+GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
+download_tmp_artifact() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local region use_gcs=false
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
+      use_gcs=true
+      break
+    fi
+  done
+
+  if [[ "$use_gcs" == "true" ]]; then
+    "$(dirname "${BASH_SOURCE[0]}")/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
+    gcloud storage cp \
+      "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
+      "${dest_dir}/${artifact_name}"
+    return 0
+  fi
+
+  if [[ -n "${BUILDKITE_AGENT_GCP_REGION:-}" ]]; then
+    buildkite-agent annotate --style warning --context "gcs-artifact-fallback-${artifact_name}" \
+      "Agent region \`${BUILDKITE_AGENT_GCP_REGION}\` not in GCS list. Falling back to buildkite-agent download for \`${artifact_name}\`."
+  fi
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+}
+upload_tmp_artifact() {
+  local local_path="$1" artifact_name="$2" build_id="$3"
+
+  "$(dirname "${BASH_SOURCE[0]}")/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
+
+  printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
+    gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
+}
+
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     echo "DRY_RUN is enabled."
