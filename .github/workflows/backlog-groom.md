@@ -196,12 +196,16 @@ jobs:
       duplicate_pr_found: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_found }}
       duplicate_pr_url: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_url }}
 engine:
-  id: copilot
+  id: claude
+  model: "llm-gateway/claude-sonnet-4-6"
+  env:
+    ANTHROPIC_BASE_URL: "https://elastic.litellm-prod.ai/"
+    ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_LITELLM_PROXY_API_KEY }}
 tools:
   github:
     toolsets: [issues, pull_requests, repos]
 network:
-  allowed: [defaults, node]
+  allowed: [defaults, node, elastic.litellm-prod.ai]
 checkout:
   fetch-depth: 0
 safe-outputs:
