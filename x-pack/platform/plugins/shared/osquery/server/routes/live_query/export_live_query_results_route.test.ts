@@ -211,6 +211,41 @@ describe('exportLiveQueryResultsRoute', () => {
     );
   });
 
+  it('returns 404 when actionDetails is found but does not contain the requested actionId', async () => {
+    const router = httpServiceMock.createRouter();
+    const osqueryContext = createOsqueryContext();
+
+    exportLiveQueryResultsRoute(router as never, osqueryContext);
+
+    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+      .mock.calls[0][1];
+
+    // actionDetails returns successfully but with a different action_id — mismatch
+    const searchMock = buildSearchMock([{ action_id: 'something-else', query: 'SELECT 1' }]);
+
+    const context = {
+      core: Promise.resolve({}),
+      search: Promise.resolve({ search: searchMock }),
+    };
+
+    const request = {
+      ...httpServerMock.createKibanaRequest({
+        params: { id: 'live-query-1', actionId: 'action-abc' },
+        query: { format: 'ndjson' },
+        body: {},
+      }),
+      events: { aborted$: NEVER, completed$: NEVER },
+    };
+
+    const response = httpServerMock.createResponseFactory();
+    await registeredHandler(context, request, response);
+
+    expect(response.notFound).toHaveBeenCalledWith(
+      expect.objectContaining({ body: expect.objectContaining({ message: 'Live query action not found' }) })
+    );
+    expect(mockHandler).not.toHaveBeenCalled();
+  });
+
   it('proceeds without metadata enrichment when action details lookup fails', async () => {
     const router = httpServiceMock.createRouter();
     const osqueryContext = createOsqueryContext();

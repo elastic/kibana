@@ -197,6 +197,19 @@ paths:
                   message:
                     type: string
                     example: 'Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.'
+        '404':
+          description: >
+            The parent live query action `{id}` was found but does not contain
+            a query whose `action_id` matches `{actionId}`. This typically means
+            the `id` and `actionId` URL parameters refer to different queries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Live query action not found'
         '403':
           description: >
             The authenticated user does not have the `osquery-readLiveQueries`

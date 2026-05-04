@@ -68,7 +68,8 @@ export const exportLiveQueryResultsRoute = (
         // When present, ECS mapping enriches all export formats: NDJSON/JSON rows
         // gain extra ECS-keyed fields (e.g. process.pid alongside osquery.pid.number)
         // and CSV column headers use ECS names rather than raw osquery field names.
-        // Failure here is non-fatal — the export will proceed without enriched metadata.
+        // Transport-level failures are non-fatal — the export proceeds without enriched metadata.
+        // A successful fetch where the actionId is not in the queries list returns 404.
         try {
           const abortController = new AbortController();
           const sub = request.events.aborted$.subscribe(() => abortController.abort());
@@ -92,6 +93,10 @@ export const exportLiveQueryResultsRoute = (
             if (matchingQuery) {
               query = matchingQuery.query;
               ecsMapping = matchingQuery.ecs_mapping as ECSMapping | undefined;
+            } else if (actionDetails?._source != null) {
+              // actionDetails was fetched successfully but the requested actionId is not in
+              // its queries list — the caller provided a mismatched id/actionId pair.
+              return response.notFound({ body: { message: 'Live query action not found' } });
             }
           } finally {
             sub.unsubscribe();
