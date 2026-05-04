@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const rowStyles = css({ marginTop: '0px !important' });
@@ -20,11 +20,17 @@ export const ControlSettingTooltipLabel = ({
 }: {
   label: string;
   tooltip: string;
-}) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem grow={false} css={rowStyles}>
-      <EuiIconTip content={tooltip} position="right" aria-label={`${label} - ${tooltip}`} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+}) => {
+  const labelId = useGeneratedHtmlId();
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <span id={labelId}>{label}</span>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={rowStyles}>
+        <EuiIconTip content={tooltip} position="right" aria-labelledby={labelId} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
