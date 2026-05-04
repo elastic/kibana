@@ -124,6 +124,35 @@ const orderAgentNodes = <T extends Node<FlowNodeData>>(nodes: T[]): T[] => {
   return result;
 };
 
+const STREAM_INDENT = 28; // px per depth level in the streams tree
+
+/**
+ * Stack stream nodes vertically, indenting each by its depth in the hierarchy.
+ * Depth is derived from the number of dots in the stream name
+ * (e.g. "logs" → 0, "logs.otel" → 1, "logs.otel.abc" → 2).
+ */
+const stackStreamNodes = <T extends Node<FlowNodeData>>(
+  nodeList: T[],
+  xBase: number,
+  yStart: number
+): { nodes: T[]; nextY: number } => {
+  let y = yStart;
+  const positioned = nodeList.map((node) => {
+    const streamName =
+      (node.data as { streamName?: string }).streamName ?? (node.data as { label?: string }).label ?? '';
+    const depth = streamName ? streamName.split('.').length - 1 : 0;
+    const result = {
+      ...node,
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+      position: { x: xBase + depth * STREAM_INDENT, y },
+    };
+    y += NODE_HEIGHT + NODE_GAP;
+    return result;
+  });
+  return { nodes: positioned, nextY: y };
+};
+
 /**
  * Main layout function.
  *
@@ -133,7 +162,7 @@ const orderAgentNodes = <T extends Node<FlowNodeData>>(nodes: T[]): T[] => {
  *
  * Shippers column: 3 lanes (agents → agentless → prometheus) stacked top-to-bottom.
  * Endpoints column: cloud pipelines then bulk, stacked.
- * Streams column: tree-ordered (depth-first) and stacked.
+ * Streams column: depth-first tree order with x-indentation per hierarchy level.
  */
 export const applyFlowLayout = <T extends Node<FlowNodeData>>(
   nodes: T[],
@@ -175,9 +204,9 @@ export const applyFlowLayout = <T extends Node<FlowNodeData>>(
   ey = afterPipelines + (pipelineNodes.length > 0 && bulkNodes.length > 0 ? NODE_GAP : 0);
   const { nodes: posBulk } = stackNodes(bulkNodes, COLUMN_X.endpoints, ey);
 
-  // ── Streams ───────────────────────────────────────────────────────────────
+  // ── Streams (tree with x-indentation per depth level) ────────────────────
   const streamNodes = orderStreamNodes(byColumn('streams'));
-  const { nodes: posStreams } = stackNodes(streamNodes, COLUMN_X.streams, 0);
+  const { nodes: posStreams } = stackStreamNodes(streamNodes, COLUMN_X.streams, 0);
 
   // ── Reassemble preserving original order ──────────────────────────────────
   const positionById = new Map<string, { x: number; y: number }>();
