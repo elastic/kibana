@@ -207,7 +207,6 @@ checkout:
 safe-outputs:
   staged: false
   create-pull-request:
-    labels: [backlog-groom]
     max: 1
   noop:
     max: 1
