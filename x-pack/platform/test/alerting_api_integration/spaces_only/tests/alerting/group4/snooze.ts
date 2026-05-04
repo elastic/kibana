@@ -154,14 +154,11 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       await getRuleEvents(createdRule.id);
 
       log.info('start snoozing');
-      const now = new Date().toISOString();
-      const snoozeSeconds = 10;
-      const snoozeDuration = snoozeSeconds * 1000;
       await alertUtils.getSnoozeRequest(createdRule.id).send({
         schedule: {
           custom: {
-            duration: snoozeDuration,
-            start: now,
+            duration: '10s',
+            start: new Date().toISOString(),
             recurring: {
               occurrences: 1,
             },
@@ -169,15 +166,20 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         },
       });
 
-      // could be an action execution while calling snooze, so set snooze start
-      // to a value that we know it will be in effect (after this call)
-      const snoozeStartDate = new Date();
+      // This test was failing, we now use the persisted schedule so the time
+      // boundaries match the server. Client Date.now() vs server side value
+      // might be a possible cause of the flakiness here.
+      const { body: ruleWithSnooze } = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+      const { rRule, duration: snoozeDurationMs } = ruleWithSnooze.snooze_schedule[0];
+      const snoozeWindowStartMs = Date.parse(rRule.dtstart);
+      const snoozeWindowEndMs = snoozeWindowStartMs + snoozeDurationMs;
 
       // wait for 4 triggered actions - in case some fired before snooze went into effect
       log.info('wait for snoozing to end');
       const ruleEvents = await getRuleEvents(createdRule.id, 4);
-      const snoozeStart = snoozeStartDate.valueOf();
-      const snoozeEnd = snoozeStartDate.valueOf();
       let actionsBefore = 0;
       let actionsDuring = 0;
       let actionsAfter = 0;
@@ -187,9 +189,9 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         if (!timestamp) continue;
 
         const time = new Date(timestamp).valueOf();
-        if (time < snoozeStart) {
+        if (time < snoozeWindowStartMs) {
           actionsBefore++;
-        } else if (time > snoozeEnd) {
+        } else if (time > snoozeWindowEndMs) {
           actionsAfter++;
         } else {
           actionsDuring++;
