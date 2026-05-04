@@ -83,7 +83,7 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
 
       return updated;
     });
-  }, [selectedPipelineId, health, setNodes]);
+  }, [selectedPipelineId, health, setNodes, config]);
 
   useEffect(() => {
     fitView({ padding: 0.1 });
