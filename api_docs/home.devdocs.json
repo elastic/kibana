@@ -272,7 +272,7 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
+          "(id: \"PHP\" | \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
         ],
         "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
         "lineNumber": 65,
@@ -288,7 +288,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\""
+              "\"PHP\" | \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\""
             ],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
             "lineNumber": 71,

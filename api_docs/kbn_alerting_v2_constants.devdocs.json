@@ -109,6 +109,23 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/rule_doctor/insights\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.DEFAULT_ARTIFACT_VALUE_LIMIT",
         "type": "number",
         "tags": [],
