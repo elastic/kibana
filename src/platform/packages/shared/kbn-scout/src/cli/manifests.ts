@@ -29,7 +29,7 @@ const manifestUpdateReporter = path.join(
 );
 
 async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
-  // `passWithNoTests` lets configs with zero tests exit cleanly (code 0) so we can
+  // passWithNoTests lets configs with zero tests exit cleanly (code 0) so we can
   // unambiguously treat any non-zero exit as a real discovery failure (e.g. a syntax
   // error during Playwright transpilation).
   const result = await playwrightCLI.test(

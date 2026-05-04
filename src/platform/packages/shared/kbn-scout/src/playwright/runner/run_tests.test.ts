@@ -92,7 +92,7 @@ describe('hasTestsInPlaywrightConfig', () => {
     expect(exitCode).toEqual(0);
   });
 
-  it(`should log an error and return '1' when no tests are found`, async () => {
+  it(`should log an error and return '2' when no tests are found`, async () => {
     execPromiseMock.mockRejectedValueOnce(new Error('No tests found'));
 
     const exitCode = await hasTestsInPlaywrightConfig(
@@ -106,7 +106,7 @@ describe('hasTestsInPlaywrightConfig', () => {
     expect(mockLog.error).toHaveBeenCalledWith(
       expect.stringMatching(/^scout: No tests found in \[configPath\/playwright\.config\.ts\]\./)
     );
-    expect(exitCode).toEqual(1);
+    expect(exitCode).toEqual(2);
   });
 
   it(`should log an error and return '1' when test command throws error`, async () => {
