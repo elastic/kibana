@@ -289,7 +289,6 @@ describe('deserializer and serializer', () => {
 
   it('preserves rollover fields the UI does not manage when using default rollover', () => {
     formInternal._meta.hot.isUsingDefaultRollover = true;
-    formInternal.phases.hot!.actions.rollover!.min_primary_shard_size = '5gb';
     // @ts-expect-error - this is an unknown field that should be preserved by the serializer even when using default rollover
     formInternal.phases.hot!.actions.rollover!.unknown_setting = 123;
 
@@ -299,7 +298,6 @@ describe('deserializer and serializer', () => {
     expect(rollover).toEqual(
       expect.objectContaining({
         ...defaultRolloverAction,
-        min_primary_shard_size: '5gb',
         unknown_setting: 123,
       })
     );
@@ -308,7 +306,7 @@ describe('deserializer and serializer', () => {
     expect(rollover!.max_size).toBeUndefined();
   });
 
-  it('does not drop rollover min_* fields on save when using default rollover', () => {
+  it('does not enable default rollover mode when min_* fields are present', () => {
     const policyWithRolloverMinFields: SerializedPolicy = {
       name: 'policyWithRolloverMinFields',
       phases: {
@@ -331,6 +329,7 @@ describe('deserializer and serializer', () => {
 
     const nextSerializer = createSerializer(cloneDeep(policyWithRolloverMinFields));
     const nextFormInternal = deserializer(cloneDeep(policyWithRolloverMinFields));
+    expect(nextFormInternal._meta.hot.isUsingDefaultRollover).toBe(false);
     const result = nextSerializer(nextFormInternal);
 
     const rollover = result.phases.hot!.actions.rollover!;

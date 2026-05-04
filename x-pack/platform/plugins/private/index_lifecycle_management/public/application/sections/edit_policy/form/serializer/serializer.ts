@@ -85,19 +85,21 @@ export const createSerializer =
             }
 
             // We are using user-defined, custom rollover settings.
-            if (updatedPolicy.phases.hot?.actions.rollover?.max_age) {
+            const updatedRollover = updatedPolicy.phases.hot?.actions.rollover;
+            const rolloverMeta = hotMeta?.customRollover;
+            if (updatedRollover?.max_age) {
               hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${
-                hotMeta?.customRollover?.maxAgeUnit ?? ''
+                rolloverMeta?.maxAgeUnit ?? ''
               }`;
             } else {
               delete hotPhaseActions.rollover.max_age;
             }
 
-            if (typeof updatedPolicy.phases.hot?.actions.rollover?.max_docs !== 'number') {
+            if (typeof updatedRollover?.max_docs !== 'number') {
               delete hotPhaseActions.rollover.max_docs;
             }
 
-            if (updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_size) {
+            if (updatedRollover?.max_primary_shard_size) {
               hotPhaseActions.rollover.max_primary_shard_size = `${
                 hotPhaseActions.rollover.max_primary_shard_size
               }${hotMeta?.customRollover?.maxPrimaryShardSizeUnit ?? ''}`;
@@ -105,18 +107,53 @@ export const createSerializer =
               delete hotPhaseActions.rollover.max_primary_shard_size;
             }
 
-            if (
-              typeof updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_docs !== 'number'
-            ) {
+            if (typeof updatedRollover?.max_primary_shard_docs !== 'number') {
               delete hotPhaseActions.rollover.max_primary_shard_docs;
             }
 
-            if (updatedPolicy.phases.hot?.actions.rollover?.max_size) {
+            if (updatedRollover?.max_size) {
               hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${
-                hotMeta?.customRollover?.maxStorageSizeUnit ?? ''
+                rolloverMeta?.maxStorageSizeUnit ?? ''
               }`;
             } else {
               delete hotPhaseActions.rollover.max_size;
+            }
+
+            if (updatedRollover?.min_age) {
+              hotPhaseActions.rollover.min_age = `${updatedRollover.min_age}${
+                rolloverMeta?.minAgeUnit ?? ''
+              }`;
+            } else {
+              delete hotPhaseActions.rollover.min_age;
+            }
+
+            if (typeof updatedRollover?.min_docs === 'number') {
+              hotPhaseActions.rollover.min_docs = updatedRollover.min_docs;
+            } else {
+              delete hotPhaseActions.rollover.min_docs;
+            }
+
+            if (updatedRollover?.min_size) {
+              hotPhaseActions.rollover.min_size = `${updatedRollover.min_size}${
+                rolloverMeta?.minStorageSizeUnit ?? ''
+              }`;
+            } else {
+              delete hotPhaseActions.rollover.min_size;
+            }
+
+            if (updatedRollover?.min_primary_shard_size) {
+              hotPhaseActions.rollover.min_primary_shard_size = `${
+                updatedRollover.min_primary_shard_size
+              }${rolloverMeta?.minPrimaryShardSizeUnit ?? ''}`;
+            } else {
+              delete hotPhaseActions.rollover.min_primary_shard_size;
+            }
+
+            if (typeof updatedRollover?.min_primary_shard_docs === 'number') {
+              hotPhaseActions.rollover.min_primary_shard_docs =
+                updatedRollover.min_primary_shard_docs;
+            } else {
+              delete hotPhaseActions.rollover.min_primary_shard_docs;
             }
           }
 

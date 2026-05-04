@@ -41,6 +41,11 @@ import {
   MaxAgeField,
   MaxDocumentCountField,
   MaxIndexSizeField,
+  MinPrimaryShardSizeField,
+  MinPrimaryShardDocsField,
+  MinAgeField,
+  MinDocumentCountField,
+  MinIndexSizeField,
 } from './components';
 
 const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
@@ -160,6 +165,21 @@ export const HotPhase: FunctionComponent = () => {
 
                 {/* This field is currently deprecated and will be removed in v8+ of the stack */}
                 <MaxIndexSizeField />
+                <EuiSpacer />
+
+                <MinPrimaryShardSizeField />
+                <EuiSpacer />
+
+                <MinPrimaryShardDocsField />
+                <EuiSpacer />
+
+                <MinAgeField />
+                <EuiSpacer />
+
+                <MinDocumentCountField />
+                <EuiSpacer />
+
+                <MinIndexSizeField />
               </>
             )}
           </div>

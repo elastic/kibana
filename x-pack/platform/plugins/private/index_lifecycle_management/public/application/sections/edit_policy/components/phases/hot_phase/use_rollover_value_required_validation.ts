@@ -12,7 +12,13 @@ import { useFormData, useFormContext } from '../../../../../../shared_imports';
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 import { ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE } from '../../../form';
 
-const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
+const rolloverFieldPaths = [
+  ROLLOVER_FORM_PATHS.maxDocs,
+  ROLLOVER_FORM_PATHS.maxAge,
+  ROLLOVER_FORM_PATHS.maxSize,
+  ROLLOVER_FORM_PATHS.maxPrimaryShardSize,
+  ROLLOVER_FORM_PATHS.maxPrimaryShardDocs,
+];
 
 export const useRolloverValueRequiredValidation = (): boolean => {
   const [isValid, setIsValid] = useState(false);

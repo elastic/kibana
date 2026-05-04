@@ -106,6 +106,26 @@ export const createDeserializer =
         result.phases.hot.actions.rollover.max_age = maxAge.size;
         result._meta.hot.customRollover.maxAgeUnit = maxAge.units;
       }
+
+      if (result.phases.hot.actions.rollover.min_size) {
+        const minSize = splitSizeAndUnits(result.phases.hot.actions.rollover.min_size);
+        result.phases.hot.actions.rollover.min_size = minSize.size;
+        result._meta.hot.customRollover.minStorageSizeUnit = minSize.units;
+      }
+
+      if (result.phases.hot.actions.rollover.min_primary_shard_size) {
+        const minPrimaryShardSize = splitSizeAndUnits(
+          result.phases.hot.actions.rollover.min_primary_shard_size
+        );
+        result.phases.hot.actions.rollover.min_primary_shard_size = minPrimaryShardSize.size;
+        result._meta.hot.customRollover.minPrimaryShardSizeUnit = minPrimaryShardSize.units;
+      }
+
+      if (result.phases.hot.actions.rollover.min_age) {
+        const minAge = splitSizeAndUnits(result.phases.hot.actions.rollover.min_age);
+        result.phases.hot.actions.rollover.min_age = minAge.size;
+        result._meta.hot.customRollover.minAgeUnit = minAge.units;
+      }
     }
     if (result.phases.hot?.actions.shrink?.max_primary_shard_size) {
       const primaryShardSize = splitSizeAndUnits(

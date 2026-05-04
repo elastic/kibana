@@ -23,7 +23,21 @@ import {
   downsampleIntervalMultipleOfPreviousOne,
 } from './validations';
 
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
+const rolloverMaxFormPaths = [
+  ROLLOVER_FORM_PATHS.maxDocs,
+  ROLLOVER_FORM_PATHS.maxAge,
+  ROLLOVER_FORM_PATHS.maxSize,
+  ROLLOVER_FORM_PATHS.maxPrimaryShardSize,
+  ROLLOVER_FORM_PATHS.maxPrimaryShardDocs,
+];
+
+const rolloverMinFormPaths = [
+  ROLLOVER_FORM_PATHS.minDocs,
+  ROLLOVER_FORM_PATHS.minAge,
+  ROLLOVER_FORM_PATHS.minSize,
+  ROLLOVER_FORM_PATHS.minPrimaryShardSize,
+  ROLLOVER_FORM_PATHS.minPrimaryShardDocs,
+];
 
 const { emptyField, isInteger, numberGreaterThanField } = fieldValidators;
 
@@ -272,6 +286,15 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         maxAgeUnit: {
           defaultValue: 'd',
         },
+        minStorageSizeUnit: {
+          defaultValue: 'gb',
+        },
+        minPrimaryShardSizeUnit: {
+          defaultValue: 'gb',
+        },
+        minAgeUnit: {
+          defaultValue: 'd',
+        },
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
@@ -431,7 +454,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
               },
             ],
-            fieldsToValidateOnChange: rolloverFormPaths,
+            fieldsToValidateOnChange: rolloverMaxFormPaths,
           },
           max_docs: {
             label: i18nTexts.editPolicy.maxDocsLabel,
@@ -447,7 +470,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
               },
             ],
             serializer: serializers.stringToNumber,
-            fieldsToValidateOnChange: rolloverFormPaths,
+            fieldsToValidateOnChange: rolloverMaxFormPaths,
           },
           max_primary_shard_size: {
             label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
@@ -459,7 +482,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
-            fieldsToValidateOnChange: rolloverFormPaths,
+            fieldsToValidateOnChange: rolloverMaxFormPaths,
           },
           max_primary_shard_docs: {
             label: i18nTexts.editPolicy.maxPrimaryShardDocsLabel,
@@ -475,7 +498,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
               },
             ],
             serializer: serializers.stringToNumber,
-            fieldsToValidateOnChange: rolloverFormPaths,
+            fieldsToValidateOnChange: rolloverMaxFormPaths,
           },
           max_size: {
             label: i18nTexts.editPolicy.maxSizeLabel,
@@ -487,7 +510,63 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
-            fieldsToValidateOnChange: rolloverFormPaths,
+            fieldsToValidateOnChange: rolloverMaxFormPaths,
+          },
+          min_age: {
+            label: i18nTexts.editPolicy.minRolloverAgeLabel,
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
+              },
+            ],
+            fieldsToValidateOnChange: rolloverMinFormPaths,
+          },
+          min_docs: {
+            label: i18nTexts.editPolicy.minRolloverDocsLabel,
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
+              },
+            ],
+            serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverMinFormPaths,
+          },
+          min_primary_shard_size: {
+            label: i18nTexts.editPolicy.minPrimaryShardSizeLabel,
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            fieldsToValidateOnChange: rolloverMinFormPaths,
+          },
+          min_primary_shard_docs: {
+            label: i18nTexts.editPolicy.minPrimaryShardDocsLabel,
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
+              },
+            ],
+            serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverMinFormPaths,
+          },
+          min_size: {
+            label: i18nTexts.editPolicy.minRolloverSizeLabel,
+            validations: [
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+            ],
+            fieldsToValidateOnChange: rolloverMinFormPaths,
           },
         },
         forcemerge: {

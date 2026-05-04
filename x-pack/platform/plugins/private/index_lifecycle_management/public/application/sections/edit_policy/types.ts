@@ -59,6 +59,9 @@ interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields, DownsampleF
     enabled: boolean;
     maxPrimaryShardSizeUnit?: string;
     maxAgeUnit?: string;
+    minPrimaryShardSizeUnit?: string;
+    minAgeUnit?: string;
+    minStorageSizeUnit?: string;
 
     /**
      * @deprecated This is the byte size unit for the max_size field which will by removed in version 8+ of the stack.

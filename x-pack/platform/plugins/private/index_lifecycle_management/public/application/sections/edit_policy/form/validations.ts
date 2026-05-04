@@ -60,7 +60,13 @@ export const ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE = 'ROLLOVER_VALUE_REQUIRED_
 
 export const DATA_PHASE_REQUIRED_VALIDATION_CODE = 'DATA_PHASE_REQUIRED_VALIDATION_CODE';
 
-const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
+const rolloverMaxFieldPaths = [
+  ROLLOVER_FORM_PATHS.maxDocs,
+  ROLLOVER_FORM_PATHS.maxAge,
+  ROLLOVER_FORM_PATHS.maxSize,
+  ROLLOVER_FORM_PATHS.maxPrimaryShardSize,
+  ROLLOVER_FORM_PATHS.maxPrimaryShardDocs,
+];
 
 /**
  * An ILM policy requires that for rollover a value must be set for one of the threshold values.
@@ -71,7 +77,7 @@ const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   const fields = form.getFields();
   // At least one rollover field needs a value specified for this action.
-  const someRolloverFieldHasAValue = rolloverFieldPaths.some((rolloverFieldPath) =>
+  const someRolloverFieldHasAValue = rolloverMaxFieldPaths.some((rolloverFieldPath) =>
     Boolean(fields[rolloverFieldPath]?.value)
   );
   if (!someRolloverFieldHasAValue) {
@@ -97,7 +103,7 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
     }
     return errorToReturn;
   } else {
-    rolloverFieldPaths.forEach((rolloverFieldPath) => {
+    rolloverMaxFieldPaths.forEach((rolloverFieldPath) => {
       fields[rolloverFieldPath]?.clearErrors(ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE);
     });
   }

@@ -143,6 +143,18 @@ export const i18nTexts = {
         defaultMessage: 'Maximum docs in the primary shard',
       }
     ),
+    minPrimaryShardSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.minimumPrimaryShardSizeLabel',
+      {
+        defaultMessage: 'Minimum primary shard size',
+      }
+    ),
+    minPrimaryShardDocsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.minimumPrimaryShardDocsLabel',
+      {
+        defaultMessage: 'Minimum docs in the primary shard',
+      }
+    ),
     maxPrimaryShardSizeUnitsLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
       {
@@ -152,12 +164,27 @@ export const i18nTexts = {
     maxAgeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
       defaultMessage: 'Maximum age',
     }),
+    minRolloverAgeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.minimumAgeLabel', {
+      defaultMessage: 'Minimum age',
+    }),
     maxDocsLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
       defaultMessage: 'Maximum documents',
     }),
+    minRolloverDocsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.minimumDocumentsLabel',
+      {
+        defaultMessage: 'Minimum documents',
+      }
+    ),
     maxSizeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
       defaultMessage: 'Maximum index size',
     }),
+    minRolloverSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.minimumIndexSizeLabel',
+      {
+        defaultMessage: 'Minimum index size',
+      }
+    ),
     downsampleLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.downsampleTitle', {
       defaultMessage: 'Downsample',
     }),
