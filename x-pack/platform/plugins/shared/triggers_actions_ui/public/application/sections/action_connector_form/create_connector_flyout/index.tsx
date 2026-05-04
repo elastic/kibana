@@ -138,7 +138,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
       ? (actionTypeModel?.subtype ?? [])
-          .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
+          .filter((item) => allActionTypes && allActionTypes[item.id]?.enabledInConfig)
           .flatMap((subtypeAction) => {
             if (!actionTypeRegistry.has(subtypeAction.id)) {
               return [];
@@ -313,7 +313,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
         {hasConnectorTypeSelected ? (
           <>
-            {groupActionTypeModel && (
+            {groupActionButtons.length > 0 && (
               <>
                 <EuiButtonGroup
                   isFullWidth

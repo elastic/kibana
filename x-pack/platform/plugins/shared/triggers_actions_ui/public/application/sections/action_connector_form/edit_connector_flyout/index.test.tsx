@@ -294,6 +294,25 @@ describe('EditConnectorFlyout', () => {
     });
   });
 
+  it('shows an error callout and no form when loadActionTypes fails', async () => {
+    loadActionTypes.mockRejectedValue(new Error('network error'));
+
+    const { getByTestId, queryByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('connector-action-types-load-error')).toBeInTheDocument();
+    });
+
+    expect(queryByTestId('nameInput')).not.toBeInTheDocument();
+  });
+
   describe('Header', () => {
     it('shows the icon', async () => {
       const { getByTestId } = appMockRenderer.render(

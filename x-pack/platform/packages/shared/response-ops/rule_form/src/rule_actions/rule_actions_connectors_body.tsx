@@ -285,7 +285,7 @@ export const RuleActionsConnectorsBody = ({
         <EuiFacetButton
           data-test-subj="ruleActionsConnectorsModalFilterButton"
           key="all"
-          quantity={availableConnectors.length}
+          quantity={Object.values(connectorsMap).reduce((sum, { total }) => sum + total, 0)}
           isSelected={selectedConnectorType === 'all'}
           onClick={onConnectorOptionSelect('all')}
         >
@@ -308,7 +308,7 @@ export const RuleActionsConnectorsBody = ({
           })}
       </EuiFacetGroup>
     );
-  }, [availableConnectors, connectorsMap, selectedConnectorType, onConnectorOptionSelect]);
+  }, [connectorsMap, selectedConnectorType, onConnectorOptionSelect]);
 
   const toggleFilterPopover = useCallback(() => {
     setIsConenctorFilterPopoverOpen((prev) => !prev);

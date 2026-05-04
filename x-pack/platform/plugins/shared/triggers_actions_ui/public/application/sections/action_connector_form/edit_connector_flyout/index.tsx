@@ -143,9 +143,11 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
   const [resolvedActionType, setResolvedActionType] = useState<ActionType | null>(null);
+  const [actionTypesLoadError, setActionTypesLoadError] = useState<Error | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    setActionTypesLoadError(null);
     (async () => {
       try {
         const types = await loadActionTypes({ http });
@@ -167,9 +169,10 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               isDeprecated: false,
             } as ActionType)
         );
-      } catch {
+      } catch (err) {
         if (!cancelled) {
           setResolvedActionType(null);
+          setActionTypesLoadError(err instanceof Error ? err : new Error(String(err)));
         }
       }
     })();
@@ -341,6 +344,33 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               )}
+              {actionTypesLoadError && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="connector-action-types-load-error"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.actionTypesLoadError',
+                      { defaultMessage: 'Failed to load connector information' }
+                    )}
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.editConnectorForm.actionTypesLoadErrorDescription',
+                        {
+                          defaultMessage:
+                            'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+                        }
+                      )}
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
               {showLoadingSpinner && (
                 <EuiFlexGroup
                   direction="column"
@@ -403,7 +433,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 </>
               )}
 
-              {!isLoadingActionTypeModel && !actionTypeModelError && (
+              {!isLoadingActionTypeModel && !actionTypeModelError && !actionTypesLoadError && (
                 <>
                   <ConnectorForm
                     actionTypeModel={actionTypeModel}
@@ -435,6 +465,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     actionTypeModelError,
+    actionTypesLoadError,
     isEdit,
     isLoadingActionTypeModel,
     showLoadingSpinner,
@@ -511,7 +542,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           isPreconfigured={connector.isPreconfigured}
           connectorName={connector.name}
           connectorTypeDesc={
-            actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage
+            actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage || ''
           }
           setTab={handleSetTab}
           selectedTab={selectedTab}
