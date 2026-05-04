@@ -25,7 +25,7 @@ import {
 } from '../model/schema/common_attributes.gen';
 import { GetScheduledActionResultsResponse } from './get_scheduled_action_results.gen';
 import { GetScheduledQueryResultsResponse } from './get_scheduled_query_results.gen';
-import { ExportFormat, ExportRequestBody, ExportResultRow } from '../export/export_results.gen';
+import { ExportFormat, ExportRequestBody, ExportJsonResponse } from '../export/export_results.gen';
 
 export const OsqueryExportScheduledQueryResultsRequestQuery = lazySchema(() =>
   z.object({
@@ -70,12 +70,10 @@ export type OsqueryExportScheduledQueryResultsRequestBodyInput = z.input<
 >;
 
 /**
-* A single JSON array containing all result rows. All rows are held in memory before writing; prefer `ndjson` for large exports.
+* A JSON object with `_meta` (export metadata) and `results` (all result rows). Rows are held in memory before writing; prefer `ndjson` for large exports.
 
 */
-export const OsqueryExportScheduledQueryResultsResponse = lazySchema(() =>
-  z.array(ExportResultRow)
-);
+export const OsqueryExportScheduledQueryResultsResponse = lazySchema(() => ExportJsonResponse);
 export type OsqueryExportScheduledQueryResultsResponse = z.infer<
   typeof OsqueryExportScheduledQueryResultsResponse
 >;
