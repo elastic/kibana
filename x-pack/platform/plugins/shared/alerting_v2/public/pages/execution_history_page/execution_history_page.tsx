@@ -7,7 +7,9 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiBasicTable,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiPageHeader,
   EuiSpacer,
@@ -119,7 +121,10 @@ export const ExecutionHistoryPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
-  const { data, isFetching } = useFetchExecutionHistory({ page: page + 1, perPage });
+  const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
+    page: page + 1,
+    perPage,
+  });
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
 
@@ -178,14 +183,39 @@ export const ExecutionHistoryPage = () => {
       </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === POLICIES_TAB_ID ? (
-        <EuiBasicTable<PolicyExecutionHistoryItem>
-          items={items}
-          columns={columns}
-          loading={isFetching}
-          noItemsMessage={policiesEmptyState}
-          pagination={pagination}
-          onChange={onTableChange}
-        />
+        isError ? (
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            title={
+              <FormattedMessage
+                id="xpack.alertingV2.executionHistory.errorTitle"
+                defaultMessage="Failed to load execution history."
+              />
+            }
+          >
+            <EuiButton
+              color="danger"
+              onClick={() => refetch()}
+              data-test-subj="executionHistoryRetryButton"
+            >
+              <FormattedMessage
+                id="xpack.alertingV2.executionHistory.retryButton"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
+          </EuiCallOut>
+        ) : (
+          <EuiBasicTable<PolicyExecutionHistoryItem>
+            items={items}
+            columns={columns}
+            loading={isFetching}
+            noItemsMessage={policiesEmptyState}
+            pagination={pagination}
+            onChange={onTableChange}
+          />
+        )
       ) : (
         rulesPlaceholder
       )}
