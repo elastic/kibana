@@ -40,7 +40,7 @@ describe('ChangeTrackingService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let service: ChangeTrackingService;
 
-  const snapshot = (name: string): RuleSnapshot => ({
+  const ruleSnapshot = (name: string): RuleSnapshot => ({
     attributes: { name } as RawRule,
     references: [],
   });
@@ -126,7 +126,7 @@ describe('ChangeTrackingService', () => {
         module: 'stack',
         objectType: RULE_SAVED_OBJECT_TYPE,
         objectId: 'rule-1',
-        after: snapshot('after'),
+        snapshot: ruleSnapshot('snapshot'),
       };
 
       await service.log(change, baseOpts);
@@ -137,21 +137,11 @@ describe('ChangeTrackingService', () => {
           {
             objectType: RULE_SAVED_OBJECT_TYPE,
             objectId: 'rule-1',
-            before: undefined,
-            after: snapshot('after'),
+            snapshot: ruleSnapshot('snapshot'),
           },
         ],
         expect.objectContaining({
           ...baseOpts,
-          fieldsToIgnore: {
-            attributes: {
-              executionStatus: true,
-              monitoring: true,
-              lastRun: true,
-              nextRun: true,
-              scheduledTaskId: true,
-            },
-          },
           fieldsToHash: { attributes: { apiKey: true, uiamApiKey: true } },
           correlationId: expect.any(String),
         })
@@ -171,13 +161,13 @@ describe('ChangeTrackingService', () => {
           module: 'stack',
           objectType: RULE_SAVED_OBJECT_TYPE,
           objectId: 'a',
-          after: snapshot('a'),
+          snapshot: ruleSnapshot('a'),
         },
         {
           module: 'security',
           objectType: RULE_SAVED_OBJECT_TYPE,
           objectId: 'b',
-          after: snapshot('b'),
+          snapshot: ruleSnapshot('b'),
         },
       ];
 
@@ -200,7 +190,7 @@ describe('ChangeTrackingService', () => {
         module: 'stack',
         objectType: RULE_SAVED_OBJECT_TYPE,
         objectId: 'rule-1',
-        after: snapshot('x'),
+        snapshot: ruleSnapshot('x'),
       };
 
       await expect(service.logBulk([change], baseOpts)).resolves.toBeUndefined();
@@ -221,7 +211,7 @@ describe('ChangeTrackingService', () => {
         module: 'security',
         objectType: RULE_SAVED_OBJECT_TYPE,
         objectId: 'rule-1',
-        after: snapshot('x'),
+        snapshot: ruleSnapshot('x'),
       };
 
       await service.logBulk([change], baseOpts);

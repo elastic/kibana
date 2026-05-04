@@ -15,6 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   describe.skip('Remote clusters', function () {
     describe('GET /api/upgrade_assistant/remote_clusters', () => {
       before(async () => {
