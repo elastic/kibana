@@ -1548,41 +1548,46 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.escapeAndPreserveHighlightTags",
+        "id": "def-common.formatFieldStringValueWithHighlights",
         "type": "Function",
         "tags": [],
-        "label": "escapeAndPreserveHighlightTags",
+        "label": "formatFieldStringValueWithHighlights",
         "description": [
-          "\nEscapes HTML in a string while preserving field-format highlight <mark> tags.\nUsed for values already processed by formatFieldValue / getHighlightHtml (e.g. resource badges)."
+          "\nFormats a value using the default string formatter with React output and search highlighting.\n\nThis is a convenience function for formatting values when you only have a field name (not a DataViewField).\nIt attempts to look up the field in the data view, falling back to a minimal field object with just the name.\nThis fallback ensures search highlighting still works even for fields not in the data view (e.g., OTel body.text).\n"
         ],
         "signature": [
-          "(value: string) => string"
+          "({ value, hit, fieldFormats, dataView, fieldName, options, }: ",
+          "FormatFieldStringWithHighlightsParams",
+          ") => React.ReactNode"
         ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-        "lineNumber": 23,
-        "columnNumber": 1,
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+        "lineNumber": 158,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.escapeAndPreserveHighlightTags.$1",
-            "type": "string",
+            "id": "def-common.formatFieldStringValueWithHighlights.$1",
+            "type": "Object",
             "tags": [],
-            "label": "value",
+            "label": "{\n  value,\n  hit,\n  fieldFormats,\n  dataView,\n  fieldName,\n  options,\n}",
             "description": [],
             "signature": [
-              "string"
+              "FormatFieldStringWithHighlightsParams"
             ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-            "lineNumber": 27,
-            "columnNumber": 48,
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+            "lineNumber": 158,
+            "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatFieldStringWithHighlightsParams",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A ReactNode that can be rendered directly"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1662,14 +1667,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
           },
@@ -1680,18 +1677,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
-          },
-          {
-            "plugin": "@kbn/discover-contextual-components",
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
-          },
-          {
-            "plugin": "@kbn/discover-contextual-components",
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
-          },
-          {
-            "plugin": "@kbn/discover-contextual-components",
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
           }
         ],
         "children": [
@@ -2990,62 +2975,6 @@
             "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.getHighlightedFieldValue",
-        "type": "Function",
-        "tags": [],
-        "label": "getHighlightedFieldValue",
-        "description": [
-          "\nMerges ES highlight snippets into a field value, producing safe HTML with <mark> tags.\nReplicates the logic of getHighlightHtml from @kbn/field-formats-plugin, which packages\ncannot import directly.\n\nEach snippet in the highlights array is the full field value with ES highlight tags\naround matched terms. The function iterates over all snippets (handling multi-valued\nfields), strips the ES tags to find the matching text, and replaces those occurrences\nin the escaped field value with properly tagged <mark> elements."
-        ],
-        "signature": [
-          "(fieldValue: string, highlights: string[] | undefined) => string"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-        "lineNumber": 48,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getHighlightedFieldValue.$1",
-            "type": "string",
-            "tags": [],
-            "label": "fieldValue",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-            "lineNumber": 59,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getHighlightedFieldValue.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "highlights",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-            "lineNumber": 60,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
