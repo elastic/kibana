@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiCard,
   useEuiTheme,
   EuiIconTip,
   EuiStat,
@@ -41,68 +41,18 @@ export function Card({
   dataTestSubjTitle?: string;
 }) {
   const { euiTheme } = useEuiTheme();
-  const cardPadding = euiTheme.size.m;
-  const isClickable = Boolean(onClick) && !isDisabled && !isSelected;
+  const isCardDisabled = Boolean(isDisabled) || Boolean(isSelected);
+  const isClickable = Boolean(onClick) && !isCardDisabled;
 
-  const style = css`
+  const cardStyle = css`
     height: 100%;
     min-width: 300px;
-    padding: 0;
     border-radius: ${euiTheme.border.radius.medium};
     border: ${isSelected
       ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
       : 'none'};
     background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
-  `;
-
-  const buttonStyle = css`
-    ${style}
-    && {
-      cursor: ${isClickable ? 'pointer' : 'default'};
-    }
-
-    ${isSelected
-      ? css`
-          &&,
-          &&:hover,
-          &&:focus,
-          &&:focus-visible,
-          &&:active {
-            background-color: ${euiTheme.colors.backgroundLightPrimary};
-            text-decoration: none;
-            color: ${euiTheme.colors.textPrimary};
-          }
-
-          /* EuiButtonEmpty hover/active state uses a ::before overlay */
-          &&::before,
-          &&:hover::before,
-          &&:active::before {
-            content: none;
-            display: none;
-            background-color: transparent;
-          }
-
-          /* High-contrast mode can add a hover ::after border indicator */
-          &&::after,
-          &&:hover::after,
-          &&:active::after {
-            display: none;
-          }
-
-          && *,
-          &&:hover *,
-          &&:focus *,
-          &&:active * {
-            color: inherit;
-            text-decoration: none;
-          }
-        `
-      : undefined}
-  `;
-
-  const divStyle = css`
-    ${style}
-    padding: ${cardPadding};
+    cursor: ${isClickable ? 'pointer' : 'default'};
   `;
 
   const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${dataTestSubjTitle || title}`;
@@ -120,7 +70,6 @@ export function Card({
         titleSize="m"
         descriptionElement="div"
         css={css`
-          padding: ${euiTheme.size.xs} 0;
           color: ${isSelected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
         `}
         description={
@@ -160,28 +109,20 @@ export function Card({
     </>
   );
 
-  return onClick ? (
-    <EuiButtonEmpty
-      isDisabled={isDisabled}
+  return (
+    <EuiCard
+      display="plain"
+      hasBorder={false}
+      paddingSize="m"
+      isDisabled={isCardDisabled}
       onClick={isClickable ? onClick : undefined}
-      css={buttonStyle}
-      type="button"
-      contentProps={{
-        css: css`
-          justify-content: flex-start;
-          padding: ${cardPadding};
-        `,
-      }}
+      css={cardStyle}
+      aria-pressed={isSelected}
+      title={content}
+      titleElement="span"
+      textAlign="left"
       aria-label={title}
-      aria-pressed={Boolean(isSelected)}
       data-test-subj={dataTestSubject}
-      color="text"
-    >
-      {content}
-    </EuiButtonEmpty>
-  ) : (
-    <div css={divStyle} data-test-subj={dataTestSubject}>
-      {content}
-    </div>
+    />
   );
 }

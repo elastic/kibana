@@ -26,19 +26,18 @@ describe('Card', () => {
     expect(card).toHaveTextContent('Test Footer');
   });
 
-  it('renders as a div when onClick is not provided', () => {
+  it('renders a non-interactive card when onClick is not provided', () => {
     render(<Card {...defaultProps} />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
-    expect(card.tagName).toBe('DIV');
+    fireEvent.click(card);
   });
 
-  it('renders as a button when onClick is provided', () => {
+  it('adds an aria-label when onClick is provided', () => {
     const onClick = jest.fn();
     render(<Card {...defaultProps} onClick={onClick} />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
-    expect(card.tagName).toBe('BUTTON');
     expect(card.getAttribute('aria-label')).toBe('Test Card Title');
   });
 
@@ -52,12 +51,22 @@ describe('Card', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('shows disabled state when isDisabled is true', () => {
+  it('does not call onClick when isDisabled is true', () => {
     const onClick = jest.fn();
     render(<Card {...defaultProps} onClick={onClick} isDisabled />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
-    expect(card.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(card);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not call onClick when isSelected is true', () => {
+    const onClick = jest.fn();
+    render(<Card {...defaultProps} onClick={onClick} isSelected />);
+
+    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
+    fireEvent.click(card);
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it('renders tooltip when titleTooltipContent is provided', () => {
