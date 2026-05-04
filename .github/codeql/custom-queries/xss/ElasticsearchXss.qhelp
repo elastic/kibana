@@ -16,6 +16,7 @@ The query tracks data from the following <code>@kbn/discover-utils</code> functi
 <li><code>buildDataTableRecord</code> — wraps raw ES hits into <code>DataTableRecord</code> objects</li>
 <li><code>buildDataTableRecordList</code> — wraps multiple ES hits into <code>DataTableRecord[]</code></li>
 <li><code>getMessageFieldWithFallbacks</code> — extracts message field values from ES documents</li>
+<li><code>getLogFieldWithFallback</code> — extracts log field values with fallback logic</li>
 </ul>
 <p>
 The following <code>@kbn/discover-utils</code> functions are intentionally excluded because they
