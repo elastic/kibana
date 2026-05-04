@@ -101,6 +101,7 @@ function createServerCallback() {
         case 'header_as_payload':
           payloads.push(JSON.stringify(request.headers));
           response.statusCode = 200;
+          response.setHeader('Content-Type', 'text/plain; charset=utf-8');
           response.end('OK');
           return;
         case 'binary_response':
