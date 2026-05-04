@@ -21,6 +21,9 @@
       "dataViewFieldEditor",
       "visualizations",
       "kibanaUtils"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
     ]
   }
 }
