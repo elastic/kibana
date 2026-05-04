@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { CoreStart } from '@kbn/core/public';
-import { formatRequest, type RouteRepositoryClient } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository-utils';
+import { type RouteRepositoryClient } from '@kbn/server-route-repository';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import type { SharedAPMRouteRepository } from './routes';
 import type { CallApi } from './call_api';

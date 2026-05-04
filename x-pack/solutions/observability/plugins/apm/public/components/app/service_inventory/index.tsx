@@ -24,16 +24,14 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import {
-  callApmApi as callApmApi2,
-  type APIReturnType,
-} from '../../../services/rest/create_call_apm_api';
+import { type APIReturnType } from '../../../services/rest/create_call_apm_api';
 import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
-import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { getApmInternalServices, type ApmPluginStartDeps, type ApmServices } from '../../../plugin';
+import { FooApm } from '../../shared/foo';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -175,6 +173,7 @@ function useServicesDetailedStatisticsFetcher({
 }
 
 export function ServiceInventory() {
+  const { callApmApi: callApmApiV2 } = getApmInternalServices();
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
@@ -305,7 +304,8 @@ export function ServiceInventory() {
 
   return (
     <>
-      <Foo callApmApi={callApmApi2} />
+      <Foo callApmApi={callApmApiV2} />
+      <FooApm />
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
         <EuiFlexItem style={{ minWidth: 0 }}>

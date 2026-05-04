@@ -9,9 +9,10 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import type { APMClientV2 } from '@kbn/apm-api-shared';
 
 interface FooProps {
-  callApmApi: (endpoint: 'GET /internal/apm/foo', options?: any) => Promise<{ msg: string }>;
+  callApmApi: APMClientV2;
 }
 
 export function Foo({ callApmApi }: FooProps) {
@@ -25,7 +26,10 @@ export function Foo({ callApmApi }: FooProps) {
     }
     setLoading(true);
     try {
-      const response = await callApmApi('GET /internal/apm/foo', {});
+      const response = await callApmApi('GET /internal/apm/foo/{serviceName}', {
+        params: { path: { serviceName: 'my-service' }, query: { foo: 'bar' } },
+        signal: null,
+      });
       setData(response);
     } finally {
       setLoading(false);

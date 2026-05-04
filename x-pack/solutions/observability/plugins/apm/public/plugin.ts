@@ -89,6 +89,8 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { APMClientV2 } from '@kbn/apm-api-shared';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
@@ -142,6 +144,7 @@ export interface ApmServices {
 
 export interface ApmInternalServices {
   cpsManager?: ICPSManager;
+  callApmApi: APMClientV2;
 }
 
 export const [getApmInternalServices, setApmInternalServices] =
@@ -535,6 +538,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
 
+    const callApmApi = createCallApmApiV2(core);
+
+    const ApmInternalServices: ApmInternalServices = {
+      callApmApi,
+    };
+
     if (
       core.featureFlags.getBooleanValue(
         OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
@@ -543,10 +552,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     ) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
       setApmInternalServices({
+        ...ApmInternalServices,
         cpsManager: plugins.cps?.cpsManager,
       });
     } else {
-      setApmInternalServices({});
+      setApmInternalServices(ApmInternalServices);
     }
     if (plugins.agentBuilder) {
       import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
