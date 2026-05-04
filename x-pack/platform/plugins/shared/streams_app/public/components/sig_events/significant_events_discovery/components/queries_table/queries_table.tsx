@@ -39,7 +39,6 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
-import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { getFormattedError } from '../../../../../util/errors';
 import { AssetImage } from '../../../../asset_image';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -148,7 +147,6 @@ export function QueriesTable() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       ]),
     [queryClient]
   );

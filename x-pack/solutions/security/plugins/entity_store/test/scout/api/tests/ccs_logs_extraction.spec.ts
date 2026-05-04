@@ -548,6 +548,7 @@ apiTest.describe(
               ],
             },
           },
+          sort: 'entity.id:asc',
         });
 
         expect(latestSearchResponse.hits.hits).toHaveLength(2);
