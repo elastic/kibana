@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EbtClickAttrs } from './types';
-export * from './constants';
+/** Shape of the `data-ebt-*` attributes for click tracking. */
+export interface EbtClickAttrs {
+  action: string;
+  element: string;
+  detail?: string;
+}
