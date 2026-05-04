@@ -41,11 +41,11 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   getDisplayNameTooltip: ({ embeddable }) => {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     if (isDisabled(embeddable)) {
-      return i18n.translate('dashboard.addPanelFlyout.timeSliderOnlyOneTooltip', {
+      return i18n.translate('controls.timeSlider.disabledTooltop', {
         defaultMessage: 'You can only add one time slider control per dashboard.',
       });
     }
-    return i18n.translate('dashboard.addPanelFlyout.timeSliderTooltip', {
+    return i18n.translate('controls.timeSlider.tooltip', {
       defaultMessage: 'Add a time slider control to your dashboard.',
     });
   },
