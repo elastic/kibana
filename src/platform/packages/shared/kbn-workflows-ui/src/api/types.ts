@@ -124,3 +124,29 @@ export interface ResumeExecutionParams {
 export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
 }
+
+/** Body for `POST /internal/workflows/trigger_events/_search` (space comes from the request). */
+export interface SearchTriggerEventLogParams {
+  triggerIds?: string[];
+  kql?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface SearchTriggerEventLogHit {
+  id: string;
+  source: Record<string, unknown>;
+}
+
+export interface SearchTriggerEventLogResult {
+  hits: SearchTriggerEventLogHit[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export interface TriggerEventTriggerIdsResponse {
+  triggerIds: string[];
+}

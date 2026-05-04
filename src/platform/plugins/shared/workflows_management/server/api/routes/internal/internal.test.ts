@@ -15,6 +15,8 @@ describe('Internal Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let mockApi: { disableAllWorkflows: jest.Mock };
   let mockTriggerEventsIsEnabled: boolean;
+  const mockSearchTriggerEventLog = jest.fn();
+  const mockGetDistinctTriggerIdsForSpace = jest.fn();
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -35,12 +37,23 @@ describe('Internal Routes', () => {
     jest.clearAllMocks();
     routeHandlers = {};
     mockTriggerEventsIsEnabled = true;
+    mockSearchTriggerEventLog.mockResolvedValue({
+      hits: [],
+      total: 0,
+      page: 1,
+      size: 10,
+    });
+    mockGetDistinctTriggerIdsForSpace.mockResolvedValue([]);
 
     mockApi = { disableAllWorkflows: jest.fn() };
 
     const mockWorkflowsService = {
       getWorkflowsExecutionEngine: jest.fn().mockImplementation(async () => ({
-        triggerEvents: { isEnabled: mockTriggerEventsIsEnabled },
+        triggerEvents: {
+          isEnabled: mockTriggerEventsIsEnabled,
+          searchTriggerEventLog: mockSearchTriggerEventLog,
+          getDistinctTriggerIdsForSpace: mockGetDistinctTriggerIdsForSpace,
+        },
       })),
     };
 
@@ -112,6 +125,11 @@ describe('Internal Routes', () => {
   it('should register the disable route handler', () => {
     expect(routeHandlers[`POST:/internal/workflows/disable`]).toBeDefined();
     expect(routeHandlers[`POST:/internal/workflows/disable`].handler).toEqual(expect.any(Function));
+  });
+
+  it('should register trigger event log search routes', () => {
+    expect(routeHandlers[`POST:/internal/workflows/trigger_events/_search`]).toBeDefined();
+    expect(routeHandlers[`GET:/internal/workflows/trigger_events/_trigger_ids`]).toBeDefined();
   });
 
   it('should call api.disableAllWorkflows scoped to the request space', async () => {

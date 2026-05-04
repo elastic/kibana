@@ -44,7 +44,10 @@ import type {
   MgetWorkflowsParams,
   ResumeExecutionParams,
   RunWorkflowOptions,
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
   TestWorkflowParams,
+  TriggerEventTriggerIdsResponse,
   UpdateWorkflowParams,
   ValidateWorkflowParams,
   WorkflowExecutionLogsResponse,
@@ -289,6 +292,25 @@ export class WorkflowApi {
 
   async getConfig(): Promise<WorkflowsConfig> {
     return this.http.get(`${INTERNAL_BASE}/config`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  /**
+   * Search `.workflows-events` for the current space (time range, optional trigger ids, KQL).
+   */
+  async searchTriggerEvents(
+    params: SearchTriggerEventLogParams
+  ): Promise<SearchTriggerEventLogResult> {
+    return this.http.post(`${INTERNAL_BASE}/trigger_events/_search`, {
+      body: JSON.stringify(params),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  /** Distinct `triggerId` values present in `.workflows-events` for the current space. */
+  async getTriggerEventTriggerIds(): Promise<TriggerEventTriggerIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/trigger_events/_trigger_ids`, {
       version: INTERNAL_API_VERSION,
     });
   }
