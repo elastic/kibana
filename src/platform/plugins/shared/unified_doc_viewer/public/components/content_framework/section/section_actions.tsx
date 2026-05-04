@@ -10,13 +10,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getLinkActionProps } from '../utils/link_action';
-
-export interface EbtClickAttrs {
-  action?: string;
-  element?: string;
-  detail?: string;
-}
 
 interface BaseAction {
   icon: IconType;

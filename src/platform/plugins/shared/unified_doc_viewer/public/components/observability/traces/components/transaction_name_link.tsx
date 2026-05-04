@@ -14,6 +14,7 @@ import {
   type TransactionDetailsByNameParams,
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { EBT_CLICK_ACTION_VIEW_TRANSACTION } from '../ebt_constants';
 
@@ -21,7 +22,7 @@ interface TransactionNameLinkProps {
   serviceName?: string;
   transactionName: string;
   renderContent?: (name: string) => React.ReactNode;
-  ebt: { element: string; detail: string };
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
 export function TransactionNameLink({

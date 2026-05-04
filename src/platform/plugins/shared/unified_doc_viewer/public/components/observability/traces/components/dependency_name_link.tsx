@@ -15,6 +15,7 @@ import {
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { SpanIcon } from '@kbn/apm-ui-shared';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { EBT_CLICK_ACTION_VIEW_DEPENDENCY } from '../ebt_constants';
 
@@ -24,7 +25,7 @@ interface DependencyNameLinkProps {
   spanSubtype?: string;
   environment?: string;
   formattedDependencyName?: React.ReactNode;
-  ebt: { element: string; detail: string };
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
 export function DependencyNameLink({
