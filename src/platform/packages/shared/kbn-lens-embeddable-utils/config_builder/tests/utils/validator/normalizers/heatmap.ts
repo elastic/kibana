@@ -12,7 +12,7 @@ import type { HeatmapVisualizationState } from '@kbn/lens-common';
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
-import type { ColumnRemapping } from './common';
+import type { IdRemapping } from './common';
 import { DEFAULT_LAYER_ID, getCommonNormalizer, getPaletteNormalizer } from './common';
 
 type HeatmapAttributes = Extract<LensAttributes, { visualizationType: 'lnsHeatmap' }>;
@@ -23,6 +23,7 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
       legend: { isVisible, shouldTruncate },
       gridConfig: { isXAxisTitleVisible, isYAxisTitleVisible },
     } = attributes.state.visualization;
+    const hasYAxis = Boolean(attributes.state.visualization.yAccessor);
 
     // Set defaults added by the transform that the original doesn't have
     // https://github.com/elastic/kibana/issues/246078
@@ -30,7 +31,10 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
     attributes.state.visualization.legend.shouldTruncate = shouldTruncate ?? false;
     if (!shouldTruncate) delete attributes.state.visualization.legend.maxLines; // not needed if false
     attributes.state.visualization.gridConfig.isXAxisTitleVisible = isXAxisTitleVisible ?? false;
-    attributes.state.visualization.gridConfig.isYAxisTitleVisible = isYAxisTitleVisible ?? false;
+    // from_api uses layer.axis?.y?.title?.visible ?? false; when there is no Y bucket there is no axis.y
+    attributes.state.visualization.gridConfig.isYAxisTitleVisible = hasYAxis
+      ? isYAxisTitleVisible ?? false
+      : false;
 
     // Align deprecated naming conventions
     attributes.state.visualization.gridConfig.type = 'heatmap_grid';
@@ -44,14 +48,12 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
     attributes.state.visualization.legend.type = 'heatmap_legend';
 
     // Remove transform-added column properties not in the original
-    for (const dsState of Object.values(attributes.state.datasourceStates)) {
-      for (const layer of Object.values(dsState.layers)) {
-        layer.columnOrder = [...layer.columnOrder].sort();
-        for (const col of Object.values(layer.columns)) {
-          delete (col as any).params?.parentFormat;
-          if ((col as any).operationType === 'count') {
-            delete (col as any).params;
-          }
+    for (const layer of Object.values(attributes.state.datasourceStates.formBased?.layers ?? {})) {
+      layer.columnOrder = [...layer.columnOrder].sort();
+      for (const col of Object.values(layer.columns)) {
+        delete (col as any).params?.parentFormat;
+        if (col.operationType === 'count') {
+          delete (col as any).params;
         }
       }
     }
@@ -64,7 +66,7 @@ function getColumnRemapping({
   xAccessor,
   yAccessor,
   valueAccessor,
-}: HeatmapVisualizationState): ColumnRemapping {
+}: HeatmapVisualizationState): IdRemapping {
   return [
     [xAccessor, 'heatmap_value_accessor_x'],
     [yAccessor, 'heatmap_value_accessor_y'],
@@ -93,7 +95,7 @@ const alignId: NormalizerConfig<HeatmapAttributes> = {
 
 export const normalizeHeatmap = mergeNormalizers([
   getCommonNormalizer<HeatmapAttributes>(({ state: { visualization } }) => ({
-    layerId: visualization.layerId,
+    layerRemapping: [[visualization.layerId, DEFAULT_LAYER_ID]],
     columnRemapping: getColumnRemapping(visualization),
   })),
   alignId,

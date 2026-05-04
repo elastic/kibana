@@ -94,8 +94,7 @@ async function processDashboardFile(filePath, packageName) {
             package_name: packageName,
             dashboard_file: path.basename(filePath),
             panel_title:
-              panel.title ||
-              `${dashboard.attributes.title ?? dashboard.id} (panel ${index} of ${panels.length})`,
+              panel.title || `${dashboard.attributes.title ?? dashboard.id} (panel: ${index})`,
             attributes: attrs,
           });
         }

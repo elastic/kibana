@@ -11,6 +11,6 @@ import type { LensApiConfig } from '../../../schema';
 import type { LensAttributes } from '../../../types';
 
 export interface ValidateTransform<T extends LensApiConfig> {
-  fromState: (attributes: LensAttributes, strict?: boolean, excludedFields?: string[]) => void;
+  fromState: (attributes: LensAttributes) => void;
   fromApi: (config: T, excludedFields?: string[]) => void;
 }

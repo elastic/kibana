@@ -14,6 +14,8 @@ import type { ValidateTransform } from './types';
 import { getChartSchema } from './schema';
 import { getChartNormalizer } from './normalizers';
 
+const strictChartTypes = new Set(['heatmap']);
+
 /**
  * Test harness to validate LensConfigBuilder conversions
  *
@@ -31,8 +33,9 @@ export function validateStateTransformsFn(
 ): ValidateTransform<LensApiConfigByType[typeof chartType]>['fromState'] {
   const schema = getChartSchema(chartType);
   const builder = new LensConfigBuilder(undefined, true);
+  const strict = strictChartTypes.has(chartType);
 
-  return function validateStateTransforms(attributes, strict = false, excludedFields = []) {
+  return function validateStateTransforms(attributes) {
     const newApiConfig = builder.toAPIFormat(attributes);
 
     expect(() => {
@@ -48,7 +51,7 @@ export function validateStateTransformsFn(
       const normalizer = getChartNormalizer(chartType);
       const newAttributes = builder.fromAPIFormat(newApiConfig);
       const normalizedAttributes = normalizer?.({
-        original: attributes,
+        original: structuredClone(attributes),
         transformed: newAttributes,
       }) ?? {
         original: attributes,

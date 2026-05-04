@@ -60,7 +60,7 @@ describe('Integration panels', () => {
                 const typeValidator = validator[type];
 
                 if (typeValidator) {
-                  validator[type].fromState(attributes, true);
+                  validator[type].fromState(attributes);
                 } else {
                   throw new Error(`No validator found for type: ${type}(${chartType})`);
                 }

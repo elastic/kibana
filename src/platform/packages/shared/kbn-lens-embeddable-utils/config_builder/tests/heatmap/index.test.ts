@@ -48,6 +48,10 @@ describe('Heatmap', () => {
       it('should convert a selector color by value palette', () => {
         validator.heatmap.fromState(dslMocks.selectorColorByValueAttributes);
       });
+
+      it('should convert a heatmap with formula columns', () => {
+        validator.heatmap.fromState(dslMocks.formulaColumns);
+      });
     });
 
     describe('ESQL', () => {
