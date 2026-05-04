@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
@@ -40,17 +41,26 @@ export function ApmEmbeddableContext({
     return getDateRange({ rangeFrom, rangeTo });
   }, [rangeFrom, rangeTo]);
 
-  const history = useMemo(
-    () =>
-      createMemoryHistory({
-        initialEntries: [
-          `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
-            kuery
-          )}&comparisonEnabled=false`,
-        ],
-      }),
-    [rangeFrom, rangeTo, kuery]
-  );
+  // The history instance must be stable across re-renders to prevent issues with components down the line which do not expect the reference to change.
+  // Updates are handled via the useEffect below that will push objects via `replace()` that will properly trigger subscriptions for consuming components.
+  const history = useRef<MemoryHistory | null>(null);
+  if (history.current === null) {
+    history.current = createMemoryHistory({
+      initialEntries: [
+        `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
+          kuery
+        )}&comparisonEnabled=false`,
+      ],
+    });
+  }
+
+  useEffect(() => {
+    history.current?.replace(
+      `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
+        kuery
+      )}&comparisonEnabled=false`
+    );
+  }, [history, rangeFrom, rangeTo, kuery]);
 
   const services = {
     config: deps.config,
@@ -86,7 +96,7 @@ export function ApmEmbeddableContext({
             telemetry: deps.telemetry,
           }}
         >
-          <RouterProvider router={apmRouter as any} history={history}>
+          <RouterProvider router={apmRouter as any} history={history.current}>
             <TimeRangeMetadataContextProvider
               uiSettings={deps.coreStart.uiSettings}
               start={resolvedStart ?? rangeFrom}
