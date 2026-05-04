@@ -7,7 +7,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -60,7 +59,6 @@ export interface CreateMaintenanceWindowFormProps {
   onSuccess: () => void;
   initialValue?: FormProps;
   maintenanceWindowId?: string;
-  showMultipleSolutionsWarning?: boolean;
 }
 
 const useDefaultTimezone = () => {
@@ -90,13 +88,7 @@ const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
 };
 
 export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormProps) => {
-  const {
-    onCancel,
-    onSuccess,
-    initialValue,
-    maintenanceWindowId,
-    showMultipleSolutionsWarning = false,
-  } = props;
+  const { onCancel, onSuccess, initialValue, maintenanceWindowId } = props;
 
   const [defaultStartDateValue] = useState<string>(() => moment().toISOString());
   const [defaultEndDateValue] = useState<string>(() => moment().add(30, 'minutes').toISOString());
@@ -200,7 +192,7 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
       }),
       scopedQuery: scopedQueryPayload,
       scopeEpisodeQuery: scopeEpisodeQueryPayload,
-      ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
+      ...(scopedQueryPayload ? { categoryIds: null } : {}),
     };
 
     if (!scopedQueryPayload && !scopeEpisodeQueryPayload) {
@@ -409,18 +401,6 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
               )}
             </UseField>
           </ScopeSection>
-          {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
-            <EuiFlexItem>
-              <EuiCallOut
-                announceOnMount
-                data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
-                title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
-                color="warning"
-              >
-                <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
-              </EuiCallOut>
-            </EuiFlexItem>
-          ) : null}
           <ScopeSection
             title={i18n.EPISODES_SCOPE_TITLE}
             description={i18n.EPISODES_SCOPE_DESCRIPTION}

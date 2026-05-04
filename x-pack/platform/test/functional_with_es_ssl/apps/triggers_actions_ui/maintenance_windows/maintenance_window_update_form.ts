@@ -78,41 +78,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('should show callout when update a maintenance window with old chosen solutions', async () => {
-      const createdMaintenanceWindow = await createMaintenanceWindow({
-        name: 'Test Maintenance Window 2',
-        getService,
-        overwrite: {
-          r_rule: {
-            dtstart: new Date().toISOString(),
-            tzid: 'UTC',
-            freq: 3,
-            interval: 12,
-            count: 5,
-          },
-          category_ids: ['observability', 'securitySolution'],
-        },
-      });
-
-      objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
-
-      await browser.refresh();
-
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows('Test Maintenance Window 2');
-
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-edit');
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('createMaintenanceWindowForm');
-      });
-
-      expect(
-        await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsRemovedWarning')
-      ).to.contain('Support for multiple solution categories is removed.');
-    });
-
-    it('should show a callout warning when editing a maintenance window', async () => {
+    it('should update a maintenance window with a scoped query', async () => {
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name: 'New Maintenance Window',
         getService,
@@ -135,10 +101,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await testSubjects.existOrFail('maintenanceWindowScopeQuery');
-
-      expect(
-        await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsRemovedWarning')
-      ).to.contain('Support for multiple solution categories is removed.');
 
       await (await testSubjects.find('create-submit')).click();
 

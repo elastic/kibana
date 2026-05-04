@@ -19,17 +19,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
-
-    const hasScopedQuery = !!maintenanceWindow.scopedQuery;
-    const hasOldCategorySettings = maintenanceWindow.categoryIds
-      ? maintenanceWindow.categoryIds.length > 0 && maintenanceWindow.categoryIds.length < 3
-      : false;
-
-    const showMultipleSolutionsWarning = !hasScopedQuery && hasOldCategorySettings;
-    return {
-      maintenanceWindow: convertFromMaintenanceWindowToForm(maintenanceWindow),
-      showMultipleSolutionsWarning,
-    };
+    return convertFromMaintenanceWindowToForm(maintenanceWindow);
   };
 
   const onErrorFn = () => {
@@ -50,8 +40,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
   });
 
   return {
-    maintenanceWindow: data?.maintenanceWindow,
-    showMultipleSolutionsWarning: data?.showMultipleSolutionsWarning,
+    maintenanceWindow: data,
     isLoading: isLoading || isInitialLoading,
     isError,
   };

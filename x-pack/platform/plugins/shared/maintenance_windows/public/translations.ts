@@ -356,21 +356,6 @@ export const ARCHIVE_SUBTITLE = i18n.translate('xpack.maintenanceWindows.archive
     'Upcoming maintenance window events are canceled and the window is queued for deletion.',
 });
 
-export const SOLUTION_CONFIG_REMOVAL_WARNING_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.solutionConfigRemovalWarning.title',
-  {
-    defaultMessage: 'Support for multiple solution categories is removed.',
-  }
-);
-
-export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
-  'xpack.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
-  {
-    defaultMessage:
-      'When you save the changes, the maintenance window will affect all rules that meet the filtering criteria.',
-  }
-);
-
 export const TABLE_ACTION_UNARCHIVE = i18n.translate('xpack.maintenanceWindows.table.unarchive', {
   defaultMessage: 'Unarchive',
 });

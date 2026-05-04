@@ -24,8 +24,7 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit);
 
   const { maintenanceWindowId } = useParams<{ maintenanceWindowId: string }>();
-  const { maintenanceWindow, showMultipleSolutionsWarning, isLoading, isError } =
-    useGetMaintenanceWindow(maintenanceWindowId);
+  const { maintenanceWindow, isLoading, isError } = useGetMaintenanceWindow(maintenanceWindowId);
 
   if (isError) {
     navigateToMaintenanceWindows();
@@ -42,7 +41,6 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
       <CreateMaintenanceWindowForm
         initialValue={maintenanceWindow}
         maintenanceWindowId={maintenanceWindowId}
-        showMultipleSolutionsWarning={showMultipleSolutionsWarning}
         onCancel={navigateToMaintenanceWindows}
         onSuccess={navigateToMaintenanceWindows}
       />
