@@ -12,6 +12,30 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
+const CLOUD_LINKS = [
+  {
+    id: 'elasticCloud',
+    label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
+      defaultMessage: 'Elastic Cloud',
+    }),
+    path: '/home',
+  },
+  {
+    id: 'usage',
+    label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
+      defaultMessage: 'Usage',
+    }),
+    path: '/billing/usage',
+  },
+  {
+    id: 'organization',
+    label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
+      defaultMessage: 'Organization',
+    }),
+    path: '/account/members',
+  },
+];
+
 export const CloudLinks = () => {
   const {
     services: { cloud },
@@ -23,30 +47,6 @@ export const CloudLinks = () => {
   }
 
   const baseUrl = cloud.baseUrl.replace(/\/$/, '');
-
-  const cloudLinks = [
-    {
-      id: 'elasticCloud',
-      label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
-        defaultMessage: 'Elastic Cloud',
-      }),
-      path: '/home',
-    },
-    {
-      id: 'usage',
-      label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
-        defaultMessage: 'Usage',
-      }),
-      path: '/billing/usage',
-    },
-    {
-      id: 'organization',
-      label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
-        defaultMessage: 'Organization',
-      }),
-      path: '/account/members',
-    },
-  ];
 
   return (
     <EuiFlexGroup
@@ -72,7 +72,7 @@ export const CloudLinks = () => {
           <EuiIcon type="logoCloud" size="m" aria-hidden={true} />
         </EuiLink>
       </EuiFlexItem>
-      {cloudLinks.map((link) => (
+      {CLOUD_LINKS.map((link) => (
         <EuiFlexItem grow={false} key={link.id}>
           <EuiLink
             href={`${baseUrl}${link.path}`}
