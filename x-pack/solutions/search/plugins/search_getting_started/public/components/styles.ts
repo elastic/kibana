@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { useAgentBuilderAgentById } from './use_agent_by_id';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
-export const useIsAgentReadOnly = (agentId?: string) => {
-  const { agent } = useAgentBuilderAgentById(agentId);
-  return !!agent?.readonly;
-};
+export const SampleDataPanelStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    paddingInline: euiTheme.size.l,
+    paddingBlock: euiTheme.size.m,
+  });
