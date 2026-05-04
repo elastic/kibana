@@ -65,7 +65,13 @@ export const registerTranslationsRoute = ({
         },
         async (_ctx, req, res) => {
           const requestedLocale = req.params.locale.toLowerCase();
-          if (!supportedLocales.some((supported) => supported.toLowerCase() === requestedLocale)) {
+          // Resolve the canonical locale id (matching the casing used as
+          // the `translationHashes` key) so the hash lookup below stays
+          // consistent with this case-insensitive validation
+          const canonicalLocale = supportedLocales.find(
+            (supported) => supported.toLowerCase() === requestedLocale
+          );
+          if (!canonicalLocale) {
             return res.notFound({
               body: `Unknown locale: ${req.params.locale}`,
             });
@@ -73,7 +79,7 @@ export const registerTranslationsRoute = ({
 
           // Validate the translation hash if provided in the URL
           const requestedHash = req.params.translationHash;
-          const expectedHash = translationHashes[req.params.locale];
+          const expectedHash = translationHashes[canonicalLocale];
           if (requestedHash && expectedHash && requestedHash !== expectedHash) {
             return res.notFound({
               body: `Stale translation hash for locale: ${req.params.locale}`,

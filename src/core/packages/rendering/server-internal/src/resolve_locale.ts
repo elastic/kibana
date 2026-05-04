@@ -81,7 +81,9 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
       getHeader(request, 'accept-language'),
       configuredLocales
     );
-    if (headerLocale) {
+    // Match the profile/cookie paths above: only return a header-derived
+    // locale if we can actually serve translations for it.
+    if (headerLocale && translationHashes[headerLocale]) {
       return finalize(headerLocale, request, serverBasePath);
     }
   }

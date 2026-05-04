@@ -126,6 +126,23 @@ describe('resolveLocale', () => {
       expect(result.locale).toBe('fr-FR');
     });
 
+    it('ignores an Accept-Language match that is configured but missing from translationHashes', () => {
+      // Edge case: a locale is in i18n.locales (so configuredLocales has it)
+      // but translationHashes is missing it (e.g. translation file failed
+      // to load). The Accept-Language path must gate on translationHashes
+      // the same way the profile and cookie paths do.
+      const result = resolveLocale(
+        baseArgs({
+          isServerless: true,
+          configuredLocales: ['en', 'fr-FR'],
+          translationHashes: { en: 'h1' }, // 'fr-FR' missing on purpose
+          configLocale: 'en',
+          request: buildRequest({ acceptLanguage: 'fr-FR,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('en');
+    });
+
     it('falls through to configLocale when picker is disabled (i18n.locales is empty)', () => {
       const result = resolveLocale(
         baseArgs({
