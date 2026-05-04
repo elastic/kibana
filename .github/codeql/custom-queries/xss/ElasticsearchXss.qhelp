@@ -16,13 +16,16 @@ The query tracks data from the following <code>@kbn/discover-utils</code> functi
 <li><code>buildDataTableRecord</code> — wraps raw ES hits into <code>DataTableRecord</code> objects</li>
 <li><code>buildDataTableRecordList</code> — wraps multiple ES hits into <code>DataTableRecord[]</code></li>
 <li><code>getMessageFieldWithFallbacks</code> — extracts message field values from ES documents</li>
-<li><code>getLogFieldWithFallback</code> — extracts log field values with fallback logic</li>
-<li><code>formatHit</code> — formats an ES hit for display</li>
 </ul>
 <p>
-Note: <code>formatFieldValue</code> is intentionally excluded. It returns plain text strings
-via the <code>'text'</code> content type, which does not produce HTML output.
+The following <code>@kbn/discover-utils</code> functions are intentionally excluded because they
+return <code>ReactNode</code> or plain text, not HTML strings:
 </p>
+<ul>
+<li><code>formatHitReact</code> — returns <code>ReactNode</code>, safe for direct React rendering</li>
+<li><code>formatFieldValueReact</code> — returns <code>ReactNode</code> via <code>reactConvert</code></li>
+<li><code>formatFieldValueText</code> — returns a plain text string</li>
+</ul>
 <p>
 The query catches both direct usage of <code>dangerouslySetInnerHTML</code> as a JSX attribute
 and indirect usage via object literals that are later spread into JSX elements. The latter
