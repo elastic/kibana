@@ -11,20 +11,20 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
-import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import {
-  ML_ANNOTATIONS_INDEX_ALIAS_READ,
-  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-} from '../../../common/constants/index_patterns';
 
-import type { Annotation, Annotations } from '../../../common/types/annotations';
+import type { Annotation, Annotations } from '@kbn/ml-common-types/annotations';
 import {
   isAnnotation,
   isAnnotations,
   getAnnotationFieldName,
   getAnnotationFieldValue,
-} from '../../../common/types/annotations';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/annotations';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import {
+  ML_ANNOTATIONS_INDEX_ALIAS_READ,
+  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+} from '../../../common/constants/index_patterns';
+import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions

@@ -30,7 +30,6 @@ import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './vi
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 
-export { NL_TO_ESQL_FLAG } from '../hooks/use_nl_to_esql_check';
 export { VisorMode } from './mode_selector';
 
 export interface QuickSearchVisorProps {
@@ -115,11 +114,10 @@ export function QuickSearchVisor({
 
     setIsNlLoading(true);
     try {
-      const sourceNames = selectedSources.map((s) => s.label);
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
-          query: trimmed,
-          sources: sourceNames.length ? sourceNames : undefined,
+          nlInstruction: trimmed,
+          currentQuery: query,
         }),
       });
       if (result.content) {
@@ -136,14 +134,7 @@ export function QuickSearchVisor({
     } finally {
       setIsNlLoading(false);
     }
-  }, [
-    nlValue,
-    isNlLoading,
-    core.http,
-    core.notifications.toasts,
-    onUpdateAndSubmitQuery,
-    selectedSources,
-  ]);
+  }, [nlValue, isNlLoading, core.http, core.notifications.toasts, onUpdateAndSubmitQuery, query]);
 
   const checkConnectorAvailability = useCallback(async () => {
     if (connectorCheckRef.current) return;
