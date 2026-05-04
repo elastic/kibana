@@ -659,21 +659,23 @@ export const bulkUpdate = async (
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
-    const updatedFieldsByCaseId = query.cases.reduce<Map<string, string[]>>((acc, updateCase) => {
-      // Keep first occurrence for duplicate ids handling.
-      if (acc.has(updateCase.id)) {
+    const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
+      (acc, { updateReq }) => {
+        // Keep first occurrence for duplicate ids handling.
+        if (acc.has(updateReq.id)) {
+          return acc;
+        }
+
+        const { id, version, ...restFields } = updateReq;
+        const updatedFields = Object.keys(restFields);
+        if (updatedFields.length > 0) {
+          acc.set(updateReq.id, updatedFields);
+        }
+
         return acc;
-      }
-
-      const updatedFields = Object.keys(updateCase).filter(
-        (key) => key !== 'id' && key !== 'version'
-      );
-      if (updatedFields.length > 0) {
-        acc.set(updateCase.id, updatedFields);
-      }
-
-      return acc;
-    }, new Map());
+      },
+      new Map()
+    );
 
     for (const updatedCase of updatedCasesResponse) {
       const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
