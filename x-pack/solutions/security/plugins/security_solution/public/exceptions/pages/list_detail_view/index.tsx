@@ -202,7 +202,9 @@ export const ListsDetailViewComponent: FC = () => {
   ]);
   return (
     <>
-      {screenReaderMessage && <EuiScreenReaderLive>{screenReaderMessage}</EuiScreenReaderLive>}
+      {screenReaderMessage && (
+        <EuiScreenReaderLive focusRegionOnTextChange>{screenReaderMessage}</EuiScreenReaderLive>
+      )}
       <SpyRoute pageName={SecurityPageName.exceptions} state={{ listName }} />
       {detailsViewContent}
     </>
