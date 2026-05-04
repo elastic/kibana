@@ -31,6 +31,7 @@ import {
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
@@ -179,9 +180,11 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
                     }
                   )}
                   data-test-subj="unifiedDocViewerSpanLinkTypeSelect"
-                  data-ebt-action={EBT_CLICK_ACTION_FILTER_SPAN_LINKS}
-                  data-ebt-element={EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS}
-                  data-ebt-detail={EBT_DETAIL_SPAN_DOC}
+                  {...getEbtProps({
+                    action: EBT_CLICK_ACTION_FILTER_SPAN_LINKS,
+                    element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
+                    detail: EBT_DETAIL_SPAN_DOC,
+                  })}
                   options={selectOptions}
                   value={type}
                   onChange={(e) => {

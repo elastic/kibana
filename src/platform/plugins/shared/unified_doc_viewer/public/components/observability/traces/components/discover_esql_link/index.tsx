@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { QueryOperator } from '@kbn/esql-composer';
-
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
 import { getLinkActionProps } from '../../../../content_framework/utils/link_action';
@@ -27,7 +27,7 @@ export const DiscoverEsqlLink = ({
   whereClause?: QueryOperator;
   tabLabel: string;
   dataTestSubj: string;
-  ebt: { action: string; element: string; detail: string };
+  ebt: EbtClickAttrs;
   children: React.ReactNode;
 }) => {
   const actions = useDocViewerExtensionActionsContext();
@@ -55,13 +55,7 @@ export const DiscoverEsqlLink = ({
   });
 
   return discoverUrl || canOpenInNewTab ? (
-    <EuiLink
-      data-test-subj={dataTestSubj}
-      data-ebt-action={ebt.action}
-      data-ebt-element={ebt.element}
-      data-ebt-detail={ebt.detail}
-      {...linkProps}
-    >
+    <EuiLink data-test-subj={dataTestSubj} {...getEbtProps(ebt)} {...linkProps}>
       {children}
     </EuiLink>
   ) : (

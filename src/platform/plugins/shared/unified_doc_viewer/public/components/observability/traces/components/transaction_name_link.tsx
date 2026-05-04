@@ -14,7 +14,7 @@ import {
   type TransactionDetailsByNameParams,
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { EBT_CLICK_ACTION_VIEW_TRANSACTION } from '../ebt_constants';
 
@@ -77,9 +77,7 @@ export function TransactionNameLink({
         <EuiLink
           {...routeLinkProps}
           data-test-subj="unifiedDocViewerObservabilityTracesTransactionNameLink"
-          data-ebt-action={EBT_CLICK_ACTION_VIEW_TRANSACTION}
-          data-ebt-element={ebt.element}
-          data-ebt-detail={ebt.detail}
+          {...getEbtProps({ action: EBT_CLICK_ACTION_VIEW_TRANSACTION, ...ebt })}
         >
           {content}
         </EuiLink>

@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EbtClickAttrs } from './types';
-export * from './constants';
-export * from './helpers';
+import type { EbtClickAttrs } from './types';
+
+/** Maps an EbtClickAttrs object to the corresponding `data-ebt-*` HTML attributes. */
+export function getEbtProps(ebt: Partial<EbtClickAttrs>): Record<string, string> {
+  return {
+    ...(ebt?.action && { 'data-ebt-action': ebt.action }),
+    ...(ebt?.element && { 'data-ebt-element': ebt.element }),
+    ...(ebt?.detail && { 'data-ebt-detail': ebt.detail }),
+  };
+}

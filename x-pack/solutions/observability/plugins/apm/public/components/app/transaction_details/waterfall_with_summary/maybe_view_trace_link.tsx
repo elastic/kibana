@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
@@ -32,8 +33,12 @@ function FullTraceButton({
         defaultMessage: 'View full trace',
       })}
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
-      data-ebt-action={onClick ? EBT_CLICK_ACTION_VIEW_FULL_TRACE : undefined}
-      data-ebt-element={onClick ? EBT_ELEMENT_WATERFALL_VIEW_FULL_TRACE : undefined}
+      {...(onClick
+        ? getEbtProps({
+            action: EBT_CLICK_ACTION_VIEW_FULL_TRACE,
+            element: EBT_ELEMENT_WATERFALL_VIEW_FULL_TRACE,
+          })
+        : {})}
       iconType="chartWaterfall"
       isLoading={isLoading}
       disabled={isDisabled}

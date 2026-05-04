@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -287,9 +288,11 @@ function InternalTraceWaterfall({
       >
         <div
           data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
-          data-ebt-action={EBT_CLICK_ACTION_EXPAND_TRACE}
-          data-ebt-element={EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_WATERFALL_AREA}
-          data-ebt-detail={ebtDetail}
+          {...getEbtProps({
+            action: EBT_CLICK_ACTION_EXPAND_TRACE,
+            element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_WATERFALL_AREA,
+            detail: ebtDetail,
+          })}
           aria-label={fullScreenButtonLabel}
           tabIndex={0}
           onClick={() => setShowFullScreenWaterfall(true)}

@@ -10,7 +10,7 @@
 import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
-import { EBT_CLICK_ACTION_VIEW_SERVICE, type EbtClickAttrs } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTION_VIEW_SERVICE, getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { ServiceNameWithIcon } from './service_name_with_icon';
 
@@ -74,9 +74,7 @@ export function ServiceNameLink({
         <EuiLink
           {...routeLinkProps}
           data-test-subj={dataTestSubj}
-          data-ebt-action={EBT_CLICK_ACTION_VIEW_SERVICE}
-          data-ebt-element={ebt.element}
-          data-ebt-detail={ebt.detail}
+          {...getEbtProps({ action: EBT_CLICK_ACTION_VIEW_SERVICE, ...ebt })}
         >
           {content}
         </EuiLink>

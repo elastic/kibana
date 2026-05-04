@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AgentIcon } from '@kbn/custom-icons';
-import { EBT_CLICK_ACTION_VIEW_ERROR, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click';
+import {
+  EBT_CLICK_ACTION_VIEW_ERROR,
+  EBT_CLICK_ACTION_VIEW_SERVICE,
+  getEbtProps,
+} from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -109,8 +113,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             <EuiBadge
               color="hollow"
               data-test-subj="apmBarDetailsServiceNameBadge"
-              data-ebt-action={getServiceBadgeHref ? EBT_CLICK_ACTION_VIEW_SERVICE : undefined}
-              data-ebt-element={getServiceBadgeHref ? ebt?.serviceBadge?.element : undefined}
+              {...(getServiceBadgeHref && ebt?.serviceBadge
+                ? getEbtProps({
+                    action: EBT_CLICK_ACTION_VIEW_SERVICE,
+                    element: ebt.serviceBadge.element,
+                  })
+                : {})}
               data-prevent-row-click={getServiceBadgeHref ? true : undefined}
               href={getServiceBadgeHref?.(item.serviceName) as any}
               aria-label={
@@ -158,8 +166,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 color={theme.euiTheme.colors.danger}
                 iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
-                data-ebt-action={ebt ? EBT_CLICK_ACTION_VIEW_ERROR : undefined}
-                data-ebt-element={ebt?.errorBadge.element}
+                {...(ebt
+                  ? getEbtProps({
+                      action: EBT_CLICK_ACTION_VIEW_ERROR,
+                      element: ebt.errorBadge.element,
+                    })
+                  : {})}
                 data-prevent-row-click
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
