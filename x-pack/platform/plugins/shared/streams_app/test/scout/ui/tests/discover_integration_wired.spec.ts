@@ -14,7 +14,7 @@ const WIRED_STREAM_NAME = 'logs.otel.child';
 
 test.describe(
   'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
-  { tag: tags.serverless.observability.complete },
+  { tag: tags.serverless.observability.all },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Create a wired stream
