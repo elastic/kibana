@@ -85,6 +85,7 @@ packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-moon @elastic/kibana-operations
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
+packages/kbn-perf-page-load @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-check @elastic/appex-sharedux
@@ -95,9 +96,12 @@ packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-rspack-optimizer @elastic/kibana-operations
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
+packages/kbn-swc-config @elastic/kibana-operations
+packages/kbn-transpiler-config @elastic/kibana-operations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-tsconfig/base @elastic/kibana-operations
