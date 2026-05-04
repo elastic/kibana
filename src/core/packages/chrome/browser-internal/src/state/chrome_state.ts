@@ -21,7 +21,6 @@ import type {
   ChromeNavLink,
   ChromeNextAiButton,
   ChromeNextGlobalSearchConfig,
-  ChromeNextSpaceSelectorConfig,
   ChromeUserBanner,
   AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
@@ -71,7 +70,7 @@ export interface ChromeState {
   aiButton: State<ReadonlySet<ChromeNextAiButton>>;
   globalSearch: State<ChromeNextGlobalSearchConfig | undefined>;
   userMenu: State<ReactNode>;
-  spaceSelector: State<ChromeNextSpaceSelectorConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -79,6 +78,9 @@ export interface ChromeState {
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
   };
+
+  /** App documentation link registered by the current app */
+  appDocumentationLink: State<string | undefined>;
 
   /** Feedback handler registered by the feedback plugin */
   feedbackHandler: State<(() => void) | undefined>;
@@ -128,13 +130,16 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const aiButton = createState<ReadonlySet<ChromeNextAiButton>>(new Set());
   const globalSearch = createState<ChromeNextGlobalSearchConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
-  const spaceSelector = createState<ChromeNextSpaceSelectorConfig | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+
+  // App Documentation Link
+  const appDocumentationLink = createState<string | undefined>(undefined);
 
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
@@ -169,7 +174,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     aiButton,
     globalSearch,
     userMenu,
-    spaceSelector,
+    contextSwitcher,
     customNavLink,
     appMenu,
     help: {
@@ -177,6 +182,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    appDocumentationLink,
     feedbackHandler,
     newsfeedHandler,
     inlineAppHeader,

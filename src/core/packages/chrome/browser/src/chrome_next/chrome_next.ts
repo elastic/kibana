@@ -11,7 +11,6 @@ import type { ReactNode, MouseEventHandler } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNextAiButton } from './ai_button';
 import type { ChromeNextGlobalSearchConfig } from './global_search';
-import type { ChromeNextSpaceSelectorConfig } from './space_selector';
 
 /** @public */
 export interface AppHeaderBack {
@@ -31,6 +30,33 @@ export interface AppHeaderBadge {
   onClick?: () => void;
   onClickAriaLabel?: string;
   'data-test-subj'?: string;
+}
+
+/** @public */
+export interface AppHeaderBadgeItem {
+  name: string;
+  icon?: string;
+  onClick?: () => void;
+  items?: AppHeaderBadgeItem[];
+  popoverWidth?: number;
+  'data-test-subj'?: string;
+  disabled?: boolean;
+  toolTipContent?: string;
+}
+
+/** @public */
+export interface AppHeaderBadge {
+  label: string;
+  /** EUI badge color. `filled` is intentionally excluded. */
+  color?: 'hollow' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
+  tooltip?: string;
+  onClick?: () => void;
+  onClickAriaLabel?: string;
+  'data-test-subj'?: string;
+  /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
+  items?: AppHeaderBadgeItem[];
+  /** Width of the popover menu panel in pixels. */
+  popoverWidth?: number;
 }
 
 /** @public */
@@ -56,7 +82,7 @@ export interface AppHeaderConfig {
 }
 
 /**
- * Chrome-Next APIs: AI button slot, global search, user menu, and space selector.
+ * Chrome-Next APIs: AI button slot, global search, user menu, context switcher, and app header.
  * @public
  */
 export interface ChromeNext {
@@ -89,13 +115,14 @@ export interface ChromeNext {
      */
     set(content?: ReactNode): void;
   };
-  spaceSelector: {
+  contextSwitcher: {
     /**
-     * Set the space selector configuration for the Chrome-Next sidenav.
-     * Chrome renders a space avatar in the sidenav header with a custom popover.
+     * Set the context switcher content for the Chrome-Next global header.
+     * The provided ReactNode is rendered as-is in the header's context switcher slot.
+     * The consumer owns the full UI (context switcher trigger button, popover, menu items).
      * Pass `undefined` to remove. Global — persists across app changes.
      */
-    set(config?: ChromeNextSpaceSelectorConfig): void;
+    set(content?: ReactNode): void;
   };
   appHeader: {
     /**

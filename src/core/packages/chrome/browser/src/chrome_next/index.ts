@@ -8,6 +8,12 @@
  */
 
 export type { ChromeNextAiButton } from './ai_button';
-export type { ChromeNext, AppHeaderConfig, AppHeaderBack, AppHeaderBadge, AppHeaderTab } from './chrome_next';
+export type {
+  ChromeNext,
+  AppHeaderConfig,
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderTab,
+} from './chrome_next';
 export type { ChromeNextGlobalSearchConfig } from './global_search';
-export type { ChromeNextSpaceSelectorConfig } from './space_selector';

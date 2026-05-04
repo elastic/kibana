@@ -16,7 +16,6 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeNextGlobalSearchConfig,
-  ChromeNextSpaceSelectorConfig,
   AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type {
@@ -37,10 +36,9 @@ const createStartContractMock = () => {
     undefined
   );
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
-  const nextSpaceSelectorState$ = new BehaviorSubject<ChromeNextSpaceSelectorConfig | undefined>(
-    undefined
-  );
+  const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
+  const appDocumentationLinkState$ = new BehaviorSubject<string | undefined>(undefined);
 
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
@@ -146,10 +144,10 @@ const createStartContractMock = () => {
           nextUserMenuState$.next(content ?? null);
         }),
       }),
-      spaceSelector: lazyObject({
-        get$: jest.fn().mockReturnValue(nextSpaceSelectorState$),
-        set: jest.fn((config?: ChromeNextSpaceSelectorConfig) => {
-          nextSpaceSelectorState$.next(config);
+      contextSwitcher: lazyObject({
+        get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
+        set: jest.fn((content?: ReactNode) => {
+          nextContextSwitcherState$.next(content ?? null);
         }),
       }),
       inlineAppHeader: lazyObject({
@@ -176,6 +174,10 @@ const createStartContractMock = () => {
     registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
     getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     registerNewsfeedHandler: jest.fn().mockReturnValue(() => {}),
+    registerAppDocumentationLink: jest.fn((link: string) => {
+      appDocumentationLinkState$.next(link);
+    }),
+    getAppDocumentationLink$: jest.fn().mockReturnValue(appDocumentationLinkState$),
   });
 
   return startContract;

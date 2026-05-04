@@ -50,6 +50,7 @@
             "lineNumber": 88,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "FindPluginsOptions",
             "trackAdoption": false,
             "isRequired": false
           }

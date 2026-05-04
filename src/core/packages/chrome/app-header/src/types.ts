@@ -10,6 +10,7 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type {
   AppHeaderBack as CoreAppHeaderBack,
   AppHeaderBadge as CoreAppHeaderBadge,
+  AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
   AppHeaderConfig as CoreAppHeaderConfig,
   AppHeaderTab as CoreAppHeaderTab,
 } from '@kbn/core-chrome-browser';
@@ -17,6 +18,7 @@ import type {
 export type AppHeaderMenu = AppMenuConfig;
 export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;
+export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
 export type AppHeaderTab = CoreAppHeaderTab;
 export type ChromeAppHeaderProps = CoreAppHeaderConfig;

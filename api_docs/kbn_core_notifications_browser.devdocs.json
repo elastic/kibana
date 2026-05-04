@@ -11,7 +11,15 @@
         "tags": [],
         "label": "ErrorToastOptions",
         "description": [
-          "\nOptions available for {@link IToasts} error APIs."
+          "\nOptions available for ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          },
+          " error APIs."
         ],
         "signature": [
           "ErrorToastOptions",
@@ -105,7 +113,15 @@
         "tags": [],
         "label": "IToasts",
         "description": [
-          "\nMethods for adding and removing global toast messages. See {@link ToastsApi}."
+          "\nMethods for adding and removing global toast messages. See ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.ToastsApi",
+            "text": "ToastsApi"
+          },
+          "."
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
         "lineNumber": 65,
@@ -168,6 +184,7 @@
                 "lineNumber": 71,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -246,6 +263,7 @@
                 "lineNumber": 73,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -302,6 +320,7 @@
                 "lineNumber": 74,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -358,6 +377,7 @@
                 "lineNumber": 75,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -414,6 +434,7 @@
                 "lineNumber": 76,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -470,6 +491,7 @@
                 "lineNumber": 77,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -487,6 +509,7 @@
                 "lineNumber": 77,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorToastOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -550,6 +573,7 @@
                 "lineNumber": 102,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -646,7 +670,15 @@
         "tags": [],
         "label": "NotificationCoordinatorState",
         "description": [
-          "\nSpecifies the internal state of {@link NotificationCoordinatorPublicApi}."
+          "\nSpecifies the internal state of ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.NotificationCoordinatorPublicApi",
+            "text": "NotificationCoordinatorPublicApi"
+          },
+          "."
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
         "lineNumber": 80,
@@ -706,7 +738,13 @@
             "tags": [],
             "label": "toasts",
             "description": [
-              "{@link ToastsSetup}"
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.ToastsSetup",
+                "text": "ToastsSetup"
+              }
             ],
             "signature": [
               "IToasts"
@@ -724,7 +762,14 @@
             "tags": [],
             "label": "coordinator",
             "description": [
-              "\n{@link NotificationCoordinator}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.NotificationCoordinator",
+                "text": "NotificationCoordinator"
+              }
             ],
             "signature": [
               "(registrar: string) => ",
@@ -775,7 +820,13 @@
             "tags": [],
             "label": "toasts",
             "description": [
-              "{@link ToastsStart}"
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.ToastsStart",
+                "text": "ToastsStart"
+              }
             ],
             "signature": [
               "IToasts"
@@ -895,7 +946,15 @@
         "tags": [],
         "label": "ToastOptions",
         "description": [
-          "\nOptions available for {@link IToasts} APIs."
+          "\nOptions available for ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          },
+          " APIs."
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
         "lineNumber": 36,
@@ -1031,7 +1090,15 @@
         "tags": [],
         "label": "ToastInput",
         "description": [
-          "\nInputs for {@link IToasts} APIs."
+          "\nInputs for ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          },
+          " APIs."
         ],
         "signature": [
           "string | ",
@@ -1051,7 +1118,15 @@
         "tags": [],
         "label": "ToastInputFields",
         "description": [
-          "\nAllowed fields for {@link ToastInput}.\n"
+          "\nAllowed fields for ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.ToastInput",
+            "text": "ToastInput"
+          },
+          ".\n"
         ],
         "signature": [
           "Pick<",
@@ -1076,7 +1151,14 @@
         "tags": [],
         "label": "ToastsSetup",
         "description": [
-          "\n{@link IToasts}"
+          "\n",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          }
         ],
         "signature": [
           "IToasts"
@@ -1095,7 +1177,14 @@
         "tags": [],
         "label": "ToastsStart",
         "description": [
-          "\n{@link IToasts}"
+          "\n",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          }
         ],
         "signature": [
           "IToasts"

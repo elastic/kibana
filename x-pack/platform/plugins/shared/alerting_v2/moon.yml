@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-security-server'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/core-http-server-utils'
@@ -91,7 +92,6 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
-  - '@kbn/user-profile-components'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
@@ -100,7 +100,9 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

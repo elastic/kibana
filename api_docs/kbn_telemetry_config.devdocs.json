@@ -57,7 +57,15 @@
             "tags": [],
             "label": "tracing",
             "description": [
-              "\nTracing config. See {@link TracingConfig}."
+              "\nTracing config. See ",
+              {
+                "pluginId": "@kbn/telemetry-config",
+                "scope": "common",
+                "docId": "kibKbnTelemetryConfigPluginApi",
+                "section": "def-common.TracingConfig",
+                "text": "TracingConfig"
+              },
+              "."
             ],
             "signature": [
               {
@@ -81,7 +89,15 @@
             "tags": [],
             "label": "metrics",
             "description": [
-              "\nMetrics config. See {@link MetricsConfig}."
+              "\nMetrics config. See ",
+              {
+                "pluginId": "@kbn/telemetry-config",
+                "scope": "common",
+                "docId": "kibKbnTelemetryConfigPluginApi",
+                "section": "def-common.MetricsConfig",
+                "text": "MetricsConfig"
+              },
+              "."
             ],
             "signature": [
               {

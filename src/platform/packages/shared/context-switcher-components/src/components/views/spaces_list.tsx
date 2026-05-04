@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,7 @@ import type {
 } from '../selectable_list';
 
 import { Footer } from '../footer';
-import { type FooterAction } from '../types';
+import type { ActionConfig } from '../types';
 
 const BACK_BUTTON_ARIA_LABEL = i18n.translate(
   'contextSwitcherComponents.spacesListView.backButtonAriaLabel',
@@ -40,13 +41,13 @@ const BACK_BUTTON_ARIA_LABEL = i18n.translate(
 export interface SpacesListViewProps {
   readonly id: string;
   readonly title: string;
-  readonly headerAction?: ReactNode;
+  readonly headerAction?: ActionConfig;
   readonly items: ReadonlyArray<SelectableListItem>;
   readonly search?: SelectableListSearchConfig;
   readonly isLoading?: boolean;
   readonly loadingMessage?: string;
   readonly noMatchesMessage?: ReactElement;
-  readonly footerAction?: FooterAction;
+  readonly footerAction?: ActionConfig;
   readonly onBack?: () => void;
   readonly onSelect: SelectableListProps['onSelect'];
 }
@@ -123,7 +124,17 @@ export const SpacesListView = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+                {headerAction && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={headerAction.onClick}
+                      data-test-subj={headerAction['data-test-subj']}
+                    >
+                      {headerAction.label}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
 
               {searchNode && (

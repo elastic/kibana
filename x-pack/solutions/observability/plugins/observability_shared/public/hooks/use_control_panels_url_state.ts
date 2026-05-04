@@ -164,14 +164,16 @@ const mergeDefaultPanelsWithUrlConfig = (
   const existingKeys = Object.keys(visiblePanels);
   const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
-  // Per-property merge: config defaults (e.g. fieldName) are preserved while
-  // URL overrides (e.g. selectedOptions) are applied on top.
+  // Per-property merge: URL overrides (e.g. selectedOptions) are applied on
+  // top of config defaults, but layout properties (width, grow) always come
+  // from the config so code changes take effect regardless of persisted URL state.
   const merged: ControlPanels = existingKeys.reduce((acc, key) => {
+    const { width: _w, grow: _g, ...urlOverrides } = controlPanelsToOverride[key] ?? {};
     return {
       ...acc,
       [key]: {
         ...visiblePanels[key],
-        ...(controlPanelsToOverride[key] ?? {}),
+        ...urlOverrides,
       },
     };
   }, {});

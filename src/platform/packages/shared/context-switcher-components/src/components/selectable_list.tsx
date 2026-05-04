@@ -119,8 +119,10 @@ export const SelectableList = ({
 
   const selectableStyles = css`
     /* no underline */
-    .euiSelectableListItem:hover .euiSelectableListItem__text,
-    .euiSelectableListItem.euiSelectableListItem-isFocused .euiSelectableListItem__text {
+    && .euiSelectableListItem:hover:not([aria-disabled='true']) .euiSelectableListItem__text,
+    &&
+      .euiSelectableListItem.euiSelectableListItem-isFocused:not([aria-disabled='true'])
+      .euiSelectableListItem__text {
       text-decoration: none;
     }
     /* blue background color and rounded corners */

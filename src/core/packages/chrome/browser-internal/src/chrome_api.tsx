@@ -149,6 +149,8 @@ export function createChromeApi({
     registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
     getHelpMenuLinks$: () => services.navControls.getHelpMenuLinks$(),
     setHelpMenuLinks: services.navControls.setHelpMenuLinks,
+    registerAppDocumentationLink: state.appDocumentationLink.set,
+    getAppDocumentationLink$: () => state.appDocumentationLink.$,
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,
@@ -208,9 +210,9 @@ export function createChromeApi({
         get$: () => state.userMenu.$,
         set: state.userMenu.set,
       },
-      spaceSelector: {
-        get$: () => state.spaceSelector.$,
-        set: state.spaceSelector.set,
+      contextSwitcher: {
+        get$: () => state.contextSwitcher.$,
+        set: state.contextSwitcher.set,
       },
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,

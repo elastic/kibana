@@ -103,6 +103,7 @@
                 "lineNumber": 106,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "BufferEncoding",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -139,6 +140,7 @@
                 "lineNumber": 137,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "BufferEncoding",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -175,6 +177,7 @@
                 "lineNumber": 162,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Buffer",
                 "trackAdoption": false,
                 "isRequired": true
               }
