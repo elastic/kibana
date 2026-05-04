@@ -52,31 +52,6 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   };
 }
 
-// Regular expression to match different types of comments:
-// - Block comments, single and multiline (/* ... */)
-// - Single-line comments (// ...)
-// - Hash comments (# ...)
-export function hasComments(data: string) {
-  /*
-    1. (\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)
-       - (\/\*): Matches the start of a block comment
-       - [^*]*: Matches any number of characters that are NOT an asterisk (*), to avoid prematurely closing the comment.
-       - \*+: Matches one or more asterisks (*), which is part of the block comment closing syntax.
-       - (?:[^/*][^*]*\*+)*: This non-capturing group ensures that any characters between asterisks and slashes are correctly matched and prevents mismatching on nested or unclosed comments.
-       - \*\/: Matches the closing of a block comment
-
-    2. (\/\/.*)
-       - Matches single-line comments starting with '//'.
-       - .*: Matches any characters that follow until the end of the line.
-
-    3. (#.*)
-       - Matches single-line comments starting with a hash (#).
-       - .*: Matches any characters that follow until the end of the line.
-   */
-  const re = /(\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)|(\/\/.*)|(#.*)/;
-  return re.test(data);
-}
-
 export function extractWarningMessages(warnings: string) {
   // pattern for valid warning header
   const re =

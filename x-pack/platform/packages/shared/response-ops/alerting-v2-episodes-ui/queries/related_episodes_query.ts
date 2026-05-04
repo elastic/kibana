@@ -6,22 +6,36 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { ComposerQuery } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-import { addEpisodeAggregation, ALERT_EPISODE_FIELDS } from './episodes_query';
+import { addEpisodeAggregation } from './episodes_query';
 
-/**
- * ES|QL query listing alert episodes for a rule, excluding one episode id.
- * Temporarily limited to 5 episodes.
- */
-export const buildRelatedAlertEpisodesEsqlQuery = (ruleId: string, excludeEpisodeId: string) => {
-  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
-    .where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
+// Subset of `ALERT_EPISODE_FIELDS` actually populated by this query. The action
+// `last_*` columns are excluded because we only read from `.rule-events` here
+// and don't run the action INLINE STATS — keeping them caused a runtime error.
+export const RELATED_EPISODE_FIELDS = [
+  '@timestamp',
+  'episode.id',
+  'episode.status',
+  'rule.id',
+  'group_hash',
+  'first_timestamp',
+  'last_timestamp',
+  'duration',
+] as const;
 
+const RELATED_EPISODE_LIMIT = 5;
+
+export const finishRelatedEpisodesQuery = (query: ComposerQuery) => {
   addEpisodeAggregation(query);
 
-  // prettier-ignore
   return query
     .sort([TIME_FIELD, 'DESC'])
-    .limit(5)
-    .keep(...ALERT_EPISODE_FIELDS);
+    .limit(RELATED_EPISODE_LIMIT)
+    .keep(...RELATED_EPISODE_FIELDS);
+};
+
+export const buildRelatedBaseQuery = (ruleId: string, excludeEpisodeId: string) => {
+  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
+    .where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
 };

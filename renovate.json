@@ -55,6 +55,23 @@
       "enabled": true
     },
     {
+      "groupName": "@rspack",
+      "matchDepNames": [
+        "@rspack/core",
+        "@rspack/plugin-react-refresh",
+        "@rsdoctor/rspack-plugin"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": [
+        "Team:Operations",
+        "backport:skip",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "30 days",
+      "enabled": true
+    },
+    {
       "groupName": "devcontainer",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2120,14 +2137,6 @@
       "enabled": true
     },
     {
-      "groupName": "Cytoscape",
-      "matchDepNames": ["cytoscape", "cytoscape-dagre"],
-      "reviewers": ["team:ml-ui"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "hdr-histogram-js",
       "matchDepNames": ["hdr-histogram-js"],
       "reviewers": ["team:obs-presentation-team"],
@@ -2518,15 +2527,6 @@
       "enabled": true
     },
     {
-      "groupName": "canvas-confetti",
-      "matchDepNames": ["canvas-confetti", "@types/canvas-confetti"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:SharedUX", "release_note:skip", "backport:previous-minor"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "xml Format Util",
       "matchDepNames": ["xml-formatter"],
       "reviewers": ["team:security-threat-hunting"],
@@ -2545,8 +2545,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "groupName": "@swc",
+      "matchDepNames": ["@swc/core", "@swc/helpers"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
