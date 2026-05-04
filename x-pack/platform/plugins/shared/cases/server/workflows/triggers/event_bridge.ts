@@ -27,8 +27,8 @@ export function registerCasesWorkflowEventBridge(
   }
 
   const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
-    const client = await workflowsExtensions.getClient(request);
     try {
+      const client = await workflowsExtensions.getClient(request);
       await client.emitEvent(eventType, payload as Record<string, unknown>);
     } catch (error) {
       logger.warn(`Failed to emit workflow trigger "${eventType}": ${error}`);

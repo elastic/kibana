@@ -26,7 +26,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     const logger = loggingSystemMock.createLogger();
     const request = httpServerMock.createKibanaRequest();
 
-    const mockClient = { emitEvent: jest.fn() };
+    const mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
 
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
@@ -70,7 +70,10 @@ describe('registerCasesWorkflowEventBridge', () => {
     const logger = loggingSystemMock.createLogger();
     const request = httpServerMock.createKibanaRequest();
 
-    const mockClient = { emitEvent: jest.fn().mockRejectedValue(new Error('boom')) };
+    const mockClient = {
+      emitEvent: jest.fn().mockRejectedValue(new Error('boom')),
+      isWorkflowsAvailable: true,
+    };
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
 
