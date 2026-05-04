@@ -8,12 +8,8 @@
  */
 
 import React, { type MouseEventHandler } from 'react';
-import { EuiSplitButton, EuiIconTip, useEuiTheme, type IconType } from '@elastic/eui';
+import { EuiSplitButton, EuiIcon, EuiIconTip, useEuiTheme, type IconType } from '@elastic/eui';
 import { css, type Interpolation, type Theme } from '@emotion/react';
-import {
-  APP_MENU_NOTIFICATION_INDICATOR_TOP,
-  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-} from '../constants';
 
 export interface SplitButtonWithNotificationProps {
   children?: React.ReactNode;
@@ -63,13 +59,7 @@ export const SplitButtonWithNotification = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div
-      css={{
-        position: 'relative',
-        display: fullWidth ? 'block' : 'inline-block',
-        padding: `0 ${euiTheme.size.s}`,
-      }}
-    >
+    <div css={{ padding: `0 ${euiTheme.size.s}` }}>
       <EuiSplitButton
         color="text"
         size="s"
@@ -88,8 +78,6 @@ export const SplitButtonWithNotification = ({
           data-test-subj={dataTestSubj}
           id={id}
           onClick={onClick as MouseEventHandler}
-          iconType={iconType}
-          iconSize="m"
           isLoading={isMainButtonLoading}
           isSelected={isSelected}
           href={href}
@@ -97,6 +85,50 @@ export const SplitButtonWithNotification = ({
           fullWidth={fullWidth}
           aria-haspopup={ariaHasPopup}
         >
+          {iconType && !isMainButtonLoading && (
+            <span
+              css={{
+                position: 'relative',
+                display: 'inline-flex',
+                marginInlineEnd: euiTheme.size.xs,
+              }}
+            >
+              <EuiIcon type={iconType} size="m" aria-hidden={true} />
+              {showNotificationIndicator && (
+                <div
+                  data-test-subj="split-button-notification-indicator"
+                  css={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    transform: 'translate(50%, -50%)',
+                    zIndex: 1,
+                    pointerEvents: 'none',
+                    '& svg': {
+                      stroke: euiTheme.colors.backgroundBasePlain,
+                      strokeWidth: euiTheme.size.xxs,
+                      paintOrder: 'stroke fill',
+                    },
+                  }}
+                >
+                  <span css={{ pointerEvents: 'auto' }}>
+                    <EuiIconTip
+                      type="dot"
+                      size="m"
+                      color="primary"
+                      content={notificationIndicatorTooltipContent}
+                      iconProps={{
+                        onClick:
+                          isDisabled || isLoading || isMainButtonLoading
+                            ? undefined
+                            : (onClick as MouseEventHandler),
+                      }}
+                    />
+                  </span>
+                </div>
+              )}
+            </span>
+          )}
           {children}
         </EuiSplitButton.ActionPrimary>
         <EuiSplitButton.ActionSecondary
@@ -107,38 +139,6 @@ export const SplitButtonWithNotification = ({
           isDisabled={isSecondaryButtonDisabled}
         />
       </EuiSplitButton>
-      {showNotificationIndicator && (
-        <div
-          data-test-subj="split-button-notification-indicator"
-          css={{
-            position: 'absolute',
-            top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
-            left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-            zIndex: 1,
-            pointerEvents: 'none',
-            '& svg': {
-              stroke: euiTheme.colors.backgroundBasePlain,
-              strokeWidth: euiTheme.size.xxs,
-              paintOrder: 'stroke fill',
-            },
-          }}
-        >
-          <span css={{ pointerEvents: 'auto' }}>
-            <EuiIconTip
-              type="dot"
-              size="m"
-              color="primary"
-              content={notificationIndicatorTooltipContent}
-              iconProps={{
-                onClick:
-                  isDisabled || isLoading || isMainButtonLoading
-                    ? undefined
-                    : (onClick as MouseEventHandler),
-              }}
-            />
-          </span>
-        </div>
-      )}
     </div>
   );
 };

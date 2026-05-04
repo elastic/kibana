@@ -62,7 +62,7 @@ describe('<SplitButtonWithNotification />', () => {
   });
 
   it('should show the notification indicator when showNotificationIndicator is true', () => {
-    setup({ showNotificationIndicator: true });
+    setup({ showNotificationIndicator: true, iconType: 'save' });
     expect(screen.getByTestId('split-button-notification-indicator')).toBeVisible();
   });
 
@@ -77,6 +77,7 @@ describe('<SplitButtonWithNotification />', () => {
         onSecondaryButtonClick={jest.fn()}
         secondaryButtonAriaLabel="More options"
         showNotificationIndicator={true}
+        iconType="save"
         isDisabled={true}
       >
         Save
