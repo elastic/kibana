@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { validateEndpointAttachmentMetadata } from './endpoint_metadata_schema';
 
 describe('validateEndpointAttachmentMetadata', () => {
@@ -96,5 +97,58 @@ describe('validateEndpointAttachmentMetadata', () => {
     expect(() => validateEndpointAttachmentMetadata('string')).toThrow(
       'Invalid endpoint attachment metadata'
     );
+  });
+
+  // Errors thrown from a registered cases-plugin `schemaValidator` callback are
+  // surfaced to the HTTP client as-is. `Boom.badRequest` (HTTP 400) is the only
+  // shape that turns into a client error — a plain `Error` would bubble up as
+  // 500 Internal Server Error and pollute the server logs.
+  describe('error shape', () => {
+    const expectBoom400 = (input: unknown, partialMessage?: string): void => {
+      let captured: unknown;
+      try {
+        validateEndpointAttachmentMetadata(input);
+      } catch (err) {
+        captured = err;
+      }
+      expect(captured).toBeDefined();
+      expect(Boom.isBoom(captured as Error)).toBe(true);
+      const boomErr = captured as Boom.Boom;
+      expect(boomErr.output.statusCode).toBe(400);
+      if (partialMessage) {
+        expect(boomErr.message).toContain(partialMessage);
+      }
+    };
+
+    it('throws Boom.badRequest (400) for invalid shape', () => {
+      expectBoom400({ command: 'isolate' }, 'Invalid endpoint attachment metadata');
+    });
+
+    it('throws Boom.badRequest (400) for empty targets', () => {
+      expectBoom400(
+        { command: 'isolate', comment: 'c', targets: [] },
+        'targets must contain at least one entry'
+      );
+    });
+
+    it('throws Boom.badRequest (400) for unknown top-level keys', () => {
+      expectBoom400(
+        {
+          command: 'isolate',
+          comment: 'c',
+          targets: [{ endpointId: '1', hostname: 'h', agentType: 'endpoint' }],
+          extra: 'nope',
+        },
+        'unknown key(s) [extra]'
+      );
+    });
+
+    it('throws Boom.badRequest (400) for null input', () => {
+      expectBoom400(null, 'expected an object');
+    });
+
+    it('throws Boom.badRequest (400) for non-object input', () => {
+      expectBoom400('string', 'expected an object');
+    });
   });
 });

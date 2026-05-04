@@ -92,6 +92,31 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
   }
 }
 
+/**
+ * Unified attachment shape fields that must NOT appear on the legacy
+ * `cases-comments` SO. When a unified-shape payload (e.g.
+ * `{ type: 'security.endpoint', attachmentId, metadata }`) is written to the
+ * legacy SO type, the request attributes still carry those keys after io-ts
+ * decoding and may otherwise leak into `_source` (mapping is `dynamic: false`,
+ * so they would be stored but not indexed). Stripping here guarantees
+ * byte-for-byte equivalence with pre-migration legacy writes.
+ */
+const UNIFIED_ONLY_ATTRIBUTE_KEYS = ['attachmentId', 'metadata', 'data'] as const;
+
+function stripUnifiedOnlyFields<T extends object>(attributes: T): T {
+  const asRecord = attributes as unknown as Record<string, unknown>;
+  let result: Record<string, unknown> | undefined;
+  for (const key of UNIFIED_ONLY_ATTRIBUTE_KEYS) {
+    if (key in asRecord) {
+      if (result === undefined) {
+        result = { ...asRecord };
+      }
+      delete result[key];
+    }
+  }
+  return (result ?? asRecord) as unknown as T;
+}
+
 export class AttachmentService {
   private readonly _getter: AttachmentGetter;
 
@@ -311,7 +336,7 @@ export class AttachmentService {
       const attachment =
         await this.context.unsecuredSavedObjectsClient.create<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
-          extractedAttributes,
+          stripUnifiedOnlyFields(extractedAttributes),
           {
             references: extractedReferences,
             id,
@@ -390,7 +415,7 @@ export class AttachmentService {
             return {
               type: CASE_COMMENT_SAVED_OBJECT,
               ...attachment,
-              attributes: extractedAttributes,
+              attributes: stripUnifiedOnlyFields(extractedAttributes),
               references: extractedReferences,
             };
           }),
@@ -492,7 +517,7 @@ export class AttachmentService {
         await this.context.unsecuredSavedObjectsClient.update<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
           savedObjectId,
-          extractedAttributes,
+          stripUnifiedOnlyFields(extractedAttributes),
           {
             ...options,
             /**
@@ -590,7 +615,7 @@ export class AttachmentService {
               ...c.options,
               type: CASE_COMMENT_SAVED_OBJECT,
               id: c.savedObjectId,
-              attributes: extractedAttributes,
+              attributes: stripUnifiedOnlyFields(extractedAttributes),
               /* If c.options?.references are undefined and there is no field to move to the refs
                * then the extractedAttributes will be an empty array. If we pass the empty array
                * on the update then all previously refs will be removed. The check below is needed

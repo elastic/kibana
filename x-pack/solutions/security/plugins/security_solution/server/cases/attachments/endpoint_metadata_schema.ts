@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { isLeft } from 'fp-ts/Either';
+import Boom from '@hapi/boom';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../common/endpoint/service/response_actions/constants';
 
 /**
@@ -42,23 +43,38 @@ const EndpointAttachmentMetadataRt = rt.strict({
 
 const ALLOWED_TOP_LEVEL_KEYS = new Set(['command', 'comment', 'targets']);
 
+/**
+ * Throws `Boom.badRequest` (HTTP 400) on invalid metadata so the cases-plugin
+ * route handler surfaces a client error instead of a 500. Plain `Error`s thrown
+ * from registered `schemaValidator` callbacks bubble up as 500 Internal Server
+ * Error and pollute the server logs with stack traces for what is really a
+ * caller mistake.
+ */
 export const validateEndpointAttachmentMetadata = (data: unknown): void => {
+  if (data === null || typeof data !== 'object') {
+    throw Boom.badRequest(
+      `Invalid endpoint attachment metadata: expected an object, received ${
+        data === null ? 'null' : typeof data
+      }`
+    );
+  }
+
   const result = EndpointAttachmentMetadataRt.decode(data);
   if (isLeft(result)) {
-    throw new Error(
+    throw Boom.badRequest(
       `Invalid endpoint attachment metadata: expected { command: string, comment: string, targets: Array<{ endpointId: string, hostname: string, agentType: ResponseActionAgentType }> }`
     );
   }
 
   const extraKeys = Object.keys(data as object).filter((key) => !ALLOWED_TOP_LEVEL_KEYS.has(key));
   if (extraKeys.length > 0) {
-    throw new Error(
+    throw Boom.badRequest(
       `Invalid endpoint attachment metadata: unknown key(s) [${extraKeys.join(', ')}]`
     );
   }
 
   if (result.right.targets.length === 0) {
-    throw new Error(
+    throw Boom.badRequest(
       'Invalid endpoint attachment metadata: targets must contain at least one entry'
     );
   }

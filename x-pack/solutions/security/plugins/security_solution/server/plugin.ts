@@ -534,6 +534,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
       schemaValidator: validateEndpointAttachmentMetadata,
     });
+    // Back-compat: keep the legacy `endpoint` external-reference type registered so
+    // existing API clients that still POST `{ type: 'externalReference',
+    // externalReferenceAttachmentTypeId: 'endpoint', ... }` are not rejected with
+    // 400 "Attachment type endpoint is not registered." after this PR. The cases
+    // server already converts legacy-shape SOs to the unified `security.endpoint`
+    // shape on read via `externalReferenceAttachmentTransformer.toUnifiedSchema`.
+    plugins.cases.attachmentFramework.registerExternalReference({
+      id: 'endpoint',
+    });
     plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
