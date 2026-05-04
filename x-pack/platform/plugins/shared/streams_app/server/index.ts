@@ -10,7 +10,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { StreamsAppConfig } from './config';
-import { StreamsAppPlugin } from './plugin';
 import type {
   StreamsAppServerSetup,
   StreamsAppServerStart,
@@ -31,5 +30,7 @@ export const plugin: PluginInitializer<
   StreamsAppServerStart,
   StreamsAppSetupDependencies,
   StreamsAppStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<StreamsAppConfig>) =>
-  new StreamsAppPlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<StreamsAppConfig>) => {
+  const { StreamsAppPlugin } = await import('./plugin');
+  return new StreamsAppPlugin(pluginInitializerContext);
+};

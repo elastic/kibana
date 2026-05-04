@@ -1431,7 +1431,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 143,
+        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1447,7 +1447,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 143,
+            "lineNumber": 147,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
@@ -1468,7 +1468,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 163,
+        "lineNumber": 167,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1484,7 +1484,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 163,
+            "lineNumber": 167,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1966,7 +1966,7 @@
           "(id: string) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 134,
+        "lineNumber": 138,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1982,7 +1982,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 134,
+            "lineNumber": 138,
             "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
@@ -2003,7 +2003,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 167,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2019,7 +2019,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 167,
+            "lineNumber": 171,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -3519,7 +3519,7 @@
           "(id: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 117,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3535,7 +3535,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 117,
+            "lineNumber": 121,
             "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
@@ -8078,7 +8078,7 @@
           "5"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 185,
+        "lineNumber": 189,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
