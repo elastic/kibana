@@ -59,10 +59,7 @@ describe('dimension editor', () => {
   };
 
   const fullState: Required<
-    Omit<
-      MetricVisualizationState,
-      'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight' | 'styleTemplate'
-    >
+    Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
   > = {
     layerId: 'first',
     layerType: 'data',

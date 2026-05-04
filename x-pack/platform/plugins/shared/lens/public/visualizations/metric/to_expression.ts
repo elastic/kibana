@@ -21,6 +21,7 @@ import {
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_STYLE_TEMPLATE,
+  inferStyleTemplate,
 } from '@kbn/lens-common';
 import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
@@ -178,20 +179,12 @@ export const toExpression = (
     theme.getTheme()
   );
 
+  const inferredTemplate = inferStyleTemplate(state);
   const templateLayout =
-    state.styleTemplate && state.styleTemplate !== 'custom'
-      ? LENS_METRIC_STYLE_TEMPLATE[state.styleTemplate]
-      : undefined;
-  const primaryPosition =
-    templateLayout?.primaryPosition ??
-    state.primaryPosition ??
-    LENS_METRIC_STATE_DEFAULTS.primaryPosition;
-  const titlesTextAlign =
-    templateLayout?.titlesTextAlign ??
-    state.titlesTextAlign ??
-    LENS_METRIC_STATE_DEFAULTS.titlesTextAlign;
-  const primaryAlign =
-    templateLayout?.primaryAlign ?? state.primaryAlign ?? LENS_METRIC_STATE_DEFAULTS.primaryAlign;
+    inferredTemplate !== 'custom' ? LENS_METRIC_STYLE_TEMPLATE[inferredTemplate] : undefined;
+  const primaryPosition = state.primaryPosition ?? LENS_METRIC_STATE_DEFAULTS.primaryPosition;
+  const titlesTextAlign = state.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign;
+  const primaryAlign = state.primaryAlign ?? LENS_METRIC_STATE_DEFAULTS.primaryAlign;
   const secondaryAlign =
     templateLayout?.secondaryAlign ??
     state.secondaryAlign ??

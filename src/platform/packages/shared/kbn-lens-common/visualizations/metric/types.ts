@@ -69,7 +69,6 @@ export interface MetricVisualizationState {
    */
   titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
-  styleTemplate?: MetricStyleTemplateId;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;

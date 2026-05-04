@@ -78,7 +78,6 @@ describe('metric visualization', () => {
       | 'secondaryPrefix'
       | 'valuesTextAlign'
       | 'titleWeight'
-      | 'styleTemplate'
     >
   > = {
     layerId: 'first',
@@ -110,12 +109,7 @@ describe('metric visualization', () => {
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
-      | 'secondaryTrend'
-      | 'secondaryColor'
-      | 'secondaryPrefix'
-      | 'valuesTextAlign'
-      | 'titleWeight'
-      | 'styleTemplate'
+      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'
     >
   > = {
     ...fullState,
@@ -129,7 +123,11 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
-        styleTemplate: 'bottom',
+        titlesTextAlign: 'left',
+        primaryPosition: 'bottom',
+        primaryAlign: 'right',
+        iconAlign: 'right',
+        secondaryAlign: 'right',
       });
     });
 
@@ -696,17 +694,18 @@ describe('metric visualization', () => {
       `);
     });
 
-    it('prioritizes styleTemplate over conflicting style fields', () => {
+    it('infers top style template from layout fields and applies preset iconAlign', () => {
       const expression = visualization.toExpression(
         {
           ...fullState,
           icon: 'sortUp',
-          styleTemplate: 'top',
-          titlesTextAlign: 'right',
-          primaryAlign: 'right',
-          secondaryAlign: 'right',
-          iconAlign: 'right',
-          primaryPosition: 'bottom',
+          // These fields match the 'top' preset exactly
+          titlesTextAlign: 'left',
+          primaryAlign: 'left',
+          primaryPosition: 'top',
+          secondaryAlign: 'left',
+          // This is overridden by the inferred 'top' preset
+          iconAlign: 'left',
           breakdownByAccessor: undefined,
           collapseFn: undefined,
         },
@@ -719,9 +718,9 @@ describe('metric visualization', () => {
 
       expect(metricVisFn?.arguments.titlesTextAlign).toEqual(['left']);
       expect(metricVisFn?.arguments.primaryAlign).toEqual(['left']);
+      expect(metricVisFn?.arguments.primaryPosition).toEqual(['top']);
       expect(metricVisFn?.arguments.secondaryAlign).toEqual(['left']);
       expect(metricVisFn?.arguments.iconAlign).toEqual(['right']);
-      expect(metricVisFn?.arguments.primaryPosition).toEqual(['top']);
     });
 
     describe('trendline expression', () => {

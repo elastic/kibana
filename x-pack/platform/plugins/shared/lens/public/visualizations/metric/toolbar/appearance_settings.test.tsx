@@ -22,10 +22,7 @@ const palette: PaletteOutput<CustomPaletteParams> = {
 
 // Remove legacy state properties as they should be removed in the initialize method
 const fullState: Required<
-  Omit<
-    MetricVisualizationState,
-    'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight' | 'styleTemplate'
-  >
+  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
 > = {
   layerId: 'first',
   layerType: 'data',
@@ -270,8 +267,9 @@ describe('appearance settings', () => {
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
   });
 
-  it('defaults to custom template when styleTemplate is not set', () => {
-    renderComponent({ styleTemplate: undefined });
+  it('shows custom template when layout fields do not match any preset', () => {
+    // 'left'/'center'/'right' combination does not match any preset
+    renderComponent({ primaryPosition: 'bottom', titlesTextAlign: 'center', primaryAlign: 'left' });
 
     expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
       'aria-checked',
@@ -279,21 +277,97 @@ describe('appearance settings', () => {
     );
   });
 
-  it('persists selected style template in state', () => {
-    renderComponent({ styleTemplate: 'custom' });
+  it('shows custom template after custom card is clicked even if layout still matches a preset', () => {
+    // State matches the 'bottom' preset
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
+
+    // Before click: 'bottom' preset is inferred and selected
+    expect(screen.getByTestId('lens-metric-style-template-bottom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-custom'));
+
+    // After click: custom is selected via local React state, no state write needed
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('shows bottom template when layout fields match the bottom preset', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-bottom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('infers bottom preset when secondaryAlign is absent without secondary metric', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: undefined,
+      secondaryMetricAccessor: undefined,
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-bottom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('infers custom template when secondaryAlign is set but mismatches preset without secondary metric', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: 'left',
+      secondaryMetricAccessor: undefined,
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('applies preset layout fields to state when a template card is selected', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
 
     fireEvent.click(screen.getByTestId('lens-metric-style-template-top'));
 
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
-        styleTemplate: 'top',
         primaryPosition: 'top',
+        titlesTextAlign: 'left',
+        primaryAlign: 'left',
       })
     );
   });
 
-  it('opens details accordion when custom style template is selected', () => {
-    renderComponent({ styleTemplate: 'top' });
+  it('opens details accordion when custom card is selected without writing to saved state', () => {
+    // Start with a preset layout (bottom matches)
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
 
     const detailsAccordion = screen.getByTestId('lens-metric-appearance-details-accordion');
     const detailsButton = detailsAccordion.querySelector('button');
@@ -304,21 +378,26 @@ describe('appearance settings', () => {
     fireEvent.click(screen.getByTestId('lens-metric-style-template-custom'));
 
     expect(detailsButton).toHaveAttribute('aria-expanded', 'true');
+    expect(mockSetState).not.toHaveBeenCalled();
   });
 
-  it('set custom style template when editing layout options manually', () => {
-    renderComponent({ styleTemplate: 'top' });
+  it('infers template from new field values after editing a layout option', () => {
+    // Start with the top preset layout
+    renderComponent({
+      primaryPosition: 'top',
+      titlesTextAlign: 'left',
+      primaryAlign: 'left',
+    });
 
     const btnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-primary-metric-alignment-btn'
     );
     btnGroup.select('Right');
 
-    expect(mockSetState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        primaryAlign: 'right',
-        styleTemplate: 'custom',
-      })
+    expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ primaryAlign: 'right' }));
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
     );
   });
 });
