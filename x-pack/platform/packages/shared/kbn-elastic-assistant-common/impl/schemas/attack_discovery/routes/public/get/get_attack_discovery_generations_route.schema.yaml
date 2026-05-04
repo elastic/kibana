@@ -57,16 +57,19 @@ paths:
                     description: List of Attack Discovery generations
                     items:
                       $ref: '../../../generation.schema.yaml#/components/schemas/AttackDiscoveryGeneration'
-              example:
-                generations:
-                  - execution_uuid: "46b218d5-535d-4329-be56-d0f6af6986b7"
-                    connector_id: "chatGpt5_0ChatAzure"
-                    loading_message: "AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries."
-                    start: "2025-09-29T06:42:08.962Z"
-                    end: "2025-09-29T06:42:44.810Z"
-                    status: "succeeded"
-                    alerts_context_count: 75
-                    discoveries: 3
+              examples:
+                GetAttackDiscoveryGenerationsResponse200Example:
+                  summary: Latest Attack Discovery generation metadata for the current user.
+                  value:
+                    generations:
+                      - execution_uuid: "46b218d5-535d-4329-be56-d0f6af6986b7"
+                        connector_id: "chatGpt5_0ChatAzure"
+                        loading_message: "AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries."
+                        start: "2025-09-29T06:42:08.962Z"
+                        end: "2025-09-29T06:42:44.810Z"
+                        status: "succeeded"
+                        alerts_context_count: 75
+                        discoveries: 3
         400:
           description: Bad Request response.
           content:
@@ -86,7 +89,10 @@ paths:
                     type: string
                     description: Human-readable error message
                     example: "Invalid size parameter. Must be a positive number."
-              example:
-                status_code: 400
-                error: "Bad Request"
-                message: "Invalid size parameter. Must be a positive number."
+              examples:
+                GetAttackDiscoveryGenerationsResponse400Example:
+                  summary: Bad Request error returned when the size parameter is invalid.
+                  value:
+                    status_code: 400
+                    error: "Bad Request"
+                    message: "Invalid size parameter. Must be a positive number."

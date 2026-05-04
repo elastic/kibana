@@ -16,6 +16,7 @@ import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -27,7 +28,7 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isLatencyThresholdRuleType } from './helpers';
+import { getAggsTypeFromRule } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
@@ -44,7 +45,8 @@ export function LatencyChart({
   environment,
   start,
   end,
-  latencyAggregationType,
+  ruleAggregationType,
+  latencyAggregationType: latencyAggregationTypeProp,
   setLatencyAggregationType,
   setTransactionType,
   comparisonChartTheme,
@@ -58,7 +60,7 @@ export function LatencyChart({
   ruleTypeId,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   transactionName?: string;
   serviceName: string;
@@ -66,7 +68,8 @@ export function LatencyChart({
   start: string;
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
-  latencyAggregationType: LatencyAggregationType;
+  ruleAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   setLatencyAggregationType?: (value: LatencyAggregationType) => void;
   setTransactionType?: (value: string) => void;
   comparisonEnabled: boolean;
@@ -76,7 +79,7 @@ export function LatencyChart({
   threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
-  ruleTypeId?: string;
+  ruleTypeId?: ApmRuleType;
 }) {
   const {
     services: { uiSettings },
@@ -92,9 +95,12 @@ export function LatencyChart({
       : ApmDocumentType.ServiceTransactionMetric,
   });
 
+  const latencyAggregationType =
+    latencyAggregationTypeProp ?? getAggsTypeFromRule(ruleAggregationType ?? 'avg');
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
+      if (serviceName && start && end && latencyAggregationType && preferred) {
         return callApmApi(`GET /internal/apm/services/{serviceName}/transactions/charts/latency`, {
           params: {
             path: { serviceName },
@@ -137,7 +143,7 @@ export function LatencyChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     customAlertEvaluationThreshold,
-    isMatchingRuleType: isLatencyThresholdRuleType,
+    showAnnotations: !!threshold,
     dateFormat,
   });
 
@@ -160,7 +166,7 @@ export function LatencyChart({
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
-  const showTransactionTypeSelect = transactionTypes && setTransactionType;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>

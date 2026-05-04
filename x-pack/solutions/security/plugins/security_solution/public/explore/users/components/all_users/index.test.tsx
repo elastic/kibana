@@ -22,17 +22,17 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openRightPanel: mockOpenRightPanel })),
+  useExpandableFlyoutApi: jest.fn(() => ({ openFlyout: mockOpenFlyout })),
 }));
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
 
   beforeEach(() => {
-    mockOpenRightPanel.mockClear();
+    mockOpenFlyout.mockClear();
   });
 
   describe('rendering', () => {
@@ -190,14 +190,16 @@ describe('Users Table Component', () => {
 
       fireEvent.click(getByTestId('users-link-anchor'));
 
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: UserPanelKey,
-        params: {
-          userName,
-          entityId,
-          contextID: 'allUsers',
-          scopeId: 'allUsers',
-          isPreviewMode: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName,
+            entityId,
+            contextID: 'allUsers',
+            scopeId: 'allUsers',
+            isPreviewMode: false,
+          },
         },
       });
     });
@@ -231,7 +233,7 @@ describe('Users Table Component', () => {
 
       fireEvent.click(getByTestId('users-link-anchor'));
 
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 });

@@ -81,6 +81,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -148,6 +149,7 @@
                 "lineNumber": 41,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutReportEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -258,6 +260,7 @@
                 "lineNumber": 32,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -325,6 +328,7 @@
                 "lineNumber": 45,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestFailure",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -417,6 +421,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -441,6 +446,7 @@
                 "lineNumber": 23,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -563,6 +569,7 @@
                 "lineNumber": 107,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutReportEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -651,6 +658,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutTestConfigStatsData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -776,6 +784,7 @@
                 "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1166,6 +1175,7 @@
             "lineNumber": 16,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1207,6 +1217,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPlaywrightReporterOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1248,6 +1259,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPlaywrightReporterOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1289,6 +1301,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPlaywrightReporterOptions",
             "trackAdoption": false,
             "isRequired": false
           }

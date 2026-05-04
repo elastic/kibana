@@ -81,7 +81,7 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
       <EuiButtonEmpty
         onClick={onShowDocument}
         iconType="expand"
-        size="s"
+        size="xs"
         flush="left"
         data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
       >

@@ -44,11 +44,11 @@ import { ManagementPageLoader } from '../../management_page_loader';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
-import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useGetArtifact } from '../../../hooks/artifacts';
 import { ArtifactConfirmModal } from './artifact_confirm_modal';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useCreateOrUpdateArtifact } from '../hooks/use_artifact_update_or_create';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -233,11 +233,11 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
-    const {
-      isLoading: internalIsSubmittingData,
-      mutateAsync: submitData,
-      error: internalSubmitError,
-    } = useWithArtifactSubmitData(apiClient, formMode);
+    const [internalSubmitError, setInternalSubmitError] = useState<IHttpFetchError | undefined>(
+      undefined
+    );
+    const { isLoading: internalIsSubmittingData, createOrUpdateArtifact } =
+      useCreateOrUpdateArtifact(apiClient);
 
     const { mutateAsync: markInsightAsRemediated } = useMarkInsightAsRemediated(
       sourceInsight?.back_url
@@ -300,10 +300,16 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
-      ({ item: updatedItem, isValid, confirmModalLabels }) => {
+      ({
+        item: updatedItem,
+        additionalEntries: updatedAdditionalEntries,
+        isValid,
+        confirmModalLabels,
+      }) => {
         if (isMounted()) {
           setFormState({
             item: updatedItem,
+            additionalEntries: updatedAdditionalEntries,
             isValid,
             confirmModalLabels,
           });
@@ -369,22 +375,28 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
           });
       } else if (formState.confirmModalLabels) {
         setShowConfirmModal(true);
-      } else {
-        submitData(formState.item).then(handleSuccess);
+      } else if (createOrUpdateArtifact) {
+        createOrUpdateArtifact(formState.item, formState.additionalEntries)
+          .then((createdOrUpdatedItems) => handleSuccess(createdOrUpdatedItems[0]))
+          .catch((err) => setInternalSubmitError(err));
       }
     }, [
-      formMode,
-      formState.item,
+      submitHandler,
       formState.confirmModalLabels,
+      formState.item,
+      formState.additionalEntries,
+      formMode,
       handleSuccess,
       isMounted,
-      submitData,
-      submitHandler,
+      createOrUpdateArtifact,
     ]);
 
     const confirmModalOnSuccess = useCallback(
-      () => submitData(formState.item).then(handleSuccess),
-      [submitData, formState.item, handleSuccess]
+      () =>
+        createOrUpdateArtifact?.(formState.item, formState.additionalEntries)
+          .then((createdOrUpdatedItems) => handleSuccess(createdOrUpdatedItems[0]))
+          .catch((err) => setInternalSubmitError(err)),
+      [createOrUpdateArtifact, formState.additionalEntries, formState.item, handleSuccess]
     );
 
     const confirmModal = useMemo(() => {
@@ -491,6 +503,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               onChange={handleFormComponentOnChange}
               disabled={isSubmittingData}
               item={formState.item}
+              additionalEntries={formState.additionalEntries}
               error={submitError ?? undefined}
               mode={formMode}
             />

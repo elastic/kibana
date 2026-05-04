@@ -139,6 +139,7 @@ export {
   type QueryType,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
+  HIGH_SEVERITY_THRESHOLD,
   queryTypeSchema,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
@@ -206,6 +207,7 @@ export type {
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
+export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
 export {

@@ -59,6 +59,7 @@
             "lineNumber": 50,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -142,6 +143,7 @@
             "lineNumber": 63,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Params",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -195,6 +197,7 @@
             "lineNumber": 30,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -607,6 +610,7 @@
                 "lineNumber": 28,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "NotifyInput",
                 "trackAdoption": false
               }
             ]
@@ -642,6 +646,7 @@
                 "lineNumber": 28,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "NotifyInput",
                 "trackAdoption": false
               }
             ]

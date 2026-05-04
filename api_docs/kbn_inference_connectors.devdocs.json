@@ -10,7 +10,15 @@
         "tags": [],
         "label": "loadConnectors",
         "description": [
-          "\nFetches AI connectors for a given feature from the search_inference_endpoints backend\nand maps them to {@link AIConnector}. The backend route applies feature resolution,\ndefault-connector UI settings, and recommended-endpoint flagging.\n"
+          "\nFetches AI connectors for a given feature from the search_inference_endpoints backend\nand maps them to ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          ". The backend route applies feature resolution,\ndefault-connector UI settings, and recommended-endpoint flagging.\n"
         ],
         "signature": [
           "({ http, featureId, }: { http: ",
@@ -149,6 +157,7 @@
             "lineNumber": 26,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "UseConnectorByIdProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -207,6 +216,7 @@
             "lineNumber": 48,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "UseLoadConnectorsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -288,7 +298,15 @@
         "tags": [],
         "label": "UseLoadConnectorsProps",
         "description": [
-          "\nProps for {@link useLoadConnectors}.\n\nThe hook calls an internal HTTP route registered by the `searchInferenceEndpoints` plugin.\nAny Kibana plugin that uses this package must load that plugin (it is platform-shared and\nenabled in standard distributions)."
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.useLoadConnectors",
+            "text": "useLoadConnectors"
+          },
+          ".\n\nThe hook calls an internal HTTP route registered by the `searchInferenceEndpoints` plugin.\nAny Kibana plugin that uses this package must load that plugin (it is platform-shared and\nenabled in standard distributions)."
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
         "lineNumber": 21,

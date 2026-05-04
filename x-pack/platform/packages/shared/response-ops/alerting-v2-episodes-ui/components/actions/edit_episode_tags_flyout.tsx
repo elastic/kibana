@@ -25,12 +25,21 @@ function tagValueFromOptionKey(key: string): string {
 }
 
 export interface AlertEpisodeTagsFlyoutProps {
-  isOpen: boolean;
   onClose: () => void;
   groupHash: string;
   currentTags: string[];
   http: HttpStart;
   services: { expressions: ExpressionsStart };
+  /**
+   * When provided, called with the selected tags on save instead of the
+   * internal single-row mutation. The flyout closes immediately after calling.
+   */
+  onSave?: (tags: string[]) => void;
+  /**
+   * When true, render only the body — `overlays.openFlyout` already provides
+   * the surrounding `EuiFlyout` shell. Default `false` for inline usage.
+   */
+  embedded?: boolean;
 }
 
 export function AlertEpisodeTagsFlyout({
@@ -39,6 +48,8 @@ export function AlertEpisodeTagsFlyout({
   currentTags,
   http,
   services,
+  onSave,
+  embedded = false,
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -121,6 +132,11 @@ export function AlertEpisodeTagsFlyout({
     if (saveBlocked) {
       return;
     }
+    if (onSave) {
+      onSave(selectedTags);
+      onClose();
+      return;
+    }
     createAlertAction(
       {
         groupHash,
@@ -129,10 +145,11 @@ export function AlertEpisodeTagsFlyout({
       },
       { onSuccess: onClose }
     );
-  }, [createAlertAction, groupHash, onClose, saveBlocked, selectedTags]);
+  }, [createAlertAction, groupHash, onClose, onSave, saveBlocked, selectedTags]);
 
   return (
     <EpisodeActionFlyout
+      embedded={embedded}
       onClose={onClose}
       dataTestSubj="alertingEpisodeTagsFlyout"
       ariaLabelledBy="alertingEpisodeTagsFlyoutTitle"

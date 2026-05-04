@@ -126,6 +126,10 @@ export {
   SubagentExecutionMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
   type RoundInput,
@@ -207,6 +211,7 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -248,3 +253,4 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export { EffortLevels, type EffortLevel } from './model_provider';
