@@ -108,7 +108,9 @@ describe('exportLiveQueryResultsRoute', () => {
 
     const context = {
       core: Promise.resolve({}),
-      search: Promise.resolve({ search: buildSearchMock() }),
+      search: Promise.resolve({
+        search: buildSearchMock([{ action_id: 'action-abc', query: 'SELECT 1' }]),
+      }),
     };
 
     const response = httpServerMock.createResponseFactory();
@@ -241,7 +243,9 @@ describe('exportLiveQueryResultsRoute', () => {
     await registeredHandler(context, request, response);
 
     expect(response.notFound).toHaveBeenCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ message: 'Live query action not found' }) })
+      expect.objectContaining({
+        body: expect.objectContaining({ message: 'Live query action not found' }),
+      })
     );
     expect(mockHandler).not.toHaveBeenCalled();
   });
@@ -296,7 +300,9 @@ describe('exportLiveQueryResultsRoute', () => {
 
     const context = {
       core: Promise.resolve({}),
-      search: Promise.resolve({ search: buildSearchMock() }),
+      search: Promise.resolve({
+        search: buildSearchMock([{ action_id: 'action-with-"quotes"', query: 'SELECT 1' }]),
+      }),
     };
 
     const request = {

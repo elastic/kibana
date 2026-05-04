@@ -12,11 +12,13 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 
 import { OSQUERY_INTEGRATION_NAME, allowedExperimentalValues } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { ExportFormat } from '../../lib/format_results';
 import { createExportRouteHandler, type ExportRouteParams } from './create_export_route_handler';
+import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 
 jest.mock('../../lib/export_results_to_stream', () => ({
   exportResultsToStream: jest.fn(),
@@ -30,22 +32,7 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
 }));
 
-jest.mock('../../utils/ccs_utils', () => ({
-  hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
-  prefixIndexPatternsWithCcs: jest.fn((index: string, ccsEnabled: boolean) =>
-    ccsEnabled ? `${index},*:${index}` : index
-  ),
-}));
-
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
-import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
-
-const mockHasConnectedRemoteClusters = hasConnectedRemoteClusters as jest.MockedFunction<
-  typeof hasConnectedRemoteClusters
->;
-const mockPrefixIndexPatternsWithCcs = prefixIndexPatternsWithCcs as jest.MockedFunction<
-  typeof prefixIndexPatternsWithCcs
->;
 
 const mockExportResultsToStream = exportResultsToStream as jest.MockedFunction<
   typeof exportResultsToStream
@@ -59,14 +46,22 @@ const baseParams: ExportRouteParams = {
   fileNamePrefix: 'osquery-results-test',
 };
 
-const mockAsInternalUser = {};
+const mockOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockClosePointInTime = jest.fn().mockResolvedValue({});
+const mockSearchSearch = jest.fn();
+const mockSearch: jest.Mocked<IScopedSearchClient> = {
+  search: mockSearchSearch,
+} as unknown as jest.Mocked<IScopedSearchClient>;
 
 const createContext = () =>
   ({
     core: Promise.resolve({
       elasticsearch: {
         client: {
-          asInternalUser: mockAsInternalUser,
+          asInternalUser: {
+            openPointInTime: mockOpenPointInTime,
+            closePointInTime: mockClosePointInTime,
+          },
         },
       },
       security: {
@@ -77,6 +72,7 @@ const createContext = () =>
         },
       },
     }),
+    search: Promise.resolve(mockSearch),
   } as unknown as RequestHandlerContext & DataRequestHandlerContext);
 
 type ExportHandlerRequest = KibanaRequest<
@@ -117,6 +113,7 @@ describe('createExportRouteHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     auditLoggerLog.mockClear();
+    mockOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
     const stream = new PassThrough();
     stream.end();
     mockExportResultsToStream.mockResolvedValue(stream);
@@ -268,7 +265,7 @@ describe('createExportRouteHandler', () => {
     );
   });
 
-  it('resolves space-scoped indices when getIntegrationNamespaces returns namespaces', async () => {
+  it('passes integrationNamespaces to baseRequest when getIntegrationNamespaces returns namespaces', async () => {
     const getIntegrationNamespaces = jest.fn().mockResolvedValue({
       [OSQUERY_INTEGRATION_NAME]: ['fleet-ns'],
     });
@@ -284,12 +281,14 @@ describe('createExportRouteHandler', () => {
     expect(getIntegrationNamespaces).toHaveBeenCalled();
     expect(mockExportResultsToStream).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: `logs-${OSQUERY_INTEGRATION_NAME}.result-fleet-ns`,
+        baseRequest: expect.objectContaining({
+          integrationNamespaces: ['fleet-ns'],
+        }),
       })
     );
   });
 
-  it('adds a quoted agent ID allowlist clause to the ES query when agentIds are provided', async () => {
+  it('passes agentIds to baseRequest when agentIds are provided', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
@@ -299,34 +298,37 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
-    const queryStr = JSON.stringify(esQueryArg);
-    expect(queryStr).toContain('agent.id');
-    expect(queryStr).toContain('agent-1');
-    // Values must be double-quoted in the KQL filter for consistent parsing
-    expect(queryStr).toContain('"agent-1"');
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseRequest: expect.objectContaining({
+          agentIds: ['agent-1', 'host/with:special'],
+        }),
+      })
+    );
     expect(response.ok).toHaveBeenCalled();
   });
 
-  it('includes negated esFilters as must_not in the ES query', async () => {
+  it('passes validated esFilters to baseRequest', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
+    const esFilter = {
+      meta: { negate: true, type: 'phrase', key: 'osquery.uid', params: { query: '0' } },
+      query: { match_phrase: { 'osquery.uid': '0' } },
+    };
     const request = createExportRequest({
       query: { format: 'ndjson' },
-      body: {
-        esFilters: [
-          {
-            meta: { negate: true, type: 'phrase', key: 'osquery.uid', params: { query: '0' } },
-            query: { match_phrase: { 'osquery.uid': '0' } },
-          },
-        ],
-      },
+      body: { esFilters: [esFilter] },
     });
 
     await handler(createContext(), request, response, baseParams);
 
-    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
-    expect(esQueryArg?.bool?.must_not).toEqual([{ match_phrase: { 'osquery.uid': '0' } }]);
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseRequest: expect.objectContaining({
+          esFilters: [esFilter],
+        }),
+      })
+    );
     expect(response.ok).toHaveBeenCalled();
   });
 
@@ -334,9 +336,10 @@ describe('createExportRouteHandler', () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
     // Malicious kuery: tries to escape the action_id gate via a top-level OR.
-    // Without outer parens the composed filter `(action_id: "abc") AND host.name: "a" OR action_id: "other"`
-    // would compile with operator-precedence ambiguity. With them the user kuery is
-    // isolated as `((action_id: "abc") AND (host.name: "a" OR action_id: "other"))`.
+    // The handler validates the full composed filter `(${baseFilter}) AND (${malicious})` —
+    // this is syntactically valid. The factory DSL will wrap everything in outer parens
+    // preventing OR-escape. The test confirms no 400 is returned and the raw kuery is
+    // forwarded to the factory (which applies the gate).
     const request = createExportRequest({
       query: { format: 'ndjson' },
       body: { kuery: 'host.name: "a" OR action_id: "other"' },
@@ -347,19 +350,41 @@ describe('createExportRouteHandler', () => {
     expect(response.badRequest).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalled();
 
-    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
-    const queryStr = JSON.stringify(esQueryArg);
-
-    // The base-filter value must survive in the compiled query.
-    expect(queryStr).toContain('"abc"');
-
-    // The malicious "other" action_id is NOT a top-level OR alternative —
-    // it is nested inside the user-kuery's inner should and scoped by the
-    // surrounding AND with the base filter.
-    expect(esQueryArg?.bool?.should).toBeUndefined();
+    const baseRequest = mockExportResultsToStream.mock.calls[0][0].baseRequest;
+    // The base filter is passed unchanged — the factory scopes to it.
+    expect(baseRequest?.baseFilter).toBe('action_id: "abc"');
+    // The raw user kuery is forwarded; the factory composes with outer parens.
+    expect(baseRequest?.kuery).toBe('host.name: "a" OR action_id: "other"');
   });
 
-  it('passes asInternalUser ES client to exportResultsToStream', async () => {
+  it('opens PIT via asInternalUser and passes it to exportResultsToStream', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    // Handler opens PIT with the broad index pattern
+    expect(mockOpenPointInTime).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+        keep_alive: '5m',
+        ignore_unavailable: true,
+      })
+    );
+
+    // PIT id is forwarded to the stream module
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pit: { id: 'mock-pit-id', keep_alive: '5m' },
+      })
+    );
+  });
+
+  it('passes context.search client to exportResultsToStream', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
@@ -370,35 +395,27 @@ describe('createExportRouteHandler', () => {
     await handler(createContext(), request, response, baseParams);
 
     expect(mockExportResultsToStream).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: mockAsInternalUser })
+      expect.objectContaining({ search: mockSearch })
     );
   });
 
-  it('applies CCS prefix to the resolved index when ccsEnabled is true', async () => {
-    mockHasConnectedRemoteClusters.mockResolvedValueOnce(true);
-    mockPrefixIndexPatternsWithCcs.mockImplementationOnce((idx: string) => `${idx},*:${idx}`);
-
+  it('passes baseRequest with factoryQueryType exportResults', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
-    const request = createExportRequest({ query: { format: 'ndjson' }, body: {} });
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
 
     await handler(createContext(), request, response, baseParams);
 
-    const indexArg = mockExportResultsToStream.mock.calls[0][0].index;
-    expect(indexArg).toContain('*:');
-  });
-
-  it('does not apply CCS prefix when ccsEnabled is false', async () => {
-    mockHasConnectedRemoteClusters.mockResolvedValueOnce(false);
-
-    const handler = createExportRouteHandler(createOsqueryContext());
-    const response = httpServerMock.createResponseFactory();
-    const request = createExportRequest({ query: { format: 'ndjson' }, body: {} });
-
-    await handler(createContext(), request, response, baseParams);
-
-    const indexArg = mockExportResultsToStream.mock.calls[0][0].index;
-    expect(indexArg).not.toContain('*:');
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseRequest: expect.objectContaining({
+          factoryQueryType: OsqueryQueries.exportResults,
+        }),
+      })
+    );
   });
 
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {

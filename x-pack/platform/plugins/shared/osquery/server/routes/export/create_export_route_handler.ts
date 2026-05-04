@@ -8,7 +8,6 @@
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { AuditEvent } from '@kbn/core-security-server';
 
@@ -16,14 +15,13 @@ import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters, escapeKuery } from '@kbn/es-query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { getQueryFilter } from '../../utils/build_query';
-import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
 import { createFormatter } from '../../lib/format_results';
 import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 
 export interface ExportRouteParams {
   /** KQL base filter (e.g. `action_id: "abc"` or `schedule_id: "x" AND ...`) */
@@ -60,10 +58,9 @@ export const createExportRouteHandler =
 
     const logger = osqueryContext.logFactory.get('export_results');
 
-    // Build filter query. All clauses are collected into an array and the
-    // entire expression is wrapped in a final outer pair of parentheses so
-    // that a user-supplied `kuery` cannot escape the action_id / schedule_id
-    // gate via KQL OR precedence (e.g. `foo) OR action_id: "other" AND (bar`).
+    // Validate the KQL filter at the route boundary so invalid kuery surfaces
+    // as a 400 before any ES round-trips. Compose the full filter string the
+    // same way the factory will so validation matches execution.
     const filterParts: string[] = [`(${baseFilter})`];
     if (agentIds && agentIds.length > 0) {
       const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
@@ -74,11 +71,10 @@ export const createExportRouteHandler =
       filterParts.push(`(${kuery})`);
     }
 
-    const filter = `(${filterParts.join(' AND ')})`;
+    const fullFilter = `(${filterParts.join(' AND ')})`;
 
-    let kqlFilterClause: estypes.QueryDslQueryContainer;
     try {
-      kqlFilterClause = getQueryFilter({ filter });
+      getQueryFilter({ filter: fullFilter });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       logger.warn(`Invalid kuery in export request: ${message}`);
@@ -88,16 +84,13 @@ export const createExportRouteHandler =
       });
     }
 
-    // Build ES filter clauses from SearchBar filter pills. An invalid pill must
-    // NOT fall through to an unfiltered export — silently returning the full
-    // dataset when the user asked for a narrowed one is a correctness hazard.
-    let esFilterClauses: estypes.QueryDslQueryContainer[] = [];
-    let esFilterMustNotClauses: estypes.QueryDslQueryContainer[] = [];
+    // Validate esFilters at the route boundary — an invalid pill must NOT fall
+    // through to an unfiltered export.
+    let validatedEsFilters: Filter[] | undefined;
     if (esFilters && esFilters.length > 0) {
       try {
-        const built = buildQueryFromFilters(esFilters as unknown as Filter[], undefined);
-        esFilterClauses = built.filter as estypes.QueryDslQueryContainer[];
-        esFilterMustNotClauses = built.must_not as estypes.QueryDslQueryContainer[];
+        buildQueryFromFilters(esFilters as unknown as Filter[], undefined);
+        validatedEsFilters = esFilters as unknown as Filter[];
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         logger.warn(`Invalid esFilters in export request: ${message}`);
@@ -111,36 +104,52 @@ export const createExportRouteHandler =
     }
 
     const coreContext = await context.core;
-    // Uses internal user — osquery_manager / fleet indices require it (matches search strategy in server/search_strategy/osquery/index.ts).
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
 
-    // Resolve space-aware index
-    let index = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
+    // PIT lifecycle stays in route; data plugin search context does not expose PIT lifecycle (design D5).
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+    // Resolve integration namespaces and pass them to the factory for index resolution.
+    // The factory (query.export_results.dsl.ts) handles buildIndexNameWithNamespace,
+    // CCS prefixing, and tolerance flags — the route no longer builds the index string.
+    let integrationNamespaces: string[] | undefined;
 
     if (osqueryContext?.service?.getIntegrationNamespaces) {
       const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
         osqueryContext,
         request
       );
-      const integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+      const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
         [OSQUERY_INTEGRATION_NAME],
         spaceScopedClient,
         logger
       );
 
-      const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+      const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
       if (osqueryNamespaces && osqueryNamespaces.length > 0) {
-        index = osqueryNamespaces
-          .map((namespace) =>
-            buildIndexNameWithNamespace(`logs-${OSQUERY_INTEGRATION_NAME}.result*`, namespace)
-          )
-          .join(',');
+        integrationNamespaces = osqueryNamespaces;
       }
     }
 
-    // Apply CCS prefix to match the search strategy's index handling.
-    index = prefixIndexPatternsWithCcs(index, ccsEnabled);
+    // Open PIT with the broad index pattern. Index resolution for per-namespace
+    // scoping is the factory's responsibility; ES ignores the `index` in search
+    // body when a PIT is provided, so the PIT scope is determined here.
+    // ignore_unavailable mirrors query.all_results.dsl.ts.
+    const pitResponse = await esClient.openPointInTime({
+      index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      keep_alive: '5m',
+      ignore_unavailable: true,
+    });
+    const pitId = pitResponse.id;
+
+    const closePit = async (id: string) => {
+      try {
+        await esClient.closePointInTime({ id });
+      } catch (e) {
+        // Leaked PITs consume cluster memory until keep_alive expires (5m).
+        // Surface at warn so cluster-memory pressure is visible in ops dashboards.
+        logger.warn(`Failed to close PIT ${id}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    };
 
     // Get user info for metadata
     const user = await getUserInfo({
@@ -162,14 +171,21 @@ export const createExportRouteHandler =
         ? (['agent.name', 'agent.id', ...Object.keys(ecsMapping)] as string[])
         : undefined;
 
+    const searchContext = await context.search;
+
     const result = await exportResultsToStream({
-      esClient,
-      index,
-      query: {
-        bool: {
-          filter: [kqlFilterClause, ...esFilterClauses],
-          ...(esFilterMustNotClauses.length > 0 ? { must_not: esFilterMustNotClauses } : {}),
-        },
+      search: searchContext,
+      pit: { id: pitId, keep_alive: '5m' },
+      closePit,
+      baseRequest: {
+        factoryQueryType: OsqueryQueries.exportResults,
+        baseFilter,
+        kuery,
+        agentIds,
+        esFilters: validatedEsFilters,
+        size: 1_000,
+        ecsMapping,
+        integrationNamespaces,
       },
       formatter,
       metadata: {
