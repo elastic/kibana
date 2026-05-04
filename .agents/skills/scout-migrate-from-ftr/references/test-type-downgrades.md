@@ -1,48 +1,29 @@
 # Test type downgrades
 
-Not every FTR test should become a Scout UI test. Many should be downgraded to a Scout **API** test or a **unit/component test (RTL/Jest)**. This file is the catalog of criteria, used by:
+Not every FTR test should become a Scout UI test. Many should be downgraded to a Scout **API** test or a **unit/component test (RTL/Jest)**. This file is consumed by:
 
-- the planner step (step 1 of [`SKILL.md`](../SKILL.md)), to decide each test's target type and record the choice in the migration plan
-- the execution step (steps 1 and 7 of [`migration-execution.md`](migration-execution.md)), when implementing or noticing a misclassification
+- [`migration-planning.md`](migration-planning.md) step 2 (triage), to decide each test's target type
+- [`migration-execution.md`](migration-execution.md) steps 1 and 7, when implementing or noticing a misclassification
 
-## Decision matrix
+## How to decide
 
-| Target | Use when | Why |
-|--------|---------|-----|
-| **Scout UI test** | The flow requires a real browser **and** a running server (navigation, cross-page flows, permission-gated UI, serverless-vs-stateful UI differences). | Only Scout UI tests exercise the full browser + server stack. |
-| **Scout API test** | The suite mostly validates **data correctness**: server responses, exact data values, API behavior, or backend logic that an FTR test was reaching through the UI. | Data-correctness assertions don't need a browser. API tests are faster, less flaky, and cheaper to run in parallel. |
-| **Unit / component test (RTL/Jest)** | The behavior can be exercised in isolation, without a running server. | Pulls coverage out of e2e and into the fastest, most reliable layer. |
-| **Drop** | Duplicates existing coverage, tests deprecated features, or is an artifact of FTR limitations. | Record what coverage (if any) is lost. |
-| **Defer** | Depends on a Scout capability that doesn't yet exist. | Flag the missing capability explicitly. |
+The authoritative decision matrix lives in the Scout best practices doc — do not duplicate it here:
 
-## RTL/Jest candidates (strongest signal to downgrade)
+[`docs/extend/scout/best-practices.md#pick-the-right-test-type`](../../../../docs/extend/scout/best-practices.md#pick-the-right-test-type)
 
-Anything in this list is almost certainly **not** a UI test. Place RTL tests next to the component under test (e.g. `my_component.test.tsx` alongside `my_component.tsx`):
+That section covers when to choose a Scout UI test, Scout API test, Jest integration test, or Jest unit test, with concrete code examples for each.
 
-- Internal component logic: loading/error states, conditional rendering based on props or hooks.
-- Table/list structure: column configuration, row rendering, sorting, data-driven assertions.
-- Form fields and filters: input validation, field interactions, filter clearing.
-- Hover states, tooltips, popovers, and toggle behaviors.
-- Feature-flagged UI: tabs/sections that appear based on config, agent type, or license.
-- Filter behavior that doesn't require a running server.
+## Where RTL/Jest tests live
 
-## Scout API candidates
+When the plan classifies an FTR test as a unit/component test, place the new test next to the component under test (not in `test/scout`):
 
-Downgrade UI to API when the test:
+- `<plugin>/public/components/my_component/my_component.tsx`
+- `<plugin>/public/components/my_component/my_component.test.tsx`
 
-- Asserts exact data values (e.g. document counts, field contents, response shapes).
-- Validates API responses or contract behavior the UI was used to inspect.
-- Checks backend logic through the UI (RBAC outcomes, server-side filtering, error responses).
+Before writing one, find a similar `*.test.tsx` next to a sibling component in the same plugin and follow that file's setup (testing utilities, mocks, providers). Plugins differ in their Jest patterns; mirror local conventions rather than inventing a new one.
 
-## What stays as a Scout UI test
+## Who runs the migration
 
-Keep Scout UI for what genuinely **requires** the full stack:
+All test-type targets — Scout UI, Scout API, **and RTL/Jest** — are migrated by step 3 (execute) of the parent skill, following [`migration-execution.md`](migration-execution.md). For RTL/Jest extractions, the executor follows the host plugin's existing Jest patterns (see above) rather than the Scout-specific patterns.
 
-- Navigation and cross-page flows.
-- Permission-gated UI behavior end-to-end.
-- Serverless-vs-stateful rendering differences.
-- User flows that span multiple pages or persist state across navigation.
-
-## Recording in the plan
-
-The planner step records each downgrade in the test inventory table (see [`output-template.md`](output-template.md), section 1) with a one-line justification, and surfaces a per-type breakdown in section 2 ("Test type routing"). The execution step then follows that classification rather than re-deciding per file.
+If a downgrade requires component refactoring (e.g. extracting a render-only component to make it unit-testable) that goes beyond a straightforward port, the executor surfaces it as a `guided` batch in the plan rather than attempting it autonomously.
