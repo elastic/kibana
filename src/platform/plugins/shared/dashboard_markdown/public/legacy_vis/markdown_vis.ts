@@ -12,6 +12,7 @@ import { toExpressionAst } from './to_ast';
 export const markdownVisType = {
   name: 'markdown',
   title: 'Markdown',
+  icon: 'text',
   disableCreate: true,
   disableEdit: true,
   toExpressionAst,
