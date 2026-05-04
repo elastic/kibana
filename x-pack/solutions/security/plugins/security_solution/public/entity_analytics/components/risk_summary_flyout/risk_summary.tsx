@@ -285,9 +285,8 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.title"
-              defaultMessage="{entity} risk summary"
-              values={{ entity: capitalize(entityType) }}
+              id="xpack.securitySolution.flyout.riskScore.title"
+              defaultMessage="Risk score"
             />
           </h3>
         </EuiTitle>
