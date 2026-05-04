@@ -144,6 +144,23 @@ describe('generateWorkflowTool', () => {
     );
   });
 
+  it('returns an errorResult when attachmentId is provided but the attachment does not exist', async () => {
+    const get = jest.fn().mockReturnValue(undefined);
+    const context = buildContext({ get });
+    const tool = generateWorkflowTool({ workflowsManagement });
+
+    const out = await tool.handler({ query: 'q', attachmentId: 'missing' } as any, context);
+
+    expect(generateWorkflowMock).not.toHaveBeenCalled();
+    expect(context.attachments.add).not.toHaveBeenCalled();
+    expect((out as { results: Array<{ type: string; data: any }> }).results[0].type).toBe(
+      ToolResultType.error
+    );
+    expect((out as { results: Array<{ type: string; data: any }> }).results[0].data.message).toMatch(
+      /not found/i
+    );
+  });
+
   it('returns an errorResult when the source attachment is the wrong type', async () => {
     const get = jest
       .fn()

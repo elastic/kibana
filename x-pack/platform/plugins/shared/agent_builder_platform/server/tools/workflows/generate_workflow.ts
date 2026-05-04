@@ -92,6 +92,11 @@ And you should **not**:
       const model = await modelProvider.getDefaultModel();
 
       const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
+      if (attachmentId && !sourceAttachment) {
+        return {
+          results: [errorResult(`Attachment with ID '${attachmentId}' not found.`)],
+        };
+      }
       if (sourceAttachment && sourceAttachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
         return {
           results: [
