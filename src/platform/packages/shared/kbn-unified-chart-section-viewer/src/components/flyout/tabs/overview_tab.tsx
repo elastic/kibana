@@ -46,7 +46,10 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     ? undefined
     : metricItem.dataStream;
 
-  const { kind: sourceKind } = useMetricSourceKind(localSourceName, METRIC_SOURCE_KIND.DATA_STREAM);
+  const { kind: sourceKind } = useMetricSourceKind({
+    name: localSourceName,
+    fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+  });
   const renderStreamFlyout = useStreamsFlyoutRenderer();
 
   const streamSection =

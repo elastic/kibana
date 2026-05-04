@@ -44,7 +44,7 @@ describe('useMetricSourceKind', () => {
   it('returns the provided fallback when external services are absent', () => {
     mockedUseExternalServices.mockReturnValue(undefined);
     const { result } = renderHook(() =>
-      useMetricSourceKind('logs-foo-default', METRIC_SOURCE_KIND.DATA_STREAM)
+      useMetricSourceKind({ name: 'logs-foo-default', fallback: METRIC_SOURCE_KIND.DATA_STREAM })
     );
     expect(result.current).toEqual({ kind: METRIC_SOURCE_KIND.DATA_STREAM });
   });
@@ -52,7 +52,7 @@ describe('useMetricSourceKind', () => {
   it('returns the provided fallback when dataViews is missing', () => {
     mockedUseExternalServices.mockReturnValue({});
     const { result } = renderHook(() =>
-      useMetricSourceKind('logs-foo-default', METRIC_SOURCE_KIND.INDEX)
+      useMetricSourceKind({ name: 'logs-foo-default', fallback: METRIC_SOURCE_KIND.INDEX })
     );
     expect(result.current).toEqual({ kind: METRIC_SOURCE_KIND.INDEX });
   });
@@ -61,7 +61,7 @@ describe('useMetricSourceKind', () => {
     const getIndices = jest.fn();
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
     const { result } = renderHook(() =>
-      useMetricSourceKind(undefined, METRIC_SOURCE_KIND.DATA_STREAM)
+      useMetricSourceKind({ name: undefined, fallback: METRIC_SOURCE_KIND.DATA_STREAM })
     );
     expect(result.current).toEqual({ kind: METRIC_SOURCE_KIND.DATA_STREAM });
     expect(getIndices).not.toHaveBeenCalled();
@@ -72,7 +72,10 @@ describe('useMetricSourceKind', () => {
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
     const { result } = renderHook(() =>
-      useMetricSourceKind('metrics-plain-index', METRIC_SOURCE_KIND.DATA_STREAM)
+      useMetricSourceKind({
+        name: 'metrics-plain-index',
+        fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+      })
     );
 
     await waitFor(() => expect(result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX));
@@ -87,7 +90,9 @@ describe('useMetricSourceKind', () => {
     const getIndices = jest.fn().mockResolvedValue([matchedItem('logs-ds', 'data_stream')]);
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
-    const { result } = renderHook(() => useMetricSourceKind('logs-ds', METRIC_SOURCE_KIND.INDEX));
+    const { result } = renderHook(() =>
+      useMetricSourceKind({ name: 'logs-ds', fallback: METRIC_SOURCE_KIND.INDEX })
+    );
 
     await waitFor(() => expect(result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM));
   });
@@ -97,7 +102,7 @@ describe('useMetricSourceKind', () => {
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
     const { result } = renderHook(() =>
-      useMetricSourceKind('not-in-response', METRIC_SOURCE_KIND.DATA_STREAM)
+      useMetricSourceKind({ name: 'not-in-response', fallback: METRIC_SOURCE_KIND.DATA_STREAM })
     );
 
     await waitFor(() => expect(getIndices).toHaveBeenCalled());
@@ -112,13 +117,13 @@ describe('useMetricSourceKind', () => {
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
     const first = renderHook(() =>
-      useMetricSourceKind('retry-source', METRIC_SOURCE_KIND.DATA_STREAM)
+      useMetricSourceKind({ name: 'retry-source', fallback: METRIC_SOURCE_KIND.DATA_STREAM })
     );
     await waitFor(() => expect(getIndices).toHaveBeenCalledTimes(1));
     expect(first.result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM);
 
     const second = renderHook(() =>
-      useMetricSourceKind('retry-source', METRIC_SOURCE_KIND.DATA_STREAM)
+      useMetricSourceKind({ name: 'retry-source', fallback: METRIC_SOURCE_KIND.DATA_STREAM })
     );
     await waitFor(() => expect(second.result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX));
     expect(getIndices).toHaveBeenCalledTimes(2);
@@ -132,13 +137,13 @@ describe('useMetricSourceKind', () => {
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
     const first = renderHook(() =>
-      useMetricSourceKind('eventually-found', METRIC_SOURCE_KIND.INDEX)
+      useMetricSourceKind({ name: 'eventually-found', fallback: METRIC_SOURCE_KIND.INDEX })
     );
     await waitFor(() => expect(getIndices).toHaveBeenCalledTimes(1));
     expect(first.result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX);
 
     const second = renderHook(() =>
-      useMetricSourceKind('eventually-found', METRIC_SOURCE_KIND.INDEX)
+      useMetricSourceKind({ name: 'eventually-found', fallback: METRIC_SOURCE_KIND.INDEX })
     );
     await waitFor(() => expect(second.result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM));
     expect(getIndices).toHaveBeenCalledTimes(2);
@@ -148,8 +153,12 @@ describe('useMetricSourceKind', () => {
     const getIndices = jest.fn().mockResolvedValue([matchedItem('dedup-source', 'index')]);
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
-    const a = renderHook(() => useMetricSourceKind('dedup-source', METRIC_SOURCE_KIND.DATA_STREAM));
-    const b = renderHook(() => useMetricSourceKind('dedup-source', METRIC_SOURCE_KIND.DATA_STREAM));
+    const a = renderHook(() =>
+      useMetricSourceKind({ name: 'dedup-source', fallback: METRIC_SOURCE_KIND.DATA_STREAM })
+    );
+    const b = renderHook(() =>
+      useMetricSourceKind({ name: 'dedup-source', fallback: METRIC_SOURCE_KIND.DATA_STREAM })
+    );
 
     await waitFor(() => expect(a.result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX));
     await waitFor(() => expect(b.result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX));
@@ -165,7 +174,8 @@ describe('useMetricSourceKind', () => {
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
 
     const { result, rerender } = renderHook(
-      ({ name }: { name: string }) => useMetricSourceKind(name, METRIC_SOURCE_KIND.DATA_STREAM),
+      ({ name }: { name: string }) =>
+        useMetricSourceKind({ name, fallback: METRIC_SOURCE_KIND.DATA_STREAM }),
       { initialProps: { name: 'first-source' } }
     );
 

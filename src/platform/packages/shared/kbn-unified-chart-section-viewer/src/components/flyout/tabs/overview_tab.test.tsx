@@ -302,10 +302,10 @@ describe('Metric Flyout Overview Tab', () => {
       // Remote sources are not classified via `_resolve/index`; the hook is
       // always called with `undefined` so we never issue a request that would
       // fail or return a misleading result.
-      expect(mockedUseMetricSourceKind).toHaveBeenCalledWith(
-        undefined,
-        METRIC_SOURCE_KIND.DATA_STREAM
-      );
+      expect(mockedUseMetricSourceKind).toHaveBeenCalledWith({
+        name: undefined,
+        fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+      });
     });
   });
 });

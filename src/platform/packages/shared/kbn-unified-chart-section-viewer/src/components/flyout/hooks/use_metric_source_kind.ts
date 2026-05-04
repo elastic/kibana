@@ -24,38 +24,43 @@ export const METRIC_SOURCE_KIND = {
 
 export type MetricSourceKind = (typeof METRIC_SOURCE_KIND)[keyof typeof METRIC_SOURCE_KIND];
 
+export interface UseMetricSourceKindParams {
+  name: string | undefined;
+  fallback: MetricSourceKind;
+}
+
 export interface UseMetricSourceKindResult {
   kind: MetricSourceKind;
 }
 
 /**
  * Classifies a metric source via `dataViews.getIndices` (`_resolve/index`).
- * Best-effort: returns `fallbackKind` whenever the kind cannot be determined
- * (missing `dataViews`, missing `name`, request in flight, fetch error, or
- * source not found in the response). Only flips when the response confirms a
- * different kind for the current `name`.
+ * Best-effort: returns `fallback` whenever the kind cannot be determined
+ * (missing `dataViewsService`, missing `name`, request in flight, fetch error,
+ * or source not found in the response). Only flips when the response confirms
+ * a different kind for the current `name`.
  *
  * Multiple consumers asking for the same `name` share a single in-flight
  * request via the module-level cache below.
  */
-export const useMetricSourceKind = (
-  name: string | undefined,
-  fallbackKind: MetricSourceKind
-): UseMetricSourceKindResult => {
-  const dataViews = useExternalServices()?.dataViews;
+export const useMetricSourceKind = ({
+  name,
+  fallback,
+}: UseMetricSourceKindParams): UseMetricSourceKindResult => {
+  const dataViewsService = useExternalServices()?.dataViews;
 
   const { value } = useAbortableAsync<ClassifiedSource | undefined>(async () => {
-    if (!dataViews || !name) return undefined;
-    return resolveSourceKind(dataViews, name);
-  }, [dataViews, name]);
+    if (!dataViewsService || !name) return undefined;
+    return resolveSourceKind(dataViewsService, name);
+  }, [dataViewsService, name]);
 
   // Guard against stale results: `useAbortableAsync` keeps the previous value
   // while a new request is in flight, so without this check we could briefly
   // expose the previous source's kind on a different name.
   if (!value || value.name !== name) {
-    return { kind: fallbackKind };
+    return { kind: fallback };
   }
-  return { kind: value.kind ?? fallbackKind };
+  return { kind: value.kind ?? fallback };
 };
 
 interface ClassifiedSource {
@@ -83,12 +88,12 @@ export const resetMetricSourceKindCache = () => {
 };
 
 const resolveSourceKind = async (
-  dataViews: DataViewsPublicPluginStart,
+  dataViewsService: DataViewsPublicPluginStart,
   name: string
 ): Promise<ClassifiedSource> => {
   let pending = cache.get(name);
   if (!pending) {
-    pending = fetchSourceKind(dataViews, name);
+    pending = fetchSourceKind(dataViewsService, name);
     cache.set(name, pending);
     // Negative-cache eviction: `getIndices` swallows HTTP errors as `[]`, so a
     // resolved-with-undefined hides both real failures and transient states
@@ -112,10 +117,10 @@ const resolveSourceKind = async (
 };
 
 const fetchSourceKind = async (
-  dataViews: DataViewsPublicPluginStart,
+  dataViewsService: DataViewsPublicPluginStart,
   name: string
 ): Promise<MetricSourceKind | undefined> => {
-  const matched: MatchedItem[] = await dataViews.getIndices({
+  const matched: MatchedItem[] = await dataViewsService.getIndices({
     pattern: name,
     showAllIndices: true,
     isRollupIndex: () => false,
