@@ -9,7 +9,9 @@
 
 import type { OasdiffEntry } from '../parse_oasdiff';
 import type { RequestBodyConsumer, RequestBodyIndex } from '../build_request_body_index';
-import { buildEntry, makeSkipKey, type ComponentTightening, type SkipKey } from './types';
+import { buildEntry } from './build_entry';
+import { makeSkipKey } from './make_skip_key';
+import type { ComponentTightening, SkipKey } from './types';
 
 interface Expansion {
   consumer: RequestBodyConsumer;

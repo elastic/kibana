@@ -14,7 +14,7 @@ import { expandComponentTightenings } from './expand_component_tightenings';
 import { collectInlineTightenings } from './collect_inline_tightenings';
 import type { DetectionResult } from './types';
 
-export { REQUEST_ADDITIONAL_PROPERTIES_TIGHTENED_ID } from './types';
+export { REQUEST_ADDITIONAL_PROPERTIES_TIGHTENED_ID } from './build_entry';
 export type { DetectionResult } from './types';
 
 export const detectAdditionalPropertiesTightening = (

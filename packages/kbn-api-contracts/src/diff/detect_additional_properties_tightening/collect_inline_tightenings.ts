@@ -11,7 +11,9 @@ import { get } from 'lodash';
 import type { OasdiffEntry } from '../parse_oasdiff';
 import { isRecord } from '../is_record';
 import { collectTighteningsInSchemaDiff } from './collect_tightenings_in_schema_diff';
-import { buildEntry, makeSkipKey, type SkipKey } from './types';
+import { buildEntry } from './build_entry';
+import { makeSkipKey } from './make_skip_key';
+import type { SkipKey } from './types';
 
 interface InlineSchemaContext {
   path: string;

@@ -10,8 +10,8 @@
 import {
   detectAdditionalPropertiesTightening,
   REQUEST_ADDITIONAL_PROPERTIES_TIGHTENED_ID,
-} from './detect_additional_properties_tightening';
-import type { RequestBodyIndex } from './build_request_body_index';
+} from '.';
+import type { RequestBodyIndex } from '../build_request_body_index';
 
 const TIGHTENING_TEXT =
   'Request body schema disallows extra fields (additionalProperties: false). Clients sending unknown keys will now receive 400.';

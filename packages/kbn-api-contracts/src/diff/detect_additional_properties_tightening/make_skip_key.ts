@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OasdiffEntry } from '../parse_oasdiff';
+import type { SkipKey } from './types';
 
-export interface DetectionResult {
-  entries: OasdiffEntry[];
-  warnings: string[];
-}
-
-export interface ComponentTightening {
-  componentName: string;
-  pointers: string[];
-}
-
-export type SkipKey = string;
+export const makeSkipKey = (path: string, method: string, pointer: string): SkipKey =>
+  `${path}|${method}|${pointer}`;
