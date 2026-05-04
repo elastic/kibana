@@ -14,13 +14,19 @@ import { getPreDiscoveredEisModels, enableCcm } from './eis_helpers';
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 const eisCcmApiKey = process.env[EIS_CCM_API_KEY_ENV];
 
+// Connector IDs present in the Vault blob but no longer reachable upstream.
+// Remove entries here once they're dropped from Vault.
+const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>(['bedrock-claude-sonnet-3-7']);
+
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const log = getService('log');
   const es = getService('es');
 
-  const allStaticConnectors = getAvailableConnectors();
+  const allStaticConnectors = getAvailableConnectors().filter(
+    (c) => !EXCLUDED_STATIC_CONNECTOR_IDS.has(c.id)
+  );
   const sampledStaticConnectors = takeRandomLlmSample(allStaticConnectors);
   const allEisModels = getPreDiscoveredEisModels();
   const sampledEisModels = takeRandomLlmSample(allEisModels);
