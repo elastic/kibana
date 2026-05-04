@@ -124,28 +124,46 @@ const orderAgentNodes = <T extends Node<FlowNodeData>>(nodes: T[]): T[] => {
   return result;
 };
 
-const STREAM_INDENT = 28; // px per depth level in the streams tree
+// Each depth level is offset by slightly more than one node-width so that a
+// parent's right-side handle (x + NODE_WIDTH) sits to the LEFT of its child's
+// left-side handle (x + STREAM_INDENT * relDepth).  This ensures tree edges
+// always flow left-to-right rather than backward.
+const STREAM_INDENT = NODE_WIDTH + 30;
+
+const getStreamDepth = (streamName: string) =>
+  streamName ? streamName.split('.').length - 1 : 0;
 
 /**
- * Stack stream nodes vertically, indenting each by its depth in the hierarchy.
- * Depth is derived from the number of dots in the stream name
- * (e.g. "logs" → 0, "logs.otel" → 1, "logs.otel.abc" → 2).
+ * Stack stream nodes vertically, indenting each level by STREAM_INDENT px.
+ *
+ * Indentation is relative to the shallowest depth in the set so that root
+ * streams start flush at xBase regardless of their absolute dot-count.
  */
 const stackStreamNodes = <T extends Node<FlowNodeData>>(
   nodeList: T[],
   xBase: number,
   yStart: number
 ): { nodes: T[]; nextY: number } => {
+  if (nodeList.length === 0) return { nodes: nodeList, nextY: yStart };
+
+  const getDepth = (node: T) => {
+    const name =
+      (node.data as { streamName?: string }).streamName ??
+      (node.data as { label?: string }).label ??
+      '';
+    return getStreamDepth(name);
+  };
+
+  const minDepth = Math.min(...nodeList.map(getDepth));
+
   let y = yStart;
   const positioned = nodeList.map((node) => {
-    const streamName =
-      (node.data as { streamName?: string }).streamName ?? (node.data as { label?: string }).label ?? '';
-    const depth = streamName ? streamName.split('.').length - 1 : 0;
+    const relDepth = getDepth(node) - minDepth;
     const result = {
       ...node,
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
-      position: { x: xBase + depth * STREAM_INDENT, y },
+      position: { x: xBase + relDepth * STREAM_INDENT, y },
     };
     y += NODE_HEIGHT + NODE_GAP;
     return result;
