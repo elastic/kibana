@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { Space } from '@kbn/spaces-plugin/common';
 import {
-  selectOverviewState,
+  selectOverviewPageState,
   setOverviewPageStateAction,
   updateManagementPageStateAction,
 } from '../../../state';
@@ -71,9 +71,7 @@ const SelectablePopover = ({ space }: { space: Space }) => {
     }
   }, [dispatch, showFromAllSpacesVal]);
 
-  const {
-    pageState: { showFromAllSpaces },
-  } = useSelector(selectOverviewState);
+  const { showFromAllSpaces } = useSelector(selectOverviewPageState);
 
   const updateState = (val: boolean) => {
     setShowFromAllSpacesVal(val);

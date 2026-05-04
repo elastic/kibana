@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
-import { type TracksOverlays } from '@kbn/presentation-util';
 import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
-import type { HasAppContext } from '@kbn/presentation-publishing';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { triggers } from '@kbn/ui-actions-plugin/public';
+
+import { getTimeSliderActionItem } from '../../../dashboard_actions/get_time_slider_control_action_item';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';
+import type { DashboardApi } from '../../../dashboard_api/types';
 
-export async function getMenuItemGroups(
-  api: HasAppContext & TracksOverlays
-): Promise<MenuItemGroup[]> {
+export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGroup[]> {
   const groups: Record<string, MenuItemGroup> = {};
   const addPanelContext = {
     embeddable: api,
@@ -68,6 +67,12 @@ export async function getMenuItemGroups(
       });
     });
   });
+
+  /** Handle special time slider case */
+  if (groups.controls) {
+    const timeSliderAction = await getTimeSliderActionItem(api);
+    if (timeSliderAction) pushItem(groups.controls, timeSliderAction);
+  }
 
   return Object.values(groups)
     .map((group) => {

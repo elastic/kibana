@@ -37,7 +37,7 @@ import type {
 } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
-import { QradarDataInputStep } from './types';
+import { QradarDataInputStep, SentinelDataInputStep } from './types';
 import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 export interface MigrationDataInputFlyoutProps {
@@ -89,6 +89,18 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
             }
             return QradarDataInputStep.Enhancements;
           });
+          return;
+        }
+
+        if (vendor === MigrationSource.SENTINEL) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(SentinelDataInputStep.Watchlists);
+            return;
+          }
+          if (migrationStats?.id) {
+            setDataInputStep(SentinelDataInputStep.End);
+          }
+          return;
         }
 
         if (newMissingResourcesIndexed?.macros.length) {

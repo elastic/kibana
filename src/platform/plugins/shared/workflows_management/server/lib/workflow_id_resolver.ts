@@ -9,7 +9,7 @@
 
 import { v4 as generateUuid } from 'uuid';
 
-import { WorkflowValidationError } from '../../common/lib/errors';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import {
   buildSuffixedCandidate,
   isValidWorkflowId,

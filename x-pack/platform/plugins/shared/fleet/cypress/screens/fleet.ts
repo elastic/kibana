@@ -54,7 +54,9 @@ export const ENROLLMENT_TOKENS = {
   CREATE_TOKEN_MODAL_NAME_FIELD: 'createEnrollmentTokenNameField',
   CREATE_TOKEN_MODAL_SELECT_FIELD: 'createEnrollmentTokenSelectField',
   LIST_TABLE: 'enrollmentTokenListTable',
+  TABLE_ACTIONS_MENU: 'enrollmentTokenTable.actionsMenu',
   TABLE_REVOKE_BTN: 'enrollmentTokenTable.revokeBtn',
+  FILTER_INACTIVE: 'enrollmentTokensList.filterInactive',
 };
 
 export const UNINSTALL_TOKENS = {

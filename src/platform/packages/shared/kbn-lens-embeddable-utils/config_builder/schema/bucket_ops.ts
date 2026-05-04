@@ -46,7 +46,7 @@ export const bucketDateHistogramOperationSchema = schema.object(
      */
     field: schema.string({
       meta: {
-        description: 'Field to be used for the date histogram',
+        description: 'Field to be used for the date histogram.',
       },
     }),
     /**
@@ -55,7 +55,7 @@ export const bucketDateHistogramOperationSchema = schema.object(
     suggested_interval: schema.string({
       defaultValue: LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
       meta: {
-        description: 'Suggested interval',
+        description: 'Suggested time interval.',
       },
     }),
     /**
@@ -64,7 +64,8 @@ export const bucketDateHistogramOperationSchema = schema.object(
     use_original_time_range: schema.boolean({
       defaultValue: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
       meta: {
-        description: 'Whether to use original time range',
+        description:
+          'When `true`, uses the original time range instead of the current query time range.',
       },
     }),
     /**
@@ -73,14 +74,14 @@ export const bucketDateHistogramOperationSchema = schema.object(
     include_empty_rows: schema.boolean({
       defaultValue: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
       meta: {
-        description: 'Whether to include empty rows',
+        description: 'When `true`, includes empty rows in the results.',
       },
     }),
     drop_partial_intervals: schema.maybe(
       schema.boolean({
         defaultValue: false,
         meta: {
-          description: 'Whether to drop partial intervals',
+          description: 'When `true`, drops partial intervals from the results.',
         },
       })
     ),
@@ -94,7 +95,7 @@ const bucketTermsRankByCustomSharedSchema = schema.object({
    */
   field: schema.string({
     meta: {
-      description: 'Numeric field to be used for the custom operation',
+      description: 'Numeric field to be used for the custom operation.',
     },
   }),
   /**
@@ -103,7 +104,7 @@ const bucketTermsRankByCustomSharedSchema = schema.object({
   direction: builderEnums.direction({
     meta: {
       id: 'termsRankByCustomDirection',
-      description: 'Sort direction for custom ranking',
+      description: 'Sort direction for custom ranking.',
     },
   }),
 });
@@ -138,7 +139,7 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
       id: 'termsRankByPercentileOperation',
       title: 'Terms Rank By Percentile Operation',
       description:
-        'Ranks terms by a percentile value of a numeric field (e.g. the 95th percentile of response time).',
+        'Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.',
     },
   }
 );
@@ -158,7 +159,7 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
       id: 'termsRankByPercentileRankOperation',
       title: 'Terms Rank By Percentile Rank Operation',
       description:
-        'Ranks terms by the percentile rank of a single value — the proportion of field values at or below that value.',
+        'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.',
     },
   }
 );
@@ -174,7 +175,7 @@ export const bucketTermsOperationSchema = schema.object(
     fields: schema.arrayOf(
       schema.string({
         meta: {
-          description: 'Fields to be used for the terms',
+          description: 'Fields to be used for the terms.',
         },
       }),
       { minSize: 1, maxSize: 4 }
@@ -184,7 +185,7 @@ export const bucketTermsOperationSchema = schema.object(
      */
     limit: schema.number({
       defaultValue: LENS_TERMS_LIMIT_DEFAULT,
-      meta: { description: 'Maximum number of terms' },
+      meta: { description: 'Number of terms to return.' },
     }),
     /**
      * Whether to increase accuracy
@@ -192,7 +193,7 @@ export const bucketTermsOperationSchema = schema.object(
     increase_accuracy: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Whether to increase accuracy',
+          description: 'When `true`, increases accuracy at the cost of performance.',
         },
       })
     ),
@@ -204,7 +205,7 @@ export const bucketTermsOperationSchema = schema.object(
         values: schema.arrayOf(
           schema.string({
             meta: {
-              description: 'Values to include',
+              description: 'Values to include.',
             },
           }),
           { maxSize: 100 }
@@ -212,7 +213,7 @@ export const bucketTermsOperationSchema = schema.object(
         as_regex: schema.maybe(
           schema.boolean({
             meta: {
-              description: 'Whether to use regex',
+              description: 'When `true`, treats the values as regular expressions.',
             },
           })
         ),
@@ -226,7 +227,7 @@ export const bucketTermsOperationSchema = schema.object(
         values: schema.arrayOf(
           schema.string({
             meta: {
-              description: 'Values to exclude',
+              description: 'Values to exclude.',
             },
           }),
           { maxSize: 100 }
@@ -234,7 +235,7 @@ export const bucketTermsOperationSchema = schema.object(
         as_regex: schema.maybe(
           schema.boolean({
             meta: {
-              description: 'Whether to use regex',
+              description: 'When `true`, treats the values as regular expressions.',
             },
           })
         ),
@@ -247,7 +248,7 @@ export const bucketTermsOperationSchema = schema.object(
       schema.object({
         include_documents_without_field: schema.boolean({
           meta: {
-            description: 'Whether to include documents without field',
+            description: 'When `true`, includes documents that do not have the specified field.',
           },
         }),
       })
@@ -265,7 +266,7 @@ export const bucketTermsOperationSchema = schema.object(
           direction: builderEnums.direction({
             meta: {
               id: 'termsRankByAlphabeticalDirection',
-              description: 'Sort direction for alphabetical ranking',
+              description: 'Sort direction for alphabetical ranking.',
             },
           }),
         }),
@@ -276,7 +277,7 @@ export const bucketTermsOperationSchema = schema.object(
            */
           max: schema.number({
             meta: {
-              description: 'Maximum number of rare terms',
+              description: 'Number of rare terms to include.',
             },
           }),
         }),
@@ -290,14 +291,14 @@ export const bucketTermsOperationSchema = schema.object(
             min: 0,
             meta: {
               description:
-                "0-based index into the metrics array (layer's metrics array if XY chart) identifying which metric to rank by. Defaults to 0 (first metric).",
+                'Zero-based index into the metrics array identifying which metric to rank by.',
             },
           }),
 
           direction: builderEnums.direction({
             meta: {
               id: 'termsRankByMetricDirection',
-              description: 'Sort direction for metric-based ranking',
+              description: 'Sort direction for metric-based ranking.',
             },
           }),
         }),
@@ -342,7 +343,7 @@ export const bucketHistogramOperationSchema = schema.object(
      */
     field: schema.string({
       meta: {
-        description: 'Field to be used for the histogram',
+        description: 'Field to be used for the histogram.',
       },
     }),
     /**
@@ -352,7 +353,7 @@ export const bucketHistogramOperationSchema = schema.object(
       [
         schema.number({
           meta: {
-            description: 'Granularity of the histogram',
+            description: 'Granularity of the histogram.',
           },
           min: LENS_HISTOGRAM_GRANULARITY_MIN,
           max: LENS_HISTOGRAM_GRANULARITY_MAX,
@@ -368,7 +369,7 @@ export const bucketHistogramOperationSchema = schema.object(
      */
     include_empty_rows: schema.boolean({
       meta: {
-        description: 'Whether to include empty rows',
+        description: 'When `true`, includes empty rows in the results.',
       },
       defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
     }),
@@ -396,7 +397,7 @@ export const bucketRangesOperationSchema = schema.object(
      */
     field: schema.string({
       meta: {
-        description: 'Field to be used for the range',
+        description: 'Field to be used for the range.',
       },
     }),
     /**
@@ -410,7 +411,7 @@ export const bucketRangesOperationSchema = schema.object(
         lte: schema.maybe(
           schema.number({
             meta: {
-              description: 'Less than or equal to',
+              description: 'Less than or equal to.',
             },
           })
         ),
@@ -420,7 +421,7 @@ export const bucketRangesOperationSchema = schema.object(
         gt: schema.maybe(
           schema.number({
             meta: {
-              description: 'Greater than',
+              description: 'Greater than.',
             },
           })
         ),
@@ -430,7 +431,7 @@ export const bucketRangesOperationSchema = schema.object(
         label: schema.maybe(
           schema.string({
             meta: {
-              description: 'Label',
+              description: 'Label.',
             },
           })
         ),
@@ -441,13 +442,22 @@ export const bucketRangesOperationSchema = schema.object(
   { meta: { id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges } }
 );
 
-export const bucketOperationDefinitionSchema = schema.oneOf([
-  bucketDateHistogramOperationSchema,
-  bucketTermsOperationSchema,
-  bucketHistogramOperationSchema,
-  bucketRangesOperationSchema,
-  bucketFiltersOperationSchema,
-]);
+export const bucketOperationDefinitionSchema = schema.oneOf(
+  [
+    bucketDateHistogramOperationSchema,
+    bucketTermsOperationSchema,
+    bucketHistogramOperationSchema,
+    bucketRangesOperationSchema,
+    bucketFiltersOperationSchema,
+  ],
+  {
+    meta: {
+      title: 'Breakdown Operation',
+      description:
+        'Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.',
+    },
+  }
+);
 
 export type TermOperationRankByCustomBaseType = TypeOf<typeof bucketTermsRankByCustomBaseSchema>;
 export type TermOperationRankByCustomPercentileType = TypeOf<
