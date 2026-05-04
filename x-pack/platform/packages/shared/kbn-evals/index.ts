@@ -123,6 +123,10 @@ export {
   createEsqlValidityEvaluator,
   ESQL_VALIDITY_EVALUATOR_NAME,
 } from './src/evaluators/esql/validity';
+export {
+  createEsqlExecutionEvaluator,
+  ESQL_EXECUTION_EVALUATOR_NAME,
+} from './src/evaluators/esql/execution';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
