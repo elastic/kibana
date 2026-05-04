@@ -1,5 +1,5 @@
 {
-  "sha1": "b95d4eeb97328fe221bdc05b9f7d1989e60e92ed",
+  "sha1": "2f4386dcf81fbf55a7643d3be3e9f4159c0c25c3",
   "tests": [
     {
       "id": "79abdadc4886132-c537aed5c2bba8c",
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/maps_telemetry.spec.ts",
-        "line": 26,
+        "line": 29,
         "column": 10
       }
     },
@@ -473,7 +473,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/search_esql.spec.ts",
-        "line": 41,
+        "line": 39,
         "column": 10
       }
     },
