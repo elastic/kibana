@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -24,6 +25,7 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -36,7 +38,6 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import type { ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { FlyoutHeader } from './header';
@@ -118,6 +119,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
   } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
+
+  // Delay the spinner so quick spec loads don't flash a loading state.
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
+  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
+    isLoadingActionTypeModel,
+  ]);
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
@@ -325,7 +332,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
-            {isLoadingActionTypeModel && (
+            {showLoadingSpinner && (
               <EuiFlexGroup
                 direction="column"
                 justifyContent="center"

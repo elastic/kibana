@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { IconType } from '@elastic/eui';
 import {
   EuiButton,
@@ -28,6 +29,7 @@ import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -38,7 +40,6 @@ import { EditConnectorTabs } from '../../../../types';
 import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -183,6 +184,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
   } = useActionTypeModel({ actionTypeRegistry, actionType: resolvedActionType, http, uiSettings });
+
+  // Delay the spinner so quick spec loads don't flash a loading state.
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
+  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
+    isLoadingActionTypeModel,
+  ]);
 
   const showButtons =
     canSave &&
@@ -334,7 +341,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               )}
-              {isLoadingActionTypeModel && (
+              {showLoadingSpinner && (
                 <EuiFlexGroup
                   direction="column"
                   justifyContent="center"
@@ -430,6 +437,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     actionTypeModelError,
     isEdit,
     isLoadingActionTypeModel,
+    showLoadingSpinner,
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,

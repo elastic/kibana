@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -122,6 +123,11 @@ const ActionsConnectorsList = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  // Delay the loading indicator so quick fetches don't flash a spinner.
+  const isAnyLoading = isLoadingActions || isLoadingActionTypes;
+  const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
+  useDebounce(() => setShowLoadingIndicator(isAnyLoading), 300, [isAnyLoading]);
 
   const disabledActConnectorCss = css`
     .actConnectorsList__tableRowDisabled {
@@ -475,7 +481,7 @@ const ActionsConnectorsList = ({
 
   const table = (
     <EuiInMemoryTable
-      loading={isLoadingActions || isLoadingActionTypes}
+      loading={showLoadingIndicator}
       items={actionConnectorTableItems}
       sorting={true}
       itemId={(item: ActionConnectorTableItem) =>
@@ -623,7 +629,7 @@ const ActionsConnectorsList = ({
         />
 
         {/* Render the view based on if there's data or if they can save */}
-        {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
+        {showLoadingIndicator && <CenterJustifiedSpinner />}
         {actionConnectorTableItems.length !== 0 && table}
         {actionConnectorTableItems.length === 0 &&
           canSave &&
