@@ -93,7 +93,6 @@ export const MLOverviewCard = ({
         title={title}
         titleSize={titleSize}
         titleElement="h3"
-        id="mlOverviewCardTitle"
       >
         <EuiText size="s">{description}</EuiText>
         <EuiSpacer size="s" />
@@ -102,7 +101,6 @@ export const MLOverviewCard = ({
           target="_self"
           onClick={() => navigateToPath(path)}
           data-test-subj={buttonDataTestSubj}
-          aria-label={buttonLabel}
         >
           {iconType ? <EuiIcon type={iconType} /> : null}
           {buttonLabel}

@@ -59,9 +59,12 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
         defaultMessage:
           'Detecting data drifts enables you to identify potential performance issues.',
       })}
-      buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
-        defaultMessage: 'Compare data distribution',
-      })}
+      buttonLabel={i18n.translate(
+        'xpack.ml.datavisualizer.selector.compareDataDistributionButtonLabel',
+        {
+          defaultMessage: 'Compare data distribution',
+        }
+      )}
       cardDataTestSubj="mlDataVisualizerCardDataDriftData"
       buttonDataTestSubj="mlDataVisualizerSelectDataDriftButton"
     />
@@ -90,9 +93,12 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
         defaultMessage: 'Data view',
       })}
       titleSize={cardTitleSize}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
-        defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
-      })}
+      description={i18n.translate(
+        'xpack.ml.datavisualizer.selector.selectDataViewDescription',
+        {
+          defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
+        }
+      )}
       buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
         defaultMessage: 'Select data view',
       })}
