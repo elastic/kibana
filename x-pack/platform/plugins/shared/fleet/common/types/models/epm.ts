@@ -807,6 +807,8 @@ export interface Installation {
   is_dependency_of?: IsDependencyOf | null;
   /** Whether the package was installed as a dependency (not manually by a user) */
   installed_as_dependency?: boolean;
+  /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
+  previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
 }
 
 export interface PackageUsageStats {

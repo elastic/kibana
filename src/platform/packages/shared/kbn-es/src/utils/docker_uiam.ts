@@ -93,6 +93,13 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--net',
       'elastic',
 
+      // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
+      // when total stack RSS approaches Docker VM limit.
+      '--memory',
+      '1g',
+      '--memory-swap',
+      '1g',
+
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
 
@@ -124,6 +131,15 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--net',
       'elastic',
 
+      // The Quarkus base image launches the JVM with `-XX:MaxRAMPercentage=80.0`
+      // and no Xmx, so without an explicit cgroup limit the JVM reserves up to
+      // 80% of the Docker VM's memory as heap (~6.4GB on the 8GB default).
+      // Pair this with JAVA_OPTS_APPEND below to bound heap predictably.
+      '--memory',
+      '2g',
+      '--memory-swap',
+      '2g',
+
       '--volume',
       `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
 
@@ -141,6 +157,9 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+      '--env',
+      'JAVA_OPTS_APPEND=-Xms256m -Xmx1g',
 
       '--env',
       'uiam.apikey.convert.validation.endpoint.enabled=false',
@@ -229,6 +248,12 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--net',
     'elastic',
 
+    // See note on the `uiam` container memory limits above.
+    '--memory',
+    '2g',
+    '--memory-swap',
+    '2g',
+
     '--volume',
     `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
 
@@ -246,6 +271,9 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
 
     '--entrypoint',
     '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+    '--env',
+    'JAVA_OPTS_APPEND=-Xms256m -Xmx1g',
 
     '--env',
     'uiam.apikey.convert.validation.endpoint.enabled=false',
