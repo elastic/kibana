@@ -174,6 +174,7 @@ function loadFallbackSkipSet(repoRoot) {
  */
 function undot(segPath) {
   return segPath
+    .replace(/\\/g, '/')
     .split('/')
     .map((seg) => (seg === '.' || seg === '..' ? seg : seg.replace(/^\./, '')))
     .join('/');
