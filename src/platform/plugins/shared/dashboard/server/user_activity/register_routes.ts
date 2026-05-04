@@ -36,11 +36,13 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
           tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
           meta: schema.maybe(
             schema.object({
-              time_range: timeRangeSchema,
-              query: asCodeQuerySchema,
-              filters: schema.arrayOf(asCodeFilterSchema, {
-                maxSize: 100,
-              }),
+              time_range: schema.maybe(timeRangeSchema),
+              query: schema.maybe(asCodeQuerySchema),
+              filters: schema.maybe(
+                schema.arrayOf(asCodeFilterSchema, {
+                  maxSize: 100,
+                })
+              ),
               panel_count: schema.number(),
               errors: schema.arrayOf(
                 schema.object({ panel_id: schema.string(), error: schema.string() }),
