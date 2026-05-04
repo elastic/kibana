@@ -9,14 +9,16 @@ import Dagre from '@dagrejs/dagre';
 import { Position, type Node, type Edge } from '@xyflow/react';
 
 // Fixed x positions for each column (left edge of the column band)
-const COLUMN_X = { shippers: 0, endpoints: 500, streams: 900 } as const;
+const COLUMN_X = { shippers: 0, endpoints: 600, streams: 1050 } as const;
 
-export const NODE_WIDTH = 200;
-export const NODE_HEIGHT = 80;
+export const NODE_WIDTH = 220;
+// Use a generous height estimate for Dagre so nodes don't overlap even when
+// rendered content is taller than the minimum (EuiPanel padding + badges etc.)
+export const NODE_HEIGHT = 130;
 
-const LANE_GAP = 40;
-const RANKSEP = 40;
-const NODESEP = 20;
+const LANE_GAP = 60;
+const RANKSEP = 60;
+const NODESEP = 40;
 const MARGINX = 10;
 const MARGINY = 10;
 

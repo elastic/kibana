@@ -22,6 +22,7 @@ import { FlowCanvas } from './flow_canvas';
 import { SimulatedSourcesBanner } from './simulated_sources_banner';
 import { Legend } from './legend';
 import { useFlowThroughputPoll } from './hooks/use_flow_throughput_poll';
+import { DetailFlyout } from './panels/detail_flyout';
 
 export function IngestFlowView() {
   const {
@@ -84,6 +85,13 @@ export function IngestFlowView() {
           <EuiFlexItem grow={false}>
             <SimulatedSourcesBanner />
           </EuiFlexItem>
+
+          {selectedNodeId && flowGraphFetch.value && (
+            <DetailFlyout
+              node={flowGraphFetch.value.nodes.find((n) => n.id === selectedNodeId) ?? null}
+              onClose={() => setSelectedNodeId(null)}
+            />
+          )}
 
           <EuiFlexItem grow>
             {flowGraphFetch.loading && flowGraphFetch.value === undefined ? (

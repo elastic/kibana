@@ -66,7 +66,9 @@ const payloadNodeToFlowNode = (node: FlowNode): Node<FlowNodeData> => ({
   data: node as FlowNodeData,
   width: NODE_WIDTH,
   height: NODE_HEIGHT,
-  ...(node.parentId ? { parentId: node.parentId } : {}),
+  // Do NOT set parentId here: React Flow would treat the node as a child with
+  // position relative to the parent, conflicting with Dagre's absolute coords.
+  // Parent grouping is handled purely inside the layout function for clustering.
 });
 
 const payloadEdgeToFlowEdge = (
