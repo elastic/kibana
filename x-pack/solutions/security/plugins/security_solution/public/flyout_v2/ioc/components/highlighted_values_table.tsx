@@ -30,7 +30,7 @@ const byIndicatorType = (indicatorType: string, field: string) =>
 interface HighlightedValuesTableProps {
   indicator: Indicator;
   ['data-test-subj']?: string;
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

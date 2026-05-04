@@ -21,7 +21,7 @@ export interface TableTabProps {
   /**
    * Renderer for cell actions
    */
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

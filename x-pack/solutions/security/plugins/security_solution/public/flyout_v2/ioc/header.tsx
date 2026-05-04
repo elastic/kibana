@@ -54,7 +54,7 @@ export interface HeaderProps {
   /**
    * Renderer for cell actions
    */
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 const highLevelFields = [

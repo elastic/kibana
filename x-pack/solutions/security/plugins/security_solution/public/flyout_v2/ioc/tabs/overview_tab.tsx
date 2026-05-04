@@ -29,7 +29,7 @@ export interface OverviewTabProps {
   /**
    * Renderer for cell actions
    */
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

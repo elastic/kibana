@@ -16,7 +16,6 @@ import type { Indicator } from '../../../../common/threat_intelligence/types/ind
 import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
 import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 
 const euiTableSearchOptions: EuiSearchBarProps = {
   box: {
@@ -34,7 +33,7 @@ export interface IndicatorFieldsTableProps {
   indicator: Indicator;
   ['data-test-subj']?: string;
   compressed?: boolean;
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
@@ -42,7 +41,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
   compressed,
-  renderCellActions = noopCellActionRenderer,
+  renderCellActions,
 }) => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
   const columns = useMemo(

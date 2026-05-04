@@ -40,7 +40,7 @@ export interface GetTabsDisplayedOptions {
   /**
    * Renderer for cell actions
    */
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

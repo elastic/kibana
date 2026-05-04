@@ -41,7 +41,7 @@ export interface IOCDetailsProps {
   /**
    * Renderer for cell actions
    */
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**
