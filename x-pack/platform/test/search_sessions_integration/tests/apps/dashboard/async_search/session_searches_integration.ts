@@ -201,6 +201,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.waitFor('the third search should be added to the session', async () => {
+          await browser.refresh();
+          await testSubjects.existOrFail('searchSessionsMgmtUiTable');
           searchSessionList = await searchSessionsManagement.getList();
           searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
           return searchSessionItem.searchesCount === 3;

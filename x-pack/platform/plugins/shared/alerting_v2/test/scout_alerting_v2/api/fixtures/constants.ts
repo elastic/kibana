@@ -10,4 +10,7 @@ export const API_HEADERS = {
 };
 
 export { ALERTING_V2_RULE_API_PATH as RULE_API_PATH } from '@kbn/alerting-v2-constants';
+export { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH as INSIGHTS_API_PATH } from '@kbn/alerting-v2-constants';
+export { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../../../common/advanced_settings';
 export const ALERTING_EVENTS_INDEX = '.rule-events';
+export const RULE_DOCTOR_INSIGHTS_INDEX = '.rule-doctor-insights';
