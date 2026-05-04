@@ -10,7 +10,7 @@ import {
   exportRequestBodySchema,
   exportScheduledQueryParamsSchema,
 } from './export_request_body_schema';
-import { SUPPORTED_EXPORT_FORMATS } from '../../lib/format_results';
+const SUPPORTED_EXPORT_FORMATS = ['ndjson', 'json', 'csv'] as const;
 
 describe('exportRequestBodySchema', () => {
   it('accepts null (body omitted)', () => {
