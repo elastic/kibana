@@ -19,10 +19,10 @@ imports:
   - .github/agents/code-reviewer.md
 engine:  
   id: codex
-  model: gpt-5.3-codex
+  model: gpt-5.5
   args:
     - -c
-    - model=llm-gateway/gpt-5.3-codex
+    - model=llm-gateway/gpt-5.5
     - -c
     - model_context_window=1050000
     # Disable plugins and apps to remove context bloat
