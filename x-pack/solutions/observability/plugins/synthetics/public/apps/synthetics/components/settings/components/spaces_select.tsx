@@ -14,6 +14,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+import { ALL_SPACES_LABEL } from '../../monitor_add_edit/fields/monitor_spaces';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
@@ -41,6 +42,28 @@ export const SpaceSelector = <T extends FieldValues>({
   });
 
   const prevAgentPolicyId = usePrevious(selectedAgentPolicyId);
+
+  const hasAgentPolicyField = selectedAgentPolicyId !== undefined;
+
+  // When there is no agent policy field (e.g. Project API Keys), load all spaces unconditionally
+  useEffect(() => {
+    if (hasAgentPolicyField || !data?.spacesDataPromise) return;
+    let cancelled = false;
+
+    data.spacesDataPromise.then(({ spacesMap }) => {
+      if (cancelled) return;
+      const allSpacesOption = { id: ALL_SPACES_ID, label: ALL_SPACES_LABEL };
+      const spaceOptions = [...spacesMap].map(([spaceId, spaceData]) => ({
+        id: spaceId,
+        label: spaceData.name,
+      }));
+      setSpacesList([allSpacesOption, ...spaceOptions]);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasAgentPolicyField, data?.spacesDataPromise]);
 
   useEffect(() => {
     if (

@@ -1745,6 +1745,10 @@
         "dynamic": false,
         "properties": {}
       },
+      "previous_dependency_versions": {
+        "dynamic": false,
+        "properties": {}
+      },
       "previous_version": {
         "type": "keyword"
       },

@@ -1,6 +1,230 @@
 {
-  "sha1": "355f80ffb551acef4a742276ef8eb2cf2888cb5c",
+  "sha1": "a9e1cc2d3fc16091080ead177bc59287b22318ac",
   "tests": [
+    {
+      "id": "f4c048e25988cb5-605d7a7bf19c60f",
+      "title": "Hosts Page - Flyout Overview Tab - KPI charts and collapsible sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-35a9aa41665f195",
+      "title": "Hosts Page - Flyout Overview Tab - Services section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-d9d5a1fb8867828",
+      "title": "Hosts Page - Flyout Metadata Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-45117973f50ff3b",
+      "title": "Hosts Page - Flyout Metrics Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 130,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-f6e05596318ee58",
+      "title": "Hosts Page - Flyout Processes Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 145,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-da68e3d67e89a90",
+      "title": "Hosts Page - Flyout Logs Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 160,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-9ceded1164e0270",
+      "title": "Hosts Page - Flyout Open as page and return",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 173,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-58869cff261d35c",
+      "title": "Hosts Page - Flyout Dashboards Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 200,
+        "column": 9
+      }
+    },
+    {
+      "id": "429b26b1a93be7d-b4cd1ee38b3f8ad",
+      "title": "Hosts Page - Empty State should show onboarding page when no data is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "be1aecc053c50f1-611d1ff7855fd31",
+      "title": "Hosts Page - OTel Semconv Data should display semconv hosts in the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "be1aecc053c50f1-ff02499a61ea52d",
+      "title": "Hosts Page - OTel Semconv Data should display KPI metrics for semconv data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "be1aecc053c50f1-def058930f8255d",
+      "title": "Hosts Page - OTel Semconv Data should show metric values in table rows (not N/A)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "line": 86,
+        "column": 9
+      }
+    },
+    {
+      "id": "be1aecc053c50f1-08e4dfc9f56760e",
+      "title": "Hosts Page - OTel Semconv Data should hide rx and tx columns for semconv data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "line": 110,
+        "column": 9
+      }
+    },
+    {
+      "id": "be1aecc053c50f1-c52ff07e6919ab7",
+      "title": "Hosts Page - OTel Semconv Data should open flyout for a semconv host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "line": 115,
+        "column": 9
+      }
+    },
     {
       "id": "a01812d3d8d03d1-6edec65fe06717b",
       "title": "Infrastructure Inventory - Onboarding Renders no data page and redirects to onboarding page when no data is present",
