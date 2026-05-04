@@ -129,3 +129,7 @@ const filteredFiles = filterFilesByPackages(
 2. Return affected project IDs
 
 **Performance**: ~5-7 seconds
+
+## PR Jest selective testing
+
+On pull request builds, Jest unit and integration test groups are narrowed to configs under affected packages (see `pick_test_group_run_order` in CI stats). Add the GitHub label `ci:prevent-selective-testing` to run the full Jest suite instead. Touching files listed in `CRITICAL_FILES_JEST_*` in `const.ts` also skips filtering for the relevant test type.

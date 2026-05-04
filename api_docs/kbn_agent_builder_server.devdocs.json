@@ -2706,7 +2706,7 @@
           "\nProvider, allowing to select various models depending on the needs."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-        "lineNumber": 35,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2718,7 +2718,7 @@
             "tags": [],
             "label": "getDefaultModel",
             "description": [
-              "\nReturns the model used for LLM tasks in the current round."
+              "\nReturns the default model used for LLM tasks in the current context."
             ],
             "signature": [
               "() => Promise<",
@@ -2732,7 +2732,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-            "lineNumber": 39,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2741,12 +2741,61 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-server",
-            "id": "def-common.ModelProvider.getModel",
+            "id": "def-common.ModelProvider.selectModel",
             "type": "Function",
             "tags": [],
-            "label": "getModel",
+            "label": "selectModel",
             "description": [
-              "\nReturns a model using the given connectorId.\n\nWill throw if connector doesn't exist, user has no access, or connector\nis not a GenAI connector."
+              "\nReturns the best available model based on the given selection options.\n\nAvailable options are:\n- effortLevel: the effort level of the task the model will be used for."
+            ],
+            "signature": [
+              "(opts: ",
+              "ModelSelectionPreferences",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ScopedModel",
+                "text": "ScopedModel"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ModelProvider.selectModel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ModelSelectionPreferences"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
+                "lineNumber": 55,
+                "columnNumber": 17,
+                "deprecated": false,
+                "docsReferencedTypeName": "ModelSelectionPreferences",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ModelProvider.getModelById",
+            "type": "Function",
+            "tags": [],
+            "label": "getModelById",
+            "description": [
+              "\nReturns a model using the given connectorId.\n\nWill throw if connector doesn't exist, user has no access, or connector is not a GenAI connector."
             ],
             "signature": [
               "(options: { connectorId: string; }) => Promise<",
@@ -2760,34 +2809,34 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-            "lineNumber": 43,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/agent-builder-server",
-                "id": "def-common.ModelProvider.getModel.$1",
+                "id": "def-common.ModelProvider.getModelById.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-                "lineNumber": 49,
-                "columnNumber": 23,
+                "lineNumber": 62,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/agent-builder-server",
-                    "id": "def-common.ModelProvider.getModel.$1.connectorId",
+                    "id": "def-common.ModelProvider.getModelById.$1.connectorId",
                     "type": "string",
                     "tags": [],
                     "label": "connectorId",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-                    "lineNumber": 49,
-                    "columnNumber": 25,
+                    "lineNumber": 62,
+                    "columnNumber": 29,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2810,7 +2859,7 @@
               "ModelProviderStats"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-            "lineNumber": 50,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3706,7 +3755,7 @@
           "\nRepresents a model that can be used within the agentBuilder framework (e.g. tools).\n\nIt exposes different interfaces to models."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3730,7 +3779,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3754,7 +3803,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3778,7 +3827,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/model_provider.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

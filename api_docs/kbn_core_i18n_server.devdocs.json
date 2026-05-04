@@ -20,7 +20,7 @@
         "label": "I18nServiceSetup",
         "description": [],
         "path": "src/core/packages/i18n/server/src/types.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,13 +32,61 @@
             "tags": [],
             "label": "getLocale",
             "description": [
-              "\nReturn the locale currently in use."
+              "\nReturn the server's default locale, as configured by `i18n.defaultLocale`\n(or the deprecated `i18n.locale`)."
             ],
             "signature": [
               "() => string"
             ],
             "path": "src/core/packages/i18n/server/src/types.ts",
-            "lineNumber": 14,
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server",
+            "id": "def-server.I18nServiceSetup.getLocales",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocales",
+            "description": [
+              "\nReturn the locales the deployment offers in the language picker, as\nconfigured by `i18n.locales`. Returns an empty array when the picker\nis disabled (i.e., `i18n.locales: []`)."
+            ],
+            "signature": [
+              "() => readonly string[]"
+            ],
+            "path": "src/core/packages/i18n/server/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server",
+            "id": "def-server.I18nServiceSetup.getAvailableLocales",
+            "type": "Function",
+            "tags": [],
+            "label": "getAvailableLocales",
+            "description": [
+              "\nReturn the available locales paired with their display labels. Suitable\nfor rendering language pickers; returns an empty array when the picker\nis disabled."
+            ],
+            "signature": [
+              "() => readonly ",
+              {
+                "pluginId": "@kbn/i18n",
+                "scope": "common",
+                "docId": "kibKbnI18nPluginApi",
+                "section": "def-common.AvailableLocale",
+                "text": "AvailableLocale"
+              },
+              "[]"
+            ],
+            "path": "src/core/packages/i18n/server/src/types.ts",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -58,7 +106,7 @@
               "() => string[]"
             ],
             "path": "src/core/packages/i18n/server/src/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -78,7 +126,27 @@
               "() => string"
             ],
             "path": "src/core/packages/i18n/server/src/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server",
+            "id": "def-server.I18nServiceSetup.getTranslationHashes",
+            "type": "Function",
+            "tags": [],
+            "label": "getTranslationHashes",
+            "description": [
+              "\nReturns a map of locale ID to translation content hash for all configured locales."
+            ],
+            "signature": [
+              "() => Record<string, string>"
+            ],
+            "path": "src/core/packages/i18n/server/src/types.ts",
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

@@ -43,7 +43,7 @@ import {
   TRANSACTION_RESULT,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
+import { MAX_ITEMS_PER_PAGE } from './trace_constants';
 
 export const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
