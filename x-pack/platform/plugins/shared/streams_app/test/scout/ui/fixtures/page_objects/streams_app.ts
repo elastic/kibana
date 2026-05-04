@@ -911,23 +911,30 @@ export class StreamsApp {
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
+  /**
+   * Asserts a preview grid cell eventually contains `value`.
+   * Uses a high default timeout so the simulation preview has time to refresh
+   * after transient stale values (e.g. literal "null" from a Set processor).
+   */
   async expectCellValueContains({
     columnName,
     rowIndex,
     value,
     invertCondition = false,
+    timeout = 30_000,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
     invertCondition?: boolean;
+    timeout?: number;
   }) {
     const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
-      await expect(cellLocator).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value, { timeout });
     } else {
-      await expect(cellLocator).toContainText(value);
+      await expect(cellLocator).toContainText(value, { timeout });
     }
   }
 

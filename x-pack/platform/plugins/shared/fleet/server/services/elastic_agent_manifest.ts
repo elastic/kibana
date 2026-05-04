@@ -36,9 +36,6 @@ spec:
       # If you are using the Universal Profiling integration, please uncomment the following line before applying.
       # hostPID: true
       hostNetwork: true
-      # The following setting is needed for Universal Profiling to allow to set procMount to "Unmasked".
-      # If you are using the Universal Profiling integration, please uncomment the following line before applying.
-      # hostUsers: false
       dnsPolicy: ClusterFirstWithHostNet
       # Uncomment if using hints feature
       #initContainers:
@@ -49,7 +46,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        curl -sL https://github.com/elastic/elastic-agent/archive/9.4.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-9.4/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/9.5.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-9.5/deploy/kubernetes/elastic-agent-standalone/templates.d"
       #    volumeMounts:
       #      - name: external-inputs
       #        mountPath: /etc/elastic-agent/inputs.d
@@ -82,6 +79,9 @@ spec:
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
+            # 'Defend for containers' integration (cloud-defend) uses the HOSTFS_PROC_PATH variable for accessing process information from the node.
+            - name: HOSTFS_PROC_PATH
+              value: "/hostfs/proc"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
@@ -95,7 +95,6 @@ spec:
             # The following capabilities are needed for Universal Profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
             # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #procMount: "Unmasked"
             #privileged: true
             #capabilities:
             #  add:
@@ -131,6 +130,14 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: boot
+              mountPath: /boot
+              readOnly: true
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+            - name: sys-kernel-security
+              mountPath: /sys/kernel/security
+              readOnly: true
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
             # Uncomment if using hints feature
@@ -168,6 +175,17 @@ spec:
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # The following three mounts are needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using cloud-defend, then these volumes and the corresponding mounts can be removed.
+        - name: boot
+          hostPath:
+            path: /boot
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: sys-kernel-security
+          hostPath:
+            path: /sys/kernel/security
         # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
         # Update 'kube-system' with the namespace of your agent installation
         - name: elastic-agent-state
@@ -360,9 +378,6 @@ spec:
       # If you are using the Universal Profiling integration, please uncomment the following line before applying.
       # hostPID: true
       hostNetwork: true
-      # The following setting is needed for Universal Profiling to allow to set procMount to "Unmasked".
-      # If you are using the Universal Profiling integration, please uncomment the following line before applying.
-      # hostUsers: false
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
@@ -402,6 +417,9 @@ spec:
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
+            # 'Defend for containers' integration (cloud-defend) uses the HOSTFS_PROC_PATH variable for accessing process information from the node.
+            - name: HOSTFS_PROC_PATH
+              value: "/hostfs/proc"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
@@ -415,7 +433,6 @@ spec:
             # The following capabilities are needed for Universal Profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
             # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #procMount: "Unmasked"
             #privileged: true
             #capabilities:
             #  add:
@@ -450,6 +467,14 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: boot
+              mountPath: /boot
+              readOnly: true
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+            - name: sys-kernel-security
+              mountPath: /sys/kernel/security
+              readOnly: true
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
       volumes:
@@ -486,6 +511,17 @@ spec:
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # The following three mounts are needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using cloud-defend, then these volumes and the corresponding mounts can be removed.
+        - name: boot
+          hostPath:
+            path: /boot
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: sys-kernel-security
+          hostPath:
+            path: /sys/kernel/security
         # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
         # Update 'kube-system' with the namespace of your agent installation
         - name: elastic-agent-state

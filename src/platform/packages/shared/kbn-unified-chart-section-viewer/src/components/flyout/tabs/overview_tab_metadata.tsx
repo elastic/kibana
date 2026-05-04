@@ -37,6 +37,8 @@ interface StaticSource {
   kind: MetricSourceKind;
 }
 
+const LABEL_WIDTH_MULTIPLIER = 11.25;
+
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
   /**
@@ -51,7 +53,7 @@ export const OverviewTabMetadata = ({ metricItem, staticSource }: OverviewTabMet
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
-    const labelMinWidthPxInner = euiTheme.base * 11.25;
+    const labelMinWidthPxInner = euiTheme.base * LABEL_WIDTH_MULTIPLIER;
 
     const sourceRow = staticSource
       ? [
