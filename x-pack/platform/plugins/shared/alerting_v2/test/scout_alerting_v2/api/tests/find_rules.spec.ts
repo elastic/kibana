@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALL_ROLE,
@@ -36,7 +35,14 @@ const findRulesUrl = (
   return qs ? `${testData.RULE_API_PATH}?${qs}` : testData.RULE_API_PATH;
 };
 
-apiTest.describe('Find rules API', { tag: tags.stateful.classic }, () => {
+/*
+ * The authorization tests below use `requestAuth.getApiKeyForCustomRole`, and
+ * custom-role auth is not yet supported on Elastic Cloud Hosted. To avoid
+ * silent false-positives (ECH currently falls back to `viewer` for unsupported
+ * custom roles), the entire suite is restricted to local stateful (classic)
+ * until ECH support lands.
+ */
+apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
   let adminHeaders: Record<string, string>;
 

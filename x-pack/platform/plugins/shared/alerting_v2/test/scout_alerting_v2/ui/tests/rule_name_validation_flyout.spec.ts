@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ALL_ROLE, test } from '../fixtures';
+import { test } from '../fixtures';
 
-test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.classic }, () => {
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
+test.describe('Rule name validation — Discover flyout', { tag: '@local-stateful-classic' }, () => {
   const SOURCE_INDEX = 'test-discover-rule-validation';
 
   test.beforeAll(async ({ esClient }) => {
@@ -28,7 +32,7 @@ test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.c
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALL_ROLE);
+    await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.ruleForm.gotoDiscover();
   });
 

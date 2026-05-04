@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ALL_ROLE, test } from '../fixtures';
+import { test } from '../fixtures';
 
-test.describe('Rule name validation — dedicated page', { tag: tags.stateful.classic }, () => {
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
+test.describe('Rule name validation — dedicated page', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALL_ROLE);
+    await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.ruleForm.gotoCreate();
   });
 

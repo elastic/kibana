@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ALL_ROLE, test } from '../fixtures';
+import { test } from '../fixtures';
 
 const TEST_INDEX = 'test-discover-query-sync';
 const UPDATED_QUERY = `FROM ${TEST_INDEX}`;
 
-test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classic }, () => {
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
+test.describe('Discover query sync — Rule flyout', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esClient }) => {
     await esClient.indices.create(
       {
@@ -29,7 +33,7 @@ test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classi
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALL_ROLE);
+    await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.ruleForm.gotoDiscover();
   });
 

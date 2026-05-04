@@ -8,48 +8,31 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import type { RuleDoctorInsightDoc } from '../../../../server/resources/indices/rule_doctor_insights';
 import { RULE_DOCTOR_INSIGHTS_INDEX } from '../../common/constants';
 
-export interface InsightSeed {
-  insight_id: string;
-  status?: 'open' | 'dismissed' | 'applied';
-  type?: string;
-  action?: string;
-  impact?: string;
-  confidence?: string;
-  title?: string;
-  summary?: string;
-  rule_ids?: string[];
-  data?: Record<string, unknown>;
-  current?: unknown;
-  proposed?: unknown;
-  space_id?: string;
-}
+export type InsightSeed = Pick<RuleDoctorInsightDoc, 'insight_id'> &
+  Partial<Omit<RuleDoctorInsightDoc, 'insight_id' | '@timestamp'>>;
 
-const INSIGHT_DEFAULTS = {
+const INSIGHT_DEFAULTS: Omit<RuleDoctorInsightDoc, 'insight_id' | '@timestamp'> = {
   execution_id: 'exec-1',
-  status: 'open' as const,
+  status: 'open',
   type: 'coverage_gap',
   action: 'create_rule',
   impact: 'medium',
   confidence: 'high',
   title: 'Test insight',
   summary: 'A test insight for Scout API tests',
-  rule_ids: [] as string[],
-  data: {} as Record<string, unknown>,
+  justification: 'Generated for Scout API tests',
+  rule_ids: [],
+  data: {},
   current: null,
   proposed: null,
   space_id: 'default',
 };
 
 export interface InsightsApiService {
-  /**
-   * Bulk-index a list of insights (defaults are filled in for unspecified fields).
-   * The target index is owned by the plugin — it must already exist when this
-   * is called. Tests should only mutate documents, not the index itself.
-   */
   seed: (insights: InsightSeed[]) => Promise<void>;
-  /** Delete every document in the rule-doctor insights index without touching the index. */
   cleanUp: () => Promise<void>;
 }
 

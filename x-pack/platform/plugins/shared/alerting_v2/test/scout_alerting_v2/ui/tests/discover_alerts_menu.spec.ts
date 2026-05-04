@@ -6,15 +6,19 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
-import { READ_ROLE, test } from '../fixtures';
+import { test } from '../fixtures';
 
 const SAMPLE_DATA_SET = 'ecommerce';
 
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: tags.stateful.classic,
+    tag: '@local-stateful-classic',
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -22,7 +26,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(READ_ROLE);
+      await browserAuth.loginAsAlertingV2Viewer();
       await pageObjects.discover.goto();
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'

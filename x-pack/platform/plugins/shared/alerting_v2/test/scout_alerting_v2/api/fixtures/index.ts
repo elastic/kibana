@@ -58,10 +58,15 @@ export const buildAlertingApiServices = ({
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
-    async ({ apiServices, esClient, kbnClient, log }, use) => {
-      const extended = apiServices as AlertingApiServicesFixture;
-      extended.alertingV2 = buildAlertingApiServices({ esClient, kbnClient, log });
-      await use(extended);
+    async (
+      { apiServices, esClient, kbnClient, log },
+      use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices: AlertingApiServicesFixture = {
+        ...apiServices,
+        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log }),
+      };
+      await use(extendedApiServices);
     },
     { scope: 'worker' },
   ],

@@ -17,19 +17,12 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { COMMON_HEADERS, RULE_API_PATH } from '../../common/constants';
 
-/**
- * Test-time HTTP client for the alerting_v2 rules API. The shape mirrors the
- * server-side `RulesClient` so test code reads the same way regardless of
- * whether it's exercising the API in-process (server tests) or over HTTP
- * (Scout tests).
- */
 export interface RulesApiService {
   create: (data: CreateRuleData, options?: { id?: string }) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
-  /** Removes every rule in the current space via `_bulk_delete?match_all=true`. */
   cleanUp: () => Promise<void>;
 }
 

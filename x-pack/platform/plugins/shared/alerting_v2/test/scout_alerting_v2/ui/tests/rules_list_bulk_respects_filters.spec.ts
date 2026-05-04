@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ALL_ROLE, buildCreateRuleData, test } from '../fixtures';
+import { buildCreateRuleData, test } from '../fixtures';
 
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
 test.describe(
   'Rules list bulk actions respect active filters',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     const tagA = 'scout-bulk-filter-a';
     const tagB = 'scout-bulk-filter-b';
@@ -54,7 +58,7 @@ test.describe(
       });
 
       await test.step('open rules list and filter by tag A', async () => {
-        await browserAuth.loginWithCustomRole(ALL_ROLE);
+        await browserAuth.loginAsAlertingV2Editor();
         await pageObjects.rulesList.goto();
         await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
         await pageObjects.rulesList.filterBySingleTag(tagA);
