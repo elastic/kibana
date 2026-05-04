@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 export const calendarSchema = schema.object({
   calendarId: schema.string(),
   calendar_id: schema.maybe(schema.string()),
-  job_ids: schema.arrayOf(schema.string()),
+  job_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   description: schema.maybe(schema.string()),
   total_job_count: schema.maybe(schema.number()),
   events: schema.arrayOf(
@@ -23,7 +23,8 @@ export const calendarSchema = schema.object({
       skip_result: schema.maybe(schema.boolean()),
       skip_model_update: schema.maybe(schema.boolean()),
       force_time_shift: schema.maybe(schema.number()),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 

@@ -389,18 +389,7 @@ function createMultiCommand(
   };
 }
 
-export function getLookupIndexCreateSuggestion(
-  innerText: string,
-  indexName?: string
-): ISuggestionItem {
-  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
-  const rangeToReplace =
-    indexName && start !== -1
-      ? {
-          start,
-          end: start + indexName.length,
-        }
-      : undefined;
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
   return {
     label: indexName
       ? i18n.translate(
@@ -445,8 +434,6 @@ export function getLookupIndexCreateSuggestion(
 
       arguments: [{ indexName }],
     },
-
-    rangeToReplace,
 
     incomplete: true,
   } as ISuggestionItem;

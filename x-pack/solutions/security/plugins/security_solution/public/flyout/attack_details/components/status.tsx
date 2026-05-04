@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { find } from 'lodash/fp';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo } from '../../document_details/right/utils/enriched_field_info';
@@ -34,7 +34,7 @@ export const Status = memo(() => {
   const { attackId, indexName, browserFields, dataFormattedForFieldBrowser } =
     useAttackDetailsContext();
   const currentSpaceId = useSpaceId();
-  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
   const statusData = useMemo(() => {
     const item = find(
       { field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' },

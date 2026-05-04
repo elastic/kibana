@@ -24,7 +24,6 @@ import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { isRecommendedConnector } from '../../../../../../../common/recommended_connectors';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
@@ -40,6 +39,21 @@ const selectableAriaLabel = i18n.translate(
     defaultMessage: 'Select a model',
   }
 );
+
+/**
+ * Generates an accessible label for the connector selector button that includes
+ * both the action ("Select connector") and the current value, satisfying WCAG 4.1.2
+ * Name, Role, Value requirement so screen readers announce the selected connector.
+ */
+const getConnectorButtonAriaLabel = (connectorName: string) =>
+  i18n.translate(
+    'xpack.agentBuilder.conversationInput.connectorSelector.connectorButtonAriaLabel',
+    {
+      defaultMessage: 'Select connector, {connectorName}',
+      values: { connectorName },
+    }
+  );
+
 const defaultConnectorLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.defaultConnectorLabel',
   {
@@ -66,27 +80,28 @@ const connectorSelectId = 'agentBuilderConnectorSelect';
 const connectorListId = `${connectorSelectId}_listbox`;
 const CONNECTOR_OPTION_ROW_HEIGHT = 32;
 
+const defaultConnectorButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel',
+  { defaultMessage: 'LLM' }
+);
+
 const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
   onClick: () => void;
   disabled: boolean;
   selectedConnectorName?: string;
 }> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
+  const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
       iconType={() => <ConnectorIcon connectorName={selectedConnectorName} />}
       onClick={onClick}
-      aria-labelledby={connectorSelectId}
+      aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
     >
-      {selectedConnectorName ?? (
-        <FormattedMessage
-          id="xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel"
-          defaultMessage="LLM"
-        />
-      )}
+      {connectorDisplayName}
     </InputPopoverButton>
   );
 };
@@ -168,13 +183,24 @@ export const ConnectorSelector: React.FC<{}> = () => {
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);
 
   const { recommendedConnectors, otherConnectors, customConnectors } = useMemo(() => {
-    const recommended = connectors.filter((c) => isRecommendedConnector(c.id));
-    const notRecommended = connectors.filter((c) => !isRecommendedConnector(c.id));
-    return {
-      recommendedConnectors: recommended,
-      otherConnectors: notRecommended.filter((c) => c.isPreconfigured),
-      customConnectors: notRecommended.filter((c) => !c.isPreconfigured),
-    };
+    const groupedConnectors = connectors.reduce<{
+      recommendedConnectors: typeof connectors;
+      otherConnectors: typeof connectors;
+      customConnectors: typeof connectors;
+    }>(
+      (acc, c) => {
+        if (c.isRecommended) {
+          acc.recommendedConnectors.push(c);
+        } else if (c.isPreconfigured) {
+          acc.otherConnectors.push(c);
+        } else {
+          acc.customConnectors.push(c);
+        }
+        return acc;
+      },
+      { recommendedConnectors: [], otherConnectors: [], customConnectors: [] }
+    );
+    return groupedConnectors;
   }, [connectors]);
 
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);

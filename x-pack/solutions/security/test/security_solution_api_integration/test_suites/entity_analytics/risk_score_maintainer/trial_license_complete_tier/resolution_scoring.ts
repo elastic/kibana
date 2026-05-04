@@ -97,6 +97,26 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       };
 
+      const waitForResolutionRelationshipCleared = async (aliasEuid: string): Promise<void> => {
+        await retry.waitForWithTimeout(
+          `resolution relationship cleared for ${aliasEuid}`,
+          60_000,
+          async () => {
+            await es.indices.refresh({ index: entityStoreIndex });
+            const response = await es.search({
+              index: entityStoreIndex,
+              size: 1,
+              query: { term: { 'entity.id': aliasEuid } },
+            });
+            const doc = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+            return (
+              getEntityField(doc, 'entity.relationships.resolution.resolved_to') == null ||
+              getEntityField(doc, 'entity.relationships.resolution.resolved_to') === ''
+            );
+          }
+        );
+      };
+
       const refreshResolutionLookup = async (): Promise<void> => {
         await es.indices.refresh({ index: entityStoreIndex });
       };
@@ -122,6 +142,34 @@ export default ({ getService }: FtrProviderContext): void => {
               )
           )[0];
 
+      const getMatchingScore = ({
+        scores,
+        entityId,
+        scoreType,
+        predicate,
+      }: {
+        scores: ReturnType<typeof normalizeScores>;
+        entityId: string;
+        scoreType: 'base' | 'resolution';
+        predicate?: (score: ReturnType<typeof normalizeScores>[number]) => boolean;
+      }) =>
+        scores
+          .filter(
+            (score) =>
+              score.id_value === entityId &&
+              score.score_type === scoreType &&
+              (!predicate || predicate(score))
+          )
+          .sort(
+            (left, right) =>
+              (scoreType === 'resolution'
+                ? (right.related_entities?.length ?? 0) - (left.related_entities?.length ?? 0)
+                : 0) ||
+              String(right.calculation_run_id ?? '').localeCompare(
+                String(left.calculation_run_id ?? '')
+              )
+          )[0];
+
       const waitForScore = async ({
         entityId,
         scoreType,
@@ -137,12 +185,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await retry.waitForWithTimeout(waitLabel, 60_000, async () => {
           const scores = normalizeScores(await readRiskScores(es));
-          const score = getBestScore({ scores, entityId, scoreType });
+          const score = predicate
+            ? getMatchingScore({ scores, entityId, scoreType, predicate })
+            : getBestScore({ scores, entityId, scoreType });
           if (!score) {
-            return false;
-          }
-
-          if (predicate && !predicate(score)) {
             return false;
           }
 
@@ -339,6 +385,122 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(resolutionScore.id_value).to.eql(targetUser.expectedEuid);
         expect(resolutionScore.calculated_score_norm).to.be.greaterThan(0);
         expect(resolutionScore.calculation_run_id).to.be.a('string');
+      });
+
+      it('stops attributing alias alerts to the previous target after unlink reconciliation', async () => {
+        const shortId = uuidv4().slice(0, 8);
+        const { testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `unlink-target-${shortId}` }),
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `unlink-alias-${shortId}` }),
+        ]);
+        const [targetUser, aliasUser] = testEntities;
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [targetUser.documentId, aliasUser.documentId],
+          alerts: 2,
+          riskScore: 45,
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreEntities({ es, log, count: 2 });
+
+        await maintainerScenario.setEntityResolutionTarget({
+          testEntity: aliasUser,
+          resolvedToEntityId: targetUser.expectedEuid,
+        });
+        await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
+        await refreshResolutionLookup();
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const linkedResolutionScore = await waitForResolutionScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `linked resolution score for ${targetUser.expectedEuid}`,
+          predicate: (score) => {
+            const relatedEntityIds =
+              score.related_entities?.map((entity) => entity.entity_id) ?? [];
+            return relatedEntityIds.includes(aliasUser.expectedEuid);
+          },
+        });
+
+        await entityStoreUtils.unlinkEntitiesViaResolutionApi({
+          entityIds: [aliasUser.expectedEuid],
+        });
+        await entityStoreUtils.forceExtractEntities({ entityType: 'user' });
+        await waitForResolutionRelationshipCleared(aliasUser.expectedEuid);
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [aliasUser.documentId],
+          alerts: 1,
+          riskScore: 70,
+        });
+
+        await refreshResolutionLookup();
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        let postUnlinkRunId: string | undefined;
+        await retry.waitForWithTimeout(
+          `post-unlink unreconciled resolution cleared for ${aliasUser.expectedEuid}`,
+          60_000,
+          async () => {
+            const allScores = normalizeScores(await readRiskScores(es));
+            const candidateRunId = allScores
+              .filter(
+                (score) =>
+                  score.id_value === aliasUser.expectedEuid &&
+                  score.score_type === 'base' &&
+                  hasPositiveCalculatedScore(score) &&
+                  score.calculation_run_id !== linkedResolutionScore.calculation_run_id
+              )
+              .map((score) => score.calculation_run_id)
+              .find(
+                (runId): runId is string =>
+                  typeof runId === 'string' &&
+                  !allScores.some(
+                    (score) =>
+                      score.calculation_run_id === runId &&
+                      score.score_type === 'resolution' &&
+                      ((score.id_value === aliasUser.expectedEuid &&
+                        hasPositiveCalculatedScore(score)) ||
+                        score.related_entities?.some(
+                          (entity) => entity.entity_id === aliasUser.expectedEuid
+                        ))
+                  )
+              );
+
+            if (!candidateRunId) {
+              return false;
+            }
+
+            postUnlinkRunId = candidateRunId;
+            return true;
+          }
+        );
+
+        expect(postUnlinkRunId).to.be.a('string');
+
+        const allScores = normalizeScores(await readRiskScores(es));
+        const postUnlinkTargetResolutionScores = allScores.filter(
+          (score) =>
+            score.id_value === targetUser.expectedEuid &&
+            score.score_type === 'resolution' &&
+            score.calculation_run_id === postUnlinkRunId
+        );
+        const postUnlinkAliasResolutionScores = allScores.filter(
+          (score) =>
+            score.id_value === aliasUser.expectedEuid &&
+            score.score_type === 'resolution' &&
+            score.calculation_run_id === postUnlinkRunId
+        );
+
+        expect(
+          postUnlinkTargetResolutionScores.some((score) =>
+            score.related_entities?.some((entity) => entity.entity_id === aliasUser.expectedEuid)
+          )
+        ).to.be(false);
+        expect(postUnlinkAliasResolutionScores.length).to.eql(0);
       });
 
       describe('@skipInServerless resolution group-level modifiers', () => {

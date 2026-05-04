@@ -188,6 +188,7 @@
             "lineNumber": 26,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "EdotCollectorParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -241,6 +242,7 @@
             "lineNumber": 107,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "EdotCollectorParams",
             "trackAdoption": false,
             "isRequired": true
           }

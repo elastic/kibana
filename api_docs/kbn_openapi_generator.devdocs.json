@@ -63,6 +63,7 @@
             "lineNumber": 48,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "GeneratorConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -114,6 +115,7 @@
             "lineNumber": 23,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "LinterConfig",
             "trackAdoption": false,
             "isRequired": true
           }

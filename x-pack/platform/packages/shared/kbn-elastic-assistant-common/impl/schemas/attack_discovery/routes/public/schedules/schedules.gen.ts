@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ApiConfig } from '../../../../conversations/common_attributes.gen';
 import { NonEmptyString } from '../../../../common_attributes.gen';
@@ -22,90 +22,98 @@ import { NonEmptyString } from '../../../../common_attributes.gen';
 /**
  * An query condition to filter alerts
  */
+export const Query = lazySchema(() =>
+  z.object({
+    query: z.union([z.string(), z.object({}).catchall(z.unknown())]),
+    language: z.string(),
+  })
+);
 export type Query = z.infer<typeof Query>;
-export const Query = z.object({
-  query: z.union([z.string(), z.object({}).catchall(z.unknown())]),
-  language: z.string(),
-});
 
 /**
  * The filter array used to define the conditions for when alerts are selected as an Attack Discovery context. Defaults to an empty array.
  */
+export const Filters = lazySchema(() => z.array(z.unknown()));
 export type Filters = z.infer<typeof Filters>;
-export const Filters = z.array(z.unknown());
 
 /**
  * An Attack Discovery schedule params
  */
+export const AttackDiscoveryScheduleParams = lazySchema(() =>
+  z.object({
+    /**
+     * The index pattern to get alerts from
+     */
+    alertsIndexPattern: z.string(),
+    /**
+     * LLM API configuration.
+     */
+    apiConfig: ApiConfig.merge(
+      z.object({
+        /**
+         * The name of the connector
+         */
+        name: z.string(),
+      })
+    ),
+    end: z.string().optional(),
+    query: Query.optional(),
+    filters: Filters.optional(),
+    combinedFilter: z.object({}).catchall(z.unknown()).optional(),
+    size: z.number(),
+    start: z.string().optional(),
+  })
+);
 export type AttackDiscoveryScheduleParams = z.infer<typeof AttackDiscoveryScheduleParams>;
-export const AttackDiscoveryScheduleParams = z.object({
-  /**
-   * The index pattern to get alerts from
-   */
-  alertsIndexPattern: z.string(),
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig.merge(
-    z.object({
-      /**
-       * The name of the connector
-       */
-      name: z.string(),
-    })
-  ),
-  end: z.string().optional(),
-  query: Query.optional(),
-  filters: Filters.optional(),
-  combinedFilter: z.object({}).catchall(z.unknown()).optional(),
-  size: z.number(),
-  start: z.string().optional(),
-});
 
+export const IntervalSchedule = lazySchema(() =>
+  z.object({
+    /**
+     * The schedule interval
+     */
+    interval: z.string(),
+  })
+);
 export type IntervalSchedule = z.infer<typeof IntervalSchedule>;
-export const IntervalSchedule = z.object({
-  /**
-   * The schedule interval
-   */
-  interval: z.string(),
-});
 
 /**
  * Groups actions by use cases. Use `default` for alert notifications.
  */
+export const AttackDiscoveryScheduleActionGroup = lazySchema(() => z.string());
 export type AttackDiscoveryScheduleActionGroup = z.infer<typeof AttackDiscoveryScheduleActionGroup>;
-export const AttackDiscoveryScheduleActionGroup = z.string();
 
 /**
  * The connector ID.
  */
+export const AttackDiscoveryScheduleActionId = lazySchema(() => z.string());
 export type AttackDiscoveryScheduleActionId = z.infer<typeof AttackDiscoveryScheduleActionId>;
-export const AttackDiscoveryScheduleActionId = z.string();
 
 /**
  * Object containing the allowed connector fields, which varies according to the connector type.
  */
+export const AttackDiscoveryScheduleActionParams = lazySchema(() =>
+  z.object({}).catchall(z.unknown())
+);
 export type AttackDiscoveryScheduleActionParams = z.infer<
   typeof AttackDiscoveryScheduleActionParams
 >;
-export const AttackDiscoveryScheduleActionParams = z.object({}).catchall(z.unknown());
 
+export const AttackDiscoveryScheduleActionAlertsFilter = lazySchema(() =>
+  z.object({}).catchall(z.unknown())
+);
 export type AttackDiscoveryScheduleActionAlertsFilter = z.infer<
   typeof AttackDiscoveryScheduleActionAlertsFilter
 >;
-export const AttackDiscoveryScheduleActionAlertsFilter = z.object({}).catchall(z.unknown());
 
 /**
  * The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`
  */
+export const AttackDiscoveryScheduleActionNotifyWhen = lazySchema(() =>
+  z.enum(['onActiveAlert', 'onThrottleInterval', 'onActionGroupChange'])
+);
 export type AttackDiscoveryScheduleActionNotifyWhen = z.infer<
   typeof AttackDiscoveryScheduleActionNotifyWhen
 >;
-export const AttackDiscoveryScheduleActionNotifyWhen = z.enum([
-  'onActiveAlert',
-  'onThrottleInterval',
-  'onActionGroupChange',
-]);
 export type AttackDiscoveryScheduleActionNotifyWhenEnum =
   typeof AttackDiscoveryScheduleActionNotifyWhen.enum;
 export const AttackDiscoveryScheduleActionNotifyWhenEnum =
@@ -114,74 +122,77 @@ export const AttackDiscoveryScheduleActionNotifyWhenEnum =
 /**
  * Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
  */
+export const AttackDiscoveryScheduleActionThrottle = lazySchema(() =>
+  z.string().regex(/^[1-9]\d*[smhd]$/)
+);
 export type AttackDiscoveryScheduleActionThrottle = z.infer<
   typeof AttackDiscoveryScheduleActionThrottle
 >;
-export const AttackDiscoveryScheduleActionThrottle = z.string().regex(/^[1-9]\d*[smhd]$/);
 
 /**
  * The action frequency defines when the action runs (for example, only on schedule execution or at specific time intervals).
  */
+export const AttackDiscoveryScheduleActionFrequency = lazySchema(() =>
+  z.object({
+    /**
+     * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+     */
+    summary: z.boolean(),
+    notifyWhen: AttackDiscoveryScheduleActionNotifyWhen,
+    throttle: AttackDiscoveryScheduleActionThrottle.nullable(),
+  })
+);
 export type AttackDiscoveryScheduleActionFrequency = z.infer<
   typeof AttackDiscoveryScheduleActionFrequency
 >;
-export const AttackDiscoveryScheduleActionFrequency = z.object({
-  /**
-   * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
-   */
-  summary: z.boolean(),
-  notifyWhen: AttackDiscoveryScheduleActionNotifyWhen,
-  throttle: AttackDiscoveryScheduleActionThrottle.nullable(),
-});
 
+export const AttackDiscoveryScheduleGeneralAction = lazySchema(() =>
+  z.object({
+    /**
+     * The action type used for sending notifications.
+     */
+    actionTypeId: z.string(),
+    group: AttackDiscoveryScheduleActionGroup,
+    id: AttackDiscoveryScheduleActionId,
+    params: AttackDiscoveryScheduleActionParams,
+    uuid: NonEmptyString.optional(),
+    alertsFilter: AttackDiscoveryScheduleActionAlertsFilter.optional(),
+    frequency: AttackDiscoveryScheduleActionFrequency.optional(),
+  })
+);
 export type AttackDiscoveryScheduleGeneralAction = z.infer<
   typeof AttackDiscoveryScheduleGeneralAction
 >;
-export const AttackDiscoveryScheduleGeneralAction = z.object({
-  /**
-   * The action type used for sending notifications.
-   */
-  actionTypeId: z.string(),
-  group: AttackDiscoveryScheduleActionGroup,
-  id: AttackDiscoveryScheduleActionId,
-  params: AttackDiscoveryScheduleActionParams,
-  uuid: NonEmptyString.optional(),
-  alertsFilter: AttackDiscoveryScheduleActionAlertsFilter.optional(),
-  frequency: AttackDiscoveryScheduleActionFrequency.optional(),
-});
 
+export const AttackDiscoveryScheduleSystemAction = lazySchema(() =>
+  z.object({
+    /**
+     * The action type used for sending notifications.
+     */
+    actionTypeId: z.string(),
+    id: AttackDiscoveryScheduleActionId,
+    params: AttackDiscoveryScheduleActionParams,
+    uuid: NonEmptyString.optional(),
+  })
+);
 export type AttackDiscoveryScheduleSystemAction = z.infer<
   typeof AttackDiscoveryScheduleSystemAction
 >;
-export const AttackDiscoveryScheduleSystemAction = z.object({
-  /**
-   * The action type used for sending notifications.
-   */
-  actionTypeId: z.string(),
-  id: AttackDiscoveryScheduleActionId,
-  params: AttackDiscoveryScheduleActionParams,
-  uuid: NonEmptyString.optional(),
-});
 
+export const AttackDiscoveryScheduleAction = lazySchema(() =>
+  z.union([AttackDiscoveryScheduleGeneralAction, AttackDiscoveryScheduleSystemAction])
+);
 export type AttackDiscoveryScheduleAction = z.infer<typeof AttackDiscoveryScheduleAction>;
-export const AttackDiscoveryScheduleAction = z.union([
-  AttackDiscoveryScheduleGeneralAction,
-  AttackDiscoveryScheduleSystemAction,
-]);
 
 /**
  * An Attack Discovery schedule execution status
  */
+export const AttackDiscoveryScheduleExecutionStatus = lazySchema(() =>
+  z.enum(['ok', 'active', 'error', 'unknown', 'warning'])
+);
 export type AttackDiscoveryScheduleExecutionStatus = z.infer<
   typeof AttackDiscoveryScheduleExecutionStatus
 >;
-export const AttackDiscoveryScheduleExecutionStatus = z.enum([
-  'ok',
-  'active',
-  'error',
-  'unknown',
-  'warning',
-]);
 export type AttackDiscoveryScheduleExecutionStatusEnum =
   typeof AttackDiscoveryScheduleExecutionStatus.enum;
 export const AttackDiscoveryScheduleExecutionStatusEnum =
@@ -190,120 +201,128 @@ export const AttackDiscoveryScheduleExecutionStatusEnum =
 /**
  * An Attack Discovery schedule execution information
  */
+export const AttackDiscoveryScheduleExecution = lazySchema(() =>
+  z.object({
+    /**
+     * Date of the execution
+     */
+    date: z.string().datetime(),
+    /**
+     * Duration of the execution
+     */
+    duration: z.number().optional(),
+    /**
+     * Status of the execution
+     */
+    status: AttackDiscoveryScheduleExecutionStatus,
+    message: z.string().optional(),
+  })
+);
 export type AttackDiscoveryScheduleExecution = z.infer<typeof AttackDiscoveryScheduleExecution>;
-export const AttackDiscoveryScheduleExecution = z.object({
-  /**
-   * Date of the execution
-   */
-  date: z.string().datetime(),
-  /**
-   * Duration of the execution
-   */
-  duration: z.number().optional(),
-  /**
-   * Status of the execution
-   */
-  status: AttackDiscoveryScheduleExecutionStatus,
-  message: z.string().optional(),
-});
 
 /**
  * An Attack Discovery schedule
  */
+export const AttackDiscoverySchedule = lazySchema(() =>
+  z.object({
+    /**
+     * UUID of Attack Discovery schedule
+     */
+    id: z.string(),
+    /**
+     * The name of the schedule
+     */
+    name: z.string(),
+    /**
+     * The name of the user that created the schedule
+     */
+    createdBy: z.string(),
+    /**
+     * The name of the user that updated the schedule
+     */
+    updatedBy: z.string(),
+    /**
+     * The date the schedule was created
+     */
+    createdAt: z.string().datetime(),
+    /**
+     * The date the schedule was updated
+     */
+    updatedAt: z.string().datetime(),
+    /**
+     * Indicates whether the schedule is enabled
+     */
+    enabled: z.boolean(),
+    /**
+     * The Attack Discovery schedule configuration parameters
+     */
+    params: AttackDiscoveryScheduleParams,
+    /**
+     * The Attack Discovery schedule interval
+     */
+    schedule: IntervalSchedule,
+    /**
+     * The Attack Discovery schedule actions
+     */
+    actions: z.array(AttackDiscoveryScheduleAction),
+    /**
+     * The Attack Discovery schedule last execution summary
+     */
+    lastExecution: AttackDiscoveryScheduleExecution.optional(),
+  })
+);
 export type AttackDiscoverySchedule = z.infer<typeof AttackDiscoverySchedule>;
-export const AttackDiscoverySchedule = z.object({
-  /**
-   * UUID of Attack Discovery schedule
-   */
-  id: z.string(),
-  /**
-   * The name of the schedule
-   */
-  name: z.string(),
-  /**
-   * The name of the user that created the schedule
-   */
-  createdBy: z.string(),
-  /**
-   * The name of the user that updated the schedule
-   */
-  updatedBy: z.string(),
-  /**
-   * The date the schedule was created
-   */
-  createdAt: z.string().datetime(),
-  /**
-   * The date the schedule was updated
-   */
-  updatedAt: z.string().datetime(),
-  /**
-   * Indicates whether the schedule is enabled
-   */
-  enabled: z.boolean(),
-  /**
-   * The Attack Discovery schedule configuration parameters
-   */
-  params: AttackDiscoveryScheduleParams,
-  /**
-   * The Attack Discovery schedule interval
-   */
-  schedule: IntervalSchedule,
-  /**
-   * The Attack Discovery schedule actions
-   */
-  actions: z.array(AttackDiscoveryScheduleAction),
-  /**
-   * The Attack Discovery schedule last execution summary
-   */
-  lastExecution: AttackDiscoveryScheduleExecution.optional(),
-});
 
 /**
  * An Attack Discovery schedule create properties
  */
+export const AttackDiscoveryScheduleCreateProps = lazySchema(() =>
+  z.object({
+    /**
+     * The name of the schedule
+     */
+    name: z.string(),
+    /**
+     * Indicates whether the schedule is enabled
+     */
+    enabled: z.boolean().optional(),
+    /**
+     * The Attack Discovery schedule configuration parameters
+     */
+    params: AttackDiscoveryScheduleParams,
+    /**
+     * The Attack Discovery schedule interval
+     */
+    schedule: IntervalSchedule,
+    /**
+     * The Attack Discovery schedule actions
+     */
+    actions: z.array(AttackDiscoveryScheduleAction).optional(),
+  })
+);
 export type AttackDiscoveryScheduleCreateProps = z.infer<typeof AttackDiscoveryScheduleCreateProps>;
-export const AttackDiscoveryScheduleCreateProps = z.object({
-  /**
-   * The name of the schedule
-   */
-  name: z.string(),
-  /**
-   * Indicates whether the schedule is enabled
-   */
-  enabled: z.boolean().optional(),
-  /**
-   * The Attack Discovery schedule configuration parameters
-   */
-  params: AttackDiscoveryScheduleParams,
-  /**
-   * The Attack Discovery schedule interval
-   */
-  schedule: IntervalSchedule,
-  /**
-   * The Attack Discovery schedule actions
-   */
-  actions: z.array(AttackDiscoveryScheduleAction).optional(),
-});
 
 /**
  * An Attack Discovery schedule update properties
  */
+export const AttackDiscoveryScheduleUpdateProps = lazySchema(() =>
+  z.object({
+    /**
+     * The name of the schedule
+     */
+    name: z.string(),
+    /**
+     * The Attack Discovery schedule configuration parameters
+     */
+    params: AttackDiscoveryScheduleParams,
+    /**
+     * The Attack Discovery schedule interval
+     */
+    schedule: IntervalSchedule,
+    /**
+     * The Attack Discovery schedule actions
+     */
+    actions: z.array(AttackDiscoveryScheduleAction),
+  })
+);
 export type AttackDiscoveryScheduleUpdateProps = z.infer<typeof AttackDiscoveryScheduleUpdateProps>;
-export const AttackDiscoveryScheduleUpdateProps = z.object({
-  /**
-   * The name of the schedule
-   */
-  name: z.string(),
-  /**
-   * The Attack Discovery schedule configuration parameters
-   */
-  params: AttackDiscoveryScheduleParams,
-  /**
-   * The Attack Discovery schedule interval
-   */
-  schedule: IntervalSchedule,
-  /**
-   * The Attack Discovery schedule actions
-   */
-  actions: z.array(AttackDiscoveryScheduleAction),
-});

@@ -129,10 +129,19 @@ export class InferencePlugin
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
 
-    const internalRepository = core.savedObjects.createInternalRepository();
-    const internalClient = new SavedObjectsClient(internalRepository);
-    const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
-    installTokenUsageDashboard(savedObjectsImporter, this.logger).catch((e) => {
+    const installDashboardIfTokenUsageTrackingEnabled = async () => {
+      const internalRepository = core.savedObjects.createInternalRepository();
+      const internalClient = new SavedObjectsClient(internalRepository);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(internalClient);
+      const isEnabled = await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+      if (!isEnabled) {
+        return;
+      }
+      const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
+      await installTokenUsageDashboard(savedObjectsImporter, this.logger);
+    };
+
+    installDashboardIfTokenUsageTrackingEnabled().catch((e) => {
       this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
     });
 
@@ -324,6 +333,12 @@ export class InferencePlugin
       getInferenceEndpointById: async (inferenceId: string) => {
         const esClient = core.elasticsearch.client.asInternalUser;
         return getInferenceEndpointById({ inferenceId, esClient });
+      },
+      installTokenUsageDashboard: async () => {
+        const internalRepository = core.savedObjects.createInternalRepository();
+        const internalClient = new SavedObjectsClient(internalRepository);
+        const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
+        await installTokenUsageDashboard(savedObjectsImporter, this.logger);
       },
     };
   }

@@ -14,12 +14,14 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const GetEndpointExceptionsPerPolicyOptInResponse = lazySchema(() =>
+  z.object({
+    status: z.boolean(),
+    reason: z.enum(['newDeployment', 'userOptedIn']).optional(),
+  })
+);
 export type GetEndpointExceptionsPerPolicyOptInResponse = z.infer<
   typeof GetEndpointExceptionsPerPolicyOptInResponse
 >;
-export const GetEndpointExceptionsPerPolicyOptInResponse = z.object({
-  status: z.boolean(),
-  reason: z.enum(['newDeployment', 'userOptedIn']).optional(),
-});

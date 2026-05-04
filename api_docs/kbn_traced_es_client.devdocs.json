@@ -1241,6 +1241,7 @@
                 "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TSearchRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1306,6 +1307,7 @@
                 "lineNumber": 89,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TSearchRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1368,6 +1370,7 @@
                 "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Required",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1491,6 +1494,7 @@
                 "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityEsQueryRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1614,6 +1618,7 @@
                 "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityEsQueryRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1631,6 +1636,7 @@
                 "lineNumber": 109,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEsqlOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }

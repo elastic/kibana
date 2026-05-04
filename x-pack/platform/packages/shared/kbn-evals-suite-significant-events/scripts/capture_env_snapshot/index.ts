@@ -17,11 +17,12 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
   description: `
     Capture the current Streams/SigEvents environment into a GCS snapshot.
 
-    .kibana system indices (--system-indices) are reindexed to snapshot-safe names (snapshot-*) with mappings preserved.
-    All other indices (--logs-index, --alert-indices) are included directly in the snapshot.
+    Protected Kibana indices listed in --system-indices (Streams .kibana_streams_*) are reindexed to snapshot-safe names (snapshot-*) with mappings preserved.
+    --logs-index and --alert-indices are included directly in the snapshot (not reindexed).
 
     Prerequisites:
       - Local Elasticsearch with GCS credentials in keystore
+      - The configured user must have the manage_security cluster privilege (required to create and delete the temporary superuser account)
 
     Examples:
       node scripts/capture_sigevents_env_snapshot.js --snapshot-name my-snapshot
@@ -31,6 +32,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
       'es-url',
       'es-username',
       'es-password',
+      'kibana-url',
       'snapshot-name',
       'run-id',
       'logs-index',
@@ -50,6 +52,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)
       --es-username           ES username (default: from kibana.dev.yml)
       --es-password           ES password (default: from kibana.dev.yml)
+      --kibana-url            Kibana base URL (default: from kibana.dev.yml)
     `,
   },
 });

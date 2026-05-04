@@ -1,0 +1,43 @@
+responses:
+  '200':
+    description: A search response.
+    content:
+      application/json:
+        examples:
+          findSavedObjectsResponse:
+            summary: A page of saved objects
+            value:
+              page: 1
+              per_page: 20
+              total: 1
+              saved_objects:
+                - id: example-dashboard-1
+                  type: dashboard
+                  attributes:
+                    title: Example dashboard 1
+                  references: []
+                  namespaces:
+                    - default
+                  managed: false
+                  updated_at: '2026-04-17T12:00:00.000Z'
+                  version: WzEsMV0=
+  '400':
+    description: A bad request.
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'This type dashboard is not allowed: Bad Request'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/saved_objects/_find?type=dashboard&fields=title&per_page=20&page=1" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/saved_objects/_find?type=dashboard&fields=title&per_page=20&page=1

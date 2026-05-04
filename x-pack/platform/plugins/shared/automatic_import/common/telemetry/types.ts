@@ -37,6 +37,7 @@ export enum AutomaticImportTelemetryEventType {
   IntegrationDownloadZipClicked = 'automatic_import_integration_download_zip_clicked',
   ApproveModalCancelClicked = 'automatic_import_approve_modal_cancel_clicked',
   ApproveModalApproveClicked = 'automatic_import_approve_modal_approve_clicked',
+  ApproveModalApproveWithAutoInstallClicked = 'automatic_import_approve_modal_approve_with_auto_install_clicked',
 }
 
 export interface CreateIntegrationPageLoadedPayload {
@@ -134,6 +135,9 @@ export interface ApproveModalApproveClickedPayload {
   dataStreamCount: number;
 }
 
+/** User approved with "Automatically install integration after approval" checked; fires after approve API succeeds, before install. */
+export type ApproveModalApproveWithAutoInstallClickedPayload = ApproveModalApproveClickedPayload;
+
 export interface DataStreamDeleteConfirmedPayload {
   sessionId?: string;
   integrationId?: string;
@@ -190,6 +194,8 @@ export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTeleme
     ? ApproveModalCancelClickedPayload
     : T extends AutomaticImportTelemetryEventType.ApproveModalApproveClicked
     ? ApproveModalApproveClickedPayload
+    : T extends AutomaticImportTelemetryEventType.ApproveModalApproveWithAutoInstallClicked
+    ? ApproveModalApproveWithAutoInstallClickedPayload
     : T extends AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed
     ? DataStreamDeleteConfirmedPayload
     : T extends AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed

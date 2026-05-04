@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
 import type { Part, TextPart } from '@a2a-js/sdk';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { isRoundCompleteEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -48,6 +48,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
       const a2aConversationId = generateA2AConversationId(contextId);
 
       const { events$ } = await execution.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request: this.kibanaRequest,
         params: {
           agentId: this.agentId,

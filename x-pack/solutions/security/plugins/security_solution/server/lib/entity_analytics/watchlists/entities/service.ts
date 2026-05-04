@@ -11,12 +11,21 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { get } from 'lodash';
-import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 
 import type { IntegrationType } from '../entity_sources/infra';
 import type { CorrelationMap } from './types';
 import { getEntityType } from './utils';
+
+/** Reduced `_source` shape returned by the paginated entity store scan. */
+interface EntityStoreSyncHit {
+  entity: {
+    id: string;
+    type?: string;
+    EngineMetadata?: { Type: string };
+    attributes?: { watchlists?: unknown };
+  };
+}
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
@@ -28,32 +37,32 @@ export type IdentityProvider =
   | { type: 'index'; field: string }
   | { type: 'store'; queryRule: string };
 
-export interface EntityStoreQueryResult {
+/** A single page of entity store results yielded by listEntityStoreEntities. */
+export interface EntityStorePageResult {
   entityIdsByType: EntityStoreEntityIdsByType;
   watchlistsByEuid: WatchlistsByEuid;
+  /** Only present for index-type identity providers. */
+  correlationMap?: CorrelationMap;
+  /** The entity.id of the last entity in this page, used for range-based deletion detection. */
+  maxEntityId: string;
 }
-
-export type IndexSourceQueryResult = EntityStoreQueryResult & {
-  correlationMap: CorrelationMap;
-};
-
-type EntityStoreResultFor<T extends IdentityProvider['type']> = T extends 'index'
-  ? IndexSourceQueryResult
-  : EntityStoreQueryResult;
 
 interface WatchlistEntitiesServiceDeps {
   esClient: ElasticsearchClient;
   namespace: string;
+  /** Overrides ENTITY_STORE_PAGE_SIZE — intended for tests only. */
+  pageSize?: number;
 }
 
 export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
 export const createWatchlistEntitiesService = ({
   esClient,
   namespace,
+  pageSize = ENTITY_STORE_PAGE_SIZE,
 }: WatchlistEntitiesServiceDeps) => {
-  async function listEntityStoreEntities<T extends IdentityProvider['type']>(
+  async function* listEntityStoreEntities(
     idp: IdentityProvider
-  ): Promise<EntityStoreResultFor<T>> {
+  ): AsyncGenerator<EntityStorePageResult> {
     const isIndexSync = idp.type === 'index';
 
     const query = (() => {
@@ -69,38 +78,43 @@ export const createWatchlistEntitiesService = ({
       throw new Error(`Unsupported identity provider: ${JSON.stringify(idp)}`);
     })();
 
-    const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
-    const correlationMap: CorrelationMap = new Map();
-    const watchlistsByEuid: WatchlistsByEuid = new Map();
+    const sourceFields: string[] = [
+      'entity.id',
+      'entity.type',
+      'entity.EngineMetadata.Type',
+      'entity.attributes.watchlists',
+      ...(isIndexSync ? [idp.field] : []),
+    ];
 
     let searchAfter: SortResults | undefined;
-    let fetchMore = true;
 
-    while (fetchMore) {
-      const response = await esClient.search<EntityStoreEntity>({
+    for (let i = 0; i < MAX_ENTITY_STORE_SCAN_ITERATIONS; i++) {
+      const response = await esClient.search<EntityStoreSyncHit>({
         index: getEntitiesAlias(ENTITY_LATEST, namespace),
-        size: 1000,
-        sort: ['_doc'],
+        size: pageSize,
+        sort: [{ 'entity.id': 'asc' }],
         search_after: searchAfter,
+        _source: sourceFields,
         query,
       });
 
       const hits = response.hits.hits;
 
       if (hits.length === 0) {
-        fetchMore = false;
         break;
       }
 
-      hits.reduce(
-        (acc, hit) => {
-          const record = hit._source;
-          if (!record?.entity?.id) return acc;
+      const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
+      const correlationMap: CorrelationMap = new Map();
+      const watchlistsByEuid: WatchlistsByEuid = new Map();
 
+      for (const hit of hits) {
+        const record = hit._source;
+        if (record?.entity?.id) {
           const entityType = getEntityType(record);
           const euid = record.entity.id;
 
-          acc.entityIdsByType[entityType].push(euid);
+          entityIdsByType[entityType].push(euid);
 
           const rawWatchlists = get(record, 'entity.attributes.watchlists');
           const watchlists = Array.isArray(rawWatchlists)
@@ -110,34 +124,41 @@ export const createWatchlistEntitiesService = ({
             : undefined;
 
           if (watchlists) {
-            acc.watchlistsByEuid.set(euid, watchlists as string[]);
+            watchlistsByEuid.set(euid, watchlists as string[]);
           }
 
-          if (!isIndexSync) {
-            return acc;
+          if (isIndexSync) {
+            const correlationValue = get(record, idp.field);
+            if (correlationValue) {
+              correlationMap.set(String(correlationValue), { euid, entityType });
+            }
           }
+        }
+      }
 
-          const correlationValue = get(record, idp.field);
-          if (!correlationValue) {
-            return acc;
-          }
+      const lastHit = hits[hits.length - 1];
+      const rawSortValue = lastHit.sort?.[0];
+      if (rawSortValue == null) {
+        throw new Error(
+          'Entity store pagination query returned a hit without sort values — verify the query includes a sort on entity.id'
+        );
+      }
+      const maxEntityId = String(rawSortValue);
 
-          acc.correlationMap.set(String(correlationValue), { euid, entityType });
-          return acc;
-        },
-        { entityIdsByType, correlationMap, watchlistsByEuid }
-      );
+      yield {
+        entityIdsByType,
+        watchlistsByEuid,
+        maxEntityId,
+        correlationMap: isIndexSync ? correlationMap : undefined,
+      };
 
-      searchAfter = hits[hits.length - 1].sort;
+      if (hits.length < pageSize) {
+        break;
+      }
+      searchAfter = lastHit.sort;
     }
-
-    const deduped = dedup(entityIdsByType);
-    return (
-      isIndexSync
-        ? { entityIdsByType: deduped, correlationMap, watchlistsByEuid }
-        : { entityIdsByType: deduped, watchlistsByEuid }
-    ) as EntityStoreResultFor<T>;
   }
+
   return { listEntityStoreEntities };
 };
 
@@ -148,12 +169,10 @@ const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => 
   [EntityType.generic]: [],
 });
 
+export const ENTITY_STORE_PAGE_SIZE = 10_000;
+const MAX_ENTITY_STORE_SCAN_ITERATIONS = 10_000;
+
 const integrationToStoreNamespaceMap: Record<IntegrationType, string> = {
   entityanalytics_okta: 'okta',
   entityanalytics_ad: 'active_directory',
 };
-
-const dedup = (entityIdsByType: EntityStoreEntityIdsByType): EntityStoreEntityIdsByType =>
-  Object.fromEntries(
-    Object.entries(entityIdsByType).map(([et, ids]) => [et, Array.from(new Set(ids))])
-  ) as EntityStoreEntityIdsByType;

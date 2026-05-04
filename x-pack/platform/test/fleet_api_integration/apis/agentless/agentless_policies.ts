@@ -548,6 +548,165 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Custom fields (global_data_tags)', () => {
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089);
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should store global_data_tags on the package policy when creating an agentless policy', async () => {
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `test_agentless-${Date.now()}`,
+          description: 'test agentless policy with custom fields',
+          namespace: 'default',
+          global_data_tags: [
+            { name: 'client_id', value: 'acme' },
+            { name: 'env', value: 'prod' },
+          ],
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicy.item.global_data_tags).to.eql([
+          { name: 'client_id', value: 'acme' },
+          { name: 'env', value: 'prod' },
+        ]);
+
+        // Verify the full agent policy contains an add_fields processor with the custom tags
+        const { body: fullPolicyBody } = await supertest
+          .get(`/api/fleet/agent_policies/${policy.item.id}/full`)
+          .auth('elastic', 'changeme')
+          .expect(200);
+
+        const inputs = fullPolicyBody.item.inputs as Array<Record<string, any>>;
+        const addFieldsProcessors = inputs
+          .flatMap((input) => input.processors ?? [])
+          .filter((p: any) => p.add_fields != null);
+
+        expect(addFieldsProcessors.length).to.be.greaterThan(0);
+        const fields = addFieldsProcessors[0].add_fields.fields;
+        expect(fields.client_id).to.be('acme');
+        expect(fields.env).to.be('prod');
+      });
+
+      it('should update global_data_tags on the package policy when updating', async () => {
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `test_agentless-${Date.now()}`,
+          description: 'test agentless policy with custom fields',
+          namespace: 'default',
+          global_data_tags: [{ name: 'client_id', value: 'original' }],
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        const packagePolicyBefore = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicyBefore.item.global_data_tags).to.eql([
+          { name: 'client_id', value: 'original' },
+        ]);
+
+        // Update the package policy with new custom fields
+        await apiClient.updatePackagePolicy(policy.item.id, {
+          global_data_tags: [{ name: 'client_id', value: 'updated' }],
+        } as any);
+
+        const packagePolicyAfter = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicyAfter.item.global_data_tags).to.eql([
+          { name: 'client_id', value: 'updated' },
+        ]);
+      });
+
+      it('should reject global_data_tags on a non-agentless package policy', async () => {
+        const agentPolicyRes = await apiClient.createAgentPolicy(undefined, {
+          name: `standard-policy-${Date.now()}`,
+          namespace: 'default',
+          description: '',
+        });
+
+        const packagePolicyName = `test_agentless-${Date.now()}`;
+        const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: packagePolicyName,
+          namespace: 'default',
+          policy_ids: [agentPolicyRes.item.id],
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        // Try to add global_data_tags to the standard (non-agentless) package policy via update
+        await expectToRejectWithError(
+          () =>
+            supertest
+              .put(`/api/fleet/package_policies/${packagePolicyRes.item.id}`)
+              .auth('elastic', 'changeme')
+              .set('kbn-xsrf', 'xxxx')
+              .send({
+                global_data_tags: [{ name: 'client_id', value: 'acme' }],
+              })
+              .then((res) => {
+                if (res.status !== 200) {
+                  throw new Error(`${res.status} "${res.body?.message ?? 'Unknown error'}"`);
+                }
+                return res.body;
+              }),
+          /`global_data_tags` can only be set on agentless integration policies/
+        );
+      });
+    });
+
     describe('Side effects', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();

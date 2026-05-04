@@ -550,7 +550,7 @@ describe('usePackagePolicy', () => {
             "vars": Object {
               "existing_input_level_var": Object {
                 "type": "text",
-                "value": "existing-value",
+                "value": "default_value",
               },
               "new_input_level_var": Object {
                 "type": "text",

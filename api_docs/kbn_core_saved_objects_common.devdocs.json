@@ -1538,12 +1538,12 @@
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
+            "plugin": "@kbn/ml-common-types",
+            "path": "x-pack/platform/packages/shared/ml/common-types/modules.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
+            "plugin": "@kbn/ml-common-types",
+            "path": "x-pack/platform/packages/shared/ml/common-types/modules.ts"
           }
         ],
         "initialIsOpen": false
@@ -1936,7 +1936,23 @@
         "tags": [],
         "label": "SavedObjectsImportWarning",
         "description": [
-          "\nComposite type of all the possible types of import warnings.\n\nSee {@link SavedObjectsImportSimpleWarning} and {@link SavedObjectsImportActionRequiredWarning}\nfor more details.\n"
+          "\nComposite type of all the possible types of import warnings.\n\nSee ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectsImportSimpleWarning",
+            "text": "SavedObjectsImportSimpleWarning"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectsImportActionRequiredWarning",
+            "text": "SavedObjectsImportActionRequiredWarning"
+          },
+          "\nfor more details.\n"
         ],
         "signature": [
           "SavedObjectsImportSimpleWarning",

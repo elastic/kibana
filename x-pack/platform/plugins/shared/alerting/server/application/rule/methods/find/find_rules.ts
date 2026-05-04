@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { pick } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildConsumersFilter,
   buildRuleTypeIdsFilter,
@@ -43,7 +44,9 @@ export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
+  searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  aggregations?: Record<string, unknown>;
 }
 
 export async function findRules<Params extends RuleParams = never>(
@@ -134,6 +137,7 @@ export async function findRules<Params extends RuleParams = never>(
     per_page: perPage,
     total,
     saved_objects: data,
+    aggregations,
   } = await findRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
@@ -143,6 +147,8 @@ export async function findRules<Params extends RuleParams = never>(
       fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
     },
   });
+
+  const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
 
   const siemRules: Rule[] = [];
 
@@ -210,6 +216,8 @@ export async function findRules<Params extends RuleParams = never>(
       page,
       perPage,
       total,
+      ...(searchAfter !== undefined ? { searchAfter } : {}),
+      ...(aggregations !== undefined ? { aggregations } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -219,6 +227,8 @@ export async function findRules<Params extends RuleParams = never>(
     page,
     perPage,
     total,
+    ...(searchAfter !== undefined ? { searchAfter } : {}),
+    ...(aggregations !== undefined ? { aggregations } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

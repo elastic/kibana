@@ -68,6 +68,7 @@
               "lineNumber": 15,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "NotebookListValue",
               "trackAdoption": false,
               "isRequired": false
             }

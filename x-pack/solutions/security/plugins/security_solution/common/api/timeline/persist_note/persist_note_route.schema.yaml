@@ -46,6 +46,14 @@ paths:
                   nullable: true
                   description: Saved object version string from a previous read; optional on update.
                   example: WzQ2LDFd
+            examples:
+              addNote:
+                summary: Add a note on an event
+                value:
+                  note:
+                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                    note: Escalated to tier-2 analyst
       responses:
         '200':
           description: The persisted note, including `noteId` and `version`.
@@ -53,6 +61,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseNote'
+              examples:
+                persisted:
+                  summary: Persisted note wrapper
+                  value:
+                    note:
+                      noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                      version: WzQ2LDFd
+                      timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                      note: Escalated to tier-2 analyst
 components:
   schemas:
     ResponseNote:

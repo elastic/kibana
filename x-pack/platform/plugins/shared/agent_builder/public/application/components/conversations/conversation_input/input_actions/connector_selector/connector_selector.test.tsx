@@ -34,10 +34,6 @@ jest.mock('../../../../../hooks/use_ui_privileges', () => ({
   useUiPrivileges: () => ({ write: true }),
 }));
 
-jest.mock('../../../../../../../common/recommended_connectors', () => ({
-  isRecommendedConnector: () => false,
-}));
-
 jest.mock('../input_actions.styles', () => ({
   getMaxListHeight: () => 200,
   selectorPopoverPanelStyles: undefined,
@@ -49,16 +45,19 @@ jest.mock('../input_popover_button', () => ({
     disabled,
     children,
     onClick,
+    'aria-label': ariaLabel,
   }: {
     disabled?: boolean;
     children: React.ReactNode;
     onClick: () => void;
+    'aria-label'?: string;
   }) => (
     <button
       type="button"
       data-test-subj="agentBuilderConnectorSelectorButton"
       disabled={disabled}
       onClick={onClick}
+      aria-label={ariaLabel}
     >
       {children}
     </button>
@@ -298,5 +297,21 @@ describe('ConnectorSelector sync effect', () => {
       const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
       expect(button).not.toBeDisabled();
     });
+  });
+
+  it('announces the current connector name in the button aria-label', () => {
+    const connectors = [mkConnector('Elastic Managed LLM')];
+    setup({
+      connectors,
+      selectedConnector: 'Elastic Managed LLM',
+    });
+    const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+    expect(button).toHaveAttribute('aria-label', 'Select connector, Elastic Managed LLM');
+  });
+
+  it('uses a fallback label when no connector is selected', () => {
+    setup({ connectors: [], selectedConnector: undefined });
+    const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+    expect(button).toHaveAttribute('aria-label', 'Select connector, LLM');
   });
 });

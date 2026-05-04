@@ -59,6 +59,10 @@ export type {
   BaseConnectorContract,
   StepStabilityLevel,
   HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
   StepPropertyHandler,
   PropertySelectionHandler,
   SelectionOption,
@@ -67,6 +71,7 @@ export type {
   StepSelectionValues,
   RequestOptions,
   GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
