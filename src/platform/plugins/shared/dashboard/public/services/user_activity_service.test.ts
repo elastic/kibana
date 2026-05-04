@@ -59,11 +59,10 @@ describe(`user activity service`, () => {
           tags: [],
           meta: {
             time_range: {
-              to: 'now',
               from: 'now-15m',
+              to: 'now',
             },
-            query: { query: 'hi', language: 'kuery' },
-            filters: [],
+            query: { expression: 'hi', language: 'kql' },
             panel_count: 0,
             errors: [],
           },
@@ -92,11 +91,10 @@ describe(`user activity service`, () => {
           tags: [],
           meta: {
             time_range: {
-              to: 'now',
               from: 'now-15m',
+              to: 'now',
             },
-            query: { query: 'hi', language: 'kuery' },
-            filters: [],
+            query: { expression: 'hi', language: 'kql' },
             panel_count: 0,
             errors: [],
           },
