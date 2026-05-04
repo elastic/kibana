@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/react-env'
   - '@kbn/react-kibana-context-env'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/core-chrome-layout-components'
   - '@kbn/core-chrome-sidebar-components'
   - '@kbn/ui-side-navigation'
   - '@kbn/core-chrome-feature-flags'
@@ -50,6 +51,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/use-observable'
   - '@kbn/shared-ux-utility'
+  - '@kbn/app-header'
 tags:
   - shared-browser
   - package

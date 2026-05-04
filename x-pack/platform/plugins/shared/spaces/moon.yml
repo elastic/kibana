@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/cps-common'
   - '@kbn/cps-utils'
   - '@kbn/tour-queue'
+  - '@kbn/context-switcher-components'
 tags:
   - plugin
   - prod
