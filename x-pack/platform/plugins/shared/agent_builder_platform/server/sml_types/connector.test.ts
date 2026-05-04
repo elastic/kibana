@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
+import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
@@ -26,7 +26,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 const createContext = () => ({
   logger: loggingSystemMock.createLogger(),
-  request: httpServerMock.createKibanaRequest(),
+  savedObjectsClient: mockSavedObjectsClient as any,
 });
 
 const createAttachmentContext = () => ({
@@ -96,14 +96,6 @@ describe('connectorSmlType', () => {
           },
         ],
       });
-    });
-
-    it('throws when request is not available', async () => {
-      const context = { logger: loggingSystemMock.createLogger() };
-
-      await expect(connectorSmlType.getSmlData!('conn-1', context as never)).rejects.toThrow(
-        'no request available'
-      );
     });
 
     it('returns undefined on error and logs warning', async () => {

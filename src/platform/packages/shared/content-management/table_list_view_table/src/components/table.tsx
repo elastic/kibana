@@ -390,7 +390,7 @@ export function Table<T extends UserContentCommonSchema>({
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          noItemsMessage={noItemsMessage}
+          noItemsMessage={isFetchingItems ? '' : noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}

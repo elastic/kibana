@@ -305,6 +305,25 @@ export const ServicenowSearch: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'ServiceNow connector — cross-action usage guidance for LLMs.',
+    '',
+    '## Discovery pattern',
+    'When the target table is unknown, start with listTables (optionally filter by query keyword),',
+    'then call describeTable on the chosen table to understand available fields before querying.',
+    '',
+    '## Knowledge articles',
+    'listKnowledgeBases → search (or listRecords) on kb_knowledge table.',
+    'Useful fields: sys_id, number, short_description, text, topic, category, author,',
+    'sys_created_on, sys_updated_on, workflow_state, kb_knowledge_base, kb_category.',
+    'To filter by knowledge base: include kb_knowledge_base=<kb_sys_id> in encodedQuery.',
+    '',
+    '## Attachments',
+    'Attachment sys_ids are not stored on the parent record. Find them first:',
+    '  listRecords(table=sys_attachment, encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>)',
+    'Then call getAttachment with the attachment sys_id to retrieve base64-encoded content.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',

@@ -29,6 +29,42 @@ function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
     }, {} as Record<string, string[]>);
 }
 
+describe('generateInputId', () => {
+  it('should use name instead of type when name is present', () => {
+    expect(
+      generateInputId({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('nginx-filelog_otel');
+  });
+
+  it('should fall back to type when name is not present', () => {
+    expect(
+      generateInputId({
+        type: 'logfile',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('nginx-logfile');
+  });
+
+  it('should use name without policy_template prefix when policy_template is not stored on the input (single-template packages)', () => {
+    expect(
+      generateInputId({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('filelog_otel');
+  });
+});
+
 describe('toPackagePolicy', () => {
   describe('With nginx package', () => {
     it('should work', () => {

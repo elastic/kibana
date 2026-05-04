@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -831,7 +832,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('translates search into name and tag prefix query', async () => {
+    it('passes search and searchFields to the saved objects client', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -849,16 +850,10 @@ describe('RulesClient', () => {
         perPage: 10,
         sortField: 'updatedAt',
         sortOrder: 'desc',
-        filter: expect.any(String),
+        search: 'prod* alerts*',
+        searchFields: ['metadata.name', 'metadata.description'],
+        defaultSearchOperator: 'AND',
       });
-
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
-          ),
-        })
-      );
     });
 
     it('trims search before passing it to the saved objects client', async () => {
@@ -875,14 +870,12 @@ describe('RulesClient', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
-          ),
+          search: 'prod* alerts*',
         })
       );
     });
 
-    it('passes filters and search together', async () => {
+    it('passes filter and search as separate params', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -896,14 +889,10 @@ describe('RulesClient', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: expect.stringContaining(`${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`),
-        })
-      );
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.tags: prod*'
-          ),
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+          search: 'prod*',
+          searchFields: ['metadata.name', 'metadata.description'],
+          defaultSearchOperator: 'AND',
         })
       );
     });
@@ -1091,6 +1080,57 @@ describe('RulesClient', () => {
         { type: RULE_SAVED_OBJECT_TYPE, id: 'filter-rule-1' },
         { type: RULE_SAVED_OBJECT_TYPE, id: 'filter-rule-2' },
       ]);
+      expect(res.errors).toEqual([]);
+      expect(res.truncated).toBeUndefined();
+    });
+
+    it('caps filter-based bulk delete at BULK_FILTER_MAX_RULES and returns truncation metadata', async () => {
+      const client = createClient();
+      const excessTotal = BULK_FILTER_MAX_RULES + 42;
+
+      mockSavedObjectsClient.find.mockImplementation((opts: { page?: number }) => {
+        const p = opts.page ?? 1;
+        const pageSize = 100;
+        const savedObjects = Array.from({ length: pageSize }, (_, i) => ({
+          id: `cap-rule-${(p - 1) * pageSize + i}`,
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: baseSoAttrs,
+          references: [],
+          score: 0,
+        }));
+        return Promise.resolve({
+          saved_objects: savedObjects,
+          total: excessTotal,
+          page: p,
+          per_page: pageSize,
+        });
+      });
+
+      getRuleExecutorTaskIdMock.mockImplementation(({ ruleId }) => `task:${ruleId}`);
+
+      mockSavedObjectsClient.bulkDelete.mockImplementation(
+        async (docs: Array<{ type: string; id: string }>) => ({
+          statuses: docs.map(({ id }) => ({
+            id,
+            type: RULE_SAVED_OBJECT_TYPE,
+            success: true,
+          })),
+        })
+      );
+
+      const res = await client.bulkDeleteRules({ filter: 'kind: alert' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(BULK_FILTER_MAX_RULES / 100);
+      const bulkDeleteArg = mockSavedObjectsClient.bulkDelete.mock.calls[0][0] as Array<{
+        id: string;
+      }>;
+      expect(bulkDeleteArg).toHaveLength(BULK_FILTER_MAX_RULES);
+      expect(bulkDeleteArg[0].id).toBe('cap-rule-0');
+      expect(bulkDeleteArg[BULK_FILTER_MAX_RULES - 1].id).toBe(
+        `cap-rule-${BULK_FILTER_MAX_RULES - 1}`
+      );
+      expect(res.truncated).toBe(true);
+      expect(res.totalMatched).toBe(excessTotal);
       expect(res.errors).toEqual([]);
     });
 
@@ -1657,8 +1697,65 @@ describe('RulesClient', () => {
         client.bulkDeleteRules({ ids: ['rule-1'], filter: 'some-filter' } as any)
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: 'Only one of ids or filter can be provided',
+        message: 'ids cannot be combined with filter or search',
       });
+    });
+
+    it('threads search through to the saved objects client for filter-based bulk ops', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'search-rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: baseSoAttrs,
+            references: [],
+            score: 0,
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 100,
+      });
+
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:search-rule-1');
+
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'search-rule-1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+      });
+
+      await client.bulkDeleteRules({ search: 'prod' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'prod*',
+          searchFields: ['metadata.name', 'metadata.description'],
+          defaultSearchOperator: 'AND',
+        })
+      );
+    });
+
+    it('passes both filter and search for filter-based bulk ops', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 100,
+      });
+
+      await client.bulkDeleteRules({ filter: 'enabled: true', search: 'prod' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+          search: 'prod*',
+          searchFields: ['metadata.name', 'metadata.description'],
+          defaultSearchOperator: 'AND',
+        })
+      );
     });
   });
 });

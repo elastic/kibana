@@ -38,6 +38,12 @@ function isConnectorWithInferenceId(
   );
 }
 
+function isDynamicInferenceConnector(
+  connector: InMemoryConnector
+): connector is InMemoryConnectorWithInferenceId {
+  return connector.isDynamic === true && isConnectorWithInferenceId(connector);
+}
+
 export function findEndpointsWithoutConnectors(
   endpoints: InferenceInferenceEndpointInfo[],
   connectors: InMemoryConnector[]
@@ -48,6 +54,21 @@ export function findEndpointsWithoutConnectors(
   return endpoints.filter(
     (endpoint) => !existingConnectorInferenceIds.includes(endpoint.inference_id)
   );
+}
+
+/**
+ * Returns the ids of dynamic inference connectors that no longer have a corresponding
+ * eligible inference endpoint.
+ */
+export function findStaleDynamicConnectorIds(
+  eligibleEndpoints: InferenceInferenceEndpointInfo[],
+  connectors: InMemoryConnector[]
+): string[] {
+  const eligibleInferenceIds = new Set(eligibleEndpoints.map((endpoint) => endpoint.inference_id));
+  return connectors
+    .filter(isDynamicInferenceConnector)
+    .filter((connector) => !eligibleInferenceIds.has(connector.config.inferenceId))
+    .map((connector) => connector.id);
 }
 
 export function connectorFromEndpoint(endpoint: InferenceInferenceEndpointInfo): InMemoryConnector {

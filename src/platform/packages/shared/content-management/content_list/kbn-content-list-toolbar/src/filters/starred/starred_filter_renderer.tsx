@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 import type { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFilterDisplay } from '@kbn/content-list-provider';
+import { useContentListConfig } from '@kbn/content-list-provider';
 
 const STARRED_FIELD = 'starred';
 
@@ -48,7 +48,7 @@ export const StarredFilterRenderer = ({
   onChange,
   'data-test-subj': dataTestSubj = 'contentListStarredRenderer',
 }: StarredFilterRendererProps) => {
-  const { hasStarred } = useFilterDisplay();
+  const { supports } = useContentListConfig();
 
   const active = query?.hasIsClause(STARRED_FIELD) ?? false;
 
@@ -64,7 +64,7 @@ export const StarredFilterRenderer = ({
     onChange(nextQuery);
   }, [query, onChange, active]);
 
-  if (!hasStarred) {
+  if (!supports.starred) {
     return null;
   }
 

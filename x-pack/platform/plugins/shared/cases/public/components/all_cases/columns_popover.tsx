@@ -193,7 +193,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                             aria-label={i18n.DRAG_HANDLE}
                             grow={false}
                           >
-                            <EuiIcon type="dragVertical" color="subdued" />
+                            <EuiIcon type="dragVertical" color="subdued" aria-hidden={true} />
                           </EuiPanel>
                         </EuiFlexItem>
                       )}

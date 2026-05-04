@@ -6,19 +6,33 @@
  */
 
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
-import { getEnabledRoutes } from './route_config';
+import { getEnabledRoutes, getViewIdForPathname } from './route_config';
 import { useFeatureFlags } from './hooks/use_feature_flags';
+import { useKibana } from './hooks/use_kibana';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   const featureFlags = useFeatureFlags();
+  const { pathname } = useLocation();
+  const {
+    services: { executionContext },
+  } = useKibana();
 
   const enabledRoutes = useMemo(() => getEnabledRoutes(featureFlags), [featureFlags]);
+
+  const viewId = useMemo(
+    () => getViewIdForPathname(pathname, enabledRoutes),
+    [pathname, enabledRoutes]
+  );
+
+  useExecutionContext(executionContext, { type: 'application', page: viewId });
 
   return (
     <AppLayout>

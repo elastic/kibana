@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface EntryTitleProps {
@@ -30,7 +31,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
       name,
     },
-    preferredSchema: searchCriteria?.preferredSchema ?? 'semconv',
+    preferredSchema: searchCriteria?.preferredSchema ?? DEFAULT_SCHEMA,
   });
 
   const providerName = cloudProvider ?? 'Unknown';

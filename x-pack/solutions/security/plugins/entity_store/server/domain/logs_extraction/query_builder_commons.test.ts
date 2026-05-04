@@ -60,20 +60,21 @@ describe('buildExtractionSourceClause', () => {
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
 
-  it('should build FROM, METADATA, and time range with strict lower bound when recoveryId is absent', () => {
-    const clause = buildExtractionSourceClause(baseParams);
-    expect(clause).toContain('FROM logs-*, metrics-*');
-    expect(clause).toContain('METADATA _index');
-    expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
-    expect(clause).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
-  });
+  it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
+    const withCursor = buildExtractionSourceClause({
+      ...baseParams,
+      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
+    });
+    expect(withCursor).toContain('FROM logs-*, metrics-*');
+    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
+    expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
 
-  it('should use inclusive lower bound on @timestamp when recoveryId is set', () => {
-    const clause = buildExtractionSourceClause({ ...baseParams, recoveryId: 'recover-1' });
-    expect(clause).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    const withoutCursor = buildExtractionSourceClause({ ...baseParams });
+    expect(withoutCursor).toContain(
+      `${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`
+    );
   });
 });
 
@@ -90,13 +91,13 @@ describe('aggregationStats', () => {
     expect(aggregationStats([keywordField()], true)).toBe(
       `${recentData(
         'host.name'
-      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE TO_STRING(host.name) IS NOT NULL`
     );
   });
 
   it('should keep raw destination when renameToRecent is false', () => {
     expect(aggregationStats([keywordField()], false)).toBe(
-      `host.name = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      `host.name = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE TO_STRING(host.name) IS NOT NULL`
     );
   });
 
@@ -108,7 +109,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'collect_values', maxLength: 10 },
     };
     expect(aggregationStats([field], false)).toBe(
-      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE tags IS NOT NULL'
+      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
     );
   });
 
@@ -120,7 +121,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'collect_values', maxLength: 50 },
     };
     expect(aggregationStats([field], false)).toBe(
-      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE entity.source IS NOT NULL'
+      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
     );
   });
 
@@ -132,7 +133,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'prefer_oldest_value' },
     };
     expect(aggregationStats([field], false)).toBe(
-      `event.created = FIRST(TO_DATETIME(event.created), ${TIMESTAMP_FIELD}) WHERE event.created IS NOT NULL`
+      `event.created = FIRST(TO_DATETIME(event.created), ${TIMESTAMP_FIELD}) WHERE TO_DATETIME(event.created) IS NOT NULL`
     );
   });
 
@@ -453,8 +454,6 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
     const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
     const esql = conditionToESQL(mapped);
     expect(esql).toContain(recentData('event.kind'));
-    expect(esql).toContain(recentData('user.name'));
-    expect(esql).toContain(recentData('host.id'));
     expect(esql).toContain('entity.id');
     expect(esql).not.toContain(recentData('entity.id'));
   });

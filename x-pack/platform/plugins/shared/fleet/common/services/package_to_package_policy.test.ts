@@ -5,10 +5,47 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
+import type { NewPackagePolicyInput, PackageInfo } from '../types';
 
-import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
+import {
+  packageToPackagePolicy,
+  packageToPackagePolicyInputs,
+  getInputEffectiveName,
+} from './package_to_package_policy';
 import { AWS_PACKAGE } from './fixtures/aws_package';
+
+describe('getInputEffectiveName', () => {
+  it('returns name when present on a registry input', () => {
+    expect(getInputEffectiveName({ name: 'filelog_otel', type: 'otelcol' })).toBe('filelog_otel');
+  });
+
+  it('falls back to type when name is absent on a registry input', () => {
+    expect(getInputEffectiveName({ type: 'logfile' })).toBe('logfile');
+  });
+
+  it('returns name when present on a policy input, ignoring the instance id', () => {
+    expect(
+      getInputEffectiveName({
+        id: 'otelcol-nginx-abc123',
+        name: 'filelog_otel',
+        type: 'otelcol',
+        enabled: true,
+        streams: [],
+      } as NewPackagePolicyInput)
+    ).toBe('filelog_otel');
+  });
+
+  it('falls back to type when name is absent on a policy input', () => {
+    expect(
+      getInputEffectiveName({
+        id: 'logfile-nginx-abc123',
+        type: 'logfile',
+        enabled: true,
+        streams: [],
+      } as NewPackagePolicyInput)
+    ).toBe('logfile');
+  });
+});
 
 describe('Fleet - packageToPackagePolicy', () => {
   const mockPackage: PackageInfo = {
@@ -91,6 +128,119 @@ describe('Fleet - packageToPackagePolicy', () => {
         { type: 'foo', enabled: true, policy_template: 'test_template', streams: [] },
         { type: 'bar', enabled: true, policy_template: 'test_template', streams: [] },
       ]);
+    });
+
+    it('returns distinct inputs when multiple inputs share the same type but have different ids', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              { name: 'filelog_otel', type: 'otelcol', title: 'Logs via filelog' },
+              { name: 'nginx_otel', type: 'otelcol', title: 'Metrics via nginx receiver' },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+      });
+      expect(result[1]).toMatchObject({
+        type: 'otelcol',
+        name: 'nginx_otel',
+        policy_template: 'nginx',
+        enabled: true,
+      });
+    });
+
+    it('does not set name when registry input has no id', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        policy_templates: [
+          {
+            name: 'test_template',
+            inputs: [{ type: 'logfile' }],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBeUndefined();
+    });
+
+    it('does not match streams that reference by type when inputs have explicit ids', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'nginx.access',
+            path: 'access',
+            streams: [{ input: 'otelcol', title: 'Access logs' }],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            data_streams: ['access'],
+            inputs: [
+              { name: 'filelog_otel', type: 'otelcol', title: 'Logs' },
+              { name: 'nginx_otel', type: 'otelcol', title: 'Metrics' },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+      // Neither input should have matched the stream because
+      // 'otelcol' is the type, not an id
+      expect(result[0].streams).toHaveLength(0);
+      expect(result[1].streams).toHaveLength(0);
+    });
+
+    it('matches streams to inputs by id when inputs have ids', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'nginx.access',
+            path: 'access',
+            streams: [{ input: 'filelog_otel', title: 'Access logs' }],
+          },
+          {
+            type: 'metrics',
+            dataset: 'nginx.stubstatus',
+            path: 'stubstatus',
+            streams: [{ input: 'nginx_otel', title: 'Stub status metrics' }],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            data_streams: ['access', 'stubstatus'],
+            inputs: [
+              { name: 'filelog_otel', type: 'otelcol', title: 'Logs' },
+              { name: 'nginx_otel', type: 'otelcol', title: 'Metrics' },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('filelog_otel');
+      expect(result[0].streams).toHaveLength(1);
+      expect(result[0].streams[0].data_stream.dataset).toBe('nginx.access');
+
+      expect(result[1].name).toBe('nginx_otel');
+      expect(result[1].streams).toHaveLength(1);
+      expect(result[1].streams[0].data_stream.dataset).toBe('nginx.stubstatus');
     });
 
     it('returns inputs with streams for packages with streams', () => {

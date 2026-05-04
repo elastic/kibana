@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
 const mockRules = [
@@ -79,6 +80,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onNavigateToDetails: jest.fn(),
+  onExpand: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
@@ -263,6 +265,36 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 5 rules');
     });
 
+    it('shows "Select first {max} rules" without disclosure until select-all is active', () => {
+      renderTable({
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+      });
+
+      const btn = screen.getByTestId('selectAllRulesButton');
+      expect(btn).toHaveTextContent('Select first');
+      expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+
+      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+    });
+
+    it('shows disclosure only after select-all when total exceeds bulk cap', () => {
+      renderTable({
+        selectedCount: BULK_FILTER_MAX_RULES,
+        isAllSelected: true,
+        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+      });
+
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('Selected');
+      expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
+        /10,?000/
+      );
+      const disc = screen.getByTestId('bulkSelectAllLimitDisclosure');
+      expect(disc).toHaveTextContent('Only the first');
+      expect(disc.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+    });
+
     it('hides "Select all" button when all selected', () => {
       renderTable({ selectedCount: 5, isAllSelected: true, totalItemCount: 5 });
 
@@ -444,6 +476,24 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
       expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
+
+  describe('expand button', () => {
+    it('renders an expand button for each row', () => {
+      renderTable();
+
+      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('expandRule-rule-2')).toBeInTheDocument();
+    });
+
+    it('calls onExpand with the row rule when the expand button is clicked', () => {
+      const onExpand = jest.fn();
+      renderTable({ onExpand });
+
+      fireEvent.click(screen.getByTestId('expandRule-rule-1'));
+
+      expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 });

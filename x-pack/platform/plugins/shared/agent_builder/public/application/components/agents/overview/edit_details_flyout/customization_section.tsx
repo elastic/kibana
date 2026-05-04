@@ -37,11 +37,11 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
       <EuiTitle size="xs">
         <h3>{flyoutLabels.customizationTitle}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" component="p">
         {flyoutLabels.customizationDescription}
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiPanel hasBorder paddingSize="l">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>

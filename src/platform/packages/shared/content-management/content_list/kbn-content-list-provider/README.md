@@ -96,7 +96,9 @@ The `dataSource` prop configures how items are fetched:
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `findItems` | `FindItemsFn` | Yes | Async function that fetches items (returns `{ items: ContentListItem[], total: number }`). |
-| `onFetchSuccess` | `(result) => void` | No | Callback after successful fetch. |
+| `debounceMs` | `number` | No | Milliseconds to debounce free-text search before firing a request. Defaults to `300`. Structured filter changes (tags, flags, sort, pagination) are always immediate. |
+| `onFetchSuccess` | `(result) => void` | No | Callback after a successful fetch. Useful for priming local caches. |
+| `onInvalidate` | `() => void` | No | Called by `refetch` before re-executing the query so any client-side cache can be cleared first. |
 
 #### findItems Parameters
 
@@ -125,7 +127,8 @@ item={{
 | Prop | Type | Description |
 |------|------|-------------|
 | `isReadOnly` | `boolean` | When `true`, disables selection and editing actions. |
-| `features` | `ContentListFeatures` | Feature configuration for sorting and other capabilities. |
+| `features` | `ContentListFeatures` | Opt-in feature configuration. Supports `sorting` (field list + initial sort), `pagination` (initial page size), `tags` (tag facet provider), `starred` (favorites service required), and `userProfiles` (user profile facet provider). |
+| `services` | `ContentListServices` | External service integrations. Supports `favorites` (for starred toggling), `tags` (for tag filter popovers), and `userProfiles` (for `createdBy` avatars and filter popovers). |
 
 ## Architecture
 
@@ -172,6 +175,19 @@ Manages runtime data using a reducer pattern with React Query for data fetching.
 
 | Hook | Returns | Purpose |
 |------|---------|---------|
-| `useContentListItems()` | `{ items, totalItems, isLoading, error, refetch }` | Access loaded items and loading state. |
+| `useContentListItems()` | `{ items, totalItems, isLoading, isFetching, error, hasNoItems, hasNoResults, hasActiveQuery, refetch }` | Access loaded items, loading/fetching flags, and empty-state signals. |
+| `useContentListPhase()` | `ContentListPhase` | Derive the current render phase (`'initialLoad' \| 'empty' \| 'filtering' \| 'filtered' \| 'populated'`) from provider state. |
 | `useContentListSort()` | `{ field, direction, setSort, isSupported }` | Read/update sort configuration. |
+| `useContentListSearch()` | `{ queryText, setQueryFromEuiQuery, setQueryFromText, isSupported, fieldNames }` | Read/update the search bar query text. |
+| `useContentListPagination()` | `{ page, setPage, isSupported }` | Read/update pagination state. |
+| `useContentListSelection()` | `{ selectedItems, selectedCount, clearSelection }` | Access the current row selection and clear it. |
+| `useContentListFilters()` | `{ filters, clearFilters }` | Read derived `ActiveFilters` from `queryText` and clear all structured filters (preserving free-text search). |
+| `useFilterToggle(fieldName)` | `(id: string, type?: 'include' \| 'exclude') => void` | Toggle a value in any field filter via EUI Query mutations. |
+| `useTagFilterToggle()` | `(value: string) => void` | Convenience wrapper around `useFilterToggle` for the `tag` field. |
+| `useCreatedByFilterToggle()` | `(value: string) => void` | Convenience wrapper around `useFilterToggle` for the `createdBy` field. |
+| `useFilterFacets(filterId, opts?)` | `UseQueryResult<FilterFacet[]>` | Fetch display-ready `FilterFacet[]` for a filter popover (lazy, via React Query). Pass `{ enabled: isOpen }` to fire on popover open. |
+| `useDeleteConfirmation(options?)` | `{ requestDelete, deleteModal }` | Trigger a delete confirmation flow. Call `requestDelete(items)` to open the modal; render `deleteModal` in the tree. |
+| `useProfileCache()` | `ProfileCache \| undefined` | Access the shared profile cache instance. Returns `undefined` when user profiles are not configured. |
+| `useProfileCacheVersion()` | `number` | Subscribe to cache version changes. Re-renders only when profiles are loaded. |
+| `useProfile(uid)` | `UserProfileEntry \| undefined` | Resolve a single profile by UID. Self-loading via batched requests. |
 

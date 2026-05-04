@@ -217,7 +217,7 @@ export const getAlertsAppMenuItem = ({
       defaultMessage: 'Alerts',
     }),
     testId: 'discoverAlertsButton',
-    order: 4,
+    order: 5,
     iconType: 'warning',
     popoverWidth: 250,
     items,

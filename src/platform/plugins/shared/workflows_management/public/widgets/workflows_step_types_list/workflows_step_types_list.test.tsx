@@ -32,8 +32,10 @@ jest.mock('../../shared/ui/step_icons/get_base_connector_type', () => ({
   }),
 }));
 
-jest.mock('../../shared/ui/step_icons/get_step_icon_type', () => ({
-  getStepIconType: jest.fn(() => 'globe'),
+jest.mock('../../shared/ui/step_icons/step_icon', () => ({
+  StepIcon: ({ stepType, title }: { stepType: string; title?: string }) => (
+    <span data-test-subj="step-icon" data-step-type={stepType} title={title} />
+  ),
 }));
 
 describe('calculateVisibleIconsCount', () => {

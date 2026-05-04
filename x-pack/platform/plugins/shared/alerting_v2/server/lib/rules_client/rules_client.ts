@@ -6,7 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  BULK_FILTER_MAX_RULES,
+  createRuleDataSchema,
+  updateRuleDataSchema,
+} from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
@@ -42,10 +46,19 @@ import {
   buildUpdateRuleAttributes,
 } from './utils';
 import { buildRuleSoFilter } from './build_rule_filter';
-import { buildFindRulesSearch } from './build_rule_search';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
+
+type ResolveRuleIdsResult =
+  | { ids: string[]; usedFilter: false }
+  | {
+      ids: string[];
+      usedFilter: true;
+      truncated: boolean;
+      totalMatched: number;
+    };
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
@@ -359,13 +372,16 @@ export class RulesClient {
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
-    const filter = buildFindRulesSearch({ filter: params.filter, search: params.search });
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const search = buildSoSearch(params.search);
     const sortField = mapSortField(params.sortField);
 
     const res = await this.rulesSavedObjectService.find({
       page,
       perPage,
-      filter,
+      filter: soFilter,
+      search,
+      searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       sortField,
       sortOrder: params.sortOrder,
     });
@@ -382,32 +398,47 @@ export class RulesClient {
 
   /**
    * Resolves rule IDs from a BulkRulesParams. If `ids` are provided directly,
-   * returns them. If a `filter` is provided, paginates through all matching
-   * rules and collects their IDs.
+   * returns them. If a `filter` is provided, pages matching rules and collects
+   * IDs up to {@link BULK_FILTER_MAX_RULES}.
    */
-  private async resolveRuleIds(params: BulkRulesParams): Promise<string[]> {
-    if (params.ids && params.filter) {
-      throw Boom.badRequest('Only one of ids or filter can be provided');
+  private async resolveRuleIds(params: BulkRulesParams): Promise<ResolveRuleIdsResult> {
+    if (params.ids && (params.filter || params.search)) {
+      throw Boom.badRequest('ids cannot be combined with filter or search');
     }
 
     if (params.ids) {
-      return params.ids;
+      return { ids: params.ids, usedFilter: false };
     }
 
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const search = buildSoSearch(params.search);
     const allIds: string[] = [];
     let currentPage = 1;
     const pageSize = 100;
+    let totalMatched = 0;
 
     while (true) {
       const res = await this.rulesSavedObjectService.find({
         page: currentPage,
         perPage: pageSize,
         filter: soFilter,
+        search,
+        searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       });
 
+      if (currentPage === 1) {
+        totalMatched = res.total;
+      }
+
       for (const so of res.saved_objects) {
+        if (allIds.length >= BULK_FILTER_MAX_RULES) {
+          break;
+        }
         allIds.push(so.id);
+      }
+
+      if (allIds.length >= BULK_FILTER_MAX_RULES) {
+        break;
       }
 
       if (allIds.length >= res.total) {
@@ -416,14 +447,31 @@ export class RulesClient {
       currentPage++;
     }
 
-    return allIds;
+    const truncated = totalMatched > BULK_FILTER_MAX_RULES;
+
+    return {
+      ids: allIds,
+      usedFilter: true,
+      truncated,
+      totalMatched,
+    };
+  }
+
+  private bulkFilterResponseFields(
+    resolution: ResolveRuleIdsResult
+  ): Pick<BulkOperationResponse, 'truncated' | 'totalMatched'> {
+    if (!resolution.usedFilter || !resolution.truncated) {
+      return {};
+    }
+    return { truncated: true, totalMatched: resolution.totalMatched };
   }
 
   @withApm
   public async bulkDeleteRules(params: BulkRulesParams): Promise<BulkOperationResponse> {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
-    const ids = await this.resolveRuleIds(params);
+    const resolution = await this.resolveRuleIds(params);
+    const { ids } = resolution;
 
     if (ids.length === 0) {
       return { rules: [], errors: [] };
@@ -450,7 +498,7 @@ export class RulesClient {
       }
     }
 
-    return { rules: [], errors };
+    return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
 
   @withApm
@@ -458,7 +506,8 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
     const rules: RuleResponse[] = [];
-    const ids = await this.resolveRuleIds(params);
+    const resolution = await this.resolveRuleIds(params);
+    const { ids } = resolution;
 
     if (ids.length === 0) {
       return { rules: [], errors: [] };
@@ -552,7 +601,7 @@ export class RulesClient {
       }
     }
 
-    return { rules, errors };
+    return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
 
   @withApm
@@ -560,7 +609,8 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
     const rules: RuleResponse[] = [];
-    const ids = await this.resolveRuleIds(params);
+    const resolution = await this.resolveRuleIds(params);
+    const { ids } = resolution;
 
     if (ids.length === 0) {
       return { rules: [], errors: [] };
@@ -637,6 +687,6 @@ export class RulesClient {
       }
     }
 
-    return { rules, errors };
+    return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
 }

@@ -13,43 +13,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/agent-builder-genai-utils",
-        "id": "def-server.buildVisualizationConfig",
-        "type": "Function",
-        "tags": [],
-        "label": "buildVisualizationConfig",
-        "description": [],
-        "signature": [
-          "({ nlQuery, index, chartType, esql, existingConfig, parsedExistingConfig, includeTimeRange, additionalChartConfigInstructions, modelProvider, logger, events, esClient, }: BuildVisualizationConfigParams) => Promise<BuildVisualizationConfigResult>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/build_visualization_config.ts",
-        "lineNumber": 39,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/agent-builder-genai-utils",
-            "id": "def-server.buildVisualizationConfig.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  nlQuery,\n  index,\n  chartType,\n  esql,\n  existingConfig,\n  parsedExistingConfig = null,\n  includeTimeRange = true,\n  additionalChartConfigInstructions,\n  modelProvider,\n  logger,\n  events,\n  esClient,\n}",
-            "description": [],
-            "signature": [
-              "BuildVisualizationConfigParams"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/build_visualization_config.ts",
-            "lineNumber": 39,
-            "columnNumber": 48,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.cleanupMapping",
         "type": "Function",
         "tags": [],
@@ -83,6 +46,7 @@
             "lineNumber": 14,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "MappingTypeMapping",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -124,6 +88,7 @@
             "lineNumber": 14,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "EsqlResponse",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -138,19 +103,19 @@
         "tags": [],
         "label": "executeEsql",
         "description": [
-          "\nExecute an ES|QL query and returns the response.\nCross-cluster search (CCS) is supported: queries may target remote indices (e.g. FROM remote:index).\nallow_partial_results is enabled so that if a remote cluster is unavailable during a CCS query,\npartial results from the available clusters are returned instead of failing the entire request."
+          "\nExecute an ES|QL query and returns the response.\nCross-cluster search (CCS) is supported: queries may target remote indices (e.g. FROM remote:index).\nallow_partial_results is enabled so that if a remote cluster is unavailable during a CCS query,\npartial results from the available clusters are returned instead of failing the entire request.\n\nWhen `limit` is provided, the query is rewritten so the ES|QL engine enforces the cap. If the\nquery already ends with a `LIMIT N`, the trailing limit becomes `min(N, limit)`; otherwise a\nnew `| LIMIT <limit>` pipe is appended. See `applyLimit` for full semantics."
         ],
         "signature": [
-          "({ query, params, esClient, }: { query: string; params?: Record<string, ",
+          "({ query, params, limit, esClient, }: { query: string; params?: Record<string, ",
           "FieldValue",
-          ">[] | undefined; esClient: ",
+          ">[] | undefined; limit?: number | undefined; esClient: ",
           "ElasticsearchClient",
           "; }) => Promise<",
           "EsqlResponse",
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
-        "lineNumber": 24,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -160,10 +125,10 @@
             "id": "def-server.executeEsql.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  query,\n  params,\n  esClient,\n}",
+            "label": "{\n  query,\n  params,\n  limit,\n  esClient,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
-            "lineNumber": 28,
+            "lineNumber": 34,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -176,7 +141,7 @@
                 "label": "query",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
-                "lineNumber": 29,
+                "lineNumber": 35,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -194,7 +159,23 @@
                   ">[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
-                "lineNumber": 30,
+                "lineNumber": 36,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
+                "id": "def-server.executeEsql.$1.limit",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1198,7 +1179,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
-                "lineNumber": 31,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1251,6 +1232,7 @@
             "lineNumber": 24,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "MappingTypeMapping",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1298,29 +1280,11 @@
             "lineNumber": 94,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "GenerateEsqlParams",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-genai-utils",
-        "id": "def-server.getChartTypeSelectionPromptContent",
-        "type": "Function",
-        "tags": [],
-        "label": "getChartTypeSelectionPromptContent",
-        "description": [],
-        "signature": [
-          "() => string"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/chart_type_guidance.ts",
-        "lineNumber": 11,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2422,7 +2386,7 @@
           "[]>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 52,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2435,7 +2399,7 @@
             "label": "{\n  resource,\n  esClient,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 55,
+            "lineNumber": 59,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2448,7 +2412,7 @@
                 "label": "resource",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 56,
+                "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3452,7 +3416,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 57,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3470,7 +3434,7 @@
         "tags": [],
         "label": "getIndexFields",
         "description": [
-          "\nResolves field information for a list of indices, transparently handling\nthe local-vs-CCS split. Local indices use the _mapping API (preserving\nthe full mapping tree in `rawMapping`), while CCS indices fall back to\nthe batched _field_caps API."
+          "\nResolves field information for a list of indices, transparently handling\nthe local-vs-CCS split. Local inputs are classified via `_resolve/index`\nand routed to the appropriate mapping / field-caps fetcher; CCS inputs\ngo directly to the batched _field_caps API."
         ],
         "signature": [
           "({ indices, esClient, cleanup, }: { indices: string[]; esClient: ",
@@ -3486,7 +3450,7 @@
           ">>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 119,
+        "lineNumber": 172,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3499,7 +3463,7 @@
             "label": "{\n  indices,\n  esClient,\n  cleanup = true,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 123,
+            "lineNumber": 176,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3515,7 +3479,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 124,
+                "lineNumber": 177,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4519,7 +4483,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 125,
+                "lineNumber": 178,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4535,7 +4499,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 126,
+                "lineNumber": 179,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5660,7 +5624,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-        "lineNumber": 138,
+        "lineNumber": 199,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5673,7 +5637,7 @@
             "label": "{\n  nlQuery,\n  indexPattern = '*',\n  includeAliases = true,\n  includeDatastream = true,\n  limit = 1,\n  esClient,\n  model,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-            "lineNumber": 147,
+            "lineNumber": 208,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -5686,7 +5650,7 @@
                 "label": "nlQuery",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 148,
+                "lineNumber": 209,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5702,7 +5666,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 149,
+                "lineNumber": 210,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5718,7 +5682,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 150,
+                "lineNumber": 211,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5734,7 +5698,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 151,
+                "lineNumber": 212,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5750,7 +5714,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 152,
+                "lineNumber": 213,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6754,7 +6718,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 153,
+                "lineNumber": 214,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6776,7 +6740,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 154,
+                "lineNumber": 215,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6799,7 +6763,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 155,
+                "lineNumber": 216,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6823,7 +6787,7 @@
           "(name: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 24,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6839,7 +6803,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 24,
+            "lineNumber": 28,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -9234,7 +9198,7 @@
           "<T extends { name: string; }>(resources: T[]) => { local: T[]; remote: T[]; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -9250,7 +9214,7 @@
               "T[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 31,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9268,7 +9232,7 @@
         "label": "relevanceSearch",
         "description": [],
         "signature": [
-          "({ term, target, size, model, esClient, logger, }: { term: string; target: string; size?: number | undefined; model: ",
+          "({ term, target, size, model, esClient, logger, topSnippetsConfig, }: { term: string; target: string; size?: number | undefined; model: ",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -9286,7 +9250,15 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => Promise<",
+          "; topSnippetsConfig?: ",
+          {
+            "pluginId": "@kbn/agent-builder-genai-utils",
+            "scope": "server",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
+            "section": "def-server.TopSnippetsConfig",
+            "text": "TopSnippetsConfig"
+          },
+          " | undefined; }) => Promise<",
           "PerformMatchSearchResponse",
           ">"
         ],
@@ -9301,10 +9273,10 @@
             "id": "def-server.relevanceSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  term,\n  target,\n  size = 10,\n  model,\n  esClient,\n  logger,\n}",
+            "label": "{\n  term,\n  target,\n  size = 10,\n  model,\n  esClient,\n  logger,\n  topSnippetsConfig,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -9317,7 +9289,7 @@
                 "label": "term",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 32,
+                "lineNumber": 33,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9330,7 +9302,7 @@
                 "label": "target",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 33,
+                "lineNumber": 34,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9346,7 +9318,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 34,
+                "lineNumber": 35,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9368,7 +9340,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 35,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10372,7 +10344,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 36,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10394,7 +10366,32 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 37,
+                "lineNumber": 38,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
+                "id": "def-server.relevanceSearch.$1.topSnippetsConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "topSnippetsConfig",
+                "description": [
+                  "When provided, uses ES|QL TOP_SNIPPETS instead of ES highlighting."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-genai-utils",
+                    "scope": "server",
+                    "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
+                    "section": "def-server.TopSnippetsConfig",
+                    "text": "TopSnippetsConfig"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
+                "lineNumber": 39,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10413,7 +10410,7 @@
         "label": "runSearchTool",
         "description": [],
         "signature": [
-          "({ nlQuery, index, rowLimit, customInstructions, allowPatternTarget, timeRange, model, esClient, logger, events, }: { nlQuery: string; index?: string | undefined; rowLimit?: number | undefined; customInstructions?: string | undefined; allowPatternTarget?: boolean | undefined; timeRange?: ",
+          "({ nlQuery, index, rowLimit, customInstructions, allowPatternTarget, timeRange, model, esClient, logger, events, topSnippetsConfig, }: { nlQuery: string; index?: string | undefined; rowLimit?: number | undefined; customInstructions?: string | undefined; allowPatternTarget?: boolean | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/agent-builder-common",
             "scope": "common",
@@ -10447,7 +10444,15 @@
             "section": "def-common.ToolEventEmitter",
             "text": "ToolEventEmitter"
           },
-          "; }) => Promise<",
+          "; topSnippetsConfig?: ",
+          {
+            "pluginId": "@kbn/agent-builder-genai-utils",
+            "scope": "server",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
+            "section": "def-server.TopSnippetsConfig",
+            "text": "TopSnippetsConfig"
+          },
+          " | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -10466,7 +10471,7 @@
           ">[]>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10476,10 +10481,10 @@
             "id": "def-server.runSearchTool.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  nlQuery,\n  index,\n  rowLimit,\n  customInstructions,\n  allowPatternTarget = false,\n  timeRange,\n  model,\n  esClient,\n  logger,\n  events,\n}",
+            "label": "{\n  nlQuery,\n  index,\n  rowLimit,\n  customInstructions,\n  allowPatternTarget = false,\n  timeRange,\n  model,\n  esClient,\n  logger,\n  events,\n  topSnippetsConfig,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -10492,7 +10497,7 @@
                 "label": "nlQuery",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 29,
+                "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10508,7 +10513,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 30,
+                "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10524,7 +10529,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 31,
+                "lineNumber": 33,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10540,7 +10545,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 32,
+                "lineNumber": 34,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10558,7 +10563,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 33,
+                "lineNumber": 35,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10581,7 +10586,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 35,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10603,7 +10608,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 36,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11607,7 +11612,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 37,
+                "lineNumber": 39,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11629,7 +11634,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 38,
+                "lineNumber": 40,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11651,7 +11656,30 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
-                "lineNumber": 39,
+                "lineNumber": 41,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
+                "id": "def-server.runSearchTool.$1.topSnippetsConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "topSnippetsConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-genai-utils",
+                    "scope": "server",
+                    "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
+                    "section": "def-server.TopSnippetsConfig",
+                    "text": "TopSnippetsConfig"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
+                "lineNumber": 42,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11937,11 +11965,27 @@
         "label": "IndexFieldsResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 108,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
+            "id": "def-server.IndexFieldsResult.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"index\" | \"alias\" | \"indexPattern\" | \"dataStream\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.IndexFieldsResult.fields",
@@ -11960,7 +12004,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 109,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11977,7 +12021,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 110,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12429,6 +12473,52 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
+        "id": "def-server.TopSnippetsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopSnippetsConfig",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/extract_snippets.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
+            "id": "def-server.TopSnippetsConfig.numSnippets",
+            "type": "number",
+            "tags": [],
+            "label": "numSnippets",
+            "description": [
+              "Maximum number of snippets per document."
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/extract_snippets.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
+            "id": "def-server.TopSnippetsConfig.numWords",
+            "type": "number",
+            "tags": [],
+            "label": "numWords",
+            "description": [
+              "Maximum number of words per snippet."
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/extract_snippets.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -12493,6 +12583,23 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-genai-utils",
+        "id": "def-server.IndexFieldType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexFieldType",
+        "description": [],
+        "signature": [
+          "\"index\" | \"alias\" | \"indexPattern\" | \"dataStream\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.listIndices",
         "type": "boolean",
         "tags": [],
@@ -12517,23 +12624,6 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
         "lineNumber": 15,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-genai-utils",
-        "id": "def-server.VisualizationConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "VisualizationConfig",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/chart_type_registry.ts",
-        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

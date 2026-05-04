@@ -114,7 +114,19 @@ export function createNavigationTree({
               defaultMessage: 'Anomaly detection',
             }),
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
+            children: [
+              {
+                link: 'management:anomaly_detection',
+                title: i18n.translate(
+                  'xpack.serverlessSearch.nav.machineLearning.anomalyDetection.manageJobs',
+                  {
+                    defaultMessage: 'Manage jobs',
+                  }
+                ),
+              },
+              { link: 'ml:anomalyExplorer' },
+              { link: 'ml:singleMetricViewer' },
+            ],
           },
           {
             id: 'category-data_frame analytics',
@@ -256,8 +268,9 @@ export function createNavigationTree({
                   breadcrumbStatus: 'hidden' as const,
                   children: [
                     { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },
+                    { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
                     {
-                      link: 'management:notification_policies' as const,
+                      link: 'management:action_policies' as const,
                       breadcrumbStatus: 'hidden' as const,
                     },
                   ],
@@ -270,7 +283,7 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
-              { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
+              { link: 'rules', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -290,6 +303,7 @@ export function createNavigationTree({
             id: 'settings_ml',
             title: MACHINE_LEARNING_TITLE,
             children: [
+              { link: 'management:overview', breadcrumbStatus: 'hidden' },
               { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
               { link: 'management:anomaly_detection' },
               { link: 'management:analytics' },

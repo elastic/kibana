@@ -24,7 +24,7 @@ import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../..
 import { addPathParamToUrl } from '../../../../../common/utils/integrations';
 import { INTEGRATION_APP_ID } from '../../../../../common/lib/integrations/constants';
 import { useKibana, useNavigation } from '../../../../../common/lib/kibana';
-import { usePrivilegedAccessDetectionIntegration } from '../../../privileged_user_monitoring_onboarding/hooks/use_integrations';
+import { usePrivilegedAccessDetectionIntegration } from '../../../privileged_user_monitoring_onboarding/hooks/use_privileged_access_detection_integration';
 
 export const PrivilegedAccessInfoPopover = () => {
   const { docLinks } = useKibana().services;

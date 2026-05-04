@@ -79,9 +79,9 @@ const renderComponent = (props = {}) =>
   );
 
 describe('ActionsMenu', () => {
-  it('renders the title "Select an action"', () => {
+  it('renders the title "Actions menu"', () => {
     renderComponent();
-    expect(screen.getByText('Select an action')).toBeInTheDocument();
+    expect(screen.getByText('Actions menu')).toBeInTheDocument();
   });
 
   it('renders top-level options', () => {
@@ -141,7 +141,7 @@ describe('ActionsMenu', () => {
     fireEvent.click(screen.getByText('Back'));
 
     // Should show top-level options again
-    expect(screen.getByText('Select an action')).toBeInTheDocument();
+    expect(screen.getByText('Actions menu')).toBeInTheDocument();
     expect(screen.getByText('Triggers')).toBeInTheDocument();
     expect(screen.getByText('If Condition')).toBeInTheDocument();
   });

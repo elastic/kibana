@@ -113,6 +113,9 @@ export interface BuilderParameters {
   extended_fields: {
     parameters: { payload: { extended_fields: Record<string, string> } };
   };
+  template: {
+    parameters: { payload: { template: { id: string; version: number } | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {

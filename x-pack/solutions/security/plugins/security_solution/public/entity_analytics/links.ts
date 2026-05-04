@@ -40,6 +40,7 @@ const privMonLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityAnalyticsEntityStoreV2',
 };
 
 const eaOverviewLinks: LinkItem = {
@@ -106,6 +107,22 @@ export const entityAnalyticsLinks: LinkItem = {
   links: [eaOverviewLinks, privMonLinks, homePageLinks],
   hideTimeline: true,
   skipUrlState: true,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+};
+
+export const entityAnalyticsV2Links: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHomePage,
+  title: ENTITY_ANALYTICS,
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  globalNavPosition: 7,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
+      defaultMessage: 'Entity analytics',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

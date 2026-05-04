@@ -24,6 +24,7 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -37,12 +38,14 @@ interface ScoreBaseEntitiesParams {
   now: string;
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
+  abortSignal?: AbortSignal;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
   lookupIndex: string;
+  abortSignal?: AbortSignal;
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
@@ -81,11 +84,16 @@ export const calculateBaseEntityScores = async function* ({
   now,
   watchlistConfigs,
   calculationRunId,
+  abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
 
   do {
+    if (abortSignal?.aborted) {
+      logger.info('Base scoring aborted between pages');
+      return;
+    }
     // Per page: find this page's start/end IDs for scoring, then apply entity modifiers.
     const pageResult = await fetchNextEuidPage({
       esClient,
@@ -142,12 +150,18 @@ export const scoreBaseEntities = async ({
     // Per page: split docs by write path, sync lookup docs, then write scores.
     pagesProcessed += 1;
     const categorized = categorizePhase1Entities(page);
+    const resolutionTargetIds = await findResolutionTargetIdsForPage({
+      page,
+      crudClient: params.crudClient,
+      logger: params.logger,
+    });
     const lookupSyncResult = await syncLookupIndexForCategorizedPage({
       esClient: params.esClient,
       index: lookupIndex,
       page,
       categorized,
       now: params.now,
+      resolutionTargetIds,
     });
 
     writeNowCount += categorized.write_now.length;
@@ -303,11 +317,75 @@ const enrichWithModifiers = async ({
     weights: [],
     page: {
       scores,
-      identifierField: 'entity_id',
+      identifierField: 'entity.id',
     },
     entities: entityMap,
     watchlistConfigs,
   });
 
   return { entityIds: euidValues, scores: finalScores, entities: entityMap };
+};
+
+/**
+ * Temporary phase-1 backfill for lookup self-rows.
+ *
+ * Why this exists:
+ * - Some scored entities are resolution targets and do not have
+ *   `entity.relationships.resolution.resolved_to` on their own document.
+ * - Without explicitly detecting those targets, lookup sync can miss the
+ *   target self-row and phase 2 cannot discover/score the group when only the
+ *   target has alerts.
+ *
+ * Fixes behavior reported in https://github.com/elastic/security-team/issues/16838
+ *
+ * Remove this helper once https://github.com/elastic/security-team/issues/16839 implemented
+ */
+const findResolutionTargetIdsForPage = async ({
+  page,
+  crudClient,
+  logger,
+}: {
+  page: ScoredEntityPage;
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+}): Promise<string[]> => {
+  const candidateTargetIds = page.entityIds.filter((id) => {
+    const entity = page.entities.get(id);
+    return entity && !entity.entity?.relationships?.resolution?.resolved_to;
+  });
+
+  if (candidateTargetIds.length === 0) {
+    return [];
+  }
+
+  const candidateSet = new Set(candidateTargetIds);
+  const confirmedTargetIds = new Set<string>();
+
+  try {
+    let searchAfter: Array<string | number> | undefined;
+    do {
+      const { entities, nextSearchAfter } = await crudClient.listEntities({
+        filter: {
+          terms: { 'entity.relationships.resolution.resolved_to': candidateTargetIds },
+        },
+        size: MAX_ENTITY_SEARCH_PAGE_SIZE,
+        searchAfter,
+        source: ['entity.relationships.resolution.resolved_to'],
+      });
+      for (const entity of entities) {
+        const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
+        if (typeof resolvedTo === 'string' && candidateSet.has(resolvedTo)) {
+          confirmedTargetIds.add(resolvedTo);
+        }
+      }
+      searchAfter = nextSearchAfter;
+    } while (searchAfter !== undefined);
+  } catch (error) {
+    logger.warn(
+      `Error checking resolution targets for lookup sync. Continuing without additional target self-rows: ${error}`
+    );
+    return [];
+  }
+
+  return [...confirmedTargetIds];
 };

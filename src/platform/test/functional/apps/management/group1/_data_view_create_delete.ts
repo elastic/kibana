@@ -31,6 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -43,6 +46,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
     });
 
@@ -79,12 +85,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await new Promise((e) => setTimeout(e, 1000));
         // this won't have 'timestamp' field
         await PageObjects.settings.setIndexPatternField('kibana*');
-        // wait for timestamp fields to load
+        // wait for other date fields to load
         await new Promise((e) => setTimeout(e, 1000));
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         // verify an error is displayed
         await find.byClassName('euiFormErrorText');
         await flyout.closeFlyout();
+      });
+
+      it('correctly resets time field after index pattern changes', async function () {
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
+        // setting the index pattern also sets the time field
+        await PageObjects.settings.setIndexPatternField('log*');
+        // wait for date fields to load
+        await retry.waitFor('time field', async () => {
+          const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
+          return (await timeFieldInput.getAttribute('value')) === '@timestamp';
+        });
+        // this won't have any date fields
+        await PageObjects.settings.setIndexPatternField('without-timefield');
+        // wait for the dropdown to get disabled
+        await retry.waitFor('no time field', async () => {
+          const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
+          return !(await timeFieldInput.getAttribute('value'));
+        });
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.be('without-timefield');
+        });
+        await testSubjects.missingOrFail('currentIndexPatternTimeField');
+        await PageObjects.settings.clickKibanaIndexPatterns();
       });
     });
 

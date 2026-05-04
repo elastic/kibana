@@ -262,11 +262,8 @@ describe('Auto gap fill RBAC', { tags: ['@ess'] }, () => {
       visit(RULES_URL);
     });
 
-    it('shows the settings button and modal but disables edits', () => {
-      cy.get(RULE_SETTINGS_BUTTON).should('exist').click();
-      cy.get(RULE_SETTINGS_MODAL).should('exist');
-      cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('be.disabled');
-      cy.get(RULE_SETTINGS_SAVE_BUTTON).should('be.disabled');
+    it('does not show the settings button', () => {
+      cy.get(RULE_SETTINGS_BUTTON).should('not.exist');
     });
   });
 });

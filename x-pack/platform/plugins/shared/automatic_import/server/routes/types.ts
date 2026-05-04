@@ -58,6 +58,7 @@ export interface IntegrationParams {
   logo?: string;
   description: string;
   title: string;
+  connectorId?: string;
 }
 
 export interface DataStreamParams {

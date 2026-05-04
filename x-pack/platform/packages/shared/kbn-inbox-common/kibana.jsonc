@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/inbox-common",
+  "owner": [
+    "@elastic/security-pds-deployment",
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

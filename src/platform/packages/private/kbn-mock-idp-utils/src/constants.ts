@@ -19,6 +19,10 @@ export const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS = 'api-keys';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS = 'users';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION = 'token-invalidation';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS = 'oauth-clients';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES =
+  'oauth-authorization-codes';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS = 'oauth-app-connections';
 export const MOCK_IDP_UIAM_COSMOS_DB_NAME = 'uiam-db';
 // Cosmos DB emulator uses a fixed key. For production, this should be retrieved from configuration.
 export const MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY =
@@ -52,6 +56,8 @@ export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'https://uiam:8443';
 export const MOCK_IDP_UIAM_SERVICE_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_URL || 'https://localhost:8443';
+export const MOCK_IDP_UIAM_OAUTH_BASE_URL =
+  process.env.MOCK_IDP_UIAM_OAUTH_BASE_URL || `https://localhost:8444/oauth2`;
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

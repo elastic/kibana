@@ -64,8 +64,7 @@ describe('IdentifierControlForm', () => {
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       // no need to test further as the control type is disabled
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
 
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('??field');
@@ -98,8 +97,7 @@ describe('IdentifierControlForm', () => {
       fireEvent.change(variableNameInput, { target: { value: '?value' } });
 
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
       // values dropdown should be rendered
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
       expect(valuesOptionsDropdown).toBeInTheDocument();
@@ -233,8 +231,7 @@ describe('IdentifierControlForm', () => {
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
 
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('??function');

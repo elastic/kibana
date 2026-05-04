@@ -51,38 +51,46 @@ export class ApiKeyInvalidationTaskRunner {
     const removalDelay =
       this.config.invalidateApiKeysTask?.removalDelay ?? INVALIDATE_API_KEYS_TASK_REMOVAL_DELAY;
     let totalInvalidated = 0;
+    let missingApiKeyRetries = { ...state.missing_api_key_retries };
 
     try {
-      totalInvalidated = await runInvalidate({
+      const result = await runInvalidate({
         invalidateApiKeyFn: this.security?.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: this.securityCore.authc.apiKeys.uiam?.invalidate,
         logger: this.logger,
+        missingApiKeyRetries,
         removalDelay,
         savedObjectsClient: this.savedObjectsClient,
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
         savedObjectTypesToQuery: [],
       });
+      totalInvalidated = result.totalInvalidated;
+      missingApiKeyRetries = result.missingApiKeyRetries;
 
+      const updatedState: LatestTaskStateSchema = {
+        runs: (state.runs || 0) + 1,
+        total_invalidated: totalInvalidated,
+        missing_api_key_retries: missingApiKeyRetries,
+      };
       return {
-        state: {
-          runs: (state.runs || 0) + 1,
-          total_invalidated: totalInvalidated,
-        },
+        state: updatedState,
         schedule: { interval },
       };
     } catch (e) {
       this.logger.error(
-        `Error executing notification policy apiKey invalidation task: ${(e as Error).message}`,
+        `Error executing action policy apiKey invalidation task: ${(e as Error).message}`,
         {
           error: { stack_trace: (e as Error).stack },
         }
       );
 
+      const updatedState: LatestTaskStateSchema = {
+        runs: (state.runs || 0) + 1,
+        total_invalidated: totalInvalidated,
+        missing_api_key_retries: missingApiKeyRetries,
+      };
       return {
-        state: {
-          runs: (state.runs || 0) + 1,
-          total_invalidated: totalInvalidated,
-        },
+        state: updatedState,
         schedule: { interval },
       };
     }

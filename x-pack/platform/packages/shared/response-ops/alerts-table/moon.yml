@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/field-types'
   - '@kbn/react-query'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/es-query'
 tags:
   - shared-browser
   - package

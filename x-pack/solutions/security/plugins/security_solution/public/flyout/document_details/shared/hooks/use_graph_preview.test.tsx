@@ -14,9 +14,13 @@ import { mockFieldData } from '../mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
 import {
-  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-  GRAPH_TARGET_EUID_SOURCE_FIELDS,
+  getGraphActorEuidSourceFields,
+  getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common/constants';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+
+jest.mock('@kbn/entity-store/public');
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
 
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
@@ -25,10 +29,36 @@ jest.mock('../../../shared/hooks/use_should_show_graph');
 import { useShouldShowGraph } from '../../../shared/hooks/use_should_show_graph';
 const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
+// Mock EUID that returns known identity fields per entity type
+const mockEuid = {
+  getEuidSourceFields: (entityType: string) => {
+    const fieldsMap: Record<string, string[]> = {
+      user: ['user.email', 'user.id', 'user.name'],
+      host: ['host.id', 'host.name', 'host.hostname'],
+      service: ['service.name'],
+      generic: ['entity.id'],
+    };
+    return { identitySourceFields: fieldsMap[entityType] ?? [] };
+  },
+};
+
+const mockActorFields = getGraphActorEuidSourceFields(
+  mockEuid as unknown as Parameters<typeof getGraphActorEuidSourceFields>[0]
+);
+const mockTargetFields = getGraphTargetEuidSourceFields(
+  mockEuid as unknown as Parameters<typeof getGraphTargetEuidSourceFields>[0]
+);
+
 // All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
 const ALL_EUID_SOURCE_FIELDS: readonly string[] = [
-  ...GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-  ...GRAPH_TARGET_EUID_SOURCE_FIELDS,
+  ...mockActorFields.user,
+  ...mockActorFields.host,
+  ...mockActorFields.service,
+  ...mockActorFields.generic,
+  ...mockTargetFields.user,
+  ...mockTargetFields.host,
+  ...mockTargetFields.service,
+  ...mockTargetFields.generic,
 ];
 
 // Mock uses EUID source fields (user.id as actor, entity.target.id as target)
@@ -77,6 +107,8 @@ const eventMockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
 describe('useGraphPreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default mock: euid API returns mock euid
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: mockEuid });
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
     // Default mock: graph should be shown (license + entity store available)

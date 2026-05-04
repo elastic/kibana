@@ -8,7 +8,6 @@
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
@@ -55,11 +54,9 @@ export function useStreamsPrivileges() {
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
-  const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
-
   const wiredStreamViewsEnabled = uiSettings.get(
     OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-    true
+    false
   );
 
   const overviewPageEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE, false);
@@ -86,9 +83,6 @@ export function useStreamsPrivileges() {
       },
       contentPacks: {
         enabled: contentPacksEnabled,
-      },
-      attachments: {
-        enabled: attachmentsEnabled,
       },
       wiredStreamViews: {
         enabled: wiredStreamViewsEnabled,

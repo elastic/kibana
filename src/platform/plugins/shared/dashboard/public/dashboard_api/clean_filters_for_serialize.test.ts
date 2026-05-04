@@ -9,7 +9,6 @@
 
 import type { Filter } from '@kbn/es-query';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
-import type { DashboardFilter } from '../../server';
 
 describe('cleanFiltersForSerialize', () => {
   test('should return undefined if filters is not provided', () => {
@@ -22,10 +21,10 @@ describe('cleanFiltersForSerialize', () => {
       { query: { b: 'b' }, meta: { value: undefined } },
     ];
 
-    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+    const cleanedFilters = cleanFiltersForSerialize(filters);
 
-    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
-    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
+    expect(cleanedFilters?.[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedFilters?.[1]).toEqual({ query: { b: 'b' }, meta: {} });
   });
 
   test('should remove undefined "meta.key" property from each filter', () => {
@@ -34,10 +33,10 @@ describe('cleanFiltersForSerialize', () => {
       { query: { b: 'b' }, meta: { key: undefined } },
     ];
 
-    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+    const cleanedFilters = cleanFiltersForSerialize(filters);
 
-    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
-    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
+    expect(cleanedFilters?.[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedFilters?.[1]).toEqual({ query: { b: 'b' }, meta: {} });
   });
 
   test('should remove undefined "meta.alias" property from each filter', () => {
@@ -46,10 +45,10 @@ describe('cleanFiltersForSerialize', () => {
       { query: { b: 'b' }, meta: { alias: undefined } },
     ];
 
-    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+    const cleanedFilters = cleanFiltersForSerialize(filters);
 
-    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
-    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
+    expect(cleanedFilters?.[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedFilters?.[1]).toEqual({ query: { b: 'b' }, meta: {} });
   });
 
   test('should remove undefined "meta.key", "meta.alias", and "meta.value" properties from nested compound filters', () => {
@@ -64,9 +63,9 @@ describe('cleanFiltersForSerialize', () => {
       },
     ];
 
-    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+    const cleanedFilters = cleanFiltersForSerialize(filters);
 
-    expect(cleanedFilters[0]).toEqual({
+    expect(cleanedFilters?.[0]).toEqual({
       meta: {
         params: [
           { query: { a: 'a' }, meta: {} },
@@ -79,11 +78,9 @@ describe('cleanFiltersForSerialize', () => {
   test('should not fail if meta is missing from filters', () => {
     const filters: Filter[] = [{ query: { a: 'a' } }, { query: { b: 'b' } }] as unknown as Filter[];
 
-    const cleanedFilters = cleanFiltersForSerialize(
-      filters as unknown as Filter[]
-    ) as DashboardFilter[];
+    const cleanedFilters = cleanFiltersForSerialize(filters as unknown as Filter[]);
 
-    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' } });
-    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' } });
+    expect(cleanedFilters?.[0]).toEqual({ query: { a: 'a' } });
+    expect(cleanedFilters?.[1]).toEqual({ query: { b: 'b' } });
   });
 });

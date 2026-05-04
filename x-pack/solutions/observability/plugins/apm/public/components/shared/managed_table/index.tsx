@@ -17,6 +17,7 @@ import {
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
@@ -147,6 +148,11 @@ function ActionsCell<T extends object>({
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+const managedTableTableWrapperCss = css`
+  min-inline-size: 0;
+  inline-size: 100%;
+`;
 
 function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
   return orderBy(items, sortField, sortDirection) as T[];
@@ -442,34 +448,36 @@ function UnoptimizedManagedTable<T extends object>(props: {
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem>
-        <EuiBasicTable<T>
-          loading={isLoading}
-          tableLayout={tableLayout}
-          error={
-            error
-              ? i18n.translate('xpack.apm.managedTable.errorMessage', {
-                  defaultMessage: 'Failed to fetch',
-                })
-              : ''
-          }
-          noItemsMessage={
-            isLoading
-              ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
-                  defaultMessage: 'Loading…',
-                })
-              : noItemsMessage
-          }
-          items={renderedItems}
-          columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
-          rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
-          sorting={sorting}
-          onChange={onTableChange}
-          tableCaption={props.tableCaption}
-          rowProps={props.rowProps}
-          scrollableInline
-          responsiveBreakpoint={false}
-          {...(paginationProps ? { pagination: paginationProps } : {})}
-        />
+        <div css={managedTableTableWrapperCss}>
+          <EuiBasicTable<T>
+            loading={isLoading}
+            tableLayout={tableLayout}
+            error={
+              error
+                ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
+                : ''
+            }
+            noItemsMessage={
+              isLoading
+                ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+                    defaultMessage: 'Loading…',
+                  })
+                : noItemsMessage
+            }
+            items={renderedItems}
+            columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
+            rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
+            sorting={sorting}
+            onChange={onTableChange}
+            tableCaption={props.tableCaption}
+            rowProps={props.rowProps}
+            scrollableInline
+            responsiveBreakpoint={false}
+            {...(paginationProps ? { pagination: paginationProps } : {})}
+          />
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

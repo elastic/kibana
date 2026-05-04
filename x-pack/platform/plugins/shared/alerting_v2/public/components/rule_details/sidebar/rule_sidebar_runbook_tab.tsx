@@ -8,13 +8,10 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiMarkdownFormat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRule } from '../rule_context';
 
-export interface RuleSidebarRunbookTabProps {
-  rule: RuleApiResponse;
-}
-
-export const RuleSidebarRunbookTab: React.FC<RuleSidebarRunbookTabProps> = ({ rule }) => {
+export const RuleSidebarRunbookTab: React.FC = () => {
+  const rule = useRule();
   const runbook = rule.artifacts?.find((artifact) => artifact.type === 'runbook');
 
   if (!runbook) {

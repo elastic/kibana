@@ -26,7 +26,15 @@
         "tags": [],
         "label": "fitToBox",
         "description": [
-          "\nCalculate the size of an image, fitting to our limits see {@link boxDimensions},\nwhile preserving the aspect ratio."
+          "\nCalculate the size of an image, fitting to our limits see ",
+          {
+            "pluginId": "@kbn/shared-ux-file-util",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileUtilPluginApi",
+            "section": "def-common.boxDimensions",
+            "text": "boxDimensions"
+          },
+          ",\nwhile preserving the aspect ratio."
         ],
         "signature": [
           "(width: number, height: number) => { width: number; height: number; }"
@@ -280,6 +288,7 @@
             "lineNumber": 13,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "BehaviorSubject",
             "trackAdoption": false,
             "isRequired": true
           }

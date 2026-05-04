@@ -15,7 +15,7 @@ import { labels } from '../utils/i18n';
 export const AgentBuilderToolCreatePage = () => {
   useBreadcrumb([
     {
-      text: labels.tools.title,
+      text: labels.tools.libraryTitle,
       path: appPaths.tools.list,
     },
     {

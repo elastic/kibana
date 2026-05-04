@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { ApplicationStart } from '@kbn/core/public';
-import { navigateToConnectorsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
+import { navigateToModelManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -162,9 +162,9 @@ export function ChatFlyout({
     setConversationId(id || undefined);
   };
 
-  const navigateToConnectorsManagementAppHandler = (application: ApplicationStart) => {
+  const navigateToModelManagementAppHandler = (application: ApplicationStart) => {
     onClose();
-    navigateToConnectorsManagementApp(application);
+    navigateToModelManagementApp(application);
   };
 
   return isOpen ? (
@@ -314,7 +314,7 @@ export function ChatFlyout({
               refreshConversations={refreshConversations}
               updateDisplayedConversation={updateDisplayedConversation}
               onConversationDuplicate={onConversationDuplicate}
-              navigateToConnectorsManagementApp={navigateToConnectorsManagementAppHandler}
+              navigateToModelManagementApp={navigateToModelManagementAppHandler}
             />
           </EuiFlexItem>
 

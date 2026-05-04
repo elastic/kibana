@@ -25,7 +25,12 @@ import {
   isElementCommandBadge,
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
-import { getSelectionRange, insertNodeAtCursor } from './utils';
+import {
+  createTextFragment,
+  ensureCaretTargetBeforeFirstBadge,
+  getSelectionRange,
+  insertNodeAtCursor,
+} from './utils';
 
 const EDITOR_MAX_HEIGHT = 240;
 
@@ -67,7 +72,7 @@ const fragmentContainsBadge = (fragment?: DocumentFragment): boolean => {
 /**
  * Sanitizes pasted HTML to only allow badge spans.
  * Uses DOMParser to safely parse HTML, then walks its children,
- * keeping only badge spans and text nodes.
+ * keeping only badge spans, <br> elements, and text nodes.
  */
 const sanitizeHtmlIncludeOnlyTextAndBadges = (html: string): DocumentFragment => {
   const parser = new DOMParser();
@@ -82,6 +87,8 @@ const sanitizeHtmlIncludeOnlyTextAndBadges = (html: string): DocumentFragment =>
       if (isElementCommandBadge(element)) {
         // Clone the badge span
         fragment.appendChild(element.cloneNode(true));
+      } else if (element.tagName === 'BR') {
+        fragment.appendChild(document.createElement('br'));
       } else {
         // Strip other HTML, keep text content
         fragment.appendChild(document.createTextNode(element.textContent ?? ''));
@@ -207,9 +214,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           const hasBadgeHtml = htmlData && stringContainsBadge(htmlData);
           const node = hasBadgeHtml
             ? sanitizeHtmlIncludeOnlyTextAndBadges(htmlData)
-            : document.createTextNode(textData);
+            : createTextFragment(textData);
 
           insertNodeAtCursor(node);
+          if (ref.current) {
+            ensureCaretTargetBeforeFirstBadge(ref.current);
+          }
 
           onChange();
         }}

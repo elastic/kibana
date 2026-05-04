@@ -59,6 +59,8 @@ interface WorkflowExecutionRuntimeManagerInit {
  * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
  * and uses topological sorting to determine execution order.
  */
+const LOOP_STEP_TYPES = new Set(['foreach', 'while']);
+
 export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
@@ -476,11 +478,40 @@ export class WorkflowExecutionRuntimeManager {
 
   public async resume(): Promise<void> {
     await this.workflowExecutionState.load();
+    this.evictCompletedLoopOutputs();
     this.nextNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
+  }
+
+  /**
+   * Re-applies stale output eviction for loops that completed before the workflow
+   * suspended. Called after load() so that resume tasks don't carry the full output
+   * of every past loop iteration in memory — matching the in-memory state the initial
+   * task had at the point of suspension.
+   */
+  private evictCompletedLoopOutputs(): void {
+    // De-duplicate by stepId: a nested loop has multiple executions (one per outer
+    // iteration), all COMPLETED, but getInnerStepIds is called per step ID not per
+    // execution — deduplication avoids redundant evictStaleLoopOutputs calls.
+    const completedLoopStepIds = new Set(
+      this.workflowExecutionState
+        .getAllStepExecutions()
+        .filter(
+          (exec) =>
+            exec.stepType != null &&
+            LOOP_STEP_TYPES.has(exec.stepType) &&
+            exec.status === ExecutionStatus.COMPLETED
+        )
+        .map((exec) => exec.stepId)
+    );
+
+    for (const loopStepId of completedLoopStepIds) {
+      const innerStepIds = this.workflowGraph.getInnerStepIds(loopStepId);
+      this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+    }
   }
 
   public async saveState(): Promise<void> {

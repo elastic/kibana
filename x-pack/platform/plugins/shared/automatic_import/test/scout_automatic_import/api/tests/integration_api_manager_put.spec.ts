@@ -23,7 +23,7 @@ apiTest.describe(
     apiTest(
       'PUT /integrations: creates integration without data streams',
       async ({ apiClient, apiServices }) => {
-        const integrationId = 'scout-create-minimal';
+        const integrationId = 'scout_create_minimal';
         const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -44,7 +44,7 @@ apiTest.describe(
     apiTest(
       'PUT /integrations: creates integration with empty data streams array',
       async ({ apiClient, apiServices }) => {
-        const integrationId = 'scout-create-empty-ds';
+        const integrationId = 'scout_create_empty_ds';
         const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {

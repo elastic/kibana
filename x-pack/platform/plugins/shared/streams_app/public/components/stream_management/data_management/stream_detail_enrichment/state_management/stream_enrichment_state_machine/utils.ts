@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StreamlangUIBranch } from '@kbn/streamlang';
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
@@ -169,28 +170,43 @@ function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): nu
   return -1;
 }
 
-/* Find insert index based on step hierarchy */
-export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
+/* Find insert index based on step hierarchy and branch */
+export function findInsertIndex(
+  stepRefs: StepActorRef[],
+  parentId: string | null,
+  branch: StreamlangUIBranch = 'if'
+): number {
   // Find the index of the parent step
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
 
-  // Find the last index of any step with the same parentId
-  let newSiblingIndex = -1;
+  if (parentId !== null && parentIndex !== -1) {
+    // Find the last descendant in the target branch
+    const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+    const directChildren = steps.filter((s) => s.parentId === parentId);
 
-  if (parentId !== null) {
-    newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
-  }
+    if (branch === 'if') {
+      // Find last direct if-branch child and its descendants
+      const lastIfChild = [...directChildren].reverse().find((s) => s.branch !== 'else');
+      if (lastIfChild) {
+        const descendants = collectDescendantStepIds(steps, lastIfChild.customIdentifier);
+        const lastDescId = Array.from(descendants).at(-1) ?? lastIfChild.customIdentifier;
+        const idx = stepRefs.findIndex((ref) => ref.id === lastDescId);
+        return idx + 1;
+      }
+      // No if-branch children yet, insert right after parent
+      return parentIndex + 1;
+    }
 
-  if (newSiblingIndex !== -1) {
-    // Insert after the last sibling with the same parentId
-    return newSiblingIndex;
-  } else if (parentIndex !== -1) {
-    // Insert right after the parent if no siblings
+    // else branch: insert at end of all descendants
+    const newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
+    if (newSiblingIndex !== -1) {
+      return newSiblingIndex;
+    }
     return parentIndex + 1;
-  } else {
-    // No parent, insert at the end
-    return stepRefs.length;
   }
+
+  // No parent, insert at the end
+  return stepRefs.length;
 }
 
 export function insertAtIndex<T>(array: T[], item: T, index: number): T[] {
@@ -227,16 +243,22 @@ export function reorderSteps(
   // 3. Remove the block from the array
   const withoutBlock = [...stepRefs.slice(0, startIndex), ...stepRefs.slice(endIndex)];
 
-  // 4. Get the parentId of the block root
-  const blockRootParentId = stepRefs[startIndex].getSnapshot().context.step.parentId;
+  // 4. Get the parentId and branch of the block root
+  const blockRoot = stepRefs[startIndex].getSnapshot().context.step;
+  const blockRootParentId = blockRoot.parentId;
+  const blockRootBranch = blockRoot.branch ?? 'if';
 
   if (direction === 'up') {
-    // Find the previous block with the same parentId
+    // Find the previous block with the same parentId and branch
     let insertIndex = 0;
     for (let i = startIndex - 1; i >= 0; i--) {
       const candidate = stepRefs[i];
       const candidateStep = candidate.getSnapshot().context.step;
-      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+      if (
+        !allBlockIds.has(candidate.id) &&
+        candidateStep.parentId === blockRootParentId &&
+        (candidateStep.branch ?? 'if') === blockRootBranch
+      ) {
         // Find the start of this previous block in withoutBlock
         const candidateBlockStart = withoutBlock.findIndex((step) => step.id === candidate.id);
         insertIndex = candidateBlockStart;
@@ -247,12 +269,16 @@ export function reorderSteps(
     return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
   } else {
     // direction === 'down'
-    // Find the next block with the same parentId
+    // Find the next block with the same parentId and branch
     let insertIndex = withoutBlock.length;
     for (let i = endIndex; i < stepRefs.length; i++) {
       const candidate = stepRefs[i];
       const candidateStep = candidate.getSnapshot().context.step;
-      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+      if (
+        !allBlockIds.has(candidate.id) &&
+        candidateStep.parentId === blockRootParentId &&
+        (candidateStep.branch ?? 'if') === blockRootBranch
+      ) {
         // Find the end of this next block in withoutBlock
         let candidateBlockEnd = withoutBlock.findIndex((step) => step.id === candidate.id);
         // Find the last descendant of this block
@@ -290,7 +316,7 @@ export function reorderStepsByDragDrop(
   stepRefs: StepActorRef[],
   sourceStepId: string,
   targetStepId: string,
-  operation: 'before' | 'after' | 'inside'
+  operation: 'before' | 'after' | 'inside' | 'inside-else'
 ): StepActorRef[] {
   const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
 
@@ -319,8 +345,6 @@ export function reorderStepsByDragDrop(
   // Remove source block from array
   const withoutSource = [...stepRefs.slice(0, sourceBlockStart), ...stepRefs.slice(sourceBlockEnd)];
 
-  const updatedSourceBlock = sourceBlock;
-
   // Find target position in the filtered array
   const targetIndexInFiltered = withoutSource.findIndex((ref) => ref.id === targetStepId);
   if (targetIndexInFiltered === -1) {
@@ -331,9 +355,22 @@ export function reorderStepsByDragDrop(
   let insertIndex: number;
 
   if (operation === 'inside') {
-    // Insert as first child of target
-    // Find where target's children start (right after target)
+    // Insert as first child of target (if branch)
     insertIndex = targetIndexInFiltered + 1;
+  } else if (operation === 'inside-else') {
+    // Insert into the else branch - after all existing if-branch descendants
+    const filteredSteps = withoutSource.map((ref) => ref.getSnapshot().context.step);
+    const directChildren = filteredSteps.filter((s) => s.parentId === targetStepId);
+    const lastIfChild = [...directChildren].reverse().find((s) => s.branch !== 'else');
+    if (lastIfChild) {
+      const descendants = collectDescendantStepIds(filteredSteps, lastIfChild.customIdentifier);
+      const lastDescId = Array.from(descendants).at(-1) ?? lastIfChild.customIdentifier;
+      const idx = withoutSource.findIndex((ref) => ref.id === lastDescId);
+      insertIndex = idx + 1;
+    } else {
+      // No if-branch children, insert right after parent
+      insertIndex = targetIndexInFiltered + 1;
+    }
   } else if (operation === 'before') {
     // Insert before target
     insertIndex = targetIndexInFiltered;
@@ -353,7 +390,7 @@ export function reorderStepsByDragDrop(
   // Insert source block at the calculated position
   return [
     ...withoutSource.slice(0, insertIndex),
-    ...updatedSourceBlock,
+    ...sourceBlock,
     ...withoutSource.slice(insertIndex),
   ];
 }

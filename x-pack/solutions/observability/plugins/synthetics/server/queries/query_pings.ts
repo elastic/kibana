@@ -17,6 +17,7 @@ import type {
   PingsResponse,
 } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
+import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -117,7 +118,7 @@ export async function queryPings<F>(
   } = await syntheticsEsClient.search(searchBody);
 
   const pings: Ping[] = hits.map((doc: any) => {
-    const { _id, _source } = doc;
+    const { _id, _index, _source } = doc;
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
@@ -126,7 +127,9 @@ export async function queryPings<F>(
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return { ..._source, timestamp: _source['@timestamp'], docId: _id };
+    const remote = getRemoteMonitorInfo(_index, _source?.kibanaUrl);
+
+    return { ..._source, timestamp: _source['@timestamp'], docId: _id, ...(remote && { remote }) };
   });
 
   return {

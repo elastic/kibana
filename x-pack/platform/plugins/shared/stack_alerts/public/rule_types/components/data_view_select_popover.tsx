@@ -181,6 +181,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   return (
     <EuiPopover
       id="dataViewPopover"
+      aria-label={i18n.translate(
+        'xpack.stackAlerts.components.ui.dataViewSelectPopover.ariaLabel',
+        { defaultMessage: 'Data view' }
+      )}
       button={
         <EuiExpression
           display="columns"

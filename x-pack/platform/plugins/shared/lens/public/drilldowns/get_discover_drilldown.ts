@@ -12,7 +12,8 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LensApi } from '@kbn/lens-common-2';
 import type { DrilldownDefinition } from '@kbn/embeddable-plugin/public';
 import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS, DOC_TYPE } from '../../common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS } from '../../common/constants';
 import { DiscoverDrilldownEditor } from './editor';
 import type { DiscoverDrilldownState } from '../../server';
 import type { DiscoverAppLocator } from '../trigger_actions/open_in_discover_helpers';
@@ -87,7 +88,7 @@ export function getDiscoverDrilldown(deps: {
       }),
       isCompatible: (context: SetupContext) =>
         deps.hasDiscoverAccess() &&
-        apiIsOfType(context.embeddable, DOC_TYPE) &&
+        apiIsOfType(context.embeddable, LENS_EMBEDDABLE_TYPE) &&
         (context.embeddable as LensApi).isTextBasedLanguage() !== true,
       isStateValid: () => true,
       order: 8,

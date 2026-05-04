@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
   'Service map',
@@ -48,10 +49,41 @@ test.describe(
     }) => {
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
       await serviceMapPage.typeInTheSearchBar('_id : foo');
-      await serviceMapPage.waitForServiceMapToLoad();
-      await expect(serviceMapPage.noServicesPlaceholder).toBeVisible();
+      await expect(serviceMapPage.noServicesPlaceholder).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       await expect(serviceMapPage.noServicesPlaceholder).toHaveText('No services available');
       await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
+    });
+
+    test('options panel: find in page, filter placeholders, and Ctrl+K focus', async ({
+      page,
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
+      await serviceMapPage.waitForServiceMapToLoad();
+      await serviceMapPage.settleServiceMapLayout();
+
+      await expect(serviceMapPage.serviceMapOptionsPanel).toBeVisible();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+
+      await expect(page.getByPlaceholder('Alert status')).toBeVisible();
+      await expect(page.getByPlaceholder('SLO Status')).toBeVisible();
+      await expect(page.getByPlaceholder('Anomaly Status')).toBeVisible();
+
+      await serviceMapPage.serviceMapFindInPageInput.fill('opbeans');
+      await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(
+        /[1-9][0-9]*\/[1-9][0-9]*/
+      );
+
+      await page.getByTestId('serviceMapHideControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
+      await serviceMapPage.openFindInPageWithKeyboardShortcut();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeFocused();
+
+      await page.getByTestId('serviceMapHideControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
+      await page.getByTestId('serviceMapShowControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
     });
   }
 );
