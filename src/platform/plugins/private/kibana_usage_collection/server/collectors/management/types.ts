@@ -190,7 +190,6 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
-  'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
