@@ -27,7 +27,8 @@ import { registerLocators } from './locators';
 import { isElasticInferenceServiceEnabled, isModelSettingsEnabled } from './feature_flag';
 
 export class SearchInferenceEndpointsPlugin
-  implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart> {
+  implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
+{
   private config: SearchInferenceEndpointsConfigType;
   private registerInferenceEndpoints?: ManagementApp;
   private registerModelSettings?: ManagementApp;
@@ -50,17 +51,13 @@ export class SearchInferenceEndpointsPlugin
     this.registerInferenceEndpoints =
       plugins.management.sections.section.modelManagement.registerApp({
         id: INFERENCE_ENDPOINTS_APP_ID,
-        title: eisEnabled ?
-
-          i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
-            defaultMessage: 'External Inference',
-          }) :
-          i18n.translate(
-            'xpack.searchInferenceEndpoints.inferenceEndpointsTitle',
-            {
+        title: eisEnabled
+          ? i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
+              defaultMessage: 'External Inference',
+            })
+          : i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpointsTitle', {
               defaultMessage: 'Inference endpoints',
-            }
-          ),
+            }),
         order: 2,
         async mount({ element, history }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');
@@ -99,13 +96,9 @@ export class SearchInferenceEndpointsPlugin
       this.registerElasticInferenceService =
         plugins.management.sections.section.modelManagement.registerApp({
           id: ELASTIC_INFERENCE_SERVICE_APP_ID,
-          title:
-            i18n.translate(
-              'xpack.searchInferenceEndpoints.elasticInferenceServiceTitle',
-              {
-                defaultMessage: 'Elastic Inference',
-              }
-            ),
+          title: i18n.translate('xpack.searchInferenceEndpoints.elasticInferenceServiceTitle', {
+            defaultMessage: 'Elastic Inference',
+          }),
           order: 1,
           async mount({ element, history }: ManagementAppMountParams) {
             const { renderElasticInferenceServiceApp } = await import(

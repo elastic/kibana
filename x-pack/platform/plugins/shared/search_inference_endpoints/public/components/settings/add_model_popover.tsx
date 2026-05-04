@@ -79,10 +79,10 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       panelProps={
         panelWidth
           ? {
-            css: css`
+              css: css`
                 width: ${panelWidth}px;
               `,
-          }
+            }
           : undefined
       }
     >
