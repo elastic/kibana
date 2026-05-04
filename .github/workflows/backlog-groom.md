@@ -205,7 +205,7 @@ network:
 checkout:
   fetch-depth: 0
 safe-outputs:
-  staged: true
+  staged: false
   create-pull-request:
     labels: [backlog-groom]
     max: 1
@@ -300,3 +300,4 @@ The linked pull request must:
 - Never remove, skip, or comment out tests to make them pass.
 - If you cannot make progress safely, use `noop` with a concise explanation.
 - If the issue is ambiguous or requires design decisions, use `noop` explaining what clarification is needed.
+
