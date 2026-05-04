@@ -35,6 +35,7 @@ export interface BuildkiteGroup {
 }
 
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
@@ -52,6 +53,20 @@ export interface BuildkiteAgentTargetingRule {
   minCpuPlatform?: string;
   preemptible?: boolean;
   diskSizeGb?: number;
+}
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
+  env?: { [key: string]: string | number };
 }
 
 export interface BuildkiteCommandStep {
