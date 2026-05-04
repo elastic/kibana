@@ -219,7 +219,7 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -232,7 +232,7 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -245,7 +245,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -270,7 +270,7 @@
               "IconType"
             ],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +293,7 @@
                   "<T>"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-                "lineNumber": 49,
+                "lineNumber": 50,
                 "columnNumber": 25,
                 "deprecated": false,
                 "docsReferencedTypeName": "SavedObjectCommon",
@@ -322,7 +322,7 @@
               "<T>) => string) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -345,7 +345,7 @@
                   "<T>"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-                "lineNumber": 50,
+                "lineNumber": 51,
                 "columnNumber": 29,
                 "deprecated": false,
                 "docsReferencedTypeName": "SavedObjectCommon",
@@ -374,7 +374,7 @@
               "<T>) => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -397,7 +397,7 @@
                   "<T>"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-                "lineNumber": 51,
+                "lineNumber": 52,
                 "columnNumber": 20,
                 "deprecated": false,
                 "docsReferencedTypeName": "SavedObjectCommon",
@@ -426,7 +426,7 @@
               "<T>) => string) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -449,7 +449,7 @@
                   "<T>"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-                "lineNumber": 52,
+                "lineNumber": 53,
                 "columnNumber": 26,
                 "deprecated": false,
                 "docsReferencedTypeName": "SavedObjectCommon",
@@ -472,7 +472,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -504,7 +504,7 @@
           "SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize"
         ],
         "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-        "lineNumber": 103,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

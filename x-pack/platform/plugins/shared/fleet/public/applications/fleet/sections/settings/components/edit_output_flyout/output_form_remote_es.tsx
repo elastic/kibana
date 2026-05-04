@@ -212,6 +212,22 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       <EuiSpacer size="m" />
       {enableSyncIntegrations ? (
         <>
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="syncIntegrationsServerlessCallout"
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.syncIntegrationsServerlessCallout',
+              {
+                defaultMessage:
+                  'Integration sync is not supported when the remote cluster is a serverless project.',
+              }
+            )}
+            iconType="warning"
+            color="warning"
+            size="s"
+            heading="p"
+          />
+          <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
             helpText={

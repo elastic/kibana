@@ -6,56 +6,64 @@
  */
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../hooks';
 import { GroupMenu } from './group_menu';
+import { GroupByTour } from './group_by_tour';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
 import type { GroupByState } from '../../../../../state/overview';
-import { selectOverviewState, setOverviewGroupByAction } from '../../../../../state/overview';
+import { selectOverviewGroupBy, setOverviewGroupByAction } from '../../../../../state/overview';
+
+const DEFAULT_GROUP_BY: GroupByState = { field: 'none', order: 'asc' };
+const LOCAL_STORAGE_KEY = 'synthetics.overviewGroupBy';
 
 export const GroupFields = () => {
-  const {
-    groupBy: { field: groupField, order: groupOrder },
-  } = useSelector(selectOverviewState);
+  const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
   const dispatch = useDispatch();
   const [urlParams, updateUrlParams] = useUrlParams();
+  const [localStorageGroupBy, setLocalStorageGroupBy] =
+    useLocalStorage<GroupByState>(LOCAL_STORAGE_KEY);
 
   const { groupBy: urlGroupField, groupOrderBy: urlGroupOrderBy } = urlParams();
 
-  const isUrlHydratedFromRedux = useRef(false);
+  const isInitialized = useRef(false);
+
   useEffect(() => {
-    if (urlGroupField !== groupField) {
-      if (!urlGroupField && groupField !== 'none' && !isUrlHydratedFromRedux.current) {
-        // Hydrate url only during initialization
-        updateUrlParams({ groupBy: groupField, groupOrderBy: groupOrder });
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
+    if (urlGroupField) {
+      const state: GroupByState = {
+        field: urlGroupField,
+        order: urlGroupOrderBy ?? 'asc',
+      };
+      dispatch(setOverviewGroupByAction(state));
+      setLocalStorageGroupBy(state);
+    } else if (localStorageGroupBy) {
+      dispatch(setOverviewGroupByAction(localStorageGroupBy));
+      if (localStorageGroupBy.field !== DEFAULT_GROUP_BY.field) {
+        updateUrlParams({
+          groupBy: localStorageGroupBy.field,
+          groupOrderBy: localStorageGroupBy.order,
+        });
       }
     }
-    isUrlHydratedFromRedux.current = true;
-
-    // Only depend on the serialized snapshot
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, groupField, groupOrder, urlGroupField, urlGroupOrderBy]);
-
-  const isUReduxHydratedFromUrl = useRef(false);
-
-  useEffect(() => {
-    if (urlGroupField && urlGroupField !== groupField && !isUReduxHydratedFromUrl.current) {
-      dispatch(
-        setOverviewGroupByAction({
-          field: urlGroupField ?? 'none',
-          order: urlGroupOrderBy ?? 'asc',
-        })
-      );
-    }
-    isUReduxHydratedFromUrl.current = true;
-    // Only depend on the serialized snapshot
-  }, [dispatch, groupField, groupOrder, urlGroupField, urlGroupOrderBy]);
+  }, [
+    dispatch,
+    localStorageGroupBy,
+    setLocalStorageGroupBy,
+    updateUrlParams,
+    urlGroupField,
+    urlGroupOrderBy,
+  ]);
 
   const handleChange = (groupByState: GroupByState) => {
     dispatch(setOverviewGroupByAction(groupByState));
     updateUrlParams({ groupBy: groupByState.field, groupOrderBy: groupByState.order });
+    setLocalStorageGroupBy(groupByState);
   };
 
   const groupByOptions = [
@@ -72,8 +80,20 @@ export const GroupFields = () => {
       },
     },
     {
+      label: MONITOR_LABEL,
+      value: 'monitor',
+      checked: groupField === 'monitor',
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        handleChange({
+          field: 'monitor',
+          order: groupOrder,
+        });
+      },
+    },
+    {
       label: LOCATION_LABEL,
-      value: 'location.id',
+      value: 'locationId',
       checked: groupField === 'locationId',
       defaultSortOrder: 'asc',
       onClick: () => {
@@ -151,20 +171,22 @@ export const GroupFields = () => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxxs">
-              <span>{GROUP_TITLE}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="syntheticsOverviewGroupButton">
-            <GroupMenu
-              groupOptions={groupByOptions}
-              orderByOptions={orderByOptions}
-              groupField={label}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <GroupByTour>
+          <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <span>{GROUP_TITLE}</span>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="syntheticsOverviewGroupButton">
+              <GroupMenu
+                groupOptions={groupByOptions}
+                orderByOptions={orderByOptions}
+                groupField={label}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </GroupByTour>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -196,6 +218,13 @@ const getOrderContent = (groupField: string) => {
         desc: SORT_ALPHABETICAL_DESC,
         label: PROJECT_LABEL,
       };
+    case 'monitor':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_LABEL,
+      };
+
     default:
       return {
         asc: ASCENDING_LABEL,
@@ -235,6 +264,9 @@ const DESCENDING_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.
 
 const NONE_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.none.label', {
   defaultMessage: 'None',
+});
+const MONITOR_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.monitor.label', {
+  defaultMessage: 'Monitor',
 });
 
 const LOCATION_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.location.label', {
