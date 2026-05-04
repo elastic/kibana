@@ -23,6 +23,8 @@ import {
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EventLoggerToken } from './tokens';
 
+const DEFAULT_PAGE_SIZE = 50;
+
 interface ActionPolicyExecutionCursorPayload {
   search_after: SortResults;
 }
@@ -65,7 +67,7 @@ export class EventLogService implements EventLogServiceContract {
     startDate,
     policyIds,
     cursor,
-    pageSize,
+    pageSize = DEFAULT_PAGE_SIZE,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
     if (policyIds.length === 0) {
       return { events: [], cursor: null, hasMore: false };
