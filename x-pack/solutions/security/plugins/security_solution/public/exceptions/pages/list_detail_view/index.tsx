@@ -5,15 +5,15 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EmptyViewerState,
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { EuiSkeletonText } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { EuiScreenReaderLive, EuiSkeletonText } from '@elastic/eui';
+import { useLocation, useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { SecurityPageName } from '../../../../common/constants';
@@ -70,6 +70,17 @@ export const ListsDetailViewComponent: FC = () => {
     handleCloseReferenceErrorModal,
     handleReferenceDelete,
   } = useListDetailsView(exceptionListId);
+
+  const location = useLocation<{ justCreated?: string }>();
+  const [screenReaderMessage, setScreenReaderMessage] = useState('');
+
+  useEffect(() => {
+    if (location.state?.justCreated) {
+      setScreenReaderMessage(
+        i18n.SHARED_EXCEPTION_LIST_CREATED_SUCCESSFULLY(location.state.justCreated)
+      );
+    }
+  }, [location.state]);
 
   const [showIncludeExpiredExceptionItemsModal, setShowIncludeExpiredExceptionItemsModal] =
     useState<CheckExceptionTtlActionTypes | null>(null);
@@ -197,6 +208,9 @@ export const ListsDetailViewComponent: FC = () => {
   ]);
   return (
     <>
+      {screenReaderMessage && (
+        <EuiScreenReaderLive focusRegionOnTextChange>{screenReaderMessage}</EuiScreenReaderLive>
+      )}
       <SpyRoute pageName={SecurityPageName.exceptions} state={{ listName }} />
       {detailsViewContent}
     </>
