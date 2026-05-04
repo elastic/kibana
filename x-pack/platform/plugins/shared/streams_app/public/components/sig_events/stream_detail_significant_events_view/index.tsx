@@ -83,14 +83,31 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     refetch,
   } = useFetchKnowledgeIndicators({ definition });
   const onKnowledgeIndicatorsTaskComplete = useCallback(
-    (_result: WorkflowExecutionResult) => {
+    (result: WorkflowExecutionResult) => {
+      const output = result.output ?? {};
+      const featuresSkipped = output.featuresSkipped === true;
+      const discoveredFeatures = Array.isArray(output.discoveredFeatures)
+        ? output.discoveredFeatures
+        : [];
+      const persistedQueries = Array.isArray(output.persistedQueries)
+        ? output.persistedQueries
+        : [];
+      const count = discoveredFeatures.length + persistedQueries.length;
+
       toasts.addSuccess({
         title: i18n.translate(
           'xpack.streams.significantEventsTable.generateMoreSuccessToastTitle',
           {
-            defaultMessage: 'Knowledge indicators generated successfully',
+            defaultMessage:
+              '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
+            values: { count },
           }
         ),
+        text: featuresSkipped
+          ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
+              defaultMessage: 'Feature identification was skipped.',
+            })
+          : undefined,
       });
 
       void Promise.all([

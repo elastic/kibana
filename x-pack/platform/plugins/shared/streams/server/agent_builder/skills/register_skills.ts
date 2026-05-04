@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { WorkflowsManagementApi } from '../../lib/workflows/workflow_execution_client';
 import { streamsManagementSkill } from './streams_management_skill';
