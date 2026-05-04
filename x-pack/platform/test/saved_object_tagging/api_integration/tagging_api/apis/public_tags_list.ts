@@ -26,13 +26,15 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('returns all tags when called without query parameters', async () => {
+    it('returns tags with default pagination meta when called without query parameters', async () => {
       const { body } = await supertest.get('/api/tags').expect(200);
 
-      expect(body.page).to.be(1);
-      expect(body.total).to.be(body.tags.length);
+      expect(body.meta.page).to.be(1);
+      expect(body.meta.per_page).to.be(20);
+      expect(body.meta.total).to.be.greaterThan(0);
+      expect(body.meta.total).to.be.greaterThanOrEqual(body.data.length);
 
-      const ids = body.tags.map((t: { id: string }) => t.id);
+      const ids = body.data.map((t: { id: string }) => t.id);
       expect(ids).to.contain('tag-1');
       expect(ids).to.contain('tag-2');
       expect(ids).to.contain('tag-3');
@@ -41,18 +43,19 @@ export default function ({ getService }: FtrProviderContext) {
     it('filters tags by query', async () => {
       const { body } = await supertest.get('/api/tags?query=least').expect(200);
 
-      expect(body.page).to.be(1);
-      expect(body.total).to.be(1);
-      expect(body.tags).to.have.length(1);
-      expect(body.tags[0].id).to.be('tag-3');
+      expect(body.meta.page).to.be(1);
+      expect(body.meta.total).to.be(1);
+      expect(body.data).to.have.length(1);
+      expect(body.data[0].id).to.be('tag-3');
     });
 
     it('paginates tags when page/per_page are provided', async () => {
       const { body } = await supertest.get('/api/tags?page=1&per_page=2').expect(200);
 
-      expect(body.page).to.be(1);
-      expect(body.total).to.be.greaterThan(2);
-      expect(body.tags).to.have.length(2);
+      expect(body.meta.page).to.be(1);
+      expect(body.meta.per_page).to.be(2);
+      expect(body.meta.total).to.be.greaterThan(2);
+      expect(body.data).to.have.length(2);
     });
 
     it('rejects invalid page/per_page values', async () => {

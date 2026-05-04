@@ -98,11 +98,25 @@ export const tagResponseItemSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
+const tagsListResponseMetaSchema = schema.object(
+  {
+    page: schema.number({
+      meta: { description: 'The current page number.' },
+    }),
+    per_page: schema.number({
+      meta: { description: 'The number of results returned per page.' },
+    }),
+    total: schema.number({
+      meta: { description: 'The total number of tags matching the query.' },
+    }),
+  },
+  { unknowns: 'forbid' }
+);
+
 export const tagsListResponseBodySchema = schema.object(
   {
-    tags: schema.arrayOf(tagResponseItemSchema, { minSize: 0, maxSize: 10000 }),
-    total: schema.number(),
-    page: schema.number(),
+    data: schema.arrayOf(tagResponseItemSchema, { minSize: 0, maxSize: 1000 }),
+    meta: tagsListResponseMetaSchema,
   },
   { unknowns: 'forbid' }
 );

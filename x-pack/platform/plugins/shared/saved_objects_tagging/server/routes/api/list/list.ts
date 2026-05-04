@@ -18,18 +18,23 @@ export const list = async (
   const { client } = (await requestContext.core).savedObjects;
 
   const { query, page, per_page: perPage } = requestQuery;
+  const resolvedPage = page ?? 1;
+  const resolvedPerPage = perPage ?? 20;
   const soResponse = await client.find<TagAttributes>({
     type: [tagSavedObjectTypeName],
     search: query,
     searchFields: ['name', 'description'],
     defaultSearchOperator: 'AND',
-    page: page ?? 1,
-    perPage: perPage ?? 20,
+    page: resolvedPage,
+    perPage: resolvedPerPage,
   });
 
   return {
-    tags: soResponse.saved_objects.map(getTagResponseItem),
-    total: soResponse.total,
-    page: soResponse.page,
+    data: soResponse.saved_objects.map(getTagResponseItem),
+    meta: {
+      page: soResponse.page,
+      per_page: resolvedPerPage,
+      total: soResponse.total,
+    },
   };
 };

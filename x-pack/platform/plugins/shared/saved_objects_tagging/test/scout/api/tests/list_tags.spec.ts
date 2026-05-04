@@ -30,11 +30,12 @@ apiTest.describe('tags - list', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(Array.isArray(response.body.tags)).toBe(true);
-    expect(typeof response.body.total).toBe('number');
-    expect(typeof response.body.page).toBe('number');
+    expect(Array.isArray(response.body.data)).toBe(true);
+    expect(typeof response.body.meta.total).toBe('number');
+    expect(typeof response.body.meta.page).toBe('number');
+    expect(typeof response.body.meta.per_page).toBe('number');
 
-    expect(response.body.total).toBeGreaterThanOrEqual(1);
-    expect(response.body.tags.map((t: { id: string }) => t.id)).toContain('tag-1');
+    expect(response.body.meta.total).toBeGreaterThanOrEqual(1);
+    expect(response.body.data.map((t: { id: string }) => t.id)).toContain('tag-1');
   });
 });
