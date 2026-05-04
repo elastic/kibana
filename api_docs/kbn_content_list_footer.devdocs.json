@@ -24,7 +24,7 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 35,
             "deprecated": false,
             "docsReferencedTypeName": "ContentListFooterProps",
@@ -131,7 +131,7 @@
           " component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -149,7 +149,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
