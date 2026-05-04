@@ -68,7 +68,7 @@ export function EdgeContents({
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-  const { offset, comparisonEnabled, rangeFrom, rangeTo, kuery } = query;
+  const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 
   const isEdgeSelection = isEdge(selection);
   const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
@@ -131,7 +131,7 @@ export function EdgeContents({
           <EuiFlexItem>
             <OpenInDiscover
               dataTestSubj="apmEdgeContentsOpenInDiscoverButton"
-              variant="outlinedButton"
+              variant="button"
               indexType="traces"
               label={i18n.translate('xpack.apm.serviceMap.edgeContents.openInDiscover', {
                 defaultMessage: 'Explore traces',
@@ -139,10 +139,10 @@ export function EdgeContents({
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               queryParams={{
-                kuery,
                 serviceName: sourceServiceName,
                 environment,
                 dependencyName,
+                sortDirection: 'DESC',
               }}
             />
           </EuiFlexItem>

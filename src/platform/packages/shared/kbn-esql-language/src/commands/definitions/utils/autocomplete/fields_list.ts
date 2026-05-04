@@ -14,11 +14,17 @@ import {
   commaCompleteItem,
   assignCompletionItem,
 } from '../../../registry/complete_items';
-import type { Location } from '../../../registry/types';
-import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../../registry/types';
+import {
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
+  type Location,
+} from '../../../registry/types';
+import { ReplacementRangeStrategyKind } from '../../../../language/autocomplete/utils/prefix_range';
 import { getAssignmentExpressionRoot } from '../expressions';
 import { suggestForExpression } from './expressions';
 import { withAutoSuggest } from './helpers';
+import { endsWithComma, endsWithWhitespace } from '../regex';
 import type { ExpressionContextOptions } from './expressions/types';
 
 export async function suggestFieldsList(
@@ -40,6 +46,10 @@ export async function suggestFieldsList(
     allowSingleColumnFields?: boolean;
     /** the preferred field type */
     preferredExpressionType?: ExpressionContextOptions['preferredExpressionType'];
+    /** Columns to exclude from suggestions (e.g. already used in BY clause) */
+    ignoredColumnsForEmptyExpression?: string[];
+    /** If true, disables col0 and assignment suggestions (for contexts where assignments are not supported) */
+    disableNewColumnSuggestion?: boolean;
   }
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
@@ -48,10 +58,10 @@ export async function suggestFieldsList(
   const innerText = query.substring(0, cursorPosition);
   const lastField = fieldList[fieldList.length - 1];
 
-  const endsWithComma = /,\s*$/.test(innerText);
+  const hasTrailingComma = endsWithComma(innerText);
   const withinFunction =
     lastField && isFunctionExpression(lastField) && within(innerText.length, lastField);
-  const startingNewExpression = endsWithComma && !withinFunction;
+  const startingNewExpression = hasTrailingComma && !withinFunction;
 
   let expressionRoot = startingNewExpression ? undefined : lastField;
   let insideAssignment = false;
@@ -72,12 +82,17 @@ export async function suggestFieldsList(
     options: {
       preferredExpressionType: options?.preferredExpressionType,
       functionsToIgnore: options?.functionsToIgnore,
+      ignoredColumnsForEmptyExpression: options?.ignoredColumnsForEmptyExpression,
     },
   });
 
   const { position, isComplete, insideFunction } = computed;
 
-  if (position === 'empty_expression' && !insideAssignment) {
+  if (
+    position === 'empty_expression' &&
+    !insideAssignment &&
+    !options?.disableNewColumnSuggestion
+  ) {
     suggestions.push(
       getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
     );
@@ -90,10 +105,15 @@ export async function suggestFieldsList(
     !insideFunction
   ) {
     if (options?.includePipeAndCommaSuggestions !== false) {
-      suggestions.push(
-        withAutoSuggest(pipeCompleteItem),
-        withAutoSuggest({ ...commaCompleteItem, text: ', ' })
-      );
+      const commaSuggestion = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
+
+      if (endsWithWhitespace(innerText)) {
+        commaSuggestion.replacementRangeStrategy = {
+          kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
+        };
+      }
+
+      suggestions.push(pipeCompleteItem, commaSuggestion);
     }
 
     if (options?.afterCompleteSuggestions) {
@@ -105,9 +125,10 @@ export async function suggestFieldsList(
   if (
     isColumn(expressionRoot) &&
     !insideAssignment &&
+    !options?.disableNewColumnSuggestion &&
     !context?.columns?.has(expressionRoot.name)
   ) {
-    suggestions.push(withAutoSuggest(assignCompletionItem));
+    suggestions.push(assignCompletionItem);
   }
 
   return suggestions;

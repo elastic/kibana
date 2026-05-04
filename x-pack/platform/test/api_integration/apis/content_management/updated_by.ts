@@ -19,19 +19,19 @@ export default function ({ getService }: FtrProviderContext) {
         const createResponse = await supertest
           .post(DASHBOARD_API_PATH)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'Sample dashboard',
           });
 
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.not.have.key('updated_by');
 
         const updateResponse = await supertest
           .put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'updated title',
           });
@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(DASHBOARD_API_PATH)
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'Sample dashboard',
           });
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('updated_by is with profile_id', async () => {
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.have.key('updated_by');
         expect(createResponse.body.meta.updated_by).to.be(interactiveUser.uid);
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         const updateResponse = await supertestWithAuth
           .put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'updated title',
           });
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertestWithAuth
           .get(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send();
 
         expect(getResponse.status).to.be(200);
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set(interactiveUser2.headers)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'updated title',
           });
@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertestWithAuth
           .get(`${DASHBOARD_API_PATH}/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send();
 
         expect(getResponse.status).to.be(200);

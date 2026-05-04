@@ -8,6 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { cleanupMapping } from './cleanup_mapping';
+import { batchByUrlLength } from '../batch_by_url_length';
 
 export interface GetDataStreamMappingEntry {
   mappings: MappingTypeMapping;
@@ -42,19 +43,27 @@ export const getDataStreamMappings = async ({
   cleanup?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<GetDataStreamMappingsResults> => {
-  const response = await esClient.transport.request<GetDataStreamMappingsRes>({
-    path: `/_data_stream/${datastreams.join(',')}/_mappings`,
-    method: 'GET',
-  });
+  const batches = batchByUrlLength(datastreams);
 
-  return response.data_streams.reduce((res, datastream) => {
-    const mappings =
-      '_doc' in datastream.effective_mappings
-        ? datastream.effective_mappings._doc
-        : datastream.effective_mappings;
-    res[datastream.name] = {
-      mappings: cleanup ? cleanupMapping(mappings) : mappings,
-    };
-    return res;
-  }, {} as GetDataStreamMappingsResults);
+  const batchResults = await Promise.all(
+    batches.map(async (batch) => {
+      const response = await esClient.transport.request<GetDataStreamMappingsRes>({
+        path: `/_data_stream/${batch.join(',')}/_mappings`,
+        method: 'GET',
+      });
+
+      return response.data_streams.reduce((res, datastream) => {
+        const mappings =
+          '_doc' in datastream.effective_mappings
+            ? datastream.effective_mappings._doc
+            : datastream.effective_mappings;
+        res[datastream.name] = {
+          mappings: cleanup ? cleanupMapping(mappings) : mappings,
+        };
+        return res;
+      }, {} as GetDataStreamMappingsResults);
+    })
+  );
+
+  return Object.assign({}, ...batchResults);
 };

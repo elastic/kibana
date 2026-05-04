@@ -28,6 +28,10 @@
     "@kbn/data-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/apm-types",
-    "@kbn/core-chrome-app-menu-components"
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-http-browser",
+    "@kbn/esql-utils",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/resizable-layout"
   ]
 }

@@ -14,7 +14,7 @@ import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_pa
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { useGetUrlParams } from '../../../../hooks/use_url_params';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
+import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { PLUGIN } from '../../../../../../../common/constants/plugin';
 
 function title(t?: number) {
@@ -69,11 +69,7 @@ export function OverviewStatus({
   const { statusFilter } = useGetUrlParams();
   const { application } = useKibana().services;
 
-  const {
-    status,
-    error: statusError,
-    loading,
-  } = useOverviewStatus({ scopeStatusByLocation: true });
+  const { status, error: statusError, loading } = useOverviewStatusState();
   const dispatch = useDispatch();
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,

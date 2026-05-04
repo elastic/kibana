@@ -21,6 +21,68 @@
     "functions": [
       {
         "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.assembleGrokProcessor",
+        "type": "Function",
+        "tags": [],
+        "label": "assembleGrokProcessor",
+        "description": [
+          "\nOrchestrates the full grok processor assembly pipeline:\n  1. For each pattern group, compute review fields from nodes\n  2. Call the provided reviewFn (LLM review) with those fields\n  3. Assemble a GrokProcessorResult from nodes + review\n  4. Merge all per-group processors into one\n  5. Return a Streamlang GrokProcessor ready for simulation/use\n\nCallers supply their own reviewFn to handle LLM transport\n(streaming API, in-process call, kbnClient.request, etc.).\n\nMessages passed to reviewFn are truncated to avoid polluting\nthe LLM context. Groups are processed in parallel via\nPromise.allSettled; individual failures are silently dropped\nso partial results still produce a merged processor."
+        ],
+        "signature": [
+          "({ from, patternGroups, reviewFn, }: ",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.AssembleGrokProcessorParams",
+            "text": "AssembleGrokProcessorParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.GrokProcessor",
+            "text": "GrokProcessor"
+          },
+          " | null>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.assembleGrokProcessor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  from,\n  patternGroups,\n  reviewFn,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.AssembleGrokProcessorParams",
+                "text": "AssembleGrokProcessorParams"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+            "lineNumber": 46,
+            "columnNumber": 45,
+            "deprecated": false,
+            "docsReferencedTypeName": "AssembleGrokProcessorParams",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
         "id": "def-common.extractGrokPatternDangerouslySlow",
         "type": "Function",
         "tags": [],
@@ -30,7 +92,13 @@
         ],
         "signature": [
           "(messages: string[]) => ",
-          "GrokPatternNode",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokPatternNode",
+            "text": "GrokPatternNode"
+          },
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/tokenization/extract_grok_pattern.ts",
@@ -69,7 +137,13 @@
         "description": [],
         "signature": [
           "(nodes: ",
-          "GrokPatternNode",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokPatternNode",
+            "text": "GrokPatternNode"
+          },
           "[]) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_pattern.ts",
@@ -86,7 +160,13 @@
             "label": "nodes",
             "description": [],
             "signature": [
-              "GrokPatternNode",
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.GrokPatternNode",
+                "text": "GrokPatternNode"
+              },
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_pattern.ts",
@@ -111,9 +191,21 @@
         ],
         "signature": [
           "(nodes: ",
-          "GrokPatternNode",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokPatternNode",
+            "text": "GrokPatternNode"
+          },
           "[], reviewResult: ",
-          "NormalizedReviewResult",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.NormalizedReviewResult",
+            "text": "NormalizedReviewResult"
+          },
           ") => ",
           {
             "pluginId": "@kbn/grok-heuristics",
@@ -137,7 +229,13 @@
             "label": "nodes",
             "description": [],
             "signature": [
-              "GrokPatternNode",
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.GrokPatternNode",
+                "text": "GrokPatternNode"
+              },
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
@@ -155,12 +253,19 @@
             "label": "reviewResult",
             "description": [],
             "signature": [
-              "NormalizedReviewResult"
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.NormalizedReviewResult",
+                "text": "NormalizedReviewResult"
+              }
             ],
             "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NormalizedReviewResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -179,9 +284,21 @@
         ],
         "signature": [
           "(nodes: ",
-          "GrokPatternNode",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokPatternNode",
+            "text": "GrokPatternNode"
+          },
           "[], numExamples: number) => ",
-          "ReviewFields"
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.ReviewFields",
+            "text": "ReviewFields"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
         "lineNumber": 21,
@@ -197,7 +314,13 @@
             "label": "nodes",
             "description": [],
             "signature": [
-              "GrokPatternNode",
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.GrokPatternNode",
+                "text": "GrokPatternNode"
+              },
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
@@ -443,6 +566,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -454,6 +578,127 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.AssembleGrokProcessorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AssembleGrokProcessorParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.AssembleGrokProcessorParams.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.AssembleGrokProcessorParams.patternGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "patternGroups",
+            "description": [],
+            "signature": [
+              "{ messages: string[]; nodes: ",
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.GrokPatternNode",
+                "text": "GrokPatternNode"
+              },
+              "[]; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.AssembleGrokProcessorParams.reviewFn",
+            "type": "Function",
+            "tags": [],
+            "label": "reviewFn",
+            "description": [],
+            "signature": [
+              "(reviewFields: ",
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.ReviewFields",
+                "text": "ReviewFields"
+              },
+              ", messages: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.NormalizedReviewResult",
+                "text": "NormalizedReviewResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-heuristics",
+                "id": "def-common.AssembleGrokProcessorParams.reviewFn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "reviewFields",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: { grok_component: string; example_values: string[]; }; }"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
+                "deprecated": false,
+                "docsReferencedTypeName": "ReviewFields",
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-heuristics",
+                "id": "def-common.AssembleGrokProcessorParams.reviewFn.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/grok-heuristics",
         "id": "def-common.GrokProcessorResult",
@@ -514,10 +759,276 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.LiteralValueNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "LiteralValueNode",
+        "description": [
+          "\nRepresents a literal value in a Grok pattern."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.LiteralValueNode.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [
+              "GROK pattern that can extract all observed values. (e.g. ` `, `\\s+`, `\\t`, `,`)"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.NamedFieldNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "NamedFieldNode",
+        "description": [
+          "\nRepresents a named field in a Grok pattern."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.NamedFieldNode.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique identifier for the field."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.NamedFieldNode.component",
+            "type": "string",
+            "tags": [],
+            "label": "component",
+            "description": [
+              "GROK component that can extract all observed values. (e.g. `YEAR`)"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.NamedFieldNode.values",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [
+              "All unique values observed for this field."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.NormalizedReviewResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NormalizedReviewResult",
+        "description": [
+          "\nResult from LLM review of fields where ECS field names have already been mapped to OpenTelemetry fields.\n\nExample value:\n\n```json\n{\n    \"log_source\": \"Apache HTTP Server Log\",\n    \"fields\": [\n        {\n            \"name\": \"@timestamp\",\n            \"columns\": [\"field_0\", \"field_1\", \"field_2\"],\n            \"grok_components\": [\"DAY\", \"SYSLOGTIMESTAMP\", \"YEAR\"]\n        },\n        {\n            \"name\": \"log.level\",\n            \"columns\": [\"field_3\"],\n            \"grok_components\": [\"LOGLEVEL\"]\n        },\n        {\n            \"name\": \"message\",\n            \"columns\": [\"field_4\"],\n            \"grok_components\": [\"GREEDYDATA\"]\n        }\n    ]\n}\n```"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.NormalizedReviewResult.log_source",
+            "type": "string",
+            "tags": [],
+            "label": "log_source",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.NormalizedReviewResult.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ name: string; columns: string[]; grok_components: string[]; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.GrokPatternNode",
+        "type": "Type",
+        "tags": [],
+        "label": "GrokPatternNode",
+        "description": [
+          "\nRepresents a node in a pattern group, which can be either a named field or a literal value."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.NamedFieldNode",
+            "text": "NamedFieldNode"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.LiteralValueNode",
+            "text": "LiteralValueNode"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.GrokReviewFn",
+        "type": "Type",
+        "tags": [],
+        "label": "GrokReviewFn",
+        "description": [],
+        "signature": [
+          "(reviewFields: ",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.ReviewFields",
+            "text": "ReviewFields"
+          },
+          ", messages: string[]) => Promise<",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.NormalizedReviewResult",
+            "text": "NormalizedReviewResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.GrokReviewFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "reviewFields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { grok_component: string; example_values: string[]; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ReviewFields",
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.GrokReviewFn.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/assemble_grok_processor.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.ReviewFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ReviewFields",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { grok_component: string; example_values: string[]; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/grok-heuristics",
@@ -534,7 +1045,7 @@
             "section": "def-common.Prompt",
             "text": "Prompt"
           },
-          "<unknown, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly grok_components: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\", \"grok_components\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
+          "<{ sample_messages: string[]; review_fields: string; }, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly grok_components: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\", \"grok_components\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/review_fields_prompt.ts",
         "lineNumber": 12,

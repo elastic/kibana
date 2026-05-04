@@ -1,5 +1,9 @@
 get:
   summary: Get environments for service
+  description: >
+    Retrieve the available environments for a given service, to be used in agent configuration.
+    You must have `read` privileges for the APM and User Experience feature in Kibana.
+    If `serviceName` is omitted, environments across all services are returned.
   operationId: getEnvironmentsForService
   tags:
     - APM agent configuration
@@ -7,9 +11,10 @@ get:
     - $ref: '../components/headers/elastic_api_version.yaml'
     - name: serviceName
       in: query
-      description: The name of the service
+      description: The name of the service. If omitted, environments across all services are returned.
       schema:
         type: string
+      example: opbeans-node
   responses:
     '200':
       description: Successful response
@@ -17,6 +22,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/service_environments_response.yaml'
+          examples:
+            getEnvironmentsForServiceResponseExample1:
+              $ref: '../components/examples/agent_configuration_environments_200_response1.yaml'
     '400':
       description: Bad Request response
       content:

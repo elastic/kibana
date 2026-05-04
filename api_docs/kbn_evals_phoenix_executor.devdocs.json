@@ -346,9 +346,10 @@
                           "TExample"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
-                        "lineNumber": 108,
+                        "lineNumber": 123,
                         "columnNumber": 3,
                         "deprecated": false,
+                        "docsReferencedTypeName": "TExample",
                         "trackAdoption": false
                       }
                     ]
@@ -410,6 +411,7 @@
                 "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -486,7 +488,7 @@
           "(base: T) => T"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-phoenix-executor/src/with_phoenix_executor.ts",
-        "lineNumber": 38,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -502,9 +504,10 @@
               "T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-phoenix-executor/src/with_phoenix_executor.ts",
-            "lineNumber": 57,
+            "lineNumber": 59,
             "columnNumber": 84,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }

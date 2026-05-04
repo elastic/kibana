@@ -318,6 +318,7 @@
             "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -341,6 +342,7 @@
             "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -466,6 +468,7 @@
             "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -549,6 +552,7 @@
             "lineNumber": 31,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevel",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -573,6 +577,7 @@
             "lineNumber": 31,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "Writer",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -709,6 +714,84 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.createMetricsServiceInstance",
+        "type": "Function",
+        "tags": [],
+        "label": "createMetricsServiceInstance",
+        "description": [
+          "\nCreates an APM service instance from a config entry, applying optional\nruntime/SDK fields to the instance. Shared between the CLI scenario and\nthe Scout test fixture so both stay in sync."
+        ],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmMetricsServiceConfig",
+            "text": "ApmMetricsServiceConfig"
+          },
+          ", environment: string) => ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmMetricsServiceInstance",
+            "text": "ApmMetricsServiceInstance"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 333,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.createMetricsServiceInstance.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace",
+                "scope": "server",
+                "docId": "kibKbnSynthtracePluginApi",
+                "section": "def-server.ApmMetricsServiceConfig",
+                "text": "ApmMetricsServiceConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 334,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ApmMetricsServiceConfig",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.createMetricsServiceInstance.$2",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 335,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.deleteSummaryFieldTransform",
         "type": "Function",
         "tags": [],
@@ -786,6 +869,7 @@
             "lineNumber": 22,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -809,6 +893,7 @@
             "lineNumber": 22,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1522,6 +1607,234 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateAppMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "generateAppMetrics",
+        "description": [
+          "\nGenerates app-metric documents for a single timestamp, normalising\nextraMetrics into an array and applying each entry as a separate metricset."
+        ],
+        "signature": [
+          "(instance: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Instance",
+            "text": "Instance"
+          },
+          ", config: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmMetricsServiceConfig",
+            "text": "ApmMetricsServiceConfig"
+          },
+          ", timestamp: number) => ",
+          "Metricset",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 360,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateAppMetrics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "instance",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnSynthtraceClientPluginApi",
+                "section": "def-common.Instance",
+                "text": "Instance"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 361,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Instance",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateAppMetrics.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace",
+                "scope": "server",
+                "docId": "kibKbnSynthtracePluginApi",
+                "section": "def-server.ApmMetricsServiceConfig",
+                "text": "ApmMetricsServiceConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 362,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ApmMetricsServiceConfig",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateAppMetrics.$3",
+            "type": "number",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 363,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateCascadingFailureData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateCascadingFailureData",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  logsEsClient,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; logsEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogsSynthtraceEsClient",
+            "text": "LogsSynthtraceEsClient"
+          },
+          "; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
+        "lineNumber": 506,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateCascadingFailureData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  logsEsClient,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
+            "lineNumber": 509,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateCascadingFailureData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
+                "lineNumber": 510,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateCascadingFailureData.$1.logsEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "logsEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogsSynthtraceEsClient",
+                    "text": "LogsSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
+                "lineNumber": 511,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.generateCycleTopologyData",
         "type": "Function",
         "tags": [],
@@ -2029,6 +2342,7 @@
             "lineNumber": 221,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldDiscoveryDataParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4359,6 +4673,188 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.ApmMetricsServiceConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApmMetricsServiceConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.agentName",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.runtimeVersion",
+            "type": "string",
+            "tags": [],
+            "label": "runtimeVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.runtimeName",
+            "type": "string",
+            "tags": [],
+            "label": "runtimeName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.telemetrySdkName",
+            "type": "string",
+            "tags": [],
+            "label": "telemetrySdkName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.telemetrySdkLanguage",
+            "type": "string",
+            "tags": [],
+            "label": "telemetrySdkLanguage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceConfig.extraMetrics",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "extraMetrics",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | Record<string, unknown>[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.ApmMetricsServiceInstance",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApmMetricsServiceInstance",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 323,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceInstance.instance",
+            "type": "Object",
+            "tags": [],
+            "label": "instance",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnSynthtraceClientPluginApi",
+                "section": "def-common.Instance",
+                "text": "Instance"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 324,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ApmMetricsServiceInstance.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace",
+                "scope": "server",
+                "docId": "kibKbnSynthtracePluginApi",
+                "section": "def-server.ApmMetricsServiceConfig",
+                "text": "ApmMetricsServiceConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 325,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.ApmServiceConfig",
         "type": "Interface",
         "tags": [],
@@ -4547,6 +5043,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ComponentTemplateName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4619,6 +5116,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmSynthtracePipelines",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4636,6 +5134,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmPipelineOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5400,7 +5899,7 @@
           "PackageManagement"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/infra/infra_synthtrace_es_client.ts",
-        "lineNumber": 24,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5736,6 +6235,7 @@
                 "lineNumber": 36,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexTemplateName",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5774,6 +6274,7 @@
                 "lineNumber": 37,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexTemplateName",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5948,6 +6449,7 @@
                 "lineNumber": 52,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "MappingTypeMapping",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -6645,6 +7147,84 @@
     "misc": [
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.APM_METRICS_ALL_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "APM_METRICS_ALL_SERVICES",
+        "description": [
+          "\nAll APM metrics services (dashboard + non-dashboard)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmMetricsServiceConfig",
+            "text": "ApmMetricsServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 318,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.APM_METRICS_DASHBOARD_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "APM_METRICS_DASHBOARD_SERVICES",
+        "description": [
+          "\nDashboard-catalog service configs: one per metrics dashboard type.\nUsed by both the CLI synthtrace scenario and the Scout test fixtures."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmMetricsServiceConfig",
+            "text": "ApmMetricsServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 171,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.APM_METRICS_NON_DASHBOARD_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "APM_METRICS_NON_DASHBOARD_SERVICES",
+        "description": [
+          "\nNon-dashboard service configs: services that exercise code paths\noutside the dashboard catalog (JRuby JVM, Go classic, Ruby classic)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmMetricsServiceConfig",
+            "text": "ApmMetricsServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 288,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.DEFAULT_ELASTIC_APM_SERVICES",
         "type": "Array",
         "tags": [],
@@ -6975,6 +7555,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
         "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.APM_METRICS_SERVICE_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "APM_METRICS_SERVICE_NAMES",
+        "description": [],
+        "signature": [
+          "{ readonly JAVA_APM: \"metrics-java-apm\"; readonly NODEJS_APM: \"metrics-nodejs-apm\"; readonly RUBY_JRUBY: \"metrics-ruby-jruby\"; readonly EDOT_JAVA: \"metrics-edot-java\"; readonly EDOT_NODEJS: \"metrics-edot-nodejs\"; readonly EDOT_DOTNET_V9: \"metrics-edot-dotnet-v9\"; readonly EDOT_DOTNET_V8: \"metrics-edot-dotnet-v8\"; readonly OTEL_JAVA: \"metrics-otel-java\"; readonly OTEL_NODEJS: \"metrics-otel-nodejs\"; readonly OTEL_DOTNET: \"metrics-otel-dotnet\"; readonly OTEL_GO: \"metrics-otel-go\"; readonly OTEL_NATIVE_EDOT_JAVA: \"metrics-on-edot-java\"; readonly OTEL_NATIVE_EDOT_NODEJS: \"metrics-on-edot-nodejs\"; readonly OTEL_NATIVE_EDOT_PYTHON: \"metrics-on-edot-python\"; readonly OTEL_NATIVE_OTEL_JAVA: \"metrics-on-otel-java\"; readonly OTEL_NATIVE_OTEL_NODEJS: \"metrics-on-otel-nodejs\"; readonly OTEL_NATIVE_OTEL_PYTHON: \"metrics-on-otel-python\"; readonly OTEL_NATIVE_OTEL_GO: \"metrics-on-otel-go\"; readonly GO_CLASSIC: \"metrics-go-classic\"; readonly RUBY_CLASSIC: \"metrics-ruby-classic\"; readonly RUST: \"metrics-rust\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7405,6 +8002,164 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.sigEvents",
+        "type": "Object",
+        "tags": [],
+        "label": "sigEvents",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.sigEvents.DEFAULT_SERVICE_GRAPH",
+            "type": "Object",
+            "tags": [],
+            "label": "DEFAULT_SERVICE_GRAPH",
+            "description": [],
+            "signature": [
+              "{ edges: { source: string; target: string; protocol: string; }[]; services: ({ readonly name: \"claim-intake\"; readonly runtime: \"node\"; readonly infraDeps: readonly [\"kafka\", \"postgres\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"claims\"; }; readonly os: { readonly type: \"linux\"; readonly name: \"Debian GNU/Linux\"; readonly version: \"12 (bookworm)\"; }; }; readonly serviceLogs: { readonly success: readonly [\"Claim intake successful\", \"Claim intake completed\"]; readonly error: readonly [\"Failed to persist claim to database: connection timeout\", \"Claim validation failed: missing required field \\\"policy_id\\\"\", \"Unhandled error in claim pipeline: request processing aborted\"]; }; } | { readonly name: \"policy-lookup\"; readonly runtime: \"java\"; readonly infraDeps: readonly [\"postgres\", \"redis\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"claims\"; }; readonly os?: undefined; }; readonly serviceLogs?: undefined; } | { readonly name: \"fraud-check\"; readonly runtime: \"python\"; readonly infraDeps: readonly [\"elasticsearch\", \"mongodb\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"claims\"; }; readonly os?: undefined; }; readonly serviceLogs: { readonly success: readonly [\"Fraud check passed\", \"No fraud detected\", \"Risk score evaluated: insufficient transaction history, defaulting to manual review\"]; readonly error: readonly [\"Fraud detection model timeout: upstream scoring service unavailable\", \"Fraud check failed: scoring pipeline returned unexpected error\"]; }; } | { readonly name: \"payment-processor\"; readonly runtime: \"go\"; readonly infraDeps: readonly [\"kafka\", \"postgres\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"payments\"; }; readonly os?: undefined; }; readonly serviceLogs: { readonly success: readonly [\"Payment processed successfully\", \"Payment completed\"]; readonly error: readonly [\"Payment gateway rejected transaction: insufficient funds\", \"Duplicate payment detected: idempotency key already used\", \"Payment processing failed: downstream acquirer timeout after 30s\", \"Payment persistence failed: database transaction rolled back after timeout\", \"Event publish failed: unable to reach Kafka broker after 3 retries\"]; }; } | { readonly name: \"notification-dispatch\"; readonly runtime: \"node\"; readonly infraDeps: readonly [\"kafka\", \"redis\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"notifications\"; }; readonly os?: undefined; }; readonly serviceLogs?: undefined; })[]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.sigEvents.buildLogsGenerator",
+            "type": "Function",
+            "tags": [],
+            "label": "buildLogsGenerator",
+            "description": [],
+            "signature": [
+              "<TServiceGraph extends ",
+              "ServiceGraph",
+              "<string> = ",
+              "ServiceGraph",
+              "<string>>(config: ",
+              "LogsGeneratorConfig",
+              "<TServiceGraph>) => { generator: (timestamp: number, index: number) => Log[]; manifest: ",
+              "LogsManifest",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.sigEvents.buildLogsGenerator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "LogsGeneratorConfig",
+                  "<TServiceGraph>"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/build_logs_generator.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
+                "deprecated": false,
+                "docsReferencedTypeName": "LogsGeneratorConfig",
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.SYSTEM_METRICS",
+        "type": "Object",
+        "tags": [],
+        "label": "SYSTEM_METRICS",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.SYSTEM_METRICS.system.cpu.total.norm.pct",
+            "type": "number",
+            "tags": [],
+            "label": "'system.cpu.total.norm.pct'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.SYSTEM_METRICS.system.process.cpu.total.norm.pct",
+            "type": "number",
+            "tags": [],
+            "label": "'system.process.cpu.total.norm.pct'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.SYSTEM_METRICS.system.memory.actual.free",
+            "type": "number",
+            "tags": [],
+            "label": "'system.memory.actual.free'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.SYSTEM_METRICS.system.memory.total",
+            "type": "number",
+            "tags": [],
+            "label": "'system.memory.total'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.SYSTEM_METRICS.system.process.memory.rss.bytes",
+            "type": "number",
+            "tags": [],
+            "label": "'system.process.memory.rss.bytes'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/apm_metrics_dashboards.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

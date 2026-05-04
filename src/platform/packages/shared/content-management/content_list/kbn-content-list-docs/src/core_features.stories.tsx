@@ -9,20 +9,47 @@
 
 import React, { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ContentListProvider } from '@kbn/content-list-provider';
-import type { ContentListItem } from '@kbn/content-list-provider';
-import { ContentListTable } from '@kbn/content-list-table';
-import { ContentListFooter } from '@kbn/content-list-footer';
-import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { createStoryFindItems, StateDiagnosticPanel } from './stories_helpers';
+import { EuiSpacer } from '@elastic/eui';
+import {
+  ContentList,
+  ContentListProvider,
+  ContentListTable,
+  ContentListFooter,
+  ContentListToolbar,
+  type ContentListItem,
+} from '@kbn/content-list';
+import {
+  createStoryFindItems,
+  DashboardListingEmptyPromptMock,
+  DashboardListingStoryFrame,
+  StateDiagnosticPanel,
+} from './stories_helpers';
 
 // =============================================================================
 // Storybook Meta
 // =============================================================================
 
-const meta: Meta = {
-  title: 'Content List',
+interface CoreFeaturesStoryArgs {
+  scrollableInline: boolean;
+  responsiveBreakpoint: boolean;
+}
+
+const meta: Meta<CoreFeaturesStoryArgs> = {
+  title: 'Content List/Core Features',
+  argTypes: {
+    scrollableInline: {
+      control: 'boolean',
+      description: 'Enable horizontal scrolling when columns exceed container width.',
+    },
+    responsiveBreakpoint: {
+      control: 'boolean',
+      description: 'Collapse the table into responsive cards on narrow viewports.',
+    },
+  },
+  args: {
+    scrollableInline: true,
+    responsiveBreakpoint: false,
+  },
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -57,7 +84,10 @@ const { Column, Action } = ContentListTable;
  * - [x] Search (PR 4)
  * - [x] Selection + bulk bar (PR 7)
  */
-const CoreFeaturesWrapper = () => {
+const CoreFeaturesWrapper = ({
+  scrollableInline = true,
+  responsiveBreakpoint = false,
+}: CoreFeaturesStoryArgs) => {
   const labels = useMemo(
     () => ({
       entity: 'dashboard',
@@ -115,6 +145,8 @@ const CoreFeaturesWrapper = () => {
     []
   );
 
+  const emptyStateElement = useMemo(() => <DashboardListingEmptyPromptMock />, []);
+
   const displayElement = useMemo(
     () => (
       <ContentListProvider
@@ -124,43 +156,45 @@ const CoreFeaturesWrapper = () => {
         features={features}
         item={itemConfig}
       >
-        <ContentListToolbar />
-        <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
-        <ContentListFooter />
+        <ContentList emptyState={emptyStateElement}>
+          <ContentListToolbar />
+          <ContentListTable title="Dashboards" {...{ scrollableInline, responsiveBreakpoint }}>
+            {tableChildren}
+          </ContentListTable>
+          <ContentListFooter />
+        </ContentList>
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, tableChildren]
+    [
+      labels,
+      dataSource,
+      features,
+      itemConfig,
+      tableChildren,
+      emptyStateElement,
+      scrollableInline,
+      responsiveBreakpoint,
+    ]
   );
 
   return (
-    <ContentListProvider id="core-features" {...{ labels, dataSource, features }} item={itemConfig}>
-      <EuiTitle size="s">
-        <h2>Core Features</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          The minimum feature set required to migrate the simplest <code>TableListView</code>{' '}
-          consumers (Graph, Files Management) to Content List. Core = Search + Sort + Pagination +
-          UpdatedAt + Actions + Selection + Delete.
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
+    <DashboardListingStoryFrame>
+      <ContentListProvider
+        id="core-features"
+        {...{ labels, dataSource, features }}
+        item={itemConfig}
+      >
+        <ContentList emptyState={emptyStateElement}>
           <ContentListToolbar />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
-        </EuiFlexItem>
-        <EuiFlexItem>
+          <ContentListTable title="Dashboards" {...{ scrollableInline, responsiveBreakpoint }}>
+            {tableChildren}
+          </ContentListTable>
           <ContentListFooter />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <StateDiagnosticPanel defaultOpen element={displayElement} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ContentListProvider>
+        </ContentList>
+        <EuiSpacer size="m" />
+        <StateDiagnosticPanel defaultOpen element={displayElement} />
+      </ContentListProvider>
+    </DashboardListingStoryFrame>
   );
 };
 
@@ -171,14 +205,15 @@ const CoreFeaturesWrapper = () => {
  *
  * **Core** = Search + Sort + Pagination + UpdatedAt + Actions + Selection + Delete
  *
- * This story is intentionally non-configurable — it represents the
- * opinionated, production-like composition that a consumer like Graph or
- * Files Management would use. It demonstrates the two-layer architecture:
- * a `ContentListProvider` that owns data-fetching and state, with
- * composable `ContentListToolbar`, `ContentListTable`, and
- * `ContentListFooter` children that read from the provider via context.
+ * This story is intentionally non-configurable — it represents a
+ * production-like feature-owned page shell with `ContentList` embedded
+ * inside it. It demonstrates the lower-level composition that a consumer
+ * like Dashboards or Graph can use when it needs custom page chrome around
+ * the list region.
  */
-export const CoreFeatures: StoryObj = {
+type Story = StoryObj<CoreFeaturesStoryArgs>;
+
+export const CoreFeatures: Story = {
   name: 'Core Features',
-  render: () => <CoreFeaturesWrapper />,
+  render: (args) => <CoreFeaturesWrapper {...args} />,
 };

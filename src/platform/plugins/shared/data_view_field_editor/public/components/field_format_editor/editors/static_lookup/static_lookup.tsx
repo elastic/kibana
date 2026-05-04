@@ -164,7 +164,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
         />
         <EuiSpacer size="m" />
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           size="s"
           onClick={this.addLookup}
           data-test-subj={'staticLookupEditorAddEntry'}

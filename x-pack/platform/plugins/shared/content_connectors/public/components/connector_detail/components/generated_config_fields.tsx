@@ -153,6 +153,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorNameLink"
               external
               target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -171,6 +172,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorIdLink"
                   external
                   target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -186,7 +188,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                     <EuiButtonIcon
                       size="xs"
                       data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       onClick={copy}
                       aria-label={i18n.translate(
                         'xpack.contentConnectors.connectorDeployment.copyConnectorId',
@@ -279,7 +281,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                               <EuiButtonIcon
                                 size="xs"
                                 data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                                iconType="copyClipboard"
+                                iconType="copy"
                                 onClick={copy}
                                 aria-label={i18n.translate(
                                   'xpack.contentConnectors.connectorDeployment.copyIndexName',

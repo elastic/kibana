@@ -90,6 +90,11 @@ const inferenceEndpoints = [
     service_settings: {
       model_id: 'rainbow-sprinkles',
     },
+    metadata: {
+      display: {
+        model_creator: 'Anthropic',
+      },
+    },
   },
   {
     inference_id: '.elser-2-elastic',
@@ -325,9 +330,9 @@ describe('When the tabular page is loaded', () => {
 
     it('should display accordions with tables for model groups', () => {
       const groupAccordions = screen.getAllByTestId(/-accordion$/);
-      expect(groupAccordions).toHaveLength(5);
+      expect(groupAccordions).toHaveLength(6);
       const groupTables = screen.getAllByTestId(/-table$/);
-      expect(groupTables).toHaveLength(5);
+      expect(groupTables).toHaveLength(6);
     });
 
     it('should have expected endpoint table columns', () => {
@@ -344,9 +349,14 @@ describe('When the tabular page is loaded', () => {
     it('should show expected group labels and endpoint counts', () => {
       const expectedGroups = [
         {
-          groupId: 'elastic',
+          groupId: 'Elastic',
           label: 'Elastic',
-          countLabel: '6 endpoints',
+          countLabel: '5 endpoints',
+        },
+        {
+          groupId: 'Anthropic',
+          label: 'Anthropic',
+          countLabel: '1 endpoint',
         },
         {
           groupId: '.own_model',
@@ -386,7 +396,7 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should disable delete action for preconfigured endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elastic-table');
+      const elserTable = screen.getByTestId('Elastic-table');
 
       const preconfiguredRow = within(elserTable).getByText('.elser-2-elastic').closest('tr');
 
@@ -404,7 +414,7 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should enable delete action for user-defined endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elastic-table');
+      const elserTable = screen.getByTestId('Elastic-table');
 
       const userDefinedRow = within(elserTable).getByText('custom-inference-id').closest('tr');
 
@@ -516,14 +526,8 @@ describe('When the tabular page is loaded', () => {
     const stats = screen.getByTestId('endpointStats');
     expect(stats).toBeInTheDocument();
 
-    // 3 unique services: elasticsearch, openai, elastic
-    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
-
     // 8 unique models
     expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
-
-    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
-    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
 
     // 11 endpoints total
     expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');

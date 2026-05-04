@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 
 import { Position } from '@elastic/charts';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,7 @@ import type {
   AnnotationGroups,
   FormBasedPersistedState,
   VisualizationInfo,
+  XYPersistedState,
 } from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
@@ -67,11 +69,16 @@ import type {
   XYDataLayerConfig,
   SeriesType,
   XYByValueAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from './types';
 import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
+import {
+  getAccessorColorConfigs,
+  getColorAssignments,
+  getLayerPaletteName,
+} from './color_assignment';
+import { getDefaultPalette } from './default_palette';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
@@ -124,7 +131,6 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import type { XYPersistedState } from './persistence';
 import { convertPersistedState, convertToPersistable } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
 import {
@@ -168,8 +174,9 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<XYState, XYPersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<XYVisualizationState, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
+  suggestionPriority: 1,
   getVisualizationTypeId(state, layerId) {
     const type = getVisualizationType(state, layerId);
     return type === 'mixed' ? type : type.id;
@@ -268,7 +275,7 @@ export const getXyVisualization = ({
 
   getDescription,
 
-  switchVisualizationType(seriesType: string, state: XYState, layerId?: string) {
+  switchVisualizationType(seriesType: string, state: XYVisualizationState, layerId?: string) {
     const dataLayer = layerId
       ? state.layers.find((l) => l.layerId === layerId)
       : state.layers.at(0);
@@ -317,7 +324,7 @@ export const getXyVisualization = ({
 
     return {
       title: 'Empty XY chart',
-      legend: { isVisible: true, position: Position.Right },
+      legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,
       layers: [
@@ -418,9 +425,10 @@ export const getXyVisualization = ({
     }
 
     const isTextBasedLayer = frame.datasourceLayers[layerId]?.isTextBasedLanguage();
+    const isDarkMode = kibanaTheme.getTheme().darkMode;
 
     if (isAnnotationsLayer(layer)) {
-      return getAnnotationsConfiguration({ state, frame, layer });
+      return getAnnotationsConfiguration({ state, frame, layer, isDarkMode });
     }
 
     const sortedAccessors: string[] = getSortedAccessors(
@@ -436,6 +444,7 @@ export const getXyVisualization = ({
       frame,
       layer,
       fieldFormats,
+      isDarkMode,
       paletteService,
       accessors: sortedAccessors,
     });
@@ -488,7 +497,9 @@ export const getXyVisualization = ({
         })
         .unsubscribe();
     } else {
-      const palette = paletteService.get(dataLayer.palette?.name || 'default');
+      const palette = paletteService.get(
+        dataLayer.palette?.name || getDefaultPalette(dataLayer.seriesType)
+      );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
 
@@ -725,8 +736,9 @@ export const getXyVisualization = ({
         newLayer.splitAccessors = newLayer.splitAccessors.filter((a) => a !== columnId);
         if (newLayer.splitAccessors.length === 0) {
           delete newLayer.splitAccessors;
-          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          // as palette and colorMapping are associated with the breakdown dimension, remove them together with the breakdown dimension
           delete newLayer.palette;
+          delete newLayer.colorMapping;
         }
       }
     }
@@ -1142,7 +1154,13 @@ export const getXyVisualization = ({
         });
     }
 
-    const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
+    const info = getNotifiableFeatures(
+      state,
+      frame,
+      paletteService,
+      fieldFormats,
+      kibanaTheme.getTheme().darkMode
+    );
 
     return errors.concat(warnings, info);
   },
@@ -1166,8 +1184,10 @@ export const getXyVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
-    const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
+    const allSuggestions = suggestions as Array<
+      Suggestion<XYVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<XYVisualizationState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
@@ -1181,7 +1201,7 @@ export const getXyVisualization = ({
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...(context.configuration as XYState),
+        ...(context.configuration as XYVisualizationState),
       },
     };
     return suggestion;
@@ -1195,7 +1215,13 @@ export const getXyVisualization = ({
   },
 
   getVisualizationInfo(state, frame) {
-    return getVisualizationInfo(state, frame, paletteService, fieldFormats);
+    return getVisualizationInfo(
+      state,
+      frame,
+      paletteService,
+      fieldFormats,
+      kibanaTheme.getTheme().darkMode
+    );
   },
 
   getTelemetryEventsOnSave(state, prevState) {
@@ -1224,6 +1250,7 @@ const getMappedAccessors = ({
   accessors,
   frame,
   fieldFormats,
+  isDarkMode,
   paletteService,
   state,
   layer,
@@ -1232,7 +1259,8 @@ const getMappedAccessors = ({
   frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
-  state: XYState;
+  isDarkMode: boolean;
+  state: XYVisualizationState;
   layer: XYDataLayerConfig;
 }) => {
   let mappedAccessors: AccessorConfig[] = accessors.map((accessor) => ({
@@ -1252,7 +1280,8 @@ const getMappedAccessors = ({
         ...layer,
         accessors: accessors.filter((sorted) => layer.accessors.includes(sorted)),
       },
-      paletteService
+      paletteService,
+      isDarkMode
     );
   }
   return mappedAccessors;
@@ -1305,10 +1334,11 @@ function resolveDefaultPaletteForSeriesType(
 }
 
 function getVisualizationInfo(
-  state: XYState,
+  state: XYVisualizationState,
   frame: Partial<FramePublicAPI> | undefined,
   paletteService: PaletteRegistry,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  isDarkMode = false
 ): VisualizationInfo {
   const isHorizontal = isHorizontalChart(state.layers);
   const visualizationLayersInfo = state.layers.map((layer) => {
@@ -1349,6 +1379,7 @@ function getVisualizationInfo(
             frame: frame as Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
             layer,
             fieldFormats,
+            isDarkMode,
             paletteService,
             accessors: sortedAccessors,
           });
@@ -1367,11 +1398,9 @@ function getVisualizationInfo(
         });
 
         if (!layer.collapseFn) {
-          palette.push(
-            ...paletteService
-              .get(layer.palette?.name || 'default')
-              .getCategoricalColors(10, layer.palette?.params)
-          );
+          const paletteDefinition =
+            paletteService.get(getLayerPaletteName(layer)) ?? paletteService.get('default');
+          palette.push(...paletteDefinition.getCategoricalColors(10, layer.palette?.params));
         }
       }
     }
@@ -1421,7 +1450,7 @@ function getVisualizationInfo(
       palette.push(
         ...layer.annotations
           .filter(({ isHidden }) => !isHidden)
-          .map((annotation) => getAnnotationAccessor(annotation).color)
+          .map((annotation) => getAnnotationAccessor(annotation, isDarkMode).color)
       );
     }
 
@@ -1443,10 +1472,11 @@ function getVisualizationInfo(
 }
 
 function getNotifiableFeatures(
-  state: XYState,
+  state: XYVisualizationState,
   frame: Pick<FramePublicAPI, 'dataViews'> & Partial<FramePublicAPI>,
   paletteService: PaletteRegistry,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  isDarkMode = false
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
     (layer) =>
@@ -1457,7 +1487,13 @@ function getNotifiableFeatures(
   if (!annotationsWithIgnoreFlag.length) {
     return [];
   }
-  const visualizationInfo = getVisualizationInfo(state, frame, paletteService, fieldFormats);
+  const visualizationInfo = getVisualizationInfo(
+    state,
+    frame,
+    paletteService,
+    fieldFormats,
+    isDarkMode
+  );
 
   return [
     {
@@ -1539,6 +1575,9 @@ const SubtypeSwitch = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsPopoverAriaLabel', {
+          defaultMessage: 'Stacking options',
+        })}
         ownFocus
         panelPaddingSize="none"
         button={

@@ -55,6 +55,7 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.notifyWhen !== undefined ? { notifyWhen: rule.notifyWhen } : {}),
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
+    ...(rule.snoozedInstances !== undefined ? { snoozedInstances: rule.snoozedInstances } : {}),
     ...(meta ? { meta } : {}),
     ...(rule.executionStatus
       ? {
@@ -83,6 +84,7 @@ export const transformRuleDomainToRuleAttributes = ({
     revision: rule.revision,
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
+    ...(rule.lastEnabledAt ? { lastEnabledAt: rule.lastEnabledAt.toISOString() } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
     artifacts: artifactsWithRefs,
   } as RawRule;

@@ -8,9 +8,10 @@
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -53,7 +54,12 @@ export function useStreamsPrivileges() {
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
-  const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
+  const wiredStreamViewsEnabled = uiSettings.get(
+    OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+    false
+  );
+
+  const overviewPageEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE, false);
 
   return {
     ui: streams as {
@@ -78,8 +84,11 @@ export function useStreamsPrivileges() {
       contentPacks: {
         enabled: contentPacksEnabled,
       },
-      attachments: {
-        enabled: attachmentsEnabled,
+      wiredStreamViews: {
+        enabled: wiredStreamViewsEnabled,
+      },
+      overviewPage: {
+        enabled: overviewPageEnabled,
       },
     },
     isLoading: !license,

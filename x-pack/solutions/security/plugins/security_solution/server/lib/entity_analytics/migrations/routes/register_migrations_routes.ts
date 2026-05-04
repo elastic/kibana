@@ -13,5 +13,5 @@ export const registerMigrationsRoutes = ({
   config,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
-  entityAnalyticsRunMigrationsRoute(router, logger, getStartServices);
+  entityAnalyticsRunMigrationsRoute(router, logger, getStartServices, config);
 };

@@ -35,6 +35,7 @@
             "lineNumber": 15,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -58,7 +59,7 @@
             "section": "def-common.EventAnnotationConfig",
             "text": "EventAnnotationConfig"
           },
-          ") => ",
+          ", isDarkMode?: boolean) => ",
           {
             "pluginId": "@kbn/visualization-ui-components",
             "scope": "public",
@@ -68,7 +69,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
-        "lineNumber": 19,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -90,8 +91,26 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
-            "lineNumber": 19,
-            "columnNumber": 39,
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.getAnnotationAccessor.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDarkMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -126,7 +145,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 29,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -149,9 +168,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 30,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -185,7 +205,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 35,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -208,9 +228,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 36,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -244,7 +265,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 23,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -267,9 +288,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 24,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -313,6 +335,9 @@
         "tags": [],
         "label": "defaultAnnotationColor",
         "description": [],
+        "signature": [
+          "\"#2B394F\""
+        ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "lineNumber": 19,
         "columnNumber": 14,
@@ -328,10 +353,10 @@
         "label": "defaultAnnotationRangeColor",
         "description": [],
         "signature": [
-          "\"#F04E981A\""
+          "\"#2B394F1A\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

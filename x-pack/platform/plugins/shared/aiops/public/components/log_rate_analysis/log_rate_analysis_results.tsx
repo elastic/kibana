@@ -100,7 +100,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
 }) => {
-  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
@@ -125,7 +125,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
   const abortCtrl = useRef(new AbortController());
   const previousSearchQuery = useRef(searchQuery);
-
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
   );
@@ -258,8 +257,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         // TODO Handle data view without time fields.
         timeFieldName: dataView.timeFieldName ?? '',
         index: dataView.getIndexPattern(),
-        // Temporarily disable grouping until https://github.com/elastic/kibana/issues/232849 is resolved.
-        grouping: false,
+        grouping: true,
         flushFix: true,
         // If analysis type is `spike`, pass on window parameters as is,
         // if it's `dip`, swap baseline and deviation.
@@ -268,6 +266,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           : getSwappedWindowParameters(chartWindowParameters)),
         overrides,
         sampleProbability,
+        projectRouting: cps?.cpsManager?.getProjectRouting(),
       },
       headers: { [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
     };
@@ -282,6 +281,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     sampleProbability,
     overrides,
     embeddingOrigin,
+    cps,
   ]);
 
   useEffect(() => {
@@ -364,7 +364,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="aiopsLogRateAnalysisOptionsButton"
-                  iconType="controlsHorizontal"
+                  iconType="controls"
                   onClick={onEmbeddableOptionsClickHandler}
                   aria-label={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonAriaLabel', {
                     defaultMessage: 'Analysis options',
@@ -431,7 +431,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       {showLogRateAnalysisResultsTable && groupResults && foundGroups && (
         <>
           <EuiSpacer size="xs" />
-          <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
+          <EuiText size="xs">{groupResultsHelpMessage}</EuiText>
         </>
       )}
       <EuiSpacer size="s" />

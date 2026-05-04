@@ -197,8 +197,8 @@ const enrichOperators = (
         Location.SORT,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.LIMIT_BY,
         Location.COMPLETION,
-        Location.MMR,
         Location.RERANK,
         Location.JOIN,
       ]);
@@ -215,8 +215,8 @@ const enrichOperators = (
         Location.STATS,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.LIMIT_BY,
         Location.COMPLETION,
-        Location.MMR,
         Location.RERANK,
         Location.JOIN,
       ]);
@@ -234,7 +234,6 @@ const enrichOperators = (
         Location.ROW,
         Location.STATS_WHERE,
         Location.COMPLETION,
-        Location.MMR,
         Location.RERANK,
         Location.JOIN,
       ];

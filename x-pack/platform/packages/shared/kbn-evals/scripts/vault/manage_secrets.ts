@@ -101,6 +101,15 @@ const configSchema = schema.object(
         { unknowns: 'allow' }
       )
     ),
+    evaluationsKbn: schema.maybe(
+      schema.object(
+        {
+          url: schema.string({ minLength: 1 }),
+          apiKey: schema.string({ minLength: 1 }),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
     gcsDatasetAccessCredentials: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   },
   { unknowns: 'allow' }

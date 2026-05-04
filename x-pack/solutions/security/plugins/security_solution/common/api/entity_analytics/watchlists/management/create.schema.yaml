@@ -13,6 +13,7 @@ paths:
       x-state: Technical Preview
       operationId: CreateWatchlist
       summary: Create a new watchlist
+      description: Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
       requestBody:
         required: true
         content:
@@ -21,7 +22,6 @@ paths:
               type: object
               required:
                 - name
-                - description
                 - riskModifier
               properties:
                 name:
@@ -32,10 +32,47 @@ paths:
                   description: Description of the watchlist
                 riskModifier:
                   type: number
+                  minimum: 0
+                  maximum: 2
                   description: Risk score modifier associated with the watchlist
                 managed:
                   type: boolean
                   description: Indicates if the watchlist is managed by the system
+                entitySources:
+                  description: Optional entity sources to create and link to the watchlist
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - name
+                    additionalProperties: false
+                    properties:
+                      type:
+                        $ref: "../data_source/common.schema.yaml#/components/schemas/EntitySourceType"
+                      name:
+                        type: string
+                      indexPattern:
+                        type: string
+                      integrationName:
+                        type: string
+                        description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+                      enabled:
+                        type: boolean
+                      identifierField:
+                        type: string
+                        description: Field used to query the entity store for index-type sources
+                      queryRule:
+                        type: string
+                        description: KQL query used to filter data from the provided index patterns
+                      matchers:
+                        type: array
+                        items:
+                          $ref: "../data_source/common.schema.yaml#/components/schemas/Matcher"
+                      filter:
+                        $ref: "../data_source/common.schema.yaml#/components/schemas/Filter"
+                      range:
+                        $ref: "../data_source/common.schema.yaml#/components/schemas/DateRange"
             examples:
               CreateWatchlistRequest:
                 summary: Create watchlist request
@@ -44,13 +81,33 @@ paths:
                   description: High risk vendor watchlist
                   riskModifier: 1.5
                   managed: false
+              CreateWatchlistWithSourcesRequest:
+                summary: Create watchlist with entity sources
+                value:
+                  name: High Risk Vendors
+                  description: High risk vendor watchlist
+                  riskModifier: 1.5
+                  managed: false
+                  entitySources:
+                    - type: index
+                      name: My User Index Source
+                      indexPattern: my-sync-index
+                      identifierField: user.name
+                      enabled: true
       responses:
         "200":
           description: Watchlist created successfully
           content:
             application/json:
               schema:
-                $ref: "./common.schema.yaml#/components/schemas/WatchlistObject"
+                allOf:
+                  - $ref: "./common.schema.yaml#/components/schemas/WatchlistObject"
+                  - type: object
+                    properties:
+                      entitySources:
+                        type: array
+                        items:
+                          $ref: "../data_source/common.schema.yaml#/components/schemas/MonitoringEntitySource"
               examples:
                 CreateWatchlistResponse:
                   summary: Created watchlist

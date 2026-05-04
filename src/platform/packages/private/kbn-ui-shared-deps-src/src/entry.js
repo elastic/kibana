@@ -27,6 +27,9 @@ export const KbnI18n = require('@kbn/i18n');
 export const KbnI18nReact = require('@kbn/i18n-react');
 export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
+// JSX runtime exports for SWC's importSource: '@emotion/react'
+export const EmotionReactJsxRuntime = require('@emotion/react/jsx-runtime');
+export const EmotionReactJsxDevRuntime = require('@emotion/react/jsx-dev-runtime');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 
@@ -35,6 +38,8 @@ export const IoTs = require('io-ts');
 export const IoTsReporter = require('io-ts/Reporter');
 export const IoTsPathReporter = require('io-ts/PathReporter');
 export const IoTsThrowReporter = require('io-ts/ThrowReporter');
+// eslint-disable-next-line @kbn/eslint/module_migration
+export const Zod = require('zod/v4');
 
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
@@ -121,4 +126,7 @@ export const KbnReactKibanaContextEnv = require('@kbn/react-kibana-context-env')
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
 export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+export const KbnCoreDi = require('@kbn/core-di-browser');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
+export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');

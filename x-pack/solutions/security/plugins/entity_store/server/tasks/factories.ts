@@ -6,15 +6,25 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
+import { AssetManagerClient } from '../domain/asset_manager';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { CcsLogsExtractionClient } from '../domain/logs_extraction';
-import { CRUDClient } from '../domain/crud';
-import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
+import {
+  CcsLogExtractionStateClient,
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+} from '../domain/saved_objects';
+import type { TelemetryReporter } from '../telemetry/events';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
+}
+
+export interface AssetManagerClientFactoryResult {
+  assetManagerClient: AssetManagerClient;
+  esClient: ElasticsearchClient;
 }
 
 export async function createLogsExtractionClient({
@@ -36,16 +46,17 @@ export async function createLogsExtractionClient({
 
   const dataViewsService = await pluginsStart.dataViews.dataViewsServiceFactory(
     soClient,
-    internalUserClient
+    internalUserClient,
+    fakeRequest
   );
 
   const esClient = clusterClient.asCurrentUser;
-  const crudClient = new CRUDClient({
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(
     logger,
     esClient,
     namespace,
-  });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+    new CcsLogExtractionStateClient(soClient, namespace, logger)
+  );
 
   const logsExtractionClient = new LogsExtractionClient({
     logger,
@@ -59,5 +70,53 @@ export async function createLogsExtractionClient({
 
   return {
     logsExtractionClient,
+  };
+}
+
+export async function createAssetManagerClient({
+  core,
+  fakeRequest,
+  logger,
+  namespace,
+  analytics,
+  isServerless = false,
+}: {
+  core: EntityStoreCoreSetup;
+  logger: Logger;
+  namespace: string;
+  fakeRequest: KibanaRequest;
+  analytics: TelemetryReporter;
+  isServerless?: boolean;
+}): Promise<AssetManagerClientFactoryResult> {
+  const [coreStart, pluginsStart] = await core.getStartServices();
+
+  const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
+  const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
+  const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+  const ccsLogExtractionStateClient = new CcsLogExtractionStateClient(soClient, namespace, logger);
+  const { logsExtractionClient } = await createLogsExtractionClient({
+    core,
+    fakeRequest,
+    logger,
+    namespace,
+  });
+
+  return {
+    esClient,
+    assetManagerClient: new AssetManagerClient({
+      logger,
+      esClient,
+      taskManager: pluginsStart.taskManager,
+      engineDescriptorClient,
+      globalStateClient,
+      ccsLogExtractionStateClient,
+      namespace,
+      isServerless,
+      logsExtractionClient,
+      security: pluginsStart.security,
+      analytics,
+      savedObjectsClient: soClient,
+    }),
   };
 }

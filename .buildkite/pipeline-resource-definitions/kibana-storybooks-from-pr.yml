@@ -26,7 +26,7 @@ spec:
         trigger_mode: none
       cancel_intermediate_builds: true
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
       teams:
         appex-sharedux:
           access_level: MANAGE_BUILD_AND_READ

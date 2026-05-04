@@ -266,6 +266,7 @@
                 "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -290,6 +291,7 @@
                 "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -309,6 +311,7 @@
                 "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -362,6 +365,7 @@
                 "lineNumber": 354,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortReason",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -559,6 +563,7 @@
                 "lineNumber": 480,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -593,6 +598,7 @@
                 "lineNumber": 482,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -690,6 +696,7 @@
                 "lineNumber": 593,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Type",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -714,6 +721,7 @@
                 "lineNumber": 593,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionFunctionParameter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -776,6 +784,7 @@
                 "lineNumber": 612,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -818,6 +827,7 @@
                 "lineNumber": 614,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -878,6 +888,7 @@
                 "lineNumber": 716,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstNode",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -895,6 +906,7 @@
                 "lineNumber": 716,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -941,6 +953,7 @@
                 "lineNumber": 737,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -975,6 +988,7 @@
                 "lineNumber": 739,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1019,6 +1033,7 @@
                 "lineNumber": 764,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1036,6 +1051,7 @@
                 "lineNumber": 765,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1143,6 +1159,7 @@
                 "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Execution",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1196,6 +1213,7 @@
                 "lineNumber": 45,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortReason",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1417,6 +1435,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1441,6 +1460,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1581,6 +1601,7 @@
                 "lineNumber": 119,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1605,6 +1626,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1624,6 +1646,7 @@
                 "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2072,6 +2095,7 @@
                 "lineNumber": 190,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2095,6 +2119,7 @@
                 "lineNumber": 191,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2193,6 +2218,7 @@
                 "lineNumber": 198,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2252,6 +2278,7 @@
                 "lineNumber": 298,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2330,6 +2357,7 @@
                 "lineNumber": 311,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2380,6 +2408,7 @@
                 "lineNumber": 323,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2397,6 +2426,7 @@
                 "lineNumber": 323,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2496,6 +2526,7 @@
                 "lineNumber": 352,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2659,6 +2690,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false
               },
               {
@@ -2675,6 +2707,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               },
               {
@@ -2835,6 +2868,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               }
             ]
@@ -3044,6 +3078,7 @@
                 "lineNumber": 94,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyExpressionFunctionDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3367,6 +3402,7 @@
                 "lineNumber": 29,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArgumentType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3556,6 +3592,7 @@
                 "lineNumber": 41,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3605,6 +3642,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IExpressionLoaderParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3674,6 +3712,7 @@
                 "lineNumber": 104,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortReason",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3846,6 +3885,7 @@
                 "lineNumber": 124,
                 "columnNumber": 57,
                 "deprecated": false,
+                "docsReferencedTypeName": "IExpressionLoaderParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4003,6 +4043,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false
               },
               {
@@ -4019,6 +4060,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false
               },
               {
@@ -4041,6 +4083,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderHandlers",
                 "trackAdoption": false
               }
             ]
@@ -4082,6 +4125,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4398,6 +4442,7 @@
                 "lineNumber": 63,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4415,6 +4460,7 @@
                 "lineNumber": 64,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderHandlerParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4465,6 +4511,7 @@
                 "lineNumber": 129,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializableRecord",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4568,6 +4615,7 @@
                 "lineNumber": 174,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4649,6 +4697,7 @@
                 "lineNumber": 53,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4695,6 +4744,7 @@
                 "lineNumber": 55,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4740,6 +4790,7 @@
                 "lineNumber": 67,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4904,6 +4955,7 @@
                 "lineNumber": 327,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionServiceParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5471,6 +5523,7 @@
                 "lineNumber": 266,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false
               },
               {
@@ -5494,6 +5547,7 @@
                 "lineNumber": 268,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false
               }
             ]
@@ -5664,6 +5718,7 @@
                 "lineNumber": 412,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5681,6 +5736,7 @@
                 "lineNumber": 413,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5745,6 +5801,7 @@
                 "lineNumber": 423,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5810,6 +5867,7 @@
                 "lineNumber": 433,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5935,6 +5993,7 @@
                 "lineNumber": 448,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6248,6 +6307,7 @@
                 "lineNumber": 40,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyExpressionTypeDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6372,6 +6432,7 @@
                 "lineNumber": 66,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6408,6 +6469,7 @@
                 "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6452,6 +6514,7 @@
                 "lineNumber": 70,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6494,6 +6557,7 @@
                 "lineNumber": 70,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6538,6 +6602,7 @@
                 "lineNumber": 82,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6563,6 +6628,7 @@
                 "lineNumber": 82,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6648,6 +6714,7 @@
                 "lineNumber": 70,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Executor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6951,6 +7018,7 @@
                 "lineNumber": 20,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "Datatable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7078,6 +7146,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Executor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7577,6 +7646,7 @@
             "lineNumber": 18,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionAstExpression",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7659,6 +7729,7 @@
             "lineNumber": 114,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7752,6 +7823,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RefObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -7775,6 +7847,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionRendererParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8348,6 +8421,7 @@
                 "lineNumber": 89,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "Datatable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9000,6 +9074,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9078,6 +9153,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9130,6 +9206,7 @@
                 "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9157,6 +9234,7 @@
                 "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9201,6 +9279,7 @@
                 "lineNumber": 119,
                 "columnNumber": 65,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9598,6 +9677,7 @@
                 "lineNumber": 111,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9617,6 +9697,7 @@
                 "lineNumber": 111,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arguments",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9636,6 +9717,7 @@
                 "lineNumber": 111,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10460,6 +10542,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10477,6 +10560,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10500,6 +10584,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderHandlers",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10624,6 +10709,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TData",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10641,6 +10727,7 @@
                 "lineNumber": 32,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TInspectorAdapters",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -10708,6 +10795,7 @@
                 "lineNumber": 35,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRendererEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11208,6 +11296,7 @@
                 "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11232,6 +11321,7 @@
                 "lineNumber": 256,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11320,6 +11410,7 @@
                 "lineNumber": 266,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11344,6 +11435,7 @@
                 "lineNumber": 268,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11404,6 +11496,7 @@
                 "lineNumber": 271,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11463,6 +11556,7 @@
                 "lineNumber": 277,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11531,6 +11625,7 @@
                 "lineNumber": 282,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11548,6 +11643,7 @@
                 "lineNumber": 283,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11705,6 +11801,7 @@
                 "lineNumber": 38,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11741,6 +11838,7 @@
                 "lineNumber": 39,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -12468,6 +12566,7 @@
                 "lineNumber": 85,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderUpdateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -12519,6 +12618,7 @@
                 "lineNumber": 86,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -12570,6 +12670,7 @@
                 "lineNumber": 87,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -13665,6 +13766,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -13783,6 +13885,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "I",
             "trackAdoption": false
           },
           {
@@ -13807,6 +13910,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false
           }
         ],
@@ -14839,7 +14943,14 @@
       "tags": [],
       "label": "ExpressionsStart",
       "description": [
-        "\nExpressions public start contrect, extends {@link ExpressionServiceStart}"
+        "\nExpressions public start contrect, extends ",
+        {
+          "pluginId": "expressions",
+          "scope": "public",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-public.ExpressionServiceStart",
+          "text": "ExpressionServiceStart"
+        }
       ],
       "signature": [
         {
@@ -14919,6 +15030,7 @@
               "lineNumber": 206,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "HTMLElement",
               "trackAdoption": false
             },
             {
@@ -14966,6 +15078,7 @@
               "lineNumber": 208,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "IExpressionLoaderParams",
               "trackAdoption": false
             }
           ]
@@ -15011,6 +15124,7 @@
               "lineNumber": 180,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "HTMLElement",
               "trackAdoption": false
             },
             {
@@ -15044,6 +15158,7 @@
               "lineNumber": 182,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "ExpressionRenderHandlerParams",
               "trackAdoption": false
             }
           ]
@@ -15093,6 +15208,7 @@
               "lineNumber": 20,
               "columnNumber": 41,
               "deprecated": false,
+              "docsReferencedTypeName": "ReactExpressionRendererProps",
               "trackAdoption": false
             }
           ]
@@ -15368,6 +15484,7 @@
                 "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15392,6 +15509,7 @@
                 "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -15411,6 +15529,7 @@
                 "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15464,6 +15583,7 @@
                 "lineNumber": 354,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortReason",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -15661,6 +15781,7 @@
                 "lineNumber": 480,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15695,6 +15816,7 @@
                 "lineNumber": 482,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15792,6 +15914,7 @@
                 "lineNumber": 593,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Type",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15816,6 +15939,7 @@
                 "lineNumber": 593,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionFunctionParameter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15878,6 +16002,7 @@
                 "lineNumber": 612,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15920,6 +16045,7 @@
                 "lineNumber": 614,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15980,6 +16106,7 @@
                 "lineNumber": 716,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstNode",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15997,6 +16124,7 @@
                 "lineNumber": 716,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -16043,6 +16171,7 @@
                 "lineNumber": 737,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16077,6 +16206,7 @@
                 "lineNumber": 739,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -16121,6 +16251,7 @@
                 "lineNumber": 764,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16138,6 +16269,7 @@
                 "lineNumber": 765,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -16247,6 +16379,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -16271,6 +16404,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -16411,6 +16545,7 @@
                 "lineNumber": 119,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -16435,6 +16570,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -16454,6 +16590,7 @@
                 "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -16902,6 +17039,7 @@
                 "lineNumber": 190,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16925,6 +17063,7 @@
                 "lineNumber": 191,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -17023,6 +17162,7 @@
                 "lineNumber": 198,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -17082,6 +17222,7 @@
                 "lineNumber": 298,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17160,6 +17301,7 @@
                 "lineNumber": 311,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -17210,6 +17352,7 @@
                 "lineNumber": 323,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17227,6 +17370,7 @@
                 "lineNumber": 323,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -17326,6 +17470,7 @@
                 "lineNumber": 352,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -17489,6 +17634,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false
               },
               {
@@ -17505,6 +17651,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               },
               {
@@ -17665,6 +17812,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               }
             ]
@@ -17874,6 +18022,7 @@
                 "lineNumber": 94,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyExpressionFunctionDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18197,6 +18346,7 @@
                 "lineNumber": 29,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArgumentType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18390,6 +18540,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false
               },
               {
@@ -18406,6 +18557,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false
               },
               {
@@ -18428,6 +18580,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderHandlers",
                 "trackAdoption": false
               }
             ]
@@ -18469,6 +18622,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18777,6 +18931,7 @@
                 "lineNumber": 24,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18823,6 +18978,7 @@
                 "lineNumber": 30,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18868,6 +19024,7 @@
                 "lineNumber": 36,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19091,6 +19248,7 @@
                 "lineNumber": 40,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyExpressionTypeDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19215,6 +19373,7 @@
                 "lineNumber": 66,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19251,6 +19410,7 @@
                 "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19295,6 +19455,7 @@
                 "lineNumber": 70,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -19337,6 +19498,7 @@
                 "lineNumber": 70,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19381,6 +19543,7 @@
                 "lineNumber": 82,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -19406,6 +19569,7 @@
                 "lineNumber": 82,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19491,6 +19655,7 @@
                 "lineNumber": 70,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Executor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19739,6 +19904,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Executor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -20202,6 +20368,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -20282,6 +20449,7 @@
             "lineNumber": 18,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionAstExpression",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -20379,6 +20547,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "E",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -20396,6 +20565,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "S",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -21017,6 +21187,7 @@
                 "lineNumber": 89,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "Datatable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -21669,6 +21840,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -21747,6 +21919,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -21799,6 +21972,7 @@
                 "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -21826,6 +22000,7 @@
                 "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -21870,6 +22045,7 @@
                 "lineNumber": 119,
                 "columnNumber": 65,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -22232,6 +22408,7 @@
                 "lineNumber": 111,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -22251,6 +22428,7 @@
                 "lineNumber": 111,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arguments",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -22270,6 +22448,7 @@
                 "lineNumber": 111,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -23094,6 +23273,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -23111,6 +23291,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -23134,6 +23315,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderHandlers",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -23266,6 +23448,7 @@
                 "lineNumber": 38,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -23302,6 +23485,7 @@
                 "lineNumber": 39,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -23626,6 +23810,7 @@
                 "lineNumber": 85,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderUpdateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -23677,6 +23862,7 @@
                 "lineNumber": 86,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -23728,6 +23914,7 @@
                 "lineNumber": 87,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -24691,6 +24878,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "I",
             "trackAdoption": false
           },
           {
@@ -24715,6 +24903,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false
           }
         ],
@@ -25559,6 +25748,7 @@
                 "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -25583,6 +25773,7 @@
                 "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -25602,6 +25793,7 @@
                 "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -25655,6 +25847,7 @@
                 "lineNumber": 354,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortReason",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -25852,6 +26045,7 @@
                 "lineNumber": 480,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -25886,6 +26080,7 @@
                 "lineNumber": 482,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -25983,6 +26178,7 @@
                 "lineNumber": 593,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Type",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -26007,6 +26203,7 @@
                 "lineNumber": 593,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionFunctionParameter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -26069,6 +26266,7 @@
                 "lineNumber": 612,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -26111,6 +26309,7 @@
                 "lineNumber": 614,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -26171,6 +26370,7 @@
                 "lineNumber": 716,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstNode",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -26188,6 +26388,7 @@
                 "lineNumber": 716,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -26234,6 +26435,7 @@
                 "lineNumber": 737,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -26268,6 +26470,7 @@
                 "lineNumber": 739,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -26312,6 +26515,7 @@
                 "lineNumber": 764,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Fn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -26329,6 +26533,7 @@
                 "lineNumber": 765,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -26436,6 +26641,7 @@
                 "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Execution",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -26489,6 +26695,7 @@
                 "lineNumber": 45,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortReason",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -26710,6 +26917,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -26734,6 +26942,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -26874,6 +27083,7 @@
                 "lineNumber": 119,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -26898,6 +27108,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -26917,6 +27128,7 @@
                 "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27365,6 +27577,7 @@
                 "lineNumber": 190,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -27388,6 +27601,7 @@
                 "lineNumber": 191,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27486,6 +27700,7 @@
                 "lineNumber": 198,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27545,6 +27760,7 @@
                 "lineNumber": 298,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -27623,6 +27839,7 @@
                 "lineNumber": 311,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27673,6 +27890,7 @@
                 "lineNumber": 323,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -27690,6 +27908,7 @@
                 "lineNumber": 323,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27789,6 +28008,7 @@
                 "lineNumber": 352,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27952,6 +28172,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false
               },
               {
@@ -27968,6 +28189,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               },
               {
@@ -28128,6 +28350,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               }
             ]
@@ -28337,6 +28560,7 @@
                 "lineNumber": 94,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyExpressionFunctionDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -28660,6 +28884,7 @@
                 "lineNumber": 29,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArgumentType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -28853,6 +29078,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false
               },
               {
@@ -28869,6 +29095,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false
               },
               {
@@ -28891,6 +29118,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderHandlers",
                 "trackAdoption": false
               }
             ]
@@ -28932,6 +29160,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -29215,6 +29444,7 @@
                 "lineNumber": 16,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstNode",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -29391,6 +29621,7 @@
                 "lineNumber": 327,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionServiceParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -29958,6 +30189,7 @@
                 "lineNumber": 266,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false
               },
               {
@@ -29981,6 +30213,7 @@
                 "lineNumber": 268,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false
               }
             ]
@@ -30151,6 +30384,7 @@
                 "lineNumber": 412,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -30168,6 +30402,7 @@
                 "lineNumber": 413,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -30232,6 +30467,7 @@
                 "lineNumber": 423,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -30297,6 +30533,7 @@
                 "lineNumber": 433,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -30422,6 +30659,7 @@
                 "lineNumber": 448,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -30735,6 +30973,7 @@
                 "lineNumber": 40,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyExpressionTypeDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -30859,6 +31098,7 @@
                 "lineNumber": 66,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -30895,6 +31135,7 @@
                 "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -30939,6 +31180,7 @@
                 "lineNumber": 70,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -30981,6 +31223,7 @@
                 "lineNumber": 70,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -31025,6 +31268,7 @@
                 "lineNumber": 82,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionValue",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -31050,6 +31294,7 @@
                 "lineNumber": 82,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -31135,6 +31380,7 @@
                 "lineNumber": 70,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Executor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -31438,6 +31684,7 @@
                 "lineNumber": 20,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "Datatable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -31565,6 +31812,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Executor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -32046,6 +32294,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Datatable",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -32278,6 +32527,7 @@
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionState",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -32418,6 +32668,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -32498,6 +32749,7 @@
             "lineNumber": 18,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionAstExpression",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -32551,6 +32803,7 @@
             "lineNumber": 16,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableRow",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -32720,6 +32973,7 @@
             "lineNumber": 100,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "UiSettingFnArgumentsBrowser",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -32764,6 +33018,7 @@
             "lineNumber": 128,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "UiSettingFnArgumentsServer",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -32951,6 +33206,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "E",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -32968,6 +33224,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "S",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -33069,6 +33326,7 @@
             "lineNumber": 16,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -33121,6 +33379,7 @@
             "lineNumber": 12,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionValueBoxed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -34562,6 +34821,7 @@
                 "lineNumber": 89,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "Datatable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -34747,6 +35007,7 @@
                 "lineNumber": 51,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -34806,6 +35067,7 @@
                 "lineNumber": 52,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -34865,6 +35127,7 @@
                 "lineNumber": 53,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35121,6 +35384,7 @@
                 "lineNumber": 38,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35180,6 +35444,7 @@
                 "lineNumber": 39,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35231,6 +35496,7 @@
                 "lineNumber": 40,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35314,6 +35580,7 @@
                 "lineNumber": 28,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35381,6 +35648,7 @@
                 "lineNumber": 29,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35813,6 +36081,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -35891,6 +36160,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -35943,6 +36213,7 @@
                 "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -35970,6 +36241,7 @@
                 "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -36014,6 +36286,7 @@
                 "lineNumber": 119,
                 "columnNumber": 65,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -36678,6 +36951,7 @@
                 "lineNumber": 111,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -36697,6 +36971,7 @@
                 "lineNumber": 111,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arguments",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -36716,6 +36991,7 @@
                 "lineNumber": 111,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -37540,6 +37816,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -37557,6 +37834,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -37580,6 +37858,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderHandlers",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -38498,6 +38777,7 @@
                 "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -38522,6 +38802,7 @@
                 "lineNumber": 256,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -38610,6 +38891,7 @@
                 "lineNumber": 266,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Input",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -38634,6 +38916,7 @@
                 "lineNumber": 268,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionExecutionParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -38694,6 +38977,7 @@
                 "lineNumber": 271,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -38753,6 +39037,7 @@
                 "lineNumber": 277,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -38821,6 +39106,7 @@
                 "lineNumber": 282,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionAstExpression",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -38838,6 +39124,7 @@
                 "lineNumber": 283,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -38995,6 +39282,7 @@
                 "lineNumber": 38,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -39031,6 +39319,7 @@
                 "lineNumber": 39,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -39584,6 +39873,7 @@
                 "lineNumber": 85,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderUpdateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -39635,6 +39925,7 @@
                 "lineNumber": 86,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -39686,6 +39977,7 @@
                 "lineNumber": 87,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "IInterpreterRenderEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -40120,6 +40412,7 @@
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Datatable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -41719,6 +42012,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "I",
             "trackAdoption": false
           },
           {
@@ -41743,6 +42037,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false
           }
         ],
@@ -42022,7 +42317,7 @@
         "label": "MathArguments",
         "description": [],
         "signature": [
-          "{ expression: string; onError?: \"false\" | \"null\" | \"zero\" | \"throw\" | undefined; }"
+          "{ expression: string; onError?: \"false\" | \"null\" | \"throw\" | \"zero\" | undefined; }"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/math.ts",
         "lineNumber": 14,
@@ -43373,7 +43668,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nCalculates the cumulative sum of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate cumulative sum will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the cumulative sum of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Cumulative sums always start with 0, a cell will contain its own value plus the values of\n  all cells of the same series further up in the table.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of\n  all cells of the same series further up in the table.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  cumulative sum of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"cumulative_sum\""
             ],
@@ -43389,7 +43686,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nCalculates the cumulative sum of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate cumulative sum will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the cumulative sum of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Cumulative sums always start with 0, a cell will contain its own value plus the values of\n  all cells of the same series further up in the table.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of\n  all cells of the same series further up in the table.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  cumulative sum of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"datatable\""
             ],
@@ -43405,7 +43704,9 @@
             "type": "Array",
             "tags": [],
             "label": "inputTypes",
-            "description": [],
+            "description": [
+              "\nCalculates the cumulative sum of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate cumulative sum will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the cumulative sum of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Cumulative sums always start with 0, a cell will contain its own value plus the values of\n  all cells of the same series further up in the table.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of\n  all cells of the same series further up in the table.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  cumulative sum of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"datatable\"[]"
             ],
@@ -43421,7 +43722,9 @@
             "type": "string",
             "tags": [],
             "label": "help",
-            "description": [],
+            "description": [
+              "\nCalculates the cumulative sum of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate cumulative sum will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the cumulative sum of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Cumulative sums always start with 0, a cell will contain its own value plus the values of\n  all cells of the same series further up in the table.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of\n  all cells of the same series further up in the table.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  cumulative sum of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/cumulative_sum.ts",
             "lineNumber": 61,
             "columnNumber": 3,
@@ -43434,7 +43737,9 @@
             "type": "Object",
             "tags": [],
             "label": "args",
-            "description": [],
+            "description": [
+              "\nCalculates the cumulative sum of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate cumulative sum will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the cumulative sum of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Cumulative sums always start with 0, a cell will contain its own value plus the values of\n  all cells of the same series further up in the table.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of\n  all cells of the same series further up in the table.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  cumulative sum of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/cumulative_sum.ts",
             "lineNumber": 65,
             "columnNumber": 3,
@@ -43850,6 +44155,7 @@
                 "lineNumber": 192,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -44059,6 +44365,7 @@
                     "lineNumber": 227,
                     "columnNumber": 19,
                     "deprecated": false,
+                    "docsReferencedTypeName": "PointSeries",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -44189,6 +44496,7 @@
                     "lineNumber": 247,
                     "columnNumber": 19,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Datatable",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -44279,7 +44587,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nCalculates the derivative of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate derivative will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the derivative of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the\n  value of the previous cell of the same series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row\n  will be set to `undefined`.\n* If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`\n* If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"derivative\""
             ],
@@ -44295,7 +44605,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nCalculates the derivative of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate derivative will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the derivative of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the\n  value of the previous cell of the same series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row\n  will be set to `undefined`.\n* If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`\n* If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"datatable\""
             ],
@@ -44311,7 +44623,9 @@
             "type": "Array",
             "tags": [],
             "label": "inputTypes",
-            "description": [],
+            "description": [
+              "\nCalculates the derivative of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate derivative will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the derivative of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the\n  value of the previous cell of the same series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row\n  will be set to `undefined`.\n* If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`\n* If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"datatable\"[]"
             ],
@@ -44327,7 +44641,9 @@
             "type": "string",
             "tags": [],
             "label": "help",
-            "description": [],
+            "description": [
+              "\nCalculates the derivative of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate derivative will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the derivative of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the\n  value of the previous cell of the same series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row\n  will be set to `undefined`.\n* If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`\n* If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/derivative.ts",
             "lineNumber": 62,
             "columnNumber": 3,
@@ -44340,7 +44656,9 @@
             "type": "Object",
             "tags": [],
             "label": "args",
-            "description": [],
+            "description": [
+              "\nCalculates the derivative of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate derivative will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the derivative of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the\n  value of the previous cell of the same series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row\n  will be set to `undefined`.\n* If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`\n* If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/derivative.ts",
             "lineNumber": 66,
             "columnNumber": 3,
@@ -46875,7 +47193,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"false\" | \"null\" | \"zero\" | \"throw\")[]"
+                      "(\"false\" | \"null\" | \"throw\" | \"zero\")[]"
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/math.ts",
                     "lineNumber": 61,
@@ -47538,7 +47856,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nCalculates the moving average of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate moving average will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the moving average of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Moving average always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last\n* [window] of values divided by [window] excluding the current bucket.\nIf either of window edges moves outside the borders of data series, the window shrinks to include available values only.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If null or undefined value is encountered, skip the current row and do not change the window\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison."
+            ],
             "signature": [
               "\"moving_average\""
             ],
@@ -47554,7 +47874,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nCalculates the moving average of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate moving average will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the moving average of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Moving average always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last\n* [window] of values divided by [window] excluding the current bucket.\nIf either of window edges moves outside the borders of data series, the window shrinks to include available values only.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If null or undefined value is encountered, skip the current row and do not change the window\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison."
+            ],
             "signature": [
               "\"datatable\""
             ],
@@ -47570,7 +47892,9 @@
             "type": "Array",
             "tags": [],
             "label": "inputTypes",
-            "description": [],
+            "description": [
+              "\nCalculates the moving average of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate moving average will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the moving average of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Moving average always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last\n* [window] of values divided by [window] excluding the current bucket.\nIf either of window edges moves outside the borders of data series, the window shrinks to include available values only.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If null or undefined value is encountered, skip the current row and do not change the window\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison."
+            ],
             "signature": [
               "\"datatable\"[]"
             ],
@@ -47586,7 +47910,9 @@
             "type": "string",
             "tags": [],
             "label": "help",
-            "description": [],
+            "description": [
+              "\nCalculates the moving average of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate moving average will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the moving average of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Moving average always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last\n* [window] of values divided by [window] excluding the current bucket.\nIf either of window edges moves outside the borders of data series, the window shrinks to include available values only.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If null or undefined value is encountered, skip the current row and do not change the window\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/moving_average.ts",
             "lineNumber": 60,
             "columnNumber": 3,
@@ -47599,7 +47925,9 @@
             "type": "Object",
             "tags": [],
             "label": "args",
-            "description": [],
+            "description": [
+              "\nCalculates the moving average of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate moving average will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the moving average of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Moving average always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last\n* [window] of values divided by [window] excluding the current bucket.\nIf either of window edges moves outside the borders of data series, the window shrinks to include available values only.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If null or undefined value is encountered, skip the current row and do not change the window\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the\n  calculation of the current series even if this results in `NaN` (like in case of objects).\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/moving_average.ts",
             "lineNumber": 64,
             "columnNumber": 3,
@@ -48686,7 +49014,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nCalculates the overall metric of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate overall metric will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the overall metric of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Each cell will contain the calculated metric based on the values of all cells belonging to the current series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the overall metric of\n  all cells of the same series.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  overall metric of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"overall_metric\""
             ],
@@ -48702,7 +49032,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nCalculates the overall metric of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate overall metric will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the overall metric of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Each cell will contain the calculated metric based on the values of all cells belonging to the current series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the overall metric of\n  all cells of the same series.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  overall metric of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"datatable\""
             ],
@@ -48718,7 +49050,9 @@
             "type": "Array",
             "tags": [],
             "label": "inputTypes",
-            "description": [],
+            "description": [
+              "\nCalculates the overall metric of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate overall metric will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the overall metric of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Each cell will contain the calculated metric based on the values of all cells belonging to the current series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the overall metric of\n  all cells of the same series.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  overall metric of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "signature": [
               "\"datatable\"[]"
             ],
@@ -48734,7 +49068,9 @@
             "type": "string",
             "tags": [],
             "label": "help",
-            "description": [],
+            "description": [
+              "\nCalculates the overall metric of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate overall metric will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the overall metric of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Each cell will contain the calculated metric based on the values of all cells belonging to the current series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the overall metric of\n  all cells of the same series.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  overall metric of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/overall_metric.ts",
             "lineNumber": 61,
             "columnNumber": 3,
@@ -48747,7 +49083,9 @@
             "type": "Object",
             "tags": [],
             "label": "args",
-            "description": [],
+            "description": [
+              "\nCalculates the overall metric of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate overall metric will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the overall metric of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Each cell will contain the calculated metric based on the values of all cells belonging to the current series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the overall metric of\n  all cells of the same series.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  overall metric of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/overall_metric.ts",
             "lineNumber": 65,
             "columnNumber": 3,
@@ -49324,6 +49662,7 @@
                     "lineNumber": 70,
                     "columnNumber": 7,
                     "deprecated": false,
+                    "docsReferencedTypeName": "PointSeries",
                     "trackAdoption": false,
                     "isRequired": true
                   },
@@ -49860,6 +50199,7 @@
                     "lineNumber": 34,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Range",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -49951,6 +50291,7 @@
                     "lineNumber": 35,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -50253,6 +50594,7 @@
                     "lineNumber": 24,
                     "columnNumber": 17,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false,
                     "isRequired": true
                   }

@@ -20,7 +20,8 @@ describe('dataAggregateStepDefinition', () => {
       order_by?: string;
       order?: 'asc' | 'desc';
       limit?: number;
-    }
+    },
+    abortSignal?: AbortSignal
   ): StepHandlerContext<
     typeof dataAggregateStepDefinition.inputSchema,
     typeof dataAggregateStepDefinition.configSchema
@@ -40,7 +41,7 @@ describe('dataAggregateStepDefinition', () => {
       warn: jest.fn(),
       error: jest.fn(),
     },
-    abortSignal: new AbortController().signal,
+    abortSignal: abortSignal ?? new AbortController().signal,
     stepId: 'test-aggregate',
     stepType: 'data.aggregate',
   });
@@ -344,6 +345,58 @@ describe('dataAggregateStepDefinition', () => {
       const result = await dataAggregateStepDefinition.handler(context);
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('exceeding the maximum');
+    });
+  });
+
+  describe('abort and error handling', () => {
+    it('returns error when abort signal fires before aggregation starts', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const context = createMockContext(
+        { items: tickets },
+        {
+          group_by: ['status'],
+          metrics: [{ name: 'count', operation: 'count' }],
+        },
+        controller.signal
+      );
+      const result = await dataAggregateStepDefinition.handler(context);
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('aborted');
+    });
+
+    it('returns error when renderInputTemplate throws', async () => {
+      const context = createMockContext(
+        { items: tickets },
+        {
+          group_by: ['status'],
+          metrics: [{ name: 'count', operation: 'count' }],
+        }
+      );
+      (context.contextManager.renderInputTemplate as jest.Mock).mockImplementation(() => {
+        throw new Error('render failure');
+      });
+
+      const result = await dataAggregateStepDefinition.handler(context);
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toBe('render failure');
+    });
+
+    it('returns generic error message when non-Error value is thrown', async () => {
+      const context = createMockContext(
+        { items: tickets },
+        {
+          group_by: ['status'],
+          metrics: [{ name: 'count', operation: 'count' }],
+        }
+      );
+      (context.contextManager.renderInputTemplate as jest.Mock).mockImplementation(() => {
+        throw 'string-error'; // eslint-disable-line no-throw-literal
+      });
+
+      const result = await dataAggregateStepDefinition.handler(context);
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toBe('Failed to aggregate items');
     });
   });
 

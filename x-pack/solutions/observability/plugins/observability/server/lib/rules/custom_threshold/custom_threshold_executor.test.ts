@@ -397,6 +397,38 @@ describe('The custom threshold alert type', () => {
         await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
       });
+      test('alerts as expected with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected on both boundaries with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [1.0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [1.0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1.0], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1.0]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      });
+      test('alerts as expected with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('does not alert on both boundaries with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1.0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1.0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1.0], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1.0]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
       test('reports expected values to the action context', async () => {
         setResults(COMPARATORS.GREATER_THAN, [0.75], true);
         await execute(COMPARATORS.GREATER_THAN, [0.75]);
@@ -1045,7 +1077,7 @@ describe('The custom threshold alert type', () => {
           stateResult2
         );
         expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-        expect(mockedEvaluateRule.mock.calls[2][11]).toEqual([
+        expect(mockedEvaluateRule.mock.calls[2][12]).toEqual([
           { bucketKey: { groupBy0: 'b' }, key: 'b' },
         ]);
       });
@@ -1169,6 +1201,35 @@ describe('The custom threshold alert type', () => {
             'Average test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         });
+      });
+
+      test('when source tags is a string, it is treated as a single tag', async () => {
+        setEvaluationResults([
+          {
+            'host-01': {
+              ...customThresholdNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              isNoData: false,
+              bucketKey: { groupBy0: 'host-01' },
+              flattenGrouping: { 'host.name': 'host-01' },
+              context: {
+                tags: 'host-01_tag1',
+              },
+            },
+          },
+        ]);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
+
+        const reportedAlert = getLastReportedAlert(instanceIdA);
+        expect(reportedAlert?.context?.tags).toStrictEqual([
+          'host-01_tag1',
+          'ruleTag1',
+          'ruleTag2',
+        ]);
       });
     });
 
@@ -3217,6 +3278,22 @@ describe('The custom threshold alert type', () => {
         await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
       });
+      test('alerts as expected with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
       test('reports expected values to the action context', async () => {
         setResults(COMPARATORS.GREATER_THAN, [0.75], true);
         await execute(COMPARATORS.GREATER_THAN, [0.75]);
@@ -3889,7 +3966,7 @@ describe('The custom threshold alert type', () => {
           stateResult2
         );
         expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-        expect(mockedEvaluateRule.mock.calls[2][11]).toEqual([
+        expect(mockedEvaluateRule.mock.calls[2][12]).toEqual([
           { bucketKey: { groupBy0: 'b' }, key: 'b' },
         ]);
       });
@@ -4013,6 +4090,35 @@ describe('The custom threshold alert type', () => {
             'Last value of test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         });
+      });
+
+      test('when source tags is a string, it is treated as a single tag', async () => {
+        setEvaluationResults([
+          {
+            'host-01': {
+              ...customThresholdLastValueCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              isNoData: false,
+              bucketKey: { groupBy0: 'host-01' },
+              flattenGrouping: { 'host.name': 'host-01' },
+              context: {
+                tags: 'host-01_tag1',
+              },
+            },
+          },
+        ]);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
+
+        const reportedAlert = getLastReportedAlert(instanceIdA);
+        expect(reportedAlert?.context?.tags).toStrictEqual([
+          'host-01_tag1',
+          'ruleTag1',
+          'ruleTag2',
+        ]);
       });
     });
 
@@ -4967,6 +5073,22 @@ describe('The custom threshold alert type', () => {
         expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
         setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
         await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the not between (inclusive) comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
         expect(getLastReportedAlert(instanceID)).toBe(undefined);
       });
       test('reports expected values to the action context', async () => {

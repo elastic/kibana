@@ -4,26 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-inference-endpoints'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-inference-endpoints'
+  title: '@kbn/search-inference-endpoints'
   description: Moon project for @kbn/search-inference-endpoints
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/search_inference_endpoints
+  sourceRoot: x-pack/platform/plugins/shared/search_inference_endpoints
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
-  - '@kbn/ml-plugin'
   - '@kbn/ml-trained-models-utils'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-server'
@@ -36,7 +34,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/features-plugin'
   - '@kbn/ui-theme'
-  - '@kbn/deeplinks-search'
   - '@kbn/deeplinks-management'
   - '@kbn/management-plugin'
   - '@kbn/serverless'
@@ -46,10 +43,19 @@ dependsOn:
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/object-utils'
   - '@kbn/react-query'
-  - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
+  - '@kbn/core-http-router-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-security-server'
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/management-settings-ids'
+  - '@kbn/scout'
+  - '@kbn/search-api-panels'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/analytics'
 tags:
   - plugin
   - prod
@@ -62,17 +68,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout_inference_test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

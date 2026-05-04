@@ -36,6 +36,7 @@ import {
   tap,
   type Subscription,
 } from 'rxjs';
+import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
@@ -61,7 +62,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
@@ -182,7 +183,7 @@ export function loadEmbeddableData(
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
+            lastState.ref_id
           )}`,
         };
 
@@ -308,7 +309,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
@@ -326,6 +327,29 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // Capture blocking errors in APM for observability
+    internalApi.blockingError$
+      .pipe(filter((error): error is Error => error != null))
+      .subscribe((error) => {
+        const currentState = getState();
+        const parentContext = getParentContext(parentApi);
+        const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+        const transaction = apm.getCurrentTransaction();
+        if (transaction) {
+          const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+          if (span) {
+            span.addLabels({
+              kibana_meta_lens_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_lens_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_lens_metric_id: meta?.metric_id ?? 'unknown',
+            });
+            apm.captureError(error);
+            // @ts-expect-error RUM types don't include outcome
+            span.outcome = 'failure';
+            span.end();
+          }
+        }
+      }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set

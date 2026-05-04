@@ -5,34 +5,41 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiPageTemplate,
   EuiBasicTable,
   EuiBadge,
+  EuiButton,
+  EuiEmptyPrompt,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  EuiPageSection,
   EuiSelect,
   EuiSpacer,
-  EuiText,
+  EuiToolTip,
+  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
+  type EuiTableSelectionType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
+import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
+  const [selectedRuns, setSelectedRuns] = useState<EvaluationRunSummary[]>([]);
 
-  const { data, isLoading, error } = useEvaluationRuns({
+  const { data, isLoading, error, refetch } = useEvaluationRuns({
     page: pageIndex + 1,
     perPage: pageSize,
     branch: searchText || undefined,
@@ -71,7 +78,9 @@ export const RunsListPage: React.FC = () => {
         truncateText: true,
         width: '200px',
         render: (runId: string) => (
-          <EuiLink onClick={() => history.push(`/runs/${runId}`)}>{runId.slice(0, 12)}...</EuiLink>
+          <EuiLink onClick={() => history.push(`/runs/${encodeURIComponent(runId)}`)}>
+            {runId.slice(0, 12)}...
+          </EuiLink>
         ),
       },
       {
@@ -113,12 +122,39 @@ export const RunsListPage: React.FC = () => {
         name: i18n.COLUMN_CI,
         render: (ci: EvaluationRunSummary['ci']) =>
           ci?.build_url ? (
-            <EuiLink href={ci.build_url} target="_blank" external>
-              {i18n.CI_BUILD_LINK}
-            </EuiLink>
+            <span
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+              role="presentation"
+            >
+              <EuiLink href={ci.build_url} target="_blank" external>
+                {i18n.CI_BUILD_LINK}
+              </EuiLink>
+            </span>
           ) : (
             '-'
           ),
+      },
+      {
+        field: 'ci',
+        name: i18n.COLUMN_PULL_REQUEST,
+        render: (ci: EvaluationRunSummary['ci']) => {
+          const prRaw = ci?.pull_request;
+          if (!prRaw) return '-';
+          const prUrl = resolvePrUrl(prRaw);
+          if (!prUrl) return '-';
+          return (
+            <span
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+              role="presentation"
+            >
+              <EuiLink href={prUrl} target="_blank" external>
+                {i18n.PR_LINK}
+              </EuiLink>
+            </span>
+          );
+        },
       },
     ],
     [history]
@@ -138,55 +174,113 @@ export const RunsListPage: React.FC = () => {
     }
   };
 
+  const hasSelection = selectedRuns.length > 0;
+  const lockedSuiteId = hasSelection ? selectedRuns[0].suite_id : undefined;
+  const selectedRunIds = useMemo(() => new Set(selectedRuns.map((r) => r.run_id)), [selectedRuns]);
+  const selectionFull = selectedRuns.length >= 2;
+
+  const selection: EuiTableSelectionType<EvaluationRunSummary> = useMemo(
+    () => ({
+      onSelectionChange: (items: EvaluationRunSummary[]) => setSelectedRuns(items),
+      selectable: (run: EvaluationRunSummary) => {
+        if (selectedRunIds.has(run.run_id)) return true;
+        if (selectionFull) return false;
+        return !hasSelection || run.suite_id === lockedSuiteId;
+      },
+      selectableMessage: (selectable: boolean, run: EvaluationRunSummary) => {
+        if (selectable) return '';
+        if (selectionFull && !selectedRunIds.has(run.run_id)) return i18n.COMPARE_MAX_SELECTED_HINT;
+        return i18n.COMPARE_DIFFERENT_SUITE_HINT;
+      },
+    }),
+    [hasSelection, lockedSuiteId, selectedRunIds, selectionFull]
+  );
+
+  const totalRuns = data?.total ?? 0;
+  const showCompareControls = totalRuns >= 2;
+  const canCompare = selectedRuns.length === 2;
+
+  const handleCompare = useCallback(() => {
+    if (!canCompare) return;
+    const [runA, runB] = selectedRuns;
+    history.push(
+      `/compare?runA=${encodeURIComponent(runA.run_id)}&runB=${encodeURIComponent(runB.run_id)}`
+    );
+  }, [canCompare, selectedRuns, history]);
+
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle={i18n.PAGE_TITLE} />
-      <EuiPageTemplate.Section>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              placeholder={i18n.SEARCH_PLACEHOLDER}
-              value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                setPageIndex(0);
-              }}
-              isClearable
-            />
+    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            placeholder={i18n.SEARCH_PLACEHOLDER}
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setPageIndex(0);
+              setSelectedRuns([]);
+            }}
+            isClearable
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
+          <EuiSelect
+            aria-label={i18n.SUITE_FILTER_ARIA_LABEL}
+            options={suiteOptions}
+            value={suiteIdFilter}
+            onChange={(event) => {
+              setSuiteIdFilter(event.target.value);
+              setPageIndex(0);
+              setSelectedRuns([]);
+            }}
+          />
+        </EuiFlexItem>
+        {showCompareControls && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={canCompare ? undefined : i18n.COMPARE_SELECTION_HINT}
+              position="top"
+            >
+              <EuiButton iconType="diff" onClick={handleCompare} isDisabled={!canCompare} size="m">
+                {i18n.COMPARE_SELECTED_BUTTON}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
-            <EuiSelect
-              aria-label={i18n.SUITE_FILTER_ARIA_LABEL}
-              options={suiteOptions}
-              value={suiteIdFilter}
-              onChange={(event) => {
-                setSuiteIdFilter(event.target.value);
-                setPageIndex(0);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {error ? (
-          <>
-            <EuiText color="danger" size="s">
-              <p>{String(error)}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {error ? (
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.getLoadErrorBody(String(error))}</p>}
+          actions={[
+            <EuiButton onClick={() => refetch()} iconType="refresh">
+              {i18n.RETRY_BUTTON}
+            </EuiButton>,
+          ]}
+        />
+      ) : (
         <EuiBasicTable<EvaluationRunSummary>
+          tableCaption={i18n.TABLE_CAPTION}
           items={data?.runs ?? []}
+          itemId="run_id"
           columns={columns}
           loading={isLoading}
           pagination={pagination}
           onChange={onTableChange}
+          selection={showCompareControls ? selection : undefined}
           rowProps={(item) => ({
-            onClick: () => history.push(`/runs/${item.run_id}`),
+            onClick: (e: React.MouseEvent) => {
+              const target = e.target as HTMLElement;
+              if (target.closest('.euiTableRowCellCheckbox, .euiLink, a')) return;
+              history.push(`/runs/${encodeURIComponent(item.run_id)}`);
+            },
             style: { cursor: 'pointer' },
           })}
         />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+      )}
+    </EuiPageSection>
   );
 };

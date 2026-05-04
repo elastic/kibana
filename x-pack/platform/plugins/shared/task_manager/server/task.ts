@@ -30,6 +30,33 @@ export enum TaskCost {
   ExtraLarge = 10,
 }
 
+/**
+ * String values for task cost as stored in the task schema (e.g. in saved objects).
+ * Use these when reading cost from task params or instance attributes.
+ */
+export enum InstanceTaskCost {
+  Tiny = 'tiny',
+  Normal = 'normal',
+  ExtraLarge = 'extralarge',
+}
+
+/** Maps schema cost strings to their integer values for capacity calculations. */
+export const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
+  [InstanceTaskCost.Tiny]: TaskCost.Tiny,
+  [InstanceTaskCost.Normal]: TaskCost.Normal,
+  [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
+};
+
+/**
+ * Translates cost string from task params/instance (e.g. 'extralarge') to the
+ * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
+ */
+export const getTaskCostFromInstance = (cost?: InstanceTaskCost): number | undefined => {
+  if (cost) {
+    return INSTANCE_TASK_COST_TO_INT[cost];
+  }
+};
+
 /*
  * Type definitions and validations for tasks.
  */
@@ -259,6 +286,7 @@ export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-s
 
 export interface TaskUserScope {
   apiKeyId: string;
+  uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
 }
@@ -370,9 +398,14 @@ export interface TaskInstance {
   partition?: number;
 
   /**
-   * Used to allow tasks to be scoped to a user via their API key
+   * Used to allow tasks to be scoped to a user via their ES API key
    */
   apiKey?: string;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their UIAM API key
+   */
+  uiamApiKey?: string;
 
   /**
    * Meta data related to the API key associated with this task
@@ -383,6 +416,14 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+
+  /**
+   * Optional cost for this task instance, overriding the task type's default cost.
+   * When set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').
+   * Used by the task selector and capacity logic to limit concurrent work.
+   * Use getTaskCostFromInstance() to translate to the integer TaskCost.
+   */
+  cost?: InstanceTaskCost;
 }
 
 /**
@@ -516,6 +557,7 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
+  uiamApiKey?: string;
   userScope?: TaskUserScope;
 };
 
@@ -529,3 +571,8 @@ export interface ApiKeyOptions {
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+
+// Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
+export interface TaskEventLogger {
+  logEvent(properties: object, id?: string): void;
+}

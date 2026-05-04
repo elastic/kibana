@@ -4,36 +4,41 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-plugin'
+  title: '@kbn/evals-plugin'
   description: Moon project for @kbn/evals-plugin
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/evals
+  sourceRoot: x-pack/platform/plugins/shared/evals
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/features-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/management-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/storage-adapter'
   - '@kbn/es-errors'
   - '@kbn/evals-common'
+  - '@kbn/zod-helpers'
   - '@kbn/i18n'
-  - '@kbn/react-kibana-context-render'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/i18n-react'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/code-editor'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -46,16 +51,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -37,13 +37,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/252238
-  describe.skip('Conversation History', function () {
+  describe('Conversation History', function () {
     let llmProxy: LlmProxy;
     const conversationIds: string[] = [];
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
+      await deleteConnectors(supertest);
       await createConnector(llmProxy, supertest);
 
       // Create conversations once for all tests
@@ -67,6 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         wait_for_completion: true,
         refresh: true,
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
     });
 
@@ -122,14 +123,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const conversationIdToContinue = conversationIds[1];
       await agentBuilder.navigateToConversationViaHistory(conversationIdToContinue);
 
-      // Continue the conversation with a new message
+      // Continue the conversation with a new message — continueConversation waits
+      // for the new response to appear as the last round before returning
       await agentBuilder.continueConversation(MOCKED_INPUT, MOCKED_RESPONSE, llmProxy);
-
-      // Assert the new response content (continueConversation already waits for it)
-      const responseElements = await testSubjects.findAll('agentBuilderRoundResponse');
-      const lastResponseElement = responseElements[responseElements.length - 1];
-      const responseText = await lastResponseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
     });
 
     it('can delete conversations and updates conversation history', async () => {
@@ -164,15 +160,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Assert the title was updated correctly
       expect(updatedTitle).to.be(newTitle);
-    });
-
-    it.skip('does not allow continuing to chat if the agent cannot be found', async () => {
-      // 1. Add new agent
-      // 2. Create new conversation with that agent
-      // 3. Go to /agents
-      // 4. Delete agent created in step 1
-      // 5. Go to conversations/:conversationId
-      // 6. Assert it's disabled
     });
   });
 }

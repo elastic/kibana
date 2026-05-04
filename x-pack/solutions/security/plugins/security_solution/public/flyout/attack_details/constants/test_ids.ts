@@ -29,3 +29,10 @@ export const INSIGHTS_SECTION_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-overview-insights-section` as const;
 export const INSIGHTS_ENTITIES_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-overview-insights-entities` as const;
+export const INSIGHTS_CORRELATIONS_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-overview-insights-correlations` as const;
+export const FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-footer-take-action-button` as const;
+export const INSIGHTS_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-insights-tab` as const;
+export const ATTACK_DETAILS_LEFT_INSIGHTS_CORRELATION_TABLE =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-insights-correlation-table` as const;

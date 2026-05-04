@@ -82,12 +82,13 @@ describe('OpenInDiscover', () => {
     jest.clearAllMocks();
   });
 
-  describe('button variant', () => {
+  describe('emptyButton variant', () => {
     it('should render a button with correct props', () => {
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -103,7 +104,7 @@ describe('OpenInDiscover', () => {
     it('should render a button with custom label when provided', () => {
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
           indexType="traces"
           rangeFrom="now-15m"
@@ -121,8 +122,9 @@ describe('OpenInDiscover', () => {
     it('should generate correct ESQL query and pass it to the locator', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -150,8 +152,9 @@ describe('OpenInDiscover', () => {
 
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -176,8 +179,9 @@ describe('OpenInDiscover', () => {
 
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -190,11 +194,11 @@ describe('OpenInDiscover', () => {
     });
   });
 
-  describe('outlinedButton variant', () => {
+  describe('button variant', () => {
     it('should render an outlined button with custom label', () => {
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="outlinedButton"
+          variant="button"
           dataTestSubj="testOutlinedButton"
           indexType="traces"
           rangeFrom="now-15m"
@@ -223,8 +227,9 @@ describe('OpenInDiscover', () => {
 
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="outlinedButton"
+          variant="button"
           dataTestSubj="testOutlinedButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -243,6 +248,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -266,6 +272,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -293,6 +300,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -310,8 +318,9 @@ describe('OpenInDiscover', () => {
     it('should generate traces ESQL query with service name and transaction type', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -328,8 +337,9 @@ describe('OpenInDiscover', () => {
     it('should generate traces ESQL query with transaction name filter', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -344,8 +354,9 @@ describe('OpenInDiscover', () => {
     it('should generate error ESQL query with error index', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="error"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -361,8 +372,9 @@ describe('OpenInDiscover', () => {
     it('should generate ESQL query with span ID for span view', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -373,30 +385,6 @@ describe('OpenInDiscover', () => {
       const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
       expect(esqlArg).toContain(`\`${SPAN_ID}\` == "span-456"`);
     });
-
-    it('should return null ESQL query when indexSettings is empty', () => {
-      mockUseApmIndexSettingsContext.mockReturnValue({
-        indexSettings: [],
-        indexSettingsStatus: FETCH_STATUS.SUCCESS,
-      } as any);
-
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
-
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: { esql: null },
-        })
-      );
-    });
   });
 
   describe('consumer scenarios', () => {
@@ -404,7 +392,7 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with only traceId and sort by @timestamp ASC', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
             indexType="traces"
             rangeFrom="now-15m"
@@ -435,7 +423,7 @@ describe('OpenInDiscover', () => {
       it('should generate query without traceId filter when traceId is not provided', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
             indexType="traces"
             rangeFrom="now-15m"
@@ -455,8 +443,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with dependency-specific params', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-24h"
             rangeTo="now"
@@ -468,6 +457,7 @@ describe('OpenInDiscover', () => {
               dependencyName: 'postgresql',
               sampleRangeFrom: 500,
               sampleRangeTo: 2000,
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -479,6 +469,7 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`\`${SPAN_DESTINATION_SERVICE_RESOURCE}\` == "postgresql"`);
         expect(esqlArg).toContain(`\`${SPAN_DURATION}\` >= 500`);
         expect(esqlArg).toContain(`\`${SPAN_DURATION}\` <= 2000`);
+        expect(esqlArg).toContain('SORT @timestamp DESC');
         // transactionName is not set, so SPAN_DURATION is used instead of TRANSACTION_DURATION
         expect(esqlArg).not.toContain(TRANSACTION_DURATION);
         expect(esqlArg).not.toContain(TRANSACTION_NAME);
@@ -489,8 +480,9 @@ describe('OpenInDiscover', () => {
       it('should generate minimal query with only kuery and environment', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-1h"
             rangeTo="now"
@@ -498,6 +490,7 @@ describe('OpenInDiscover', () => {
               kuery: 'trace.id: "abc123"',
               serviceName: 'discovered-service',
               environment: 'production',
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -506,6 +499,7 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "discovered-service"`);
         expect(esqlArg).toContain(`\`${SERVICE_ENVIRONMENT}\` == "production"`);
         expect(esqlArg).toContain('KQL("trace.id: \\"abc123\\"")');
+        expect(esqlArg).toContain('SORT @timestamp DESC');
         expect(esqlArg).not.toContain(TRANSACTION_NAME);
         expect(esqlArg).not.toContain(TRANSACTION_TYPE);
         expect(esqlArg).not.toContain(SPAN_NAME);
@@ -518,6 +512,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="link"
             dataTestSubj="apmLatencyChartOpenInDiscover"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -527,6 +522,7 @@ describe('OpenInDiscover', () => {
               environment: 'production',
               transactionName: 'GET /api/users',
               transactionType: 'request',
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -536,6 +532,7 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`\`${SERVICE_ENVIRONMENT}\` == "production"`);
         expect(esqlArg).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
         expect(esqlArg).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
+        expect(esqlArg).toContain('SORT @timestamp DESC');
         // charts don't pass sample range
         expect(esqlArg).not.toContain(TRANSACTION_DURATION);
         expect(esqlArg).not.toContain(SPAN_DURATION);
@@ -546,6 +543,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="link"
             dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -554,6 +552,7 @@ describe('OpenInDiscover', () => {
               serviceName: 'my-service',
               environment: 'production',
               transactionType: 'request',
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -561,6 +560,7 @@ describe('OpenInDiscover', () => {
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
         expect(esqlArg).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
+        expect(esqlArg).toContain('SORT @timestamp DESC');
         expect(esqlArg).not.toContain(TRANSACTION_NAME);
       });
     });
@@ -569,8 +569,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with sample range for correlations', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -582,6 +583,7 @@ describe('OpenInDiscover', () => {
               transactionType: 'request',
               sampleRangeFrom: 2000,
               sampleRangeTo: 8000,
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -592,13 +594,15 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
         expect(esqlArg).toContain(`\`${TRANSACTION_DURATION}\` >= 2000`);
         expect(esqlArg).toContain(`\`${TRANSACTION_DURATION}\` <= 8000`);
+        expect(esqlArg).toContain('SORT @timestamp DESC');
       });
 
       it('should generate correct query without sample range when chart is not brushed', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -608,6 +612,7 @@ describe('OpenInDiscover', () => {
               environment: 'production',
               transactionName: 'GET /api/users',
               transactionType: 'request',
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -615,6 +620,7 @@ describe('OpenInDiscover', () => {
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
         expect(esqlArg).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
+        expect(esqlArg).toContain('SORT @timestamp DESC');
         expect(esqlArg).not.toContain(TRANSACTION_DURATION);
       });
     });
@@ -623,8 +629,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with error index and error group ID', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
+            label="Open in Discover"
             indexType="error"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -632,6 +639,7 @@ describe('OpenInDiscover', () => {
               kuery: '',
               serviceName: 'my-service',
               errorGroupId: 'abc123def456',
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -641,6 +649,7 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).not.toContain(MOCK_TRACES_INDEX);
         expect(esqlArg).toContain(`\`${ERROR_GROUP_ID}\` == "abc123def456"`);
         expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
+        expect(esqlArg).toContain('SORT @timestamp DESC');
       });
     });
 
@@ -648,14 +657,16 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with span ID', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
             queryParams={{
               kuery: 'service.name: "my-service"',
               spanId: 'span-abc-123',
+              sortDirection: 'DESC',
             }}
           />
         );
@@ -664,6 +675,7 @@ describe('OpenInDiscover', () => {
         expect(esqlArg).toContain(`FROM ${MOCK_TRACES_INDEX}`);
         expect(esqlArg).toContain(`\`${SPAN_ID}\` == "span-abc-123"`);
         expect(esqlArg).toContain('KQL("service.name: \\"my-service\\"")');
+        expect(esqlArg).toContain('SORT @timestamp DESC');
         // span flyout only passes spanId and kuery — no explicit service/transaction filters
         expect(esqlArg).not.toContain(`\`${SERVICE_NAME}\` ==`);
         expect(esqlArg).not.toContain(TRANSACTION_NAME);

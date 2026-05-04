@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -37,9 +38,15 @@ export const registerBulkGetRoute = (
       path: '/_bulk_get',
       options: {
         summary: `Get saved objects`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Retrieves multiple Kibana saved objects by type and ID in a single request.
+
+For transferring or backing up saved objects, prefer the export API (\`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_get.examples.yaml'),
       },
       security: {
         authz: {
@@ -52,9 +59,10 @@ export const registerBulkGetRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-            fields: schema.maybe(schema.arrayOf(schema.string())),
-            namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          })
+            fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+            namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          }),
+          { maxSize: 10_000 }
         ),
       },
     },

@@ -1,7 +1,533 @@
 {
   "id": "workflowsExtensions",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.PublicStepRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "PublicStepRegistry",
+        "description": [
+          "\nRegistry for public-side workflow step definition.\nStores UI-related information (label, description, icon) for step types.\nAccepts either a definition directly or a loader function that returns a promise of a definition."
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepRegistry.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicStepRegistry.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+                "lineNumber": 24,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "Logger",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepRegistry.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister step definition."
+            ],
+            "signature": [
+              "<Input extends ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>> = ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>, Output extends ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>> = ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>, Config extends ",
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip> = ",
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>(definitionOrLoader: ",
+              "PublicStepDefinitionOrLoader",
+              "<Input, Output, Config>) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicStepRegistry.register.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "definitionOrLoader",
+                "description": [
+                  "- The step definition to register, or a function that returns a promise of the definition (e.g. for dynamic imports)"
+                ],
+                "signature": [
+                  "PublicStepDefinitionOrLoader",
+                  "<Input, Output, Config>"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "PublicStepDefinitionOrLoader",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepRegistry.whenReady",
+            "type": "Function",
+            "tags": [],
+            "label": "whenReady",
+            "description": [
+              "\nReturns a promise that resolves when all pending async loaders have settled.\nUse before reading the registry if you need to guarantee all async registrations are complete."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet definition for a specific step type."
+            ],
+            "signature": [
+              "(stepTypeId: string) => ",
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicStepDefinition",
+                "text": "PublicStepDefinition"
+              },
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>, ",
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicStepRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "stepTypeId",
+                "description": [
+                  "- The step type identifier"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+                "lineNumber": 88,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The step definition, or undefined if not found"
+            ]
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepRegistry.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [
+              "\nCheck if definition for a step type is registered."
+            ],
+            "signature": [
+              "(stepTypeId: string) => boolean"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicStepRegistry.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "stepTypeId",
+                "description": [
+                  "- The step type identifier"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+                "lineNumber": 97,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "True if definition for the step type is registered, false otherwise"
+            ]
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicStepRegistry.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [
+              "\nGet all registered step definition."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicStepDefinition",
+                "text": "PublicStepDefinition"
+              },
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>, ",
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>[]"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "Array of all registered step definition"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.PublicTriggerRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "PublicTriggerRegistry",
+        "description": [
+          "\nRegistry for public-side workflow trigger definitions.\nStores UI-related information (title, description, icon, eventSchema, snippets) for triggers."
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerRegistry.register",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "register",
+            "description": [
+              "\nRegister a trigger definition."
+            ],
+            "signature": [
+              "<EventSchema extends ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>> = ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>(definitionOrLoader: ",
+              "PublicTriggerDefinitionOrLoader",
+              "<EventSchema>) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicTriggerRegistry.register.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "definitionOrLoader",
+                "description": [
+                  "- The trigger definition to register, or a function that returns a promise of the definition (e.g. for dynamic imports)"
+                ],
+                "signature": [
+                  "PublicTriggerDefinitionOrLoader",
+                  "<EventSchema>"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "PublicTriggerDefinitionOrLoader",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerRegistry.whenReady",
+            "type": "Function",
+            "tags": [],
+            "label": "whenReady",
+            "description": [
+              "\nReturns a promise that resolves when all pending async loaders have settled.\nUse before reading the registry if you need to guarantee all async registrations are complete."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet a trigger definition by id."
+            ],
+            "signature": [
+              "(triggerId: string) => ",
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicTriggerDefinition",
+                "text": "PublicTriggerDefinition"
+              },
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicTriggerRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [
+                  "- The trigger identifier"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+                "lineNumber": 76,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The trigger definition, or undefined if not found"
+            ]
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerRegistry.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [
+              "\nCheck if a trigger is registered."
+            ],
+            "signature": [
+              "(triggerId: string) => boolean"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsExtensions",
+                "id": "def-public.PublicTriggerRegistry.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [
+                  "- The trigger identifier"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+                "lineNumber": 85,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "True if the trigger is registered, false otherwise"
+            ]
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerRegistry.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [
+              "\nGet all registered trigger definitions."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicTriggerDefinition",
+                "text": "PublicTriggerDefinition"
+              },
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>[]"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "Array of registered trigger definitions"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "workflowsExtensions",
@@ -32,7 +558,7 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -55,9 +581,114 @@
               "<Input, Output, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PublicStepDefinition",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.registerInternalStepDefinitions",
+        "type": "Function",
+        "tags": [],
+        "label": "registerInternalStepDefinitions",
+        "description": [],
+        "signature": [
+          "(stepRegistry: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "public",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-public.PublicStepRegistry",
+            "text": "PublicStepRegistry"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/steps/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.registerInternalStepDefinitions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "stepRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicStepRegistry",
+                "text": "PublicStepRegistry"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/steps/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 49,
+            "deprecated": false,
+            "docsReferencedTypeName": "PublicStepRegistry",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.registerInternalTriggerDefinitions",
+        "type": "Function",
+        "tags": [],
+        "label": "registerInternalTriggerDefinitions",
+        "description": [],
+        "signature": [
+          "(triggerRegistry: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "public",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-public.PublicTriggerRegistry",
+            "text": "PublicTriggerRegistry"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/triggers/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.registerInternalTriggerDefinitions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "triggerRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicTriggerRegistry",
+                "text": "PublicTriggerRegistry"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/triggers/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "PublicTriggerRegistry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -95,7 +726,7 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -113,7 +744,7 @@
               "React.ComponentType | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -128,11 +759,17 @@
               "\nProperty handlers for the step."
             ],
             "signature": [
-              "EditorHandlers",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.EditorHandlers",
+                "text": "EditorHandlers"
+              },
               "<Input, Output, Config> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -253,7 +890,7 @@
             "tags": [],
             "label": "snippets",
             "description": [
-              "\nPre-filled values for snippet insertion (e.g. with.condition)."
+              "\nPre-filled values for snippet insertion (e.g. on.condition)."
             ],
             "signature": [
               {
@@ -284,7 +921,7 @@
           "\nDocumentation information for a workflow step."
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -302,7 +939,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -320,7 +957,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 34,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -338,7 +975,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -422,7 +1059,7 @@
             "tags": [],
             "label": "condition",
             "description": [
-              "\nKQL condition pre-filled in the trigger's `with.condition` when the user adds this\ntrigger from the UI (actions menu or YAML autocomplete).\nMust be valid KQL and only reference properties from the event schema (validated at registration)."
+              "\nKQL condition pre-filled in the trigger's `on.condition` when the user adds this\ntrigger from the UI (actions menu or YAML autocomplete).\nMust be valid KQL and only reference properties from the event schema (validated at registration)."
             ],
             "signature": [
               "string | undefined"
@@ -450,7 +1087,7 @@
         "\nPublic-side plugin setup contract.\nExposes methods for other plugins to register public-side step and trigger definitions."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 23,
+      "lineNumber": 27,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -467,12 +1104,40 @@
             "\nRegister user-facing definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
           ],
           "signature": [
-            "<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = z.ZodType, Config extends z.ZodObject = z.ZodObject>(definition: ",
+            "<Input extends ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>> = ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, Output extends ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>> = ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, Config extends ",
+            "ZodObject",
+            "<",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodLooseShape, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip> = ",
+            "ZodObject",
+            "<",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodLooseShape, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>>(definition: ",
             "PublicStepDefinitionOrLoader",
             "<Input, Output, Config>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 28,
+          "lineNumber": 32,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -491,9 +1156,10 @@
                 "<Input, Output, Config>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 40,
+              "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicStepDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -512,18 +1178,20 @@
             "\nRegister user-facing definition for a workflow trigger.\nThis should be called during the plugin's setup phase.\nMust be paired with server-side registration (registerTrigger) for the same trigger id.\n"
           ],
           "signature": [
-            "<EventSchema extends z.ZodType = z.ZodType>(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "public",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-public.PublicTriggerDefinition",
-              "text": "PublicTriggerDefinition"
-            },
+            "<EventSchema extends ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>> = ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>>(definition: ",
+            "PublicTriggerDefinitionOrLoader",
             "<EventSchema>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 43,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -531,26 +1199,21 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-public.WorkflowsExtensionsPublicPluginSetup.registerTriggerDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
                 "- The public-side trigger definition"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "public",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-public.PublicTriggerDefinition",
-                  "text": "PublicTriggerDefinition"
-                },
+                "PublicTriggerDefinitionOrLoader",
                 "<EventSchema>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 52,
+              "lineNumber": 56,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicTriggerDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -580,12 +1243,25 @@
           "section": "def-public.PublicStepDefinition",
           "text": "PublicStepDefinition"
         },
-        "<z.ZodType, z.ZodType, z.ZodObject>> & ",
-        "TriggerRegistryStartContract",
-        " & { isReady(): Promise<void>; }"
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodObject",
+        "<",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodLooseShape, ",
+        "node_modules/zod/v4/core/schemas",
+        "$strip>>> & ",
+        "TriggerRegistryStartContract"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 65,
+      "lineNumber": 69,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -630,7 +1306,11 @@
                 "section": "def-server.ServerTriggerDefinition",
                 "text": "ServerTriggerDefinition"
               },
-              "<z.ZodType>) => void"
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>) => void"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
             "lineNumber": 48,
@@ -655,12 +1335,17 @@
                     "section": "def-server.ServerTriggerDefinition",
                     "text": "ServerTriggerDefinition"
                   },
-                  "<z.ZodType>"
+                  "<",
+                  "ZodType",
+                  "<unknown, unknown, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodTypeInternals<unknown, unknown>>>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
                 "lineNumber": 55,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerTriggerDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -705,7 +1390,11 @@
                 "section": "def-server.ServerTriggerDefinition",
                 "text": "ServerTriggerDefinition"
               },
-              "<z.ZodType> | undefined"
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
             "lineNumber": 81,
@@ -797,7 +1486,11 @@
                 "section": "def-server.ServerTriggerDefinition",
                 "text": "ServerTriggerDefinition"
               },
-              "<z.ZodType>[]"
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>[]"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
             "lineNumber": 101,
@@ -869,6 +1562,277 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServerStepDefinition",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getEmitterWorkflowExecutionIdFromRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "getEmitterWorkflowExecutionIdFromRequest",
+        "description": [
+          "Workflow execution id for chain context recovery on HTTP emit paths."
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>) => string | undefined"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getEmitterWorkflowExecutionIdFromRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getEventChainContext",
+        "type": "Function",
+        "tags": [],
+        "label": "getEventChainContext",
+        "description": [
+          "\nReturns the event-chain context for the request.\n\nTwo trusted paths:\n 1. In-process (fakeRequest): the execution engine called setWorkflowEventChainContext before\n    any step runs, so the Symbol is present and takes precedence.\n 2. Inbound HTTP from kibana.request step: no Symbol exists, but the step marks its outbound\n    call with x-elastic-internal-origin so request.isInternalApiRequest is true. Only then are\n    the event-chain headers parsed.\n\nNote: isInternalApiRequest is derived from the presence of the x-elastic-internal-origin request\nheader (see KibanaRequest constructor). It is not enforced at the network layer, so a\nsufficiently informed external caller could set it. This gate stops naive spoofing but should\nnot be treated as a hard trust boundary."
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>) => ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.EventChainContext",
+            "text": "EventChainContext"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 178,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getEventChainContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 193,
+            "columnNumber": 38,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getEventChainDepthFromHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "getEventChainDepthFromHeaders",
+        "description": [],
+        "signature": [
+          "(headers: ",
+          "Headers",
+          ") => number | undefined"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 161,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getEventChainDepthFromHeaders.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              "Headers"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.getOutboundEventChainHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "getOutboundEventChainHeaders",
+        "description": [
+          "\nReturns headers that should be added to outbound HTTP requests to Kibana\nwhen the request is made from a workflow step (e.g. kibana.request).\nEnables the server to restore event-chain context and enforce depth limits.\n"
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, emitterWorkflowExecutionId: string | undefined) => Record<string, string>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 230,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getOutboundEventChainHeaders.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 238,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.getOutboundEventChainHeaders.$2",
+            "type": "string",
+            "tags": [],
+            "label": "emitterWorkflowExecutionId",
+            "description": [
+              "- Current workflow run id for routes that load chain state from ES."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.setWorkflowEventChainContext",
+        "type": "Function",
+        "tags": [],
+        "label": "setWorkflowEventChainContext",
+        "description": [
+          "\nSets the event-chain context on the request. Called by the execution engine\nat the start of a workflow run so that any emitEvent call using this request\n(e.g. in-process with the fakeRequest) will have the correct depth and sourceExecutionId."
+        ],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, context: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.EventChainContext",
+            "text": "EventChainContext"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 218,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.setWorkflowEventChainContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.setWorkflowEventChainContext.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.EventChainContext",
+                "text": "EventChainContext"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "EventChainContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -878,6 +1842,71 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EventChainContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventChainContext",
+        "description": [
+          "\nContext attached to the request when a workflow runs, so that when code\nin that workflow emits an event (e.g. via emitEvent), we can infer the\nevent-chain depth and enforce a cap to prevent infinite loops.\nDepth is incremented for every step in the chain (any workflow); the trigger\nevent handler caps scheduling when depth exceeds the configured max.\n\n`depth` may be `-1` when the execution has no persisted chain depth yet."
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.EventChainContext.depth",
+            "type": "number",
+            "tags": [],
+            "label": "depth",
+            "description": [],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.EventChainContext.visitedWorkflowIds",
+            "type": "Array",
+            "tags": [],
+            "label": "visitedWorkflowIds",
+            "description": [
+              "Workflow ids that already ran earlier in this event chain (cycle guard)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.EventChainContext.sourceExecutionId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceExecutionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "workflowsExtensions",
         "id": "def-server.ServerStepDefinition",
@@ -967,6 +1996,7 @@
                 "lineNumber": 112,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "StepHandlerContext",
                 "trackAdoption": false
               }
             ]
@@ -1027,14 +2057,14 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.input",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "input",
             "description": [
               "\nThe validated input provided to the step based on inputSchema"
             ],
             "signature": [
-              "z.infer<TInput>"
+              "TInput extends { _zod: { output: any; }; } ? TInput[\"_zod\"][\"output\"] : unknown"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 129,
@@ -1045,14 +2075,14 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.config",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "config",
             "description": [
               "\nThe config provided to the step based on configSchema"
             ],
             "signature": [
-              "z.infer<TConfig>"
+              "TConfig extends { _zod: { output: any; }; } ? TConfig[\"_zod\"][\"output\"] : unknown"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 134,
@@ -1063,14 +2093,39 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.rawInput",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "rawInput",
             "description": [
               "\nThe raw input configuration before template rendering.\nHas the same shape as input, but values may contain template strings."
             ],
             "signature": [
-              "any"
+              "output",
+              "<TInput> extends (infer U)[] ? string | ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.OrStringRecursive",
+                "text": "OrStringRecursive"
+              },
+              "<U>[] : ",
+              "output",
+              "<TInput> extends object ? { [K in keyof (object & ",
+              "output",
+              "<TInput>)]: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.OrStringRecursive",
+                "text": "OrStringRecursive"
+              },
+              "<(object & ",
+              "output",
+              "<TInput>)[K]>; } : string | ",
+              "output",
+              "<TInput>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 139,
@@ -1193,14 +2248,15 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerResult.output",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "output",
             "description": [
               "\nOutput data from the step execution\nThis will be available to subsequent steps via template expressions"
             ],
             "signature": [
-              "any"
+              "output",
+              "<TOutput> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 207,
@@ -1239,7 +2295,7 @@
           "\nDependencies for the server plugin setup phase."
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1256,7 +2312,7 @@
           "\nDependencies for the server plugin start phase."
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1278,7 +2334,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1300,7 +2356,30 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.WorkflowsExtensionsServerPluginStartDeps.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginStart",
+                "text": "SpacesPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1311,6 +2390,82 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_DEPTH_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_DEPTH_HEADER",
+        "description": [
+          "\nHTTP header name used when a workflow step (e.g. kibana.request) makes an outbound request\nto Kibana. The execution engine sets this to the current event-chain depth so the server\ncan restore context on the incoming request and enforce the event-chain depth cap."
+        ],
+        "signature": [
+          "\"x-kibana-event-chain-depth\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER",
+        "description": [
+          "\nWorkflow execution id of the run that issued an outbound kibana.request so emit routes can\nload chain state from the persisted execution when headers are incomplete."
+        ],
+        "signature": [
+          "\"x-kibana-workflow-execution-id\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_SOURCE_EXECUTION_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_SOURCE_EXECUTION_HEADER",
+        "description": [
+          "\nHTTP header for the workflow execution id associated with the current chain hop. Set on outbound\nrequests so the server can restore `sourceExecutionId` on the incoming request."
+        ],
+        "signature": [
+          "\"x-kibana-event-chain-source-execution-id\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER",
+        "description": [
+          "\nBase64url JSON array of visited workflow ids (bounded length) for HTTP emit recovery."
+        ],
+        "signature": [
+          "\"x-kibana-event-chain-visited-workflows\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "workflowsExtensions",
         "id": "def-server.OnCancelHandler",
@@ -1359,6 +2514,7 @@
             "lineNumber": 122,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "StepHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -1384,7 +2540,7 @@
           "<EventSchema>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-        "lineNumber": 17,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1450,9 +2606,107 @@
             "lineNumber": 112,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "StepHandlerContext",
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.WORKFLOW_EVENT_CHAIN_CONTEXT",
+        "type": "Uncategorized",
+        "tags": [],
+        "label": "WORKFLOW_EVENT_CHAIN_CONTEXT",
+        "description": [
+          "\nSymbol used to attach event-chain context to a KibanaRequest."
+        ],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.WORKFLOW_EVENT_CHAIN_CONTEXT",
+            "text": "WORKFLOW_EVENT_CHAIN_CONTEXT"
+          }
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.WORKFLOW_EXECUTION_FAILED_TRIGGER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_EXECUTION_FAILED_TRIGGER_ID",
+        "description": [],
+        "signature": [
+          "\"workflows.failed\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.WorkflowExecutionFailedEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowExecutionFailedEvent",
+        "description": [],
+        "signature": [
+          "{ workflow: { id: string; name: string; spaceId: string; isErrorHandler: boolean; }; execution: { id: string; startedAt: string; failedAt: string; }; error: { message: string; stepId?: string | undefined; stepName?: string | undefined; stepExecutionId?: string | undefined; }; }"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.WorkflowsExtensionsRequestHandlerContext",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowsExtensionsRequestHandlerContext",
+        "description": [],
+        "signature": [
+          "RequestHandlerContext",
+          " & { workflows: Promise<",
+          "WorkflowsClient",
+          ">; }"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "type": "string",
+        "tags": [],
+        "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "description": [],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1467,7 +2721,7 @@
         "\nServer-side plugin setup contract.\nExposes methods for other plugins to register server-side custom workflow steps and triggers."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-      "lineNumber": 21,
+      "lineNumber": 28,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1485,17 +2739,25 @@
           ],
           "signature": [
             "(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "server",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-server.ServerStepDefinition",
-              "text": "ServerStepDefinition"
-            },
-            "<z.ZodType, z.ZodType, z.ZodObject>) => void"
+            "ServerStepDefinitionOrLoader",
+            "<",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, ",
+            "ZodObject",
+            "<",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodLooseShape, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-          "lineNumber": 26,
+          "lineNumber": 33,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1503,26 +2765,35 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerStepDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
                 "- The step server-side definition"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "server",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-server.ServerStepDefinition",
-                  "text": "ServerStepDefinition"
-                },
-                "<z.ZodType, z.ZodType, z.ZodObject>"
+                "ServerStepDefinitionOrLoader",
+                "<",
+                "ZodType",
+                "<unknown, unknown, ",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodTypeInternals<unknown, unknown>>, ",
+                "ZodType",
+                "<unknown, unknown, ",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodTypeInternals<unknown, unknown>>, ",
+                "ZodObject",
+                "<",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodLooseShape, ",
+                "node_modules/zod/v4/core/schemas",
+                "$strip>>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-              "lineNumber": 33,
+              "lineNumber": 40,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "ServerStepDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1549,10 +2820,14 @@
               "section": "def-server.ServerTriggerDefinition",
               "text": "ServerTriggerDefinition"
             },
-            "<z.ZodType>) => void"
+            "<",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-          "lineNumber": 35,
+          "lineNumber": 42,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1574,12 +2849,62 @@
                   "section": "def-server.ServerTriggerDefinition",
                   "text": "ServerTriggerDefinition"
                 },
-                "<z.ZodType>"
+                "<",
+                "ZodType",
+                "<unknown, unknown, ",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodTypeInternals<unknown, unknown>>>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-              "lineNumber": 42,
+              "lineNumber": 49,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "ServerTriggerDefinition",
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "workflowsExtensions",
+          "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerWorkflowsClientProvider",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "registerWorkflowsClientProvider",
+          "description": [
+            "\nRegister the workflows client provider.\n"
+          ],
+          "signature": [
+            "(provider: ",
+            "WorkflowsClientProvider",
+            ") => void"
+          ],
+          "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "workflowsExtensions",
+              "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerWorkflowsClientProvider.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [
+                "- The workflows client provider"
+              ],
+              "signature": [
+                "WorkflowsClientProvider"
+              ],
+              "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+              "lineNumber": 57,
+              "columnNumber": 35,
+              "deprecated": false,
+              "docsReferencedTypeName": "WorkflowsClientProvider",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1597,7 +2922,7 @@
       "tags": [],
       "label": "WorkflowsExtensionsServerPluginStart",
       "description": [
-        "\nServer-side plugin start contract.\nExposes methods for retrieving registered server-side step implementations and triggers."
+        "\nServer-side plugin start contract.\nExposes step definitions (from common contract) and trigger definitions."
       ],
       "signature": [
         "WorkflowsExtensionsStartContract",
@@ -1609,11 +2934,52 @@
           "section": "def-server.ServerStepDefinition",
           "text": "ServerStepDefinition"
         },
-        "<z.ZodType, z.ZodType, z.ZodObject>> & ",
-        "WorkflowsExtensionsTriggerListStartContract"
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodObject",
+        "<",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodLooseShape, ",
+        "node_modules/zod/v4/core/schemas",
+        "$strip>>> & { getAllTriggerDefinitions(): ",
+        {
+          "pluginId": "workflowsExtensions",
+          "scope": "server",
+          "docId": "kibWorkflowsExtensionsPluginApi",
+          "section": "def-server.ServerTriggerDefinition",
+          "text": "ServerTriggerDefinition"
+        },
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>>[]; getTriggerDefinition(triggerId: string): ",
+        {
+          "pluginId": "workflowsExtensions",
+          "scope": "server",
+          "docId": "kibWorkflowsExtensionsPluginApi",
+          "section": "def-server.ServerTriggerDefinition",
+          "text": "ServerTriggerDefinition"
+        },
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>> | undefined; getClient(request: ",
+        "KibanaRequest",
+        "<unknown, unknown, unknown, any>): Promise<",
+        "WorkflowsClient",
+        ">; }"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
-      "lineNumber": 56,
+      "lineNumber": 60,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1750,8 +3116,194 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.WORKFLOW_EXECUTION_FAILED_TRIGGER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_EXECUTION_FAILED_TRIGGER_ID",
+        "description": [],
+        "signature": [
+          "\"workflows.failed\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.WorkflowExecutionFailedEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowExecutionFailedEvent",
+        "description": [],
+        "signature": [
+          "{ workflow: { id: string; name: string; spaceId: string; isErrorHandler: boolean; }; execution: { id: string; startedAt: string; failedAt: string; }; error: { message: string; stepId?: string | undefined; stepName?: string | undefined; stepExecutionId?: string | undefined; }; }"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.commonWorkflowExecutionFailedTriggerDefinition",
+        "type": "Object",
+        "tags": [],
+        "label": "commonWorkflowExecutionFailedTriggerDefinition",
+        "description": [],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+        "lineNumber": 136,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-common.commonWorkflowExecutionFailedTriggerDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"workflows.failed\""
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-common.commonWorkflowExecutionFailedTriggerDefinition.eventSchema",
+            "type": "Object",
+            "tags": [],
+            "label": "eventSchema",
+            "description": [],
+            "signature": [
+              "ZodObject",
+              "<{ workflow: ",
+              "ZodObject",
+              "<{ id: ",
+              "ZodString",
+              "; name: ",
+              "ZodString",
+              "; spaceId: ",
+              "ZodString",
+              "; isErrorHandler: ",
+              "ZodBoolean",
+              "; }, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strict>; execution: ",
+              "ZodObject",
+              "<{ id: ",
+              "ZodString",
+              "; startedAt: ",
+              "ZodString",
+              "; failedAt: ",
+              "ZodString",
+              "; }, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strict>; error: ",
+              "ZodObject",
+              "<{ message: ",
+              "ZodString",
+              "; stepId: ",
+              "ZodOptional",
+              "<",
+              "ZodString",
+              ">; stepName: ",
+              "ZodOptional",
+              "<",
+              "ZodString",
+              ">; stepExecutionId: ",
+              "ZodOptional",
+              "<",
+              "ZodString",
+              ">; }, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strict>; }, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strict>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.workflowExecutionFailedEventSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "workflowExecutionFailedEventSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ workflow: ",
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; name: ",
+          "ZodString",
+          "; spaceId: ",
+          "ZodString",
+          "; isErrorHandler: ",
+          "ZodBoolean",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>; execution: ",
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; startedAt: ",
+          "ZodString",
+          "; failedAt: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>; error: ",
+          "ZodObject",
+          "<{ message: ",
+          "ZodString",
+          "; stepId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; stepName: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; stepExecutionId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/triggers/workflow_execution_failed.ts",
+        "lineNumber": 114,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

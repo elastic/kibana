@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { IUiSettingsClient } from '@kbn/core/public';
 
 export function isPreExecutionWorkflowEnabled(uiSettingsClient: IUiSettingsClient) {
-  const workflowsUiEnabled = uiSettingsClient.get(WORKFLOWS_UI_SETTING_ID, false);
-  const experimentalFeaturesEnabled = uiSettingsClient.get(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
-
-  return workflowsUiEnabled && experimentalFeaturesEnabled;
+  return uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID);
 }

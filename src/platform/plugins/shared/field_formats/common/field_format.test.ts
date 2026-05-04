@@ -7,11 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file -- needs TestFormat (generic test double) + ConvertOverrideFormat (tests the convert()-override code path, as used by AggsTermsFieldFormat) */
+
+import React from 'react';
+import ReactDOM from 'react-dom/server';
 import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
-import type { FieldFormatParams, TextContextTypeOptions } from './types';
+import { highlightTags } from './utils/highlight/highlight_tags';
+import type { FieldFormatParams, HtmlContextTypeOptions, TextContextTypeOptions } from './types';
 import { NULL_LABEL } from '@kbn/field-formats-common';
+import { expectReactElementAsArray } from './test_utils';
+
+const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
+const renderReact = (node: React.ReactNode) =>
+  ReactDOM.renderToStaticMarkup(React.createElement(React.Fragment, null, node)).replace(
+    /&quot;/g,
+    '"'
+  );
 
 const getTestFormat = (
   _params?: FieldFormatParams,
@@ -117,11 +130,31 @@ describe('FieldFormat class', () => {
         expect(expected).not.toContain('<');
       });
 
+      test('fallback escapes HTML characters when no custom htmlConvert is provided', () => {
+        const f = getTestFormat(undefined, constant('<script>alert("test")</script>'));
+
+        expect(f.convert('value', 'html')).toBe(
+          '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+        );
+      });
+
       test('does not escape the output of an html specific converter', () => {
         const f = getTestFormat(undefined, constant('<img>'), constant('<img>'));
 
         expect(f.convert('', 'text')).toBe('<img>');
         expect(f.convert('', 'html')).toBe('<img>');
+      });
+
+      test('handles missing values in html context when no custom htmlConvert is provided', () => {
+        const f = getTestFormat(undefined, constant('text'));
+
+        expect(f.convert(null, 'html')).toBe(
+          `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
+        );
+        expect(f.convert(undefined, 'html')).toBe(
+          `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
+        );
+        expect(f.convert('', 'html')).toBe('<span class="ffString__emptyValue">(blank)</span>');
       });
     });
 
@@ -177,6 +210,141 @@ describe('FieldFormat class', () => {
             }
           <span class=\\"ffArray__highlight\\">]</span>"
         `);
+      });
+
+      test('escapes HTML in array values', () => {
+        const f = getTestFormat(undefined, (val) => String(val));
+        const result = f.convert(['<script>alert("test")</script>'], 'html');
+        expect(result).toContain('&lt;script&gt;');
+        expect(result).toContain('alert(&quot;test&quot;)');
+        expect(result).not.toContain('<script>');
+      });
+    });
+
+    describe('default reactConvert array support', () => {
+      test('returns empty string for an empty array', () => {
+        const f = getTestFormat(undefined, (v) => String(v));
+        expect(f.reactConvert([])).toBe('');
+      });
+
+      test('returns the single element without brackets for a one-element array', () => {
+        const f = getTestFormat(undefined, (v) => String(v));
+        expect(f.reactConvert(['hello'])).toBe('hello');
+      });
+
+      test('wraps multi-element arrays with styled brackets and comma separators', () => {
+        const f = getTestFormat(undefined, (v) => String(v));
+        expectReactElementAsArray(f.reactConvert([1, 2, 3]), ['1', '2', '3']);
+      });
+
+      test('uses newline separator and indentation when values contain newlines', () => {
+        const f = getTestFormat(undefined, (v) => String(v));
+        expect(renderReact(f.reactConvert(['{\n  "x": 1\n}', '{\n  "y": 2\n}']))).toBe(
+          '<span class="ffArray__highlight">[</span>\n' +
+            '  {\n    "x": 1\n  }' +
+            '<span class="ffArray__highlight">,</span>\n' +
+            '  {\n    "y": 2\n  }\n' +
+            '<span class="ffArray__highlight">]</span>'
+        );
+      });
+
+      test('HTML-escapes special characters inside array elements', () => {
+        const f = getTestFormat(undefined, (v) => String(v));
+        expectReactElementAsArray(f.reactConvert(['<a>', '<b>']), ['&lt;a&gt;', '&lt;b&gt;']);
+      });
+
+      test('reactConvert and convert(html) produce identical array output', () => {
+        const f = getTestFormat(undefined, (v) => String(v));
+        expectReactElementAsArray(f.reactConvert([1, 2, 3]), ['1', '2', '3']);
+        expect(f.convert([1, 2, 3], 'html')).toBe(renderReact(f.reactConvert([1, 2, 3])));
+      });
+    });
+
+    describe('default reactConvert highlight support', () => {
+      const makeOptions = (fieldName: string, highlights: string[]): HtmlContextTypeOptions => ({
+        field: { name: fieldName },
+        hit: { highlight: { [fieldName]: highlights } },
+      });
+
+      test('wraps matched text in <mark> via reactConvert when highlights are present', () => {
+        const f = getTestFormat(undefined, constant('lorem ipsum dolor'));
+        const result = renderReact(
+          f.reactConvert(
+            'lorem ipsum dolor',
+            makeOptions('myField', [`lorem ${hl('ipsum')} dolor`])
+          )
+        );
+        expect(result).toBe('lorem <mark class="ffSearch__highlight">ipsum</mark> dolor');
+      });
+
+      test('returns plain text from reactConvert when no highlights are present', () => {
+        const f = getTestFormat(undefined, constant('lorem ipsum'));
+        expect(f.reactConvert('lorem ipsum', { field: { name: 'myField' }, hit: {} })).toBe(
+          'lorem ipsum'
+        );
+      });
+
+      test('returns plain text from reactConvert when highlight is for a different field', () => {
+        const f = getTestFormat(undefined, constant('lorem ipsum'));
+        expect(
+          f.reactConvert('lorem ipsum', {
+            field: { name: 'myField' },
+            hit: { highlight: { otherField: [`lorem ${hl('ipsum')}`] } },
+          })
+        ).toBe('lorem ipsum');
+      });
+
+      test('produces <mark> in HTML output via bridge when highlights are present', () => {
+        const f = getTestFormat(undefined, constant('lorem ipsum dolor'));
+        const result = f.convert(
+          'lorem ipsum dolor',
+          'html',
+          makeOptions('myField', [`lorem ${hl('ipsum')} dolor`])
+        );
+        expect(result).toBe('lorem <mark class="ffSearch__highlight">ipsum</mark> dolor');
+      });
+
+      describe('for formatters that override convert() directly (mimics AggsTermsFieldFormat)', () => {
+        class ConvertOverrideFormat extends FieldFormat {
+          static id = 'convert-override-format';
+          static title = 'Convert Override Format';
+          convert = (val: unknown) => `formatted:${val}`;
+          getConverterFor = () => this.convert;
+        }
+
+        test('wraps matched text in <mark> via reactConvert when highlights are present', () => {
+          const f = new ConvertOverrideFormat(undefined, jest.fn());
+          const result = renderReact(
+            f.reactConvert('ipsum', makeOptions('myField', [`${hl('formatted:ipsum')}`]))
+          );
+          expect(result).toBe('<mark class="ffSearch__highlight">formatted:ipsum</mark>');
+        });
+
+        test('returns plain text when no highlights present', () => {
+          const f = new ConvertOverrideFormat(undefined, jest.fn());
+          expect(f.reactConvert('ipsum', { field: { name: 'myField' }, hit: {} })).toBe(
+            'formatted:ipsum'
+          );
+        });
+      });
+
+      test('HTML-escapes special characters in highlighted output', () => {
+        const f = getTestFormat(undefined, constant('<em>lorem</em>'));
+        const result = renderReact(
+          f.reactConvert('<em>lorem</em>', makeOptions('myField', [`${hl('<em>lorem</em>')}`]))
+        );
+        expect(result).toBe('<mark class="ffSearch__highlight">&lt;em&gt;lorem&lt;/em&gt;</mark>');
+        expect(result).not.toContain('<em>');
+      });
+
+      test('does not apply highlights when options.field is absent', () => {
+        const f = getTestFormat(undefined, constant('lorem ipsum'));
+        // Without a field name the highlight lookup key is undefined, so highlights are skipped
+        // even if hit.highlight contains data.
+        const result = f.reactConvert('lorem ipsum', {
+          hit: { highlight: { myField: [`lorem ${hl('ipsum')}`] } },
+        });
+        expect(result).toBe('lorem ipsum');
       });
     });
   });

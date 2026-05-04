@@ -42,7 +42,12 @@ import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { KibanaServices } from '../../../common/lib/kibana';
 import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
+
+jest.mock('./template_fields', () => ({
+  TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
+}));
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -377,14 +382,13 @@ describe('Case View Page activity tab', () => {
       },
     });
 
+    const caseDataWithCustomFields: CaseUI = {
+      ...caseProps.caseData,
+      customFields: [customFieldsMock[1]],
+    };
+
     renderWithTestingProviders(
-      <CaseViewActivity
-        {...caseProps}
-        caseData={{
-          ...caseProps.caseData,
-          customFields: [customFieldsMock[1]],
-        }}
-      />
+      <CaseViewActivity {...caseProps} caseData={caseDataWithCustomFields} />
     );
 
     await userEvent.click(await screen.findByRole('switch'));
@@ -393,6 +397,7 @@ describe('Case View Page activity tab', () => {
       expect(replaceCustomField).toHaveBeenCalledWith({
         caseId: caseData.id,
         caseVersion: caseData.version,
+        caseData: caseDataWithCustomFields,
         customFieldId: customFieldsMock[1].key,
         customFieldValue: false,
       });
@@ -668,6 +673,32 @@ describe('Case View Page activity tab', () => {
 
         expect(await screen.findByText('My category'));
       });
+    });
+  });
+
+  describe('TemplateFields', () => {
+    it('does not render TemplateFields when templates v2 is disabled', async () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('case-view-page-sidebar')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
+    });
+
+    it('renders TemplateFields when templates v2 is enabled', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-template-fields')).toBeInTheDocument();
     });
   });
 });

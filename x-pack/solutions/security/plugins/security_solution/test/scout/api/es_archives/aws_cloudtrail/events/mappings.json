@@ -1,0 +1,85 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-aws.cloudtrail-default",
+    "template": {
+      "index_patterns": ["logs-aws.cloudtrail-*"],
+      "name": "scout-aws-cloudtrail-events",
+      "priority": 10000,
+      "data_stream": {},
+      "template": {
+        "settings": {
+          "number_of_shards": 1
+        },
+        "mappings": {
+          "properties": {
+            "@timestamp": { "type": "date" },
+            "event": {
+              "properties": {
+                "action": { "type": "keyword" },
+                "outcome": { "type": "keyword" },
+                "category": { "type": "keyword" },
+                "kind": { "type": "keyword" },
+                "module": { "type": "keyword" },
+                "type": { "type": "keyword" },
+                "dataset": { "type": "keyword" },
+                "id": { "type": "keyword" },
+                "created": { "type": "date" }
+              }
+            },
+            "host": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "name": { "type": "keyword" },
+                "hostname": { "type": "keyword" },
+                "domain": { "type": "keyword" },
+                "ip": { "type": "ip" },
+                "mac": { "type": "keyword" },
+                "os": {
+                  "properties": {
+                    "name": { "type": "keyword" },
+                    "type": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "name": { "type": "keyword" },
+                "email": { "type": "keyword" },
+                "domain": { "type": "keyword" }
+              }
+            },
+            "agent": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "type": { "type": "keyword" },
+                "version": { "type": "keyword" }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": { "type": "keyword" },
+                "namespace": { "type": "keyword" },
+                "type": { "type": "keyword" }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "provider": { "type": "keyword" },
+                "region": { "type": "keyword" },
+                "account": {
+                  "properties": {
+                    "id": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "message": { "type": "text" }
+          }
+        }
+      }
+    }
+  }
+}

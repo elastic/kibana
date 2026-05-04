@@ -11,7 +11,7 @@ export const pieVis: ElementFactory = () => ({
   displayName: '(New) Pie Vis',
   type: 'chart',
   help: 'Pie visualization',
-  icon: 'visPie',
+  icon: 'chartPie',
   expression: `kibana
 | selectFilter
 | demodata

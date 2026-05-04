@@ -19,7 +19,8 @@ export const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
       name: schema.string(),
       arguments: schema.recordOf(schema.string(), schema.any()),
     }),
-  })
+  }),
+  { maxSize: 64 }
 );
 
 export const toolsSchema = schema.maybe(
@@ -31,7 +32,7 @@ export const toolsSchema = schema.maybe(
         schema.object({
           type: schema.literal('object'),
           properties: schema.recordOf(schema.string(), schema.any()),
-          required: schema.maybe(schema.arrayOf(schema.string())),
+          required: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
         })
       ),
     })
@@ -55,7 +56,7 @@ export const messageOptionsSchema = schema.object({
 });
 
 export const chatCompleteBaseSchema = schema.object({
-  connectorId: schema.string(),
+  connectorId: schema.string({ minLength: 1 }),
   maxRetries: schema.maybe(schema.number()),
   retryConfiguration: schema.maybe(
     schema.object({
@@ -121,7 +122,7 @@ export const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.allO
   messageOptionsSchema,
   schema.object({
     system: schema.maybe(schema.string()),
-    messages: schema.arrayOf(messageSchema),
+    messages: schema.arrayOf(messageSchema, { maxSize: 1000 }),
   }),
 ]);
 
@@ -159,7 +160,8 @@ const promptSchema = schema.object({
                   schema.literal(ModelFamily.Gemini),
                 ]),
                 id: schema.maybe(schema.string()),
-              })
+              }),
+              { maxSize: 20 }
             )
           ),
           template: schema.oneOf([
@@ -182,18 +184,20 @@ const promptSchema = schema.object({
                       schema.literal(MessageRole.Assistant),
                     ]),
                     content: schema.string(),
-                  })
+                  }),
+                  { maxSize: 100 }
                 ),
               }),
             }),
           ]),
           temperature: schema.maybe(schema.number()),
         }),
-      ])
+      ]),
+      { maxSize: 20 }
     ),
   }),
   input: schema.any(),
-  prevMessages: schema.maybe(schema.arrayOf(messageSchema)),
+  prevMessages: schema.maybe(schema.arrayOf(messageSchema, { maxSize: 1000 })),
   toolChoice: toolChoiceSchema,
 });
 

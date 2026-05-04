@@ -5,28 +5,28 @@ toc:
   - file: configuration-reference.md
     children:
       - file: cloud/elastic-cloud-kibana-settings.md
-      - file: configuration-reference/general-settings.md
-      - file: configuration-reference/ai-assistant-settings.md
       - file: configuration-reference/alerting-settings.md
       - file: configuration-reference/apm-settings.md
+      - file: configuration-reference/search-sessions-settings.md
       - file: configuration-reference/banner-settings.md
       - file: configuration-reference/cases-settings.md
       - file: configuration-reference/fleet-settings.md
+      - file: configuration-reference/general-settings.md
       - file: configuration-reference/internationalization-settings.md
+      - file: configuration-reference/ai-assistant-settings.md
       - file: configuration-reference/logging-settings.md
       - file: configuration-reference/logs-settings.md
       - file: configuration-reference/map-settings.md
       - file: configuration-reference/metrics-settings.md
       - file: configuration-reference/monitoring-settings.md
+      - file: configuration-reference/product-intercept-settings.md
       - file: configuration-reference/reporting-settings.md
-      - file: configuration-reference/search-sessions-settings.md
       - file: configuration-reference/security-settings.md
+      - file: configuration-reference/share-settings.md
       - file: configuration-reference/spaces-settings.md
       - file: configuration-reference/task-manager-settings.md
       - file: configuration-reference/telemetry-settings.md
       - file: configuration-reference/url-drilldown-settings.md
-      - file: configuration-reference/product-intercept-settings.md
-      - file: configuration-reference/share-settings.md
   - file: advanced-settings.md
   - file: kibana-audit-events.md
   - hidden: user-activity.md
@@ -75,21 +75,31 @@ toc:
         children:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
+          - file: connectors-kibana/amazon-s3-action-type.md
+          - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
+          - file: connectors-kibana/confluence-cloud-action-type.md
+          - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
           - file: connectors-kibana/github-action-type.md
+          - file: connectors-kibana/figma-action-type.md
           - file: connectors-kibana/google-calendar-action-type.md
+          - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
+          - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/notion-action-type.md
+          - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
+          - file: connectors-kibana/sharepoint-server-action-type.md
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
+          - file: connectors-kibana/snowflake-action-type.md
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md

@@ -32,6 +32,7 @@ function prepareRuleMetric(isCustomized: boolean, enabled: boolean): RuleMetric 
     has_response_actions: false,
     has_response_actions_endpoint: false,
     has_response_actions_osquery: false,
+    ai_created: false,
   };
 }
 

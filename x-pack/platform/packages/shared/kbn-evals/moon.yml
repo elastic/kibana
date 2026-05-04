@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals'
+  title: '@kbn/evals'
   description: Moon project for @kbn/evals
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-evals
+  sourceRoot: x-pack/platform/packages/shared/kbn-evals
 dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/inference-common'
@@ -29,12 +28,16 @@ dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
-  - '@kbn/test'
+  - '@kbn/kbn-client'
+  - '@kbn/test-es-server'
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
   - '@kbn/dev-cli-errors'
   - '@kbn/config-schema'
   - '@kbn/evals-common'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/test'
+  - '@kbn/es-errors'
 tags:
   - test-helper
   - package
@@ -45,17 +48,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.json'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

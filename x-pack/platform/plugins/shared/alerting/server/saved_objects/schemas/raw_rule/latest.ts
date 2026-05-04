@@ -13,8 +13,8 @@ import type {
   rawRuleLastRunSchema,
 } from './v3';
 
-import type { rawRuleMonitoringSchema } from './v4';
-import type { rawRuleSchema } from './v10';
+import type { rawRuleMonitoringSchema } from './v11';
+import type { rawRuleSchema, rawRuleSnoozedInstanceSchema } from './v12';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 
@@ -23,4 +23,5 @@ export type RawRuleExecutionStatus = Mutable<TypeOf<typeof rawRuleExecutionStatu
 export type RawRuleAlertsFilter = Mutable<TypeOf<typeof rawRuleAlertsFilterSchema>>;
 export type RawRuleLastRun = Mutable<TypeOf<typeof rawRuleLastRunSchema>>;
 export type RawRuleMonitoring = Mutable<TypeOf<typeof rawRuleMonitoringSchema>>;
+export type RawRuleSnoozedInstance = Mutable<TypeOf<typeof rawRuleSnoozedInstanceSchema>>;
 export type RawRule = Mutable<TypeOf<typeof rawRuleSchema>>;

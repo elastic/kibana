@@ -10,7 +10,35 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.getControlsGroupSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "getControlsGroupSchema",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/controls-schemas",
@@ -20,7 +48,7 @@
         "label": "HasCustomPrepend",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36,7 +64,7 @@
               "React.FunctionComponent<{}>"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -56,6 +84,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -87,7 +116,7 @@
         "label": "LegacyIgnoreParentSettings",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 84,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -103,7 +132,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +148,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -135,7 +164,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -151,7 +180,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -250,6 +279,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredDataControlState.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -262,7 +307,7 @@
         "label": "LegacyStoredESQLControlExplicitInput",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -278,7 +323,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -291,7 +336,7 @@
             "label": "controlType",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -307,7 +352,7 @@
               "{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -320,7 +365,7 @@
             "label": "esqlQuery",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -336,7 +381,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -352,7 +397,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -365,7 +410,7 @@
             "label": "variableName",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -378,7 +423,7 @@
             "label": "variableType",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -452,7 +497,7 @@
         "label": "LegacyStoredTimeSliderExplicitInput",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -468,7 +513,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -484,7 +529,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -500,7 +545,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -519,7 +564,7 @@
         "label": "ControlsGroupState",
         "description": [],
         "signature": [
-          "(Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>)[]"
+          "(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "lineNumber": 30,
@@ -539,7 +584,7 @@
           "{ readonly title?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -556,7 +601,7 @@
           "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -570,10 +615,10 @@
         "label": "DataControlState",
         "description": [],
         "signature": [
-          "{ readonly title?: string | undefined; readonly use_global_filters?: boolean | undefined; readonly ignore_validations?: boolean | undefined; readonly field_name: string; readonly data_view_id: string; }"
+          "{ readonly title?: string | undefined; readonly field_name: string; readonly data_view_id: string; readonly use_global_filters: boolean; readonly ignore_validations: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -597,7 +642,7 @@
           " & { displaySettings?: { placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } | undefined; exclude?: boolean | null | undefined; existsSelected?: boolean | null | undefined; runPastTimeout?: boolean | null | undefined; searchTechnique?: string | null | undefined; selectedOptions?: (string | number)[] | null | undefined; singleSelect?: boolean | null | undefined; sort?: { by: string; direction: string; } | null | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -621,7 +666,7 @@
           " & { step?: number | undefined; value?: [string, string] | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -635,10 +680,10 @@
         "label": "OptionsListControlState",
         "description": [],
         "signature": [
-          "Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>"
+          "Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -655,7 +700,7 @@
           "{ readonly placeholder?: string | undefined; readonly hide_action_bar?: boolean | undefined; readonly hide_exclude?: boolean | undefined; readonly hide_exists?: boolean | undefined; readonly hide_sort?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 41,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -669,10 +714,10 @@
         "label": "OptionsListDSLControlState",
         "description": [],
         "signature": [
-          "{ readonly sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; readonly title?: string | undefined; readonly use_global_filters?: boolean | undefined; readonly ignore_validations?: boolean | undefined; readonly display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; readonly single_select?: boolean | undefined; readonly exclude?: boolean | undefined; readonly exists_selected?: boolean | undefined; readonly run_past_timeout?: boolean | undefined; readonly search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; readonly selected_options?: (string | number)[] | undefined; readonly field_name: string; readonly data_view_id: string; }"
+          "{ readonly title?: string | undefined; readonly display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; readonly sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; readonly field_name: string; readonly data_view_id: string; readonly use_global_filters: boolean; readonly ignore_validations: boolean; readonly exclude: boolean; readonly exists_selected: boolean; readonly run_past_timeout: boolean; readonly search_technique: \"prefix\" | \"wildcard\" | \"exact\"; readonly selected_options: (string | number)[]; readonly single_select: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -686,10 +731,10 @@
         "label": "OptionsListESQLControlState",
         "description": [],
         "signature": [
-          "{ readonly title?: string | undefined; readonly display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; readonly single_select?: boolean | undefined; readonly available_options?: string[] | undefined; readonly selected_options: string[]; readonly variable_name: string; readonly variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; readonly esql_query: string; readonly control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }"
+          "Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -706,7 +751,7 @@
           "\"prefix\" | \"wildcard\" | \"exact\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -723,7 +768,7 @@
           "string | number"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -740,7 +785,7 @@
           "{ readonly direction: \"asc\" | \"desc\"; readonly by: \"_key\" | \"_count\"; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 49,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -754,7 +799,7 @@
         "label": "PinnedControlLayoutState",
         "description": [],
         "signature": [
-          "Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & {}> & { order: number; type: string; }"
+          "Readonly<{ id?: string | undefined; } & { grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> & { order: number; type: string; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "lineNumber": 32,
@@ -771,7 +816,7 @@
         "label": "PinnedControlState",
         "description": [],
         "signature": [
-          "Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>"
+          "Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "lineNumber": 31,
@@ -788,10 +833,10 @@
         "label": "RangeSliderControlState",
         "description": [],
         "signature": [
-          "{ readonly value?: string[] | undefined; readonly title?: string | undefined; readonly step?: number | undefined; readonly use_global_filters?: boolean | undefined; readonly ignore_validations?: boolean | undefined; readonly field_name: string; readonly data_view_id: string; }"
+          "{ readonly value?: string[] | undefined; readonly title?: string | undefined; readonly field_name: string; readonly step: number; readonly data_view_id: string; readonly use_global_filters: boolean; readonly ignore_validations: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -808,7 +853,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -825,7 +870,7 @@
           "[number, number]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -839,10 +884,10 @@
         "label": "TimeSliderControlState",
         "description": [],
         "signature": [
-          "{ readonly start_percentage_of_time_range?: number | undefined; readonly end_percentage_of_time_range?: number | undefined; readonly is_anchored?: boolean | undefined; }"
+          "{ readonly start_percentage_of_time_range: number; readonly end_percentage_of_time_range: number; readonly is_anchored: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "lineNumber": 55,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -850,30 +895,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/controls-schemas",
-        "id": "def-server.controlsGroupSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "controlsGroupSchema",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<(Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>)[]>"
-        ],
-        "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
-        "lineNumber": 49,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/controls-schemas",
         "id": "def-server.optionsListDSLControlSchema",
@@ -889,7 +910,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<ExtendedProps<ExtendedProps<ExtendedProps<{ title: ",
+          "<{ exclude: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -897,7 +918,71 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; }, { data_view_id: ",
+          "<boolean>; exists_selected: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; run_past_timeout: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; search_technique: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"prefix\" | \"wildcard\" | \"exact\">; selected_options: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<(string | number)[]>; single_select: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; sort: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"_key\" | \"_count\">; direction: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"asc\" | \"desc\">; }>; data_view_id: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -921,7 +1006,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean | undefined>; ignore_validations: ",
+          "<boolean>; ignore_validations: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -929,7 +1014,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean | undefined>; }>, { display_settings: ",
+          "<boolean>; title: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -937,7 +1022,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined>; single_select: ",
+          "<string | undefined>; display_settings: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -945,58 +1030,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean | undefined>; }>, { exclude: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean | undefined>; exists_selected: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean | undefined>; run_past_timeout: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean | undefined>; search_technique: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<\"prefix\" | \"wildcard\" | \"exact\" | undefined>; selected_options: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<(string | number)[] | undefined>; sort: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined>; }>>"
+          "<Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/options_list_schema.ts",
-        "lineNumber": 42,
+        "lineNumber": 103,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1014,85 +1051,13 @@
             "pluginId": "@kbn/config-schema",
             "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<ExtendedProps<ExtendedProps<{ title: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; }, { display_settings: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined>; single_select: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean | undefined>; }>, { selected_options: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string[]>; variable_name: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string>; variable_type: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<\"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\">; esql_query: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string>; control_type: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<\"STATIC_VALUES\" | \"VALUES_FROM_QUERY\">; available_options: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string[] | undefined>; }>>"
+          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/options_list_schema.ts",
-        "lineNumber": 55,
+        "lineNumber": 184,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1113,7 +1078,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<ExtendedProps<ExtendedProps<{ title: ",
+          "<{ value: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1121,7 +1086,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; }, { data_view_id: ",
+          "<string[] | undefined>; step: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; data_view_id: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1145,7 +1118,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean | undefined>; ignore_validations: ",
+          "<boolean>; ignore_validations: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1153,7 +1126,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean | undefined>; }>, { value: ",
+          "<boolean>; title: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1161,18 +1134,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string[] | undefined>; step: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<number | undefined>; }>>"
+          "<string | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/range_slider_schema.ts",
-        "lineNumber": 15,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1201,7 +1166,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<number | undefined>; end_percentage_of_time_range: ",
+          "<number>; end_percentage_of_time_range: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1209,7 +1174,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<number | undefined>; is_anchored: ",
+          "<number>; is_anchored: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1217,10 +1182,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean | undefined>; }>"
+          "<boolean>; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/time_slider_schema.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

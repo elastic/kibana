@@ -26,12 +26,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { css } from '@emotion/react';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { MlPageHeader } from '../components/page_header';
 import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_overview';
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
@@ -229,7 +229,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
                           data-test-subj="mlOverviewCardLogPatternAnalysisButton"
                         >
-                          <EuiIcon type="logPatternAnalysis" />
+                          <EuiIcon type="pattern" />
                           <FormattedMessage
                             id="xpack.ml.overview.logPatternAnalysis.findPatternsButton"
                             defaultMessage="Find patterns"
@@ -268,7 +268,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
                           data-test-subj="mlOverviewCardLogRateAnalysisButton"
                         >
-                          <EuiIcon type="visBarVertical" />
+                          <EuiIcon type="chartBarVertical" />
                           <FormattedMessage
                             id="xpack.ml.overview.logRateAnalysis.explainChangesButton"
                             defaultMessage="Explain changes"
@@ -315,7 +315,7 @@ export const OverviewPage: FC = () => {
                             }
                           )}
                         >
-                          <EuiIcon type="changePointDetection" />
+                          <EuiIcon type="chartChangePoint" />
                           <FormattedMessage
                             id="xpack.ml.overview.changePointDetection.findChangesButton"
                             defaultMessage="Find changes"

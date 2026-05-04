@@ -14,6 +14,7 @@ import { ToolType, allToolsSelectionWildcard } from '@kbn/agent-builder-common';
 import {
   toggleToolSelection,
   isToolSelected,
+  getActiveTools,
   cleanInvalidToolReferences,
 } from './tool_selection_utils';
 import type { AgentEditState } from '../hooks/agents/use_agent_edit';
@@ -76,6 +77,53 @@ describe('tool_selection_utils', () => {
       expect(result[0].tool_ids).toContain('tool2');
       expect(result[0].tool_ids).toContain('tool3');
       expect(result[0].tool_ids).not.toContain(allToolsSelectionWildcard);
+    });
+  });
+
+  describe('getActiveTools', () => {
+    const defaultToolIds = new Set(['tool1', 'tool3']);
+
+    it('should return only explicitly selected tools when elastic capabilities are disabled', () => {
+      const selections: ToolSelection[] = [{ tool_ids: ['tool2'] }];
+      const result = getActiveTools(mockTools, selections, false, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool2']);
+    });
+
+    it('should include default tools when elastic capabilities are enabled', () => {
+      const selections: ToolSelection[] = [{ tool_ids: ['tool2'] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool2', 'tool1', 'tool3']);
+    });
+
+    it('should not duplicate tools that are both explicit and default', () => {
+      const selections: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool1', 'tool2', 'tool3']);
+    });
+
+    it('should return empty array when no tools match selections', () => {
+      const selections: ToolSelection[] = [{ tool_ids: [] }];
+      const result = getActiveTools(mockTools, selections, false, defaultToolIds);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return only default tools when no explicit selections and elastic capabilities are enabled', () => {
+      const selections: ToolSelection[] = [{ tool_ids: [] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool1', 'tool3']);
+    });
+
+    it('should handle wildcard selections with elastic capabilities', () => {
+      const selections: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      // All tools already selected via wildcard, no defaults to append
+      expect(result.map((t) => t.id)).toEqual(['tool1', 'tool2', 'tool3']);
     });
   });
 

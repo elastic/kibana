@@ -50,16 +50,12 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const savedObjectId = (initialState as LinksByReferenceState).savedObjectId;
-      const intialLinksState = savedObjectId
-        ? await loadFromLibrary(savedObjectId)
-        : (initialState as LinksState);
+      const refId = (initialState as LinksByReferenceState).ref_id;
+      const intialLinksState = refId ? await loadFromLibrary(refId) : (initialState as LinksState);
 
-      const titleManager = initializeTitleManager(initialState, {
-        borderlessByDefault: intialLinksState.layout === LINKS_HORIZONTAL_LAYOUT,
-      });
+      const titleManager = initializeTitleManager(initialState);
 
-      const isByReference = savedObjectId !== undefined;
+      const isByReference = refId !== undefined;
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       if (!isParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
@@ -76,7 +72,7 @@ export const getLinksEmbeddableFactory = () => {
       function serializeByReference(libraryId: string) {
         return {
           ...titleManager.getLatestState(),
-          savedObjectId: libraryId,
+          ref_id: libraryId,
         };
       }
 
@@ -89,7 +85,7 @@ export const getLinksEmbeddableFactory = () => {
       }
 
       const serializeState = () =>
-        isByReference ? serializeByReference(savedObjectId) : serializeByValue();
+        isByReference ? serializeByReference(refId) : serializeByValue();
 
       const unsavedChangesApi = initializeUnsavedChanges<LinksEmbeddableState>({
         uuid,
@@ -120,12 +116,12 @@ export const getLinksEmbeddableFactory = () => {
                   });
                   return !hasLinkDifference;
                 },
-            savedObjectId: 'skip',
+            ref_id: 'skip',
           };
         },
         onReset: async (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
-          if (!savedObjectId) {
+          if (!refId) {
             layout$.next((lastSaved as LinksByValueState)?.layout);
             resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
           }
@@ -184,21 +180,21 @@ export const getLinksEmbeddableFactory = () => {
                   layout: layout$.getValue(),
                   links: resolvedLinks$.getValue(),
                   title: titleManager.api.title$.getValue() ?? defaultTitle$.getValue(),
-                  savedObjectId,
+                  refId,
                 },
                 parentDashboard: parentApi,
                 onCompleteEdit: async (newState) => {
                   if (!newState) return;
 
                   // if the by reference state has changed during this edit, reinitialize the panel.
-                  const nextSavedObjectId = newState?.savedObjectId;
-                  const nextIsByReference = nextSavedObjectId !== undefined;
+                  const nextRefId = newState?.refId;
+                  const nextIsByReference = nextRefId !== undefined;
                   if (
                     nextIsByReference !== isByReference &&
                     apiIsPresentationContainer(api.parentApi)
                   ) {
                     const serializedState = nextIsByReference
-                      ? serializeByReference(nextSavedObjectId)
+                      ? serializeByReference(nextRefId)
                       : serializeByValue();
                     (serializedState as SerializedTitles).title = newState.title;
 
@@ -257,6 +253,9 @@ export const getLinksEmbeddableFactory = () => {
           <EuiPanel
             className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
             paddingSize="none"
+            color="transparent"
+            hasShadow={false}
+            hasBorder={false}
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"

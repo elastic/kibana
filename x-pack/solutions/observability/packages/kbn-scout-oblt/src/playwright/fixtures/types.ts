@@ -33,5 +33,4 @@ export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
 
 export interface ObltParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
   apiServices: ObltApiServicesFixture;
-  profilingSetup: ProfilingSetupFixture;
 }

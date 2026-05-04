@@ -127,11 +127,13 @@ interface InfraHostsResponse {
 
 export interface ExitSpanSample {
   serviceName: string;
+  agentName?: string;
   spanDestinationServiceResource: string;
   spanType: string;
   spanSubtype: string;
   destinationService?: {
     serviceName: string;
+    agentName?: string;
   };
 }
 
@@ -170,6 +172,17 @@ export interface ApmTransactionDetailsResponse {
   transaction?: Transaction;
   transactionId?: string;
   traceId?: string;
+}
+
+export interface SyntheticsMonitorDetailsResponse {
+  id: string;
+  name: string;
+  type: string;
+  enabled: boolean;
+  schedule: { number: string; unit: string };
+  locations: Array<{ id: string; label: string }>;
+  tags?: string[];
+  [key: string]: unknown;
 }
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
@@ -272,4 +285,9 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ApmTransactionDetailsResponse>;
+
+  syntheticsMonitorDetails: (params: {
+    request: KibanaRequest;
+    configId: string;
+  }) => Promise<SyntheticsMonitorDetailsResponse>;
 }

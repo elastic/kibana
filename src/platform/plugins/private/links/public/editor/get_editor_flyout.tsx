@@ -21,7 +21,7 @@ export interface EditorState {
   description?: string;
   layout?: LinksLayoutType;
   links?: ResolvedLink[];
-  savedObjectId?: string;
+  refId?: string;
   title?: string;
   error?: Error;
 }
@@ -53,10 +53,10 @@ export function getEditorFlyout({
           links: newLinks,
           layout: newLayout,
         };
-        if (initialState?.savedObjectId) {
-          const { savedObjectId, ...updateState } = newState;
+        if (initialState?.refId) {
+          const { refId, ...updateState } = newState;
           await linksClient.update({
-            id: initialState.savedObjectId,
+            id: initialState.refId,
             data: {
               ...updateState,
               links: serializeResolvedLinks(newLinks),
@@ -87,7 +87,7 @@ export function getEditorFlyout({
           ? parentDashboard.savedObjectId$.value
           : undefined
       }
-      isByReference={Boolean(initialState?.savedObjectId)}
+      isByReference={Boolean(initialState?.refId)}
     />
   );
 }

@@ -17,10 +17,7 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import dedent from 'dedent';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { LoadingState } from '../../components/loading_state';
 import { ActionModalProvider } from '../../context/action_modal';
@@ -110,8 +107,7 @@ export function SloDetailsPage() {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
+    agentBuilder.setChatConfig({
       attachments: [
         {
           type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
@@ -129,7 +125,7 @@ export function SloDetailsPage() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, sloId, sloInstanceId, remoteName, slo]);
 

@@ -7,10 +7,7 @@
 
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useDatePickerContext } from './use_date_picker';
@@ -32,8 +29,7 @@ export const useHostAttachmentConfig = () => {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
+    agentBuilder.setChatConfig({
       attachments: [
         {
           type: OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
@@ -51,7 +47,7 @@ export const useHostAttachmentConfig = () => {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, entity.name, entity.type, getParsedDateRange, loading]);
 };

@@ -60,6 +60,9 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVega.editor.vegaEditorOptionsPopoverAriaLabel', {
+        defaultMessage: 'Vega editor options',
+      })}
       id="actionsMenu"
       button={button}
       isOpen={isPopoverOpen}

@@ -1,0 +1,40 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postCloudConnectorRequestExample:
+          description: 'Create a new AWS cloud connector'
+          value:
+            name: 'My AWS connector'
+            cloudProvider: 'aws'
+            accountType: 'single-account'
+            vars: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postCloudConnectorExample:
+            description: 'The created Fleet cloud connector'
+            value:
+              item:
+                id: 'cloud-connector-id-2'
+                name: 'My AWS connector'
+                cloudProvider: 'aws'
+                accountType: 'single-account'
+                vars: {}
+                packagePolicyCount: 0
+                created_at: '2024-01-15T10:00:00.000Z'
+                updated_at: '2024-01-15T10:00:00.000Z'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

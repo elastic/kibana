@@ -84,6 +84,18 @@ test.describe(
       });
     });
 
+    test('Service badge in waterfall links to service overview', async ({
+      page,
+      pageObjects: { dependencyDetailsPage },
+    }) => {
+      await test.step('click service badge and verify navigation to service overview', async () => {
+        await dependencyDetailsPage.operationDetailSubpage.clickWaterfallServiceBadge();
+        await expect(page).toHaveURL(
+          new RegExp(`/services/${dependencyDetailsPage.SERVICE_NAME}/overview`)
+        );
+      });
+    });
+
     test('Has no detectable a11y violations on load', async ({ page }) => {
       const { violations } = await page.checkA11y({ include: ['main'] });
       expect(violations).toHaveLength(0);

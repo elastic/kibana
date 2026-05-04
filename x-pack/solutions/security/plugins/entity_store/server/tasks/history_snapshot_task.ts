@@ -13,11 +13,13 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import { parseDurationToMs } from '../infra/time';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
+import { wrapTaskRun } from '../telemetry/traces';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
@@ -96,16 +98,39 @@ export function registerHistorySnapshotTask({
       },
       createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
         run: () =>
-          runHistorySnapshotTask({
-            taskInstance,
-            abortController,
-            fakeRequest,
-            core,
-            logger,
+          wrapTaskRun({
+            spanName: 'entityStore.task.history_snapshot.run',
+            namespace: taskInstance.state.namespace,
+            attributes: {
+              'entity_store.task.id': taskInstance.id,
+              'entity_store.task.type': taskType,
+            },
+            run: () =>
+              runHistorySnapshotTask({
+                taskInstance,
+                abortController,
+                fakeRequest,
+                core,
+                logger,
+              }),
           }),
       }),
     },
   });
+}
+
+export async function stopHistorySnapshotTask({
+  logger,
+  taskManager,
+  namespace,
+}: {
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+}): Promise<void> {
+  const taskId = getHistorySnapshotTaskId(namespace);
+  await taskManager.removeIfExists(taskId);
+  logger.debug(`Stopped history snapshot task ${taskId}`);
 }
 
 export async function scheduleHistorySnapshotTasks({
@@ -123,10 +148,13 @@ export async function scheduleHistorySnapshotTasks({
 }): Promise<void> {
   try {
     const taskId = getHistorySnapshotTaskId(namespace);
+    // Delay the first run by the frequency interval (24h by default).
+    const firstRunAt = new Date(Date.now() + parseDurationToMs(frequency));
     await taskManager.ensureScheduled(
       {
         id: taskId,
         taskType: config.type,
+        runAt: firstRunAt,
         schedule: { interval: frequency },
         state: { namespace },
         params: {},

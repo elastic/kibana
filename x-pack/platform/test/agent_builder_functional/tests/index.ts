@@ -44,5 +44,12 @@ export default function ({ loadTestFile, getService }: AgentBuilderUiFtrProvider
       loadTestFile(require.resolve('./agents/create_agent.ts'));
       loadTestFile(require.resolve('./agents/edit_agent.ts'));
     });
+
+    describe('sidebar', function () {
+      loadTestFile(require.resolve('./sidebar/sidebar_conversation_flow.ts'));
+      loadTestFile(require.resolve('./sidebar/sidebar_conversation_history.ts'));
+      loadTestFile(require.resolve('./sidebar/sidebar_agent_switch.ts'));
+      loadTestFile(require.resolve('./sidebar/sidebar_error_handling.ts'));
+    });
   });
 }

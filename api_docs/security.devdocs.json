@@ -512,6 +512,7 @@
                 "lineNumber": 20,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -807,7 +808,7 @@
         "label": "SecurityNavControlServiceStart",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -835,7 +836,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -863,7 +864,7 @@
               "[]) => void"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -886,7 +887,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
-                "lineNumber": 31,
+                "lineNumber": 32,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1035,6 +1036,43 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.UserMenuLink.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "((event: React.MouseEvent<Element, MouseEvent>) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-public.UserMenuLink.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "React.MouseEvent<Element, MouseEvent>"
+                ],
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+                "lineNumber": 18,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "MouseEvent",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.UserMenuLink.content",
             "type": "CompoundType",
             "tags": [],
@@ -1046,7 +1084,7 @@
               "React.ReactNode | ((args: { closePopover: () => void; }) => React.ReactNode)"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1802,6 +1840,7 @@
                 "lineNumber": 11,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApiOperation",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2802,7 +2841,15 @@
             "tags": [],
             "label": "log",
             "description": [
-              "\nLogs an {@link AuditEvent} and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
+              "\nLogs an ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditEvent",
+                "text": "AuditEvent"
+              },
+              " and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
             ],
             "signature": [
               "(event: ",
@@ -2929,7 +2976,15 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates an {@link AuditLogger} scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
+              "\nCreates an ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
             ],
             "signature": [
               "(request: ",
@@ -2958,6 +3013,7 @@
                 "lineNumber": 24,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2971,7 +3027,15 @@
             "tags": [],
             "label": "withoutRequest",
             "description": [
-              "\n{@link AuditLogger} for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
+              "\n",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
             ],
             "signature": [
               "AuditLogger"
@@ -3213,6 +3277,7 @@
                 "lineNumber": 17,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3268,6 +3333,7 @@
                 "lineNumber": 11,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3357,6 +3423,7 @@
                 "lineNumber": 71,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -3402,6 +3469,7 @@
                 "lineNumber": 22,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -3447,6 +3515,7 @@
                 "lineNumber": 13,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -3635,6 +3704,7 @@
                 "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3659,6 +3729,7 @@
                 "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3742,6 +3813,7 @@
                 "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3766,6 +3838,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3832,6 +3905,7 @@
                 "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3856,6 +3930,7 @@
                 "lineNumber": 86,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4097,6 +4172,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckUserProfilesPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4714,7 +4790,7 @@
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
             "signature": [
-              "{ type?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
+              "{ type?: string | undefined; code?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
             "lineNumber": 200,
@@ -4857,6 +4933,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4876,6 +4953,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4923,6 +5001,7 @@
                 "lineNumber": 57,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4942,6 +5021,7 @@
                 "lineNumber": 58,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4991,6 +5071,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5054,6 +5135,7 @@
                 "lineNumber": 75,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5101,6 +5183,7 @@
                 "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5120,6 +5203,7 @@
                 "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5164,6 +5248,7 @@
                 "lineNumber": 91,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5339,6 +5424,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivilegeDeprecationsRolesByFeatureIdRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5843,7 +5929,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\" | \"assignCase\""
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\" | \"assignCase\" | \"manageTemplate\""
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "lineNumber": 14,
@@ -5913,6 +5999,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckPrivilegesPayload",
             "trackAdoption": false
           },
           {
@@ -5936,6 +6023,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckPrivilegesOptions",
             "trackAdoption": false
           }
         ],
@@ -5982,6 +6070,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -6028,6 +6117,7 @@
             "lineNumber": 71,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -6134,6 +6224,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -6346,16 +6437,16 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "savedObjectsTagging",
-              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
             },
             {
               "plugin": "actions",
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
+            },
+            {
+              "plugin": "savedObjectsTagging",
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
             },
             {
               "plugin": "ml",
@@ -6469,6 +6560,10 @@
               "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
             },
             {
+              "plugin": "alertingVTwo",
+              "path": "x-pack/platform/plugins/shared/alerting_v2/server/lib/tasks/invalidate_pending_api_keys/task_runner.ts"
+            },
+            {
               "plugin": "entityManager",
               "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
@@ -6569,16 +6664,16 @@
               "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
             {
+              "plugin": "entityStore",
+              "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
             },
             {
               "plugin": "cloudSecurityPosture",
               "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-            },
-            {
-              "plugin": "entityStore",
-              "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
             }
           ]
         },
@@ -6641,6 +6736,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/server/services/user_profiles/index.ts"
+            },
+            {
+              "plugin": "alertingVTwo",
+              "path": "x-pack/platform/plugins/shared/alerting_v2/server/routes/suggestions/suggest_user_profiles_route.ts"
             },
             {
               "plugin": "osquery",
@@ -6716,6 +6815,7 @@
             "lineNumber": 39,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "GetUserDisplayNameParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -6773,6 +6873,7 @@
             "lineNumber": 28,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -6830,6 +6931,7 @@
             "lineNumber": 83,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8418,6 +8520,7 @@
                 "lineNumber": 20,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }

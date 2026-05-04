@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -37,9 +38,15 @@ export const registerBulkDeleteRoute = (
       path: '/_bulk_delete',
       options: {
         summary: `Delete saved objects`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Deletes multiple Kibana saved objects in a single request.
+
+There is currently no complete replacement for deleting arbitrary saved objects via an HTTP API.`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_delete.examples.yaml'),
       },
       security: {
         authz: {
@@ -52,10 +59,18 @@ export const registerBulkDeleteRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-          })
+          }),
+          { maxSize: 10_000 }
         ),
         query: schema.object({
-          force: schema.maybe(schema.boolean()),
+          force: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, force deletion of multi-namespace objects from all namespaces.',
+              },
+            })
+          ),
         }),
       },
     },

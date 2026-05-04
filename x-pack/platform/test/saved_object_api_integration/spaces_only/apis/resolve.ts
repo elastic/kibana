@@ -31,11 +31,8 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = resolveTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = resolveTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     return createTestDefinitions(testCases, false, { spaceId });

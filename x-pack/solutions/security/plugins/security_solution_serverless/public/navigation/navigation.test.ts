@@ -70,7 +70,11 @@ describe('Security Side Nav', () => {
     ]);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(AIChatExperience.Classic, false);
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
+      AIChatExperience.Classic,
+      false,
+      false
+    );
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
@@ -94,5 +98,28 @@ describe('Security Side Nav', () => {
     await registerSolutionNavigation(services, []);
 
     expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Agent);
+  });
+
+  it('passes workflows UI enabled true when settings return true', async () => {
+    services.settings.client.get$ = jest.fn().mockImplementation((key: string) => {
+      if (key === WORKFLOWS_UI_SETTING_ID) {
+        return of(true);
+      }
+
+      return of(AIChatExperience.Classic);
+    });
+
+    await registerSolutionNavigation(services, [
+      {
+        product_line: 'ai_soc' as ProductLine,
+        product_tier: 'search_ai_lake' as ProductTier,
+      },
+    ]);
+
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
+      AIChatExperience.Classic,
+      true,
+      false
+    );
   });
 });

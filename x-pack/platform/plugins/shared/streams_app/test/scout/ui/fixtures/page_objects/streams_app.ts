@@ -16,13 +16,14 @@ import {
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
+import type { FieldTypeOption } from '../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly dateProcessorFormatsComboBox;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
@@ -31,6 +32,17 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createQueryStreamButton;
+  public readonly childStreamTypeSelector;
+  public readonly queryStreamFlyout;
+  public readonly queryStreamFlyoutSaveButton;
+  public readonly queryStreamCreatedSuccessToast;
+  public readonly childQueryStreamCreatedSuccessToast;
+  public readonly queryStreamUpdatedSuccessToast;
+  public readonly queryStreamDetailsQueryViewerCodeBlock;
+  public readonly deleteQueryStreamModalInput;
+  public readonly queryStreamDeletedSuccessToast;
+  public readonly queryStreamCreateErrorToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -49,6 +61,10 @@ export class StreamsApp {
       this.page,
       'streamsAppProcessorTypeSelector'
     );
+    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppDateProcessorFormatsComboBox'
+    );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
       this.page,
       'streamsAppFieldFormTypeSelect'
@@ -66,6 +82,23 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
+    this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
+    this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
+    this.queryStreamFlyoutSaveButton = this.page.getByTestId(
+      'streamsAppQueryStreamFlyoutSaveButton'
+    );
+    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
+    this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
+      'queryStreamDetailsQueryViewerCodeBlock'
+    );
+    this.deleteQueryStreamModalInput = this.page.getByTestId(
+      'streamsAppDeleteStreamModalStreamNameInput'
+    );
+    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
   }
 
   async goto() {
@@ -92,6 +125,10 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'dataQuality');
   }
 
+  async gotoOverviewTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'overview');
+  }
+
   async gotoProcessingTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'processing');
   }
@@ -105,7 +142,10 @@ export class StreamsApp {
   }
 
   async gotoAdvancedTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'advanced');
+    // Navigate to a stable tab first, then open Advanced to avoid races from direct URL nav
+    await this.gotoDataRetentionTab(streamName);
+    await this.page.getByRole('tab', { name: 'Advanced' }).click();
+    await this.page.waitForURL(/\/advanced/);
   }
 
   async gotoAttachmentsTab(streamName: string) {
@@ -212,6 +252,38 @@ export class StreamsApp {
       return 'FROM';
     }
     return null;
+  }
+
+  /**
+   * Verifies that the Discover button for a wired stream links to the ES|QL view ($.streamname)
+   * rather than the raw glob pattern.
+   */
+  async verifyWiredStreamDiscoverLinkUsesView(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Wired streams should use the ES|QL view ($.streamname), not the raw pattern.
+    const decodedHref = decodeURIComponent(href);
+    const viewFragment = `FROM $.${streamName}`;
+    const rawFragment = `FROM ${streamName}, ${streamName}.*`;
+
+    if (decodedHref.includes(rawFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} still uses raw glob pattern. Expected view reference ($.${streamName}).`
+      );
+    }
+    if (!decodedHref.includes(viewFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} does not contain expected view fragment. href=${href} expected=FROM $.${streamName}`
+      );
+    }
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
@@ -589,7 +661,7 @@ export class StreamsApp {
   async getConditionAddStepMenuButton(pos: number) {
     const conditions = await this.getConditionsListItems();
     const targetCondition = conditions[pos];
-    return targetCondition.getByRole('button', { name: 'Create nested step' });
+    return targetCondition.getByRole('button', { name: 'Create nested step' }).first();
   }
 
   async getConditionContextMenuButton(pos: number) {
@@ -678,7 +750,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -813,6 +885,24 @@ export class StreamsApp {
   }
 
   /**
+   * Confirms changes in the review modal if it appears, otherwise does nothing.
+   * The review modal only appears when there are mapping-affecting changes (not just
+   * description-only or unmapped field changes). Use this when the save operation
+   * might or might not trigger the modal depending on the type of changes.
+   */
+  async confirmChangesInReviewModalIfPresent() {
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    const appeared = await submitButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (appeared) {
+      await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+      await submitButton.click();
+    }
+  }
+
+  /**
    * Utility for data preview
    */
   async getPreviewTableRows() {
@@ -821,23 +911,30 @@ export class StreamsApp {
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
+  /**
+   * Asserts a preview grid cell eventually contains `value`.
+   * Uses a high default timeout so the simulation preview has time to refresh
+   * after transient stale values (e.g. literal "null" from a Set processor).
+   */
   async expectCellValueContains({
     columnName,
     rowIndex,
     value,
     invertCondition = false,
+    timeout = 30_000,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
     invertCondition?: boolean;
+    timeout?: number;
   }) {
     const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
-      await expect(cellLocator).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value, { timeout });
     } else {
-      await expect(cellLocator).toContainText(value);
+      await expect(cellLocator).toContainText(value, { timeout });
     }
   }
 
@@ -910,6 +1007,16 @@ export class StreamsApp {
 
   async stageFieldMappingChanges() {
     await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
+  }
+
+  async fillFieldDescription(description: string) {
+    const textarea = this.page.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+    await expect(textarea).toBeVisible();
+    await textarea.fill(description);
+  }
+
+  async clickEditFieldButton() {
+    await this.page.getByTestId('streamsAppFieldSummaryEditButton').click();
   }
 
   async unmapField() {
@@ -994,14 +1101,6 @@ export class StreamsApp {
     await acceptButton.click();
   }
 
-  async regenerateSuggestions() {
-    const regenerateButton = this.page
-      .getByTestId('streamsAppGenerateSuggestionButton')
-      .filter({ hasText: 'Regenerate all' });
-    await expect(regenerateButton).toBeVisible();
-    await regenerateButton.click();
-  }
-
   async expectConfirmationModalVisible() {
     const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
     await expect(modal).toBeVisible();
@@ -1072,7 +1171,9 @@ export class StreamsApp {
 
   // Attachments utility methods
   async expectAttachmentsEmptyPromptVisible() {
-    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible({
+      timeout: 15000, // the button may take longer to render due to environment slowness
+    });
   }
 
   async clickAddAttachmentsButton() {
@@ -1200,5 +1301,94 @@ export class StreamsApp {
 
   async fillConcatLiteralInput(value: string) {
     await this.concatLiteralInput.fill(value);
+  }
+
+  async clickCreateQueryStreamButton() {
+    await this.createQueryStreamButton.click();
+  }
+
+  async clickQueryStreamFlyoutSaveButton() {
+    await this.queryStreamFlyoutSaveButton.click();
+  }
+
+  async selectChildStreamType(type: 'Query' | 'Index') {
+    await this.childStreamTypeSelector.getByRole('button', { name: type }).click();
+  }
+
+  async clickQueryModeCreateQueryStreamButton() {
+    await this.page.getByTestId('streamsAppQueryModeCreateButton').click();
+  }
+
+  async clickQueryStreamFormCreateButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
+  }
+
+  async clickQueryStreamLink(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEntryButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamDetailsTab(tabName: string) {
+    await this.page.getByTestId(`queryStreamDetails-${tabName}-tab`).click();
+  }
+
+  async clickQueryStreamDetailsEditQueryButton() {
+    await this.page.getByTestId('queryStreamDetailsEditQueryButton').click();
+  }
+
+  async clickDeleteQueryStreamButton() {
+    await this.page.getByTestId('deleteQueryStreamButton').click();
+  }
+
+  async fillDeleteQueryStreamModalInput(value: string) {
+    await this.deleteQueryStreamModalInput.fill(value);
+  }
+
+  async clickDeleteQueryStreamModalDeleteButton() {
+    await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
+  }
+
+  async clickQueryStreamEditButton(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEditButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamFormSaveButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
+  }
+
+  async clickQueryStreamFormDeleteButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
+  }
+
+  async createRootQueryStream(name: string, esqlQuery: string) {
+    await this.clickCreateQueryStreamButton();
+    await this.fillRoutingRuleName(name);
+    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.clickQueryStreamFlyoutSaveButton();
+  }
+
+  async openCreateChildQueryStreamForm() {
+    await this.clickQueryModeCreateQueryStreamButton();
+    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+  }
+
+  async fillAndSaveChildQueryStream(childName: string, esqlQuery: string) {
+    await this.fillRoutingRuleName(childName);
+    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.clickQueryStreamFormCreateButton();
+  }
+
+  async createChildQueryStreamFromPartitioningTab(childName: string, esqlQuery: string) {
+    await this.openCreateChildQueryStreamForm();
+    await this.fillAndSaveChildQueryStream(childName, esqlQuery);
+  }
+
+  async deleteQueryStreamFromAdvancedTab(streamName: string) {
+    await this.clickStreamNameLink(streamName);
+    await this.clickQueryStreamDetailsTab('advanced');
+    await this.clickDeleteQueryStreamButton();
+    await this.fillDeleteQueryStreamModalInput(streamName);
+    await this.clickDeleteQueryStreamModalDeleteButton();
+    await this.queryStreamDeletedSuccessToast.waitFor({ state: 'visible' });
   }
 }

@@ -114,7 +114,9 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/i18n'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "lineNumber": 42,
             "columnNumber": 3,
@@ -127,7 +129,9 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/i18n-react'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "lineNumber": 43,
             "columnNumber": 3,
@@ -140,7 +144,9 @@
             "type": "string",
             "tags": [],
             "label": "'@emotion/cache'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "lineNumber": 44,
             "columnNumber": 3,
@@ -153,9 +159,41 @@
             "type": "string",
             "tags": [],
             "label": "'@emotion/react'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.emotionreactjsxruntime",
+            "type": "string",
+            "tags": [],
+            "label": "'@emotion/react/jsx-runtime'",
+            "description": [
+              "// JSX runtime exports for SWC's importSource: '@emotion/react'"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.emotionreactjsxdevruntime",
+            "type": "string",
+            "tags": [],
+            "label": "'@emotion/react/jsx-dev-runtime'",
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -166,9 +204,11 @@
             "type": "string",
             "tags": [],
             "label": "jquery",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 46,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -179,9 +219,11 @@
             "type": "string",
             "tags": [],
             "label": "moment",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 47,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -192,9 +234,11 @@
             "type": "string",
             "tags": [],
             "label": "'moment-timezone'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 48,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -205,9 +249,11 @@
             "type": "string",
             "tags": [],
             "label": "react",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -218,9 +264,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-dom'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 50,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -231,9 +279,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-dom/server'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 51,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -244,9 +294,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-router'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 52,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -257,9 +309,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-router-dom'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 53,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -270,9 +324,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-router-dom-v5-compat'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 54,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -283,9 +339,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-use'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 55,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -296,9 +354,11 @@
             "type": "string",
             "tags": [],
             "label": "'styled-components'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 56,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -309,9 +369,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/monaco'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 57,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -326,7 +388,7 @@
               "// this is how plugins/consumers from npm load monaco"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 59,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -337,9 +399,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/Option'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 60,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -350,9 +414,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/pipeable'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 61,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -363,9 +429,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/TaskEither'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 62,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -376,9 +444,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/Either'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 63,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -389,9 +459,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/function'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 64,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -402,9 +474,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/Task'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 65,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -415,9 +489,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/Set'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 66,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -428,9 +504,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/Ord'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 67,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -441,9 +519,11 @@
             "type": "string",
             "tags": [],
             "label": "'fp-ts/Array'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 68,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -454,9 +534,11 @@
             "type": "string",
             "tags": [],
             "label": "'io-ts'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 69,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -467,9 +549,11 @@
             "type": "string",
             "tags": [],
             "label": "'io-ts/lib/Reporter'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 70,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -480,9 +564,11 @@
             "type": "string",
             "tags": [],
             "label": "'io-ts/lib/PathReporter'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 71,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -493,9 +579,26 @@
             "type": "string",
             "tags": [],
             "label": "'io-ts/lib/ThrowReporter'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 72,
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.zodv4",
+            "type": "string",
+            "tags": [],
+            "label": "'zod/v4'",
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -506,9 +609,11 @@
             "type": "string",
             "tags": [],
             "label": "'@reduxjs/toolkit'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 73,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -519,9 +624,11 @@
             "type": "string",
             "tags": [],
             "label": "'react-redux'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 74,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -532,9 +639,11 @@
             "type": "string",
             "tags": [],
             "label": "redux",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 75,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -545,9 +654,11 @@
             "type": "string",
             "tags": [],
             "label": "immer",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 76,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -558,9 +669,11 @@
             "type": "string",
             "tags": [],
             "label": "reselect",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 77,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -571,9 +684,11 @@
             "type": "string",
             "tags": [],
             "label": "'fastest-levenshtein'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 78,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -584,9 +699,11 @@
             "type": "string",
             "tags": [],
             "label": "'chroma-js'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 79,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -604,7 +721,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 81,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -619,7 +736,7 @@
               "/**\n   * big deps which are locked to a single version\n   */"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 105,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -630,9 +747,11 @@
             "type": "string",
             "tags": [],
             "label": "numeral",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 109,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -643,9 +762,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/numeral'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 110,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -656,9 +777,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/charts'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 111,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -669,9 +792,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/esql'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 112,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -682,9 +807,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/esql/types'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 113,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -695,9 +822,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/datemath'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 114,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -708,9 +837,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 115,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -721,9 +852,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui/lib/components/provider/nested'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 116,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -734,9 +867,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui/lib/services/theme/warning'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 118,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -747,9 +882,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui-theme-borealis'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 119,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -764,7 +901,7 @@
               "// transient dep of eui"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 122,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -775,9 +912,11 @@
             "type": "string",
             "tags": [],
             "label": "lodash",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 123,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -788,9 +927,11 @@
             "type": "string",
             "tags": [],
             "label": "'lodash/fp'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 124,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +946,7 @@
               "/**\n   * runtime deps which don't need to be copied across all bundles\n   */"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 125,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -816,9 +957,11 @@
             "type": "string",
             "tags": [],
             "label": "uuid",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 129,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -829,9 +972,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/analytics'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 130,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -842,9 +987,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/crypto-browser'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 131,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -855,9 +1002,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/es-query'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 132,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -868,9 +1017,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/search-errors'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 133,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -881,9 +1032,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/std'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 134,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -894,9 +1047,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/safer-lodash-set'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 135,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -907,9 +1062,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/shared-ux-error-boundary'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 136,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -920,9 +1077,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/rison'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 137,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -933,9 +1092,11 @@
             "type": "string",
             "tags": [],
             "label": "history",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 138,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -946,9 +1107,11 @@
             "type": "string",
             "tags": [],
             "label": "classnames",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 139,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -959,9 +1122,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-query'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 140,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -972,9 +1137,11 @@
             "type": "string",
             "tags": [],
             "label": "'@tanstack/react-query-devtools'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 141,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -985,9 +1152,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/code-editor'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 142,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -998,9 +1167,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/esql-language'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 143,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1011,9 +1182,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/ebt-tools'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 144,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1024,9 +1197,11 @@
             "type": "string",
             "tags": [],
             "label": "'@elastic/apm-rum-core'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 145,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1037,9 +1212,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-kibana-context-common'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 146,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1050,9 +1227,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-kibana-context-root'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 147,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1063,9 +1242,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-kibana-context-render'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 148,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1076,9 +1257,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-kibana-context-theme'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 149,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1089,9 +1272,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-kibana-context-env'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 150,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1102,9 +1287,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/shared-ux-router'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 151,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1115,9 +1302,11 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/react-kibana-mount'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 152,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1128,9 +1317,26 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/visualizations-common'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 153,
+            "lineNumber": 157,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncoredibrowser",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/core-di-browser'",
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1141,9 +1347,26 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/core-chrome-sidebar-context'",
-            "description": [],
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "lineNumber": 154,
+            "lineNumber": 159,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncorechromebrowsercontext",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/core-chrome-browser-context'",
+            "description": [
+              "\nExternals mapping intended to be used in a webpack config"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

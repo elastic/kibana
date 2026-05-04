@@ -66,6 +66,7 @@ const WelcomeComponent: React.FC = () => {
         <ConnectorSetup
           onConversationUpdate={async () => {}}
           updateConversationsOnSaveConnector={false} // no conversation to update
+          loadConnectorFeatureId="attack_discovery"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -20,6 +20,8 @@ import type { UserActionBuilderMap } from './types';
 import { createCategoryUserActionBuilder } from './category';
 import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 import { createObservablesUserActionBuilder } from './observables';
+import { createExtendedFieldsUserActionBuilder } from './extended_fields';
+import { createTemplateUserActionBuilder } from './template';
 
 export const builderMap: UserActionBuilderMap = {
   create_case: createCaseUserActionBuilder,
@@ -36,4 +38,6 @@ export const builderMap: UserActionBuilderMap = {
   category: createCategoryUserActionBuilder,
   customFields: createCustomFieldsUserActionBuilder,
   observables: createObservablesUserActionBuilder,
+  extended_fields: createExtendedFieldsUserActionBuilder,
+  template: createTemplateUserActionBuilder,
 };

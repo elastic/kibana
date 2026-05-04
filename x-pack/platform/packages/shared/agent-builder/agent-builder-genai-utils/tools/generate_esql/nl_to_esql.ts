@@ -6,12 +6,13 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
-import { buildServerESQLCallbacks } from '@kbn/esql/server';
+import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
@@ -75,6 +76,17 @@ export interface GenerateEsqlOptions {
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
+  /**
+   * Time range used to supply named parameters (?_tstart, ?_tend)
+   * when executing the generated query for validation.
+   * Defaults to last 24 hours if not provided.
+   */
+  timeRange?: TimeRange;
+  /**
+   * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
+   * for time range filtering in generated queries.
+   */
+  disableNamedParams?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -87,10 +99,13 @@ export const generateEsql = async ({
   additionalContext,
   maxRetries = 3,
   rowLimit,
+  timeRange: inputTimeRange,
+  disableNamedParams,
   model,
   esClient,
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
@@ -110,14 +125,19 @@ export const generateEsql = async ({
     },
     async () => {
       try {
-        // Discover index if not provided
+        // Discover index if not provided (`indexExplorer` takes one string; append `additionalContext`
+        // when set so resource selection can use editor notes or any other hints, not only `nlQuery`.)
+        const nlQueryWithContext = additionalContext?.trim()
+          ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
+          : nlQuery.trim();
+
         let selectedTarget = index;
         if (!selectedTarget) {
           logger?.debug('No index provided, discovering target index using indexExplorer');
           const {
             resources: [selectedResource],
           } = await indexExplorer({
-            nlQuery,
+            nlQuery: nlQueryWithContext,
             esClient,
             limit: 1,
             model,
@@ -141,6 +161,8 @@ export const generateEsql = async ({
             additionalInstructions,
             additionalContext,
             rowLimit,
+            disableNamedParams,
+            timeRange,
           },
           {
             recursionLimit: 25,

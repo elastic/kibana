@@ -11,5 +11,6 @@ export const createPrebuiltRuleAssetsClient = () => {
     fetchLatestVersions: jest.fn(),
     fetchAssetsByVersion: jest.fn(),
     fetchTagsByVersion: jest.fn(),
+    fetchDeprecatedRules: jest.fn(),
   };
 };

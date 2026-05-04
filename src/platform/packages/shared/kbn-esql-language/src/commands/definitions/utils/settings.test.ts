@@ -12,27 +12,27 @@ import { UnmappedFieldsStrategy } from '../../registry/types';
 import { getUnmappedFieldsStrategy } from './settings';
 
 describe('getUnmappedFieldsStrategy', () => {
-  it('should return FAIL strategy if no headers are provided', () => {
+  it('should return DEFAULT strategy if no headers are provided', () => {
     const strategy = getUnmappedFieldsStrategy();
-    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
+    expect(strategy).toBe(UnmappedFieldsStrategy.DEFAULT);
   });
 
-  it('should return FAIL strategy if unmapped_fields setting is not provided', () => {
+  it('should return DEFAULT strategy if unmapped_fields setting is not provided', () => {
     const headers = [synth.header`SET timezone = "GMT+1"`];
     const strategy = getUnmappedFieldsStrategy(headers);
-    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
+    expect(strategy).toBe(UnmappedFieldsStrategy.DEFAULT);
   });
 
-  it('should return FAIL strategy if unmapped_fields setting is not valid', () => {
+  it('should return DEFAULT strategy if unmapped_fields setting is not valid', () => {
     const headers = [synth.header`SET unmapped_fields = "wrong_value"`];
     const strategy = getUnmappedFieldsStrategy(headers);
-    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
+    expect(strategy).toBe(UnmappedFieldsStrategy.DEFAULT);
   });
 
-  it('should return the FAIL strategy based on the unmapped_fields setting', () => {
-    const headers = [synth.header`SET unmapped_fields = "FAIL"`];
+  it('should return the DEFAULT strategy based on the unmapped_fields setting', () => {
+    const headers = [synth.header`SET unmapped_fields = "DEFAULT"`];
     const strategy = getUnmappedFieldsStrategy(headers);
-    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
+    expect(strategy).toBe(UnmappedFieldsStrategy.DEFAULT);
   });
 
   it('should return the LOAD strategy based on the unmapped_fields setting', () => {

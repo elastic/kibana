@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
@@ -19,6 +20,7 @@ import { Loader } from '../../loader';
 import type { AnomaliesHostTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../anomaly/anomaly_table_euid';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
 import { useQueryToggle } from '../../../containers/query_toggle';
@@ -28,6 +30,7 @@ import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
 import { hostsActions, hostsSelectors } from '../../../../explore/hosts/store';
+import { HostsType } from '../../../../explore/hosts/store/model';
 
 const sorting = {
   sort: {
@@ -42,6 +45,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   hostName,
   skip,
   type,
+  identityFields,
 }) => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
@@ -61,6 +65,8 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
 
   const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
+  const euidApi = useEntityStoreEuidApi();
+  const euid = euidApi?.euid;
 
   const getAnomaliesHostsTableFilterQuerySelector = useMemo(
     () => hostsSelectors.hostsAnomaliesJobIdFilterSelector(),
@@ -103,19 +109,32 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     [dispatch, type]
   );
 
+  const identitySignature = JSON.stringify(identityFields ?? {});
+  const isScopedToEntity = type === HostsType.details && hostName != null;
+  const anomaliesInfluencersFilterQuery = useMemo(
+    () =>
+      buildAnomaliesTableInfluencersFilterQuery({
+        euid,
+        entityType: 'host',
+        isScopedToEntity,
+        identityFields,
+        fallbackDisplayName: hostName,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [euid, isScopedToEntity, hostName, identitySignature]
+  );
+
   const [loadingTable, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromHostType(type, hostName),
-    filterQuery: {
-      exists: { field: 'host.name' },
-    },
+    criteriaFields: getCriteriaFromHostType(type, hostName, identityFields, euid),
+    filterQuery: anomaliesInfluencersFilterQuery,
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
     aggregationInterval: selectedInterval,
   });
 
-  const hosts = convertAnomaliesToHosts(tableData, jobNameById, hostName);
+  const hosts = convertAnomaliesToHosts(tableData, jobNameById, hostName, identityFields, euid);
 
   const columns = getAnomaliesHostTableColumnsCurated(type, startDate, endDate);
   const pagination = {

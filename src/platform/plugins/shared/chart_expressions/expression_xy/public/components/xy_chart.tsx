@@ -54,6 +54,7 @@ import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  getLegendLayout,
   getAccessorByDimension,
   getColumnByAccessor,
   getOverridesFor,
@@ -92,6 +93,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
+  getDecimalsFromFormat,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -130,6 +132,7 @@ declare global {
 }
 
 const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+const DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -360,6 +363,8 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
+  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
@@ -452,7 +457,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    darkMode
   );
 
   const visualConfigs = [
@@ -847,6 +853,11 @@ export function XYChart({
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+              legendLayout={getLegendLayout({
+                isInside: legend.isInside,
+                position: legend.position,
+                layout: legend.layout,
+              })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
@@ -860,7 +871,15 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                    labelOptions: legend.shouldTruncate
+                      ? {
+                          maxLines: legend?.maxLines ?? 1,
+                          widthLimit: DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT,
+                        }
+                      : {
+                          maxLines: 0,
+                          widthLimit: 0,
+                        },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
@@ -935,6 +954,7 @@ export function XYChart({
                 }
                 return value;
               }}
+              maximumFractionDigits={xTickDecimals}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -948,6 +968,10 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
+              const tickDecimals = axis.formatter
+                ? getDecimalsFromFormat(axis.formatter)
+                : undefined;
+
               return (
                 <Axis
                   key={axis.groupId}
@@ -966,6 +990,7 @@ export function XYChart({
                     }
                     return value;
                   }}
+                  maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}

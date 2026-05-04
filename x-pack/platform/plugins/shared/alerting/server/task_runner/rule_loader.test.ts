@@ -255,7 +255,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -269,8 +269,8 @@ describe('rule_loader', () => {
       expect(fakeRequest.isFakeRequest).toEqual(true);
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
-      expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.route.path).toEqual('/s/rule-spaceId');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -285,7 +285,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -299,6 +299,71 @@ describe('rule_loader', () => {
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_uiam_api_key`,
       });
+    });
+
+    test('logs a warning when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, false);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+    });
+
+    test('logs a debug message when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true with an ES API key', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, true);
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+    });
+
+    test('logs a warning when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true without an ES API key', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', null, undefined, true);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+    });
+
+    test('logs a warning when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is null', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, null);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
     });
   });
 });
