@@ -5,41 +5,26 @@
  * 2.0.
  */
 
-import type { RetentionStatus } from '@kbn/siem-readiness';
+/**
+ * Re-exports from @kbn/siem-readiness-common so UI components have a single import point.
+ * All status logic lives in the common package — do not add new logic here.
+ */
+export {
+  CRITICAL_FAILURE_RATE_THRESHOLD,
+  calculateFailureRate,
+  getFailureRateString,
+  isCriticalFailureRate,
+  isCriticalFailureRateFromString,
+} from '@kbn/siem-readiness-common';
 
-// ===== Thresholds (single source of truth) =====
-export const CRITICAL_FAILURE_RATE_THRESHOLD = 1; // 1%
-export const RETENTION_COMPLIANCE_DAYS = 365; // 12 months
+export { isQualityIncompatible } from '@kbn/siem-readiness-common';
 
-// ===== Continuity =====
-export const calculateFailureRate = (failedDocs: number, totalDocs: number): number => {
-  if (totalDocs === 0) return 0;
-  return (failedDocs / totalDocs) * 100;
-};
+export { isRetentionNonCompliant } from '@kbn/siem-readiness-common';
 
-export const getFailureRateString = (failedDocs: number, totalDocs: number): string => {
-  return calculateFailureRate(failedDocs, totalDocs).toFixed(1);
-};
+export { hasMissingIntegrations } from '@kbn/siem-readiness-common';
 
-export const isCriticalFailureRate = (failedDocs: number, totalDocs: number): boolean => {
-  return calculateFailureRate(failedDocs, totalDocs) >= CRITICAL_FAILURE_RATE_THRESHOLD;
-};
-
-export const isCriticalFailureRateFromString = (failureRate: string): boolean => {
-  return Number(failureRate) >= CRITICAL_FAILURE_RATE_THRESHOLD;
-};
-
-// ===== Quality =====
-export const isQualityIncompatible = (incompatibleFieldCount: number): boolean => {
-  return incompatibleFieldCount > 0;
-};
-
-// ===== Retention =====
-export const isRetentionNonCompliant = (status: RetentionStatus): boolean => {
-  return status === 'non-compliant';
-};
-
-// ===== Coverage =====
-export const hasMissingIntegrations = (missingIntegrations: string[] | undefined): boolean => {
-  return Boolean(missingIntegrations?.length);
-};
+/**
+ * @deprecated Use RETENTION_THRESHOLD_DAYS from @kbn/siem-readiness-common instead.
+ * Kept for backward compatibility.
+ */
+export { RETENTION_THRESHOLD_DAYS as RETENTION_COMPLIANCE_DAYS } from '@kbn/siem-readiness-common';

@@ -23,3 +23,13 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export {
+  siemReadinessCoverageTool,
+  SECURITY_SIEM_READINESS_COVERAGE_TOOL_ID,
+  siemReadinessQualityTool,
+  SECURITY_SIEM_READINESS_QUALITY_TOOL_ID,
+  siemReadinessContinuityTool,
+  SECURITY_SIEM_READINESS_CONTINUITY_TOOL_ID,
+  siemReadinessRetentionTool,
+  SECURITY_SIEM_READINESS_RETENTION_TOOL_ID,
+} from './siem_readiness';

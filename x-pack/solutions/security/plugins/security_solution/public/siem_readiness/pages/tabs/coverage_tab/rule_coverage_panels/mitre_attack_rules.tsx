@@ -22,6 +22,11 @@ import {
   useIntegrationDisplayNames,
   useDetectionRulesByIntegration,
 } from '@kbn/siem-readiness';
+import {
+  MITRE_TACTICS,
+  getRulesForMitreTactic,
+  hasMitreTacticMapping,
+} from '@kbn/siem-readiness-common';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
@@ -59,23 +64,6 @@ interface ThreatElement {
   rule_id: string;
   rule_name: string;
 }
-
-const MITRE_TACTICS_LIST = [
-  'Initial Access',
-  'Defense Evasion',
-  'Privilege Escalation',
-  'Persistence',
-  'Lateral Movement',
-  'Execution',
-  'Discovery',
-  'Collection',
-  'Exfiltration',
-  'Impact',
-  'Resource Development',
-  'Credential Access',
-  'Command and Control',
-  'Reconnaissance',
-];
 
 const MITRE_TACTIC_TRANSLATIONS: Record<string, string> = {
   'Initial Access': i18n.translate(
@@ -156,28 +144,16 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   const { data: mitreAttackIndicesDocCounts } = useMitreAttackIndicesDocCounts(activeRuleIndices);
 
   // Calculate total unique MITRE-related rules
-  const totalMitreRules = useMemo((): number => {
-    // 1. Create a lowercase set for O(1) lookups
-    const staticTacticSet = new Set(MITRE_TACTICS_LIST.map((t) => t.toLowerCase()));
-
-    return enabledRules.filter((rule: DetectionRule) =>
-      // 2. Return true if ANY threat tactic matches our set
-      rule.threat?.some((threat) => {
-        const name = threat.tactic?.name?.trim().toLowerCase();
-        return name && staticTacticSet.has(name);
-      })
-    ).length;
-  }, [enabledRules]);
+  const totalMitreRules = useMemo(
+    () => enabledRules.filter((rule: DetectionRule) => hasMitreTacticMapping(rule.threat)).length,
+    [enabledRules]
+  );
 
   // 2. Map each MITRE tactic to its specific coverage status
   const tacticCoverageMap = useMemo(() => {
-    return MITRE_TACTICS_LIST.map((tacticName, index) => {
+    return MITRE_TACTICS.map((tacticName, index) => {
       // Find rules associated with this specific tactic
-      const rulesForTactic = enabledRules.filter((rule: DetectionRule) =>
-        rule.threat?.some(
-          (threat: ThreatElement) => threat.tactic?.name?.toLowerCase() === tacticName.toLowerCase()
-        )
-      );
+      const rulesForTactic = getRulesForMitreTactic(enabledRules as DetectionRule[], tacticName);
 
       const missingIntegrations = new Set<string>();
       let rulesMissingDataCount = 0;

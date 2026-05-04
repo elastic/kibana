@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { MainCategories } from './types';
-
-export const GET_SIEM_READINESS_CATEGORIES_API_PATH = '/api/siem_readiness/get_categories';
-export const GET_SIEM_READINESS_RETENTION_API_PATH = '/api/siem_readiness/get_retention';
-export const GET_SIEM_READINESS_PIPELINES_API_PATH = '/api/siem_readiness/get_pipelines';
-export const GET_INDEX_RESULTS_LATEST_API_PATH =
-  '/internal/ecs_data_quality_dashboard/results_latest';
-export const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'];
-export const ALL_CATEGORIES = CATEGORY_ORDER as MainCategories[];
+// All shared constants now live in @kbn/siem-readiness-common.
+// Re-exported here for backward compatibility.
+export {
+  GET_SIEM_READINESS_CATEGORIES_API_PATH,
+  GET_SIEM_READINESS_RETENTION_API_PATH,
+  GET_SIEM_READINESS_PIPELINES_API_PATH,
+  GET_INDEX_RESULTS_LATEST_API_PATH,
+  CATEGORY_ORDER,
+  ALL_CATEGORIES,
+  SIEM_READINESS_CATEGORIES,
+  MAIN_CATEGORY_MAPPING,
+  ECS_CATEGORY_TO_MAIN,
+  RETENTION_THRESHOLD_DAYS,
+} from '@kbn/siem-readiness-common';

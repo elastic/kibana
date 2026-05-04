@@ -6,65 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import type { RelatedIntegrationRuleResponse, RelatedIntegration } from './types';
+import { getRuleIntegrationCoverage } from '@kbn/siem-readiness-common';
+import type { RuleIntegrationCoverage } from '@kbn/siem-readiness-common';
 import { useSiemReadinessApi } from './use_siem_readiness_api';
 
-export interface RuleIntegrationCoverage {
-  coveredRules: RelatedIntegrationRuleResponse[];
-  uncoveredRules: RelatedIntegrationRuleResponse[];
-  missingIntegrations: string[];
-  installedIntegrations: string[];
-  relatedIntegrations: RelatedIntegration[];
-}
-
-export const getRuleIntegrationCoverage = (
-  rules: RelatedIntegrationRuleResponse[],
-  installedIntegrationPackages: string[]
-): RuleIntegrationCoverage => {
-  const installedSet = new Set(installedIntegrationPackages);
-  const referencedIntegrations = new Set<string>();
-  const relatedIntegrationsMap = new Map<string, RelatedIntegration>();
-
-  const coveredRules: RelatedIntegrationRuleResponse[] = [];
-  const uncoveredRules: RelatedIntegrationRuleResponse[] = [];
-
-  rules.forEach((rule) => {
-    const requiredIntegrations =
-      rule.related_integrations?.map((i) => i.package).filter(Boolean) ?? [];
-
-    rule.related_integrations?.forEach((integration) => {
-      if (integration.package) {
-        referencedIntegrations.add(integration.package);
-        relatedIntegrationsMap.set(integration.package, {
-          package: integration.package,
-          version: integration.version,
-        });
-      }
-    });
-
-    if (requiredIntegrations.length === 0) {
-      coveredRules.push(rule);
-      return;
-    }
-
-    // Current behavior: a rule is considered covered if ANY required integration is installed
-    const hasInstalledIntegration = requiredIntegrations.some((pkg) => installedSet.has(pkg));
-
-    if (hasInstalledIntegration) {
-      coveredRules.push(rule);
-    } else {
-      uncoveredRules.push(rule);
-    }
-  });
-
-  return {
-    coveredRules,
-    uncoveredRules,
-    missingIntegrations: Array.from(referencedIntegrations).filter((pkg) => !installedSet.has(pkg)),
-    installedIntegrations: Array.from(installedSet),
-    relatedIntegrations: Array.from(relatedIntegrationsMap.values()),
-  };
-};
+export type { RuleIntegrationCoverage };
 
 export const useDetectionRulesByIntegration = (integrationPackages?: string | string[]) => {
   const { getDetectionRules, getIntegrations } = useSiemReadinessApi();

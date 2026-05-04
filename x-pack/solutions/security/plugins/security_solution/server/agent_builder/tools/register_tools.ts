@@ -13,6 +13,12 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
+import {
+  siemReadinessCoverageTool,
+  siemReadinessContinuityTool,
+  siemReadinessQualityTool,
+  siemReadinessRetentionTool,
+} from './siem_readiness';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -22,7 +28,8 @@ export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  isServerless: boolean
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -31,4 +38,8 @@ export const registerTools = async (
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(siemReadinessCoverageTool(core, logger));
+  agentBuilder.tools.register(siemReadinessQualityTool(core, logger));
+  agentBuilder.tools.register(siemReadinessContinuityTool(core, logger, isServerless));
+  agentBuilder.tools.register(siemReadinessRetentionTool(core, logger, isServerless));
 };
