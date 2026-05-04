@@ -14,6 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_assign'));
-    loadTestFile(require.resolve('./public_tags_list'));
+    loadTestFile(require.resolve('./public_tags_search'));
   });
 }

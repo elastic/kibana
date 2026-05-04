@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('GET /api/tags', () => {
+  describe('GET /api/tags (search)', () => {
     beforeEach(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'

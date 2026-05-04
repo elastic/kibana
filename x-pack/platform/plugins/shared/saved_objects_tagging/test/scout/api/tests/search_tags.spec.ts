@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('tags - list', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('tags - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
@@ -23,7 +23,7 @@ apiTest.describe('tags - list', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.clean({ types: ['tag'] });
   });
 
-  apiTest('lists tags (200)', async ({ apiClient }) => {
+  apiTest('searches tags (200)', async ({ apiClient }) => {
     const response = await apiClient.get('api/tags', {
       headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
       responseType: 'json',

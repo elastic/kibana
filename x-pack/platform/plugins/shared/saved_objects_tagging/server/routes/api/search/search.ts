@@ -8,13 +8,13 @@
 import type { TagAttributes } from '../../../../common/types';
 import { tagSavedObjectTypeName } from '../../../../common/constants';
 import type { TagsHandlerContext } from '../../../types';
-import type { TagsListRequestQuery, TagsListResponseBody } from '../schemas';
+import type { TagsSearchRequestQuery, TagsSearchResponseBody } from '../schemas';
 import { getTagResponseItem } from '../get_tag_response_item';
 
-export const list = async (
+export const search = async (
   requestContext: TagsHandlerContext,
-  requestQuery: TagsListRequestQuery
-): Promise<TagsListResponseBody> => {
+  requestQuery: TagsSearchRequestQuery
+): Promise<TagsSearchResponseBody> => {
   const { client } = (await requestContext.core).savedObjects;
 
   const { query, page, per_page: perPage } = requestQuery;

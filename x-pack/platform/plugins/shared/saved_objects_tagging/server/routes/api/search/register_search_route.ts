@@ -10,30 +10,29 @@ import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TagsPluginRouter } from '../../../types';
 import { handleRouteError } from '../error_handler';
 import { getRouteConfig } from '../get_route_config';
-import { tagsListRequestQuerySchema, tagsListResponseBodySchema } from '../schemas';
-import { list } from './list';
+import { tagsSearchRequestQuerySchema, tagsSearchResponseBodySchema } from '../schemas';
+import { search } from './search';
 
-export const registerListRoute = (router: TagsPluginRouter, usageCounter?: UsageCounter) => {
+export const registerSearchRoute = (router: TagsPluginRouter, usageCounter?: UsageCounter) => {
   const { basePath, routeConfig, routeVersion } = getRouteConfig();
 
-  const listRoute = router.versioned.get({
+  const searchRoute = router.versioned.get({
     path: `${basePath}`,
-    summary: 'List tags',
+    summary: 'Search tags',
     ...routeConfig,
-    description:
-      'Returns a paginated list of tags. If `page` or `per_page` are not provided, defaults are applied.',
+    description: 'Returns a paginated list of tags matching the optional `query` text.',
   });
 
-  listRoute.addVersion(
+  searchRoute.addVersion(
     {
       version: routeVersion,
       validate: {
         request: {
-          query: tagsListRequestQuerySchema,
+          query: tagsSearchRequestQuerySchema,
         },
         response: {
           200: {
-            body: () => tagsListResponseBodySchema,
+            body: () => tagsSearchResponseBodySchema,
             description: 'success',
           },
           403: {
@@ -46,7 +45,7 @@ export const registerListRoute = (router: TagsPluginRouter, usageCounter?: Usage
       telemetryHandler(req, usageCounter, async () => {
         try {
           return res.ok({
-            body: await list(ctx, req.query),
+            body: await search(ctx, req.query),
           });
         } catch (e) {
           return handleRouteError(e as Error, res);

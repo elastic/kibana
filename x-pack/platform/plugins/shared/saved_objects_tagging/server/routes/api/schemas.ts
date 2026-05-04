@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
-export const tagsListRequestQuerySchema = schema.object({
+export const tagsSearchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
       meta: {
@@ -98,7 +98,7 @@ export const tagResponseItemSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const tagsListResponseMetaSchema = schema.object(
+const tagsSearchResponseMetaSchema = schema.object(
   {
     page: schema.number({
       meta: { description: 'The current page number.' },
@@ -113,14 +113,14 @@ const tagsListResponseMetaSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const tagsListResponseBodySchema = schema.object(
+export const tagsSearchResponseBodySchema = schema.object(
   {
     data: schema.arrayOf(tagResponseItemSchema, { minSize: 0, maxSize: 1000 }),
-    meta: tagsListResponseMetaSchema,
+    meta: tagsSearchResponseMetaSchema,
   },
   { unknowns: 'forbid' }
 );
 
 export type TagResponseItem = TypeOf<typeof tagResponseItemSchema>;
-export type TagsListResponseBody = TypeOf<typeof tagsListResponseBodySchema>;
-export type TagsListRequestQuery = TypeOf<typeof tagsListRequestQuerySchema>;
+export type TagsSearchResponseBody = TypeOf<typeof tagsSearchResponseBodySchema>;
+export type TagsSearchRequestQuery = TypeOf<typeof tagsSearchRequestQuerySchema>;
