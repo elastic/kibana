@@ -85,4 +85,31 @@ describe('chain_runner', () => {
       expect(results[0].list[0].data[0][1]).toBe(15);
     });
   });
+
+  describe('circular reference prevention', () => {
+    it('rejects self-referencing expressions that would cause infinite recursion', async () => {
+      const sheets = await processExpression('.static(5), .static(10).sum(@1)');
+
+      await expect(Promise.all(sheets)).rejects.toThrow(
+        /Maximum expression resolution depth exceeded/
+      );
+    });
+
+    it('rejects direct self-reference on a single series', async () => {
+      const sheets = await processExpression('.static(5).sum(@1:1)');
+
+      await expect(Promise.all(sheets)).rejects.toThrow(
+        /Maximum expression resolution depth exceeded/
+      );
+    });
+
+    it('allows non-circular references between series in the same expression', async () => {
+      const sheets = await processExpression('.static(5), .static(10).sum(@1:1)');
+      const results = await Promise.all(sheets);
+
+      expect(results[0].list).toHaveLength(2);
+      expect(results[0].list[0].data[0][1]).toBe(5);
+      expect(results[0].list[1].data[0][1]).toBe(15);
+    });
+  });
 });

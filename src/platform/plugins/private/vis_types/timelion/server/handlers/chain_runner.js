@@ -27,6 +27,14 @@ const MAX_SHEETS = 1;
  * We should not render/compute more then 100 series per chart, doesn't have a analyticsl sense
  */
 const MAX_SERIES_PER_SHEET = 100;
+/**
+ * Maximum depth for resolving references. Prevents infinite recursion
+ * from circular references (e.g. @1 referencing its own sheet).
+ * Each level consumes ~100KB (one cache clone), so even at depth 10
+ * the total is ~1MB — safe for memory while generous for legitimate
+ * multi-level reference patterns.
+ */
+const MAX_RESOLVE_DEPTH = 10;
 
 export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
@@ -34,6 +42,7 @@ export default function chainRunner(tlConfig) {
   let queryCache = {};
   const stats = {};
   let sheet;
+  let resolveDepth = 0;
 
   function throwWithCell(cell, exception) {
     throw new Error(
@@ -72,6 +81,13 @@ export default function chainRunner(tlConfig) {
             return invoke(item.function, item.arguments);
           }
           case 'reference': {
+            resolveDepth++;
+            if (resolveDepth > MAX_RESOLVE_DEPTH) {
+              resolveDepth--;
+              throw new Error(
+                'Maximum expression resolution depth exceeded. This is usually caused by circular references.'
+              );
+            }
             let reference;
             if (item.series) {
               reference = sheet[item.plot - 1][item.series - 1];
@@ -81,7 +97,9 @@ export default function chainRunner(tlConfig) {
                 list: sheet[item.plot - 1],
               };
             }
-            return invoke('first', [reference]);
+            return invoke('first', [reference]).finally(function () {
+              resolveDepth--;
+            });
           }
           case 'chain':
             return invokeChain(item);
@@ -144,18 +162,30 @@ export default function chainRunner(tlConfig) {
   }
 
   function resolveChainList(chainList) {
+    resolveDepth++;
+    if (resolveDepth > MAX_RESOLVE_DEPTH) {
+      resolveDepth--;
+      throw new Error(
+        'Maximum expression resolution depth exceeded. This is usually caused by circular references.'
+      );
+    }
+
     const seriesList = _.map(chainList, function (chain) {
       const values = invoke('first', [chain]);
       return values.then(function (args) {
         return args;
       });
     });
-    return Promise.all(seriesList).then(function (args) {
-      const list = _.chain(args).map('list').flatten().value();
-      const seriesList = _.merge.apply(this, _.flatten([{}, args]));
-      seriesList.list = list;
-      return seriesList;
-    });
+    return Promise.all(seriesList)
+      .then(function (args) {
+        const list = _.chain(args).map('list').flatten().value();
+        const seriesList = _.merge.apply(this, _.flatten([{}, args]));
+        seriesList.list = list;
+        return seriesList;
+      })
+      .finally(function () {
+        resolveDepth--;
+      });
   }
 
   function preProcessSheet(sheet) {
