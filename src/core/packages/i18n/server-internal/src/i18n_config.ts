@@ -9,12 +9,36 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { ConfigDeprecationProvider } from '@kbn/config';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 
-export const config = {
+const DEFAULT_LOCALES = [...SUPPORTED_LOCALE_IDS];
+
+const configSchema = schema.object(
+  {
+    locales: schema.arrayOf(schema.string(), { defaultValue: DEFAULT_LOCALES, maxSize: 10 }),
+    defaultLocale: schema.string({ defaultValue: 'en' }),
+  },
+  {
+    validate: ({ locales, defaultLocale }) => {
+      if (locales.length > 0 && !locales.includes(defaultLocale)) {
+        return `[i18n.defaultLocale]: "${defaultLocale}" must be one of [i18n.locales] (${locales.join(
+          ', '
+        )})`;
+      }
+    },
+  }
+);
+
+const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+  renameFromRoot('i18n.locale', 'i18n.defaultLocale', { level: 'warning' }),
+];
+
+export type I18nConfigType = TypeOf<typeof configSchema>;
+
+export const config: ServiceConfigDescriptor<I18nConfigType> = {
   path: 'i18n',
-  schema: schema.object({
-    locale: schema.string({ defaultValue: 'en' }),
-  }),
+  schema: configSchema,
+  deprecations,
 };
-
-export type I18nConfigType = TypeOf<typeof config.schema>;

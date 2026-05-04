@@ -10,7 +10,6 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
-  buildRouteValidationWithZod,
   buildRunFilterQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
@@ -18,6 +17,7 @@ import {
   GetEvaluationRunRequestParams,
   GetEvaluationRunRequestQuery,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
