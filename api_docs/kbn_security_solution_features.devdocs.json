@@ -674,6 +674,7 @@
             "lineNumber": 40,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "MutableKibanaFeatureConfig",
             "trackAdoption": false
           }
         ],
@@ -993,10 +994,12 @@
           " | ",
           "ProductFeatureRulesKey",
           " | ",
-          "ProductFeatureAlertsKey"
+          "ProductFeatureAlertsKey",
+          " | ",
+          "ProductFeatureWorkflowsKey"
         ],
         "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
-        "lineNumber": 210,
+        "lineNumber": 216,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

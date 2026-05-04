@@ -11,7 +11,7 @@ import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
 import styled from 'styled-components';
-import { STATUS_BUTTON_TEST_ID } from '../../../../../flyout_v2/shared/components/test_ids';
+import { STATUS_BUTTON_TEST_ID } from '../../../../../flyout_v2/document/components/test_ids';
 
 const mapping = {
   open: 'primary',

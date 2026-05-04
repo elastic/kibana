@@ -165,12 +165,16 @@ export class SyntheticsPlugin
     registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
 
     coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      const browserConfig = this.initContext.config.get<{
+        experimental?: { ccs?: { enabled?: boolean } };
+      }>();
       kibanaService.init({
         coreSetup,
         coreStart,
         startPlugins: clientPluginsStart,
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
+        isCCSEnabled: !this._isServerless && (browserConfig.experimental?.ccs?.enabled ?? false),
       });
     });
 

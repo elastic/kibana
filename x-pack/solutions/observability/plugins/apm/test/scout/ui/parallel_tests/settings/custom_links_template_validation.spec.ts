@@ -13,7 +13,7 @@ import { test, testData } from '../../fixtures';
 import {
   EXTENDED_TIMEOUT,
   PRODUCTION_ENVIRONMENT,
-  SERVICE_OPBEANS_JAVA,
+  SERVICE_SYNTH_NODE_1,
 } from '../../fixtures/constants';
 
 // Constants for template URL validation tests
@@ -22,13 +22,16 @@ const templateUrl =
 const getExpectedUrl = (serviceName: string, environment: string) =>
   `http://scoutURLExample.com/ftw/app/apm/services/${serviceName}/transactions/view?comparisonEnabled=true&environment=${environment}`;
 
-test.describe.serial(
+// When unskipping, consider this used to be `test.describe.serial`
+// but there's no skip that preserves that. Consider not using serial.
+// Flaky: https://github.com/elastic/kibana/issues/262047
+test.describe.skip(
   'Custom links template validation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const uniqueLabel = `template-test-${randomUUID()}`;
     const defaultLabel = `template-test-default-${randomUUID()}`;
-    const expectedUrl = getExpectedUrl(SERVICE_OPBEANS_JAVA, PRODUCTION_ENVIRONMENT);
+    const expectedUrl = getExpectedUrl(SERVICE_SYNTH_NODE_1, PRODUCTION_ENVIRONMENT);
 
     test('Create custom link with template URL and filters', async ({
       page,
@@ -44,7 +47,7 @@ test.describe.serial(
       await customLinksPage.fillUrl(templateUrl);
 
       // Add first filter (uses existing empty filter row)
-      await customLinksPage.addFirstFilter('service.name', SERVICE_OPBEANS_JAVA);
+      await customLinksPage.addFirstFilter('service.name', SERVICE_SYNTH_NODE_1);
 
       // Add additional filter (explicitly adds new filter row)
       await customLinksPage.addAdditionalFilter('service.environment', PRODUCTION_ENVIRONMENT);
@@ -69,15 +72,15 @@ test.describe.serial(
       await browserAuth.loginAsPrivilegedUser();
 
       await transactionDetailsPage.goToTransactionDetails({
-        serviceName: testData.SERVICE_OPBEANS_JAVA,
-        transactionName: testData.PRODUCT_TRANSACTION_NAME,
-        start: testData.START_DATE,
-        end: testData.END_DATE,
+        serviceName: testData.SERVICE_SYNTH_NODE_1,
+        transactionName: testData.APPLE_TRANSACTION_NAME,
+        start: 'now-1h',
+        end: 'now',
       });
 
       await page
-        .getByRole('switch', { name: 'Show critical path' })
-        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        .getByTestId('criticalPathToggle')
+        .scrollIntoViewIfNeeded({ timeout: EXTENDED_TIMEOUT });
 
       // Open action menu and verify template population
       await transactionDetailsPage.openActionMenu();
@@ -116,15 +119,15 @@ test.describe.serial(
     }) => {
       await browserAuth.loginAsPrivilegedUser();
       await transactionDetailsPage.goToTransactionDetails({
-        serviceName: testData.SERVICE_OPBEANS_JAVA,
-        transactionName: testData.PRODUCT_TRANSACTION_NAME,
-        start: testData.START_DATE,
-        end: testData.END_DATE,
+        serviceName: testData.SERVICE_SYNTH_NODE_1,
+        transactionName: testData.APPLE_TRANSACTION_NAME,
+        start: 'now-1h',
+        end: 'now',
       });
 
       await page
-        .getByRole('switch', { name: 'Show critical path' })
-        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        .getByTestId('criticalPathToggle')
+        .scrollIntoViewIfNeeded({ timeout: EXTENDED_TIMEOUT });
       await transactionDetailsPage.openActionMenu();
 
       // Click the create custom link button from action menu
@@ -138,7 +141,7 @@ test.describe.serial(
       await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
 
       // Verify pre-populated filters
-      // Verify service.name filter value is pre-populated with SERVICE_OPBEANS_JAVA
+      // Verify service.name filter value is pre-populated with SERVICE_SYNTH_NODE_1
       await page
         .getByTestId('service.name.value')
         .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
@@ -146,7 +149,7 @@ test.describe.serial(
         dataTestSubj: 'service.name.value',
       });
       const serviceNameValue = await serviceNameComboBox.getSelectedValue();
-      expect(serviceNameValue).toBe(SERVICE_OPBEANS_JAVA);
+      expect(serviceNameValue).toBe(SERVICE_SYNTH_NODE_1);
 
       // Verify service.environment filter value is pre-populated with PRODUCTION_ENVIRONMENT
       await page
@@ -170,8 +173,8 @@ test.describe.serial(
       await customLinksPage.clickSave();
 
       await page
-        .getByRole('switch', { name: 'Show critical path' })
-        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        .getByTestId('criticalPathToggle')
+        .scrollIntoViewIfNeeded({ timeout: EXTENDED_TIMEOUT });
 
       await transactionDetailsPage.openActionMenu();
       await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({

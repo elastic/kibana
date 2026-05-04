@@ -15,8 +15,8 @@ import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conve
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { inferZodType } from '../../../../common/lib/zod';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)

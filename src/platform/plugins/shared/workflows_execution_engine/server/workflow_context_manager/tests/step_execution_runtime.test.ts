@@ -73,6 +73,8 @@ describe('StepExecutionRuntime', () => {
       load: jest.fn(),
       flush: jest.fn(),
       flushStepChanges: jest.fn(),
+      setLastFailedStepContext: jest.fn(),
+      getLastFailedStepContext: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -574,6 +576,56 @@ describe('StepExecutionRuntime', () => {
           },
         }
       );
+    });
+
+    it('should use stepId as stepName for setLastFailedStepContext when configuration.name is not a string', () => {
+      const nodeWithNonStringName = {
+        ...fakeNode,
+        configuration: { name: 42 },
+      } as GraphNodeUnion;
+
+      const runtime = new StepExecutionRuntime({
+        node: nodeWithNonStringName,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+      });
+
+      runtime.failStep(new Error('fail'));
+
+      expect(workflowExecutionState.setLastFailedStepContext).toHaveBeenCalledWith({
+        stepId: 'fakeStepId1',
+        stepName: 'fakeStepId1',
+        stepExecutionId: fakeStepExecutionId,
+      });
+    });
+
+    it('should use configuration.name for setLastFailedStepContext when it is a string', () => {
+      const nodeWithDisplayName = {
+        ...fakeNode,
+        configuration: { name: 'Display name' },
+      } as GraphNodeUnion;
+
+      const runtime = new StepExecutionRuntime({
+        node: nodeWithDisplayName,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+      });
+
+      runtime.failStep(new Error('fail'));
+
+      expect(workflowExecutionState.setLastFailedStepContext).toHaveBeenCalledWith({
+        stepId: 'fakeStepId1',
+        stepName: 'Display name',
+        stepExecutionId: fakeStepExecutionId,
+      });
     });
   });
 });

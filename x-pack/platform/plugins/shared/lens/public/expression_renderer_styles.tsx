@@ -40,8 +40,7 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
  * These elements are rendered outside the Lens DOM tree and need global targeting.
  */
 export const lnsGlobalChartStyles = (euiThemeContext: UseEuiTheme) => css`
-  [id^='echTooltipPortal'],
-  [data-euiportal='true'] {
+  [id^='echTooltipPortal'] {
     ${lnsNumericFontStyles(euiThemeContext)}
   }
 `;

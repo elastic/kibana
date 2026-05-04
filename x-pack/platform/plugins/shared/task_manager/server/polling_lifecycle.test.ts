@@ -30,6 +30,7 @@ import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
+import { EsApiKeyStrategy } from './api_key_strategy';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -112,6 +113,7 @@ describe('TaskPollingLifecycle', () => {
       },
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
+      grant_uiam_api_keys: false,
     },
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
@@ -126,6 +128,7 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
+    apiKeyStrategy: new EsApiKeyStrategy(),
     eventLogger: eventLoggerMock,
   };
 

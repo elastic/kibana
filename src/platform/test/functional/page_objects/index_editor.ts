@@ -37,12 +37,12 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async setColumn(name: string, type: string, columnIndex: number) {
-    const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
-    const columnHeader = columnHeaders[columnIndex];
-
-    expect(columnHeader).to.not.be(undefined);
-
-    await columnHeader.click();
+    await this.retry.try(async () => {
+      const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
+      const columnHeader = columnHeaders[columnIndex];
+      expect(columnHeader).to.not.be(undefined);
+      await columnHeader.click();
+    });
 
     await this.comboBox.set('indexEditorColumnTypeSelect', type);
     await this.testSubjects.setValue('indexEditorColumnNameInput', name);
@@ -63,10 +63,12 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async setCellValue(rowIndex: number, columnIndex: number, value: string): Promise<void> {
-    await this.testSubjects.click(`indexEditorCellValue-${rowIndex}-${columnIndex}`);
-    const input = await this.testSubjects.find('indexEditorCellValueInput');
-    await input.clearValueWithKeyboard();
-    await input.type(value, { charByChar: true });
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`indexEditorCellValue-${rowIndex}-${columnIndex}`);
+      const input = await this.testSubjects.find('indexEditorCellValueInput');
+      await input.clearValueWithKeyboard();
+      await input.type(value, { charByChar: true });
+    });
     await this.common.pressEnterKey();
   }
 

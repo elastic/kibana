@@ -73,6 +73,10 @@ const createMockCoreSetup = (publicBaseUrl: string | undefined = KIBANA_URL) => 
   ]),
 });
 
+const mockActionsClient = {
+  get: jest.fn().mockResolvedValue({}),
+};
+
 const createMockContext = (
   currentUser: { username: string; profile_uid?: string } | null = {
     username: 'testuser',
@@ -90,7 +94,7 @@ const createMockContext = (
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn(),
+    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -104,6 +108,7 @@ describe('oauthAuthorizeRoute', () => {
 
     // Restore mock implementations cleared by resetAllMocks
     (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
+    mockActionsClient.get.mockResolvedValue({});
     mockRateLimiter.isRateLimited.mockReturnValue(false);
     mockSpacesService.getSpaceId.mockReturnValue('default');
     mockSpacesService.spaceIdToNamespace.mockReturnValue(undefined);

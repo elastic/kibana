@@ -27,7 +27,6 @@ export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionI
           text: `${setting.name} = `,
           kind: 'Reference',
           detail: setting.description,
-          sortText: '1',
           category: SuggestionCategory.VALUE,
         })
       )

@@ -12,7 +12,7 @@ import axios from 'axios';
 import type { ExecSyncOptions } from 'child_process';
 import { execFileSync, execSync } from 'child_process';
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { parseLinkHeader } from './parse_link_header';
 import type { Artifact } from './types/artifact';
@@ -433,7 +433,7 @@ export class BuildkiteClient {
 
   uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
     this.exec(`buildkite-agent pipeline upload`, {
-      input: dump({ steps }),
+      input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };

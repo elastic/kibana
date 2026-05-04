@@ -54,7 +54,8 @@
       "observabilityAgentBuilder",
       "agentBuilder",
       "licenseManagement",
-      "serverless"
+      "serverless",
+      "cps"
     ],
     "requiredBundles": [
       "observability",

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TraceWaterfall } from '../trace_waterfall';
@@ -75,13 +75,17 @@ export function FocusedTraceWaterfall({
 }: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
   const traceItems = reparentedItems ? getTraceItems(reparentedItems) : [];
+  const contextSpanIds = useMemo(
+    () => (reparentedItems?.focusedTraceDoc.id ? [reparentedItems.focusedTraceDoc.id] : undefined),
+    [reparentedItems?.focusedTraceDoc.id]
+  );
 
   return (
     <>
       <TraceWaterfall
         traceItems={traceItems}
         showAccordion={false}
-        highlightedSpanId={reparentedItems?.focusedTraceDoc.id}
+        contextSpanIds={contextSpanIds}
         onErrorClick={onErrorClick}
         isEmbeddable={isEmbeddable}
         getServiceBadgeHref={getServiceBadgeHref}

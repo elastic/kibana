@@ -47,7 +47,7 @@ export const deserializeState = async ({
 
   if (isDiscoverSessionEmbeddableByReferenceState(apiState)) {
     // by reference
-    const { discover_session_id: savedObjectId, selected_tab_id: selectedTabId } = apiState;
+    const { ref_id: savedObjectId, selected_tab_id: selectedTabId } = apiState;
     const { getDiscoverSession } = discoverServices.savedSearch;
     const session = await getDiscoverSession(savedObjectId);
     const selectedTab = selectedTabId

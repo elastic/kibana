@@ -51,6 +51,7 @@
             "lineNumber": 155,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -90,6 +91,7 @@
             "lineNumber": 159,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -129,6 +131,7 @@
             "lineNumber": 163,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -222,6 +225,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -351,6 +355,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -427,6 +432,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -446,6 +452,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleCreateProps",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -537,6 +544,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -554,6 +562,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -571,6 +580,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -624,6 +634,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -641,6 +652,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -730,6 +742,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -882,6 +895,7 @@
             "lineNumber": 139,
             "columnNumber": 75,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -962,6 +976,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1010,7 +1025,7 @@
           "SearchResponse",
           "<{ 'kibana.alert.rule.risk_score': number; 'kibana.alert.rule.severity': string; 'kibana.alert.rule.building_block_type': string | undefined; \"@timestamp\": string; \"kibana.space_ids\": string[]; \"event.kind\": \"signal\"; \"kibana.alert.original_time\": string | undefined; \"kibana.alert.rule.consumer\": string; \"kibana.alert.ancestors\": { rule: string | undefined; id: string; type: string; index: string; depth: number; }[]; \"kibana.alert.status\": string; \"kibana.alert.workflow_status\": string; \"kibana.alert.depth\": number; \"kibana.alert.reason\": string; \"kibana.alert.building_block_type\": string | undefined; \"kibana.alert.severity\": string; \"kibana.alert.risk_score\": number; \"kibana.alert.rule.parameters\": { [key: string]: ",
           "SearchTypes",
-          "; }; \"kibana.alert.rule.actions\": { action_type_id: string; group?: string | undefined; id: string; params: object; uuid?: string | undefined; alerts_filter?: object | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; }[]; \"kibana.alert.rule.author\": string[]; \"kibana.alert.rule.created_at\": string; \"kibana.alert.rule.created_by\": string; \"kibana.alert.rule.description\": string; \"kibana.alert.rule.enabled\": boolean; \"kibana.alert.rule.exceptions_list\": { id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; }[]; \"kibana.alert.rule.false_positives\": string[]; \"kibana.alert.rule.from\": string; \"kibana.alert.rule.immutable\": boolean; \"kibana.alert.rule.interval\": string; \"kibana.alert.rule.license\": string | undefined; \"kibana.alert.rule.max_signals\": number; \"kibana.alert.rule.name\": string; \"kibana.alert.rule.namespace\": string | undefined; \"kibana.alert.rule.note\": string | undefined; \"kibana.alert.rule.references\": string[]; \"kibana.alert.rule.risk_score_mapping\": { field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[]; \"kibana.alert.rule.rule_id\": string; \"kibana.alert.rule.rule_name_override\": string | undefined; \"kibana.alert.rule.severity_mapping\": { field: string; value: string; operator: \"equals\"; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; \"kibana.alert.rule.tags\": string[]; \"kibana.alert.rule.threat\": { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; \"kibana.alert.rule.throttle\": string | undefined; \"kibana.alert.rule.timeline_id\": string | undefined; \"kibana.alert.rule.timeline_title\": string | undefined; \"kibana.alert.rule.timestamp_override\": string | undefined; \"kibana.alert.rule.to\": string; \"kibana.alert.rule.type\": \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\"; \"kibana.alert.rule.updated_at\": string; \"kibana.alert.rule.updated_by\": string; \"kibana.alert.rule.uuid\": string; \"kibana.alert.rule.version\": number; \"kibana.alert.uuid\": string; \"kibana.alert.rule.indices\": string[] | undefined; \"host.risk.calculated_level\": string | undefined; \"host.risk.calculated_score_norm\": number | undefined; \"user.risk.calculated_level\": string | undefined; \"user.risk.calculated_score_norm\": number | undefined; \"kibana.alert.url\": string | undefined; \"kibana.alert.workflow_tags\": string[] | undefined; \"kibana.alert.workflow_assignee_ids\": string[] | undefined; \"kibana.alert.host.criticality_level\": string | undefined; \"kibana.alert.user.criticality_level\": string | undefined; \"host.asset.criticality\": string | undefined; \"user.asset.criticality\": string | undefined; \"kibana.alert.rule.execution.type\": string | undefined; \"kibana.alert.intended_timestamp\": string | undefined; \"service.asset.criticality\": string | undefined; \"service.risk.calculated_level\": string | undefined; \"service.risk.calculated_score_norm\": number | undefined; \"kibana.alert.original_data_stream.dataset\"?: string | undefined; \"kibana.alert.original_data_stream.namespace\"?: string | undefined; \"kibana.alert.original_data_stream.type\"?: string | undefined; \"kibana.alert.updated_at\"?: string | undefined; \"kibana.alert.updated_by.user.id\"?: string | undefined; \"kibana.alert.updated_by.user.name\"?: string | undefined; \"kibana.alert.attack_ids\"?: string[] | undefined; } & { [key: string]: ",
+          "; }; \"kibana.alert.rule.actions\": { action_type_id: string; group?: string | undefined; id: string; params: object; uuid?: string | undefined; alerts_filter?: object | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; }[]; \"kibana.alert.rule.author\": string[]; \"kibana.alert.rule.created_at\": string; \"kibana.alert.rule.created_by\": string; \"kibana.alert.rule.description\": string; \"kibana.alert.rule.enabled\": boolean; \"kibana.alert.rule.exceptions_list\": { id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; }[]; \"kibana.alert.rule.false_positives\": string[]; \"kibana.alert.rule.from\": string; \"kibana.alert.rule.immutable\": boolean; \"kibana.alert.rule.interval\": string; \"kibana.alert.rule.license\": string | undefined; \"kibana.alert.rule.max_signals\": number; \"kibana.alert.rule.name\": string; \"kibana.alert.rule.namespace\": string | undefined; \"kibana.alert.rule.note\": string | undefined; \"kibana.alert.rule.references\": string[]; \"kibana.alert.rule.risk_score_mapping\": { field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[]; \"kibana.alert.rule.rule_id\": string; \"kibana.alert.rule.rule_name_override\": string | undefined; \"kibana.alert.rule.severity_mapping\": { field: string; value: string; operator: \"equals\"; severity: \"critical\" | \"high\" | \"medium\" | \"low\"; }[]; \"kibana.alert.rule.tags\": string[]; \"kibana.alert.rule.threat\": { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; \"kibana.alert.rule.throttle\": string | undefined; \"kibana.alert.rule.timeline_id\": string | undefined; \"kibana.alert.rule.timeline_title\": string | undefined; \"kibana.alert.rule.timestamp_override\": string | undefined; \"kibana.alert.rule.to\": string; \"kibana.alert.rule.type\": \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\"; \"kibana.alert.rule.updated_at\": string; \"kibana.alert.rule.updated_by\": string; \"kibana.alert.rule.uuid\": string; \"kibana.alert.rule.version\": number; \"kibana.alert.uuid\": string; \"kibana.alert.rule.indices\": string[] | undefined; \"host.risk.calculated_level\": string | undefined; \"host.risk.calculated_score_norm\": number | undefined; \"user.risk.calculated_level\": string | undefined; \"user.risk.calculated_score_norm\": number | undefined; \"kibana.alert.url\": string | undefined; \"kibana.alert.workflow_tags\": string[] | undefined; \"kibana.alert.workflow_assignee_ids\": string[] | undefined; \"kibana.alert.host.criticality_level\": string | undefined; \"kibana.alert.user.criticality_level\": string | undefined; \"host.asset.criticality\": string | undefined; \"user.asset.criticality\": string | undefined; \"kibana.alert.rule.execution.type\": string | undefined; \"kibana.alert.intended_timestamp\": string | undefined; \"service.asset.criticality\": string | undefined; \"service.risk.calculated_level\": string | undefined; \"service.risk.calculated_score_norm\": number | undefined; \"kibana.alert.original_data_stream.dataset\"?: string | undefined; \"kibana.alert.original_data_stream.namespace\"?: string | undefined; \"kibana.alert.original_data_stream.type\"?: string | undefined; \"kibana.alert.updated_at\"?: string | undefined; \"kibana.alert.updated_by.user.id\"?: string | undefined; \"kibana.alert.updated_by.user.name\"?: string | undefined; \"kibana.alert.attack_ids\"?: string[] | undefined; } & { [key: string]: ",
           "SearchTypes",
           "; } & ",
           "RiskEnrichmentFields",
@@ -1063,6 +1078,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1172,6 +1188,7 @@
             "lineNumber": 10,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertIds",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1385,6 +1402,7 @@
             "lineNumber": 15,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1495,6 +1513,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1518,6 +1537,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1684,6 +1704,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1786,6 +1807,7 @@
             "lineNumber": 98,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1825,6 +1847,7 @@
             "lineNumber": 80,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1953,6 +1976,7 @@
             "lineNumber": 12,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1970,6 +1994,7 @@
             "lineNumber": 12,
             "columnNumber": 66,
             "deprecated": false,
+            "docsReferencedTypeName": "Date",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2055,6 +2080,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2163,6 +2189,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2267,6 +2294,7 @@
             "lineNumber": 79,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2318,6 +2346,7 @@
             "lineNumber": 76,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2365,6 +2394,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2388,6 +2418,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2439,6 +2470,7 @@
             "lineNumber": 73,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }

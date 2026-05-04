@@ -31,7 +31,7 @@ export const closeCaseStepCommonDefinition: CommonStepDefinition<
   CloseCaseStepOutputSchema
 > = {
   id: CloseCaseStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.CLOSE_CASE_STEP_LABEL,
   description: i18n.CLOSE_CASE_STEP_DESCRIPTION,
   documentation: {

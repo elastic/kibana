@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
 
@@ -18,8 +19,19 @@ export const TagsField = () => {
 
   return (
     <Controller
-      name="metadata.labels"
+      name="metadata.tags"
       control={control}
+      rules={{
+        validate: (value) => {
+          if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
+            return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
+              defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
+              values: { maxLength: MAX_TAG_LENGTH },
+            });
+          }
+          return true;
+        },
+      }}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
         const options = selectedOptions;

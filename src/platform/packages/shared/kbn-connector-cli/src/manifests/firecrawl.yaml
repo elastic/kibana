@@ -1,0 +1,7 @@
+spec_id: .firecrawl
+name: "Firecrawl (testing)"
+auth_type: bearer
+secrets:
+  token:
+    vault: secret/ent-search-team/connectors-sources/firecrawl
+    field: api_key

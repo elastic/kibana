@@ -63,12 +63,7 @@ export function PipelineSuggestion({
         <RootSteps stepRefs={stepRefs} readOnly />
         <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <GenerateSuggestionButton
-              iconType="refresh"
-              size="s"
-              onClick={onRegenerate}
-              aiFeatures={aiFeatures}
-            >
+            <GenerateSuggestionButton size="s" onClick={onRegenerate} aiFeatures={aiFeatures}>
               {i18n.translate(
                 'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
                 {

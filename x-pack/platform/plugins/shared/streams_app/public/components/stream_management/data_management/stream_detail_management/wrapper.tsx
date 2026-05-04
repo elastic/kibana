@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, ROOT_STREAM_NAMES, type RootStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -30,7 +31,6 @@ import {
 } from '../../../../hooks/use_streams_doc_counts_fetch';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../../util/calculate_data_quality';
-import { FeedbackButton } from '../../../feedback_button';
 import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
@@ -53,10 +53,12 @@ export function Wrapper({
   tabs,
   streamId,
   tab,
+  topContent,
 }: {
   tabs: ManagementTabs;
   streamId: string;
   tab: string;
+  topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
@@ -108,9 +110,10 @@ export function Wrapper({
 
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
-    canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
-      ? definition.privileges.read_failure_store
-      : true,
+    getCanReadFailureStore: () =>
+      Streams.ingest.all.GetResponse.is(definition)
+        ? definition.privileges.read_failure_store
+        : false,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
   const docCountsFetch = getStreamDocCounts(streamId);
@@ -140,6 +143,24 @@ export function Wrapper({
     streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
   }
   if (Streams.WiredStream.GetResponse.is(definition)) {
+    if (ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)) {
+      streamBadges.push({
+        key: 'technicalPreview',
+        node: (
+          <EuiBetaBadge
+            tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+              defaultMessage: 'This feature is in technical preview. We are working on it...',
+            })}
+            label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+            iconType="flask"
+            size="s"
+            css={{ display: 'block' }}
+          />
+        ),
+      });
+    }
     streamBadges.push({ key: 'wired', node: <WiredStreamBadge /> });
   }
   if (Streams.ingest.all.GetResponse.is(definition)) {
@@ -194,23 +215,14 @@ export function Wrapper({
                 ))}
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {Streams.ingest.all.GetResponse.is(definition) && (
-                    <DiscoverBadgeButton
-                      stream={definition.stream}
-                      hasDataStream={definition.data_stream_exists}
-                      indexMode={definition.index_mode ?? 'standard'}
-                      spellOut
-                    />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <FeedbackButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {Streams.ingest.all.GetResponse.is(definition) && (
+              <DiscoverBadgeButton
+                stream={definition.stream}
+                hasDataStream={definition.data_stream_exists}
+                indexMode={definition.index_mode ?? 'standard'}
+                spellOut
+              />
+            )}
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
@@ -245,6 +257,7 @@ export function Wrapper({
         })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {topContent}
         {Streams.ingest.all.GetResponse.is(definition) && definition.replicated && (
           <>
             <EuiCallOut

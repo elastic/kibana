@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, TaskStatus } from '@kbn/streams-schema';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';
 import { useOnboardingApi } from '../use_onboarding_api';
+import { HIGH_SEVERITY_THRESHOLD } from './use_unbacked_queries_count';
 
 /**
  * Returns the count and IDs of promotable (draft/not-yet-promoted) queries for a specific stream.
@@ -28,7 +29,7 @@ export function usePromotableQueries(streamName: string) {
     perPage: 1_000,
   });
 
-  const { getOnboardingTaskStatus } = useOnboardingApi({ saveQueries: true });
+  const { getOnboardingTaskStatus } = useOnboardingApi();
 
   const onboardingTaskStatusResult = useQuery({
     queryKey: ['onboardingTaskStatus', streamName, 'promotableQueries'],
@@ -46,9 +47,13 @@ export function usePromotableQueries(streamName: string) {
       generatedQueries.map((query) => query.esql.query.trim()).filter((esql) => esql.length > 0)
     );
 
-    return (discoveryQueriesResult.data?.queries ?? []).filter((queryRow) =>
-      generatedQueriesEsqlSet.has(queryRow.query.esql.query.trim())
-    );
+    return (discoveryQueriesResult.data?.queries ?? [])
+      .filter(
+        (queryRow) =>
+          queryRow.query.type !== QUERY_TYPE_STATS &&
+          generatedQueriesEsqlSet.has(queryRow.query.esql.query.trim())
+      )
+      .filter((queryRow) => (queryRow.query.severity_score ?? 0) >= HIGH_SEVERITY_THRESHOLD);
   }, [discoveryQueriesResult.data?.queries, onboardingTaskStatus]);
 
   return {

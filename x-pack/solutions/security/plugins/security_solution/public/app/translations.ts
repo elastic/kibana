@@ -58,6 +58,10 @@ export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
 
+export const LAUNCHPAD = i18n.translate('xpack.securitySolution.navigation.launchpad', {
+  defaultMessage: 'Launchpad',
+});
+
 export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
   defaultMessage: 'Get started',
 });
@@ -189,6 +193,10 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
   defaultMessage: 'Blocklist',
+});
+
+export const ARTIFACTS = i18n.translate('xpack.securitySolution.navigation.artifacts', {
+  defaultMessage: 'Artifacts',
 });
 
 export const RESPONSE_ACTIONS_HISTORY = i18n.translate(

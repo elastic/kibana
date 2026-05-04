@@ -248,6 +248,7 @@
               "lineNumber": 27,
               "columnNumber": 50,
               "deprecated": false,
+              "docsReferencedTypeName": "T",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -298,7 +299,15 @@
           "tags": [],
           "label": "isScreenshotMode",
           "description": [
-            "\nAny context that requires access to the screenshot mode flag but does not have access\nto request context {@link ScreenshotModeRequestHandlerContext}, for instance if they are pre-context,\ncan use this function to check whether the request originates from a client that is in screenshot mode."
+            "\nAny context that requires access to the screenshot mode flag but does not have access\nto request context ",
+            {
+              "pluginId": "screenshotMode",
+              "scope": "server",
+              "docId": "kibScreenshotModePluginApi",
+              "section": "def-server.ScreenshotModeRequestHandlerContext",
+              "text": "ScreenshotModeRequestHandlerContext"
+            },
+            ", for instance if they are pre-context,\ncan use this function to check whether the request originates from a client that is in screenshot mode."
           ],
           "signature": [
             "(request: ",
@@ -326,6 +335,7 @@
               "lineNumber": 18,
               "columnNumber": 20,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -395,6 +405,7 @@
             "lineNumber": 49,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -478,6 +489,7 @@
             "lineNumber": 27,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }

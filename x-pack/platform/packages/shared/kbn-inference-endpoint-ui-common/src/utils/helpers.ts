@@ -63,21 +63,21 @@ export const getNonEmptyValidator = (
               : field.location === TASK_SETTINGS
               ? TASK_TYPE_CONFIG
               : PROVIDER_CONFIG;
-            if (
-              path.includes(fieldLocation) &&
-              (!configData[field.key] ||
-                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key])))
-            ) {
-              field.validationErrors = [LABELS.getRequiredMessage(field.label)];
-              field.isValid = false;
-              hasErrors = true;
-            } else {
-              field.validationErrors = [];
-              field.isValid = true;
+            if (path.includes(fieldLocation)) {
+              if (
+                !configData[field.key] ||
+                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
+              ) {
+                field.validationErrors = [LABELS.getRequiredMessage(field.label)];
+                field.isValid = false;
+                hasErrors = true;
+              } else {
+                field.validationErrors = [];
+                field.isValid = true;
+              }
             }
           }
         }
-
         updatedFormFields.push(field);
       });
 

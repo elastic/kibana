@@ -16,10 +16,11 @@ import type { ServerError } from '../types';
  *   which can cause a 409 on a concurrent PATCH even though no human changed the case.
  * - `version`: the ES-level optimistic-concurrency token — always differs between stale and latest.
  * - `updatedAt`: updated by the server on every write, including the background task.
+ * - `comments`: updates through separate API, should not be compared
  * These fields are excluded from conflict detection so only genuine user-driven changes
  * cause a retry to be rejected.
  */
-const SYSTEM_MANAGED_CASE_FIELDS = ['incrementalId', 'updatedAt', 'version'] as const;
+const SYSTEM_MANAGED_CASE_FIELDS = ['incrementalId', 'updatedAt', 'version', 'comments'] as const;
 
 export type CaseWithOptionalComments = Omit<CaseUI, 'comments'> & {
   comments?: CaseUI['comments'];
@@ -29,7 +30,14 @@ export type CaseConflictRebaseDecision = 'only_system_drift' | 'conflicting_case
 
 interface RebaseCaseMutationOnConflictParams<TRequest, TResponse> {
   request: TRequest;
-  staleCases: CaseWithOptionalComments[];
+  /**
+   * The server-side state of the affected cases *before* the user's mutation
+   * was applied — i.e. what was fetched/cached, not the locally-modified copy.
+   * This is compared against the freshly-fetched latest to detect whether a 409
+   * was caused only by system writes. Passing a locally-modified (A*) state here
+   * will cause system-only drift to be misclassified as a real conflict.
+   */
+  preRequestServerState: CaseWithOptionalComments[];
   executeRequest: (request: TRequest) => Promise<TResponse>;
   fetchLatestCase: (caseId: string) => Promise<CaseWithOptionalComments>;
   buildRetryRequest: (args: {
@@ -122,7 +130,7 @@ export const getCaseConflictRebaseDecision = ({
  */
 export const rebaseCaseMutationOnConflict = async <TRequest, TResponse>({
   request,
-  staleCases,
+  preRequestServerState,
   executeRequest,
   fetchLatestCase,
   buildRetryRequest,
@@ -130,12 +138,17 @@ export const rebaseCaseMutationOnConflict = async <TRequest, TResponse>({
   try {
     return await executeRequest(request);
   } catch (error) {
-    if (!isRetryableCaseConflictError(error) || staleCases.length === 0) {
+    if (!isRetryableCaseConflictError(error) || preRequestServerState.length === 0) {
       throw error;
     }
 
-    const latestCases = await Promise.all(staleCases.map(({ id }) => fetchLatestCase(id)));
-    const rebaseDecision = getCaseConflictRebaseDecision({ staleCases, latestCases });
+    const latestCases = await Promise.all(
+      preRequestServerState.map(({ id }) => fetchLatestCase(id))
+    );
+    const rebaseDecision = getCaseConflictRebaseDecision({
+      staleCases: preRequestServerState,
+      latestCases,
+    });
 
     if (rebaseDecision !== 'only_system_drift') {
       throw error;

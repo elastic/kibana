@@ -14,6 +14,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   id,
   namespaces,
   version,
+  created_at,
   attributes,
 }: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
   const {
@@ -39,6 +40,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   return {
     id,
     version,
+    created_at: created_at ?? undefined,
     space_ids: namespaces,
     description,
     is_default,

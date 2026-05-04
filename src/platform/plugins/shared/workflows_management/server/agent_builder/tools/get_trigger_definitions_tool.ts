@@ -8,8 +8,8 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { builtInTriggerDefinitions } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { z } from '@kbn/zod/v4';
@@ -91,7 +91,9 @@ Returns built-in trigger types (manual, scheduled, alert) including the event co
     tags: ['workflows', 'yaml', 'triggers'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };

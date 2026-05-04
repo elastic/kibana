@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/css-utils'
   - '@kbn/kql'
+  - '@kbn/date-range-picker'
 tags:
   - plugin
   - prod

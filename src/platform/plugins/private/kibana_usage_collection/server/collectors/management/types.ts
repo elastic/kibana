@@ -55,10 +55,8 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
-  'agentBuilder:connectorsEnabled': boolean;
-  'dataSources:enabled': boolean;
+  'agentContextLayer:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
-  'workflows:aiAgent:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -82,6 +80,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
+  'securitySolution:enableAlertsAndAttacksAlignment': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -191,12 +190,15 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
-  'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
+  'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsEnableMemory': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
-  'elasticConsole:enabled': boolean;
+  'elasticRamen:enabled': boolean;
+  'query_activity:minRunningTime': number;
+  'genAiSettings:tokenUsageTracking': boolean;
 }

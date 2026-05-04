@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
+import type { createMockStore } from '../../../mock/create_store';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
@@ -76,9 +77,16 @@ jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
   useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
-const renderNav = () =>
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  ...jest.requireActual('../../../hooks/use_experimental_features'),
+  useIsExperimentalFeatureEnabled: (feature: string) =>
+    mockUseIsExperimentalFeatureEnabled(feature),
+}));
+
+const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
-    wrapper: TestProviders,
+    wrapper: ({ children }) => <TestProviders store={options?.store}>{children}</TestProviders>,
   });
 
 describe('SecuritySideNav', () => {
@@ -88,24 +96,27 @@ describe('SecuritySideNav', () => {
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
+    useKibana().services.serverless = undefined;
   });
 
   it('should render main items', () => {
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith({
-      selectedId: SecurityPageName.alerts,
-      items: [
-        {
-          id: SecurityPageName.alerts,
-          label: 'alerts',
-          href: '/alerts',
-          position: 'top',
-        },
-      ],
-      categories: getNavCategories(),
-      tracker: track,
-    });
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: SecurityPageName.alerts,
+        items: [
+          {
+            id: SecurityPageName.alerts,
+            label: 'alerts',
+            href: '/alerts',
+            position: 'top',
+          },
+        ],
+        categories: getNavCategories(false),
+        tracker: track,
+      })
+    );
   });
 
   it('should render the loader if items are still empty', () => {
@@ -165,20 +176,18 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render get started item', () => {
+  it('should render launchpad item', () => {
     mockUseNavLinks.mockReturnValue([
-      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'rocket' },
+      { id: SecurityPageName.launchpad, title: 'Launchpad', sideNavIcon: 'rocket' },
     ]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [
           expect.objectContaining({
-            id: SecurityPageName.landing,
-            label: 'Get started',
-            position: 'bottom',
-            iconType: 'rocket',
-            appendSeparator: true,
+            id: SecurityPageName.launchpad,
+            label: 'Launchpad',
+            position: 'top',
           }),
         ],
       })
@@ -263,5 +272,85 @@ describe('SecuritySideNav', () => {
         })
       );
     });
+  });
+
+  describe('isNewEAHomePageEnabled feature flag', () => {
+    it('should call getNavCategories with true when feature flag is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, true),
+        })
+      );
+    });
+
+    it('should call getNavCategories with false when feature flag is disabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, false),
+        })
+      );
+    });
+  });
+
+  it('should place administration item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.administration,
+            position: 'bottom',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should not include administration item in body', () => {
+    mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
+    renderNav();
+    const calls = mockSolutionSideNav.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const items = lastCall[0].items;
+    const administrationItemsInBody = items.filter(
+      (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
+    );
+    expect(administrationItemsInBody).toHaveLength(0);
+  });
+
+  it('should select launchpad when landing page is selected', () => {
+    mockUseRouteSpy.mockReturnValue([{ pageName: SecurityPageName.landing }]);
+    const landingNavLink: NavigationLink = {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+      description: 'Get started description',
+    };
+    mockUseNavLinks.mockReturnValue([landingNavLink, alertsNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: 'securityGroup:launchpad',
+      })
+    );
+  });
+
+  it('should maintain top position for most items', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({
+            id: SecurityPageName.alerts,
+            position: 'top',
+          }),
+        ],
+      })
+    );
   });
 });

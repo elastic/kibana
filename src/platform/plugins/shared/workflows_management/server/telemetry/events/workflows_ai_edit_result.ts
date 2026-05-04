@@ -22,7 +22,7 @@ export interface WorkflowsAiEditResultParams {
   validation_passed?: boolean;
   /** Number of validation errors. Only present when edit_success is true. */
   validation_error_count?: number;
-  /** Whether this edit created a new workflow (replaceYaml with no prior attachment) */
+  /** Whether this edit created a new workflow (setYaml with no prior attachment) */
   is_creation: boolean;
   /**
    * True when this tool call produced a valid result and the previous edit tool call
@@ -71,8 +71,7 @@ export const workflowsAiEditResultSchema: RootSchema<WorkflowsAiEditResultParams
   is_creation: {
     type: 'boolean',
     _meta: {
-      description:
-        'Whether this edit created a new workflow (replaceYaml with no prior attachment)',
+      description: 'Whether this edit created a new workflow (setYaml with no prior attachment)',
       optional: false,
     },
   },

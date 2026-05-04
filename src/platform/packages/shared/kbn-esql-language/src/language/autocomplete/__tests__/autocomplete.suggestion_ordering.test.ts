@@ -60,4 +60,18 @@ describe('Suggestion Ordering', () => {
       expect(hasFunctions).toBe(true);
     });
   });
+
+  describe('FUSE command', () => {
+    it('should start with next actions before the rest of the fuse suggestions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM a | FUSE /');
+      const orderedTexts = suggestions.map((s) => s.text);
+
+      expect(orderedTexts[0]).toBe('WITH { $0 }');
+      expect(orderedTexts[1]).toBe('| ');
+      expect(orderedTexts[2]).toBe('linear ');
+      expect(orderedTexts[3]).toBe('rrf ');
+      expect(orderedTexts.indexOf('SCORE BY ')).toBeGreaterThan(3);
+    });
+  });
 });

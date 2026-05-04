@@ -66,6 +66,7 @@
                 "lineNumber": 52,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -105,6 +106,7 @@
                 "lineNumber": 70,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "StartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -263,12 +265,20 @@
                 "lineNumber": 115,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -353,6 +363,7 @@
                 "lineNumber": 147,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -373,12 +384,20 @@
                 "lineNumber": 147,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -420,6 +439,7 @@
                 "lineNumber": 163,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -440,12 +460,20 @@
                 "lineNumber": 163,
                 "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -487,6 +515,7 @@
                 "lineNumber": 179,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -507,12 +536,20 @@
                 "lineNumber": 179,
                 "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -554,6 +591,7 @@
                 "lineNumber": 196,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -574,12 +612,20 @@
                 "lineNumber": 196,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -619,6 +665,7 @@
                 "lineNumber": 217,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -638,12 +685,20 @@
                 "lineNumber": 217,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorToastOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           }
         ],

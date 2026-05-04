@@ -9,6 +9,7 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLTimeFieldFromQuery,
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
@@ -44,6 +45,7 @@ export {
   fixESQLQueryWithVariables,
   replaceESQLQueryIndexPattern,
   getCategorizeColumns,
+  getSparklineColumns,
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
@@ -70,6 +72,7 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  getAllEsqlControls,
   type ESQLStatsQueryMeta,
 } from './src';
 

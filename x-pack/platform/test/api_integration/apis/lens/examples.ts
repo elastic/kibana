@@ -20,16 +20,19 @@ export const getExampleLensBody = (
   description,
   ignore_global_filters: false,
   sampling: 1,
-  dataset: { type: 'dataView', id: SAMPLE_DATA_VIEW_ID },
+  data_source: { type: 'data_view_reference', ref_id: SAMPLE_DATA_VIEW_ID },
   metrics: [
     {
       type: 'primary',
       operation: 'count',
       label: 'Count of records',
       empty_as_null: true,
-      labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
-      value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign },
-      fit: false,
     },
   ],
+  styling: {
+    primary: {
+      labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
+      value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
+    },
+  },
 });

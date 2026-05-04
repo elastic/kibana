@@ -35,6 +35,8 @@ dependsOn:
   - '@kbn/core-user-profile-browser'
   - '@kbn/core-http-server'
   - '@kbn/core-http-server-utils'
+  - '@kbn/i18n'
+  - '@kbn/core'
 tags:
   - plugin
   - dev

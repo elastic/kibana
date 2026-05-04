@@ -12,7 +12,12 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
+import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import type { SearchHit } from '../../../../../common/search_strategy';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -102,6 +107,10 @@ export interface TakeActionDropdownProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * The raw ES search hit containing the full document source
+   */
+  searchHit: SearchHit;
 }
 
 /**
@@ -120,6 +129,7 @@ export const TakeActionDropdown = memo(
     refetchFlyoutData,
     onOsqueryClick,
     scopeId,
+    searchHit,
   }: TakeActionDropdownProps) => {
     // popover interaction
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -158,7 +168,18 @@ export const TakeActionDropdown = memo(
       [dataFormattedForFieldBrowser]
     );
 
+    const hit = useMemo(
+      () => buildDataTableRecord(searchHit as unknown as EsHitRecord),
+      [searchHit]
+    );
+
+    const isRemoteDocument = useMemo(
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
+    );
+
     const isEvent = alertSummaryData.eventKind === 'event';
+    const isAlert = alertSummaryData.eventKind === 'signal';
 
     const isAgentEndpoint = useMemo(
       () => dataAsNestedObject?.agent?.type?.includes('endpoint'),
@@ -319,26 +340,50 @@ export const TakeActionDropdown = memo(
       closePopoverHandler
     );
 
-    const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
-      closePopover: closePopoverHandler,
-      ecsRowData: dataAsNestedObject,
-    });
+    const { runWorkflowMenuItem: alertWorkflowMenuItem, runAlertWorkflowPanel } =
+      useRunAlertWorkflowPanel({
+        closePopover: closePopoverHandler,
+        ecsRowData: dataAsNestedObject,
+      });
+
+    const documents = useMemo(
+      () => [
+        {
+          _id: dataAsNestedObject._id,
+          _index: dataAsNestedObject._index ?? '',
+          ...(searchHit?._source ?? {}),
+        },
+      ],
+      [dataAsNestedObject._id, dataAsNestedObject._index, searchHit]
+    );
+
+    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+      useRunDocumentWorkflowPanel({
+        closePopover: closePopoverHandler,
+        documents,
+      });
 
     // items to render in the dropdown
     const items: AlertTableContextMenuItem[] = useMemo(
-      () => [
-        ...addToCaseActionItems,
-        ...alertsActionItems,
-        ...runWorkflowMenuItem,
-        ...hostIsolationActionItems,
-        ...endpointResponseActionsConsoleItems,
-        ...(osqueryAvailable ? [osqueryActionItem] : []),
-        ...investigateInTimelineActionItems,
-      ],
+      () =>
+        isRemoteDocument
+          ? [...investigateInTimelineActionItems]
+          : [
+              ...addToCaseActionItems,
+              ...alertsActionItems,
+              ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
+              ...hostIsolationActionItems,
+              ...endpointResponseActionsConsoleItems,
+              ...(osqueryAvailable ? [osqueryActionItem] : []),
+              ...investigateInTimelineActionItems,
+            ],
       [
         addToCaseActionItems,
         alertsActionItems,
-        runWorkflowMenuItem,
+        isAlert,
+        isRemoteDocument,
+        alertWorkflowMenuItem,
+        documentWorkflowMenuItem,
         hostIsolationActionItems,
         endpointResponseActionsConsoleItems,
         osqueryAvailable,
@@ -349,14 +394,11 @@ export const TakeActionDropdown = memo(
 
     // panels rendered in the context menu
     const panels = [
-      {
-        id: 0,
-        items,
-      },
-      ...alertTagsPanels,
-      ...runAlertWorkflowPanel,
-      ...alertAssigneesPanels,
-      ...statusActionPanels,
+      { id: 0, items },
+      ...(!isRemoteDocument ? alertTagsPanels : []),
+      ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
+      ...(!isRemoteDocument ? alertAssigneesPanels : []),
+      ...(!isRemoteDocument ? statusActionPanels : []),
     ];
 
     const takeActionButton = useMemo(

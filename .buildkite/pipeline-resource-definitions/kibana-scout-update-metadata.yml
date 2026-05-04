@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       # Schedules set BUILDKITE_BRANCH; the step uses it as the PR base. Add a schedule per target branch.
       branch_configuration: main 9.3 9.2 8.19

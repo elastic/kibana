@@ -16,6 +16,7 @@ import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
+import { KIBANA_AUTH_FULL_HEADER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import type { SessionValue } from '../../session_management';
 import type { UiamServicePublic } from '../../uiam';
@@ -163,10 +164,13 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
     // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
     // return a static user proxy. The caveat here is that we don't validate credentials, but it
     // will be done by the Elasticsearch itself.
+    // We also want to skip minimal authentication for requests that explicitly ask for the full authentication
+    // information by setting `kbn-auth-full` header to `true` (e.g., during re-authentication).
     if (
       session &&
       session.username &&
-      request.route.options.security?.authc?.enabled === 'minimal'
+      request.route.options.security?.authc?.enabled === 'minimal' &&
+      request.headers[KIBANA_AUTH_FULL_HEADER] !== 'true'
     ) {
       this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
       return this.getMinAuthenticationUserProxy(session);

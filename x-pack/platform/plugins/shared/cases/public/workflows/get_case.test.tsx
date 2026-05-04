@@ -11,7 +11,7 @@ import { getCaseStepDefinition } from './simple_steps';
 describe('getCaseStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(getCaseStepDefinition.id).toBe('cases.getCase');
-    expect(getCaseStepDefinition.category).toBe('kibana');
+    expect(getCaseStepDefinition.category).toBe('kibana.cases');
     expect(getCaseStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

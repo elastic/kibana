@@ -15,10 +15,9 @@ import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
-import { registerGetWorkflowTool } from './tools/get_workflow_tool';
-import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
+import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetupContract } from '../types';
@@ -42,10 +41,9 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetStepDefinitionsTool(agentBuilder, api);
   registerGetTriggerDefinitionsTool(agentBuilder);
   registerGetConnectorsTool(agentBuilder, api);
-  registerListWorkflowsTool(agentBuilder, api);
-  registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
 
+  registerWorkflowExecuteStepTool(agentBuilder, api);
   registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
   registerWorkflowYamlAttachment(agentBuilder, api);
