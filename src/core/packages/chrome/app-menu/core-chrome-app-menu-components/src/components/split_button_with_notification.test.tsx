@@ -22,7 +22,6 @@ const setup = (props: Partial<React.ComponentProps<typeof SplitButtonWithNotific
       data-test-subj="split-button"
       onClick={onMainButtonClick}
       onSecondaryButtonClick={onSecondaryButtonClick}
-      secondaryButtonIcon="chevronSingleDown"
       secondaryButtonAriaLabel="More options"
       {...props}
     >
@@ -76,7 +75,6 @@ describe('<SplitButtonWithNotification />', () => {
       <SplitButtonWithNotification
         onClick={onMainButtonClick}
         onSecondaryButtonClick={jest.fn()}
-        secondaryButtonIcon="chevronSingleDown"
         secondaryButtonAriaLabel="More options"
         showNotificationIndicator={true}
         isDisabled={true}

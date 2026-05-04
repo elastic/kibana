@@ -319,7 +319,6 @@ export const useTopNavLinks = ({
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
             defaultMessage: 'Save options',
           }),

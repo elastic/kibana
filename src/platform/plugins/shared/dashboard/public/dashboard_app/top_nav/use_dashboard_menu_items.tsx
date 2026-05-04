@@ -407,7 +407,6 @@ export const useDashboardMenuItems = ({
           ],
           isMainButtonLoading: isSaveInProgress,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
-          secondaryButtonIcon: 'chevronSingleDown',
           isSecondaryButtonDisabled: isSaveInProgress,
           notificationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
           showNotificationIndicator: hasUnsavedChanges,

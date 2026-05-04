@@ -45,7 +45,6 @@ type BaseSplitProps = Pick<
   | 'isMainButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
   | 'notificationIndicatorTooltipContent'

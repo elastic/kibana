@@ -31,7 +31,6 @@ export interface SplitButtonWithNotificationProps {
   fullWidth?: boolean;
   'aria-haspopup'?: 'menu';
 
-  secondaryButtonIcon: IconType;
   secondaryButtonAriaLabel: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
   isSecondaryButtonDisabled?: boolean;
@@ -46,7 +45,6 @@ export const SplitButtonWithNotification = ({
   'data-test-subj': dataTestSubj,
   css: cssProp,
   fullWidth,
-
   children,
   onClick,
   iconType,
@@ -56,12 +54,9 @@ export const SplitButtonWithNotification = ({
   target,
   id,
   'aria-haspopup': ariaHasPopup,
-
-  secondaryButtonIcon,
   secondaryButtonAriaLabel,
   onSecondaryButtonClick,
   isSecondaryButtonDisabled,
-
   showNotificationIndicator = false,
   notificationIndicatorTooltipContent,
 }: SplitButtonWithNotificationProps) => {
@@ -70,7 +65,7 @@ export const SplitButtonWithNotification = ({
   return (
     <div
       css={{
-        position: 'relative' as const,
+        position: 'relative',
         display: fullWidth ? 'block' : 'inline-block',
         padding: `0 ${euiTheme.size.s}`,
       }}
@@ -106,7 +101,7 @@ export const SplitButtonWithNotification = ({
         </EuiSplitButton.ActionPrimary>
         <EuiSplitButton.ActionSecondary
           data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
-          iconType={secondaryButtonIcon}
+          iconType="chevronSingleDown"
           aria-label={secondaryButtonAriaLabel}
           onClick={onSecondaryButtonClick}
           isDisabled={isSecondaryButtonDisabled}
@@ -116,7 +111,7 @@ export const SplitButtonWithNotification = ({
         <div
           data-test-subj="split-button-notification-indicator"
           css={{
-            position: 'absolute' as const,
+            position: 'absolute',
             top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
             left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
             zIndex: 1,
