@@ -42,19 +42,19 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const localMetricSourceName = isNonLocalIndexName(metricItem.dataStream)
+  const localIndexName = isNonLocalIndexName(metricItem.dataStream)
     ? undefined
     : metricItem.dataStream;
 
   const { kind: sourceKind } = useMetricSourceKind({
-    name: localMetricSourceName,
+    name: localIndexName,
     fallback: METRIC_SOURCE_KIND.DATA_STREAM,
   });
   const renderStreamField = useStreamsFieldRenderer();
 
   const streamSection =
-    localMetricSourceName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
-      ? renderStreamField({ streamName: localMetricSourceName })
+    localIndexName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
+      ? renderStreamField({ streamName: localIndexName })
       : null;
 
   const staticSource = useMemo(() => {
