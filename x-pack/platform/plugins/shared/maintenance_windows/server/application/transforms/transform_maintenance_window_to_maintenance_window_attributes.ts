@@ -5,9 +5,43 @@
  * 2.0.
  */
 
+import type { AlertsFilterQueryAttributes } from '../../data/types/alerts_filter_query_attributes';
 import type { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
 import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 import type { MaintenanceWindowWithoutComputedProperties } from '../types';
+
+type AlertsFilterQueryInput = NonNullable<
+  MaintenanceWindowWithoutComputedProperties['scopedQuery']
+>;
+type ScopeInput = NonNullable<MaintenanceWindowWithoutComputedProperties['scope']>;
+type ScopeAttributes = NonNullable<MaintenanceWindowAttributes['scope']>;
+
+const normalizeAlertsFilterQuery = (
+  query: AlertsFilterQueryInput
+): AlertsFilterQueryAttributes => ({
+  filters: query.filters ?? [],
+  kql: query.kql ?? '',
+  dsl: query.dsl ?? '',
+});
+
+// Tri-state spread used to model partial updates against the saved object:
+//   undefined → omit the field (preserve the existing stored value)
+//   null      → set the field to null (intentional clearing)
+//   value     → set the field to transform(value)
+const partialField = <K extends string, V, R>(
+  key: K,
+  value: V | null | undefined,
+  transform: (v: V) => R
+): { [P in K]?: R | null } => {
+  if (value === undefined) return {};
+  if (value === null) return { [key]: null } as { [P in K]: null };
+  return { [key]: transform(value) } as { [P in K]: R };
+};
+
+const transformScope = (scope: ScopeInput): ScopeAttributes => ({
+  ...partialField('alerting', scope.alerting, normalizeAlertsFilterQuery),
+  ...partialField('episodes', scope.episodes, normalizeAlertsFilterQuery),
+});
 
 export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
   maintenanceWindow: MaintenanceWindowWithoutComputedProperties
@@ -27,50 +61,13 @@ export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
     updatedBy: maintenanceWindow.updatedBy,
     createdAt: maintenanceWindow.createdAt,
     updatedAt: maintenanceWindow.updatedAt,
+    schedule: maintenanceWindow.schedule,
     ...(maintenanceWindow.categoryIds !== undefined
       ? { categoryIds: maintenanceWindow.categoryIds }
       : {}),
-    ...(maintenanceWindow.scopedQuery !== undefined
-      ? maintenanceWindow?.scopedQuery == null
-        ? { scopedQuery: maintenanceWindow?.scopedQuery }
-        : {
-            scopedQuery: {
-              filters: maintenanceWindow?.scopedQuery?.filters ?? [],
-              kql: maintenanceWindow?.scopedQuery?.kql ?? '',
-              dsl: maintenanceWindow?.scopedQuery?.dsl ?? '',
-            },
-          }
-      : {}),
-    schedule: maintenanceWindow.schedule,
+    ...partialField('scopedQuery', maintenanceWindow.scopedQuery, normalizeAlertsFilterQuery),
     ...(maintenanceWindow.scope !== undefined
-      ? maintenanceWindow.scope == null
-        ? { scope: maintenanceWindow.scope }
-        : {
-            scope: {
-              ...(maintenanceWindow.scope.alerting !== undefined
-                ? maintenanceWindow.scope.alerting == null
-                  ? { alerting: maintenanceWindow.scope.alerting }
-                  : {
-                      alerting: {
-                        filters: maintenanceWindow.scope.alerting.filters ?? [],
-                        kql: maintenanceWindow.scope.alerting.kql ?? '',
-                        dsl: maintenanceWindow.scope.alerting.dsl ?? '',
-                      },
-                    }
-                : {}),
-              ...(maintenanceWindow.scope.episodes !== undefined
-                ? maintenanceWindow.scope.episodes == null
-                  ? { episodes: maintenanceWindow.scope.episodes }
-                  : {
-                      episodes: {
-                        filters: maintenanceWindow.scope.episodes.filters ?? [],
-                        kql: maintenanceWindow.scope.episodes.kql ?? '',
-                        dsl: maintenanceWindow.scope.episodes.dsl ?? '',
-                      },
-                    }
-                : {}),
-            },
-          }
+      ? { scope: transformScope(maintenanceWindow.scope) }
       : {}),
   };
 };
