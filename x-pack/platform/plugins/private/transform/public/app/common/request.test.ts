@@ -247,7 +247,7 @@ describe('Transform: Common', () => {
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',
-      transformSettingsMaxPageSearchSize: 5000,
+      transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
       transformSettingsDocsPerSecond: null,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
