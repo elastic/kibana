@@ -102,7 +102,7 @@ describe('AggBasedSelection', () => {
       );
 
       await new Promise((resolve) => process.nextTick(resolve));
-      
+
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });
       expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);

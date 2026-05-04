@@ -8,12 +8,12 @@
  */
 
 import type { VisParams } from '@kbn/visualizations-common';
+import { asyncMap } from '@kbn/std';
 import type { VisTypeAlias } from './vis_type_alias_registry';
 import { visTypeAliasRegistry } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 import type { VisTypeDefinition } from './types';
 import type { VisGroups } from './vis_groups_enum';
-import { asyncMap } from '@kbn/std';
 
 /**
  * Vis Types Service
@@ -46,7 +46,7 @@ export class TypesService {
     return {
       /**
        * @deprecated
-       * 
+       *
        * Use createBaseVisualizationAsync
        * @param config - visualization type definition
        */
