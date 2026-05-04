@@ -554,6 +554,17 @@ describe('common attributes schemas', () => {
       expect(result.data.logo).toBeUndefined();
     });
 
+    it('accepts integration with categories (optional)', () => {
+      const payload = {
+        ...validIntegrationResponse,
+        categories: ['security', 'observability'],
+      };
+
+      const result = IntegrationResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data.categories).toEqual(['security', 'observability']);
+    });
+
     it('accepts empty data streams array', () => {
       const payload = {
         ...validIntegrationResponse,
