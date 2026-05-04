@@ -52,10 +52,5 @@ export const transformIndexSearchFormDataForCreate = (
 export const transformIndexSearchFormDataForUpdate = (
   data: IndexSearchToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToIndexSearchTool(data), [
-    'id',
-    'type',
-    'readonly',
-    'experimental',
-  ]);
+  return omit(transformFormDataToIndexSearchTool(data), ['id', 'type', 'readonly', 'experimental']);
 };
