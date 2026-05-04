@@ -138,8 +138,8 @@ export interface ServiceMapOptionsPanelProps {
   onAlertStatusFilterChange: (next: AlertStatus[]) => void;
   sloStatusFilter: SloStatus[];
   onSloStatusFilterChange: (next: SloStatus[]) => void;
-  anomalyStatusFilter: ML_ANOMALY_SEVERITY[];
-  onAnomalyStatusFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
+  anomalySeverityFilter: ML_ANOMALY_SEVERITY[];
+  onAnomalySeverityFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
   mapOrientation: ServiceMapOrientation;
   onMapOrientationChange: (next: ServiceMapOrientation) => void;
   isExpanded: boolean;
@@ -153,8 +153,8 @@ export function ServiceMapOptionsPanel({
   onAlertStatusFilterChange,
   sloStatusFilter,
   onSloStatusFilterChange,
-  anomalyStatusFilter,
-  onAnomalyStatusFilterChange,
+  anomalySeverityFilter,
+  onAnomalySeverityFilterChange,
   mapOrientation,
   onMapOrientationChange,
   isExpanded,
@@ -164,7 +164,7 @@ export function ServiceMapOptionsPanel({
 
   const alertCounts = filterOptionCounts.alerts;
   const sloStatusCounts = filterOptionCounts.slo;
-  const anomalyStatusCounts = filterOptionCounts.anomaly;
+  const anomalySeverityCounts = filterOptionCounts.anomaly;
 
   const alertStatusComboBoxOptions = useMemo(
     () =>
@@ -202,10 +202,10 @@ export function ServiceMapOptionsPanel({
     [sloStatusCounts]
   );
 
-  const anomalyStatusComboBoxOptions = useMemo(
+  const anomalyFilterComboBoxOptions = useMemo(
     () =>
       ANOMALY_SEVERITY_OPTIONS.map((opt) => {
-        const count = anomalyStatusCounts[opt.value] ?? 0;
+        const count = anomalySeverityCounts[opt.value] ?? 0;
         return {
           label: opt.label,
           value: opt.value,
@@ -217,7 +217,7 @@ export function ServiceMapOptionsPanel({
           disabled: count === 0,
         };
       }),
-    [anomalyStatusCounts]
+    [anomalySeverityCounts]
   );
 
   /** Width constraint for the floating panel; height follows content. */
@@ -404,20 +404,20 @@ export function ServiceMapOptionsPanel({
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityFilter', {
           defaultMessage: 'Anomaly severity',
         })}
-        options={anomalyStatusComboBoxOptions}
-        selectedOptions={anomalyStatusFilter.map((value) => {
-          const opt = anomalyStatusComboBoxOptions.find((o) => o.value === value);
+        options={anomalyFilterComboBoxOptions}
+        selectedOptions={anomalySeverityFilter.map((value) => {
+          const opt = anomalyFilterComboBoxOptions.find((o) => o.value === value);
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
-          onAnomalyStatusFilterChange(
+          onAnomalySeverityFilterChange(
             selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
           );
         }}
         fullWidth
         compressed
         isClearable={true}
-        data-test-subj="serviceMapAnomalyStatusFilter"
+        data-test-subj="serviceMapAnomalySeverityFilter"
         aria-label={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityAriaLabel', {
           defaultMessage: 'Filter by anomaly severity',
         })}
