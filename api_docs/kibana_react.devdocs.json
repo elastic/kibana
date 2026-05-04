@@ -118,6 +118,7 @@
                 "lineNumber": 46,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Props",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -135,6 +136,7 @@
                 "lineNumber": 46,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -185,6 +187,7 @@
                 "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -254,6 +257,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Services",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -302,6 +306,7 @@
             "lineNumber": 15,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaServices",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -393,6 +398,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -502,6 +508,7 @@
             "lineNumber": 26,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaThemeProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -541,6 +548,7 @@
             "lineNumber": 31,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "MarkdownProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -580,6 +588,7 @@
             "lineNumber": 23,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "MarkdownSimpleProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -719,6 +728,7 @@
             "lineNumber": 25,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -834,6 +844,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Function",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -912,6 +923,7 @@
             "lineNumber": 39,
             "columnNumber": 67,
             "deprecated": false,
+            "docsReferencedTypeName": "Function",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1002,6 +1014,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToMountPointOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1165,6 +1178,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1221,6 +1235,7 @@
             "lineNumber": 44,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1277,6 +1292,7 @@
             "lineNumber": 103,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1362,6 +1378,7 @@
             "lineNumber": 23,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1418,6 +1435,7 @@
             "lineNumber": 71,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1558,6 +1576,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Theme",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1576,6 +1595,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UserProfileService",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1662,6 +1682,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -1721,6 +1742,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -2722,6 +2744,7 @@
             "lineNumber": 334,
             "columnNumber": 9,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false
           }
         ],
@@ -2834,6 +2857,7 @@
             "lineNumber": 265,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "returnComment": [],
             "children": [

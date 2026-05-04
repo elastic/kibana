@@ -10,7 +10,7 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { dataViewMock } from '../__mocks__';
-import { formatFieldValue, formatFieldValueReact } from './format_value';
+import { formatFieldValue, formatFieldValueReact, formatFieldValueText } from './format_value';
 
 const services = {
   fieldFormats: {
@@ -126,6 +126,63 @@ describe('formatFieldValueReact', () => {
 
     expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
     expect(reactConvertMock).toHaveBeenCalledWith('foo', { field: undefined, hit });
+    expect(result).toBe('default-formatted:foo');
+  });
+});
+
+describe('formatFieldValueText', () => {
+  afterEach(() => {
+    (dataViewMock.getFormatterForField as jest.Mock).mockReset();
+  });
+
+  it('should call convert with text content type on the correct field formatter', () => {
+    const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
+    const convertMock = jest.fn((value: unknown) => `field-formatted:${value}`);
+    formatterForFieldMock.mockReturnValue({ convert: convertMock });
+    const field = dataViewMock.fields.getByName('message');
+
+    const result = formatFieldValueText({
+      value: 'foo',
+      fieldFormats: services.fieldFormats,
+      dataView: dataViewMock,
+      field,
+    });
+
+    expect(dataViewMock.getFormatterForField).toHaveBeenCalledWith(field);
+    expect(convertMock).toHaveBeenCalledWith('foo', 'text', undefined);
+    expect(result).toBe('field-formatted:foo');
+  });
+
+  it('should call convert with text content type on default string formatter if no field specified', () => {
+    const convertMock = jest.fn((value: unknown) => `default-formatted:${value}`);
+    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+      convert: convertMock,
+    });
+
+    const result = formatFieldValueText({
+      value: 'foo',
+      fieldFormats: services.fieldFormats,
+      dataView: dataViewMock,
+    });
+
+    expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
+    expect(convertMock).toHaveBeenCalledWith('foo', 'text', undefined);
+    expect(result).toBe('default-formatted:foo');
+  });
+
+  it('should call convert with text content type on default string formatter if no dataView is specified', () => {
+    const convertMock = jest.fn((value: unknown) => `default-formatted:${value}`);
+    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+      convert: convertMock,
+    });
+
+    const result = formatFieldValueText({
+      value: 'foo',
+      fieldFormats: services.fieldFormats,
+    });
+
+    expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
+    expect(convertMock).toHaveBeenCalledWith('foo', 'text', undefined);
     expect(result).toBe('default-formatted:foo');
   });
 });

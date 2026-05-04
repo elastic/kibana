@@ -17,6 +17,8 @@ jest.mock('./query_utils', () => ({
   QueryUtils: jest.fn().mockImplementation(() => ({
     getCustomToolsMetrics: jest.fn(),
     getCustomAgentsMetrics: jest.fn(),
+    getSkillsMetrics: jest.fn(),
+    getPluginsCount: jest.fn(),
     getConversationMetrics: jest.fn(),
     getCountersByPrefix: jest.fn(),
     getAllRoundMetrics: jest.fn(),
@@ -101,6 +103,33 @@ describe('telemetry_collector', () => {
       expect(registeredCollector.schema.custom_agents.total.type).toBe('long');
     });
 
+    it('defines skills schema', () => {
+      expect(registeredCollector.schema.skills).toBeDefined();
+      expect(registeredCollector.schema.skills.total.type).toBe('long');
+      expect(registeredCollector.schema.skills.custom.type).toBe('long');
+      expect(registeredCollector.schema.skills.plugin.type).toBe('long');
+    });
+
+    it('defines plugins schema', () => {
+      expect(registeredCollector.schema.plugins).toBeDefined();
+      expect(registeredCollector.schema.plugins.total.type).toBe('long');
+    });
+
+    it('defines skill_invocations schema', () => {
+      expect(registeredCollector.schema.skill_invocations).toBeDefined();
+      expect(registeredCollector.schema.skill_invocations.total.type).toBe('long');
+      expect(registeredCollector.schema.skill_invocations.by_origin.builtin.type).toBe('long');
+      expect(registeredCollector.schema.skill_invocations.by_origin.custom.type).toBe('long');
+      expect(registeredCollector.schema.skill_invocations.by_origin.plugin.type).toBe('long');
+    });
+
+    it('defines plugin_imports schema', () => {
+      expect(registeredCollector.schema.plugin_imports).toBeDefined();
+      expect(registeredCollector.schema.plugin_imports.total.type).toBe('long');
+      expect(registeredCollector.schema.plugin_imports.by_source.url.type).toBe('long');
+      expect(registeredCollector.schema.plugin_imports.by_source.upload.type).toBe('long');
+    });
+
     it('defines conversations schema with token breakdown', () => {
       expect(registeredCollector.schema.conversations).toBeDefined();
       expect(registeredCollector.schema.conversations.total.type).toBe('long');
@@ -176,6 +205,12 @@ describe('telemetry_collector', () => {
           ],
         }),
         getCustomAgentsMetrics: jest.fn().mockResolvedValue(3),
+        getSkillsMetrics: jest.fn().mockResolvedValue({
+          total: 12,
+          custom: 3,
+          plugin: 4,
+        }),
+        getPluginsCount: jest.fn().mockResolvedValue(7),
         getConversationMetrics: jest.fn().mockResolvedValue({
           total: 100,
           total_rounds: 500,
@@ -256,6 +291,23 @@ describe('telemetry_collector', () => {
               ])
             );
           }
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_`) {
+            return Promise.resolve(
+              new Map([
+                [`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_builtin`, 10],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_custom`, 20],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_plugin`, 5],
+              ])
+            );
+          }
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_`) {
+            return Promise.resolve(
+              new Map([
+                [`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_url`, 3],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_upload`, 7],
+              ])
+            );
+          }
           if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`) {
             return Promise.resolve(
               new Map([
@@ -307,6 +359,28 @@ describe('telemetry_collector', () => {
       });
 
       expect(result.custom_agents).toEqual({ total: 3 });
+
+      expect(result.skills).toEqual({
+        total: 12,
+        custom: 3,
+        plugin: 4,
+      });
+      expect(result.plugins).toEqual({ total: 7 });
+      expect(result.skill_invocations).toEqual({
+        total: 35,
+        by_origin: {
+          builtin: 10,
+          custom: 20,
+          plugin: 5,
+        },
+      });
+      expect(result.plugin_imports).toEqual({
+        total: 10,
+        by_source: {
+          url: 3,
+          upload: 7,
+        },
+      });
 
       expect(result.conversations).toEqual({
         total: 100,
@@ -413,6 +487,63 @@ describe('telemetry_collector', () => {
           { type: 'internalError', count: 7 },
         ],
       });
+
+      expect(mockQueryUtils.getSkillsMetrics).toHaveBeenCalledTimes(1);
+      expect(mockQueryUtils.getPluginsCount).toHaveBeenCalledTimes(1);
+      expect(mockQueryUtils.getCountersByPrefix).toHaveBeenCalledWith(
+        AGENTBUILDER_USAGE_DOMAIN,
+        `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_`
+      );
+      expect(mockQueryUtils.getCountersByPrefix).toHaveBeenCalledWith(
+        AGENTBUILDER_USAGE_DOMAIN,
+        `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_`
+      );
+    });
+
+    it('maps skill_invocation and plugin_import usage counters into telemetry', async () => {
+      mockQueryUtils.getSkillsMetrics.mockResolvedValue({
+        total: 4,
+        custom: 1,
+        plugin: 1,
+      });
+      mockQueryUtils.getPluginsCount.mockResolvedValue(2);
+      mockQueryUtils.getCountersByPrefix.mockImplementation((_domain: string, prefix: string) => {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_`) {
+          return Promise.resolve(
+            new Map([
+              [`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_builtin`, 1],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_custom`, 2],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_plugin`, 3],
+            ])
+          );
+        }
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_`) {
+          return Promise.resolve(
+            new Map([
+              [`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_url`, 4],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_upload`, 1],
+            ])
+          );
+        }
+        return Promise.resolve(new Map());
+      });
+
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
+
+      expect(result.skills).toEqual({
+        total: 4,
+        custom: 1,
+        plugin: 1,
+      });
+      expect(result.plugins).toEqual({ total: 2 });
+      expect(result.skill_invocations).toEqual({
+        total: 6,
+        by_origin: { builtin: 1, custom: 2, plugin: 3 },
+      });
+      expect(result.plugin_imports).toEqual({
+        total: 5,
+        by_source: { url: 4, upload: 1 },
+      });
     });
 
     it('returns default values when fetch throws error', async () => {
@@ -435,6 +566,23 @@ describe('telemetry_collector', () => {
       expect(result).toEqual({
         custom_tools: { total: 0, by_type: [] },
         custom_agents: { total: 0 },
+        skills: { total: 0, custom: 0, plugin: 0 },
+        plugins: { total: 0 },
+        skill_invocations: {
+          total: 0,
+          by_origin: {
+            builtin: 0,
+            custom: 0,
+            plugin: 0,
+          },
+        },
+        plugin_imports: {
+          total: 0,
+          by_source: {
+            url: 0,
+            upload: 0,
+          },
+        },
         conversations: emptyConversationMetrics,
         daily: emptyConversationMetrics,
         query_to_result_time: {

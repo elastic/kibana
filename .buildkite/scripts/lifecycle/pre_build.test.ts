@@ -112,7 +112,7 @@ const runPreBuildScript = (overrides: Record<string, string> = {}) => {
     ...process.env,
     PATH: `${binDir}:${process.env.PATH ?? ''}`,
     CALLS_FILE: callsFile,
-    GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true',
+    KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true',
     ...overrides,
   };
 

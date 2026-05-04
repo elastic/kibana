@@ -307,7 +307,9 @@ describe('Update Insights Route Handler', () => {
         reportEvent: reportEventMock,
       });
 
-      fetchMock.mockResolvedValue([{ _id: '1', _index: 'index-123', _source: {} }]);
+      fetchMock.mockResolvedValue([
+        { _id: '1', _index: 'index-123', _source: { type: 'incompatible_antivirus' } },
+      ]);
       updateMock.mockResolvedValue({ id: 1 });
 
       await callRoute(
@@ -322,6 +324,34 @@ describe('Update Insights Route Handler', () => {
 
       expect(reportEventMock).toHaveBeenCalledWith('endpoint_workflow_insights_remediated_event', {
         insightId: '1',
+        insightType: 'incompatible_antivirus',
+      });
+    });
+
+    it('should report telemetry when action.type is dismissed', async () => {
+      const reportEventMock = jest.fn();
+      const mockEndpointContext = createMockEndpointAppContext();
+      mockEndpointContext.service.getTelemetryService = jest.fn().mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      fetchMock.mockResolvedValue([
+        { _id: '1', _index: 'index-123', _source: { type: 'policy_response_failure' } },
+      ]);
+      updateMock.mockResolvedValue({ id: 1 });
+
+      await callRoute(
+        { insightId: '1' },
+        { action: { type: 'dismissed' } },
+        {
+          canWriteWorkflowInsights: false,
+          canReadWorkflowInsights: true,
+        },
+        mockEndpointContext
+      );
+
+      expect(reportEventMock).toHaveBeenCalledWith('endpoint_workflow_insights_dismissed_event', {
+        insightType: 'policy_response_failure',
       });
     });
 

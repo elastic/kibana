@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { ReactText } from 'react';
+import type { ReactNode, ReactText } from 'react';
 import React, { PureComponent } from 'react';
 import type { Sample, SampleInput } from '../../types';
 import type { FormatEditorProps } from '../types';
 import { formatId } from './constants';
 
 export const convertSampleInput = (
-  converter: (input: SampleInput) => string,
+  converter: (input: SampleInput) => ReactNode,
   inputs: SampleInput[]
 ) => {
   let error;
@@ -48,7 +47,6 @@ interface SampleInputs {
 
 export interface FormatEditorState {
   sampleInputs: SampleInput[];
-  sampleConverterType: FieldFormatsContentType;
   error?: string;
   samples: Sample[];
   sampleInputsByType: SampleInputs;
@@ -56,7 +54,6 @@ export interface FormatEditorState {
 
 export const defaultState = {
   sampleInputs: [] as SampleInput[],
-  sampleConverterType: 'text' as FieldFormatsContentType,
   error: undefined,
   samples: [] as Sample[],
   sampleInputsByType: {},
@@ -71,12 +68,11 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
 
   static getDerivedStateFromProps(nextProps: FormatEditorProps<{}>, state: FormatEditorState) {
     const { format, formatParams, onError } = nextProps;
-    const { sampleInputsByType, sampleInputs, sampleConverterType } = state;
+    const { sampleInputsByType, sampleInputs } = state;
 
-    const converter = format.getConverterFor(sampleConverterType);
     const type = typeof sampleInputsByType === 'object' && formatParams.type;
     const inputs = type ? sampleInputsByType[formatParams.type as string] || [] : sampleInputs;
-    const output = convertSampleInput(converter, inputs);
+    const output = convertSampleInput((input) => format.reactConvert(input), inputs);
     onError(output.error);
     return output;
   }

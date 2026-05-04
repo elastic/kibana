@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -29,6 +29,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { HighlightedFields } from './highlighted_fields';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { ChildLink } from '../../shared/components/child_link';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -71,7 +72,7 @@ export const InvestigationSection = memo(
       [hit]
     );
     const isRemoteDocument = useMemo(
-      () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
     );
     const ruleId = useMemo(
@@ -135,6 +136,7 @@ export const InvestigationSection = memo(
           ancestorsIndexName={ancestorsIndexName}
           renderCellActions={renderCellActions}
           hideEditButton={isRemoteDocument}
+          renderChildLink={ChildLink}
         />
       </ExpandableSection>
     );

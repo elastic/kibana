@@ -113,7 +113,7 @@ export function SuggestedStreamPanel({
   };
 
   const { isStreamNameValid, setLocalStreamName, partitionName, prefix, helpText, errorMessage } =
-    useChildStreamInput(currentSuggestion.name, false);
+    useChildStreamInput({ streamName: currentSuggestion.name, readOnly: false });
 
   if (isEditing) {
     return (

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -31,7 +31,7 @@ export { FLYOUT_FOOTER_TEST_ID };
  */
 export const PanelFooter = () => {
   const { attack, indexName, refetch } = useAttackDetailsContext();
-  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

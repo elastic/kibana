@@ -14,7 +14,10 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
+import type {
+  ESQLQueryParams,
+  IndexType,
+} from '../../../shared/links/discover_links/get_esql_query';
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
@@ -33,12 +36,20 @@ const tracesInDiscoverLabel = i18n.translate(
   }
 );
 
+const errorsInDiscoverLabel = i18n.translate(
+  'xpack.apm.alertDetails.chartActions.errorsInDiscover',
+  {
+    defaultMessage: 'Errors in Discover',
+  }
+);
+
 interface RedMetricsChartActionsProps {
   queryParams: Pick<
     ESQLQueryParams,
-    'serviceName' | 'environment' | 'transactionName' | 'transactionType' | 'kuery'
+    'serviceName' | 'environment' | 'transactionName' | 'transactionType' | 'kuery' | 'errorGroupId'
   >;
   timeRange: { from: string; to: string };
+  indexType?: IndexType;
   ruleTypeId?: string;
 }
 
@@ -65,6 +76,7 @@ function RedMetricsChartActionsPopover({
   queryParams,
   timeRange,
   ruleTypeId,
+  indexType = 'traces',
   apmLocator,
   apmSourcesAccess,
   share,
@@ -82,25 +94,42 @@ function RedMetricsChartActionsPopover({
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
-  const { serviceName, ...queryForApm } = queryParams;
+  const { serviceName, errorGroupId, ...queryForApm } = queryParams;
 
   const apmLink = useMemo(() => {
+    let serviceOverviewTab: 'errors' | 'transactions' | undefined;
+
+    if (indexType === 'error') {
+      serviceOverviewTab = 'errors';
+    } else if (queryParams.transactionName) {
+      serviceOverviewTab = 'transactions';
+    }
+
     return apmLocator.getRedirectUrl({
       serviceName,
-      serviceOverviewTab: queryParams.transactionName ? 'transactions' : undefined,
+      serviceOverviewTab,
+      errorGroupId,
       query: {
         ...queryForApm,
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
       },
     });
-  }, [apmLocator, serviceName, queryParams.transactionName, queryForApm, timeRange]);
+  }, [
+    apmLocator,
+    serviceName,
+    errorGroupId,
+    queryParams.transactionName,
+    queryForApm,
+    timeRange,
+    indexType,
+  ]);
 
   const discoverLink = useMemo(() => {
     if (indexSettingsStatus !== FETCH_STATUS.SUCCESS) return undefined;
 
     const esqlQuery = getESQLQuery({
-      indexType: 'traces',
+      indexType,
       params: { ...queryParams, sortDirection: 'DESC' },
       indexSettings,
     });
@@ -113,7 +142,7 @@ function RedMetricsChartActionsPopover({
       timeRange,
       query: { esql: esqlQuery },
     });
-  }, [share, indexSettingsStatus, queryParams, indexSettings, timeRange]);
+  }, [share, indexSettingsStatus, queryParams, indexSettings, timeRange, indexType]);
 
   return (
     <EuiPopover
@@ -144,15 +173,28 @@ function RedMetricsChartActionsPopover({
         >
           {inApmLabel}
         </EuiContextMenuItem>
-        <EuiContextMenuItem
-          href={discoverLink}
-          disabled={!discoverLink}
-          data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
-          data-action="openTracesInDiscover"
-          data-source={`alertDetails-${ruleTypeId}`}
-        >
-          {tracesInDiscoverLabel}
-        </EuiContextMenuItem>
+        {indexType === 'traces' && (
+          <EuiContextMenuItem
+            href={discoverLink}
+            disabled={!discoverLink}
+            data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
+            data-action="openTracesInDiscover"
+            data-source={`alertDetails-${ruleTypeId}`}
+          >
+            {tracesInDiscoverLabel}
+          </EuiContextMenuItem>
+        )}
+        {indexType === 'error' && (
+          <EuiContextMenuItem
+            href={discoverLink}
+            disabled={!discoverLink}
+            data-test-subj="apmAlertDetailsErrorsOpenInDiscoverAction"
+            data-action="openErrorsInDiscover"
+            data-source={`alertDetails-${ruleTypeId}`}
+          >
+            {errorsInDiscoverLabel}
+          </EuiContextMenuItem>
+        )}
       </EuiContextMenuPanel>
     </EuiPopover>
   );

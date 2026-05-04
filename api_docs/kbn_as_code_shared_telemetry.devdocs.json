@@ -1,0 +1,118 @@
+{
+  "id": "@kbn/as-code-shared-telemetry",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/as-code-shared-telemetry",
+        "id": "def-server.telemetryHandler",
+        "type": "Function",
+        "tags": [],
+        "label": "telemetryHandler",
+        "description": [],
+        "signature": [
+          "(request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, usageCounter: ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.IUsageCounter",
+            "text": "IUsageCounter"
+          },
+          " | undefined, handler: () => TResponse | Promise<TResponse>) => Promise<TResponse>"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-telemetry/src/telemetry_handler.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-shared-telemetry",
+            "id": "def-server.telemetryHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/packages/shared/as-code/shared-telemetry/src/telemetry_handler.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/as-code-shared-telemetry",
+            "id": "def-server.telemetryHandler.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCounter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.IUsageCounter",
+                "text": "IUsageCounter"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/shared-telemetry/src/telemetry_handler.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/as-code-shared-telemetry",
+            "id": "def-server.telemetryHandler.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "handler",
+            "description": [],
+            "signature": [
+              "() => TResponse | Promise<TResponse>"
+            ],
+            "path": "src/platform/packages/shared/as-code/shared-telemetry/src/telemetry_handler.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -16,6 +16,10 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: |
+            List of `alert.attributes` field names to return for each rule (for example `name`, `enabled`).
+            If omitted, the default field set is returned. Repeat the parameter to pass multiple field names, or
+            use comma-separated values when supported by your client.
           schema:
             type: array
             items:

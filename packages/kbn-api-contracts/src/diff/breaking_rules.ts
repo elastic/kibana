@@ -20,6 +20,8 @@ export interface BreakingChange {
   path: string;
   method?: string;
   reason: string;
+  oasdiffId?: string;
+  source?: string;
   details?: unknown;
 }
 
@@ -37,7 +39,7 @@ export const applyAllowlist = (
 
   for (const change of allBreakingChanges) {
     const method = change.method ?? 'ALL';
-    if (isAllowlisted(allowlist, change.path, method)) {
+    if (isAllowlisted(allowlist, change.path, method, change.oasdiffId, change.source)) {
       allowlistedChanges.push(change);
     } else {
       breakingChanges.push(change);

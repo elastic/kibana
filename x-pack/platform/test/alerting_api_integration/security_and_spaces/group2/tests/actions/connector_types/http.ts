@@ -281,6 +281,35 @@ export default function httpTest({ getService }: FtrProviderContext) {
       });
     }
 
+    it('should base64-encode binary responses and preserve the original bytes', async () => {
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            method: 'POST',
+            body: 'binary_response',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+      expect(result.connector_id).to.eql(httpActionId);
+
+      const responseHeaders = result.data?.headers ?? {};
+      const contentType = responseHeaders['content-type'] ?? responseHeaders['Content-Type'];
+      expect(contentType).to.match(/^image\/png/);
+
+      // The connector must surface binary bodies as a base64-encoded string so
+      // that non-UTF8 byte sequences are not corrupted by lossy text decoding.
+      const data = result.data?.data;
+      expect(typeof data).to.be('string');
+
+      const expectedBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      expect(Buffer.from(data as string, 'base64')).to.eql(expectedBytes);
+    });
+
     it('should handle target https that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
         .post('/api/actions/connector')

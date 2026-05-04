@@ -7,86 +7,89 @@
 
 import { i18n } from '@kbn/i18n';
 
+export type AgentBuilderAnnouncementVariant = '1a' | '1b' | '2a';
+
 export const MODAL_TITLE = i18n.translate('xpack.agentBuilder.announcementModal.modalTitle', {
   defaultMessage: 'Introducing AI Agent',
 });
 
-export const WHAT_TO_EXPECT = i18n.translate('xpack.agentBuilder.announcementModal.whatToExpect', {
-  defaultMessage: 'What to expect:',
+export const INTRO = i18n.translate('xpack.agentBuilder.announcementModal.intro', {
+  defaultMessage:
+    'AI Agent can take action, not just answer. It runs queries, connects your tools, and works across your environment to complete tasks end-to-end.',
 });
 
-export const DUAL_EXPERIENCES_TITLE = i18n.translate(
-  'xpack.agentBuilder.announcementModal.dualExperiencesTitle',
-  { defaultMessage: 'Dual Experiences:' }
+export const FEATURE_TAKES_ACTION_TITLE = i18n.translate(
+  'xpack.agentBuilder.announcementModal.featureTakesActionTitle',
+  { defaultMessage: 'Takes action' }
 );
 
-export const DUAL_EXPERIENCES_BODY = i18n.translate(
-  'xpack.agentBuilder.announcementModal.dualExperiencesBody',
+export const FEATURE_TAKES_ACTION_BODY = i18n.translate(
+  'xpack.agentBuilder.announcementModal.featureTakesActionBody',
   {
-    defaultMessage:
-      'Both AI Agent and AI Assistant are available. You are currently using the AI Agent.',
+    defaultMessage: 'by executing multi-step tasks, not just suggestions',
   }
 );
 
-export const DATA_ISOLATION_TITLE = i18n.translate(
-  'xpack.agentBuilder.announcementModal.dataIsolationTitle',
-  { defaultMessage: 'Data Isolation:' }
+export const FEATURE_CONNECTS_TOOLS_TITLE = i18n.translate(
+  'xpack.agentBuilder.announcementModal.featureConnectsToolsTitle',
+  { defaultMessage: 'Connects tools' }
 );
 
-export const DATA_ISOLATION_BODY = i18n.translate(
-  'xpack.agentBuilder.announcementModal.dataIsolationBody',
+export const FEATURE_CONNECTS_TOOLS_BODY = i18n.translate(
+  'xpack.agentBuilder.announcementModal.featureConnectsToolsBody',
   {
-    defaultMessage:
-      'AI Agent starts with a clean slate and does not currently access your previous chats, prompts, or knowledge base entries from AI Assistant.',
+    defaultMessage: 'by working across data sources and integrations',
   }
 );
 
-export const FEATURE_PARITY_TITLE = i18n.translate(
-  'xpack.agentBuilder.announcementModal.featureParityTitle',
-  { defaultMessage: 'Feature Parity:' }
+export const FEATURE_ITERATES_TITLE = i18n.translate(
+  'xpack.agentBuilder.announcementModal.featureIteratesTitle',
+  { defaultMessage: 'Iterates' }
 );
 
-export const FEATURE_PARITY_BODY = i18n.translate(
-  'xpack.agentBuilder.announcementModal.featureParityBody',
+export const FEATURE_ITERATES_BODY = i18n.translate(
+  'xpack.agentBuilder.announcementModal.featureIteratesBody',
   {
-    defaultMessage:
-      'Some legacy features, such as anonymization and chat sharing, are not yet supported in AI Agent.',
+    defaultMessage: 'by adapting mid-task based on what it finds',
   }
 );
 
-export const NEED_HISTORY_TITLE = i18n.translate(
-  'xpack.agentBuilder.announcementModal.needHistoryTitle',
-  { defaultMessage: 'Need your history?' }
+export const IMPORTANT_NOTES_TITLE = i18n.translate(
+  'xpack.agentBuilder.announcementModal.importantNotesTitle',
+  { defaultMessage: 'Important notes:' }
 );
 
-export const NEED_HISTORY_BODY = i18n.translate(
-  'xpack.agentBuilder.announcementModal.needHistoryBody',
+export const NOTE_HISTORY_UNTOUCHED = i18n.translate(
+  'xpack.agentBuilder.announcementModal.noteHistoryUntouched',
   {
-    defaultMessage:
-      'Your AI Assistant data is safe and remains fully accessible. You can opt-out of the Agent and switch back to the legacy Assistant at any time via the GenAI Settings page.',
+    defaultMessage: 'Your chat history, prompts, and data are untouched',
   }
 );
 
-export const LEARN_MORE_CALLOUT_TITLE = i18n.translate(
-  'xpack.agentBuilder.announcementModal.learnMoreCalloutTitle',
-  { defaultMessage: 'Explore Agent Builder' }
+export const NOTE_REVERT_IN_SETTINGS = i18n.translate(
+  'xpack.agentBuilder.announcementModal.noteRevertInSettings',
+  {
+    defaultMessage: 'Revert back to AI Assistant anytime in GenAI Settings',
+  }
 );
 
-export const DOCUMENTATION_LINK_TEXT = i18n.translate(
-  'xpack.agentBuilder.announcementModal.documentationLinkText',
-  { defaultMessage: 'documentation' }
+export const NOTE_CONTACT_ADMIN = i18n.translate(
+  'xpack.agentBuilder.announcementModal.noteContactAdmin',
+  {
+    defaultMessage: 'To revert to AI Assistant, please contact your administrator',
+  }
 );
 
 export const REVERT_BUTTON = i18n.translate('xpack.agentBuilder.announcementModal.revertButton', {
   defaultMessage: 'Revert to AI Assistant',
 });
 
-export const CONTINUE_BUTTON = i18n.translate(
-  'xpack.agentBuilder.announcementModal.continueButton',
-  { defaultMessage: 'Continue with AI Agent' }
+export const RELEASE_NOTES_BUTTON = i18n.translate(
+  'xpack.agentBuilder.announcementModal.releaseNotesButton',
+  { defaultMessage: 'Release notes' }
 );
 
-export const CONTINUE_BUTTON_READONLY = i18n.translate(
-  'xpack.agentBuilder.announcementModal.continueButtonReadonly',
-  { defaultMessage: 'Got it' }
+export const USE_AI_AGENT_BUTTON = i18n.translate(
+  'xpack.agentBuilder.announcementModal.useAiAgentButton',
+  { defaultMessage: 'Use AI Agent' }
 );

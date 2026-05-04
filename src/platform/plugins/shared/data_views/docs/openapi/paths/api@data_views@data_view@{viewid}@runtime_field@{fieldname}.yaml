@@ -1,8 +1,19 @@
 get:
   summary: Get a runtime field
   operationId: getRuntimeFieldDefault
+  description: >
+    Retrieve a single runtime field by name from a data view.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X GET "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+          -H "Authorization: ApiKey ${API_KEY}"
+    - lang: Console
+      source: |
+        GET kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -29,12 +40,27 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            getRuntimeFieldNotFound:
+              $ref: '../components/examples/error_404_response.yaml'
 
 delete:
-  summary: Delete a runtime field from a data view
+  summary: Delete a runtime field
   operationId: deleteRuntimeFieldDefault
+  description: >
+    Delete a runtime field from a data view.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X DELETE "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true"
+    - lang: Console
+      source: |
+        DELETE kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -47,12 +73,31 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            deleteRuntimeFieldNotFound:
+              $ref: '../components/examples/error_404_response.yaml'
 
 post:
   summary: Update a runtime field
   operationId: updateRuntimeFieldDefault
+  description: >
+    Update an existing runtime field in a data view.
+    Only the fields provided in the request body are updated.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+    - lang: Console
+      source: |
+        POST kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
+        {"runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -86,3 +131,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            updateRuntimeFieldBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

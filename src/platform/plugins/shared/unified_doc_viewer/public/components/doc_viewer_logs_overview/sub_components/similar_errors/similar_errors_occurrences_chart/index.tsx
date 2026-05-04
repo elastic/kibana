@@ -89,7 +89,7 @@ export function SimilarErrorsOccurrencesChart({
 }: SimilarErrorsOccurrencesChartProps) {
   const { data } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
   const timeRange = useMemo(
@@ -130,6 +130,9 @@ export function SimilarErrorsOccurrencesChart({
 
   const getParentApi = useCallback(() => {
     return {
+      executionContext: {
+        meta: { profile_id: profileId, metric_id: 'similarErrors' },
+      },
       getSerializedStateForChild: () => ({
         attributes: lensAttributes,
         viewMode: 'view',
@@ -137,7 +140,7 @@ export function SimilarErrorsOccurrencesChart({
       }),
       noPadding: true,
     };
-  }, [lensAttributes, timeRange]);
+  }, [lensAttributes, timeRange, profileId]);
 
   useEffect(() => {
     if (!chartEsqlQuery || !data.dataViews) {

@@ -1069,6 +1069,46 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.AnomalyThreshold",
+        "type": "Function",
+        "tags": [],
+        "label": "AnomalyThreshold",
+        "description": [],
+        "signature": [
+          "({\n  chartProps: { theme, baseTheme },\n  id,\n  severity,\n  severityThreshold,\n}: ",
+          "AnomalyThresholdProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/public/components/custom_threshold/components/anomaly_threshold.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AnomalyThreshold.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  chartProps: { theme, baseTheme },\n  id,\n  severity,\n  severityThreshold,\n}",
+            "description": [],
+            "signature": [
+              "AnomalyThresholdProps"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/components/custom_threshold/components/anomaly_threshold.tsx",
+            "lineNumber": 24,
+            "columnNumber": 34,
+            "deprecated": false,
+            "docsReferencedTypeName": "AnomalyThresholdProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.AutocompleteField",
         "type": "Function",
         "tags": [],
@@ -1099,6 +1139,7 @@
             "lineNumber": 25,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "AutocompleteFieldProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1144,6 +1185,7 @@
             "lineNumber": 22,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "BuildEsQueryArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1204,6 +1246,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1227,6 +1270,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeBuckets",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1433,6 +1477,7 @@
             "lineNumber": 13,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "DatePickerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1502,7 +1547,7 @@
           "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => string | number"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/utils/format_alert_evaluation_value.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1518,7 +1563,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/utils/format_alert_evaluation_value.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -1535,7 +1580,7 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/utils/format_alert_evaluation_value.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
@@ -1575,6 +1620,7 @@
             "lineNumber": 15,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1633,6 +1679,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1706,6 +1753,7 @@
             "lineNumber": 13,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "CoreVitalProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1810,6 +1858,7 @@
             "lineNumber": 14,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ObservabilityAlertSearchBarProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7244,6 +7293,7 @@
             "lineNumber": 53,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "Subset",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7283,6 +7333,7 @@
             "lineNumber": 13,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleConditionChartProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7322,6 +7373,7 @@
             "lineNumber": 15,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleFlyoutKueryBarProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7361,6 +7413,7 @@
             "lineNumber": 41,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7630,6 +7683,7 @@
             "lineNumber": 14,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7695,6 +7749,7 @@
             "lineNumber": 35,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "WithKueryAutocompletionLifecycleProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7750,6 +7805,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -7899,7 +7955,7 @@
         "label": "ConfigSchema",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-        "lineNumber": 107,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7915,7 +7971,7 @@
               "{ alertDetails: { logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; ruleFormV2?: { enabled: boolean; } | undefined; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 108,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7928,7 +7984,7 @@
             "label": "managedOtlpServiceUrl",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 127,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8057,6 +8113,7 @@
                 "lineNumber": 74,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "FetchDataParams",
                 "trackAdoption": false
               }
             ]
@@ -8115,6 +8172,7 @@
                 "lineNumber": 78,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "HasDataParams",
                 "trackAdoption": false
               }
             ]
@@ -9220,7 +9278,7 @@
         "label": "ObservabilityPublicPluginsSetup",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-        "lineNumber": 130,
+        "lineNumber": 128,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9242,7 +9300,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 131,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9266,7 +9324,7 @@
               "[]) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 132,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9292,7 +9350,7 @@
               "[]>) => void; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 133,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9315,7 +9373,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 134,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9337,7 +9395,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 135,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9359,7 +9417,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 136,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9382,7 +9440,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 137,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9404,7 +9462,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 138,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9426,7 +9484,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 139,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9458,7 +9516,7 @@
               "<any, {}>>) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 140,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9480,7 +9538,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 141,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9503,7 +9561,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 142,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9526,7 +9584,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 143,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9549,7 +9607,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 144,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9572,7 +9630,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 145,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9588,7 +9646,7 @@
         "label": "ObservabilityPublicPluginsStart",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-        "lineNumber": 147,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9628,7 +9686,7 @@
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 148,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9651,7 +9709,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 149,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9676,7 +9734,7 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 150,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9698,7 +9756,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 151,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9720,7 +9778,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 152,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9742,7 +9800,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 153,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9764,7 +9822,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 154,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9786,7 +9844,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 155,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9808,7 +9866,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 156,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9830,7 +9888,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 157,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9874,7 +9932,7 @@
               ") => React.JSX.Element | null; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 158,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9896,7 +9954,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 159,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9928,7 +9986,7 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 160,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9950,7 +10008,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 161,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9972,7 +10030,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 162,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9995,7 +10053,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 163,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10015,7 +10073,7 @@
               "; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 164,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10037,7 +10095,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 165,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10073,7 +10131,7 @@
               "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 166,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10096,7 +10154,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 167,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10160,7 +10218,7 @@
               ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 168,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10182,7 +10240,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 169,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10203,7 +10261,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -10211,7 +10277,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -10221,7 +10295,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -10244,7 +10326,7 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 170,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10267,7 +10349,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 171,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10289,7 +10371,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 172,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10311,7 +10393,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 173,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10333,7 +10415,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 174,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10355,7 +10437,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 175,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10378,7 +10460,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 176,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10401,7 +10483,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 177,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10423,7 +10505,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 178,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10446,7 +10528,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 179,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10462,7 +10544,7 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 180,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10536,7 +10618,7 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 181,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10559,7 +10641,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 182,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10575,7 +10657,7 @@
               "ThemeServiceSetup"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 183,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10597,7 +10679,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 184,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10613,7 +10695,7 @@
               "IToasts"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 185,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10635,7 +10717,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 186,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10657,7 +10739,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 187,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10679,7 +10761,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 188,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10701,7 +10783,7 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 189,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10724,7 +10806,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 190,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10747,7 +10829,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 191,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10770,7 +10852,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 192,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10793,7 +10875,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "lineNumber": 193,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10903,126 +10985,6 @@
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "lineNumber": 25,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.RulesLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "RulesLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/deeplinks-observability",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.RulesLocatorParams",
-            "text": "RulesLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-        "lineNumber": 27,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.RulesLocatorParams.lastResponse",
-            "type": "Array",
-            "tags": [],
-            "label": "lastResponse",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-            "lineNumber": 28,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.RulesLocatorParams.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "Record<string, string | number> | undefined"
-            ],
-            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-            "lineNumber": 29,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.RulesLocatorParams.search",
-            "type": "string",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.RulesLocatorParams.status",
-            "type": "Array",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/deeplinks-observability",
-                "scope": "common",
-                "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.RuleStatus",
-                "text": "RuleStatus"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-            "lineNumber": 31,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.RulesLocatorParams.type",
-            "type": "Array",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11669,6 +11631,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FetchDataParams",
             "trackAdoption": false
           }
         ],
@@ -17071,6 +17034,7 @@
             "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HasDataParams",
             "trackAdoption": false
           }
         ],
@@ -19910,40 +19874,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.ruleDetailsLocatorID",
-        "type": "string",
-        "tags": [],
-        "label": "ruleDetailsLocatorID",
-        "description": [],
-        "signature": [
-          "\"RULE_DETAILS_LOCATOR\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-        "lineNumber": 12,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.rulesLocatorID",
-        "type": "string",
-        "tags": [],
-        "label": "rulesLocatorID",
-        "description": [],
-        "signature": [
-          "\"RULES_LOCATOR\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
-        "lineNumber": 13,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.sloDetailsLocatorID",
         "type": "string",
         "tags": [],
@@ -20078,7 +20008,166 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.builtInComparatorsWithInclusive",
+        "type": "Object",
+        "tags": [],
+        "label": "builtInComparatorsWithInclusive",
+        "description": [],
+        "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.builtInComparatorsWithInclusive.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.BETWEEN_INCLUSIVE",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.BETWEEN_INCLUSIVE]",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.BETWEEN_INCLUSIVE.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+                "lineNumber": 16,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.BETWEEN_INCLUSIVE.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.BETWEEN_INCLUSIVE.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.NOT_BETWEEN_INCLUSIVE",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.NOT_BETWEEN_INCLUSIVE]",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.NOT_BETWEEN_INCLUSIVE.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.NOT_BETWEEN_INCLUSIVE.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.builtInComparatorsWithInclusive.COMPARATORS.NOT_BETWEEN_INCLUSIVE.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/public/constants/comparators.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "observability",
       "id": "def-public.ObservabilityPublicSetup",
@@ -20129,33 +20218,7 @@
         },
         ") => ",
         "LinkProps",
-        "; rulesLocator: ",
-        {
-          "pluginId": "share",
-          "scope": "common",
-          "docId": "kibSharePluginApi",
-          "section": "def-common.LocatorPublic",
-          "text": "LocatorPublic"
-        },
-        "<",
-        {
-          "pluginId": "@kbn/deeplinks-observability",
-          "scope": "common",
-          "docId": "kibKbnDeeplinksObservabilityPluginApi",
-          "section": "def-common.RulesLocatorParams",
-          "text": "RulesLocatorParams"
-        },
-        ">; ruleDetailsLocator: ",
-        {
-          "pluginId": "share",
-          "scope": "common",
-          "docId": "kibSharePluginApi",
-          "section": "def-common.LocatorPublic",
-          "text": "LocatorPublic"
-        },
-        "<",
-        "RuleDetailsLocatorParams",
-        ">; config: ",
+        "; config: ",
         {
           "pluginId": "observability",
           "scope": "public",
@@ -20166,7 +20229,7 @@
         "; }"
       ],
       "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-      "lineNumber": 129,
+      "lineNumber": 127,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -20218,7 +20281,7 @@
         "; }"
       ],
       "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-      "lineNumber": 195,
+      "lineNumber": 193,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -23058,6 +23121,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -23092,6 +23156,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TermQueryOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -23148,6 +23213,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -23185,6 +23251,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -23224,6 +23291,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -24066,7 +24134,9 @@
             "type": "Object",
             "tags": [],
             "label": "[enableInspectEsQueries]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 44,
             "columnNumber": 3,
@@ -24194,7 +24264,9 @@
             "type": "Object",
             "tags": [],
             "label": "[maxSuggestions]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 57,
             "columnNumber": 3,
@@ -24303,7 +24375,9 @@
             "type": "Object",
             "tags": [],
             "label": "[enableComparisonByDefault]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 69,
             "columnNumber": 3,
@@ -24415,7 +24489,9 @@
             "type": "Object",
             "tags": [],
             "label": "[defaultApmServiceEnvironment]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 82,
             "columnNumber": 3,
@@ -24540,7 +24616,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmProgressiveLoading]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 96,
             "columnNumber": 3,
@@ -24788,7 +24866,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmServiceGroupMaxNumberOfServices]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 148,
             "columnNumber": 3,
@@ -24897,7 +24977,9 @@
             "type": "Object",
             "tags": [],
             "label": "[enableInfrastructureAssetCustomDashboards]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 160,
             "columnNumber": 3,
@@ -25025,7 +25107,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmEnableTableSearchBar]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 176,
             "columnNumber": 3,
@@ -25185,7 +25269,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmEnableServiceInventoryTableSearchBar]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 192,
             "columnNumber": 3,
@@ -25345,7 +25431,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmAWSLambdaPriceFactor]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 211,
             "columnNumber": 3,
@@ -25486,7 +25574,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmAWSLambdaRequestCostPerMillion]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 227,
             "columnNumber": 3,
@@ -25582,7 +25672,9 @@
             "type": "Object",
             "tags": [],
             "label": "[syntheticsThrottlingEnabled]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 236,
             "columnNumber": 3,
@@ -25726,7 +25818,9 @@
             "type": "Object",
             "tags": [],
             "label": "[enableLegacyUptimeApp]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 259,
             "columnNumber": 3,
@@ -25854,7 +25948,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingShowErrorFrames]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 273,
             "columnNumber": 3,
@@ -25969,7 +26065,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingPervCPUWattX86]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 283,
             "columnNumber": 3,
@@ -26094,7 +26192,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingPervCPUWattArm64]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 296,
             "columnNumber": 3,
@@ -26219,7 +26319,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingDatacenterPUE]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 312,
             "columnNumber": 3,
@@ -26344,7 +26446,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingCo2PerKWH]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 337,
             "columnNumber": 3,
@@ -26469,7 +26573,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingAWSCostDiscountRate]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 361,
             "columnNumber": 3,
@@ -26594,7 +26700,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingAzureCostDiscountRate]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 378,
             "columnNumber": 3,
@@ -26719,7 +26827,9 @@
             "type": "Object",
             "tags": [],
             "label": "[profilingCostPervCPUPerHour]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 395,
             "columnNumber": 3,
@@ -26844,7 +26954,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmEnableTransactionProfiling]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 411,
             "columnNumber": 3,
@@ -26959,7 +27071,9 @@
             "type": "Object",
             "tags": [],
             "label": "[apmUseUnifiedTraceWaterfall]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 421,
             "columnNumber": 3,
@@ -27087,7 +27201,9 @@
             "type": "Object",
             "tags": [],
             "label": "[searchExcludedDataTiers]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 434,
             "columnNumber": 3,
@@ -27231,7 +27347,9 @@
             "type": "Object",
             "tags": [],
             "label": "[enableDiagnosticMode]",
-            "description": [],
+            "description": [
+              "\nuiSettings definitions for Observability."
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
             "lineNumber": 455,
             "columnNumber": 3,
@@ -27533,6 +27651,7 @@
                 "lineNumber": 42,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "AlertsLocatorParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -27593,6 +27712,7 @@
             "lineNumber": 106,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeUnit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -27635,6 +27755,7 @@
             "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -27652,6 +27773,7 @@
             "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatterOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -27692,6 +27814,7 @@
             "lineNumber": 33,
             "columnNumber": 11,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false
           }
         ],
@@ -27767,6 +27890,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -27847,6 +27971,7 @@
             "lineNumber": 14,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "LegacyComparator",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -27884,6 +28009,7 @@
             "lineNumber": 38,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -27952,6 +28078,7 @@
             "lineNumber": 221,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeUnitChar",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -27991,6 +28118,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IBasePath",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -28144,6 +28272,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LocatorPublic",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -28422,6 +28551,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProgressiveLoadingQuality",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -28805,6 +28935,7 @@
             "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false
           },
           {
@@ -28812,7 +28943,7 @@
             "id": "def-common.AsDuration.$2",
             "type": "Object",
             "tags": [],
-            "label": "__1",
+            "label": "{ defaultValue = NOT_AVAILABLE_LABEL, extended }",
             "description": [],
             "signature": [
               "FormatterOptions"
@@ -28821,6 +28952,7 @@
             "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatterOptions",
             "trackAdoption": false
           }
         ],
@@ -28859,6 +28991,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false
           },
           {
@@ -29461,6 +29594,7 @@
             "lineNumber": 30,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false
           },
           {
@@ -29477,6 +29611,7 @@
             "lineNumber": 30,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatterOptions",
             "trackAdoption": false
           }
         ],
@@ -29539,7 +29674,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nTiered features"
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
             "lineNumber": 14,
             "columnNumber": 3,
@@ -29552,7 +29689,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "\nTiered features"
+            ],
             "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
             "lineNumber": 15,
             "columnNumber": 3,
@@ -29565,7 +29704,9 @@
             "type": "Array",
             "tags": [],
             "label": "products",
-            "description": [],
+            "description": [
+              "\nTiered features"
+            ],
             "signature": [
               "{ name: \"observability\"; tier: \"complete\"; }[]"
             ],

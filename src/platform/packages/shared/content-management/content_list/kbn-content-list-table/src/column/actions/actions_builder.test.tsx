@@ -192,16 +192,33 @@ describe('actions column builder', () => {
 
     describe('custom configuration', () => {
       it('applies custom width', () => {
-        const props: ActionsColumnProps = { width: '150px' };
+        const props: ActionsColumnProps = {
+          width: '5em',
+          minWidth: '5em',
+          maxWidth: '5em',
+        };
         const result = buildActionsColumn(props, defaultContext);
 
-        expect(result).toMatchObject({ width: '150px' });
+        expect(result).toMatchObject({ width: '5em', minWidth: '5em', maxWidth: '5em' });
       });
 
-      it('does not include width when not specified', () => {
+      it('computes a default width from the action count when not specified', () => {
         const result = buildActionsColumn({}, defaultContext);
 
-        expect(result).not.toHaveProperty('width');
+        // `2 * 32` (icon-button width) + `1 * 4` (gap) + `2 * 8` (cell padding) = 84px.
+        expect(result).toMatchObject({ width: '84px', minWidth: '84px' });
+      });
+
+      it('sticks the actions column by default', () => {
+        const result = buildActionsColumn({}, defaultContext);
+
+        expect(result).toMatchObject({ sticky: true });
+      });
+
+      it('allows sticky behavior to be disabled', () => {
+        const result = buildActionsColumn({ sticky: false }, defaultContext);
+
+        expect(result).toMatchObject({ sticky: false });
       });
 
       it('applies custom column title', () => {

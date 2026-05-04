@@ -174,6 +174,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -461,6 +462,7 @@
             "lineNumber": 39,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchHit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -505,6 +507,7 @@
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchHit",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -523,6 +526,7 @@
             "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IndicesGetMappingResponse",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -567,6 +571,7 @@
             "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchHit",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -586,6 +591,7 @@
             "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }

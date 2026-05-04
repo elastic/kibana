@@ -103,6 +103,13 @@ function createServerCallback() {
           response.statusCode = 200;
           response.end('OK');
           return;
+        case 'binary_response':
+          response.statusCode = 200;
+          response.setHeader('Content-Type', 'image/png');
+          // PNG file signature, used as a deterministic non-UTF8 byte sequence
+          // to verify the http connector preserves binary responses.
+          response.end(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+          return;
       }
 
       // store a payload that was posted to be remembered

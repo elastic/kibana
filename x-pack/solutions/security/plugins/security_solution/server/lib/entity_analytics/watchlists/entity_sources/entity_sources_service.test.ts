@@ -80,24 +80,20 @@ describe('createEntitySourcesService', () => {
       ],
     });
     mockListEntityStoreEntities
-      .mockResolvedValueOnce({
-        entityIdsByType: {
-          user: ['user:1'],
-          host: [],
-          service: [],
-          generic: [],
-        },
-        correlationMap: new Map(),
-        watchlistsByEuid: new Map(),
+      .mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          correlationMap: new Map(),
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:1',
+        };
       })
-      .mockResolvedValueOnce({
-        entityIdsByType: {
-          user: ['user:2'],
-          host: ['host:1'],
-          service: [],
-          generic: [],
-        },
-        watchlistsByEuid: new Map(),
+      .mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:2'], host: ['host:1'], service: [], generic: [] },
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:2',
+        };
       });
     mockPlainIndexSync.mockResolvedValue(undefined);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
@@ -119,29 +115,33 @@ describe('createEntitySourcesService', () => {
     expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
     expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
-    expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(1, {
-      type: 'index',
-      field: 'user.id',
-    });
-    expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(2, {
+    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({ type: 'index', field: 'user.id' });
+    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({
       type: 'integration',
       name: 'entityanalytics_okta',
     });
 
+    // Each source gets one plainIndexSync call per page + one tail call (4 total, order may vary)
+    expect(mockPlainIndexSync).toHaveBeenCalledTimes(4);
+
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      {
-        sourceId: 'source-a',
-        entityStoreEntityIdsByType: {
-          user: ['user:1'],
-          host: [],
-          service: [],
-          generic: [],
-        },
+      expect.objectContaining({
+        source: expect.objectContaining({ id: 'source-a' }),
+        entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
         correlationMap: expect.any(Map),
         watchlistsByEuid: expect.any(Map),
-      },
-      {
-        sourceId: 'source-c',
+        pageRange: expect.objectContaining({ lte: expect.any(String) }),
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
+        source: expect.objectContaining({ id: 'source-a' }),
+        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
+        source: expect.objectContaining({ id: 'source-c' }),
         entityStoreEntityIdsByType: {
           user: ['user:2'],
           host: ['host:1'],
@@ -149,7 +149,14 @@ describe('createEntitySourcesService', () => {
           generic: [],
         },
         watchlistsByEuid: expect.any(Map),
-      },
+        pageRange: expect.objectContaining({ lte: expect.any(String) }),
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
+        source: expect.objectContaining({ id: 'source-c' }),
+        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+      }),
     ]);
 
     expect(logger.info).toHaveBeenCalledWith(
@@ -260,8 +267,8 @@ describe('createEntitySourcesService', () => {
           staleEntities: [{ docId: 'user:alice:doc1', sourceId: 'orphaned-source-1' }],
         })
       );
-      // plainIndexSync still runs (with empty sources) but cleanup handles orphans
-      expect(mockPlainIndexSync).toHaveBeenCalledWith([]);
+      // no active sources so plainIndexSync is never called
+      expect(mockPlainIndexSync).not.toHaveBeenCalled();
     });
 
     it('continues syncing remaining watchlists when one fails', async () => {
@@ -284,6 +291,99 @@ describe('createEntitySourcesService', () => {
       );
       // Second watchlist still synced
       expect(mockWatchlistGet).toHaveBeenCalledWith('wl-2');
+    });
+
+    it('stops syncing remaining watchlists when abort signal fires between iterations', async () => {
+      mockWatchlistList.mockResolvedValue([
+        { id: 'wl-1', name: 'First' },
+        { id: 'wl-2', name: 'Second' },
+      ]);
+
+      const controller = new AbortController();
+      const service = createService();
+
+      // Abort after the first watchlist completes
+      mockWatchlistGet.mockImplementationOnce(async () => {
+        controller.abort();
+        return { name: 'First' };
+      });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      await service.syncAllWatchlists({ abortSignal: controller.signal });
+
+      expect(mockWatchlistGet).toHaveBeenCalledTimes(1);
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Abort signal received: stopping watchlist sync')
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 2 watchlist(s) were processed'
+        )
+      );
+      expect(logger.info).not.toHaveBeenCalledWith(
+        expect.stringMatching(/Completed sync of 2 watchlist/)
+      );
+    });
+
+    it('does not sync any watchlists when abort signal is already fired', async () => {
+      mockWatchlistList.mockResolvedValue([{ id: 'wl-1', name: 'VIP Users' }]);
+
+      const controller = new AbortController();
+      controller.abort();
+
+      const service = createService();
+      await service.syncAllWatchlists({ abortSignal: controller.signal });
+
+      expect(mockWatchlistGet).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 1 watchlist(s) were processed'
+        )
+      );
+    });
+  });
+
+  describe('syncWatchlist abort handling', () => {
+    const createService = () =>
+      createEntitySourcesService({ esClient, soClient, logger, namespace });
+
+    it('skips cleanup when abort signal fires after plainIndexSync', async () => {
+      const controller = new AbortController();
+
+      // Need one active source so the paginated loop calls plainIndexSync at least once
+      mockGetEntitySourceIds.mockResolvedValue(['source-a']);
+      mockListEntitySources.mockResolvedValue({
+        sources: [{ id: 'source-a', type: 'index', identifierField: 'user.id' }],
+      });
+      mockListEntityStoreEntities.mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          correlationMap: new Map(),
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:1',
+        };
+      });
+
+      // Abort mid-way through syncWatchlist, after plainIndexSync runs
+      mockPlainIndexSync.mockImplementation(async () => {
+        controller.abort();
+      });
+
+      const service = createService();
+      await service.syncWatchlist('watchlist-1', controller.signal);
+
+      // First page pass calls plainIndexSync; abort fires so tail pass is skipped
+      expect(mockPlainIndexSync).toHaveBeenCalledTimes(1);
+      // cleanupOrphanedEntities triggers an esClient.search for orphaned source agg —
+      // it should not be called after abort
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Abort signal received: after index sync for watchlist watchlist-1, skipping cleanup'
+        )
+      );
     });
   });
 });

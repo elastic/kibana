@@ -6,7 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ToolOrigin } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   ConversationRoundStepType,
@@ -232,6 +232,7 @@ describe('conversation model converters', () => {
               data: { someData: 'someValue' },
             },
           ],
+          tool_origin: undefined,
         },
         {
           type: ConversationRoundStepType.reasoning,
@@ -313,6 +314,79 @@ describe('conversation model converters', () => {
       });
       // other types should remain unchanged
       expect(results[1].type).toBe(ToolResultType.query);
+    });
+
+    it('infers tool_origin as internal for attachment tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'attachments.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('infers tool_origin as internal for filestore tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'filestore.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('leaves tool_origin undefined for unknown tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'some.custom.tool',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBeUndefined();
+    });
+
+    it('preserves existing tool_origin when already set', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'my.registry.tool',
+          params: {},
+          results: '[]',
+          tool_origin: ToolOrigin.registry,
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.registry);
     });
 
     it('deserializes conversation with attachments', () => {

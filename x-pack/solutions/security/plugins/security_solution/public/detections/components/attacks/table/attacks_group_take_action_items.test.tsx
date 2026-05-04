@@ -115,7 +115,7 @@ describe('AttacksGroupTakeActionItems', () => {
       panels: [],
     });
     mockUseAttackInvestigateInTimelineContextMenuItems.mockReturnValue({
-      items: [{ name: 'Investigate in timeline', key: 'investigateInTimeline' }],
+      items: [{ name: 'Investigate in Timeline', key: 'investigateInTimeline' }],
       panels: [],
     });
     mockUseAttackCaseContextMenuItems.mockReturnValue({
@@ -252,10 +252,10 @@ describe('AttacksGroupTakeActionItems', () => {
   });
 
   describe('investigate in timeline', () => {
-    it('renders the `Investigate in timeline` action item when user has timeline read privileges', async () => {
+    it('renders the `Investigate in Timeline` action item when user has timeline read privileges', async () => {
       const { findByText } = renderAttack(mockAttack);
 
-      expect(await findByText('Investigate in timeline')).toBeInTheDocument();
+      expect(await findByText('Investigate in Timeline')).toBeInTheDocument();
     });
   });
 
@@ -307,7 +307,7 @@ describe('AttacksGroupTakeActionItems', () => {
     it('renders only the Investigate in Timeline action', () => {
       const { queryByText } = renderAttack(mockAttack, true);
 
-      expect(queryByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Investigate in Timeline')).toBeInTheDocument();
     });
 
     it('hides all other actions', () => {

@@ -472,7 +472,7 @@ describe('When calling package policy', () => {
         expect.anything(),
         'agent-policy',
         { name: 'Agentless policy for new-name' },
-        { force: true }
+        { bumpRevision: false, force: true }
       );
     });
     it('should not rename the agentless agent policy if agentless is not enabled in cloud environment', async () => {

@@ -18,6 +18,7 @@ import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
+  profileId: 'test-profile',
 }));
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
@@ -81,6 +82,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
     capturedGetParentApi = undefined;
     mockUseDataSourcesContext.mockReturnValue({
       indexes: { logs: 'logs-*', apm: {} },
+      profileId: 'test-profile',
     });
     mockBuild.mockResolvedValue({
       visualizationType: 'lnsXY',
@@ -152,6 +154,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   it('does not build chart when indexes.logs is undefined', async () => {
     mockUseDataSourcesContext.mockReturnValueOnce({
       indexes: { logs: undefined, apm: {} } as any,
+      profileId: 'test-profile',
     });
     const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
