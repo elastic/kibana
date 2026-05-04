@@ -27,7 +27,10 @@ import {
   NO_CREATOR_USER_LABEL,
   SENTINEL_KEYS,
 } from '@kbn/content-list-provider';
-import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
+import {
+  SAVED_OBJECTS_PER_PAGE_ID,
+  SAVED_OBJECTS_LISTING_LIMIT_ID,
+} from '@kbn/management-settings-ids';
 import { useFavorites } from '@kbn/content-management-favorites-public';
 import type { Tag } from '@kbn/content-management-tags';
 import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
@@ -207,9 +210,20 @@ export const ContentListClientProvider = ({
     []
   );
 
+  // Read listing limit once at mount. Not reactive — changes during a session
+  // are not expected to take effect until reload (same pattern as page size).
+  const [listingLimit] = useState(() =>
+    services.uiSettings.get<number>(SAVED_OBJECTS_LISTING_LIMIT_ID)
+  );
+
   const { findItems, onInvalidate, onRefresh, getItems } = useMemo(
-    () => createClientStrategy(tableListViewFindItems, starredEnabled ? decorate : undefined),
-    [tableListViewFindItems, starredEnabled, decorate]
+    () =>
+      createClientStrategy(
+        tableListViewFindItems,
+        starredEnabled ? decorate : undefined,
+        listingLimit
+      ),
+    [tableListViewFindItems, starredEnabled, decorate, listingLimit]
   );
 
   const dataSource: DataSourceConfig = useMemo(
@@ -361,9 +375,28 @@ export const ContentListClientProvider = ({
   // Derive queryKeyScope the same way the base provider does.
   const queryKeyScope = rest.queryKeyScope ?? `${rest.id}-listing`;
 
+  // Wrap the consumer's `contentEditor.onSave` so the client strategy cache is
+  // cleared before {@link useContentEditorInspect} invalidates the React Query
+  // cache. Without this, the strategy's internal `searchQuery`-keyed cache
+  // returns stale items on the post-save refetch and the row appears
+  // unchanged in the table — see `createClientStrategy.findItemsFn`.
+  const contentEditorWithInvalidation = useMemo<ContentEditorConfig | undefined>(() => {
+    if (!contentEditor?.onSave) {
+      return contentEditor;
+    }
+    const consumerOnSave = contentEditor.onSave;
+    return {
+      ...contentEditor,
+      onSave: async (args) => {
+        await consumerOnSave(args);
+        onInvalidate();
+      },
+    };
+  }, [contentEditor, onInvalidate]);
+
   // Create the onInspect callback from the content editor config.
   const onInspect = useContentEditorInspect({
-    contentEditor,
+    contentEditor: contentEditorWithInvalidation,
     entityName: rest.labels.entity,
     isReadOnly: rest.isReadOnly,
     queryKeyScope,

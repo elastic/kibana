@@ -42,6 +42,7 @@ export const LookupsDataInput = React.memo<MigrationStepProps>(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
     );
+
     const onAllLookupsCreated = useCallback(() => {
       setDataInputStep(SplunkDataInputStep.End);
     }, [setDataInputStep]);

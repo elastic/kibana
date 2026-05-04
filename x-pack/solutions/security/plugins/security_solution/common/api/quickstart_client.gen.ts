@@ -20,7 +20,10 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetAlertAssigneesRequestBodyInput,
+  SetAlertAssigneesResponse,
+} from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
@@ -523,6 +526,8 @@ import type {
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
+  CreateSentinelRuleMigrationRulesRequestParamsInput,
+  CreateSentinelRuleMigrationRulesRequestBodyInput,
   DeleteRuleMigrationRequestParamsInput,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
@@ -1021,6 +1026,25 @@ For detailed information on Kibana actions and alerting, and additional API call
     return this.kbnClient
       .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Parses Microsoft Sentinel ARM template JSON export and adds rules to an existing migration
+   */
+  async createSentinelRuleMigrationRules(props: CreateSentinelRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateSentinelRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/sentinel/rules',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -3213,7 +3237,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   async setAlertAssignees(props: SetAlertAssigneesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SetAlertAssignees`);
     return this.kbnClient
-      .request({
+      .request<SetAlertAssigneesResponse>({
         path: '/api/detection_engine/signals/assignees',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -3807,6 +3831,10 @@ export interface CreateRuleMigrationProps {
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
   body: CreateRuleMigrationRulesRequestBodyInput;
+}
+export interface CreateSentinelRuleMigrationRulesProps {
+  params: CreateSentinelRuleMigrationRulesRequestParamsInput;
+  body: CreateSentinelRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;

@@ -27,7 +27,9 @@
       "charts",
       "management",
       "kibanaUtils",
-      "share"
+      "share",
+      "eventLog",
+      "unifiedDocViewer"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],
