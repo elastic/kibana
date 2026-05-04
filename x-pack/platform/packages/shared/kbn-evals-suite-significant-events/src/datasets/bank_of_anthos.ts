@@ -104,7 +104,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
                 bool: {
                   filter: [
                     { term: { 'resource.attributes.app.keyword': 'balancereader' } },
-                    { match_phrase: { 'body.text': 'jdbc' } },
+                    { match_phrase: { 'body.text': 'org.postgresql.jdbc.PgConnection' } },
                   ],
                 },
               },
@@ -119,7 +119,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
                 bool: {
                   filter: [
                     { term: { 'resource.attributes.app.keyword': 'transactionhistory' } },
-                    { match_phrase: { 'body.text': 'jdbc' } },
+                    { match_phrase: { 'body.text': 'org.postgresql.jdbc.PgConnection' } },
                   ],
                 },
               },
