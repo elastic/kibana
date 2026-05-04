@@ -13,9 +13,9 @@ import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
 import { loadWorkflowExampleContent } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
-export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetupContract): void {
+export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetup): void {
   agentBuilder.tools.register({
     id: workflowTools.getExamples,
     type: ToolType.builtin,
