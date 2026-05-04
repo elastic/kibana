@@ -106,18 +106,6 @@ export type {
   PluginRegistry,
 } from './plugins';
 export type {
-  SmlChunk,
-  SmlData,
-  SmlContext,
-  SmlToAttachmentContext,
-  SmlListItem,
-  SmlDocument,
-  SmlSearchResult,
-  SmlTypeDefinition,
-  SmlIndexAction,
-  SmlIndexAttachmentParams,
-} from './sml';
-export type {
   AgentExecutionParams,
   AgentExecution,
   ExecuteAgentParams,
@@ -144,8 +132,6 @@ export type {
   AgentsSetup,
   AgentsStart,
   ExecutionStart,
-  SmlSetup,
-  SmlStart,
   PluginsSetup,
   PluginsStart,
   RuntimeStart,

@@ -21,7 +21,6 @@ import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
 import type { BuiltInPluginDefinition, PluginRegistry } from './plugins';
-import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './sml';
 import type {
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -124,28 +123,6 @@ export interface ExecutionStart {
   ): Promise<AgentExecution[]>;
 }
 
-/**
- * SML (Semantic Metadata Layer) setup contract.
- */
-export interface SmlSetup {
-  /**
-   * Register an SML type definition.
-   * Solutions can register their content types to make them discoverable via SML.
-   */
-  registerType: (definition: SmlTypeDefinition) => void;
-}
-
-/**
- * SML (Semantic Metadata Layer) start contract.
- */
-export interface SmlStart {
-  /**
-   * Event-driven indexing API. Allows integrations to react to
-   * create/update/delete events and update SML data immediately.
-   */
-  indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
-}
-
 export interface PluginsSetup {
   /**
    * Register a built-in plugin to be available in agentBuilder.
@@ -241,11 +218,6 @@ export interface AgentBuilderPluginSetup {
    */
   plugins: PluginsSetup;
   /**
-   * SML (Semantic Metadata Layer) setup contract.
-   * Used to register content types for discovery and search.
-   */
-  sml: SmlSetup;
-  /**
    * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
    * Exposed so that dependent plugins can pass these values to search utilities.
    */
@@ -281,11 +253,6 @@ export interface AgentBuilderPluginStart {
    * outside of the agent builder's built-in tool/agent execution flow.
    */
   runtime: RuntimeStart;
-  /**
-   * SML (Semantic Metadata Layer) service, for event-driven indexing of
-   * discoverable content.
-   */
-  sml: SmlStart;
   /**
    * Conversations service (read-only), to list and retrieve conversations.
    */
