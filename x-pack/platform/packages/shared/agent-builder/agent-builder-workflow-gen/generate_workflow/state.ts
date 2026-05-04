@@ -6,13 +6,14 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { Action, PrefetchedContext, ValidationResult } from './types';
+import type { Action, PrefetchedContext, ValidationResult, GenerateWorkflowEdit } from './types';
 
 export const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   additionalContext: Annotation<string | undefined>(),
   additionalInstructions: Annotation<string | undefined>(),
+  workflowDefinition: Annotation<GenerateWorkflowEdit | undefined>(),
   maxRetries: Annotation<number>(),
 
   // prefetched context

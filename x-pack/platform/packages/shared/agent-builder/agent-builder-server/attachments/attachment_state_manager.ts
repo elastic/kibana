@@ -82,7 +82,7 @@ export interface ResolvedAttachmentRef {
 export interface AttachmentSnapshot {
   id: string;
   version: number;
-  type: AttachmentType;
+  type: string;
   data: AttachmentVersion;
 }
 

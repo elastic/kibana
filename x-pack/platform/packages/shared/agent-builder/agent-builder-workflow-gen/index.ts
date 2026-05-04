@@ -11,4 +11,5 @@ export {
   type GenerateWorkflowDeps,
   type GenerateWorkflowParams,
   type GenerateWorkflowResponse,
+  type GenerateWorkflowEdit,
 } from './generate_workflow';

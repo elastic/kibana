@@ -18,12 +18,20 @@ import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/se
 export interface GenerateWorkflowOptions {
   /** Natural-language description of the workflow to generate. */
   nlQuery: string;
+  /** when editing an existing workflow, the workflow to edit. */
+  workflow?: GenerateWorkflowEdit;
   /** Free-form additional context (user prompt extras). */
   additionalContext?: string;
   /** Free-form additional instructions (system prompt extras). */
   additionalInstructions?: string;
   /** Max validation-failure retries before throwing. Defaults to 3. */
   maxRetries?: number;
+}
+
+export interface GenerateWorkflowEdit {
+  yaml: string;
+  name?: string;
+  id?: string;
 }
 
 /**

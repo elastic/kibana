@@ -11,4 +11,5 @@ export type {
   GenerateWorkflowDeps,
   GenerateWorkflowParams,
   GenerateWorkflowResponse,
+  GenerateWorkflowEdit,
 } from './types';

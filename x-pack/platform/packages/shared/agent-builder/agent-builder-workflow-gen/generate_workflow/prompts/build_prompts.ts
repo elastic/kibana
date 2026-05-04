@@ -11,7 +11,7 @@ import {
   formatTriggersBlock,
 } from './format_prefetched';
 import { getWorkflowBaseDocumentation } from './workflow_docs';
-import type { PrefetchedContext } from '../types';
+import type { PrefetchedContext, GenerateWorkflowEdit } from '../types';
 
 export const createSystemPrompt = ({
   prefetched,
@@ -54,17 +54,29 @@ ${formatConnectorsBlock(prefetched.connectors)}
 
 ## Generation rules
 
-- Pick whichever editing approach best fits the task: emit the entire workflow
-  in one \`set_yaml\` call, or build it incrementally with
-  \`insert_step\` / \`modify_step\` / \`modify_step_property\` / \`delete_step\`.
+- Pick whichever editing approach best fits the task:
+ - emit the entire workflow in one \`set_yaml\` call (recommended for scaffolding new workflows)
+ - or build it incrementally with \`insert_step\` / \`modify_step\` / \`modify_step_property\` / \`delete_step\` (recommended for iterative refinement)
+
 - The default trigger type is \`manual\` if the user has not asked for anything else.
+
 - Always end with a workflow that is structurally complete: at least one trigger
   and at least one step. Do not call any more tools once you are confident the
   workflow is ready — that signals the run is finished.
+
 - Use \`{{ event }}\`, \`{{ inputs.* }}\`, \`{{ steps.<name>.output.* }}\` for
   Liquid templating. NEVER use \`{{ triggers.event }}\` or \`{{ trigger.event }}\`.
+
 - Prefer connector-based steps over raw HTTP for integrations like Slack, Jira,
   PagerDuty, etc.
+
+## Providing your final response
+
+Once the workflow is successfully generated, you should stop calling tools and respond with a plain text message.
+
+The user will automatically have access to the workflow which was generated, you do not need to (and should not) provide it in your response.
+
+Only provide a small, synthetic response only containing meaningful additional information about how you built the workflow.
 
 ${additionalInstructions ? `## Additional instructions\n\n${additionalInstructions}` : ''}`;
 };
@@ -72,18 +84,18 @@ ${additionalInstructions ? `## Additional instructions\n\n${additionalInstructio
 export const createUserPrompt = ({
   nlQuery,
   additionalContext,
+  workflowDefinition,
 }: {
   nlQuery: string;
   additionalContext?: string;
+  workflowDefinition?: GenerateWorkflowEdit;
 }): string => {
   return `Generate a valid workflow definition based on the following information:
 
-<user-query>
-${nlQuery}
-</user-query>
-${
-  additionalContext ? `\n\n<additional-context>\n${additionalContext}\n</additional-context>` : ''
-}`;
+<user-query>\n${nlQuery}\n</user-query>
+${additionalContext ? `\n<additional-context>\n${additionalContext}\n</additional-context>` : ''}
+${workflowDefinition ? `\n<workflow-to-edit>\n${workflowDefinition.yaml}\n</workflow-to-edit>` : ''}
+`;
 };
 
 export const createValidationFailureMessage = (errors: string[]): string => {

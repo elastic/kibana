@@ -11,6 +11,7 @@ import type { GenerateWorkflowParams, GenerateWorkflowResponse } from './types';
 
 export const generateWorkflow = async ({
   nlQuery,
+  workflow,
   additionalContext,
   additionalInstructions,
   maxRetries = 3,
@@ -37,7 +38,14 @@ export const generateWorkflow = async ({
     },
     async () => {
       const out = await graph.invoke(
-        { nlQuery, additionalContext, additionalInstructions, maxRetries },
+        {
+          nlQuery,
+          workflowDefinition: workflow,
+          yaml: workflow?.yaml,
+          additionalContext,
+          additionalInstructions,
+          maxRetries,
+        },
         {
           recursionLimit: 40,
           tags: ['generate_workflow'],

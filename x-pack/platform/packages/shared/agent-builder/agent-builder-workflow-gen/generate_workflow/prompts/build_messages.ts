@@ -52,6 +52,7 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
       createUserPrompt({
         nlQuery: state.nlQuery,
         additionalContext: state.additionalContext,
+        workflowDefinition: state.workflowDefinition,
       })
     )
   );

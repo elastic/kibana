@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// picked the good parts from https://github.com/elastic/workflows/tree/main/docs
+
 export const getWorkflowBaseDocumentation = (): string => {
   return `# Elastic workflow - base concepts
 
