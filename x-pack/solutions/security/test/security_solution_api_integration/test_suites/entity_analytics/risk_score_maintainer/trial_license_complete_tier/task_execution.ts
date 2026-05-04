@@ -40,7 +40,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/264305
+  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
     this.tags(['esGate']);
 
     context('with maintainer test logs data', () => {

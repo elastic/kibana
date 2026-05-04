@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import type { ConversationService } from '../../conversation';
 import type { AgentsServiceStart } from '../../agents';
@@ -25,6 +26,7 @@ export const resolveServices = async ({
   agentService,
   uiSettings,
   savedObjects,
+  searchInferenceEndpoints,
 }: {
   agentId: string;
   connectorId?: string;
@@ -35,6 +37,7 @@ export const resolveServices = async ({
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }) => {
   const selectedConnectorId = await resolveSelectedConnectorId({
     request,
@@ -42,6 +45,7 @@ export const resolveServices = async ({
     uiSettings,
     savedObjects,
     inference,
+    searchInferenceEndpoints,
   });
 
   if (!selectedConnectorId) {

@@ -24,7 +24,10 @@ import type {
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -90,6 +93,7 @@ export interface WorkflowsServerPluginStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{

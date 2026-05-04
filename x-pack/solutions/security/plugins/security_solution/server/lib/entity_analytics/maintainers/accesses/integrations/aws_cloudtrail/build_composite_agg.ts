@@ -12,6 +12,9 @@ export { buildBucketUserFilter } from '../shared_query_utils';
 
 export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) =>
   buildCompositeAggQueryBase(
-    [{ term: { 'event.module': 'aws' } }, { term: { 'event.action': 'StartSession' } }],
+    [
+      { term: { 'event.module': 'aws' } },
+      { terms: { 'event.action': ['StartSession', 'SendSSHPublicKey'] } },
+    ],
     afterKey
   );

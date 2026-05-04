@@ -12,6 +12,7 @@ import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
   getWatchlistFieldLengthValidation,
+  getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
 
@@ -37,6 +38,7 @@ export const useEditWatchlistFormState = ({
     useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [hasUserEdits, setHasUserEdits] = useState(false);
+  const [isSourceValid, setSourceValid] = useState(true);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -73,8 +75,15 @@ export const useEditWatchlistFormState = ({
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
     JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
   const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
   const isDisabled =
-    isMissingId || !watchlist.name.trim() || !hasChanges || isNameTooLong || isDescriptionTooLong;
+    isMissingId ||
+    !watchlist.name.trim() ||
+    !hasChanges ||
+    isNameTooLong ||
+    isDescriptionTooLong ||
+    isRiskModifierInvalid ||
+    !isSourceValid;
 
   return {
     watchlist,
@@ -84,6 +93,8 @@ export const useEditWatchlistFormState = ({
     isDisabled,
     isNameTooLong,
     isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
+    setSourceValid,
   };
 };

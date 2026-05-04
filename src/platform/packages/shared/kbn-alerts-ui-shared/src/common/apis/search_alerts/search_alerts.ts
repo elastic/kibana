@@ -21,6 +21,7 @@ import type {
   RuleRegistrySearchResponse,
 } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
@@ -80,6 +81,10 @@ export interface SearchAlertsParams {
    * Whether to track the score of the query
    */
   trackScores?: boolean;
+  /**
+   * CPS project routing override for the underlying search request
+   */
+  projectRouting?: ProjectRouting;
 }
 
 export interface SearchAlertsResult {
@@ -107,6 +112,7 @@ export const searchAlerts = ({
   pageSize,
   minScore,
   trackScores,
+  projectRouting,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -125,6 +131,7 @@ export const searchAlerts = ({
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           abortSignal: signal,
+          projectRouting,
         }
       )
       .pipe(

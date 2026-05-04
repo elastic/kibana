@@ -14,153 +14,162 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
+export const WorkflowInsightType = lazySchema(() =>
+  z.enum(['incompatible_antivirus', 'policy_response_failure', 'custom'])
+);
 export type WorkflowInsightType = z.infer<typeof WorkflowInsightType>;
-export const WorkflowInsightType = z.enum([
-  'incompatible_antivirus',
-  'policy_response_failure',
-  'custom',
-]);
 export type WorkflowInsightTypeEnum = typeof WorkflowInsightType.enum;
 export const WorkflowInsightTypeEnum = WorkflowInsightType.enum;
 
+export const WorkflowInsightCategory = lazySchema(() => z.literal('endpoint'));
 export type WorkflowInsightCategory = z.infer<typeof WorkflowInsightCategory>;
-export const WorkflowInsightCategory = z.literal('endpoint');
 
+export const WorkflowInsightSourceType = lazySchema(() => z.literal('llm-connector'));
 export type WorkflowInsightSourceType = z.infer<typeof WorkflowInsightSourceType>;
-export const WorkflowInsightSourceType = z.literal('llm-connector');
 
+export const WorkflowInsightTargetType = lazySchema(() => z.literal('endpoint'));
 export type WorkflowInsightTargetType = z.infer<typeof WorkflowInsightTargetType>;
-export const WorkflowInsightTargetType = z.literal('endpoint');
 
+export const WorkflowInsightActionType = lazySchema(() =>
+  z.enum(['refreshed', 'remediated', 'suppressed', 'dismissed'])
+);
 export type WorkflowInsightActionType = z.infer<typeof WorkflowInsightActionType>;
-export const WorkflowInsightActionType = z.enum([
-  'refreshed',
-  'remediated',
-  'suppressed',
-  'dismissed',
-]);
 export type WorkflowInsightActionTypeEnum = typeof WorkflowInsightActionType.enum;
 export const WorkflowInsightActionTypeEnum = WorkflowInsightActionType.enum;
 
+export const CreateWorkflowInsightRequestBody = lazySchema(() =>
+  z.object({
+    insightType: WorkflowInsightType,
+  })
+);
 export type CreateWorkflowInsightRequestBody = z.infer<typeof CreateWorkflowInsightRequestBody>;
-export const CreateWorkflowInsightRequestBody = z.object({
-  insightType: WorkflowInsightType,
-});
 export type CreateWorkflowInsightRequestBodyInput = z.input<
   typeof CreateWorkflowInsightRequestBody
 >;
 
+export const CreateWorkflowInsightResponse = lazySchema(() =>
+  z.object({
+    executionId: z.string(),
+    conversationId: z.string().optional(),
+  })
+);
 export type CreateWorkflowInsightResponse = z.infer<typeof CreateWorkflowInsightResponse>;
-export const CreateWorkflowInsightResponse = z.object({
-  executionId: z.string(),
-  conversationId: z.string().optional(),
-});
+export const GetPendingWorkflowInsightsRequestQuery = lazySchema(() =>
+  z.object({
+    insightType: WorkflowInsightType.optional(),
+  })
+);
 export type GetPendingWorkflowInsightsRequestQuery = z.infer<
   typeof GetPendingWorkflowInsightsRequestQuery
 >;
-export const GetPendingWorkflowInsightsRequestQuery = z.object({
-  insightType: WorkflowInsightType.optional(),
-});
 export type GetPendingWorkflowInsightsRequestQueryInput = z.input<
   typeof GetPendingWorkflowInsightsRequestQuery
 >;
 
+export const GetPendingWorkflowInsightsResponse = lazySchema(() =>
+  z.object({
+    pending: z.array(
+      z.object({
+        executionId: z.string(),
+        status: z.string(),
+        conversationId: z.string().optional(),
+        insightType: z.string(),
+        '@timestamp': z.string(),
+      })
+    ),
+  })
+);
 export type GetPendingWorkflowInsightsResponse = z.infer<typeof GetPendingWorkflowInsightsResponse>;
-export const GetPendingWorkflowInsightsResponse = z.object({
-  pending: z.array(
-    z.object({
-      executionId: z.string(),
-      status: z.string(),
-      conversationId: z.string().optional(),
-      insightType: z.string(),
-      '@timestamp': z.string(),
-    })
-  ),
-});
+export const GetWorkflowInsightsRequestQuery = lazySchema(() =>
+  z.object({
+    size: z.coerce.number().int().optional(),
+    from: z.coerce.number().int().optional(),
+    ids: ArrayFromString(z.string()).optional(),
+    categories: ArrayFromString(WorkflowInsightCategory).optional(),
+    types: ArrayFromString(WorkflowInsightType).optional(),
+    sourceTypes: ArrayFromString(WorkflowInsightSourceType).optional(),
+    sourceIds: ArrayFromString(z.string()).optional(),
+    targetTypes: ArrayFromString(WorkflowInsightTargetType).optional(),
+    targetIds: ArrayFromString(z.string()).optional(),
+    actionTypes: ArrayFromString(WorkflowInsightActionType),
+  })
+);
 export type GetWorkflowInsightsRequestQuery = z.infer<typeof GetWorkflowInsightsRequestQuery>;
-export const GetWorkflowInsightsRequestQuery = z.object({
-  size: z.coerce.number().int().optional(),
-  from: z.coerce.number().int().optional(),
-  ids: ArrayFromString(z.string()).optional(),
-  categories: ArrayFromString(WorkflowInsightCategory).optional(),
-  types: ArrayFromString(WorkflowInsightType).optional(),
-  sourceTypes: ArrayFromString(WorkflowInsightSourceType).optional(),
-  sourceIds: ArrayFromString(z.string()).optional(),
-  targetTypes: ArrayFromString(WorkflowInsightTargetType).optional(),
-  targetIds: ArrayFromString(z.string()).optional(),
-  actionTypes: ArrayFromString(WorkflowInsightActionType),
-});
 export type GetWorkflowInsightsRequestQueryInput = z.input<typeof GetWorkflowInsightsRequestQuery>;
 
+export const GetWorkflowInsightsResponse = lazySchema(() => SuccessResponse);
 export type GetWorkflowInsightsResponse = z.infer<typeof GetWorkflowInsightsResponse>;
-export const GetWorkflowInsightsResponse = SuccessResponse;
 
+export const UpdateWorkflowInsightRequestParams = lazySchema(() =>
+  z.object({
+    insightId: z.string().min(1),
+  })
+);
 export type UpdateWorkflowInsightRequestParams = z.infer<typeof UpdateWorkflowInsightRequestParams>;
-export const UpdateWorkflowInsightRequestParams = z.object({
-  insightId: z.string().min(1),
-});
 export type UpdateWorkflowInsightRequestParamsInput = z.input<
   typeof UpdateWorkflowInsightRequestParams
 >;
 
+export const UpdateWorkflowInsightRequestBody = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string().optional(),
+    message: z.string().optional(),
+    category: WorkflowInsightCategory.optional(),
+    type: WorkflowInsightType.optional(),
+    source: z
+      .object({
+        type: WorkflowInsightSourceType.optional(),
+        id: z.string().optional(),
+        data_range_start: z.string().optional(),
+        data_range_end: z.string().optional(),
+      })
+      .optional(),
+    target: z
+      .object({
+        type: WorkflowInsightTargetType.optional(),
+        ids: z.array(z.string()).optional(),
+      })
+      .optional(),
+    action: z
+      .object({
+        type: WorkflowInsightActionType.optional(),
+        timestamp: z.string().optional(),
+      })
+      .optional(),
+    value: z.string().optional(),
+    remediation: z
+      .object({
+        exception_list_items: z
+          .array(
+            z.object({
+              list_id: z.string().optional(),
+              name: z.string().optional(),
+              description: z.string().optional(),
+              entries: z.array(z.unknown()).optional(),
+              tags: z.array(z.string()).optional(),
+              os_types: z.array(z.string()).optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+    metadata: z
+      .object({
+        notes: z.object({}).catchall(z.string()).optional(),
+        message_variables: z.array(z.string()).optional(),
+      })
+      .optional(),
+  })
+);
 export type UpdateWorkflowInsightRequestBody = z.infer<typeof UpdateWorkflowInsightRequestBody>;
-export const UpdateWorkflowInsightRequestBody = z.object({
-  '@timestamp': z.string().optional(),
-  message: z.string().optional(),
-  category: WorkflowInsightCategory.optional(),
-  type: WorkflowInsightType.optional(),
-  source: z
-    .object({
-      type: WorkflowInsightSourceType.optional(),
-      id: z.string().optional(),
-      data_range_start: z.string().optional(),
-      data_range_end: z.string().optional(),
-    })
-    .optional(),
-  target: z
-    .object({
-      type: WorkflowInsightTargetType.optional(),
-      ids: z.array(z.string()).optional(),
-    })
-    .optional(),
-  action: z
-    .object({
-      type: WorkflowInsightActionType.optional(),
-      timestamp: z.string().optional(),
-    })
-    .optional(),
-  value: z.string().optional(),
-  remediation: z
-    .object({
-      exception_list_items: z
-        .array(
-          z.object({
-            list_id: z.string().optional(),
-            name: z.string().optional(),
-            description: z.string().optional(),
-            entries: z.array(z.unknown()).optional(),
-            tags: z.array(z.string()).optional(),
-            os_types: z.array(z.string()).optional(),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
-  metadata: z
-    .object({
-      notes: z.object({}).catchall(z.string()).optional(),
-      message_variables: z.array(z.string()).optional(),
-    })
-    .optional(),
-});
 export type UpdateWorkflowInsightRequestBodyInput = z.input<
   typeof UpdateWorkflowInsightRequestBody
 >;
 
+export const UpdateWorkflowInsightResponse = lazySchema(() => SuccessResponse);
 export type UpdateWorkflowInsightResponse = z.infer<typeof UpdateWorkflowInsightResponse>;
-export const UpdateWorkflowInsightResponse = SuccessResponse;

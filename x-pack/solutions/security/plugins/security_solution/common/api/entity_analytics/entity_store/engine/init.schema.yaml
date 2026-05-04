@@ -2,9 +2,9 @@ openapi: 3.0.0
 
 info:
   title: Init Entity Engine
-  version: '2023-10-31'
+  version: '1'
 paths:
-   /api/entity_store/engines/{entityType}/init:
+   /internal/entity_store/engines/{entityType}/init:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true

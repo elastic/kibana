@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
@@ -24,54 +24,58 @@ import {
   ExceptionListItem,
 } from '../model/exception_list_common.gen';
 
+export const FindExceptionListItemsFilter = lazySchema(() => NonEmptyString);
 export type FindExceptionListItemsFilter = z.infer<typeof FindExceptionListItemsFilter>;
-export const FindExceptionListItemsFilter = NonEmptyString;
 
-export type FindExceptionListItemsRequestQuery = z.infer<typeof FindExceptionListItemsRequestQuery>;
-export const FindExceptionListItemsRequestQuery = z.object({
-  /**
-   * The `list_id`s of the items to fetch.
-   */
-  list_id: ArrayFromString(ExceptionListHumanId),
-  /**
+export const FindExceptionListItemsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The `list_id`s of the items to fetch.
+     */
+    list_id: ArrayFromString(ExceptionListHumanId),
+    /**
       * Filters the returned results according to the value of the specified field,
 using the `<field name>:<field value>` syntax.
 
       */
-  filter: ArrayFromString(FindExceptionListItemsFilter).optional().default([]),
-  /**
+    filter: ArrayFromString(FindExceptionListItemsFilter).optional().default([]),
+    /**
       * Determines whether the returned containers are Kibana associated with a Kibana space
 or available in all spaces (`agnostic` or `single`)
 
       */
-  namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
-  search: z.string().optional(),
-  /**
-   * The page number to return
-   */
-  page: z.coerce.number().int().min(0).optional(),
-  /**
-   * The number of exception list items to return per page
-   */
-  per_page: z.coerce.number().int().min(0).optional(),
-  /**
-   * Determines which field is used to sort the results.
-   */
-  sort_field: NonEmptyString.optional(),
-  /**
-   * Determines the sort order, which can be `desc` or `asc`.
-   */
-  sort_order: z.enum(['desc', 'asc']).optional(),
-});
+    namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
+    search: z.string().optional(),
+    /**
+     * The page number to return
+     */
+    page: z.coerce.number().int().min(0).optional(),
+    /**
+     * The number of exception list items to return per page
+     */
+    per_page: z.coerce.number().int().min(0).optional(),
+    /**
+     * Determines which field is used to sort the results.
+     */
+    sort_field: NonEmptyString.optional(),
+    /**
+     * Determines the sort order, which can be `desc` or `asc`.
+     */
+    sort_order: z.enum(['desc', 'asc']).optional(),
+  })
+);
+export type FindExceptionListItemsRequestQuery = z.infer<typeof FindExceptionListItemsRequestQuery>;
 export type FindExceptionListItemsRequestQueryInput = z.input<
   typeof FindExceptionListItemsRequestQuery
 >;
 
+export const FindExceptionListItemsResponse = lazySchema(() =>
+  z.object({
+    data: z.array(ExceptionListItem),
+    page: z.number().int().min(1),
+    per_page: z.number().int().min(1),
+    total: z.number().int().min(0),
+    pit: z.string().optional(),
+  })
+);
 export type FindExceptionListItemsResponse = z.infer<typeof FindExceptionListItemsResponse>;
-export const FindExceptionListItemsResponse = z.object({
-  data: z.array(ExceptionListItem),
-  page: z.number().int().min(1),
-  per_page: z.number().int().min(1),
-  total: z.number().int().min(0),
-  pit: z.string().optional(),
-});

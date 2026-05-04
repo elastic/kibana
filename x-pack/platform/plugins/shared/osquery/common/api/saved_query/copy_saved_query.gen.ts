@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CopySavedQueryResponse = lazySchema(() => z.object({}));
 export type CopySavedQueryResponse = z.infer<typeof CopySavedQueryResponse>;
-export const CopySavedQueryResponse = z.object({});

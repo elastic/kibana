@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListName,
@@ -22,16 +22,18 @@ import {
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
+export const CreateSharedExceptionListRequestBody = lazySchema(() =>
+  z.object({
+    name: ExceptionListName,
+    description: ExceptionListDescription,
+  })
+);
 export type CreateSharedExceptionListRequestBody = z.infer<
   typeof CreateSharedExceptionListRequestBody
 >;
-export const CreateSharedExceptionListRequestBody = z.object({
-  name: ExceptionListName,
-  description: ExceptionListDescription,
-});
 export type CreateSharedExceptionListRequestBodyInput = z.input<
   typeof CreateSharedExceptionListRequestBody
 >;
 
+export const CreateSharedExceptionListResponse = lazySchema(() => ExceptionList);
 export type CreateSharedExceptionListResponse = z.infer<typeof CreateSharedExceptionListResponse>;
-export const CreateSharedExceptionListResponse = ExceptionList;

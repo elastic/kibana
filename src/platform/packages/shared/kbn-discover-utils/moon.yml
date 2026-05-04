@@ -35,6 +35,8 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-http-browser'
   - '@kbn/esql-utils'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/resizable-layout'
 tags:
   - shared-common
   - package

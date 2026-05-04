@@ -13,6 +13,15 @@ import type {
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { SearchEmbeddablePanelApiState } from '../embeddable';
+
+export interface DiscoverSessionByValueInput {
+  discoverSessionTab: DiscoverSessionTab | undefined;
+  dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+}
 
 /**
  * Specifies the action to be taken for navigating back to an editor.
@@ -32,10 +41,27 @@ export enum TransferAction {
   SaveByValue,
 }
 
-interface TransferOptions {
-  state?: SavedSearchByValueAttributes;
+interface TransferOptionsBase {
   path?: string;
   app?: string;
+}
+
+interface ByValueTransferOptions extends TransferOptionsBase {
+  state: {
+    byValueState: SavedSearchByValueAttributes;
+    controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+  };
+}
+
+type CombinedTransferOptions = ByValueTransferOptions | TransferOptionsBase;
+
+type DiscoverTransferSerializedState =
+  | ControlPanelState<OptionsListESQLControlState>
+  | SearchEmbeddablePanelApiState;
+
+interface GetSerializedStateResult {
+  serializedState: SearchEmbeddablePanelApiState | undefined;
+  controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
 }
 
 export class EmbeddableEditorService {
@@ -57,8 +83,8 @@ export class EmbeddableEditorService {
 
   public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState);
 
-  public getByValueInput = (): DiscoverSessionTab | undefined =>
-    this.embeddableState?.valueInput as DiscoverSessionTab | undefined;
+  public getByValueTab = (): DiscoverSessionTab | undefined =>
+    this.getByValueInput().discoverSessionTab;
 
   /**
    * Resets the embeddable transfer state, ensuring it is cleared in storage and then dropped in memory.
@@ -70,40 +96,101 @@ export class EmbeddableEditorService {
     }
   };
 
-  public transferBackToEditor(
-    action: TransferAction.Cancel | TransferAction.SaveSession,
-    options?: Omit<TransferOptions, 'state'>
-  ): void;
+  public transferBackToEditor(action: TransferAction.Cancel | TransferAction.SaveSession): void;
   public transferBackToEditor(
     action: TransferAction.SaveByValue,
-    options: Required<Pick<TransferOptions, 'state'>> & Omit<TransferOptions, 'state'>
+    options: ByValueTransferOptions
   ): void;
-  public transferBackToEditor(action: TransferAction, options?: TransferOptions): void;
   /**
    * Initiates a navigation back to the editing application, either cancelling the current action to return
    * or passing a state for an embeddable to receive an updated view.
    *
    * **NOTE**: Cancelling will never pass an updated state, so the state param is ignored for cancel actions.
    */
-  public transferBackToEditor(action: TransferAction, options?: TransferOptions) {
+  public transferBackToEditor(action: TransferAction, options?: CombinedTransferOptions) {
     const app = options?.app || this.embeddableState?.originatingApp;
     const path = options?.path || this.embeddableState?.originatingPath;
+    const { serializedState, controlGroupState } = this.getSerializedState(action, options);
+    const controlPackages = Object.entries(controlGroupState).map(
+      ([embeddableId, controlPanelState]) => ({
+        type: ESQL_CONTROL,
+        serializedState: controlPanelState,
+        embeddableId,
+      })
+    );
 
     if (app && path) {
       this.embeddableStateTransfer.clearEditorState('discover');
-      this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
-        path,
-        state:
-          action !== TransferAction.Cancel
+      this.embeddableStateTransfer.navigateToWithEmbeddablePackages<DiscoverTransferSerializedState>(
+        app,
+        {
+          path,
+          state: serializedState
             ? [
+                ...controlPackages,
                 {
                   type: SEARCH_EMBEDDABLE_TYPE,
-                  serializedState: { attributes: options?.state },
+                  serializedState,
                   embeddableId: this.embeddableState?.embeddableId,
                 },
               ]
             : [],
-      });
+        }
+      );
     }
   }
+
+  private getSerializedState(
+    action: TransferAction,
+    options?: CombinedTransferOptions
+  ): GetSerializedStateResult {
+    if (action === TransferAction.SaveByValue) {
+      const { state } = options as ByValueTransferOptions;
+      return {
+        serializedState: { attributes: state.byValueState },
+        controlGroupState: reconcileControlGroupState({
+          controlGroupState: state.controlGroupState ?? {},
+          dashboardControlGroupState: this.getByValueInput().dashboardControlGroupState,
+        }),
+      };
+    }
+
+    return { serializedState: undefined, controlGroupState: {} };
+  }
+
+  private getByValueInput(): DiscoverSessionByValueInput {
+    return this.embeddableState?.valueInput
+      ? (this.embeddableState.valueInput as DiscoverSessionByValueInput)
+      : { discoverSessionTab: undefined, dashboardControlGroupState: undefined };
+  }
 }
+
+const reconcileControlGroupState = ({
+  controlGroupState,
+  dashboardControlGroupState,
+}: {
+  controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
+  dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+}): ControlPanelsState<OptionsListESQLControlState> => {
+  if (!dashboardControlGroupState) {
+    return controlGroupState;
+  }
+
+  const dashboardPanelIdsByVariable = Object.fromEntries(
+    Object.entries(dashboardControlGroupState).map(([dashboardPanelId, dashboardPanelState]) => [
+      dashboardPanelState.variable_name,
+      dashboardPanelId,
+    ])
+  );
+
+  return Object.entries(controlGroupState).reduce<ControlPanelsState<OptionsListESQLControlState>>(
+    (acc, [discoverPanelId, panelState]) => {
+      const nextPanelId = dashboardPanelIdsByVariable[panelState.variable_name] ?? discoverPanelId;
+
+      acc[nextPanelId] = panelState;
+
+      return acc;
+    },
+    {}
+  );
+};

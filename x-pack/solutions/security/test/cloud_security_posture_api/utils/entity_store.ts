@@ -30,8 +30,10 @@ export const cleanupEntityStore = async ({
   const spacePath = spaceId ? `/s/${spaceId}` : '';
   try {
     await supertest
-      .delete(`${spacePath}/api/entity_store/engines?delete_data=true`)
+      .delete(`${spacePath}/internal/entity_store/engines?delete_data=true`)
       .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     logger.debug(`Deleted entity store engine for space: ${spaceId || 'default'}`);
   } catch (e) {
@@ -114,9 +116,9 @@ export const initEntityEngine = async ({
   logger.debug(`Initializing entity engine for type ${entityType} in space: ${spaceLabel}`);
 
   const response = await supertest
-    .post(`${spacePath}/api/entity_store/engines/${entityType}/init`)
+    .post(`${spacePath}/internal/entity_store/engines/${entityType}/init`)
     .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31')
+    .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'kibana')
     .send({});
 
@@ -161,9 +163,10 @@ export const initEntityEnginesAndWait = async ({
     60000,
     async () => {
       const response = await supertest
-        .get(`${spacePath}/api/entity_store/status`)
+        .get(`${spacePath}/internal/entity_store/status`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31');
+        .set('elastic-api-version', '1')
+        .set('x-elastic-internal-origin', 'kibana');
 
       if (response.status !== 200) {
         logger.debug(`Entity store status check failed with status: ${response.status}`);

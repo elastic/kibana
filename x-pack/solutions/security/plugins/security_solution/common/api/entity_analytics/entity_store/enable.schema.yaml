@@ -2,9 +2,9 @@ openapi: 3.0.0
 
 info:
   title: Enable Entity Store
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/entity_store/enable:
+  /internal/entity_store/enable:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true

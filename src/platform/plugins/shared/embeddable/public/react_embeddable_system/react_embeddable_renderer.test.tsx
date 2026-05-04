@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { registerReactEmbeddableFactory } from './react_embeddable_registry';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
 
@@ -45,7 +45,7 @@ describe('embeddable renderer', () => {
   };
 
   beforeAll(() => {
-    registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
+    registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
     setupPresentationPanelServices();
   });
 
@@ -190,12 +190,12 @@ describe('embeddable renderer', () => {
   it('catches error when thrown in buildEmbeddable', async () => {
     const errorInInitializeFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'errorInBuildEmbeddable',
+      type: 'error_in_build_embeddable',
       buildEmbeddable: () => {
         throw new Error('error in buildEmbeddable');
       },
     };
-    registerReactEmbeddableFactory('errorInBuildEmbeddable', () =>
+    registerEmbeddablePublicDefinition('error_in_build_embeddable', () =>
       Promise.resolve(errorInInitializeFactory)
     );
     setupPresentationPanelServices();
@@ -205,7 +205,7 @@ describe('embeddable renderer', () => {
     const embeddable = render(
       <EuiThemeProvider>
         <EmbeddableRenderer
-          type={'errorInBuildEmbeddable'}
+          type={'error_in_build_embeddable'}
           maybeId={'12345'}
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
@@ -224,19 +224,19 @@ describe('embeddable renderer', () => {
   it('registers error API via onApiAvailable when buildEmbeddable throws', async () => {
     const errorFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'errorRegistersApi',
+      type: 'error_registers_api',
       buildEmbeddable: () => {
         throw new Error('saved object not found');
       },
     };
-    registerReactEmbeddableFactory('errorRegistersApi', () => Promise.resolve(errorFactory));
+    registerEmbeddablePublicDefinition('error_registers_api', () => Promise.resolve(errorFactory));
     setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
     render(
       <EuiThemeProvider>
         <EmbeddableRenderer
-          type={'errorRegistersApi'}
+          type={'error_registers_api'}
           maybeId={'67890'}
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
@@ -257,12 +257,14 @@ describe('embeddable renderer', () => {
   it('assigns parentApi on error API when parent is a presentation container', async () => {
     const errorFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'errorWithContainerParent',
+      type: 'error_with_container_parent',
       buildEmbeddable: () => {
         throw new Error('container parent error');
       },
     };
-    registerReactEmbeddableFactory('errorWithContainerParent', () => Promise.resolve(errorFactory));
+    registerEmbeddablePublicDefinition('error_with_container_parent', () =>
+      Promise.resolve(errorFactory)
+    );
     setupPresentationPanelServices();
 
     const parentApi = {
@@ -273,7 +275,7 @@ describe('embeddable renderer', () => {
     render(
       <EuiThemeProvider>
         <EmbeddableRenderer
-          type={'errorWithContainerParent'}
+          type={'error_with_container_parent'}
           maybeId={'99999'}
           onApiAvailable={onApiAvailable}
           getParentApi={() => parentApi}
@@ -294,9 +296,9 @@ describe('reactEmbeddable phase events', () => {
   it('publishes rendered phase immediately when dataLoading is not defined', async () => {
     const immediateLoadEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'immediateLoad',
+      type: 'immediate_load',
     };
-    registerReactEmbeddableFactory('immediateLoad', () =>
+    registerEmbeddablePublicDefinition('immediate_load', () =>
       Promise.resolve(immediateLoadEmbeddableFactory)
     );
     setupPresentationPanelServices();
@@ -326,7 +328,7 @@ describe('reactEmbeddable phase events', () => {
   it('publishes rendered phase event when dataLoading is complete', async () => {
     const dataLoadingEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'loadClicker',
+      type: 'load_clicker',
       buildEmbeddable: async ({ initialState, finalizeApi }) => {
         const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = finalizeApi({
@@ -352,7 +354,7 @@ describe('reactEmbeddable phase events', () => {
         };
       },
     };
-    registerReactEmbeddableFactory('loadClicker', () =>
+    registerEmbeddablePublicDefinition('load_clicker', () =>
       Promise.resolve(dataLoadingEmbeddableFactory)
     );
     setupPresentationPanelServices();
@@ -360,7 +362,7 @@ describe('reactEmbeddable phase events', () => {
     const phaseFn = jest.fn();
     render(
       <EmbeddableRenderer
-        type={'loadClicker'}
+        type={'load_clicker'}
         maybeId={'12345'}
         onApiAvailable={(api) => {
           api.phase$.subscribe((phase) => {

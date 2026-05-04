@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
+import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
 import { AgentSelector } from './agent_selector';
@@ -58,7 +59,8 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
 
   const headerStyles = css`
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base} ${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
+    padding-left: ${euiTheme.size.l};
     flex-grow: 0;
   `;
 
@@ -118,7 +120,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size="s"
               flush="both"
               color="text"
-              onClick={() => navigate(appPaths.root)}
+              onClick={() => navigate(appPaths.agent.root({ agentId: getLastAgentId() }))}
             >
               {labels.manageComponents}
             </EuiButtonEmpty>

@@ -12,11 +12,11 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { telemetryHandler } from '../telemetry_handler';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { useChartLayersFromEsql } from '../../chart/hooks/use_chart_layers_from_esql';
@@ -33,7 +33,7 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
   const { abortController, timeRange, esqlVariables } = fetchParams;
 
@@ -54,6 +54,7 @@ const ErrorRateChartContent = ({
 
   return (
     <Chart
+      id="errorRate"
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -70,6 +71,7 @@ const ErrorRateChartContent = ({
       isLoading={isLoadingColumns}
       error={columnsError}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };

@@ -14,24 +14,26 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
-export const FindLiveQueryRequestQuery = z.object({
-  kuery: z.string().optional(),
-  page: z.number().int().optional(),
-  pageSize: z.number().int().optional(),
-  sort: z.string().optional(),
-  sortOrder: z.enum(['asc', 'desc']).optional(),
-  /**
+export const FindLiveQueryRequestQuery = lazySchema(() =>
+  z.object({
+    kuery: z.string().optional(),
+    page: z.number().int().optional(),
+    pageSize: z.number().int().optional(),
+    sort: z.string().optional(),
+    sortOrder: z.enum(['asc', 'desc']).optional(),
+    /**
       * When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.
 
       */
-  withResultCounts: z.boolean().optional(),
-});
+    withResultCounts: z.boolean().optional(),
+  })
+);
+export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
 
+export const FindLiveQueryResponse = lazySchema(() => z.object({}));
 export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
-export const FindLiveQueryResponse = z.object({});
 
+export const FindLiveQueryDetailsResponse = lazySchema(() => z.object({}));
 export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;
-export const FindLiveQueryDetailsResponse = z.object({});

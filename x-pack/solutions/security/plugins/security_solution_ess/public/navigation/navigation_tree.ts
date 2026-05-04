@@ -66,7 +66,9 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.entityAnalytics(
+        services.experimentalFeatures?.entityAnalyticsNewHomePageEnabled
+      ),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -98,6 +100,7 @@ export const createNavigationTree = (
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
+                badgeType: 'new',
               },
               {
                 // value report
@@ -212,7 +215,7 @@ export const createNavigationTree = (
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [
-              { link: 'management:triggersActions' },
+              { id: 'stackRules', link: 'rules' },
               { link: 'management:cases' },
               { link: 'management:triggersActionsConnectors' },
               { link: 'management:reporting' },

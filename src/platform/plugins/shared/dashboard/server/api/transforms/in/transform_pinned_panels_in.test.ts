@@ -14,14 +14,15 @@ import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
-jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
-  embeddableService: {
-    getTransforms: jest.fn(),
-  },
-}));
 
 describe('transformPinnedPanelsIn', () => {
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../../kibana_services').embeddableService = {
+      getTransforms: jest.fn(),
+    };
+  });
+
   const mockPinnedPanelsState: Required<DashboardState>['pinned_panels'] = [
     {
       id: 'control1',
@@ -37,11 +38,6 @@ describe('transformPinnedPanelsIn', () => {
       config: { boo: 'bear' },
     } as unknown as Required<DashboardState>['pinned_panels'][number],
   ];
-
-  it('should return empty references if pinned_panels is undefined', () => {
-    const result = transformPinnedPanelsIn(undefined);
-    expect(result.references).toEqual([]);
-  });
 
   it('should transform pinned panels state correctly', () => {
     const result = transformPinnedPanelsIn(mockPinnedPanelsState);
@@ -68,5 +64,32 @@ describe('transformPinnedPanelsIn', () => {
     const pinnedPanelsState: Required<DashboardState>['pinned_panels'] = [];
     const result = transformPinnedPanelsIn(pinnedPanelsState);
     expect(result).toEqual({ pinnedPanels: {}, references: [] });
+  });
+});
+
+describe('validation', () => {
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../../kibana_services').embeddableService = {
+      getTransforms: () => ({
+        transformIn: () => {
+          throw new Error('Transform in error.');
+        },
+      }),
+    };
+  });
+
+  it('should throw when transform in fails', () => {
+    const pinnedPanels = [
+      {
+        type: 'type2',
+        grow: true,
+        width: CONTROL_WIDTH_SMALL,
+        config: { boo: 'bear' },
+      } as unknown as Required<DashboardState>['pinned_panels'][number],
+    ];
+    expect(() => transformPinnedPanelsIn(pinnedPanels)).toThrowErrorMatchingInlineSnapshot(
+      `"Unable to transform 1 pinned panels"`
+    );
   });
 });

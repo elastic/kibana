@@ -27,7 +27,7 @@ export const listEntitiesRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'public',
+      access: 'internal',
       path: LIST_ENTITIES_URL,
       security: {
         authz: {
@@ -37,7 +37,7 @@ export const listEntitiesRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(ListEntitiesRequestQuery),

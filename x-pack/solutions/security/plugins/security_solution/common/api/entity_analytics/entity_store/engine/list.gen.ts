@@ -11,21 +11,23 @@
  *
  * info:
  *   title: List Entity Engines
- *   version: 2023-10-31
+ *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EngineDescriptor } from '../common.gen';
 
+export const ListEntityEnginesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The total number of entity engines.
+     */
+    count: z.number().int().optional(),
+    /**
+     * An array of engine descriptors.
+     */
+    engines: z.array(EngineDescriptor).optional(),
+  })
+);
 export type ListEntityEnginesResponse = z.infer<typeof ListEntityEnginesResponse>;
-export const ListEntityEnginesResponse = z.object({
-  /**
-   * The total number of entity engines.
-   */
-  count: z.number().int().optional(),
-  /**
-   * An array of engine descriptors.
-   */
-  engines: z.array(EngineDescriptor).optional(),
-});

@@ -438,6 +438,176 @@ describe('query_utils', () => {
       });
     });
 
+    describe('getSkillsMetrics', () => {
+      it('returns total, custom, and plugin counts from ES', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 42, relation: 'eq' },
+            hits: [],
+          },
+          aggregations: {
+            custom: { doc_count: 30 },
+            plugin: { doc_count: 12 },
+          },
+        });
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result).toEqual({
+          total: 42,
+          custom: 30,
+          plugin: 12,
+        });
+      });
+
+      it('handles hits.total as a number', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: 7, hits: [] },
+          aggregations: {
+            custom: { doc_count: 5 },
+            plugin: { doc_count: 2 },
+          },
+        });
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result.total).toBe(7);
+        expect(result.custom).toBe(5);
+        expect(result.plugin).toBe(2);
+      });
+
+      it('queries the skills index with track_total_hits and filter aggs', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          aggregations: {
+            custom: { doc_count: 0 },
+            plugin: { doc_count: 0 },
+          },
+        });
+
+        await queryUtils.getSkillsMetrics();
+
+        expect(esClient.search).toHaveBeenCalledWith({
+          index: '.chat-skills',
+          size: 0,
+          track_total_hits: true,
+          aggs: {
+            custom: {
+              filter: {
+                bool: {
+                  must_not: { exists: { field: 'plugin_id' } },
+                },
+              },
+            },
+            plugin: {
+              filter: {
+                exists: { field: 'plugin_id' },
+              },
+            },
+          },
+        });
+      });
+
+      it('defaults custom and plugin to 0 when aggregations are missing', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          aggregations: {},
+        });
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result.custom).toBe(0);
+        expect(result.plugin).toBe(0);
+      });
+
+      it('returns zeros on index_not_found_exception', async () => {
+        const error = {
+          message: 'index_not_found_exception: no such index [.chat-skills]',
+        };
+        esClient.search.mockRejectedValue(error);
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result).toEqual({
+          total: 0,
+          custom: 0,
+          plugin: 0,
+        });
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('logs warning and returns zeros on other errors', async () => {
+        esClient.search.mockRejectedValue(new Error('ES error'));
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result).toEqual({
+          total: 0,
+          custom: 0,
+          plugin: 0,
+        });
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch skills metrics: ES error');
+      });
+    });
+
+    describe('getPluginsCount', () => {
+      it('returns plugins count from ES', async () => {
+        esClient.count.mockResolvedValue({
+          count: 9,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        });
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(9);
+        expect(esClient.count).toHaveBeenCalledWith({ index: '.chat-plugins' });
+      });
+
+      it('returns 0 when count is undefined', async () => {
+        esClient.count.mockResolvedValue({
+          count: undefined as any,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        });
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(0);
+      });
+
+      it('returns 0 and does not log warning for index_not_found_exception', async () => {
+        const error = {
+          message: 'index_not_found_exception: no such index [.chat-plugins]',
+        };
+        esClient.count.mockRejectedValue(error);
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(0);
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('returns 0 and logs warning on other errors', async () => {
+        esClient.count.mockRejectedValue(new Error('ES error'));
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(0);
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch plugins count: ES error');
+      });
+    });
+
     describe('getConversationMetrics', () => {
       const mockConversationResponse = ({
         totalHits = 100,

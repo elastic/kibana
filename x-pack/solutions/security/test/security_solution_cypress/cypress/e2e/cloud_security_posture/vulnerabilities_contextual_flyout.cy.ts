@@ -136,66 +136,82 @@ const deleteDataStream = () => {
   });
 };
 
-describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    login();
-    createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-  });
-
-  context('No Vulnerabilities Findings', () => {
-    it('should not display Vulnerabilities preview under Insights Entities when it does not have Vulnerabilities Findings', () => {
-      expandFirstAlertHostFlyout();
-
-      cy.log('check if Vulnerabilities preview title is not shown');
-      cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('not.exist');
+describe(
+  'Alert Host details expandable flyout',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      login();
+      createRule(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
-  });
 
-  context(
-    'Host name - Has Vulnerabilities findings but with different host name than the alerts',
-    () => {
-      beforeEach(() => {
-        createMockVulnerability(false);
-        cy.reload();
-        expandFirstAlertHostFlyout();
-      });
-
-      afterEach(() => {
-        /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
-        deleteDataStream();
-      });
-
-      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
+    context('No Vulnerabilities Findings', () => {
+      it('should not display Vulnerabilities preview under Insights Entities when it does not have Vulnerabilities Findings', () => {
         expandFirstAlertHostFlyout();
 
         cy.log('check if Vulnerabilities preview title is not shown');
         cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('not.exist');
       });
-    }
-  );
-
-  context('Host name - Has Vulnerabilities findings', () => {
-    beforeEach(() => {
-      createMockVulnerability(true);
-      cy.reload();
-      expandFirstAlertHostFlyout();
     });
 
-    afterEach(() => {
-      deleteDataStream();
-    });
+    context(
+      'Host name - Has Vulnerabilities findings but with different host name than the alerts',
+      () => {
+        beforeEach(() => {
+          createMockVulnerability(false);
+          cy.reload();
+          expandFirstAlertHostFlyout();
+        });
 
-    it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
-      cy.log('check if Vulnerabilities preview title shown');
-      cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
-    });
+        afterEach(() => {
+          /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
+          deleteDataStream();
+        });
 
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).click();
-      cy.get(CSP_INSIGHT_VULNERABILITIES_TABLE).should('be.visible');
+        it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
+          expandFirstAlertHostFlyout();
+
+          cy.log('check if Vulnerabilities preview title is not shown');
+          cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('not.exist');
+        });
+      }
+    );
+
+    context('Host name - Has Vulnerabilities findings', () => {
+      beforeEach(() => {
+        createMockVulnerability(true);
+        cy.reload();
+        expandFirstAlertHostFlyout();
+      });
+
+      afterEach(() => {
+        deleteDataStream();
+      });
+
+      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
+        cy.log('check if Vulnerabilities preview title shown');
+        cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
+      });
+
+      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+        cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).click();
+        cy.get(CSP_INSIGHT_VULNERABILITIES_TABLE).should('be.visible');
+      });
     });
-  });
-});
+  }
+);

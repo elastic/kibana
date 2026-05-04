@@ -14,8 +14,8 @@ actions:
 
         ## When to use this API
 
-        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard).
-        - Use the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](#operation/post-dashboards).
+        - Use the [Dashboards API](#operation/post-dashboards) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
 
         ## Get started
 
@@ -27,7 +27,7 @@ actions:
 
         ### Try it now
 
-        The following example creates a line chart showing log entries over time. You can run it after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/explore-analyze/index#add-sample-data):
+        The following example creates a line chart showing log entries over time. You can run it after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data):
 
         ```bash
         curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -59,18 +59,18 @@ actions:
           }'
         ```
 
-        All curl examples in this reference use [Kibana sample datasets](https://www.elastic.co/docs/explore-analyze/index#add-sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `index_pattern` and field names.
+        All curl examples in this reference use [Kibana sample datasets](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `index_pattern` and field names.
 
         ### How a visualization is structured
 
         Every visualization requires at minimum:
 
         - **`type`**: the chart to render. Each chart type has its own required fields, so the full structure of the request body depends on which `type` you specify.
-        - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
+        - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](#operation/post-dashboards). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
 
         You can also include `query` and `filters` to apply KQL or Lucene filters to all chart data. Both are optional and can be omitted.
 
-        Everything else is chart-specific: `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) endpoint for the full shape of each type.
+        Everything else is chart-specific: `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](#operation/post-visualizations) endpoint for the full shape of each type.
 
         ### Chart types
 

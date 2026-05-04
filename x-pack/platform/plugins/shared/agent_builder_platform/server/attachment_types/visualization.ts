@@ -16,9 +16,9 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import {
   LensConfigBuilder,
-  type LensApiSchemaType,
+  type LensApiConfig,
   type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 /**
  * Creates the definition for the unified `visualization` attachment type.
@@ -108,7 +108,7 @@ const toLensAttributes = (
   references: references ?? attributes.references ?? [],
 });
 
-const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
+const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
   new LensConfigBuilder().toAPIFormat(attributes);
 
 const extractChartType = (attributes: LensAttributes): string => {

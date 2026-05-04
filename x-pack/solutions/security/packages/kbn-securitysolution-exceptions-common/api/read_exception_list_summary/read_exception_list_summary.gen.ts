@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListId,
@@ -22,32 +22,36 @@ import {
   ExceptionNamespaceType,
 } from '../model/exception_list_common.gen';
 
+export const ReadExceptionListSummaryRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Exception list's identifier generated upon creation.
+     */
+    id: ExceptionListId.optional(),
+    /**
+     * Exception list's human readable identifier.
+     */
+    list_id: ExceptionListHumanId.optional(),
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    /**
+     * Search filter clause
+     */
+    filter: z.string().optional(),
+  })
+);
 export type ReadExceptionListSummaryRequestQuery = z.infer<
   typeof ReadExceptionListSummaryRequestQuery
 >;
-export const ReadExceptionListSummaryRequestQuery = z.object({
-  /**
-   * Exception list's identifier generated upon creation.
-   */
-  id: ExceptionListId.optional(),
-  /**
-   * Exception list's human readable identifier.
-   */
-  list_id: ExceptionListHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  /**
-   * Search filter clause
-   */
-  filter: z.string().optional(),
-});
 export type ReadExceptionListSummaryRequestQueryInput = z.input<
   typeof ReadExceptionListSummaryRequestQuery
 >;
 
+export const ReadExceptionListSummaryResponse = lazySchema(() =>
+  z.object({
+    windows: z.number().int().min(0).optional(),
+    linux: z.number().int().min(0).optional(),
+    macos: z.number().int().min(0).optional(),
+    total: z.number().int().min(0).optional(),
+  })
+);
 export type ReadExceptionListSummaryResponse = z.infer<typeof ReadExceptionListSummaryResponse>;
-export const ReadExceptionListSummaryResponse = z.object({
-  windows: z.number().int().min(0).optional(),
-  linux: z.number().int().min(0).optional(),
-  macos: z.number().int().min(0).optional(),
-  total: z.number().int().min(0).optional(),
-});

@@ -74,7 +74,7 @@ function toPublicEngine(
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
-    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
   };
 }
 

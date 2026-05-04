@@ -19,32 +19,35 @@ import { DEFAULT_TIME_RANGE } from '@kbn/dashboard-agent-common';
 interface UseDashboardPreviewUnifiedSearchParams {
   dashboardApi: DashboardApi | undefined;
   dashboardState: DashboardState;
-  filterManager: DataPublicPluginStart['query']['filterManager'];
+  data: DataPublicPluginStart;
 }
 
-const normalizeQuery = (nextQuery: Query | undefined) => {
+const DEFAULT_EMPTY_QUERY: Query = { query: '', language: 'kuery' };
+
+const normalizeQuery = (nextQuery: Query | undefined): Query => {
   if (!nextQuery) {
-    return undefined;
+    return DEFAULT_EMPTY_QUERY;
   }
 
   if (typeof nextQuery.query !== 'string') {
     return nextQuery;
   }
 
-  return nextQuery.query.trim() === '' ? undefined : nextQuery;
+  return nextQuery.query.trim() === '' ? DEFAULT_EMPTY_QUERY : nextQuery;
 };
 
 export const useDashboardPreviewUnifiedSearch = ({
   dashboardApi,
   dashboardState,
-  filterManager,
+  data,
 }: UseDashboardPreviewUnifiedSearchParams) => {
+  const { filterManager } = data.query;
+  const { timefilter } = data.query.timefilter;
+
   const [timeRange, setTimeRange] = useState<TimeRange>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
   );
-  const [query, setQuery] = useState<Query | undefined>(
-    normalizeQuery(toStoredQuery(dashboardState.query))
-  );
+  const [query, setQuery] = useState<Query>(normalizeQuery(toStoredQuery(dashboardState.query)));
   const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
   const [dataViews, setDataViews] = useState<DataView[]>([]);
 
@@ -110,6 +113,19 @@ export const useDashboardPreviewUnifiedSearch = ({
     };
   }, [filterManager]);
 
+  useEffect(() => {
+    const timefilterSubscription = timefilter.getTimeUpdate$().subscribe(() => {
+      const nextTimeRange = timefilter.getTime();
+      setTimeRange((currentTimeRange) =>
+        isEqual(currentTimeRange, nextTimeRange) ? currentTimeRange : nextTimeRange
+      );
+    });
+
+    return () => {
+      timefilterSubscription.unsubscribe();
+    };
+  }, [timefilter]);
+
   const onRefresh = useCallback(() => {
     dashboardApi?.forceRefresh();
   }, [dashboardApi]);
@@ -141,7 +157,7 @@ export const useDashboardPreviewUnifiedSearch = ({
       onQuerySubmit,
       onFiltersUpdated,
       onRefresh,
-      useDefaultBehaviors: true,
+      useDefaultBehaviors: false,
       disableQueryLanguageSwitcher: true,
       isDisabled: !dashboardApi,
       dataTestSubj: 'dashboardCanvasSearchBar',
@@ -153,6 +169,7 @@ export const useDashboardPreviewUnifiedSearch = ({
       showQueryMenu: false,
       screenTitle: dashboardState.title,
       displayStyle: 'inPage' as const,
+      disableSubscribingToGlobalDataServices: true,
     }),
     [
       dashboardApi,

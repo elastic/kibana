@@ -1620,6 +1620,16 @@ export const labels = {
         defaultMessage: 'Click to authorize via OAuth',
       }
     ),
+    statusEarsDisabled: i18n.translate('xpack.agentBuilder.connectors.status.earsDisabled', {
+      defaultMessage: 'Disabled',
+    }),
+    statusEarsDisabledTooltip: i18n.translate(
+      'xpack.agentBuilder.connectors.status.earsDisabledTooltip',
+      {
+        defaultMessage:
+          'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+      }
+    ),
     statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {
       defaultMessage: 'Status',
     }),
@@ -1879,6 +1889,12 @@ export const labels = {
     editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
       defaultMessage: 'Edit agent settings',
     }),
+    readMore: i18n.translate('xpack.agentBuilder.overview.description.readMore', {
+      defaultMessage: 'Read more',
+    }),
+    readLess: i18n.translate('xpack.agentBuilder.overview.description.readLess', {
+      defaultMessage: 'Read less',
+    }),
     capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
       defaultMessage: 'Capabilities',
     }),
@@ -1984,6 +2000,9 @@ export const labels = {
         defaultMessage: 'Save instructions',
       }
     ),
+    createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
+      defaultMessage: 'Elastic',
+    }),
     byAuthor: (author: string) =>
       i18n.translate('xpack.agentBuilder.overview.byAuthor', {
         defaultMessage: 'By {author}',

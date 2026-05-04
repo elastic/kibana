@@ -36,11 +36,13 @@ export interface ToolCallAction {
   type: AgentActionType.ToolCall;
   tool_calls: ToolCallWithReasoning[];
   message?: string;
+  cycle?: number;
 }
 
 export interface ExecuteToolAction {
   type: AgentActionType.ExecuteTool;
   tool_results: ToolCallResult[];
+  cycle?: number;
 }
 
 export interface ToolPromptEntry {
@@ -125,21 +127,34 @@ export function errorAction(error: AgentBuilderAgentExecutionError): AgentErrorA
   };
 }
 
-export function toolCallAction(
-  toolCalls: ToolCallWithReasoning[],
-  message?: string
-): ToolCallAction {
+export function toolCallAction({
+  toolCalls,
+  message,
+  cycle,
+}: {
+  toolCalls: ToolCallWithReasoning[];
+  message?: string;
+  cycle?: number;
+}): ToolCallAction {
   return {
     type: AgentActionType.ToolCall,
     tool_calls: toolCalls,
     message,
+    cycle,
   };
 }
 
-export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAction {
+export function executeToolAction({
+  toolResults,
+  cycle,
+}: {
+  toolResults: ToolCallResult[];
+  cycle?: number;
+}): ExecuteToolAction {
   return {
     type: AgentActionType.ExecuteTool,
     tool_results: toolResults,
+    cycle,
   };
 }
 

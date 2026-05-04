@@ -13,6 +13,9 @@ export default createTestConfig({
       'Detection Engine - New Terms Rule Execution Logic Integration Tests - Serverless Env - Complete Tier',
   },
   kbnTestServerArgs: [
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'disable:entityAnalyticsEntityStoreV2',
+    ])}`,
     `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
       'testing_ignored.constant',
       '/testing_regex*/',

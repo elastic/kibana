@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -69,6 +70,10 @@ export const InvestigationSection = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRemoteDocument = useMemo(
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
+    );
     const ruleId = useMemo(
       () =>
         (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
@@ -117,7 +122,7 @@ export const InvestigationSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INVESTIGATION_SECTION_TITLE}
       >
-        {isAlert ? (
+        {isAlert && !isRemoteDocument ? (
           <InvestigationGuide
             hit={hit}
             isAvailable={true}
@@ -129,6 +134,7 @@ export const InvestigationSection = memo(
           investigationFields={investigationFields}
           ancestorsIndexName={ancestorsIndexName}
           renderCellActions={renderCellActions}
+          hideEditButton={isRemoteDocument}
         />
       </ExpandableSection>
     );

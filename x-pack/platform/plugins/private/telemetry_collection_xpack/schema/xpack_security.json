@@ -4053,6 +4053,12 @@
                         "_meta": {
                           "description": "True if Threat match rule has does_not_match condition in threat mappings"
                         }
+                      },
+                      "ai_created": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule was created using AI assistance"
+                        }
                       }
                     }
                   }
@@ -7983,6 +7989,38 @@
                       "type": "long",
                       "_meta": {
                         "description": "The number of prebuilt rules with customized timeline_id field"
+                      }
+                    }
+                  }
+                },
+                "ai_created_rules": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of rules created via AI rule creation"
+                      }
+                    },
+                    "enabled": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of AI-created rules that are enabled"
+                      }
+                    },
+                    "disabled": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of AI-created rules that are disabled"
+                      }
+                    }
+                  }
+                },
+                "elastic_detection_rule_deprecated_status": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of installed prebuilt rules that are deprecated"
                       }
                     }
                   }

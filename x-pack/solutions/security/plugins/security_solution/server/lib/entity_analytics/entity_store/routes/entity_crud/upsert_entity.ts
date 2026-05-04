@@ -50,8 +50,8 @@ export const upsertEntity = (
 ) => {
   router.versioned
     .put({
-      access: 'public',
-      path: '/api/entity_store/entities/{entityType}',
+      access: 'internal',
+      path: '/internal/entity_store/entities/{entityType}',
       options: {
         availability: {
           stability: 'beta',
@@ -65,7 +65,7 @@ export const upsertEntity = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(UpsertEntityRequestQuery),

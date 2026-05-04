@@ -19,5 +19,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName:
         'Detection Engine - Threshold Rule Execution Logic Integration Tests - ESS Env - Trial License',
     },
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'disable:entityAnalyticsEntityStoreV2',
+        ])}`,
+      ],
+    },
   };
 }

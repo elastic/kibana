@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import deepmerge from 'deepmerge';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors, sourcererSelectors, type inputsModel } from '../../../../common/store';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
@@ -65,19 +66,18 @@ export const useObservedUser = (
       endDate: to,
       startDate: from,
       userName,
+      entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
       indexNames: securityDefaultPatterns,
       id: USER_PANEL_RISK_SCORE_QUERY_ID,
-      skip: isInitializing || useEntityStoreObservedData,
+      skip: isInitializing,
     });
 
   useQueryInspector({
     deleteQuery,
-    inspect: useEntityStoreObservedData ? entityFromStore?.inspect : inspectObservedUser,
-    loading: useEntityStoreObservedData ? entityFromStore?.isLoading ?? false : isLoading,
+    inspect: inspectObservedUser,
+    loading: isLoading,
     queryId: USER_PANEL_OBSERVED_USER_QUERY_ID,
-    refetch: useEntityStoreObservedData
-      ? entityFromStore?.refetch ?? (() => {})
-      : refetchUserDetails,
+    refetch: refetchUserDetails,
     setQuery,
   });
 
@@ -102,8 +102,9 @@ export const useObservedUser = (
   return useMemo((): ObservedUserResult => {
     if (useEntityStoreObservedData && entityFromStore) {
       return {
-        details: (entityFromStore.entity ?? {}) as UserItem,
-        isLoading: entityFromStore.isLoading,
+        // merge with entity store record
+        details: deepmerge(userDetails, entityFromStore.entityRecord ?? {}),
+        isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,
           isLoading: entityFromStore.isLoading,
@@ -114,8 +115,8 @@ export const useObservedUser = (
         },
         entityRecord: entityFromStore.entityRecord ?? null,
         refetchEntityStore: entityFromStore.refetch,
-        observedDetailsInspect: undefined,
-        refetchObservedDetails: undefined,
+        observedDetailsInspect: inspectObservedUser,
+        refetchObservedDetails: refetchUserDetails,
       };
     }
     return {

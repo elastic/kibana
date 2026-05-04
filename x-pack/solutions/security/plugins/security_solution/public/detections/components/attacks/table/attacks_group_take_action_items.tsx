@@ -8,9 +8,9 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import {
+  type AttackDiscoveryAlert,
   getAttackDiscoveryMarkdown,
   getOriginalAlertIds,
-  type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
@@ -33,18 +33,27 @@ interface AttacksGroupTakeActionItemsProps {
   closePopover?: () => void;
   /** Optional callback to run after an action is successfully taken */
   onActionSuccess?: () => void;
+  /** Whether to include the AI assistant action in the menu (default true) */
+  showAiAssistantAction?: boolean;
   /** Optional size for the context menu for flyout */
   size?: 's' | 'm';
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;
+  /**
+   * When true, only the "Investigate in Timeline" action is shown.
+   * Use this for remote/CCS attacks where mutations are not possible.
+   */
+  isRemoteDocument: boolean;
 }
 
 export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
   onActionSuccess,
+  showAiAssistantAction = true,
   size,
   telemetrySource,
+  isRemoteDocument,
 }: AttacksGroupTakeActionItemsProps) {
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -146,30 +155,37 @@ export function AttacksGroupTakeActionItems({
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
       id: 0,
-      items: [
-        ...workflowItems,
-        ...runWorkflowItems,
-        ...assignItems,
-        ...tagsItems,
-        ...investigateInTimelineItems,
-        ...casesItems,
-        ...viewInAiAssistantItems,
-      ],
+      items: isRemoteDocument
+        ? [...investigateInTimelineItems]
+        : [
+            ...casesItems,
+            ...workflowItems,
+            ...tagsItems,
+            ...assignItems,
+            ...runWorkflowItems,
+            ...(showAiAssistantAction ? viewInAiAssistantItems : []),
+            ...investigateInTimelineItems,
+          ],
     }),
     [
+      isRemoteDocument,
       runWorkflowItems,
       workflowItems,
       assignItems,
       tagsItems,
       investigateInTimelineItems,
       casesItems,
+      showAiAssistantAction,
       viewInAiAssistantItems,
     ]
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [defaultPanel, ...runWorkflowPanels, ...workflowPanels, ...assignPanels, ...tagsPanels],
-    [runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
+    () =>
+      isRemoteDocument
+        ? [defaultPanel]
+        : [defaultPanel, ...runWorkflowPanels, ...workflowPanels, ...assignPanels, ...tagsPanels],
+    [isRemoteDocument, runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
   );
 
   return <EuiContextMenu size={size} initialPanelId={defaultPanel.id} panels={panels} />;

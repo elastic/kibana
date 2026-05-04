@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   QueryOrUndefined,
@@ -24,46 +24,48 @@ import {
   PackIdOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
+export const CreateLiveQueryRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * A list of agent IDs to run the query on.
+     */
+    agent_ids: z.array(z.string()).optional(),
+    /**
+     * When `true`, the query runs on all agents.
+     */
+    agent_all: z.boolean().optional(),
+    /**
+     * A list of agent platforms to run the query on.
+     */
+    agent_platforms: z.array(z.string()).optional(),
+    /**
+     * A list of agent policy IDs to run the query on.
+     */
+    agent_policy_ids: z.array(z.string()).optional(),
+    query: QueryOrUndefined.optional(),
+    queries: ArrayQueries.optional(),
+    saved_query_id: SavedQueryIdOrUndefined.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    pack_id: PackIdOrUndefined.optional(),
+    /**
+     * A list of alert IDs associated with the live query.
+     */
+    alert_ids: z.array(z.string()).optional(),
+    /**
+     * A list of case IDs associated with the live query.
+     */
+    case_ids: z.array(z.string()).optional(),
+    /**
+     * A list of event IDs associated with the live query.
+     */
+    event_ids: z.array(z.string()).optional(),
+    /**
+     * Custom metadata object associated with the live query.
+     */
+    metadata: z.object({}).nullable().optional(),
+  })
+);
 export type CreateLiveQueryRequestBody = z.infer<typeof CreateLiveQueryRequestBody>;
-export const CreateLiveQueryRequestBody = z.object({
-  /**
-   * A list of agent IDs to run the query on.
-   */
-  agent_ids: z.array(z.string()).optional(),
-  /**
-   * When `true`, the query runs on all agents.
-   */
-  agent_all: z.boolean().optional(),
-  /**
-   * A list of agent platforms to run the query on.
-   */
-  agent_platforms: z.array(z.string()).optional(),
-  /**
-   * A list of agent policy IDs to run the query on.
-   */
-  agent_policy_ids: z.array(z.string()).optional(),
-  query: QueryOrUndefined.optional(),
-  queries: ArrayQueries.optional(),
-  saved_query_id: SavedQueryIdOrUndefined.optional(),
-  ecs_mapping: ECSMappingOrUndefined.optional(),
-  pack_id: PackIdOrUndefined.optional(),
-  /**
-   * A list of alert IDs associated with the live query.
-   */
-  alert_ids: z.array(z.string()).optional(),
-  /**
-   * A list of case IDs associated with the live query.
-   */
-  case_ids: z.array(z.string()).optional(),
-  /**
-   * A list of event IDs associated with the live query.
-   */
-  event_ids: z.array(z.string()).optional(),
-  /**
-   * Custom metadata object associated with the live query.
-   */
-  metadata: z.object({}).nullable().optional(),
-});
 
+export const CreateLiveQueryResponse = lazySchema(() => z.object({}));
 export type CreateLiveQueryResponse = z.infer<typeof CreateLiveQueryResponse>;
-export const CreateLiveQueryResponse = z.object({});

@@ -22,6 +22,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -60,6 +61,7 @@ export interface AgentExecutionDeps {
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 /**

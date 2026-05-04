@@ -10,7 +10,7 @@ import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';
-const LOGS_INDEX_PATTERN = 'logs-*';
+const LOGS_INDEX_PATTERN = 'logs*';
 
 const TRACES_ESQL_RECOMMENDED_QUERIES = [
   {

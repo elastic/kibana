@@ -80,7 +80,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const identityFieldsStable =
     identityFields != null && Object.keys(identityFields).length > 0

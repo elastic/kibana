@@ -29,12 +29,12 @@ export const timelinePrivilegesMiddleware: (kibana: CoreStart) => Middleware<{},
         title: i18n.translate(
           'xpack.securitySolution.timeline.toast.insufficientPrivileges.title',
           {
-            defaultMessage: 'Insufficient privileges (timeline)',
+            defaultMessage: 'Insufficient privileges (Timeline)',
           }
         ),
         text: i18n.translate('xpack.securitySolution.timeline.toast.insufficientPrivileges.text', {
           defaultMessage:
-            'You are trying to open a timeline but you do not have sufficient privileges. Please contact your administrator in order to get set up with the correct privileges for timeline.',
+            'You are trying to open a Timeline but you do not have sufficient privileges. Please contact your administrator in order to get set up with the correct privileges for Timeline.',
         }),
       });
       return next(showTimeline({ id: action.payload.id, show: false }));

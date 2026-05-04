@@ -218,6 +218,7 @@ export function useGetCreateApiKey() {
   const core = useStartServices();
 
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
+  const [apiKeyEncoded, setApiKeyEncoded] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const onCreateApiKey = useCallback(async () => {
     try {
@@ -228,6 +229,7 @@ export function useGetCreateApiKey() {
 
       const newApiKey = `${res.item.id}:${res.item.api_key}`;
       setApiKey(newApiKey);
+      setApiKeyEncoded(res.item.encoded);
     } catch (err) {
       core.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.fleet.standaloneAgentPage.errorCreatingAgentAPIKey', {
@@ -239,6 +241,7 @@ export function useGetCreateApiKey() {
   }, [core.notifications.toasts]);
   return {
     apiKey,
+    apiKeyEncoded,
     isLoading,
     onCreateApiKey,
   };
@@ -304,7 +307,7 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
   const downloadYaml = useMemo(
     () => () => {
       const link = document.createElement('a');
-      link.href = `data:text/x-yaml;charset=utf-8,${yaml}`;
+      link.href = `data:text/x-yaml;charset=utf-8,${encodeURIComponent(yaml)}`;
       link.download = `elastic-agent.yml`;
       link.click();
     },

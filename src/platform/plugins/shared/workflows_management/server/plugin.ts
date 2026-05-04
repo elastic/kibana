@@ -23,6 +23,7 @@ import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { defineRoutes } from './api/routes';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
+import { AvailabilityUpdater } from './availability';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -77,6 +78,7 @@ export class WorkflowsPlugin
   private analytics?: AnalyticsServiceStart;
   private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
   private config: WorkflowsManagementConfig;
+  private availabilityUpdater: AvailabilityUpdater | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -257,6 +259,15 @@ export class WorkflowsPlugin
       }
     }
 
+    if (this.api) {
+      this.availabilityUpdater = new AvailabilityUpdater({
+        licensing: plugins.licensing,
+        config: this.config,
+        api: this.api,
+        logger: this.logger,
+      });
+    }
+
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
@@ -325,5 +336,7 @@ export class WorkflowsPlugin
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.availabilityUpdater?.stop();
+  }
 }

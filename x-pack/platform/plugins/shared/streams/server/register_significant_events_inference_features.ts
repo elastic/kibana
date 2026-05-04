@@ -61,6 +61,7 @@ export function registerSignificantEventsInferenceFeatures(
     ),
     taskType: 'chat_completion',
     recommendedEndpoints: [],
+    isTechPreview: true,
   });
   if (parentResult.ok) {
     logger.debug(

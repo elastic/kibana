@@ -14,25 +14,27 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { GetUnifiedHistoryResponse } from './get_unified_history.gen';
 
+export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
+  z.object({
+    pageSize: z.coerce.number().int().min(1).max(100).optional().default(20),
+    nextPage: z.string().optional(),
+    kuery: z.string().optional(),
+    userIds: z.string().optional(),
+    sourceFilters: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+  })
+);
 export type OsqueryGetUnifiedHistoryRequestQuery = z.infer<
   typeof OsqueryGetUnifiedHistoryRequestQuery
 >;
-export const OsqueryGetUnifiedHistoryRequestQuery = z.object({
-  pageSize: z.coerce.number().int().min(1).max(100).optional().default(20),
-  nextPage: z.string().optional(),
-  kuery: z.string().optional(),
-  userIds: z.string().optional(),
-  sourceFilters: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
 export type OsqueryGetUnifiedHistoryRequestQueryInput = z.input<
   typeof OsqueryGetUnifiedHistoryRequestQuery
 >;
 
+export const OsqueryGetUnifiedHistoryResponse = lazySchema(() => GetUnifiedHistoryResponse);
 export type OsqueryGetUnifiedHistoryResponse = z.infer<typeof OsqueryGetUnifiedHistoryResponse>;
-export const OsqueryGetUnifiedHistoryResponse = GetUnifiedHistoryResponse;

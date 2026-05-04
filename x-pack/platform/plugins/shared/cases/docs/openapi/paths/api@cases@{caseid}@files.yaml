@@ -22,6 +22,11 @@ post:
       multipart/form-data:
         schema:
           $ref: '../components/schemas/add_case_file_request.yaml'
+        examples:
+          addCaseFileRequest:
+            summary: Attach a plain text file named "my_attachment".
+            value:
+              filename: my_attachment
   responses:
     '200':
       description: Indicates a successful call.
@@ -38,3 +43,16 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+  x-codeSamples:
+    - label: curl
+      lang: curl
+      source: |
+        curl \
+          --request POST 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/files' \
+          --header "Authorization: $API_KEY" \
+          --header "kbn-xsrf: true" \
+          --form "file=@/path/to/my_attachment.txt" \
+          --form "filename=my_attachment"

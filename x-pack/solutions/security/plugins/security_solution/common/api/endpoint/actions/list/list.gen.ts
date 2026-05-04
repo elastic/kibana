@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   Page,
@@ -29,25 +29,27 @@ import {
   Types,
 } from '../../model/schema/common.gen';
 
+export const GetEndpointActionListResponse = lazySchema(() => z.object({}));
 export type GetEndpointActionListResponse = z.infer<typeof GetEndpointActionListResponse>;
-export const GetEndpointActionListResponse = z.object({});
 
+export const EndpointGetActionsListRequestQuery = lazySchema(() =>
+  z.object({
+    page: Page.optional(),
+    pageSize: PageSize.optional(),
+    commands: Commands.optional(),
+    agentIds: AgentIds.optional(),
+    userIds: UserIds.optional(),
+    startDate: StartDate.optional(),
+    endDate: EndDate.optional(),
+    agentTypes: AgentTypes.optional(),
+    withOutputs: WithOutputs.optional(),
+    types: Types.optional(),
+  })
+);
 export type EndpointGetActionsListRequestQuery = z.infer<typeof EndpointGetActionsListRequestQuery>;
-export const EndpointGetActionsListRequestQuery = z.object({
-  page: Page.optional(),
-  pageSize: PageSize.optional(),
-  commands: Commands.optional(),
-  agentIds: AgentIds.optional(),
-  userIds: UserIds.optional(),
-  startDate: StartDate.optional(),
-  endDate: EndDate.optional(),
-  agentTypes: AgentTypes.optional(),
-  withOutputs: WithOutputs.optional(),
-  types: Types.optional(),
-});
 export type EndpointGetActionsListRequestQueryInput = z.input<
   typeof EndpointGetActionsListRequestQuery
 >;
 
+export const EndpointGetActionsListResponse = lazySchema(() => GetEndpointActionListResponse);
 export type EndpointGetActionsListResponse = z.infer<typeof EndpointGetActionsListResponse>;
-export const EndpointGetActionsListResponse = GetEndpointActionListResponse;
