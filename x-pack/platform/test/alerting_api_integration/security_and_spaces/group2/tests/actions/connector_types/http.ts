@@ -365,7 +365,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling http, retry later/);
-      expect(result.service_message).to.eql('[500] Internal Server Error');
+      expect(result.service_message).to.eql('[500] Internal Server Error: Error');
     });
 
     it('should not abort when the request completes normally', async () => {

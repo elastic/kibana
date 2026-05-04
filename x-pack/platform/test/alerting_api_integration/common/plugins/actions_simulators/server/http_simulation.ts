@@ -96,6 +96,7 @@ function createServerCallback() {
           return validateReceivedHeaders(request.headers, response);
         case 'failure':
           response.statusCode = 500;
+          response.setHeader('Content-Type', 'text/plain; charset=utf-8');
           response.end('Error');
           return;
         case 'header_as_payload':
