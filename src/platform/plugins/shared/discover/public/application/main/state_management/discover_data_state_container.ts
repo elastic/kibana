@@ -297,8 +297,12 @@ export function getDataStateContainer({
             appState,
             globalState,
           } = tabState;
-          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
-            selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const {
+            scopedProfilesManager$,
+            scopedEbtManager$,
+            currentDataView$,
+            cascadedDocumentsFetcher$,
+          } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
 
@@ -377,6 +381,7 @@ export function getDataStateContainer({
               },
             })
           );
+          cascadedDocumentsFetcher$.getValue().clearCascadedDocumentsDataView();
 
           const { didProfileChange, isFirstResolution } =
             await scopedProfilesManager.resolveDataSourceProfile(

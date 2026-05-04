@@ -12,6 +12,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import type {
@@ -143,6 +144,42 @@ describe('CascadedDocumentsFetcher', () => {
       })
     );
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
+  });
+
+  it('caches an enriched data view built from cascade response columns', async () => {
+    const { stateManager, fetcher } = createFetcher();
+    const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
+    const enrichedDataView = { ...dataViewWithTimefieldMock, id: 'enriched-data-view' } as DataView;
+    const baseDataView = {
+      ...dataViewWithTimefieldMock,
+      cloneWithFields: jest.fn(() => enrichedDataView),
+    } as unknown as DataView;
+
+    mockConstructCascadeQuery.mockReturnValueOnce({ esql: 'from logs' });
+    mockFetchEsql.mockResolvedValue({
+      records,
+      esqlQueryColumns: [
+        { id: 'message', name: 'message', meta: { type: 'string', esType: 'text' } },
+      ],
+    });
+
+    await fetcher.fetchCascadedDocuments(createFetchParams({ dataView: baseDataView }));
+
+    expect(baseDataView.cloneWithFields).toHaveBeenCalledWith({
+      message: {
+        name: 'message',
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+        isNull: false,
+        isComputedColumn: true,
+      },
+    });
+    expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith('node-1', records);
+    expect(fetcher.getCascadedDocumentsDataView()).toBe(enrichedDataView);
+    fetcher.clearCascadedDocumentsDataView();
+    expect(fetcher.getCascadedDocumentsDataView()).toBeUndefined();
   });
 
   it('captures an error when the cascade query cannot be constructed', async () => {
