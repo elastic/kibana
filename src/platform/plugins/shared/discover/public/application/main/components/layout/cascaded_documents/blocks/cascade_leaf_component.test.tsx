@@ -54,7 +54,6 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
     getIsActiveInstance: jest.fn(() => true),
     getCascadedDocuments: jest.fn(() => undefined),
-    getCascadedDocumentsDataView: jest.fn(() => undefined),
     setCascadedDocuments: jest.fn(),
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
