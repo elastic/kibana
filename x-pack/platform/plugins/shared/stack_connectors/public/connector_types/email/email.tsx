@@ -164,7 +164,7 @@ export function getConnectorType(
   };
 }
 
-type EmailRecipientField = 'to' | 'cc' | 'bcc' | 'replyTo';
+type EmailRecipientField = 'to' | 'cc' | 'bcc';
 
 function getRecipientFields(actionParams: EmailActionParams, field: EmailRecipientField): string[] {
   const value = actionParams[field];
@@ -177,6 +177,3 @@ const getToFields = (actionParams: EmailActionParams) => getRecipientFields(acti
 const getCcFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'cc');
 
 const getBccFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'bcc');
-
-const getReplyToFields = (actionParams: EmailActionParams) =>
-  getRecipientFields(actionParams, 'replyTo');
