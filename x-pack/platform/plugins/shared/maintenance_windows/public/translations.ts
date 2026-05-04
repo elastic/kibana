@@ -157,7 +157,7 @@ export const EPISODES_SCOPE_TITLE = i18n.translate(
 export const EPISODES_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.episodes.description',
   {
-    defaultMessage: 'Suppress alert notifications during maintenance',
+    defaultMessage: 'Suppress alert episode notifications during maintenance',
   }
 );
 
