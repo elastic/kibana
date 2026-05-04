@@ -353,11 +353,6 @@ describe('metric suggestions', () => {
           state: {
             layerId: 'first',
             layerType: LayerTypes.DATA,
-            titlesTextAlign: 'left',
-            primaryPosition: 'bottom',
-            primaryAlign: 'right',
-            iconAlign: 'right',
-            secondaryAlign: 'right',
             metricAccessor: metricColumn.columnId,
             breakdownByAccessor: bucketColumn.columnId,
           },
