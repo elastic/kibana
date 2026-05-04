@@ -157,7 +157,9 @@ function generateActions(bugs) {
     const target = toTarget(jsonpath);
     lines.push(`  - target: "${target}.required"`);
     lines.push(
-      `    description: "Remove wrongly-required fields (x-oas-optional or has default): ${buggyFields.join(', ')}"`
+      `    description: "Remove wrongly-required fields (x-oas-optional or has default): ${buggyFields.join(
+        ', '
+      )}"`
     );
     lines.push('    remove: true');
     lines.push(`  - target: "${target}"`);
