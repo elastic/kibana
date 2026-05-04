@@ -321,13 +321,99 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
   });
 
-  it('fails when --selective-testing is set without --affected-modules', () => {
+  it('fails when --selective-testing is set without --affected-modules or --affected-configs', () => {
     flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
     flagsReader.string.mockReturnValue('');
 
     expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-      '--selective-testing requires --affected-modules'
+      '--selective-testing requires exactly one of --affected-modules'
     );
+  });
+
+  it('fails when --selective-testing is set with both --affected-modules and --affected-configs', () => {
+    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+    flagsReader.string.mockImplementation((name: string) => {
+      if (name === 'affected-modules') return '/mock/affected_modules.json';
+      if (name === 'affected-configs') return '/mock/affected_configs.json';
+      return '';
+    });
+
+    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+      '--selective-testing accepts exactly one of --affected-modules or --affected-configs (got both).'
+    );
+  });
+
+  it('fails when --affected-configs is set without --selective-testing', () => {
+    flagsReader.boolean.mockReturnValue(false);
+    flagsReader.string.mockImplementation((name: string) =>
+      name === 'affected-configs' ? '/mock/affected_configs.json' : ''
+    );
+
+    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+      '--affected-configs requires --selective-testing.'
+    );
+  });
+
+  it('with --selective-testing and --affected-configs, narrows to listed configs and skips module dep walk', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+    flagsReader.string.mockImplementation((name: string) =>
+      name === 'affected-configs' ? '/mock/affected_configs.json' : ''
+    );
+
+    // Allowlist: only the parallel config of pluginA + packageA's api config.
+    // pluginA's non-parallel ui config and pluginB's api config should be dropped.
+    const allowedConfigs = [
+      'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
+      'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
+    ];
+
+    (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
+      if (readPath === '/mock/affected_configs.json') {
+        return JSON.stringify(allowedConfigs);
+      }
+      if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
+        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+      }
+      if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
+        return 'mock yaml content';
+      }
+      return '';
+    });
+
+    // Mirror the test fixture's structure but include both ui configs of pluginA so the filter
+    // has something to drop, and ensure the affected-configs path *intersects* with what survives
+    // tag/CI filters. filterModulesByScoutCiConfig is a passthrough mock here.
+    (filterModulesByScoutCiConfig as jest.Mock).mockImplementation(
+      (_l: ToolingLog, mods: ModuleDiscoveryInfo[]) => mods
+    );
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // markModulesAffectedStatus is the only caller of findPackageForPath in this CLI;
+    // --affected-configs must skip that walk.
+    expect(findPackageForPath).not.toHaveBeenCalled();
+
+    const infoCalls = log.info.mock.calls;
+    const narrowedLog = infoCalls.find((call) =>
+      String(call[0]).includes(
+        'Selective testing: Scout discovery limited to affected Playwright configs'
+      )
+    );
+    expect(narrowedLog).toBeDefined();
+
+    const summaryLog = infoCalls.find((call) =>
+      String(call[0]).match(/Affected configs: \d+ kept, \d+ dropped, \d+ module\(s\) survived/)
+    );
+    expect(summaryLog).toBeDefined();
+
+    // Standard "Found Playwright config files in X plugin(s) and Y package(s)" output.
+    const foundMessage = infoCalls.find((call) =>
+      String(call[0]).includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)'); // only pluginA survives
+    expect(foundMessage![0]).toContain('1 package(s)'); // packageA
   });
 
   it('with --selective-testing and --affected-modules, limits discovery to affected modules only', () => {

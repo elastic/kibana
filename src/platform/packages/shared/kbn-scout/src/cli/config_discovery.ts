@@ -14,6 +14,7 @@ import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
 import { markModulesAffectedStatus } from '../tests_discovery/affected_modules';
+import { filterModulesByAffectedConfigs } from '../tests_discovery/affected_configs';
 import {
   filterModulesByScoutCiConfig,
   getScoutCiExcludedConfigs,
@@ -255,11 +256,22 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
   const selectiveTesting = flagsReader.boolean('selective-testing');
   const affectedModulesPath = flagsReader.string('affected-modules');
+  const affectedConfigsPath = flagsReader.string('affected-configs');
 
-  if (selectiveTesting && !affectedModulesPath) {
+  if (selectiveTesting && !affectedModulesPath && !affectedConfigsPath) {
     throw createFailError(
-      '--selective-testing requires --affected-modules (JSON array of @kbn/ IDs from list_affected).'
+      '--selective-testing requires exactly one of --affected-modules (JSON array of @kbn/ IDs) or --affected-configs (JSON array of Playwright config paths).'
     );
+  }
+
+  if (selectiveTesting && affectedModulesPath && affectedConfigsPath) {
+    throw createFailError(
+      '--selective-testing accepts exactly one of --affected-modules or --affected-configs (got both).'
+    );
+  }
+
+  if (!selectiveTesting && affectedConfigsPath) {
+    throw createFailError('--affected-configs requires --selective-testing.');
   }
 
   // Build initial module discovery info
@@ -267,12 +279,16 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   // --affected-modules: keep every Scout module that passes target/CI filters; set isAffected
   // per module so CI step labels can use an "affected " prefix where the PR touched that @kbn/ ID.
-  const modulesAfterAffectedMark = affectedModulesPath
-    ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
-    : modulesWithTests;
+  // Skipped entirely when --affected-configs is in use (no module/dep walk needed).
+  const modulesAfterAffectedMark =
+    affectedModulesPath && !affectedConfigsPath
+      ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
+      : modulesWithTests;
 
-  // --selective-testing: narrow to affected module groups only.
-  const limitDiscoveryToAffectedModules = selectiveTesting;
+  // --selective-testing with --affected-modules: narrow to affected module groups before tag filtering.
+  // --selective-testing with --affected-configs: keep all modules here; narrow by config path *after*
+  // tag/CI filters so we don't accidentally re-include configs that those filters intentionally drop.
+  const limitDiscoveryToAffectedModules = selectiveTesting && !affectedConfigsPath;
 
   const modulesForTargetTags = limitDiscoveryToAffectedModules
     ? modulesAfterAffectedMark.filter((m) => m.isAffected === true)
@@ -281,6 +297,10 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   if (limitDiscoveryToAffectedModules) {
     log.info(
       `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterAffectedMark.length})`
+    );
+  } else if (selectiveTesting && affectedConfigsPath) {
+    log.info(
+      `Selective testing: Scout discovery limited to affected Playwright configs (will narrow ${modulesAfterAffectedMark.length} module(s) after tag/CI filters)`
     );
   } else {
     log.info(
@@ -297,16 +317,20 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const filteredModulesWithExcludedConfigs = process.env.CI
     ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
     : filteredModules;
+
+  // --affected-configs: narrow each module's configs to the allow-list, drop modules with no
+  // remaining configs, and mark survivors as affected. Runs *after* the tag/CI filters above
+  // so that a config the CI explicitly excludes can never be force-included via this flag.
+  const finalModules =
+    selectiveTesting && affectedConfigsPath
+      ? filterModulesByAffectedConfigs(filteredModulesWithExcludedConfigs, affectedConfigsPath, log)
+      : filteredModulesWithExcludedConfigs;
+
   // Handle output based on flatten flag
   if (flatten) {
-    handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
+    handleFlattenedOutput(finalModules, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(
-      filteredModulesWithExcludedConfigs,
-      flagsReader,
-      log,
-      selectiveTesting
-    );
+    handleNonFlattenedOutput(finalModules, flagsReader, log, selectiveTesting);
   }
 };
 
@@ -328,10 +352,13 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
  * - Flattened: Groups configs by deployment mode (stateful/serverless), group, and run mode
  *
- * Affected modules:
+ * Affected modules / configs:
  * - With --affected-modules, all modules are still considered; isAffected flags drive the
  *   "affected " Buildkite step prefix. With --selective-testing, only affected module groups
  *   are emitted; those steps keep the same prefix.
+ * - With --selective-testing --affected-configs, the module/dependency walk is skipped entirely
+ *   and discovery is narrowed to the listed Playwright config paths after tag/CI filters apply.
+ *   --affected-modules and --affected-configs are mutually exclusive.
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
@@ -354,8 +381,14 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               isAffected so CI can prefix steps with "affected " when the PR
                               touches that module. Combine with --selective-testing to emit only
                               affected module groups.
-    --selective-testing       Requires --affected-modules.
-                              Limits output / Scout CI steps to affected modules; labels unchanged.
+    --affected-configs <file>  Path to a JSON file of affected Playwright config paths (Scout
+                              tests-only fast path). Requires --selective-testing. Skips the
+                              module dependency walk entirely; narrows discovery to the listed
+                              configs after tag/CI filters apply. Mutually exclusive with
+                              --affected-modules.
+    --selective-testing       Requires exactly one of --affected-modules or --affected-configs.
+                              Limits output / Scout CI steps to affected modules or configs;
+                              labels unchanged.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -395,9 +428,12 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Only affected module groups (selective testing for PRs)
     node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --selective-testing --save
+
+    # Only affected Playwright configs (Scout tests-only fast path for PRs)
+    node scripts/scout discover-playwright-configs --affected-configs .scout/affected_configs.json --selective-testing --save
   `,
   flags: {
-    string: ['target', 'affected-modules'],
+    string: ['target', 'affected-modules', 'affected-configs'],
     boolean: ['save', 'validate', 'flatten', 'include-custom-servers', 'selective-testing'],
     default: {
       target: 'all',
