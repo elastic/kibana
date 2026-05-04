@@ -9,6 +9,7 @@
 @types/estree@1.0.8
 @types/json-schema@7.0.11
 @types/node@24.10.13
+@types/trusted-types@2.0.7
 @webassemblyjs/ast@1.12.1
 @webassemblyjs/floating-point-hex-parser@1.11.6
 @webassemblyjs/helper-api-error@1.11.6
@@ -40,6 +41,7 @@ caniuse-lite@1.0.30001781
 chrome-trace-event@1.0.2
 commander@2.20.3
 common-path-prefix@3.0.0
+dompurify@3.4.1
 electron-to-chromium@1.5.321
 enhanced-resolve@5.20.0
 es-module-lexer@1.5.4
@@ -64,15 +66,16 @@ json-schema-traverse@1.0.0
 jsonc-parser@3.2.0
 loader-runner@4.3.0
 locate-path@7.2.0
+marked@14.0.0
 merge-stream@2.0.0
 mime-db@1.52.0
 mime-types@2.1.35
-monaco-editor@0.44.0
-monaco-languageserver-types@0.2.3
-monaco-marker-data-provider@1.1.1
+monaco-editor@0.54.0
+monaco-languageserver-types@0.4.0
+monaco-marker-data-provider@1.2.5
 monaco-types@0.1.0
 monaco-worker-manager@2.0.1
-monaco-yaml@5.1.0
+monaco-yaml@5.4.0
 neo-async@2.6.2
 node-releases@2.0.27
 p-limit@4.0.0
@@ -81,7 +84,7 @@ path-browserify@1.0.1
 path-exists@5.0.0
 picocolors@1.1.1
 pkg-dir@7.0.0
-prettier@2.8.8
+prettier@3.8.1
 punycode@2.3.1
 require-from-string@2.0.2
 schema-utils@3.3.0

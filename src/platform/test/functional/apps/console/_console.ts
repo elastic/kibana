@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('multiple requests output', function () {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
-          await PageObjects.console.enterText(request);
+          await PageObjects.console.appendText(request);
         });
         await PageObjects.console.selectAllRequests();
         await PageObjects.console.clickPlay();

@@ -41,6 +41,9 @@ import {
 } from './mods';
 import { styles } from './editor.styles';
 
+/** Monaco action ID for Escape; use `editor.trigger()` — synthetic key events are unreliable in EditContext mode (Monaco 0.54+). */
+export const KBN_A11Y_HANDLE_ESCAPE_ACTION_ID = 'kbn.a11y.handleEscape' as const;
+
 export interface CodeEditorProps
   extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
   /** Width of editor. Defaults to 100%. */
@@ -523,27 +526,46 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       });
       editor.onDidBlurEditorText(onBlurMonaco);
 
-      const messageContribution = editor.getContribution('editor.contrib.messageController');
-      editor.onDidAttemptReadOnlyEdit(() => {
-        // @ts-expect-error the show message API does exist and is documented here
-        // https://github.com/microsoft/vscode/commit/052f02175f4752c36024c18cfbca4e13403e10c3
-        messageContribution?.showMessage(readOnlyMessage, editor.getPosition());
+      // Expose the Escape key a11y logic as a triggerable action so that tests
+      // can invoke it via editor.trigger() without relying on real keyboard events,
+      // which are not reliably routed through Monaco's handler in EditContext mode.
+      editor.addAction({
+        id: KBN_A11Y_HANDLE_ESCAPE_ACTION_ID,
+        label: 'Handle Escape: close suggestions or show accessibility hint',
+        run: () => {
+          if (isSuggestionMenuOpen.current) {
+            editor.trigger('keyboard', 'hideSuggestWidget', {});
+          } else {
+            stopEditing();
+            editorHint.current?.focus();
+          }
+        },
       });
 
-      // "widget" is not part of the TS interface but does exist
-      // @ts-expect-errors
-      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
-        ?.value;
+      try {
+        const messageContribution = editor.getContribution('editor.contrib.messageController');
 
-      // As I haven't found official documentation for "onDidShow" and "onDidHide"
-      // we guard from possible changes in the underlying lib
-      if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
-        suggestionWidget.onDidShow(() => {
-          isSuggestionMenuOpen.current = true;
+        editor.onDidAttemptReadOnlyEdit(() => {
+          messageContribution?.showMessage?.(readOnlyMessage, editor.getPosition());
         });
-        suggestionWidget.onDidHide(() => {
-          isSuggestionMenuOpen.current = false;
-        });
+      } catch {
+        // This is a guard for possible changes in the underlying lib, as we are leveraging undocumented APIs.
+      }
+
+      try {
+        const suggestionController = editor.getContribution('editor.contrib.suggestController');
+        const suggestionWidget = suggestionController?.widget?.value;
+
+        if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+          suggestionWidget.onDidShow(() => {
+            isSuggestionMenuOpen.current = true;
+          });
+          suggestionWidget.onDidHide(() => {
+            isSuggestionMenuOpen.current = false;
+          });
+        }
+      } catch {
+        // This is a guard for possible changes in the underlying lib, as we are leveraging undocumented APIs.
       }
 
       if (enableCustomContextMenu) {
@@ -561,6 +583,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       editorDidMount,
       onBlurMonaco,
       onKeydownMonaco,
+      stopEditing,
       readOnlyMessage,
       enableCustomContextMenu,
       registerContextMenuActions,
@@ -667,7 +690,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 // outer scrollbars.
                 alwaysConsumeMouseWheel: false,
               },
-              wordBasedSuggestions: false,
+              wordBasedSuggestions: 'off',
               wordWrap: 'on',
               wrappingIndent: 'indent',
               matchBrackets: 'never',

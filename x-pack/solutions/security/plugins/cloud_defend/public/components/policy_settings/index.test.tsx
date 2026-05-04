@@ -13,6 +13,9 @@ import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { PolicySettings } from '.';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
+import { useConfigModel } from '../control_yaml_view/hooks/use_config_model';
+
+jest.mock('../control_yaml_view/hooks/use_config_model');
 
 describe('<PolicySettings />', () => {
   const onChange = jest.fn();
@@ -27,6 +30,11 @@ describe('<PolicySettings />', () => {
 
   beforeEach(() => {
     onChange.mockClear();
+    // Set default mock for useConfigModel to return non null value
+    (useConfigModel as jest.Mock).mockReturnValue({
+      getValue: jest.fn(() => ''),
+      setValue: jest.fn(),
+    });
   });
 
   it('allows user to set name of integration', async () => {

@@ -33,69 +33,73 @@ export function getSuggestionProvider(
 
   return {
     triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
-    async provideCompletionItems(
-      model: monaco.editor.ITextModel,
-      position: monaco.Position,
-      _context: monaco.languages.CompletionContext,
-      token: monaco.CancellationToken
-    ): Promise<monaco.languages.CompletionList> {
-      return createMonacoProvider({
-        model,
-        run: async (safeModel) => {
-          // Avoid returning suggestions for unfocused editors sharing the same model.
-          const editors = monaco.editor
-            .getEditors()
-            .filter((editor) => editor.getModel() === model);
-          const modelHasTextFocus =
-            editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
+    provideCompletionItems: (async (model, position, _context, token) => {
+      return new Promise((resolve) => {
+        token.onCancellationRequested(() => {
+          resolve({ suggestions: [] });
+        });
 
-          if (!modelHasTextFocus) {
-            return { suggestions: [] };
-          }
+        resolve(
+          createMonacoProvider({
+            model,
+            run: async (safeModel) => {
+              // Avoid returning suggestions for unfocused editors sharing the same model.
+              const editors = monaco.editor
+                .getEditors()
+                .filter((editor) => editor.getModel() === model);
+              const modelHasTextFocus =
+                editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
 
-          const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
-          const resolvedDeps = resolvedCallbacks
-            ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
-            : deps;
-          const fullText = safeModel.getValue();
-          const offset = monacoPositionToOffset(fullText, position);
+              if (!modelHasTextFocus) {
+                return { suggestions: [] };
+              }
 
-          const computeStart = performance.now();
-          const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
-          const suggestions = await suggest(fullText, offset, cancellableCallbacks);
+              const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
+              const resolvedDeps = resolvedCallbacks
+                ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
+                : deps;
+              const fullText = safeModel.getValue();
+              const offset = monacoPositionToOffset(fullText, position);
 
-          const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
-          if (suggestionsWithCustomCommands.length) {
-            resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
-              suggestionsWithCustomCommands
-            );
-          }
+              const computeStart = performance.now();
+              const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
+              const suggestions = await suggest(fullText, offset, cancellableCallbacks);
 
-          const result = wrapAsMonacoSuggestions(suggestions, fullText);
-          const computeEnd = performance.now();
+              const suggestionsWithCustomCommands =
+                filterSuggestionsWithCustomCommands(suggestions);
+              if (suggestionsWithCustomCommands.length) {
+                resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
+                  suggestionsWithCustomCommands
+                );
+              }
 
-          resolvedDeps?.telemetry?.onSuggestionsReady?.(
-            computeStart,
-            computeEnd,
-            safeModel.getValueLength(),
-            safeModel.getLineCount()
-          );
+              const result = wrapAsMonacoSuggestions(suggestions, fullText);
+              const computeEnd = performance.now();
 
-          const streamNames = getIndexSourcesFromQuery(fullText).filter(
-            (name) => !name.includes('*')
-          );
-          for (const suggestion of result.suggestions) {
-            itemContext.set(suggestion, {
-              streamNames,
-              getFieldsMetadata: resolvedDeps?.getFieldsMetadata,
-            });
-          }
+              resolvedDeps?.telemetry?.onSuggestionsReady?.(
+                computeStart,
+                computeEnd,
+                safeModel.getValueLength(),
+                safeModel.getLineCount()
+              );
 
-          return result;
-        },
-        emptyResult: { suggestions: [] },
+              const streamNames = getIndexSourcesFromQuery(fullText).filter(
+                (name) => !name.includes('*')
+              );
+              for (const suggestion of result.suggestions) {
+                itemContext.set(suggestion, {
+                  streamNames,
+                  getFieldsMetadata: resolvedDeps?.getFieldsMetadata,
+                });
+              }
+
+              return result;
+            },
+            emptyResult: { suggestions: [] },
+          })
+        );
       });
-    },
+    }) satisfies monaco.languages.CompletionItemProvider['provideCompletionItems'],
     async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
       const context = itemContext.get(item);
       if (!context?.getFieldsMetadata) return item;

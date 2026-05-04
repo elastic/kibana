@@ -33,6 +33,13 @@ module.exports = (
       [require('./common_preset'), options],
     ],
     plugins: [
+      // monaco-editor 0.54.0+ uses ES2022 class static block syntax. @babel/preset-env may skip
+      // this transform when the browserslist target includes browsers that natively support it,
+      // so we add the plugin explicitly to guarantee transformation for all targets.
+      // Must appear here (top-level plugins) so it runs before common_preset's class-properties
+      // transform, which is a hard ordering requirement from the spec implementation.
+      require.resolve('@babel/plugin-transform-class-static-block'),
+
       // Conditionally include babel-plugin-transform-require-default
       //
       // We need to include this plugin in the main worker webpack config that handles our

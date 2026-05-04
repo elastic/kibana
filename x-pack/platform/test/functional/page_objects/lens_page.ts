@@ -38,6 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
+  const monacoEditor = getService('monacoEditor');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share, exports } =
     getPageObjects([
@@ -1975,13 +1976,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async typeFormula(formula: string) {
-      await find.byCssSelector('.monaco-editor');
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(formula);
+      await monacoEditor.setCodeEditorValueByCssSelector(
+        '[data-test-subj="lnsFormulaEditor"]',
+        formula
+      );
       // Debounce time for formula
       await common.sleep(300);
+    },
+
+    /**
+     * Simulate typing text in the formula editor (triggers Monaco's type command).
+     */
+    async simulateTypingInFormula(text: string) {
+      await monacoEditor.simulateTyping('lnsFormulaEditor', text);
+      await common.sleep(100);
+    },
+
+    /**
+     * Simulate pressing a key in the formula editor.
+     */
+    async simulateKeyInFormula(key: string) {
+      await monacoEditor.simulateKeyCommand('lnsFormulaEditor', key);
     },
 
     async expectFormulaText(formula: string) {

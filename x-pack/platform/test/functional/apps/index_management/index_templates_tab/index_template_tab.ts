@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const browser = getService('browser');
   const retry = getService('retry');
+  const monacoEditor = getService('monacoEditor');
 
   const INDEX_TEMPLATE_NAME = 'index-template-test-name';
 
@@ -139,9 +140,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('formWizardStep-2');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Modify Index settings
-        await testSubjects.setValue(
-          'kibanaCodeEditor',
+        await monacoEditor.setCodeEditorValue(
           JSON.stringify({
             index: {
               mapping: {
@@ -152,10 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 ignore_malformed: 'true',
               },
             },
-          }),
-          {
-            clearWithKeyboard: true,
-          }
+          })
         );
 
         // Navigate to Mappings

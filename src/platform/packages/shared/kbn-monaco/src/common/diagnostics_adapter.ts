@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@elastic/apm-rum';
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
@@ -68,7 +69,11 @@ export class DiagnosticsAdapter {
           });
           // Every time a new change is made, wait 500ms before validating
           handle = setTimeout(() => {
-            this.validate(model.uri, idx);
+            this.validate(model.uri, idx).catch((e) => {
+              apm.captureError(e instanceof Error ? e : new Error(String(e)), {
+                labels: { langId: this.langId },
+              });
+            });
           }, 500);
         });
 
@@ -98,8 +103,17 @@ export class DiagnosticsAdapter {
       return;
     }
 
-    const worker = await this.worker(resource);
-    const errorMarkers = await worker.getSyntaxErrors(resource.toString());
+    let errorMarkers: MonacoEditorError[] | undefined;
+    try {
+      const worker = await this.worker(resource);
+      errorMarkers = await worker.getSyntaxErrors(resource.toString());
+    } catch (e) {
+      // Gracefully handle worker errors by disabling validation
+      apm.captureError(e instanceof Error ? e : new Error(String(e)), {
+        labels: { langId: this.langId },
+      });
+      errorMarkers = [];
+    }
 
     if (idx !== this.validateIdx) {
       return;
@@ -107,12 +121,14 @@ export class DiagnosticsAdapter {
 
     if (errorMarkers) {
       const model = monaco.editor.getModel(resource);
-      this.errors = {
-        ...this.errors,
-        [model!.id]: errorMarkers,
-      };
-      // Set the error markers and underline them with "Error" severity
-      monaco.editor.setModelMarkers(model!, this.langId, errorMarkers.map(toDiagnostics));
+      if (model !== null) {
+        this.errors = {
+          ...this.errors,
+          [model.id]: errorMarkers,
+        };
+        // Set the error markers and underline them with "Error" severity
+        monaco.editor.setModelMarkers(model, this.langId, errorMarkers.map(toDiagnostics));
+      }
     }
 
     const isValid = errorMarkers === undefined || errorMarkers.length === 0;

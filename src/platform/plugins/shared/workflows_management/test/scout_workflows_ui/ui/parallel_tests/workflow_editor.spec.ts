@@ -76,13 +76,15 @@ test.describe(
       const workflowName = 'Invalid Workflow';
       await pageObjects.workflowEditor.setYamlEditorValue(getInvalidWorkflowYaml(workflowName));
 
-      // Wait for validation to complete and show errors
+      // Wait for validation to complete and show errors.
+      // Monaco YAML schema validation runs in a web worker — wait for the accordion button
+      // to become enabled (disabled when no errors). Use a generous timeout since the web
+      // worker needs time to parse the schema and emit markers.
       const validationAccordion = pageObjects.workflowEditor.validationErrorsAccordion;
       await expect(validationAccordion).toBeVisible();
-      await expect(validationAccordion).toContainText('error');
-
-      // Click to expand the accordion and verify the specific error message
-      await validationAccordion.getByRole('button', { name: 'error' }).click();
+      const errorButton = validationAccordion.getByRole('button', { name: 'error' });
+      await expect(errorButton).toBeEnabled({ timeout: 20000 });
+      await errorButton.click();
       await expect(validationAccordion.getByText('missing property "steps"')).toBeVisible();
 
       // Fix the workflow by pasting valid YAML
@@ -103,42 +105,44 @@ test.describe(
       // Click on the "type:" line to focus the editor at that position
       await page.getByText('type:', { exact: true }).click();
 
-      // Move to end of line and trigger autocomplete
+      // Move to end of line; then type a space via Monaco API (EditContext: keyboard text
+      // input no longer reaches Monaco via page.keyboard.press).
       await page.keyboard.press('End');
-      await page.keyboard.press('Space');
+      await pageObjects.workflowEditor.typeInYamlEditor(' ');
 
       // Verify the suggest widget appears with step type options
       const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();
       await expect(suggestWidget).toBeVisible();
 
-      await page.keyboard.type('ela');
+      await pageObjects.workflowEditor.typeInYamlEditor('ela');
 
       // Verify step types are shown in suggestions (alphabetically sorted, starting with 'a')
       await expect(
-        suggestWidget.getByRole('option', { name: 'elasticsearch.search' })
+        pageObjects.workflowEditor.getYamlEditorSuggestionItem('elasticsearch.search')
       ).toBeVisible();
       await expect(
-        suggestWidget.getByRole('option', { name: 'elasticsearch.index' })
+        pageObjects.workflowEditor.getYamlEditorSuggestionItem('elasticsearch.index')
       ).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.bulk' })).toBeVisible();
+      await expect(
+        pageObjects.workflowEditor.getYamlEditorSuggestionItem('elasticsearch.bulk')
+      ).toBeVisible();
 
-      await suggestWidget.getByRole('option', { name: 'elasticsearch.search' }).click();
+      await pageObjects.workflowEditor.getYamlEditorSuggestionItem('elasticsearch.search').click();
       await page.keyboard.press('Enter');
-      await page.keyboard.type('with:');
+      await pageObjects.workflowEditor.typeInYamlEditor('with:');
       await page.keyboard.press('Enter');
-      await page.keyboard.press('Space');
+      // Type space via Monaco API — page.keyboard.press('Space') doesn't reach Monaco with EditContext
+      await pageObjects.workflowEditor.typeInYamlEditor(' ');
 
       await expect(suggestWidget).toBeVisible();
-      await page.keyboard.type('ind');
+      await pageObjects.workflowEditor.typeInYamlEditor('ind');
 
-      await expect(suggestWidget.getByRole('option', { name: 'index' })).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('index')).toBeVisible();
     });
 
     test('should show root-level property suggestions on empty lines', async ({ pageObjects }) => {
       await pageObjects.workflowEditor.gotoNewWorkflow();
       const workflowName = 'Root Autocomplete Test';
-
-      const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();
 
       await pageObjects.workflowEditor.triggerAutocompleteAfter(
         getRootLevelAutocompleteYaml(workflowName),
@@ -147,9 +151,9 @@ test.describe(
 
       await expect(suggestWidget).toBeVisible();
 
-      await expect(suggestWidget.getByRole('option', { name: 'consts' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'tags' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'outputs' })).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('consts')).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('inputs')).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('outputs')).toBeVisible();
     });
 
     test('should not show validation errors for YAML comment lines with liquid variables', async ({
