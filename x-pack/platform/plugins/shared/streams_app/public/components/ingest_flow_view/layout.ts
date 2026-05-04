@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import Dagre from '@dagrejs/dagre';
 import { Position, type Node, type Edge } from '@xyflow/react';
 
-// Fixed x positions for each column (left edge of the column band)
+// Fixed x positions for each column
 const COLUMN_X = { shippers: 0, endpoints: 600, streams: 1050 } as const;
 
 export const NODE_WIDTH = 220;
-// Use a generous height estimate for Dagre so nodes don't overlap even when
-// rendered content is taller than the minimum (EuiPanel padding + badges etc.)
-export const NODE_HEIGHT = 130;
+export const NODE_HEIGHT = 110;
 
-const LANE_GAP = 60;
-const RANKSEP = 60;
-const NODESEP = 40;
-const MARGINX = 10;
-const MARGINY = 10;
+const NODE_GAP = 20; // vertical gap between nodes in the same lane
+const LANE_GAP = 50; // extra vertical gap between lanes within shippers
 
 type FlowColumn = 'shippers' | 'endpoints' | 'streams';
 type FlowLane = 'agents' | 'agentless' | 'prometheus' | 'pipelines' | 'bulk' | 'streams';
@@ -33,153 +27,113 @@ interface FlowNodeData {
 }
 
 /**
- * Layout a set of nodes in a single Dagre TB graph.
- * Returns the Dagre-positioned y values and sets x to the provided columnX.
+ * Stack a list of nodes vertically starting at yOffset.
+ * Returns positioned nodes and the y value after the last node.
  */
-const layoutColumnNodes = <T extends Node<FlowNodeData>>(
-  columnNodes: T[],
-  edges: Edge[],
-  columnX: number
-): T[] => {
-  if (columnNodes.length === 0) return columnNodes;
-
-  const g = new Dagre.graphlib.Graph({ directed: true, compound: false })
-    .setGraph({
-      rankdir: 'TB',
-      ranksep: RANKSEP,
-      nodesep: NODESEP,
-      marginx: MARGINX,
-      marginy: MARGINY,
-    })
-    .setDefaultEdgeLabel(() => ({}));
-
-  columnNodes.forEach((node) => {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
-
-  const nodeIds = new Set(columnNodes.map((n) => n.id));
-  edges.forEach((edge) => {
-    if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
-      g.setEdge(edge.source, edge.target);
-    }
-  });
-
-  Dagre.layout(g);
-
-  return columnNodes.map((node) => {
-    const dagreNode = g.node(node.id);
-    if (!dagreNode) return node;
-    return {
+const stackNodes = <T extends Node<FlowNodeData>>(
+  nodeList: T[],
+  x: number,
+  yStart: number
+): { nodes: T[]; nextY: number } => {
+  let y = yStart;
+  const nodes = nodeList.map((node) => {
+    const positioned = {
       ...node,
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
-      position: {
-        x: columnX,
-        y: Math.round(dagreNode.y - NODE_HEIGHT / 2),
-      },
+      position: { x, y },
     };
+    y += NODE_HEIGHT + NODE_GAP;
+    return positioned;
   });
+  return { nodes, nextY: y };
 };
 
 /**
- * Layout nodes within a single lane using Dagre TB, returning y positions
- * relative to yOffset.
+ * Order stream nodes so parents always come before their children,
+ * and siblings are grouped together (depth-first tree walk).
  */
-const layoutLaneNodes = <T extends Node<FlowNodeData>>(
-  laneNodes: T[],
-  edges: Edge[],
-  columnX: number,
-  yOffset: number
-): T[] => {
-  if (laneNodes.length === 0) return laneNodes;
+const orderStreamNodes = <T extends Node<FlowNodeData>>(nodes: T[]): T[] => {
+  // Build children map from the data.parentId field
+  const children = new Map<string | undefined, T[]>();
+  for (const node of nodes) {
+    const pid = (node.data as FlowNodeData).parentId;
+    const list = children.get(pid) ?? [];
+    list.push(node);
+    children.set(pid, list);
+  }
 
-  const g = new Dagre.graphlib.Graph({ directed: true, compound: false })
-    .setGraph({
-      rankdir: 'TB',
-      ranksep: RANKSEP,
-      nodesep: NODESEP,
-      marginx: MARGINX,
-      marginy: MARGINY,
-    })
-    .setDefaultEdgeLabel(() => ({}));
-
-  // Group agents by their parentId (policy group) to cluster them together
-  // by adding virtual edges between siblings under the same parent
-  const nodeIds = new Set(laneNodes.map((n) => n.id));
-
-  laneNodes.forEach((node) => {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
-
-  // Add real edges within the lane
-  edges.forEach((edge) => {
-    if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
-      g.setEdge(edge.source, edge.target);
+  const result: T[] = [];
+  const visit = (id: string | undefined) => {
+    const kids = children.get(id) ?? [];
+    for (const kid of kids) {
+      result.push(kid);
+      visit(kid.id);
     }
+  };
+
+  // Roots: nodes whose parentId doesn't exist in the set
+  const ids = new Set(nodes.map((n) => n.id));
+  const roots = nodes.filter((n) => {
+    const pid = (n.data as FlowNodeData).parentId;
+    return !pid || !ids.has(pid);
   });
 
-  // Add sibling edges for nodes that share a parentId (agents under same policy)
-  // so Dagre keeps them adjacent in y
-  const byParent = new Map<string, T[]>();
-  for (const node of laneNodes) {
+  for (const root of roots) {
+    result.push(root);
+    visit(root.id);
+  }
+
+  // Safety: add any nodes not yet visited (shouldn't happen)
+  const visited = new Set(result.map((n) => n.id));
+  for (const node of nodes) {
+    if (!visited.has(node.id)) result.push(node);
+  }
+
+  return result;
+};
+
+/**
+ * Order agent/agentPolicy nodes so each policy group is immediately
+ * followed by its agent children.
+ */
+const orderAgentNodes = <T extends Node<FlowNodeData>>(nodes: T[]): T[] => {
+  const groups = nodes.filter((n) => !(n.data as FlowNodeData).parentId);
+  const agentsByPolicy = new Map<string, T[]>();
+  for (const node of nodes) {
     const pid = (node.data as FlowNodeData).parentId;
     if (pid) {
-      const list = byParent.get(pid) ?? [];
+      const list = agentsByPolicy.get(pid) ?? [];
       list.push(node);
-      byParent.set(pid, list);
+      agentsByPolicy.set(pid, list);
     }
   }
-  for (const siblings of byParent.values()) {
-    for (let i = 0; i < siblings.length - 1; i++) {
-      const src = siblings[i].id;
-      const tgt = siblings[i + 1].id;
-      if (g.hasNode(src) && g.hasNode(tgt) && !g.hasEdge(src, tgt)) {
-        g.setEdge(src, tgt);
-      }
+  const result: T[] = [];
+  for (const group of groups) {
+    result.push(group);
+    for (const agent of agentsByPolicy.get(group.id) ?? []) {
+      result.push(agent);
     }
   }
-
-  Dagre.layout(g);
-
-  return laneNodes.map((node) => {
-    const dagreNode = g.node(node.id);
-    if (!dagreNode) return node;
-    return {
-      ...node,
-      sourcePosition: Position.Right,
-      targetPosition: Position.Left,
-      position: {
-        x: columnX,
-        y: yOffset + Math.round(dagreNode.y - NODE_HEIGHT / 2),
-      },
-    };
-  });
-};
-
-/**
- * Compute the bounding-box height of a set of already-positioned nodes.
- */
-const getBoundingHeight = (nodes: Array<Node<FlowNodeData>>): number => {
-  if (nodes.length === 0) return 0;
-  let maxBottom = 0;
+  // Standalone agents (no group)
   for (const node of nodes) {
-    const bottom = node.position.y + NODE_HEIGHT;
-    if (bottom > maxBottom) maxBottom = bottom;
+    if (!(node.data as FlowNodeData).parentId && !result.includes(node)) {
+      result.push(node);
+    }
   }
-  return maxBottom;
+  return result;
 };
 
 /**
- * Main layout function — port / adaptation of Fleet's applyCompoundLayout for
- * the 3-column (shippers / endpoints / streams), 3-lane-in-shippers topology.
+ * Main layout function.
  *
- * Algorithm:
- * 1. Shippers column: split into 3 lanes (agents / agentless / prometheus).
- *    Each lane gets its own Dagre TB run. Lanes are stacked vertically with
- *    LANE_GAP between them.
- * 2. Endpoints column: single Dagre TB run.
- * 3. Streams column: single Dagre TB run (parent→child edges give tree shape).
- * 4. All x values are fixed to COLUMN_X bucket — Dagre only determines y.
+ * Uses simple vertical stacking per column/lane — Dagre is not used here
+ * because columns are vertical lists, not graphs, and Dagre places all
+ * disconnected nodes at y=0 (same rank), causing overlap.
+ *
+ * Shippers column: 3 lanes (agents → agentless → prometheus) stacked top-to-bottom.
+ * Endpoints column: cloud pipelines then bulk, stacked.
+ * Streams column: tree-ordered (depth-first) and stacked.
  */
 export const applyFlowLayout = <T extends Node<FlowNodeData>>(
   nodes: T[],
@@ -187,65 +141,64 @@ export const applyFlowLayout = <T extends Node<FlowNodeData>>(
 ): { nodes: T[]; edges: Edge[] } => {
   if (nodes.length === 0) return { nodes, edges };
 
-  // ── Partition by column ────────────────────────────────────────────────────
-  const shippersNodes = nodes.filter((n) => n.data.column === 'shippers');
-  const endpointsNodes = nodes.filter((n) => n.data.column === 'endpoints');
-  const streamsNodes = nodes.filter((n) => n.data.column === 'streams');
+  const byColumn = (col: FlowColumn) => nodes.filter((n) => n.data.column === col);
+  const byLane = (lane: FlowLane) => nodes.filter((n) => n.data.lane === lane);
 
-  // ── Shippers: 3 lanes ──────────────────────────────────────────────────────
-  const agentsLane = shippersNodes.filter((n) => n.data.lane === 'agents');
-  const agentlessLane = shippersNodes.filter((n) => n.data.lane === 'agentless');
-  const prometheusLane = shippersNodes.filter((n) => n.data.lane === 'prometheus');
+  // ── Shippers ──────────────────────────────────────────────────────────────
+  const agentNodes = orderAgentNodes(byLane('agents'));
+  const agentlessNodes = byLane('agentless');
+  const prometheusNodes = byLane('prometheus');
 
-  const laidOutAgents = layoutLaneNodes(agentsLane, edges, COLUMN_X.shippers, 0);
-  const agentsHeight = getBoundingHeight(laidOutAgents);
+  let y = 0;
+  const { nodes: posAgents, nextY: afterAgents } = stackNodes(agentNodes, COLUMN_X.shippers, y);
+  y = afterAgents + (agentNodes.length > 0 && agentlessNodes.length > 0 ? LANE_GAP : 0);
 
-  const agentlessOffset = agentsHeight > 0 ? agentsHeight + LANE_GAP : 0;
-  const laidOutAgentless = layoutLaneNodes(
-    agentlessLane,
-    edges,
+  const { nodes: posAgentless, nextY: afterAgentless } = stackNodes(
+    agentlessNodes,
     COLUMN_X.shippers,
-    agentlessOffset
+    y
   );
-  const agentlessHeight = getBoundingHeight(
-    laidOutAgentless.map((n) => ({ ...n, position: { x: 0, y: n.position.y - agentlessOffset } }))
+  y = afterAgentless + (agentlessNodes.length > 0 && prometheusNodes.length > 0 ? LANE_GAP : 0);
+
+  const { nodes: posPrometheus } = stackNodes(prometheusNodes, COLUMN_X.shippers, y);
+
+  // ── Endpoints ─────────────────────────────────────────────────────────────
+  const pipelineNodes = byLane('pipelines');
+  const bulkNodes = byLane('bulk');
+
+  let ey = 0;
+  const { nodes: posPipelines, nextY: afterPipelines } = stackNodes(
+    pipelineNodes,
+    COLUMN_X.endpoints,
+    ey
   );
+  ey = afterPipelines + (pipelineNodes.length > 0 && bulkNodes.length > 0 ? NODE_GAP : 0);
+  const { nodes: posBulk } = stackNodes(bulkNodes, COLUMN_X.endpoints, ey);
 
-  const prometheusOffset = agentlessOffset + (agentlessHeight > 0 ? agentlessHeight + LANE_GAP : 0);
-  const laidOutPrometheus = layoutLaneNodes(
-    prometheusLane,
-    edges,
-    COLUMN_X.shippers,
-    prometheusOffset
-  );
+  // ── Streams ───────────────────────────────────────────────────────────────
+  const streamNodes = orderStreamNodes(byColumn('streams'));
+  const { nodes: posStreams } = stackNodes(streamNodes, COLUMN_X.streams, 0);
 
-  const laidOutShippers = [...laidOutAgents, ...laidOutAgentless, ...laidOutPrometheus];
-
-  // ── Endpoints column ───────────────────────────────────────────────────────
-  const laidOutEndpoints = layoutColumnNodes(endpointsNodes, edges, COLUMN_X.endpoints);
-
-  // ── Streams column ─────────────────────────────────────────────────────────
-  const laidOutStreams = layoutColumnNodes(streamsNodes, edges, COLUMN_X.streams);
-
-  // ── Reassemble in original order ───────────────────────────────────────────
+  // ── Reassemble preserving original order ──────────────────────────────────
   const positionById = new Map<string, { x: number; y: number }>();
-  const handleById = new Map<string, { sourcePosition: Position; targetPosition: Position }>();
-
-  for (const n of [...laidOutShippers, ...laidOutEndpoints, ...laidOutStreams]) {
+  for (const n of [
+    ...posAgents,
+    ...posAgentless,
+    ...posPrometheus,
+    ...posPipelines,
+    ...posBulk,
+    ...posStreams,
+  ]) {
     positionById.set(n.id, n.position);
-    handleById.set(n.id, {
-      sourcePosition: (n as { sourcePosition?: Position }).sourcePosition ?? Position.Right,
-      targetPosition: (n as { targetPosition?: Position }).targetPosition ?? Position.Left,
-    });
   }
 
   const resultNodes = nodes.map((node) => {
     const pos = positionById.get(node.id);
-    const handles = handleById.get(node.id);
     if (!pos) return node;
     return {
       ...node,
-      ...handles,
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       position: pos,
     };
   });
