@@ -194,14 +194,14 @@ const ContentListTableComponent = ({
 
   // Add the spacer column on viewports wider than this threshold (px).
   // Uses window.matchMedia so the value is not tied to a named EUI breakpoint.
-  const SPACER_BREAKPOINT_PX = 1560;
-  const [isAboveXl, setIsAboveXl] = useState(
+  const SPACER_BREAKPOINT_PX = 2560;
+  const [isWideViewport, setIsWideViewport] = useState(
     () => typeof window !== 'undefined' && window.innerWidth >= SPACER_BREAKPOINT_PX
   );
   useEffect(() => {
     const mql = window.matchMedia(`(min-width: ${SPACER_BREAKPOINT_PX}px)`);
-    setIsAboveXl(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setIsAboveXl(e.matches);
+    setIsWideViewport(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsWideViewport(e.matches);
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, []);
@@ -209,9 +209,10 @@ const ContentListTableComponent = ({
   const resolvedColumns = useColumns(children, requestDelete);
 
   /**
-   * A layout-only column appended at > xl to absorb excess horizontal space
-   * after the actions column. It has no content, no header label, is not
-   * sortable, and carries no width so the browser gives it all leftover slack.
+   * A layout-only column appended on wide viewports (above `SPACER_BREAKPOINT_PX`)
+   * to absorb excess horizontal space after the actions column. It has no
+   * content, no header label, and carries no width so the browser gives it all
+   * leftover slack.
    *
    * ARIA attributes (`aria-hidden`, `role="presentation"`) are applied
    * imperatively via the `tableRef` effect below because EUI's column API does
@@ -235,7 +236,7 @@ const ContentListTableComponent = ({
       ...resolvedColumns.map((r) => {
         const col = r.column;
         if (
-          isAboveXl &&
+          isWideViewport &&
           (col as { 'data-test-subj'?: string })['data-test-subj'] ===
             'content-list-table-column-name'
         ) {
@@ -243,9 +244,9 @@ const ContentListTableComponent = ({
         }
         return col;
       }),
-      ...(isAboveXl ? [spacerColumn] : []),
+      ...(isWideViewport ? [spacerColumn] : []),
     ],
-    [resolvedColumns, isAboveXl, spacerColumn]
+    [resolvedColumns, isWideViewport, spacerColumn]
   );
 
   const { sorting, onChange } = useSorting();
@@ -265,19 +266,19 @@ const ContentListTableComponent = ({
    * columns. EUI's column API has no `thProps`/`tdProps`, so we set the
    * attributes imperatively after each render that could add or remove rows.
    *
-   * The effect re-runs whenever `isAboveXl` or `items` changes — the two
+   * The effect re-runs whenever `isWideViewport` or `items` changes — the two
    * events that add/remove the spacer cells from the DOM.
    */
   const tableRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!tableRef.current || !isAboveXl) return;
+    if (!tableRef.current || !isWideViewport) return;
     tableRef.current
       .querySelectorAll('[data-test-subj="content-list-table-column-spacer"]')
       .forEach((cell) => {
         cell.setAttribute('aria-hidden', 'true');
         cell.setAttribute('role', 'presentation');
       });
-  }, [isAboveXl, items]);
+  }, [isWideViewport, items]);
 
   if (isLoading) {
     return (
