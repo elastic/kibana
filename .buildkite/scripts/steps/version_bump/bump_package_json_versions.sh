@@ -8,6 +8,9 @@ source "$(dirname "$0")/wait_for_pr_merge.sh"
 
 branch_to_merge_into="${OVERRIDE_BRANCH:-$BRANCH}"
 
+git fetch origin $branch_to_merge_into
+git checkout -B "$branch_to_merge_into" "origin/$branch_to_merge_into"
+
 old_version=""
 store_old_version() {
   old_version=$(jq -r '.version' package.json)
