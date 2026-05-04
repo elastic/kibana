@@ -79,7 +79,8 @@
     "@kbn/visualization-listing-components",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/cps-utils"
+    "@kbn/cps-utils",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
