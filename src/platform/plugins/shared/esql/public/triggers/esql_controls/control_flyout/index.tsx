@@ -122,6 +122,7 @@ export function ESQLControlsFlyout({
   const [variableType, setVariableType] = useState<ESQLVariableType>(initialVariableType);
 
   const [formIsInvalid, setFormIsInvalid] = useState(false);
+  const [valuesPreviewIsStale, setValuesPreviewIsStale] = useState(false);
   const [controlState, setControlState] = useState<OptionsListESQLControlState | undefined>(
     initialState
   );
@@ -156,19 +157,25 @@ export function ESQLControlsFlyout({
     const variableExists =
       checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
     const { available_options } = { available_options: [], ...controlState };
+    const staleValuesPreview =
+      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && valuesPreviewIsStale;
+
     setFormIsInvalid(
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
+        staleValuesPreview ||
         !available_options.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
     controlState,
+    controlFlyoutType,
     esqlVariables,
     variableName,
     variableType,
+    valuesPreviewIsStale,
   ]);
 
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
@@ -229,6 +236,7 @@ export function ESQLControlsFlyout({
         variableType={variableType}
         initialState={initialState}
         setControlState={setControlState}
+        setValuesPreviewIsStale={setValuesPreviewIsStale}
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}

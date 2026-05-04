@@ -53,6 +53,7 @@ interface ValueControlFormProps {
   controlFlyoutType: EsqlControlType;
   queryString: string;
   setControlState: (state: OptionsListESQLControlState) => void;
+  setValuesPreviewIsStale: (isStale: boolean) => void;
   initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
@@ -75,6 +76,7 @@ export function ValueControlForm({
   controlFlyoutType,
   search,
   setControlState,
+  setValuesPreviewIsStale,
   valuesRetrieval,
   timeRange,
   esqlVariables,
@@ -212,16 +214,21 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setEsqlQueryErrors([]);
+          setValuesPreviewIsStale(false);
+        } else {
+          setValuesPreviewIsStale(true);
         }
+
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
           return;
         }
+        setValuesPreviewIsStale(true);
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings, setValuesPreviewIsStale]
   );
 
   const setSuggestedQuery = useCallback(async () => {
@@ -320,6 +327,7 @@ export function ValueControlForm({
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
+              setValuesPreviewIsStale(true);
               setValuesQuery(q.esql);
             }}
             disableAutoFocus={true}
