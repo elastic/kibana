@@ -1,5 +1,5 @@
 {
-  "sha1": "25b6f4b3a556fd40cc15be989dbcee17c8496f9b",
+  "sha1": "45783b822de98591bc25b01d9e5186c0abdaa470",
   "tests": [
     {
       "id": "8065d296c26f2cd-b37771106c4b8c3",
@@ -16,8 +16,8 @@
       }
     },
     {
-      "id": "9034fd33949a2e3-87b7e121e6cd59a",
-      "title": "Discover Alerts menu with alerting v2 should show Alerts menu with v2 ES|QL rule row and New badge",
+      "id": "9034fd33949a2e3-5ccf3440260d0a8",
+      "title": "Discover Alerts menu with alerting v2 should show Alerts menu with ES|QL rule row and New badge",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -31,7 +31,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 9
       }
     },
@@ -45,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 7
       }
     },
@@ -59,7 +59,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 36,
+        "line": 39,
         "column": 7
       }
     },
@@ -73,7 +73,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 54,
+        "line": 47,
         "column": 7
       }
     },
@@ -87,7 +87,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 71,
+        "line": 59,
         "column": 7
       }
     },
@@ -129,7 +129,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 31,
+        "line": 30,
         "column": 7
       }
     },
@@ -143,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 7
       }
     },
@@ -157,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 62,
+        "line": 61,
         "column": 7
       }
     },
@@ -171,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
-        "line": 77,
+        "line": 68,
         "column": 7
       }
     },
@@ -185,7 +185,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_bulk_respects_filters.spec.ts",
-        "line": 74,
+        "line": 43,
         "column": 9
       }
     }

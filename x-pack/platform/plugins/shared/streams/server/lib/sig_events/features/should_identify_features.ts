@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
 import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 
-export interface FeaturesRecencyResult {
-  isRecent: boolean;
-  newestLastSeen?: string;
+export interface ShouldIdentifyFeaturesResult {
+  shouldIdentify: boolean;
 }
 
-export async function areFeaturesRecent({
+export async function shouldIdentifyFeatures({
   featureClient,
   streamName,
   thresholdHours,
@@ -21,25 +21,26 @@ export async function areFeaturesRecent({
   featureClient: FeatureClient;
   streamName: string;
   thresholdHours: number;
-}): Promise<FeaturesRecencyResult> {
+}): Promise<ShouldIdentifyFeaturesResult> {
   const { hits } = await featureClient.getFeatures(streamName, {
+    type: [...INFERRED_FEATURE_TYPES],
     limit: 1,
     sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
   });
 
   if (hits.length === 0) {
-    return { isRecent: false };
+    return { shouldIdentify: true };
   }
 
-  const newestLastSeen = hits[0].last_seen;
-  const newestTimestamp = new Date(newestLastSeen).getTime();
+  const newestTimestamp = new Date(hits[0].last_seen).getTime();
 
   if (Number.isNaN(newestTimestamp)) {
-    return { isRecent: false };
+    return { shouldIdentify: true };
   }
 
   const thresholdMs = thresholdHours * 3_600_000;
-  const isRecent = Date.now() - newestTimestamp < thresholdMs;
 
-  return { isRecent, newestLastSeen };
+  return {
+    shouldIdentify: Date.now() - newestTimestamp >= thresholdMs,
+  };
 }
