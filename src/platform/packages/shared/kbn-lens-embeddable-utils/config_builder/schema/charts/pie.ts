@@ -63,11 +63,13 @@ const pieStylingSchema = schema.object(
     labels: schema.maybe(
       schema.object(
         {
-          visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
+          visible: schema.maybe(
+            schema.boolean({ meta: { description: 'When `true`, displays slice labels.' } })
+          ),
           position: schema.maybe(
             schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
               meta: {
-                description: 'Renders pie chart slice labels inside or outside the pie',
+                description: 'Slice label position: `inside` or `outside`.',
               },
             })
           ),
@@ -82,7 +84,11 @@ const pieStylingSchema = schema.object(
     donut_hole: schema.maybe(
       schema.oneOf(
         [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
-        { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
+        {
+          meta: {
+            description: 'Donut hole size. Accepted values: `none` (full pie), `s`, `m`, `l`.',
+          },
+        }
       )
     ),
   },
