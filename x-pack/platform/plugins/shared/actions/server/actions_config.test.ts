@@ -51,7 +51,6 @@ const defaultActionsConfig: ActionsConfig = {
     },
     ears: { enabled: false },
   },
-  ears: { enabled: false }, // legacy config
 };
 
 describe('ensureUriAllowed', () => {
