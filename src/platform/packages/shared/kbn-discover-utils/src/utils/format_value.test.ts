@@ -10,7 +10,7 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { dataViewMock } from '../__mocks__';
-import { formatFieldValue, formatFieldValueReact, formatFieldValueText } from './format_value';
+import { formatFieldValueReact, formatFieldValueText } from './format_value';
 
 const services = {
   fieldFormats: {
@@ -31,44 +31,6 @@ const hit = {
     message: 'foo',
   },
 };
-
-describe('formatFieldValue', () => {
-  afterEach(() => {
-    (dataViewMock.getFormatterForField as jest.Mock).mockReset();
-  });
-
-  it('should call correct fieldFormatter for field', () => {
-    const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
-    const convertMock = jest.fn((value: unknown) => `formatted:${value}`);
-    formatterForFieldMock.mockReturnValue({ convert: convertMock });
-    const field = dataViewMock.fields.getByName('message');
-    expect(formatFieldValue('foo', hit, services.fieldFormats, dataViewMock, field)).toBe(
-      'formatted:foo'
-    );
-    expect(dataViewMock.getFormatterForField).toHaveBeenCalledWith(field);
-    expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field, hit });
-  });
-
-  it('should call default string formatter if no field specified', () => {
-    const convertMock = jest.fn((value: unknown) => `formatted:${value}`);
-    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
-      convert: convertMock,
-    });
-    expect(formatFieldValue('foo', hit, services.fieldFormats, dataViewMock)).toBe('formatted:foo');
-    expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
-    expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
-  });
-
-  it('should call default string formatter if no dataView is specified', () => {
-    const convertMock = jest.fn((value: unknown) => `formatted:${value}`);
-    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
-      convert: convertMock,
-    });
-    expect(formatFieldValue('foo', hit, services.fieldFormats)).toBe('formatted:foo');
-    expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
-    expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
-  });
-});
 
 describe('formatFieldValueReact', () => {
   afterEach(() => {

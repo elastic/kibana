@@ -20,10 +20,8 @@ The query tracks data from the following <code>@kbn/discover-utils</code> functi
 <li><code>formatHit</code> — formats an ES hit for display</li>
 </ul>
 <p>
-Note: <code>formatFieldValue</code> is intentionally excluded. It delegates to Kibana's field
-format converters which HTML-escape all output via <code>lodash/escape</code> (in both the
-default <code>html_content_type</code> fallback and the <code>StringFormat.htmlConvert</code>
-implementation), making its return value safe for use with <code>dangerouslySetInnerHTML</code>.
+Note: <code>formatFieldValue</code> is intentionally excluded. It returns plain text strings
+via the <code>'text'</code> content type, which does not produce HTML output.
 </p>
 <p>
 The query catches both direct usage of <code>dangerouslySetInnerHTML</code> as a JSX attribute
