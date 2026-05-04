@@ -20,7 +20,7 @@ groups:
           who haven't picked a preferred language. Must be one of the values listed
           in `i18n.locales` when that setting is non-empty.
         datatype: string
-        default: '"en"'
+        default: "'en'"
         applies_to:
           stack: ga 9.5+
           ech: ga
