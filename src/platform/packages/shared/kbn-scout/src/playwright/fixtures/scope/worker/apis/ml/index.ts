@@ -14,7 +14,15 @@ import { measurePerformanceAsync } from '../../../../../../common';
 
 // Model IDs that ship with Elasticsearch and must not be deleted during cleanup
 const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
+const ML_ANNOTATIONS_INDEX_ALIAS_READ = '.ml-annotations-read';
 const ML_INTERNAL_HEADERS = { [ELASTIC_HTTP_VERSION_HEADER]: '1' } as const;
+
+export interface Annotation {
+  timestamp: number;
+  annotation: string;
+  job_id: string;
+  type: 'annotation' | 'comment';
+}
 
 interface MlFilter {
   filter_id: string;
@@ -31,31 +39,42 @@ export interface DeleteJobsOptions {
 export interface MlJobsApi {
   delete: (options: DeleteJobsOptions) => Promise<void>;
   getAllJobs: () => Promise<estypes.MlJob[]>;
+  waitForJobToExist: (jobId: string, timeout?: number) => Promise<void>;
+  waitForJobNotToExist: (jobId: string, timeout?: number) => Promise<void>;
   deleteAllJobs: () => Promise<void>;
   deleteExpiredData: () => Promise<void>;
 }
 
 export interface MlCalendarsApi {
-  getAllCalendars: () => Promise<estypes.MlGetCalendarsCalendar[]>;
-  deleteCalendar: (calendarId: string) => Promise<void>;
-  deleteAllCalendars: () => Promise<void>;
+  getAll: () => Promise<estypes.MlGetCalendarsCalendar[]>;
+  waitForCalendarToExist: (calendarId: string) => Promise<void>;
+  waitForCalendarNotToExist: (calendarId: string) => Promise<void>;
+  delete: (calendarId: string) => Promise<void>;
+  deleteAll: () => Promise<void>;
 }
 
 export interface MlFiltersApi {
-  getAllFilters: () => Promise<MlFilter[]>;
-  getFilter: (filterId: string) => Promise<estypes.MlFilter | null>;
-  deleteFilter: (filterId: string) => Promise<void>;
-  deleteAllFilters: () => Promise<void>;
+  getAll: () => Promise<MlFilter[]>;
+  getById: (filterId: string) => Promise<estypes.MlFilter | null>;
+  waitForFilterToExist: (filterId: string) => Promise<void>;
+  waitForFilterToNotExist: (filterId: string) => Promise<void>;
+  delete: (filterId: string) => Promise<void>;
+  deleteAll: () => Promise<void>;
 }
 
 export interface MlAnnotationsApi {
-  getAll: () => Promise<Array<{ _id: string; _source: Record<string, unknown> }>>;
+  getAll: () => Promise<Array<{ _id: string; _source: Annotation }>>;
+  getById: (annotationId: string) => Promise<{ _id: string; _source: Annotation } | undefined>;
+  waitForAnnotationToExist: (annotationId: string) => Promise<void>;
+  waitForAnnotationNotToExist: (annotationId: string) => Promise<void>;
   delete: (annotationId: string) => Promise<void>;
   deleteAll: () => Promise<void>;
 }
 
 export interface MlDataFrameAnalyticsApi {
   getAllJobs: () => Promise<estypes.MlDataframeAnalyticsSummary[]>;
+  waitForJobToExist: (analyticsId: string, timeout?: number) => Promise<void>;
+  waitForJobNotToExist: (analyticsId: string, timeout?: number) => Promise<void>;
   deleteAllJobs: () => Promise<void>;
 }
 
@@ -97,6 +116,28 @@ export const getMlApiHelper = (
   kbnClient: KbnClient,
   esClient: EsClient
 ): MlApiService => {
+  const waitForCondition = async (
+    conditionName: string,
+    conditionFn: () => Promise<boolean>,
+    timeoutMs: number = 5000,
+    intervalMs: number = 200
+  ): Promise<void> => {
+    const deadline = Date.now() + timeoutMs;
+    let lastError: Error | undefined;
+
+    while (true) {
+      try {
+        if (await conditionFn()) return;
+      } catch (err) {
+        lastError = err as Error;
+      }
+      if (Date.now() >= deadline) break;
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    throw lastError ?? new Error(`Timed out after ${timeoutMs}ms waiting for: ${conditionName}`);
+  };
+
   const savedObjects: MlSavedObjectsApi = {
     async init(simulate = false, space?: string) {
       const path = `${
@@ -120,11 +161,11 @@ export const getMlApiHelper = (
   };
 
   const jobs: MlJobsApi = {
-    delete: async ({
+    async delete({
       jobIds,
       deleteUserAnnotations = false,
       deleteAlertingRules = false,
-    }: DeleteJobsOptions) => {
+    }: DeleteJobsOptions): Promise<void> {
       await measurePerformanceAsync(log, `mlApi.jobs.delete [${jobIds.join(', ')}]`, async () => {
         await kbnClient.request({
           method: 'POST',
@@ -136,6 +177,9 @@ export const getMlApiHelper = (
             deleteAlertingRules,
           },
         });
+        for (const jobId of jobIds) {
+          await this.waitForJobNotToExist(jobId);
+        }
       });
     },
 
@@ -144,6 +188,36 @@ export const getMlApiHelper = (
         const { jobs: adJobs } = await esClient.ml.getJobs({ job_id: '_all' });
         return adJobs;
       });
+    },
+
+    async waitForJobToExist(jobId: string, timeout = 5 * 1000): Promise<void> {
+      await waitForCondition(
+        `anomaly detection job '${jobId}' to exist`,
+        async () => {
+          const { jobs: adJobs } = await esClient.ml.getJobs({
+            job_id: jobId,
+            allow_no_match: true,
+          });
+          if (adJobs.length > 0) return true;
+          throw new Error(`Anomaly detection job '${jobId}' does not exist`);
+        },
+        timeout
+      );
+    },
+
+    async waitForJobNotToExist(jobId: string, timeout = 5 * 1000): Promise<void> {
+      await waitForCondition(
+        `anomaly detection job '${jobId}' to not exist`,
+        async () => {
+          const { jobs: adJobs } = await esClient.ml.getJobs({
+            job_id: jobId,
+            allow_no_match: true,
+          });
+          if (adJobs.length === 0) return true;
+          throw new Error(`Anomaly detection job '${jobId}' still exists`);
+        },
+        timeout
+      );
     },
 
     async deleteAllJobs(): Promise<void> {
@@ -170,27 +244,44 @@ export const getMlApiHelper = (
   };
 
   const calendars: MlCalendarsApi = {
-    async getAllCalendars(): Promise<estypes.MlGetCalendarsCalendar[]> {
-      return measurePerformanceAsync(log, 'mlApi.getAllCalendars', async () => {
+    async getAll(): Promise<estypes.MlGetCalendarsCalendar[]> {
+      return measurePerformanceAsync(log, 'mlApi.calendars.getAll', async () => {
         const response = await esClient.ml.getCalendars();
         return response.calendars || [];
       });
     },
 
-    async deleteCalendar(calendarId: string): Promise<void> {
-      await measurePerformanceAsync(log, `mlApi.deleteCalendar [${calendarId}]`, async () => {
+    async waitForCalendarToExist(calendarId: string): Promise<void> {
+      await waitForCondition(`calendar '${calendarId}' to exist`, async () => {
+        const allCalendars = await this.getAll();
+        if (allCalendars.some((c) => c.calendar_id === calendarId)) return true;
+        throw new Error(`Calendar '${calendarId}' does not exist`);
+      });
+    },
+
+    async waitForCalendarNotToExist(calendarId: string): Promise<void> {
+      await waitForCondition(`calendar '${calendarId}' to not exist`, async () => {
+        const allCalendars = await this.getAll();
+        if (!allCalendars.some((c) => c.calendar_id === calendarId)) return true;
+        throw new Error(`Calendar '${calendarId}' still exists`);
+      });
+    },
+
+    async delete(calendarId: string): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.calendars.delete [${calendarId}]`, async () => {
         const response = await esClient.ml.deleteCalendar({ calendar_id: calendarId });
         if (response.acknowledged !== true) {
           throw new Error(`Failed to delete calendar ${calendarId}`);
         }
+        await this.waitForCalendarNotToExist(calendarId);
       });
     },
 
-    async deleteAllCalendars(): Promise<void> {
-      await measurePerformanceAsync(log, 'mlApi.deleteAllCalendars', async () => {
-        const allCalendars = await this.getAllCalendars();
+    async deleteAll(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.calendars.deleteAll', async () => {
+        const allCalendars = await this.getAll();
         for (const calendar of allCalendars) {
-          await this.deleteCalendar(calendar.calendar_id).catch(() => {
+          await this.delete(calendar.calendar_id).catch(() => {
             /* ignore errors */
           });
         }
@@ -199,37 +290,56 @@ export const getMlApiHelper = (
   };
 
   const filters: MlFiltersApi = {
-    async getAllFilters() {
-      return measurePerformanceAsync(log, 'mlApi.getAllFilters', async () => {
+    async getAll() {
+      return measurePerformanceAsync(log, 'mlApi.filters.getAll', async () => {
         const response = await esClient.ml.getFilters();
         return response.filters || [];
       });
     },
 
-    async getFilter(filterId: string): Promise<estypes.MlFilter | null> {
-      return measurePerformanceAsync(log, `mlApi.getFilter [${filterId}]`, async () => {
-        const response = await esClient.ml.getFilters({ filter_id: filterId });
-        return response.filters?.[0] || null;
+    async getById(filterId: string): Promise<estypes.MlFilter | null> {
+      return measurePerformanceAsync(log, `mlApi.filters.getById [${filterId}]`, async () => {
+        try {
+          const response = await esClient.ml.getFilters({ filter_id: filterId });
+          return response.filters?.[0] ?? null;
+        } catch {
+          return null;
+        }
       });
     },
 
-    async deleteFilter(filterId: string): Promise<void> {
-      await measurePerformanceAsync(log, `mlApi.deleteFilter [${filterId}]`, async () => {
-        const existing = await this.getFilter(filterId);
+    async waitForFilterToExist(filterId: string): Promise<void> {
+      await waitForCondition(`filter '${filterId}' to exist`, async () => {
+        if ((await this.getById(filterId)) !== null) return true;
+        throw new Error(`Filter '${filterId}' does not exist`);
+      });
+    },
+
+    async waitForFilterToNotExist(filterId: string): Promise<void> {
+      await waitForCondition(`filter '${filterId}' to not exist`, async () => {
+        if ((await this.getById(filterId)) === null) return true;
+        throw new Error(`Filter '${filterId}' still exists`);
+      });
+    },
+
+    async delete(filterId: string): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.filters.delete [${filterId}]`, async () => {
+        const existing = await this.getById(filterId);
         if (!existing) return;
 
         const response = await esClient.ml.deleteFilter({ filter_id: filterId });
         if (response.acknowledged !== true) {
           throw new Error(`Failed to delete filter ${filterId}`);
         }
+        await this.waitForFilterToNotExist(filterId);
       });
     },
 
-    async deleteAllFilters(): Promise<void> {
-      await measurePerformanceAsync(log, 'mlApi.deleteAllFilters', async () => {
-        const allFilters = await this.getAllFilters();
+    async deleteAll(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.filters.deleteAll', async () => {
+        const allFilters = await this.getAll();
         for (const filter of allFilters) {
-          await this.deleteFilter(filter.filter_id).catch(() => {
+          await this.delete(filter.filter_id).catch(() => {
             /* ignore errors */
           });
         }
@@ -238,23 +348,69 @@ export const getMlApiHelper = (
   };
 
   const annotations: MlAnnotationsApi = {
-    async getAll(): Promise<Array<{ _id: string; _source: Record<string, unknown> }>> {
+    async getAll(): Promise<Array<{ _id: string; _source: Annotation }>> {
       return measurePerformanceAsync(log, 'mlApi.annotations.getAll', async () => {
         try {
-          const annotationsResp = await esClient.search({
-            index: '.ml-annotations*',
+          const annotationsResp = await esClient.search<Annotation>({
+            index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
             size: 10000,
           });
           return annotationsResp.hits.hits
-            .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
+            .filter(
+              (hit): hit is typeof hit & { _id: string; _source: Annotation } =>
+                hit._id !== undefined && hit._source !== undefined
+            )
             .map((hit) => ({
               _id: hit._id,
-              _source: hit._source as Record<string, unknown>,
+              _source: hit._source,
             }));
         } catch {
           return [];
         }
       });
+    },
+
+    async getById(annotationId: string): Promise<{ _id: string; _source: Annotation } | undefined> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.annotations.getById [${annotationId}]`,
+        async () => {
+          try {
+            const resp = await esClient.search<Annotation>({
+              index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+              size: 1,
+              query: { ids: { values: [annotationId] } },
+            });
+            const hit = resp.hits.hits[0];
+            if (hit?._id === undefined || hit._source === undefined) return undefined;
+            return { _id: hit._id, _source: hit._source };
+          } catch {
+            return undefined;
+          }
+        }
+      );
+    },
+
+    async waitForAnnotationToExist(annotationId: string): Promise<void> {
+      await waitForCondition(
+        `annotation '${annotationId}' to exist`,
+        async () => {
+          if ((await this.getById(annotationId)) !== undefined) return true;
+          throw new Error(`Annotation '${annotationId}' does not exist`);
+        },
+        30 * 1000
+      );
+    },
+
+    async waitForAnnotationNotToExist(annotationId: string): Promise<void> {
+      await waitForCondition(
+        `annotation '${annotationId}' to not exist`,
+        async () => {
+          if ((await this.getById(annotationId)) === undefined) return true;
+          throw new Error(`Annotation '${annotationId}' still exists`);
+        },
+        30 * 1000
+      );
     },
 
     async delete(annotationId: string): Promise<void> {
@@ -264,6 +420,7 @@ export const getMlApiHelper = (
           path: `/internal/ml/annotations/delete/${annotationId}`,
           headers: ML_INTERNAL_HEADERS,
         });
+        await this.waitForAnnotationNotToExist(annotationId);
       });
     },
 
@@ -290,10 +447,42 @@ export const getMlApiHelper = (
       });
     },
 
+    async waitForJobToExist(analyticsId: string, timeout = 5 * 1000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to exist`,
+        async () => {
+          const { data_frame_analytics: dfaJobs } = await esClient.ml.getDataFrameAnalytics({
+            id: analyticsId,
+            allow_no_match: true,
+          });
+          if (dfaJobs.length > 0) return true;
+          throw new Error(`Data frame analytics job '${analyticsId}' does not exist`);
+        },
+        timeout
+      );
+    },
+
+    async waitForJobNotToExist(analyticsId: string, timeout = 5 * 1000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to not exist`,
+        async () => {
+          const { data_frame_analytics: dfaJobs } = await esClient.ml.getDataFrameAnalytics({
+            id: analyticsId,
+            allow_no_match: true,
+          });
+          if (dfaJobs.length === 0) return true;
+          throw new Error(`Data frame analytics job '${analyticsId}' still exists`);
+        },
+        timeout
+      );
+    },
+
     async deleteAllJobs(): Promise<void> {
       await measurePerformanceAsync(log, 'mlApi.dataFrameAnalytics.deleteAllJobs', async () => {
         const dfaJobs = await this.getAllJobs();
         for (const job of dfaJobs) {
+          // stop and delete are kept separate: a stop failure (e.g. job already stopped)
+          // must not prevent the subsequent delete
           try {
             await esClient.ml.stopDataFrameAnalytics({ id: job.id, force: true });
           } catch {
@@ -301,6 +490,7 @@ export const getMlApiHelper = (
           }
           try {
             await esClient.ml.deleteDataFrameAnalytics({ id: job.id });
+            await this.waitForJobNotToExist(job.id);
           } catch {
             /* ignore errors */
           }
@@ -358,8 +548,8 @@ export const getMlApiHelper = (
     async cleanAnomalyDetection() {
       await measurePerformanceAsync(log, 'mlApi.indices.cleanAnomalyDetection', async () => {
         await jobs.deleteAllJobs();
-        await calendars.deleteAllCalendars();
-        await filters.deleteAllFilters();
+        await calendars.deleteAll();
+        await filters.deleteAll();
         await annotations.deleteAll();
         await jobs.deleteExpiredData();
         await savedObjects.sync();
