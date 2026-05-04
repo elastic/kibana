@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useServiceMapBadges } from './use_service_map_badges';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -22,19 +22,15 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: jest.fn(),
 }));
 
-const mockUseFetcher = jest.fn();
 jest.mock('../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
+  FETCH_STATUS: jest.requireActual('../../../hooks/use_fetcher').FETCH_STATUS,
+  useFetcher: jest.fn(),
 }));
 
 const mockedUseLicenseContext = jest.mocked(useLicenseContext);
 const mockedUseApmPluginContext = jest.mocked(useApmPluginContext);
+const mockedUseFetcher = jest.mocked(useFetcher);
+const mockedRefetch = jest.fn();
 
 const platinumLicense = { isActive: true, hasAtLeast: () => true };
 
@@ -106,7 +102,11 @@ describe('useServiceMapBadges()', () => {
     } as ReturnType<typeof useApmPluginContext>);
 
     // Default: fetcher not yet initiated (badges not loaded)
-    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.NOT_INITIATED });
+    mockedUseFetcher.mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.NOT_INITIATED,
+      refetch: mockedRefetch,
+    });
   });
 
   // ── Disabled guard scenarios ───────────────────────────────────────────────
@@ -168,7 +168,11 @@ describe('useServiceMapBadges()', () => {
 
   describe('when badges are enabled but still loading', () => {
     it('returns the original nodes and propagates the LOADING status', () => {
-      mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
+      mockedUseFetcher.mockReturnValue({
+        data: undefined,
+        status: FETCH_STATUS.LOADING,
+        refetch: mockedRefetch,
+      });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
@@ -181,7 +185,11 @@ describe('useServiceMapBadges()', () => {
 
   describe('when the badge fetch succeeds', () => {
     it('merges alert counts into matching service nodes', () => {
-      mockUseFetcher.mockReturnValue({ data: alertsOnlyResponse, status: FETCH_STATUS.SUCCESS });
+      mockedUseFetcher.mockReturnValue({
+        data: alertsOnlyResponse,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
+      });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
@@ -190,7 +198,11 @@ describe('useServiceMapBadges()', () => {
     });
 
     it('merges SLO status and count into matching service nodes', () => {
-      mockUseFetcher.mockReturnValue({ data: slosOnlyResponse, status: FETCH_STATUS.SUCCESS });
+      mockedUseFetcher.mockReturnValue({
+        data: slosOnlyResponse,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
+      });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
@@ -199,9 +211,10 @@ describe('useServiceMapBadges()', () => {
     });
 
     it('merges both alert and SLO data into the same service node when both are present', () => {
-      mockUseFetcher.mockReturnValue({
+      mockedUseFetcher.mockReturnValue({
         data: alertsAndSlosResponse,
         status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
       });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
@@ -211,7 +224,11 @@ describe('useServiceMapBadges()', () => {
     });
 
     it('does not add badge fields to service nodes with no matching badge data', () => {
-      mockUseFetcher.mockReturnValue({ data: emptyResponse, status: FETCH_STATUS.SUCCESS });
+      mockedUseFetcher.mockReturnValue({
+        data: emptyResponse,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
+      });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
@@ -228,9 +245,10 @@ describe('useServiceMapBadges()', () => {
         slos: [],
       } as unknown as ServiceMapBadgesApiResponse;
 
-      mockUseFetcher.mockReturnValue({
+      mockedUseFetcher.mockReturnValue({
         data: responseTargetingDep,
         status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
       });
 
       const { result } = renderHook(() =>
@@ -242,7 +260,11 @@ describe('useServiceMapBadges()', () => {
     });
 
     it('preserves the original data of unmatched service nodes', () => {
-      mockUseFetcher.mockReturnValue({ data: alertsOnlyResponse, status: FETCH_STATUS.SUCCESS });
+      mockedUseFetcher.mockReturnValue({
+        data: alertsOnlyResponse,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
+      });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
@@ -253,7 +275,11 @@ describe('useServiceMapBadges()', () => {
     });
 
     it('reports SUCCESS status', () => {
-      mockUseFetcher.mockReturnValue({ data: emptyResponse, status: FETCH_STATUS.SUCCESS });
+      mockedUseFetcher.mockReturnValue({
+        data: emptyResponse,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: mockedRefetch,
+      });
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
