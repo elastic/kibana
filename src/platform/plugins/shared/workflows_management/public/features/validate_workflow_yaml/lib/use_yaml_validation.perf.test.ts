@@ -14,14 +14,14 @@ import path from 'path';
 import YAML, { LineCounter } from 'yaml';
 import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
-import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
+import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
-import { validateCustomProperties } from './validate_custom_properties';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
+import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
@@ -142,13 +142,8 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
       validateIfConditions(workflowLookup, lineCounter);
     }, iterations);
 
-    timings.collectAllCustomPropertyItems = benchmarkSync(() => {
-      collectAllCustomPropertyItems(
-        workflowLookup,
-        lineCounter,
-        (stepType: string, scope: 'config' | 'input', key: string) =>
-          getPropertyHandler(stepType, scope, key)
-      );
+    timings.collectAllStepPropertyItems = benchmarkSync(() => {
+      collectAllStepPropertyItems(workflowLookup, lineCounter, getPropertyHandler);
     }, iterations);
   }
 
@@ -229,17 +224,12 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
 
     if (workflowLookup && lc) {
       start = performance.now();
-      const customPropertyItems = collectAllCustomPropertyItems(
-        workflowLookup,
-        lc,
-        (stepType: string, scope: 'config' | 'input', key: string) =>
-          getPropertyHandler(stepType, scope, key)
-      );
-      record('collectAllCustomPropertyItems', performance.now() - start);
+      const stepPropertyItems = collectAllStepPropertyItems(workflowLookup, lc, getPropertyHandler);
+      record('collectAllStepPropertyItems', performance.now() - start);
 
       start = performance.now();
-      await validateCustomProperties(customPropertyItems);
-      record('validateCustomProperties', performance.now() - start);
+      await validateStepProperties(stepPropertyItems);
+      record('validateStepProperties', performance.now() - start);
 
       start = performance.now();
       validateWorkflowInputs(workflowLookup, null, lc);

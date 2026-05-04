@@ -2,7 +2,8 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilder: 48000
-  agentBuilderPlatform: 8886
+  agentBuilderPlatform: 8737
+  agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -20,7 +21,7 @@ pageLoadAssetSize:
   cloudDefend: 8146
   cloudExperiments: 103984
   cloudFullStory: 4752
-  cloudLinks: 36333
+  cloudLinks: 42432
   cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
@@ -31,7 +32,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardAgent: 8000
+  dashboardAgent: 7786
   dashboardMarkdown: 6151
   data: 496646
   dataQuality: 11469
@@ -45,12 +46,12 @@ pageLoadAssetSize:
   developerToolbar: 4467
   devTools: 8109
   discover: 30501
-  discoverEnhanced: 5509
+  discoverEnhanced: 5353
   discoverShared: 2322
-  elasticAssistant: 301540
+  elasticAssistant: 299886
   elasticAssistantSharedState: 4881
-  elasticConsole: 4451
-  embeddable: 16634
+  elasticConsole: 4442
+  embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
@@ -70,14 +71,14 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
-  feedback: 7000
+  feedback: 6248
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
   fleet: 209495
-  genAiSettings: 6400
+  genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 26122
   globalSearchProviders: 4646
@@ -104,7 +105,7 @@ pageLoadAssetSize:
   kql: 15428
   kubernetesSecurity: 6807
   lens: 90000
-  licenseManagement: 8265
+  licenseManagement: 8193
   licensing: 10073
   links: 8620
   lists: 5093
@@ -116,7 +117,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
-  ml: 102030
+  ml: 99842
   mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
@@ -124,7 +125,7 @@ pageLoadAssetSize:
   noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 10178
-  observabilityAIAssistant: 71481
+  observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
@@ -132,7 +133,6 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 47422
   painlessLab: 6299
-  presentationPanel: 10936
   presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
@@ -155,7 +155,7 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 13404
+  searchInferenceEndpoints: 9765
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -163,21 +163,21 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 172947
+  securitySolution: 171101
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
   serverlessObservability: 19104
   serverlessSearch: 26287
-  serverlessWorkplaceAI: 5078
+  serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 58677
+  share: 64066
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 15433
+  streams: 32595
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
@@ -212,4 +212,4 @@ pageLoadAssetSize:
   watcher: 10485
   workflowsExtensions: 38894
   workflowsManagement: 35010
-  workplaceAIApp: 14056
+  workplaceAIApp: 6234

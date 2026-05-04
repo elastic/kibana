@@ -21,10 +21,10 @@ export interface RuleSnapshot {
   references: SavedObjectReference[];
 }
 
-export interface RuleChange extends ObjectChange {
+export interface RuleChange extends Omit<ObjectChange, 'snapshot'> {
   module: RuleTypeSolution;
-  before?: RuleSnapshot;
-  after: RuleSnapshot;
+  /** Post-change rule state; persisted as `object.snapshot` by @kbn/change-history. */
+  snapshot: RuleSnapshot;
 }
 
 export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
