@@ -6,6 +6,7 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import { findLastAgentStep } from './actions';
 import { createGenerateWorkflowGraph } from './graph';
 import type { GenerateWorkflowParams, GenerateWorkflowResponse } from './types';
 
@@ -60,7 +61,13 @@ export const generateWorkflow = async ({
         throw new Error(`Could not generate workflow: ${reason}`);
       }
 
-      return { workflow: out.validation.parsedWorkflow };
+      // The last agent_step in the action log is the AI message that
+      // exited the agent loop (no tool calls) — its text content is the
+      // model's final natural-language response to surface to the caller.
+      const lastAgentStep = findLastAgentStep(out.actions);
+      const response = lastAgentStep?.text ?? '';
+
+      return { workflow: out.validation.parsedWorkflow, response };
     }
   );
 };

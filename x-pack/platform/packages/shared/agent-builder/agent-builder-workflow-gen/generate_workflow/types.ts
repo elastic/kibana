@@ -52,6 +52,12 @@ export type GenerateWorkflowParams = GenerateWorkflowOptions & GenerateWorkflowD
 export interface GenerateWorkflowResponse {
   /** The validated, parsed workflow definition. */
   workflow: WorkflowYaml;
+  /**
+   * The natural-language text content of the LLM's final turn — i.e. the
+   * AI message that exited the agent loop without producing tool calls.
+   * Empty string if the loop exited without any final text (rare).
+   */
+  response: string;
 }
 
 /**
