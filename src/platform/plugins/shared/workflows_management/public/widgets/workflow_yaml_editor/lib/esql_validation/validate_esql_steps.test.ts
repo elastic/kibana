@@ -336,8 +336,14 @@ describe('validateEsqlSteps — Liquid policy', () => {
       const marker = markers[0];
       // Reconstruct the marker's end offset and confirm it doesn't escape the
       // region — the bug allowed it to land deep in the YAML below.
-      const endOffset = model.getValue().split('\n').slice(0, marker.endLineNumber - 1).join('\n')
-        .length + (marker.endLineNumber > 1 ? 1 : 0) + (marker.endColumn - 1);
+      const endOffset =
+        model
+          .getValue()
+          .split('\n')
+          .slice(0, marker.endLineNumber - 1)
+          .join('\n').length +
+        (marker.endLineNumber > 1 ? 1 : 0) +
+        (marker.endColumn - 1);
       expect(endOffset).toBeLessThanOrEqual(queryEndInFile);
     });
 
