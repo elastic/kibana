@@ -83,8 +83,6 @@ export interface Action<Context extends object = object, ActionExtension extends
    */
   isCompatible(context: ActionExecutionContext<Context>): Promise<boolean>;
 
-  isDisabled?(context: ActionExecutionContext<Context>): boolean;
-
   /**
    * Executes the action.
    */
@@ -117,10 +115,9 @@ export interface Action<Context extends object = object, ActionExtension extends
   couldBecomeCompatible?: (context: Context) => boolean;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
 
   /**
    * Determines if notification should be shown in menu for that action
@@ -154,8 +151,6 @@ export type ActionDefinition<
    */
   isCompatible?(context: ActionDefinitionContext<Context>): Promise<boolean>;
 
-  isDisabled?(context: ActionDefinitionContext<Context>): boolean;
-
   /**
    * Executes the action.
    */
@@ -176,10 +171,9 @@ export type ActionDefinition<
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionDefinitionContext<Context>): boolean;
 
   /**
    * Determines if notification should be shown in menu for that action
