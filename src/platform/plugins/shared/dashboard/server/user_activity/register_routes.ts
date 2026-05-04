@@ -33,7 +33,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
           title: schema.string(),
           start: schema.number(),
           end: schema.number(),
-          tags: schema.arrayOf(schema.string()),
+          tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
           meta: schema.maybe(
             schema.object({
               time_range: timeRangeSchema,
