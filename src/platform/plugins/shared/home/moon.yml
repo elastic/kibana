@@ -43,7 +43,6 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
-  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

@@ -158,9 +158,7 @@ describe('Landing Page', () => {
 
     test('Hides AutoOps callout when hideAnnouncements is true', async () => {
       const coreStart = coreMock.createStart();
-      coreStart.settings.globalClient.get.mockImplementation((key: string, defaultVal: unknown) =>
-        key === 'hideAnnouncements' ? true : defaultVal
-      );
+      coreStart.notifications.tours.isEnabled.mockReturnValue(false);
 
       await renderLandingPage({
         chromeStyle: 'classic',

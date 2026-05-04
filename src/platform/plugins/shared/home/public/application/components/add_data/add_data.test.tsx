@@ -19,7 +19,7 @@ jest.mock('../app_navigation_handler', () => {
 });
 
 jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
+  getServices: jest.fn().mockReturnValue({
     trackUiMetric: jest.fn(),
     addDataService: {
       getCloudConnectStatusHook: jest.fn(() => () => ({
@@ -27,11 +27,10 @@ jest.mock('../../kibana_services', () => ({
         isCloudConnected: false,
       })),
     },
+    notifications: {
+      tours: { isEnabled: jest.fn().mockReturnValue(true) },
+    },
   }),
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useGlobalUiSetting: jest.fn().mockReturnValue(false),
 }));
 
 beforeEach(() => {
@@ -63,8 +62,9 @@ describe('AddData', () => {
 
   test('hides SetupCloudConnect when hideAnnouncements is true', () => {
     jest
-      .requireMock('@kbn/kibana-react-plugin/public')
-      .useGlobalUiSetting.mockReturnValueOnce(true);
+      .requireMock('../../kibana_services')
+      .getServices()
+      .notifications.tours.isEnabled.mockReturnValueOnce(false);
     const component = shallowWithIntl(
       <AddData
         addBasePath={addBasePathMock}

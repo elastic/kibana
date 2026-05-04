@@ -9,12 +9,10 @@
 
 import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
 
 import { EuiPageBody, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
-import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 
 import { useAppContext } from '../management_app/management_context';
 import { ClassicEmptyPrompt } from './classic_empty_prompt';
@@ -43,10 +41,7 @@ export const ManagementLandingPage = ({
   } = useAppContext();
   setBreadcrumbs();
 
-  const hideAnnouncements = useObservable(
-    coreStart.settings.globalClient.get$<boolean>(HIDE_ANNOUNCEMENTS_ID, false),
-    coreStart.settings.globalClient.get<boolean>(HIDE_ANNOUNCEMENTS_ID, false)
-  );
+  const hideAnnouncements = !coreStart.notifications.tours.isEnabled();
 
   // Check AutoOps status
   const useAutoOpsStatus = getAutoOpsStatusHook();

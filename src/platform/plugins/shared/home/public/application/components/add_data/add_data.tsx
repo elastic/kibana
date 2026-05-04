@@ -27,8 +27,6 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useGlobalUiSetting } from '@kbn/kibana-react-plugin/public';
-import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import type { ApplicationStart } from '@kbn/core/public';
 import { MoveData } from '../move_data';
 import { SetupCloudConnect, CalloutSkeleton } from '../setup_cloud_connect';
@@ -43,7 +41,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric, addDataService } = getServices();
+  const { trackUiMetric, addDataService, notifications } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
   const styles = ({ euiTheme }: UseEuiTheme) =>
@@ -68,7 +66,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     useCloudConnectStatus();
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
-  const hideAnnouncements = useGlobalUiSetting<boolean>(HIDE_ANNOUNCEMENTS_ID, false);
+  const hideAnnouncements = !notifications.tours.isEnabled();
   const hasCloudConnectPermission = Boolean(
     application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
   );
