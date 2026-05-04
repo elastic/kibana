@@ -170,8 +170,8 @@ function GraphInner({
   );
 
   const filterOptionCounts = useMemo(
-    () => computeServiceMapFilterOptionCounts(initialNodes),
-    [initialNodes]
+    () => computeServiceMapFilterOptionCounts(initialNodes, initialEdges),
+    [initialNodes, initialEdges]
   );
 
   const { nodes: nodesAfterFilters, edges: edgesAfterFilters } = useMemo(
@@ -535,6 +535,10 @@ function GraphInner({
               <ServiceMapOptionsPanel
                 nodes={nodesAfterFilters}
                 filterOptionCounts={filterOptionCounts}
+                connectionFilter={viewFilters.connectionFilter}
+                onConnectionFilterChange={(next) =>
+                  setViewFilters((prev) => ({ ...prev, connectionFilter: next }))
+                }
                 alertStatusFilter={viewFilters.alertStatusFilter}
                 onAlertStatusFilterChange={(next) =>
                   setViewFilters((prev) => ({ ...prev, alertStatusFilter: next }))

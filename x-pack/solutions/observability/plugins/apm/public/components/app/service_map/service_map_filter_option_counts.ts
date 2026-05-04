@@ -14,11 +14,17 @@ import {
 } from '@kbn/rule-data-utils';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { SloStatus } from '../../../../common/service_inventory';
-import type { ServiceMapNode, ServiceNodeData } from '../../../../common/service_map';
+import type {
+  ServiceMapNode,
+  ServiceMapEdge,
+  ServiceNodeData,
+} from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import {
   getNormalizedSloStatusForMapFilters,
   getServiceNodeAlertCountForStatus,
+  getNodeConnectionCount,
+  getComponentDepthByNode,
 } from './apply_service_map_visibility';
 
 const ALERT_STATUSES: AlertStatus[] = [
@@ -84,11 +90,38 @@ function getAnomalyStatusCounts(
   return counts;
 }
 
+export interface ConnectionCounts {
+  orphaned: number;
+  connected: number;
+  depth1: number;
+}
+
 export interface ServiceMapFilterOptionCounts {
   alerts: Record<AlertStatus, number>;
   slo: Record<SloStatus, number>;
   anomaly: Record<ServiceHealthStatus, number>;
+  connection: ConnectionCounts;
   totalServiceNodes: number;
+}
+
+/** Count nodes by connection bucket. */
+function getConnectionCounts(
+  allNodes: ServiceMapNode[],
+  edges: ServiceMapEdge[]
+): ConnectionCounts {
+  const counts: ConnectionCounts = { orphaned: 0, connected: 0, depth1: 0 };
+  const depthMap = getComponentDepthByNode(new Set(allNodes.map((n) => n.id)), edges);
+  for (const node of allNodes) {
+    if (getNodeConnectionCount(node.id, edges) === 0) {
+      counts.orphaned++;
+    } else {
+      counts.connected++;
+    }
+    if (depthMap.get(node.id) === 1) {
+      counts.depth1++;
+    }
+  }
+  return counts;
 }
 
 /**
@@ -96,7 +129,8 @@ export interface ServiceMapFilterOptionCounts {
  * so filter options can show count badges.
  */
 export function computeServiceMapFilterOptionCounts(
-  nodes: ServiceMapNode[]
+  nodes: ServiceMapNode[],
+  edges: ServiceMapEdge[]
 ): ServiceMapFilterOptionCounts {
   const serviceNodes = nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data));
 
@@ -104,6 +138,7 @@ export function computeServiceMapFilterOptionCounts(
     alerts: getAlertStatusServiceCounts(serviceNodes),
     slo: getSloStatusCounts(serviceNodes),
     anomaly: getAnomalyStatusCounts(serviceNodes),
+    connection: getConnectionCounts(nodes, edges),
     totalServiceNodes: serviceNodes.length,
   };
 }

@@ -167,4 +167,141 @@ describe('applyServiceMapVisibility', () => {
     expect(hidden.d1).toBe(false);
     expect(hidden.d2).toBe(false);
   });
+
+  describe('connectionFilter', () => {
+    const nodes: ServiceMapNode[] = [
+      mkService('connected1'),
+      mkService('connected2'),
+      mkService('orphan'),
+    ];
+    const edges: ServiceMapEdge[] = [mkEdge('e1', 'connected1', 'connected2')];
+
+    it('orphanedOnly hides connected services and shows orphans', () => {
+      const { nodes: out } = applyServiceMapVisibility(nodes, edges, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['orphanedOnly'],
+      });
+      const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+      expect(hidden.connected1).toBe(true);
+      expect(hidden.connected2).toBe(true);
+      expect(hidden.orphan).toBe(false);
+    });
+
+    it('hideOrphaned hides orphans and shows connected services', () => {
+      const { nodes: out } = applyServiceMapVisibility(nodes, edges, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['hideOrphaned'],
+      });
+      const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+      expect(hidden.connected1).toBe(false);
+      expect(hidden.connected2).toBe(false);
+      expect(hidden.orphan).toBe(true);
+    });
+
+    it('empty array (default) shows all services', () => {
+      const { nodes: out } = applyServiceMapVisibility(nodes, edges, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: [],
+      });
+      expect(out.every((n) => !n.hidden)).toBe(true);
+    });
+
+    it('works in combination with other filters (AND semantics)', () => {
+      const nodesWithAlerts: ServiceMapNode[] = [
+        mkService('connectedWithAlert', { alertsCount: 1 }),
+        mkService('connectedNoAlert'),
+        mkService('orphanWithAlert', { alertsCount: 1 }),
+        mkService('orphanNoAlert'),
+      ];
+      const edgesForCombo: ServiceMapEdge[] = [
+        mkEdge('e1', 'connectedWithAlert', 'connectedNoAlert'),
+      ];
+
+      const { nodes: out } = applyServiceMapVisibility(nodesWithAlerts, edgesForCombo, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['hideOrphaned'],
+        alertStatusFilter: ['active'],
+      });
+      const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+      expect(hidden.connectedWithAlert).toBe(false);
+      expect(hidden.connectedNoAlert).toBe(true);
+      expect(hidden.orphanWithAlert).toBe(true);
+      expect(hidden.orphanNoAlert).toBe(true);
+    });
+
+    it('depth1 shows all nodes in a component with chain depth 1 (A-B)', () => {
+      // A-B is depth 1, C-D-E is depth 2, orphan is depth 0
+      const nodesChain: ServiceMapNode[] = [
+        mkService('a'),
+        mkService('b'),
+        mkService('c'),
+        mkService('d'),
+        mkService('e'),
+        mkService('orphan'),
+      ];
+      const edgesChain: ServiceMapEdge[] = [
+        mkEdge('e1', 'a', 'b'),
+        mkEdge('e2', 'c', 'd'),
+        mkEdge('e3', 'd', 'e'),
+      ];
+
+      const { nodes: out } = applyServiceMapVisibility(nodesChain, edgesChain, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['depth1'],
+      });
+      const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+      expect(hidden.a).toBe(false);
+      expect(hidden.b).toBe(false);
+      expect(hidden.c).toBe(true);
+      expect(hidden.d).toBe(true);
+      expect(hidden.e).toBe(true);
+      expect(hidden.orphan).toBe(true);
+    });
+
+    it('depth1 pulls in dependency neighbors of matching services', () => {
+      // svc-dep is depth 1 (the dep is in the same component); unrelated is orphan
+      const nodesDep: ServiceMapNode[] = [
+        mkService('svc'),
+        {
+          id: 'dep',
+          type: 'dependency',
+          position: { x: 0, y: 0 },
+          data: { id: 'dep', label: 'redis', isService: false },
+        },
+        mkService('unrelated'),
+      ];
+      const edgesDep: ServiceMapEdge[] = [mkEdge('e1', 'svc', 'dep')];
+
+      const { nodes: out } = applyServiceMapVisibility(nodesDep, edgesDep, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['depth1'],
+      });
+      const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+      expect(hidden.svc).toBe(false);
+      expect(hidden.dep).toBe(false);
+      expect(hidden.unrelated).toBe(true);
+    });
+
+    it('counts a connection to a dependency as connected', () => {
+      const nodesWithDep: ServiceMapNode[] = [
+        mkService('svc'),
+        {
+          id: 'dep',
+          type: 'dependency',
+          position: { x: 0, y: 0 },
+          data: { id: 'dep', label: 'redis', isService: false },
+        },
+        mkService('orphan'),
+      ];
+      const edgesWithDep: ServiceMapEdge[] = [mkEdge('e1', 'svc', 'dep')];
+
+      const { nodes: out } = applyServiceMapVisibility(nodesWithDep, edgesWithDep, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['orphanedOnly'],
+      });
+      const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
+      expect(hidden.svc).toBe(true);
+      expect(hidden.orphan).toBe(false);
+    });
+  });
 });

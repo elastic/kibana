@@ -34,10 +34,32 @@ import type { ServiceHealthStatus } from '../../../../common/service_health_stat
 import { ServiceHealthStatus as HealthStatus } from '../../../../common/service_health_status';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode } from '../../../../common/service_map';
+import type { ConnectionFilter } from './apply_service_map_visibility';
 import type { ServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
 import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
+
+const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
+  {
+    value: 'orphanedOnly',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphanedOnly', {
+      defaultMessage: 'No connections',
+    }),
+  },
+  {
+    value: 'hideOrphaned',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionHideOrphaned', {
+      defaultMessage: 'With connections',
+    }),
+  },
+  {
+    value: 'depth1',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionDepth1', {
+      defaultMessage: '1 connection',
+    }),
+  },
+];
 
 const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
   {
@@ -123,6 +145,8 @@ const ANOMALY_STATUS_OPTIONS: { value: ServiceHealthStatus; label: string }[] = 
 export interface ServiceMapOptionsPanelProps {
   nodes: ServiceMapNode[];
   filterOptionCounts: ServiceMapFilterOptionCounts;
+  connectionFilter: ConnectionFilter[];
+  onConnectionFilterChange: (next: ConnectionFilter[]) => void;
   alertStatusFilter: AlertStatus[];
   onAlertStatusFilterChange: (next: AlertStatus[]) => void;
   sloStatusFilter: SloStatus[];
@@ -138,6 +162,8 @@ export interface ServiceMapOptionsPanelProps {
 export function ServiceMapOptionsPanel({
   nodes,
   filterOptionCounts,
+  connectionFilter,
+  onConnectionFilterChange,
   alertStatusFilter,
   onAlertStatusFilterChange,
   sloStatusFilter,
@@ -151,9 +177,39 @@ export function ServiceMapOptionsPanel({
 }: ServiceMapOptionsPanelProps) {
   const { euiTheme } = useEuiTheme();
 
+  const connectionCounts = filterOptionCounts.connection;
   const alertCounts = filterOptionCounts.alerts;
   const sloStatusCounts = filterOptionCounts.slo;
   const anomalyStatusCounts = filterOptionCounts.anomaly;
+
+  const connectionFilterComboBoxOptions = useMemo(
+    () =>
+      CONNECTION_FILTER_OPTIONS.map((opt) => {
+        let count: number;
+        switch (opt.value) {
+          case 'orphanedOnly':
+            count = connectionCounts.orphaned;
+            break;
+          case 'hideOrphaned':
+            count = connectionCounts.connected;
+            break;
+          case 'depth1':
+            count = connectionCounts.depth1;
+            break;
+        }
+        return {
+          label: opt.label,
+          value: opt.value,
+          append: (
+            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
+              {count}
+            </EuiBadge>
+          ),
+          disabled: count === 0,
+        };
+      }),
+    [connectionCounts]
+  );
 
   const alertStatusComboBoxOptions = useMemo(
     () =>
@@ -342,6 +398,29 @@ export function ServiceMapOptionsPanel({
         </h3>
       </EuiText>
       <EuiSpacer size="s" />
+
+      <EuiComboBox
+        placeholder={i18n.translate('xpack.apm.serviceMap.controls.connectionFilter', {
+          defaultMessage: 'Connections',
+        })}
+        options={connectionFilterComboBoxOptions}
+        selectedOptions={connectionFilter.map((value) => {
+          const opt = connectionFilterComboBoxOptions.find((o) => o.value === value);
+          return { label: opt?.label ?? value, value };
+        })}
+        onChange={(selected) => {
+          onConnectionFilterChange(selected.map((s) => (s.value ?? s.label) as ConnectionFilter));
+        }}
+        fullWidth
+        compressed
+        isClearable={true}
+        data-test-subj="serviceMapConnectionFilter"
+        aria-label={i18n.translate('xpack.apm.serviceMap.controls.connectionFilterAriaLabel', {
+          defaultMessage: 'Filter by connection status',
+        })}
+      />
+
+      <EuiSpacer size="m" />
 
       <EuiComboBox
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.alertStatusFilter', {
