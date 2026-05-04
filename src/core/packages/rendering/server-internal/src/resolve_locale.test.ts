@@ -230,6 +230,11 @@ describe('readCookie', () => {
   it('skips malformed pairs without an equals sign', () => {
     expect(readCookie('foo;KBN_LOCALE=fr-FR', 'KBN_LOCALE')).toBe('fr-FR');
   });
+
+  it('returns undefined if decodeURIComponent throws', () => {
+    // passes a string that will throw when decoded - %E0%A4%A is an incomplete UTF-8 sequence
+    expect(readCookie('KBN_LOCALE=%E0%A4%A', 'KBN_LOCALE')).toBeUndefined();
+  });
 });
 
 describe('pickFromAcceptLanguage', () => {

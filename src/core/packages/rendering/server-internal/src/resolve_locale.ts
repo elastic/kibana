@@ -113,7 +113,11 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
     if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
       value = value.slice(1, -1);
     }
-    return decodeURIComponent(value);
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return undefined;
+    }
   }
   return undefined;
 };
