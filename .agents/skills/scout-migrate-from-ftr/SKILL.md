@@ -1,246 +1,197 @@
 ---
 name: scout-migrate-from-ftr
-description: Use when migrating Kibana Functional Test Runner (FTR) tests to Scout, including decisions about UI vs API tests, mapping FTR services/page objects/hooks to Scout fixtures, and splitting loadTestFile patterns.
+description: Single entry point for migrating Kibana Functional Test Runner (FTR) tests to Scout. Plans the migration first, asks the user to review the plan, then executes it. Use when migrating FTR tests to Scout, triaging FTR suites for Scout readiness, deciding UI vs API vs RTL/Jest, mapping FTR services/page objects/hooks to Scout fixtures, or splitting loadTestFile patterns.
 ---
 
 # Migrate FTR to Scout
 
 ## Overview
 
-Migrate FTR tests to Scout by deciding whether a test should be UI or API, mapping FTR concepts to Scout fixtures, and rewriting loadTestFile-based suites into standalone Scout specs. Core principle: keep UI tests focused on user interactions and move data validation to API tests.
+This is the single entry point for FTR-to-Scout migrations. It runs a deliberate three-step workflow:
 
-## Required sub-skills
+1. **Plan** — analyze the FTR suite end-to-end and write a `migration_plan.md` document.
+2. **Review gate** — stop. Surface the plan to the user and wait for explicit approval before writing or moving any test code.
+3. **Execute** — once approved, follow [`references/migration-execution.md`](references/migration-execution.md) to do the actual conversion.
 
-- **REQUIRED SUB-SKILL:** scout-create-scaffold (place tests under the correct `test/scout` path).
-- **REQUIRED SUB-SKILL:** scout-ui-testing (page objects, browser auth, parallel UI patterns).
-- **REQUIRED SUB-SKILL:** scout-api-testing (apiClient/auth, apiServices patterns).
-- **REQUIRED SUB-SKILL:** ftr-testing (understand FTR structure, loadTestFile, and configs).
-- **REQUIRED SUB-SKILL:** scout-best-practices-reviewer (review new Scout tests and migration parity).
+The review gate is the point of the workflow. The plan front-loads decisions (UI vs API vs RTL/Jest, parallelism, auth, server config, batching) so the user can correct course cheaply, before any code is rewritten. Do not skip it.
 
-## Important note
+## Required sub-skill (planning step)
 
-- If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
-- Prefer component/unit tests (RTL/Jest) for isolated UI behaviors rather than Scout functional tests. Strong candidates for RTL/Jest:
-  - Internal component logic: loading/error states, conditional rendering based on props or hooks.
-  - Table/list structure: column configuration, row rendering, sorting.
-  - Hover states, tooltips, popovers, and field validation — use RTL or Storybook.
-  - Filter behavior that doesn't require a running server.
-- Follow steps **1–10** below. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn't space/parallel-safe.
+- **REQUIRED SUB-SKILL:** ftr-testing — to understand FTR structure, `loadTestFile`, configs, services, and page objects while analyzing the source suite.
 
-## Guardrails / gotchas (high signal)
+The execution step's required sub-skills are listed in [`references/migration-execution.md`](references/migration-execution.md); do not load them until the user approves the plan.
 
-- **Preserve relevant comments**: if FTR test comments provide useful context (intent, workarounds, non-obvious setup), keep them in the migrated Scout spec. Drop only outdated comments.
-- Scout specs are **standalone**: don't rely on file execution order or `loadTestFile()` indexes.
-- Each Scout `test()` runs in a **fresh browser context**: if an FTR suite used multiple `it()` blocks as one journey, combine into one `test()` + `test.step()`. Do login/navigation in `beforeEach` (avoid `page`/`browserAuth`/`pageObjects` in `beforeAll`).
-- Keep **one suite per file**, avoid nested `describe`, and don't use `*.describe.configure()`.
-- Keep spec files **focused and small**: aim for **4–5 short test scenarios** or **2–3 long scenarios** per file. This is critical for parallel execution, where the test runner balances work at the spec-file level — oversized specs create bottlenecks.
-- UI tests: tags are **required** (validated at runtime).
-- `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don't use `esArchiver` in spec files).
-- Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-security`/`@kbn/scout-oblt`/`@kbn/scout-search`) and import `expect` from `/ui` or `/api`.
-- **TypeScript layout for Scout tests** (pick one; see **Where Scout tests are typechecked** under step 6): either fold `test/scout/**/*` into the **plugin root** `tsconfig.json` and add Scout `kbn_references` (like `discover_enhanced`), or keep **dedicated** `test/scout/{ui,api}/tsconfig.json` files. Only the latter forbids relative imports into `server/` / `public/`.
-- Replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)`.
-- Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie / `cookieHeader`), plus custom roles. Avoid FTR-style role mutation. For Scout **API** tests, see **Scout API auth (`cookieHeader` vs API key)** under step 4.
+## Inputs
 
-## Core workflow
+Before starting, collect or confirm:
 
-### 1) Decide the test type
+1. **FTR directory path**: the root of the FTR suite(s) to analyze (e.g. `x-pack/platform/test/functional/apps/dashboard`).
+2. **FTR config path(s)**: the config file(s) that wire these tests (e.g. `x-pack/platform/test/functional/config.base.ts`). Walk up from the test directory if not provided.
+3. **Target Scout module root**: where the Scout tests will live (e.g. `x-pack/platform/plugins/shared/dashboard`). If unknown, infer from the plugin that owns the FTR tests.
+4. **Deployment targets**: stateful, serverless, or both. Default: both.
 
-- **Component/unit test (RTL/Jest)**: if the behavior can be tested in isolation, prefer RTL/Jest and skip Scout entirely. Strong candidates:
-  - Internal component logic: loading/error states, conditional rendering based on props or hooks.
-  - Table/list structure: column configuration, row rendering, data-driven assertions.
-  - Form fields and filters: input validation, field interactions, filter clearing.
-  - Hover states, tooltips, popovers, and toggle behaviors.
-  - Feature-flagged UI: tabs/sections that appear based on config, agent type, or license.
-- **Scout API test**: if the suite validates server responses, data correctness, or backend behaviors, migrate to a Scout API test.
-- **Scout UI test**: if the suite validates user flows and rendering that require a real browser, migrate to a Scout UI test.
-- Data validation belongs in API tests (or unit tests), not UI tests.
+## Step 1 — Plan
 
-### 2) Place files correctly
+Go deep on FTR analysis (read every file, understand every pattern, flag every issue). Stay at the decision level for Scout — the executor step already knows Scout's APIs, fixtures, and patterns. The planner's job is to say _what_ was found and _what_ should happen, not _how_ to implement it in Scout code.
 
-- UI: `<module-root>/test/scout*/ui/{tests,parallel_tests}/**/*.spec.ts`
-- API: `<module-root>/test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`
-- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated (state is scoped to a Kibana space) and should run in parallel; otherwise use `ui/tests/` + `test`. See [Scout parallelism](docs/extend/scout/parallelism.md) for details on when to choose parallel vs sequential.
-- API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
-- Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
+### 1.1 Deep-read and index every FTR file
 
-#### Tags when the FTR suite was "deployment agnostic"
+Recursively read the FTR directory. For each file, record:
 
-For available tag helpers and their meaning, see [Deployment tags](docs/extend/scout/deployment-tags.md).
+- File path (relative to repo root)
+- Type: `index` (has `loadTestFile`), `test` (has `describe`/`it`), `config`, `page_object`, `service`, `helper`, `archive`, or `fixture`
+- Short description (one sentence: what does this file test or provide?)
+- Number of `it(...)` / `describe(...)` blocks
 
-FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec. Instead:
+Also read thoroughly:
 
-- **Solution modules** (`x-pack/solutions/observability|security|search/...`): use explicit solution targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`) so CI only runs where that solution is present. Match sibling specs in the same module.
-- **Platform modules** (`src/platform/**`, `x-pack/platform/**`): `tags.deploymentAgnostic` is appropriate when the original intent was "run everywhere."
+- The FTR config(s): capture every `kbnTestServer.serverArgs`, `esTestCluster.serverArgs`, `security.roles`, `security.defaultRoles`, `apps`, `testFiles`, and any `services`/`pageObjects` registrations. Note config inheritance chains (which base config does it extend?).
+- Every `index.ts` file that uses `loadTestFile`: capture shared `before`/`after` hooks and their setup logic. Note what state they create and whether downstream tests depend on it.
+- Every FTR service and page object referenced: note which files use them, what they do, and whether they contain hidden assertions (`existOrFail`, `missingOrFail`, `expect` inside helpers).
 
-API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
+### 1.2 Triage (what should exist, what should change)
 
-### 3) Translate the test structure
+For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`references/test-type-downgrades.md`](references/test-type-downgrades.md). For each decision, write a one-line justification.
 
-- `describe/it` -> `test.describe/test` or `apiTest.describe/apiTest` (but don't assume 1:1 `it` -> `test`).
-- `before/after` -> `test.beforeAll/test.afterAll`.
-- `beforeEach/afterEach` -> `test.beforeEach/test.afterEach`.
-- Keep **one suite per file** and a flat hierarchy (avoid nested `describe`; use `test.step()` inside a test for structure).
-- If a single FTR file contains multiple top-level `describe` blocks, split into multiple Scout specs (one describe per file).
-- **Nested `describe` blocks**: if the FTR file has nested describes, prefer splitting into separate Scout spec files. However, if the file is small and the nested describes are lightweight, flatten them into a single `test.describe` with individual `test(...)` blocks using `test.step(...)` for sub-structure instead of creating many tiny spec files.
+**File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
 
-#### Combine duplicate stateful / serverless FTR tests
+### 1.3 Complexity estimation
 
-FTR often has **separate but near-identical** test files under `test/*api_integration*/` (stateful) and `test/serverless/` (or similar directories). Before migrating each file individually, compare them: if the test flow is identical or almost identical, **combine into a single Scout spec** with tags covering both deployment targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`). Extract any deployment-specific differences into conditional helpers or small branching within the spec. Only keep separate specs when the flows genuinely diverge.
+Rate each test file:
 
-#### `it` blocks are sometimes steps (not full test cases)
+- **Simple**: single describe, ≤5 `it` blocks, no custom roles, no archives, straightforward page objects
+- **Medium**: multiple describes or >5 `it` blocks, custom roles, archive loading, moderate page object usage
+- **Complex**: custom server args, multi-step journeys with shared state, custom services, non-trivial data setup, FTR config overrides
 
-In FTR it's common for multiple `it(...)` blocks in one `describe(...)` to behave like a single user journey (shared browser state across `it`s).
-In Scout (Playwright), each `test(...)` runs with a fresh browser context, so you usually can't preserve that state across multiple `test`s.
+Sort the full inventory by complexity (simple first).
 
-Guideline:
+### 1.4 Parallelism and isolation
 
-- If the FTR suite uses multiple `it(...)` blocks as sequential steps of one flow, combine them into a single `test(...)` and convert the step boundaries into `test.step(...)`.
-- If an `it(...)` block is already an independent test case, keep it as its own `test(...)` and ensure it sets up its own preconditions.
+For each test (or group), decide whether it can run in parallel or must run sequentially:
 
-Minimal sketch:
+- **Parallel-safe**: all state is scoped to a Kibana space (saved objects, UI settings, index patterns), no global mutations, can share pre-ingested ES data
+- **Must be sequential**: needs clean cluster state, mutates global settings, writes to shared indices, or modifies cluster-level resources (ILM policies, transforms, etc.)
 
-```ts
-// FTR: multiple `it`s continue in the same browser context
-it('create entity', async () => {});
-it('edit entity', async () => {}); // continues...
+Document which tests can share the same parallel pool and which need isolation. Explain why, referencing the specific state or mutation that drives the decision.
 
-// Scout: combine into one test and use `test.step` for debuggability
-test('create and edit entity', async () => {
-  await test.step('create entity', async () => {});
-  await test.step('edit entity', async () => {});
-});
-```
+### 1.5 Test data and setup strategy
 
-### 4) Replace FTR dependencies
+For each archive, data fixture, or setup pattern found:
 
-- Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth). FTR stateful tests often use `supertest` with an implicit **admin** role—don't carry that over blindly. Research whether a lower default role like `editor` or `viewer` is sufficient; comparing the roles used in the **serverless** version of the same test (if one exists) is a good starting point.
-- Replace other FTR services with Scout fixtures (`pageObjects`, `browserAuth`, `apiServices`, `kbnClient`, `esArchiver`).
-- Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
-- **Audit FTR before/after hooks carefully**—don't copy them verbatim. Review every call in `before`/`beforeEach`/`after`/`afterEach` and verify it is still correct for Scout: replace FTR-specific APIs with their Scout equivalents, remove unnecessary calls (e.g. FTR service initialization that Scout fixtures handle automatically), and add any missing setup or cleanup that the FTR suite neglected. Ensure every resource created in `beforeAll`/`beforeEach` has matching cleanup in `afterAll`/`afterEach`—FTR suites frequently lack proper teardown. Place `kbnClient.savedObjects.cleanStandardList()` (or `scoutSpace.savedObjects.cleanStandardList()`) in **`afterAll`**, not `beforeAll`; `beforeAll` cleanup masks missing teardown and hides leaked state from previous runs.
-- Replace webdriver waits with Playwright/page object methods.
-- Move UI selectors/actions into Scout page objects; register new page objects in the plugin fixtures index.
-- If the test needs API setup/cleanup, add a scoped API service and use it in `beforeAll/afterAll`.
-- Replace per-suite FTR config flags with `uiSettings` / `scoutSpace.uiSettings`, and (when needed) `apiServices.core.settings(...)`.
-- Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-<solution>`), and import `expect` from `/ui` or `/api`.
-- If the test needs rison-encoded query params, use `@kbn/rison` and add it to `test/scout*/ui/tsconfig.json` `kbn_references`.
+1. **Inventory every archive**: path, what it contains (ES indices, Kibana saved objects, their sizes), and which test files use it
+2. **Flag underused archives**: loaded by the suite but consumed by ≤1 test (candidates for removal or replacement with programmatic setup)
+3. **Classify setup timing**: can data be loaded once (shared across all tests) or does each test need fresh data?
+4. **Flag fresh-server tests**: tests that require a completely clean ES/Kibana state (candidates for a dedicated server config)
+5. **Catalog UI settings mutations**: list every `kibanaServer.uiSettings.replace`, `uiSettings.update`, `uiSettings.delete` call, which tests use them, and whether they use replace-all semantics (wipes all settings) vs selective set
+6. **Catalog repeated magic values**: archive paths, index names, time ranges, saved object IDs that appear in multiple files. These are candidates for a shared constants file.
 
-#### Scout API auth (`cookieHeader` vs API key)
+### 1.6 Auth and roles
 
-For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](docs/extend/scout/api-auth.md).
+1. **Catalog every role**: list every FTR role from configs and test files, with the full privilege definition (ES cluster/index privileges, Kibana feature/space privileges)
+2. **Note usage frequency**: how many test files use each role
+3. **Flag over-privileged tests**: tests that run as `superuser` or the FTR default role when a narrower role would suffice. For each, note what privileges the test actually exercises
+4. **Flag roles used widely** (≥3 files): these warrant a shared auth helper rather than inline definitions
+5. **Flag special auth patterns**: `run_as`, API-key-based auth, certificate auth, or any non-standard FTR auth
 
-**FTR mapping:** FTR `roleScopedSupertest` with `useCookieHeader: true` / `withInternalHeaders` maps to **`samlAuth`** + **`cookieHeader`** merged with common headers on `apiClient` requests. FTR `supertest` with API key auth maps to **`requestAuth.getApiKey(...)`** + **`apiKeyHeader`**.
+The execution step will decide the specific Scout auth API to use; the plan just provides the complete role inventory with privilege definitions and usage context.
 
-**FTR migration gotchas (not covered in the general doc):**
+### 1.7 Reusability and abstraction audit
 
-- Handlers that call **`core.security.authc.apiKeys.create`** (nested API keys) often **fail with HTTP 500** when the incoming request uses an API key. Use **`samlAuth.asInteractiveUser('admin')`** (or the role FTR used with cookies) for those routes.
-- **Negative / least-privilege tests** that in FTR used a **custom role + cookie** (e.g. empty `kibana: []` privileges) and expect **404** from scoped saved-object access: use **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`**. **`requestAuth.getApiKeyForCustomRole(...)`** can resolve **200** for the same role shape because API-key privilege resolution differs from an interactive session.
+1. **Catalog every FTR service and page object** used by the tests: name, what it does, which files use it, and whether it contains hidden assertions (`existOrFail`, `missingOrFail`, or `expect` calls that should move to specs)
+2. **Check for existing Scout equivalents**: does a matching page object or API service already exist in the Scout packages or in other plugins' `test/scout` trees? Note: exists / exists-but-in-wrong-scope / missing
+3. **For missing equivalents**, recommend scope (shared Scout package vs solution-scoped vs plugin-local) based on how many plugins would benefit
+4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor knows where to use Scout's EUI wrappers
+5. **Flag brittle locator strategies**: `find.byCssSelector(...)`, `find.byClassName(...)`, or text-based lookups. Note where `data-test-subj` attributes are missing in source code and need to be added
+6. **Flag FTR page objects with hidden assertions**: these need restructuring since page objects should return state, with assertions belonging in the spec
 
-### 5) Split loadTestFile suites
+### 1.8 Server configuration and feature flags
 
-- Each `loadTestFile` target becomes its own Scout spec.
-- Move shared setup into each spec (or a shared fixture/helper).
-- Don't rely on spec execution order (it's not guaranteed).
-- Split flows with different state requirements (localStorage, tour visibility) into dedicated specs.
+1. **List every server arg** from `kbnTestServer.serverArgs` and `esTestCluster.serverArgs` across all relevant configs (including inherited base configs)
+2. **Classify each arg**:
+   - **Already in Scout's default server config**: no action needed
+   - **Runtime-settable** (can be changed via API/UI settings without restarting servers): note which API or setting key
+   - **Requires server config**: needs a custom Scout server config set. Check if a matching one already exists under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/`
+3. **Flag experimental feature flags** and note whether they're compile-time or runtime-settable
 
-### 6) Add helpers and constants
+### 1.9 Deployment targets and cloud portability
 
-- Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
-- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
-- For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
+For each test group, determine where it should run:
 
-#### Synthtrace in Scout **API** tests
+- **Everywhere** (stateful + serverless): preferred when the feature exists in all environments
+- **Stateful only**: feature/API doesn't exist in serverless
+- **Serverless only**: serverless-specific behavior
+- **Specific serverless projects**: e.g. security-only, observability-only
 
-Import the fixture from **`@kbn/scout-synthtrace`** (not from `@kbn/scout` / `@kbn/scout-oblt` alone). Merge it into your module's `apiTest` in `test/scout*/api/fixtures/index.ts`:
+Cross-reference with existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr_*_configs.yml` to preserve CI coverage. Flag tests that currently only run in one environment but could run in both.
 
-```ts
-import { apiTest as baseApiTest, mergeTests } from '@kbn/scout-oblt'; // or '@kbn/scout' for platform-only modules
-import { synthtraceFixture } from '@kbn/scout-synthtrace';
+**Cloud portability**: flag FTR tests that make non-portable assumptions (hardcoded `localhost` URLs, local file paths, node topology assumptions, or cluster settings unavailable on Elastic Cloud).
 
-export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
-```
+### 1.10 FTR test smells
 
-Specs then receive worker fixtures such as **`logsSynthtraceEsClient`** (`index` / `clean`) for `@kbn/synthtrace-client` generators (`log`, `timerange`, etc.).
+Scan every test file for patterns that need attention during migration:
 
-Add the same Scout **`kbn_references`** on **whichever `tsconfig.json` includes the Scout API files**: either the **plugin root** `tsconfig.json` or `test/scout*/api/tsconfig.json`. Typical API set: `@kbn/scout-oblt` (or `@kbn/scout`), **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`** (add `@kbn/synthtrace` only if types require it). UI-only synthtrace: same **`@kbn/scout-synthtrace`** import in fixtures.
+| Smell | What to flag |
+|-------|-------------|
+| **try/catch swallowing errors** | `try { ... } catch { }` or catch blocks that don't rethrow |
+| **Conditional test logic** | `if/else` inside `it()` blocks that change assertions based on runtime state |
+| **Global loading indicator waits** | `waitForSelector('globalLoadingIndicator')` or similar global spinners |
+| **Hardcoded timeouts** | `await new Promise(r => setTimeout(r, ...))`, `browser.sleep(...)` |
+| **Shared mutable state** | Variables mutated across `it()` blocks relying on execution order |
+| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state) |
+| **Duplicate test cases** | Multiple `it()` blocks testing the same behavior with minor variations |
+| **Missing cleanup** | Setup in `before`/`beforeEach` without corresponding teardown |
+| **Retry wrappers** | `retry.try(...)`, `retry.waitFor(...)` around assertions |
+| **UI-based setup/teardown** | `before`/`after` hooks that navigate pages or click through UI to create/delete test data instead of using APIs |
+| **Onboarding/tour dismissals** | `browser.setLocalStorageItem(...)`, manual tour-dismiss clicks, getting-started bypasses |
+| **Brittle CSS selectors** | `find.byCssSelector(...)`, `find.byClassName(...)`, text-based lookups without `data-test-subj` |
+| **Over-privileged execution** | Tests running as `superuser` that don't need elevated privileges |
 
-#### Where Scout tests are typechecked (choose one)
+For each smell, note the file and relevant context.
 
-See **TypeScript layout** in the `scout-create-scaffold` skill for full **Pattern A** / **Pattern B** details (what to add to `tsconfig.json`, `kbn_references`, and the `yarn kbn bootstrap` / `type_check` steps).
+### 1.11 Propose migration batches
 
-**Choosing:** Prefer **Pattern A** when migrating FTR tests that already imported registration constants or server helpers. Prefer **Pattern B** when you want minimal plugin compile cost and can keep imports boundary-safe.
+Group tests into ordered batches that can be migrated independently:
 
-#### Scout API imports and TypeScript project boundaries (Pattern B only)
+1. **Batch 1**: simplest tests, no new abstractions needed, all dependencies already exist
+2. **Batch 2**: medium tests, may need new page objects or auth helpers (which batch 1 didn't require)
+3. **Batch N**: complex tests, require new server config sets or depend on Scout capabilities that don't exist yet
 
-If the module uses **Pattern B**, treat the Scout API directory as isolated:
+For each batch:
 
-- Avoid relative imports into plugin **`server/`** / **`public/`** just to reuse a string constant—use **`api/fixtures/constants.ts`** or move the constant to **`common/`** if both prod and tests should share it.
-- Prefer **`@kbn/scout*`** / **`@kbn/synthtrace-client`** per that folder's **`kbn_references`**.
+- List the files included
+- Human involvement: `autopilot` (executor can handle end-to-end), `guided` (needs a few human decisions or source code changes), or `hands-on` (significant manual work or missing infrastructure)
+- Dependencies on previous batches (e.g. "needs the page object created in batch 2")
+- Any blockers (missing Scout features, missing `data-test-subj` in source code)
 
-**FTR migration tip:** FTR often imported server files because tests sat in the plugin program. **Pattern A** preserves that. **Pattern B** matches "thin" e2e deps—duplicate small literals or use fixtures when adding `server/` to the Scout `tsconfig` graph is wrong.
+### 1.12 Write the migration plan
 
-### 7) Extract component/unit tests where possible
+Output the plan to `migration_plan.md` in the target Scout module root, following [`references/output-template.md`](references/output-template.md) exactly.
 
-- While implementing, look for logic that can be pulled out of e2e into RTL/Jest (see step 1). Not every FTR `it` block needs a Scout equivalent.
-- Place RTL tests next to the component under test (e.g., `my_component.test.tsx` alongside `my_component.tsx`).
-- Good extraction candidates from FTR/Scout to RTL:
-  - Assertions on component props, loading/error states, or conditional rendering.
-  - Table structure, column configuration, and row data rendering.
-  - Form validation, filter interactions, and input clearing.
-  - Tooltip content, hover behavior, and popover rendering.
-- Keep Scout tests for what **requires a real browser and running server**: navigation, cross-page flows, permission-gated UI, and serverless-vs-stateful differences.
+## Step 2 — Review gate (stop)
 
-### 8) Clean up FTR wiring
+After writing `migration_plan.md`, **stop**. Do not start touching test files. Surface the plan to the user with this message (substitute the real path):
 
-- Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files.
-- Delete old FTR test files once Scout coverage is verified.
-- For staged migrations, mark remaining FTR suites as `describe.skip` to avoid duplicate coverage.
+> I generated a migration plan at `<path-to-migration_plan.md>`. Please review it carefully — it captures the test-type decisions, batching, auth strategy, and any flagged risks before any code changes. Reply when you're ready to proceed with the migration, or with any corrections to the plan.
 
-### 9) Verify and run tests locally
+If the user pushes back on classifications, batching, or anything else, update `migration_plan.md` and re-surface. Only continue once the user explicitly approves.
 
-- **Typecheck:** For **Pattern A**, run **`node scripts/type_check --project <plugin-root>/tsconfig.json`**. For **Pattern B**, run **`node scripts/type_check --project <plugin>/test/scout/api/tsconfig.json`** (and UI project if present). Use full **`node scripts/type_check`** when shared types changed broadly. Huge **`TS6059` / `TS6307`** counts under a **Scout-only** project usually mean **Pattern B** + forbidden **`server/`** relatives—switch to **Pattern A** or fix imports (step 6).
-- Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
-  `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
-- If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config set from the Playwright config path.
-- `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <configSet>` when your tests require a custom config set.
-- Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
-- UI tests must have at least one supported tag (Scout validates UI tags at runtime). API tests should also be tagged.
-- Avoid checking raw data in UI tests; prefer page object methods over direct selectors.
-- Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` (see **Tags when the FTR suite was "deployment agnostic"** under step 2).
-- Run Scout tests in both stateful and serverless if the plugin supports both.
+## Step 3 — Execute
 
-### 10) Review against Scout best practices
+Once the user approves, follow [`references/migration-execution.md`](references/migration-execution.md) end to end. That file owns the file placement rules, FTR-to-Scout dependency mapping, `loadTestFile` splitting, helper extraction, typecheck/run instructions, and the post-migration review against `scout-best-practices-reviewer`.
 
-- Read and follow the `scout-best-practices-reviewer` skill on all new/changed Scout spec files.
-- Provide the removed FTR test files as context so the reviewer can verify migration parity.
-- Address `blocker` and `major` findings before finalizing; discuss `minor` and `nit` items as appropriate.
+If during execution you discover the plan was wrong about a specific file's test type (e.g. the planner said "API test" but the suite actually exercises a real user flow), pause and confirm with the user before changing course.
 
-## Common patterns
+## Guardrails
 
-- Use `test.step(...)` inside a single `test(...)` when an FTR suite used multiple `it(...)` blocks as one journey.
-- Parallel UI: isolate per-space state via `spaceTest` + `scoutSpace`; avoid hardcoded saved object IDs and make names unique (often suffix with `scoutSpace.id`).
-- Use `globalSetupHook` in `parallel_tests/global.setup.ts` to ingest shared data once.
-- Use `page.addInitScript(...)` before navigation to set localStorage/cookies (skip tours/onboarding).
-- When FTR used rison-encoded query params, replicate with `@kbn/rison` and add **`@kbn/rison`** to **`kbn_references`** on the `tsconfig.json` that includes the Scout UI files (plugin root under **Pattern A**, or `test/scout/ui/tsconfig.json` under **Pattern B**).
-- Add stable `data-test-subj` attributes when selectors are unstable.
-- Centralize deep links + page-ready waits in page objects.
+- **The review gate is non-negotiable**: never proceed from step 1 to step 3 without explicit user approval, even if the plan looks obviously correct.
+- **Step 1 is read-only**: do not create, modify, or delete any test files during planning. Only produce the plan document.
+- **Deep on FTR, light on Scout**: every FTR finding in the plan must reference concrete file paths and line numbers. Scout recommendations stay at the decision level; the executor knows the APIs.
+- **No guessing**: if you can't determine something (e.g. whether a feature flag is runtime-settable), flag it as `NEEDS VERIFICATION` rather than guessing.
+- **Preserve intent**: when recommending dropping or converting a test, explain what coverage is lost and where it moves.
+- **Machine-parseable plan**: use consistent Markdown headings, tables, and bullet formats so step 3 (and any reviewers) can parse sections programmatically.
 
-## Common mistakes
+## References
 
-- Migrating data validation UI tests instead of converting to API tests.
-- Forgetting to split `loadTestFile` suites into separate Scout specs.
-- Forgetting UI tags (required; Scout validates UI tags at runtime). API tests should also be tagged so CI/discovery can select the right deployment target.
-- Placing Scout tests outside `test/scout*/{ui,api}/{tests,parallel_tests}`.
-- Ignoring existing parallel Scout config (mixing `tests/` with `parallel_tests/`).
-- Using the wrong Scout package (solution tests in security/observability/search must import from their solution Scout package, not `@kbn/scout`).
-- Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only “deployment agnostic” in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
-- Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
-- Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
-- Using nested `describe` blocks or `*.describe.configure()` (split into separate specs, or flatten small files into `test` + `test.step`—see step 3).
-- Migrating near-identical stateful and serverless FTR files as two separate Scout specs instead of combining them into one spec with appropriate tags (see step 3).
-- Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
-- Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
-- Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
-- Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
-- Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).
-- **Pattern B** + relative imports from `test/scout*/api/` into **`server/`** / **`public/`** (e.g. `server/saved_objects/...`). Fix by **Pattern A** (`test/scout/**/*` in the plugin `tsconfig` + Scout `kbn_references`) or duplicate constants in **`api/fixtures/constants.ts`** (step 6).
-- **Pattern A** but forgetting to add **`test/scout/**/*`** to **`include`** or omitting **`@kbn/scout-oblt`** / synthtrace **`kbn_references`**—Scout files won't typecheck in **`check_types`**.
+- Plan output structure (every section, table, and bullet format): [`references/output-template.md`](references/output-template.md)
+- Step 3 execution workflow (file placement, FTR-to-Scout mapping, typecheck/run, parity review): [`references/migration-execution.md`](references/migration-execution.md)
+- Test-type downgrade catalog (UI vs API vs RTL/Jest criteria), used in step 1.2 and step 3: [`references/test-type-downgrades.md`](references/test-type-downgrades.md)
