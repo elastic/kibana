@@ -73,7 +73,7 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const [timeFieldName, timeFieldType] = (await getESQLTimeFieldFromQuery({ query, http })) ?? [];
+  const [timeFieldName] = (await getESQLTimeFieldFromQuery({ query, http })) ?? [];
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
 
