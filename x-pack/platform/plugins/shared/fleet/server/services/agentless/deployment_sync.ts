@@ -48,7 +48,11 @@ export async function syncAgentlessDeployments(
 
   try {
     // retrieve all agentless deployments
-    const currentDeployments: Array<{ policy_id: string; revision_idx?: number }> = [];
+    const currentDeployments: Array<{
+      policy_id: string;
+      revision_idx?: number;
+      cluster_id?: string;
+    }> = [];
     let hasMore = true;
     let nextPageToken: string | undefined;
 
@@ -121,6 +125,31 @@ export async function syncAgentlessDeployments(
               keep_monitoring_alive: true,
               monitoring_enabled: [],
             });
+          } else if (
+            deployment.cluster_id &&
+            deployment.cluster_id !== agentPolicy.agentless?.cluster_id
+          ) {
+            const esClient = appContextService.getInternalUserESClient();
+            const spacedScoppedSoClient = appContextService.getInternalUserSOClientForSpaceId(
+              agentPolicy.namespace || undefined
+            );
+            logger.debug(
+              `[Agentless Deployment Sync]${dryRunTag(
+                opts?.dryRun
+              )} Updating cluster_id for policy ${agentPolicy.id}`
+            );
+            if (!opts?.dryRun) {
+              await agentPolicyService
+                .update(spacedScoppedSoClient, esClient, agentPolicy.id, {
+                  agentless: { ...agentPolicy.agentless, cluster_id: deployment.cluster_id },
+                })
+                .catch((error) => {
+                  logger.error(
+                    `[Agentless Deployment Sync] Failed to update cluster_id for policy ${agentPolicy.id}`,
+                    { error }
+                  );
+                });
+            }
           } else if (
             deployment.revision_idx === undefined ||
             deployment.revision_idx < agentPolicy.revision
