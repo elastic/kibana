@@ -437,6 +437,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     >
                       <EuiComboBox
                         fullWidth
+                        isInvalid={!!error}
                         options={toolOptions}
                         selectedOptions={value.map((toolId) => ({
                           label: toolId,

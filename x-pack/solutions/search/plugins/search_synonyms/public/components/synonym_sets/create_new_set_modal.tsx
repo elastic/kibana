@@ -96,6 +96,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           >
             <EuiFieldText
               data-test-subj="searchSynonymsCreateSynonymsSetModalFieldText"
+              isInvalid={conflictError}
               value={rawName}
               onChange={(e) => {
                 setRawName(e.target.value);
