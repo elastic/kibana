@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-performance'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-performance'
+  title: '@kbn/test-suites-xpack-performance'
   description: Moon project for @kbn/test-suites-xpack-performance
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: x-pack/performance
+  sourceRoot: x-pack/performance
 dependsOn:
   - '@kbn/journeys'
   - '@kbn/test-subj-selector'
@@ -37,16 +36,6 @@ fileGroups:
     - '**/*.ts'
     - kbn_archives/large_arrays_data_view.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -164,7 +164,7 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
     certificate: schema.maybe(schema.string()),
     certificate_key: schema.maybe(schema.string()),
   }),
-  { defaultValue: [], maxSize: 10 }
+  { defaultValue: [], maxSize: 100 }
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
@@ -249,7 +249,7 @@ export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
             }
           },
         }),
-        { maxSize: 10 }
+        { maxSize: 100 }
       )
     ),
   }),

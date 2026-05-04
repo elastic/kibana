@@ -37,7 +37,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
   });
 

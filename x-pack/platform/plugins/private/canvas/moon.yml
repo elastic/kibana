@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/canvas-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/canvas-plugin'
+  title: '@kbn/canvas-plugin'
   description: Moon project for @kbn/canvas-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/canvas
+  sourceRoot: x-pack/platform/plugins/private/canvas
 dependsOn:
   - '@kbn/core'
   - '@kbn/charts-plugin'
@@ -93,16 +92,6 @@ fileGroups:
     - tasks/mocks/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

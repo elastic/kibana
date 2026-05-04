@@ -11,7 +11,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager(

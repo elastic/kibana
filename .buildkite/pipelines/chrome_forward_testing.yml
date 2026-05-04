@@ -23,7 +23,7 @@ steps:
     id: store_cache
     soft_fail: true
     agents:
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       diskSizeGb: 95
 
   - wait
@@ -79,6 +79,7 @@ steps:
     depends_on:
       - build
     env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -229,6 +230,7 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -243,6 +245,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -258,6 +261,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 120
     depends_on:
       - build
     timeout_in_minutes: 75

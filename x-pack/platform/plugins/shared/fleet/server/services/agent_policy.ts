@@ -632,8 +632,8 @@ class AgentPolicyService {
     }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const isMultispace = (policy.space_ids ?? []).length > 1;
-    const _soClient = isMultispace
+    const hasExplicitSpaces = (policy.space_ids ?? []).length > 0;
+    const _soClient = hasExplicitSpaces
       ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
       : soClient;
     const results = await _soClient
@@ -641,7 +641,7 @@ class AgentPolicyService {
         type: savedObjectType,
         searchFields: ['name'],
         search: escapeSearchQueryPhrase(policy.name),
-        ...(isMultispace ? { namespaces: policy.space_ids } : {}),
+        ...(hasExplicitSpaces ? { namespaces: policy.space_ids } : {}),
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(

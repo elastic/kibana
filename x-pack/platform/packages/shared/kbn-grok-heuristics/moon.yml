@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/grok-heuristics'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/grok-heuristics'
+  title: '@kbn/grok-heuristics'
   description: Moon project for @kbn/grok-heuristics
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-grok-heuristics
+  sourceRoot: x-pack/platform/packages/shared/kbn-grok-heuristics
 dependsOn:
   - '@kbn/inference-common'
   - '@kbn/zod'
@@ -34,16 +33,6 @@ fileGroups:
     - '**/*.ts'
     - globals.d.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

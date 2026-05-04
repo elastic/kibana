@@ -211,5 +211,12 @@ type TestSubject =
   | 'inferenceModelId.input'
   | 'inferenceConfig'
   | 'fieldMap'
+  | 'inputOutput'
+  | 'targetField'
+  | 'targetField.input'
+  | 'toggleInferenceInputMappingMode'
+  | 'editProcessorForm.submitButton'
+  | 'editProcessorForm'
+  | 'processors>0.manageItemButton'
   | 'toggleTextField'
   | 'jsonValueField';

@@ -19,14 +19,14 @@ import { apiHasSerializableState } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, debounceTime, map, skipWhile, switchMap, tap } from 'rxjs';
-import type { DashboardBackupState } from '../services/dashboard_backup_service';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import type { initializeLayoutManager } from './layout_manager';
-import type { initializeSettingsManager } from './settings_manager';
 import type { DashboardState } from '../../common';
-import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
 import type { initializeControlGroupManager } from './control_group_manager';
 import { CONTROL_GROUP_EMBEDDABLE_ID } from './control_group_manager';
+import type { initializeLayoutManager } from './layout_manager';
+import type { initializeSettingsManager } from './settings_manager';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
 

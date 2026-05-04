@@ -122,6 +122,7 @@ const RulesPageComponent: React.FC = () => {
                     iconType="importAction"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
+                    aria-label={`${i18n.IMPORT_VALUE_LISTS}: ${i18n.UPLOAD_VALUE_LISTS_TOOLTIP}`}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
                   </EuiButtonEmpty>

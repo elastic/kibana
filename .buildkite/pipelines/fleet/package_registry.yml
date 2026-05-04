@@ -58,6 +58,7 @@ steps:
     depends_on:
       - build
     env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -72,7 +73,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 120
     timeout_in_minutes: 75
     parallelism: 20
     key: defend-workflows-stateful
@@ -90,7 +91,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 120
     timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless
@@ -107,6 +108,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
@@ -123,6 +125,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8

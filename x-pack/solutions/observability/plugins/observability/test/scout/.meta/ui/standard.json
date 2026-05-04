@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-12T15:58:06.856Z",
-  "sha1": "7985d6935802192e0cb540dd2f076a21adb0dba6",
+  "sha1": "aecba9adda79e57323a768725689f3417c78d7c6",
   "tests": [
     {
       "id": "16bb4a7ec47d274-1887bb9ce43cc37",
@@ -14,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 9
       }
     },
@@ -30,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 9
       }
     },
@@ -46,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 69,
+        "line": 70,
         "column": 9
       }
     },
@@ -62,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 9
       }
     },
@@ -78,7 +77,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 9
       }
     },
@@ -94,7 +93,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 9
       }
     }

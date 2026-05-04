@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-streams'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/streams-program-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-streams'
+  title: '@kbn/evals-suite-streams'
   description: Moon project for @kbn/evals-suite-streams
   channel: ''
   owner: '@elastic/streams-program-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/kbn-evals-suite-streams
+  sourceRoot: x-pack/platform/packages/private/kbn-evals-suite-streams
 dependsOn:
   - '@kbn/evals'
   - '@kbn/sse-utils-client'
@@ -33,16 +32,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -126,6 +126,9 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       closePopover={() => setIsPopoverOpen(false)}
       repositionOnScroll
       panelPaddingSize="none"
+      aria-label={i18n.translate('unifiedSearch.query.queryBar.syntaxOptionsPopover.ariaLabel', {
+        defaultMessage: 'Syntax options',
+      })}
     >
       <EuiPopoverTitle paddingSize="s">
         <FormattedMessage

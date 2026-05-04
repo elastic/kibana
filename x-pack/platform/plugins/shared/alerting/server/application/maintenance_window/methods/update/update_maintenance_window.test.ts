@@ -394,7 +394,75 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
-  it('should remove maintenance window with scoped query', async () => {
+  it.each([
+    ['test*', 'test*'],
+    ['test rule*', 'test rule*'],
+  ])(
+    'should generate wildcard query for keyword fields with KQL pattern: %s',
+    async (kqlPattern, expectedWildcardValue) => {
+      jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+      const mockMaintenanceWindow = getMockMaintenanceWindow({
+        duration: 60 * 60 * 1000,
+        rRule: {
+          tzid: 'CET',
+          dtstart: '2023-03-26T00:00:00.000Z',
+          freq: Frequency.WEEKLY,
+          interval: 1,
+          count: 5,
+        } as MaintenanceWindow['rRule'],
+        events: [{ gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' }],
+        expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+      });
+
+      savedObjectsClient.get.mockResolvedValue({
+        attributes: mockMaintenanceWindow,
+        version: '123',
+        id: 'test-id',
+      } as unknown as SavedObject);
+
+      savedObjectsClient.create.mockResolvedValue({
+        attributes: {
+          ...mockMaintenanceWindow,
+          ...updatedAttributes,
+          ...updatedMetadata,
+        },
+        id: 'test-id',
+      } as unknown as SavedObject);
+
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: {
+          scopedQuery: {
+            kql: `kibana.alert.rule.name: ${kqlPattern}`,
+            filters: [],
+          },
+        },
+      });
+
+      const createdAttributes = savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow;
+      const dsl = createdAttributes.scopedQuery!.dsl!;
+      const parsedDsl = JSON.parse(dsl);
+
+      const wildcardClause = parsedDsl.bool.filter[0];
+      expect(wildcardClause).toEqual({
+        bool: {
+          should: [
+            {
+              wildcard: {
+                'kibana.alert.rule.name': {
+                  value: expectedWildcardValue,
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+  );
+
+  it('should remove maintenance window with scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [

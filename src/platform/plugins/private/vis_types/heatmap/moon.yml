@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/vis-type-heatmap-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/vis-type-heatmap-plugin'
+  title: '@kbn/vis-type-heatmap-plugin'
   description: Moon project for @kbn/vis-type-heatmap-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/private/vis_types/heatmap
+  sourceRoot: src/platform/plugins/private/vis_types/heatmap
 dependsOn:
   - '@kbn/core'
   - '@kbn/charts-plugin'
@@ -45,16 +44,6 @@ fileGroups:
     - server/**/*
     - '*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -51,6 +51,7 @@ import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
   ENABLE_ESQL_RISK_SCORING,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -208,6 +209,28 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+    },
+    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalence',
+        {
+          defaultMessage: 'Exclude cold and frozen tiers in Prevalence',
+        }
+      ),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalenceDescription',
+        {
+          defaultMessage:
+            '<p>When enabled, cold and frozen tiers will be skipped in prevalence queries</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),

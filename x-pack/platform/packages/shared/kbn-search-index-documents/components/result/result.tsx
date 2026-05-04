@@ -117,7 +117,7 @@ export const Result: React.FC<ResultProps> = ({
                     setIsExpanded(!isExpanded);
                   }}
                   aria-label={tooltipText}
-                  aria-selected={isExpanded}
+                  aria-expanded={isExpanded}
                 />
               </EuiToolTip>
             </EuiFlexItem>

@@ -15,6 +15,7 @@ import type {
   CloudBackupStatus,
   ClusterUpgradeState,
   ResponseError,
+  CloudStackVersionInfo,
   SystemIndicesMigrationStatus,
   DataStreamReindexStatusResponse,
   DataStreamMetadata,
@@ -106,6 +107,13 @@ export class ApiService {
       path: `${API_BASE_PATH}/cloud_backup_status`,
       method: 'get',
       pollIntervalMs: CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
+    });
+  }
+
+  public async getCloudStackVersionInfo(currentVersion: string) {
+    return await this.sendRequest<CloudStackVersionInfo>({
+      path: `${API_BASE_PATH}/cloud_stack_versions/${encodeURIComponent(currentVersion)}`,
+      method: 'get',
     });
   }
 

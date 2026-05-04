@@ -37,7 +37,7 @@ export const defaultRule = {
     consumer: 'fakeConsumer',
     alertTypeId: 'fakeType',
     schedule: { interval: '5m' },
-    actions: [] as unknown,
+    actions: [],
   },
   references: [],
   version: '1',
@@ -56,13 +56,15 @@ export const defaultRuleForBulkDelete = {
     consumer: 'fakeConsumer',
     alertTypeId: 'fakeType',
     schedule: { interval: '5m' },
-    actions: [] as unknown,
+    actions: [],
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
-    createdAt: new Date('2019-02-12T21:01:22.000Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+    createdAt: '2019-02-12T21:01:22.000Z',
+    updatedAt: '2019-02-12T21:01:22.000Z',
   },
   references: [],
   version: '1',
@@ -94,11 +96,13 @@ export const enabledRule1 = {
     scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
-    createdAt: new Date('2019-02-12T21:01:22.000Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+    createdAt: '2019-02-12T21:01:22.000Z',
+    updatedAt: '2019-02-12T21:01:22.000Z',
   },
 };
 
@@ -111,11 +115,13 @@ export const enabledRule2 = {
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
-    createdAt: new Date('2019-02-12T21:01:22.000Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+    createdAt: '2019-02-12T21:01:22.000Z',
+    updatedAt: '2019-02-12T21:01:22.000Z',
   },
 };
 
@@ -288,8 +294,10 @@ export const disabledRule1 = {
     scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
   },
 };
@@ -303,8 +311,10 @@ export const disabledRule2 = {
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
   },
 };
@@ -315,6 +325,7 @@ export const disabledRuleWithAction1 = {
     ...disabledRule1.attributes,
     actions: [
       {
+        uuid: 'test-uuid-1',
         group: 'default',
         actionTypeId: '1',
         actionRef: '1',
@@ -332,6 +343,7 @@ export const disabledRuleWithAction2 = {
     ...disabledRule2.attributes,
     actions: [
       {
+        uuid: 'test-uuid-2',
         group: 'default',
         actionTypeId: '1',
         actionRef: '1',

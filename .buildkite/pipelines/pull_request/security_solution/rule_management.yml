@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
+    key: security-rule-management
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -18,6 +19,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
+    key: security-rule-management-prebuilt-customization
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -35,6 +37,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
+    key: security-rule-management-prebuilt-installation
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -52,6 +55,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
+    key: security-rule-management-prebuilt-management
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -69,6 +73,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
+    key: security-rule-management-prebuilt-upgrade
     agents:
       machineType: n2-standard-4
       preemptible: true

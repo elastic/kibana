@@ -10,7 +10,6 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -18,9 +17,6 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
-  apiHasParentApi,
-  apiPublishesTimeRange,
-  apiPublishesTimeslice,
   fetch$,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -31,16 +27,7 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
-import type { Observable } from 'rxjs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  map,
-  merge,
-  of,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
@@ -124,8 +111,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ? new BehaviorSubject(initialState.rawState.filters)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
-
-      const refresh$ = new BehaviorSubject<void>(undefined);
 
       const titleManager = initializeTitleManager(initialState.rawState);
       const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
@@ -221,39 +206,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         dataLoading$,
         serializeState,
       });
-      const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
-        api.timeRange$,
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
-          ? api.parentApi.timeRange$
-          : of(null),
-        apiHasParentApi(api) && apiPublishesTimeslice(api.parentApi)
-          ? api.parentApi.timeslice$
-          : of(null),
-      ]).pipe(
-        // @ts-ignore
-        map(([timeRange, parentTimeRange, parentTimeslice]) => {
-          if (timeRange) {
-            return timeRange;
-          }
-          if (parentTimeRange) {
-            return parentTimeRange;
-          }
-          if (parentTimeslice) {
-            return parentTimeslice;
-          }
-          return undefined;
-        })
-      ) as Observable<TimeRange | undefined>;
-
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
         chartWidth$.asObservable(),
         dataLoading$,
         blockingError$,
-        appliedTimeRange$,
-        query$,
-        filters$,
-        refresh$,
         anomalySwimLaneServices
       );
 

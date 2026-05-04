@@ -178,6 +178,9 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   return (
     <EuiPopover
       id="unifiedFieldTypeFilter"
+      aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.popoverAriaLabel', {
+        defaultMessage: 'Field type filter',
+      })}
       panelProps={{ css: { width: euiTheme.base * 18 } }}
       panelPaddingSize="none"
       anchorPosition="rightUp"

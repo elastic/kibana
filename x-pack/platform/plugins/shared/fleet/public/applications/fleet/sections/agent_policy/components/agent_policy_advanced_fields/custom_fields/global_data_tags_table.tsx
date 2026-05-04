@@ -21,10 +21,10 @@ import {
   EuiButtonIcon,
   EuiCode,
   EuiSpacer,
+  EuiConfirmModal,
+  useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-
-import { useStartServices } from '../../../../../../../hooks';
 
 import type {
   NewAgentPolicy,
@@ -54,7 +54,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   globalDataTags,
   isDisabled,
 }) => {
-  const { overlays } = useStartServices();
+  const deleteModalTitleId = useGeneratedHtmlId();
   const [editTags, setEditTags] = useState<{ [k: number]: GlobalDataTag }>({});
   // isAdding indicates whether a new row is currently being added to the table.
   // When true, the table will display "Confirm" and "Cancel" actions for the new row
@@ -68,6 +68,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   const [errors, setErrors] = useState<
     Record<number, { name: string | null; value: string | null }>
   >({});
+  const [tagIndexToDelete, setTagIndexToDelete] = useState<number | null>(null);
 
   const handleAddField = () => {
     setIsAdding(true);
@@ -215,53 +216,37 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   };
 
   const deleteTag = useCallback(
-    async (index: number) => {
-      const res = await overlays.openConfirm(
-        i18n.translate('xpack.fleet.globalDataTagsTable.deleteModalText', {
-          defaultMessage:
-            'Removing the field will affect the next sync. This action cannot be undone.',
-        }),
-        {
-          title: i18n.translate('xpack.fleet.globalDataTagsTable.deleteModalTitle', {
-            defaultMessage: 'Remove the {tag} field?',
-            values: {
-              tag: globalDataTags[index].name ?? '',
-            },
-          }),
-          buttonColor: 'danger',
-          cancelButtonText: i18n.translate(
-            'xpack.fleet.globalDataTagsTable.deleteModalCancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          ),
-          confirmButtonText: i18n.translate(
-            'xpack.fleet.globalDataTagsTable.deleteModalConfirmButtonText',
-            {
-              defaultMessage: 'Remove',
-            }
-          ),
-        }
-      );
-      if (!res) {
-        return;
+    (index: number) => {
+      if (index >= 0 && index < globalDataTags.length) {
+        setTagIndexToDelete(index);
       }
-      const updatedTags = globalDataTags.filter((_, i) => i !== index);
-      setEditTags((prevValue) => {
-        const newValue = { ...prevValue };
-        delete newValue[index];
-
-        return newValue;
-      });
-      updateAgentPolicy({ global_data_tags: updatedTags });
-
-      setErrors((prevErrors) => {
-        const { [index]: removedError, ...remainingErrors } = prevErrors;
-        return remainingErrors;
-      });
     },
-    [globalDataTags, overlays, updateAgentPolicy]
+    [globalDataTags.length]
   );
+
+  const confirmDeleteTag = useCallback(() => {
+    if (tagIndexToDelete === null) {
+      return;
+    }
+    const updatedTags = globalDataTags.filter((_, i) => i !== tagIndexToDelete);
+    setEditTags((prevValue) => {
+      const newValue = { ...prevValue };
+      delete newValue[tagIndexToDelete];
+
+      return newValue;
+    });
+    updateAgentPolicy({ global_data_tags: updatedTags });
+
+    setErrors((prevErrors) => {
+      const { [tagIndexToDelete]: removedError, ...remainingErrors } = prevErrors;
+      return remainingErrors;
+    });
+    setTagIndexToDelete(null);
+  }, [globalDataTags, tagIndexToDelete, updateAgentPolicy]);
+
+  const cancelDeleteTag = useCallback(() => {
+    setTagIndexToDelete(null);
+  }, []);
 
   const columns = useMemo(
     (): Array<EuiBasicTableColumn<GlobalDataTag>> => [
@@ -423,6 +408,38 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
 
   return (
     <>
+      {tagIndexToDelete !== null && (
+        <EuiConfirmModal
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
+          title={i18n.translate('xpack.fleet.globalDataTagsTable.deleteModalTitle', {
+            defaultMessage: 'Remove the {tag} field?',
+            values: {
+              tag: globalDataTags[tagIndexToDelete]?.name ?? '',
+            },
+          })}
+          onCancel={cancelDeleteTag}
+          onConfirm={confirmDeleteTag}
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.globalDataTagsTable.deleteModalCancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.fleet.globalDataTagsTable.deleteModalConfirmButtonText',
+            {
+              defaultMessage: 'Remove',
+            }
+          )}
+          buttonColor="danger"
+        >
+          <FormattedMessage
+            id="xpack.fleet.globalDataTagsTable.deleteModalText"
+            defaultMessage="Removing the field will affect the next sync. This action cannot be undone."
+          />
+        </EuiConfirmModal>
+      )}
       {globalDataTags.length === 0 && !isAdding ? (
         <EuiPanel color="subdued" paddingSize="l" className="eui-textCenter">
           <EuiText>

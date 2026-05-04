@@ -12,7 +12,9 @@ import type {
   KibanaUrl,
   BrowserAuthFixture,
 } from '@kbn/scout-oblt';
-import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import { mergeTests, test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { ServiceGroupsPage } from './page_objects/service_groups';
@@ -56,7 +58,12 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   browserAuth: ApmBrowserAuthFixture;
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
+const baseWithSynthtrace = mergeTests(base, synthtraceFixture);
+
+export const test = baseWithSynthtrace.extend<
+  ExtendedScoutTestFixtures,
+  ObltWorkerFixtures & SynthtraceFixture
+>({
   pageObjects: async (
     {
       pageObjects,

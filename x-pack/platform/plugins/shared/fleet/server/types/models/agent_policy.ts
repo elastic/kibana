@@ -154,7 +154,7 @@ export const AgentPolicyBaseSchema = {
           description:
             'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
         },
-        maxSize: 10,
+        maxSize: 100,
       }
     )
   ),

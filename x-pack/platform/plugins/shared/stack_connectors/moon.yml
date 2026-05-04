@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/stack-connectors-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/stack-connectors-plugin'
+  title: '@kbn/stack-connectors-plugin'
   description: Moon project for @kbn/stack-connectors-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/stack_connectors
+  sourceRoot: x-pack/platform/plugins/shared/stack_connectors
 dependsOn:
   - '@kbn/core'
   - '@kbn/actions-plugin'
@@ -69,16 +68,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

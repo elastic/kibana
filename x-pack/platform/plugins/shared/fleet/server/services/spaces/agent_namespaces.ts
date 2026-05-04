@@ -39,3 +39,26 @@ export async function agentsKueryNamespaceFilter(namespace?: string) {
   }
   return namespace === DEFAULT_SPACE_ID ? DEFAULT_NAMESPACES_FILTER : `namespaces:(${namespace})`;
 }
+
+/**
+ * Safely combines a namespace filter with a user-provided kuery by wrapping
+ * each part in parentheses before joining with AND. This prevents KQL operator
+ * precedence issues where OR clauses in the user kuery could bypass the
+ * namespace filter.
+ */
+export function buildFilterWithNamespace(
+  namespaceFilter: string | undefined,
+  kuery: string | undefined
+): string | undefined {
+  const filters: string[] = [];
+  if (namespaceFilter) {
+    filters.push(namespaceFilter);
+  }
+  if (kuery && kuery.trim() !== '') {
+    filters.push(kuery);
+  }
+  if (filters.length === 0) {
+    return undefined;
+  }
+  return filters.map((filter) => `(${filter})`).join(' AND ');
+}

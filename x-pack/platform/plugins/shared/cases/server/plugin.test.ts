@@ -209,6 +209,7 @@ describe('Cases Plugin', () => {
                 "text/json",
                 "application/json",
                 "application/zip",
+                "application/x-zip-compressed",
                 "application/gzip",
                 "application/x-bzip",
                 "application/x-bzip2",

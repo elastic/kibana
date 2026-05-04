@@ -22,7 +22,7 @@ import {
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices } from '../../services/kibana_services';
@@ -36,6 +36,7 @@ import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
 import type { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -106,37 +107,36 @@ export const useDashboardListingTable = ({
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
-  const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
   const dashboardContentManagementService = useMemo(
     () => getDashboardContentManagementService(),
     []
   );
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
-    dashboardBackupService.getDashboardIdsWithUnsavedChanges()
+    getDashboardBackupService().getDashboardIdsWithUnsavedChanges()
   );
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const createItem = useCallback(() => {
-    if (useSessionStorageIntegration && dashboardBackupService.dashboardHasUnsavedEdits()) {
+    if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
       confirmCreateWithUnsaved(() => {
-        dashboardBackupService.clearState();
+        getDashboardBackupService().clearState();
         goToDashboard();
       }, goToDashboard);
       return;
     }
     goToDashboard();
-  }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
+  }, [goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
     async (props: UpdateDashboardMetaProps) => {
       await dashboardContentManagementService.updateDashboardMeta(props);
 
-      setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(getDashboardBackupService().getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardContentManagementService]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -246,7 +246,7 @@ export const useDashboardListingTable = ({
 
         await dashboardContentManagementService.deleteDashboards(
           dashboardsToDelete.map(({ id }) => {
-            dashboardBackupService.clearState(id);
+            getDashboardBackupService().clearState(id);
             return id;
           })
         );
@@ -266,9 +266,9 @@ export const useDashboardListingTable = ({
         });
       }
 
-      setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(getDashboardBackupService().getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardContentManagementService]
   );
 
   const editItem = useCallback(

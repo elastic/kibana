@@ -21,7 +21,7 @@ export const getFilteredHostNames = async ({
   schema,
 }: Required<Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'schema'>> & {
   query?: estypes.QueryDslQueryContainer;
-}) => {
+}): Promise<string[]> => {
   const inventoryModel = findInventoryModel('host');
 
   const response = await infraMetricsClient.search({
@@ -31,27 +31,24 @@ export const getFilteredHostNames = async ({
     query: {
       bool: {
         filter: [
-          ...castArray(query),
           ...rangeQuery(from, to),
           ...(inventoryModel.nodeFilter?.({ schema }) ?? []),
+          ...(query ? [query] : []),
         ],
       },
     },
     aggs: {
-      uniqueHostNames: {
+      filteredHosts: {
         terms: {
           field: HOST_NAME_FIELD,
           size: limit,
-          order: {
-            _key: 'asc',
-          },
+          order: { _key: 'asc' },
         },
       },
     },
   });
 
-  const { uniqueHostNames } = response.aggregations ?? {};
-  return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
+  return response.aggregations?.filteredHosts?.buckets?.map((p) => p.key as string) ?? [];
 };
 
 export const getHasDataFromSystemIntegration = async ({

@@ -601,6 +601,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
+        isServerless: this.isServerless,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
@@ -872,6 +873,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
         telemetryConfigProvider: this.telemetryConfigProvider,
+        packageService,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {

@@ -97,6 +97,10 @@ export const getEditorOpener =
             style: 'z-index: 1004', // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
           },
           'aria-labelledby': 'dataViewEditorFlyoutTitle',
+          onClose: () => {
+            closeEditor();
+            onCancel();
+          },
         }
       );
 
