@@ -9,7 +9,6 @@
 
 export {
   AppHeaderWithFallback as AppHeader,
-  APP_HEADER_HEIGHT_CSS_VAR_NAME,
   APPLICATION_TOP_BAR_MIN_HEIGHT_PX,
 } from './src';
 export { AppHeaderView, ChromeAppHeader } from './src';

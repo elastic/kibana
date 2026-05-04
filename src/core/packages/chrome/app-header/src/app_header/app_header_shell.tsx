@@ -12,11 +12,8 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { AppHeaderPadding } from '../types';
-import { usePublishHeight } from './hooks/use_publish_height';
 
 export const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
-
-export const APP_HEADER_HEIGHT_CSS_VAR_NAME = '--kbn-appHeader--height';
 
 export interface AppHeaderShellProps {
   title?: ReactNode;
@@ -170,10 +167,9 @@ const useHeaderStyles = (sticky: boolean, padding: AppHeaderPadding | undefined)
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
   ({ title, badges, titleActions, trailing, metadata, callout, tabs, sticky = true, padding }) => {
     const styles = useHeaderStyles(sticky, padding);
-    const rootRef = usePublishHeight(APP_HEADER_HEIGHT_CSS_VAR_NAME, sticky);
 
     return (
-      <div ref={rootRef} css={styles.root} data-test-subj="appHeader">
+      <div css={styles.root} data-test-subj="appHeader">
         <div css={styles.primaryRow}>
           <div css={styles.titleCluster}>
             <div css={styles.titleGroup}>

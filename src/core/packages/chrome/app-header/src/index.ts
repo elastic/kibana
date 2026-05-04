@@ -20,7 +20,6 @@ export type {
   AppHeaderConfig,
 } from './types';
 export {
-  APP_HEADER_HEIGHT_CSS_VAR_NAME,
   APPLICATION_TOP_BAR_MIN_HEIGHT_PX,
 } from './app_header/app_header_shell';
 export type { AppHeaderWithFallbackProps } from './app_header_with_fallback';

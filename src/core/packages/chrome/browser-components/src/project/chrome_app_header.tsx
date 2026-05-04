@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import type { ChromeBreadcrumb, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import type { AppHeaderBack } from '@kbn/app-header';
+import { APPLICATION_TOP_BAR_MIN_HEIGHT_PX } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeaderView } from '@kbn/app-header';
+import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 
 function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
@@ -89,25 +91,67 @@ export function useHasChromeAppHeaderContent(): boolean {
   return hasExplicitAppHeaderContent(config) || fallback.hasContent;
 }
 
+function useMeasuredAppHeaderHeight(
+  hasContent: boolean
+): React.RefCallback<HTMLDivElement> {
+  const updateLayout = useLayoutUpdate();
+  const observerRef = useRef<ResizeObserver | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
+  }, []);
+
+  return useCallback(
+    (el: HTMLDivElement | null) => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+
+      if (!hasContent || !el) {
+        updateLayout({ applicationTopBarHeight: APPLICATION_TOP_BAR_MIN_HEIGHT_PX });
+        return;
+      }
+
+      observerRef.current = new ResizeObserver(([entry]) => {
+        const height = entry.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
+        updateLayout({ applicationTopBarHeight: height });
+      });
+
+      observerRef.current.observe(el);
+    },
+    [hasContent, updateLayout]
+  );
+}
+
 export const ChromeAppHeaderRenderer = React.memo(() => {
   const config = useAppHeaderConfig();
   const fallback = useFallbackProps();
 
   const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
+  const measureRef = useMeasuredAppHeaderHeight(hasContent);
+
   if (!hasContent) return null;
 
   return (
-    <AppHeaderView
-      title={config?.title}
-      back={config?.back ?? fallback.back}
-      tabs={config?.tabs}
-      badges={config?.badges}
-      menu={config?.menu ?? fallback.menu}
-      onShare={config?.onShare}
-      favorite={config?.favorite}
-      sticky={false}
-      padding="m"
-    />
+    <div ref={measureRef}>
+      <AppHeaderView
+        title={config?.title}
+        back={config?.back ?? fallback.back}
+        tabs={config?.tabs}
+        badges={config?.badges}
+        menu={config?.menu ?? fallback.menu}
+        onShare={config?.onShare}
+        favorite={config?.favorite}
+        sticky={false}
+        padding="m"
+      />
+    </div>
   );
 });
 

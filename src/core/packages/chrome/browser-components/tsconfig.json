@@ -33,6 +33,7 @@
     "@kbn/react-env",
     "@kbn/react-kibana-context-env",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-sidebar-components",
     "@kbn/ui-side-navigation",
     "@kbn/core-chrome-feature-flags",
