@@ -28,7 +28,7 @@ const manifestUpdateReporter = path.join(
   '/src/platform/packages/private/kbn-scout-reporting/src/reporting/playwright/manifest_updater'
 );
 
-async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
+export async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
   // passWithNoTests lets configs with zero tests exit cleanly (code 0) so we can
   // unambiguously treat any non-zero exit as a real discovery failure (e.g. a syntax
   // error during Playwright transpilation).
