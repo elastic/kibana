@@ -73,7 +73,6 @@ export function FieldName({
             <EuiToolTip
               position="top"
               content={tooltip}
-              delay="long"
               anchorClassName="eui-textBreakAll"
             >
               <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
@@ -83,7 +82,6 @@ export function FieldName({
           {isMultiField && !disableMultiFieldBadge && (
             <EuiToolTip
               position="top"
-              delay="long"
               content={i18n.translate(
                 'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
                 {

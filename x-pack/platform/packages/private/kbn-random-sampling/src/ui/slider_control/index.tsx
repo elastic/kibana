@@ -43,7 +43,6 @@ export function ControlSlider({
     <TooltipWrapper
       tooltipContent={disabledReason}
       condition={disabled}
-      delay="regular"
       display="block"
     >
       <EuiFlexGroup gutterSize="none">

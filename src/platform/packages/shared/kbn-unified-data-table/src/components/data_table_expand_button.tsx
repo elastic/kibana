@@ -51,7 +51,6 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   return (
     <EuiToolTip
       content={buttonLabel}
-      delay="long"
       ref={toolTipRef}
       anchorClassName="unifiedDataTable__rowControl"
       disableScreenReaderOutput

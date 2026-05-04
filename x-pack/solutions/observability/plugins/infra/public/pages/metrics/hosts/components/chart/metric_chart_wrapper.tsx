@@ -65,7 +65,6 @@ export const MetricChartWrapper = React.memo(
         ) : (
           <EuiToolTip
             className="eui-fullWidth"
-            delay="regular"
             content={toolTip}
             anchorClassName="eui-fullWidth"
           >

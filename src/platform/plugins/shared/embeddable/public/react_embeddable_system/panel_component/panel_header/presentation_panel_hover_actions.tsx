@@ -359,7 +359,7 @@ export const PresentationPanelHoverActions = ({
 
         if (tooltip) {
           notificationComponent = (
-            <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            <EuiToolTip position="top" content={tooltip} key={notification.id}>
               {notificationComponent}
             </EuiToolTip>
           );
@@ -447,7 +447,6 @@ export const PresentationPanelHoverActions = ({
                 size="m"
                 title={!hideTitle ? title || undefined : undefined}
                 content={description}
-                delay="regular"
                 position="top"
                 data-test-subj="embeddablePanelDescriptionTooltip"
                 type="info"
