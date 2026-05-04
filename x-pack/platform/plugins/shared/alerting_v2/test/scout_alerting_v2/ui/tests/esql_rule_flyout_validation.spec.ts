@@ -12,10 +12,10 @@ import { test } from '../fixtures';
 const SAMPLE_DATA_SET = 'ecommerce';
 
 /**
- * ES|QL rule flyout validation — covers the ?param resolution logic introduced
- * in esql_rule_utils.ts. The unit-level coverage lives in esql_rule_utils.test.ts;
- * these tests verify the resulting UI state (callout visibility, save button
- * enabled/disabled) end-to-end in the browser.
+ * ES|QL rule flyout validation — covers the ?param resolution logic in
+ * alerting-v2-rule-form/utils/esql_rule_utils.ts. The unit-level coverage lives
+ * in esql_rule_utils.test.ts; these tests verify the resulting UI state (callout
+ * visibility, save button enabled/disabled) end-to-end in the browser.
  */
 test.describe('ES|QL rule flyout — ?param validation', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {

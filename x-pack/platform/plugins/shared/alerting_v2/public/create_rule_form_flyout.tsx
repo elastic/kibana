@@ -8,12 +8,14 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { untilPluginStartServicesReady } from './kibana_services';
 
 export interface CreateRuleFormFlyoutProps {
   query: string;
   onClose?: () => void;
   push?: boolean;
+  esqlVariables?: ESQLControlVariable[];
   validationErrors?: string[];
 }
 

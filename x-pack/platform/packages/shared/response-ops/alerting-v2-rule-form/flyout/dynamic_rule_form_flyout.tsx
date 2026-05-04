@@ -10,9 +10,11 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { RuleFormFlyout } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
+import { inlineEsqlVariables } from '../utils/esql_rule_utils';
 import type { FormValues } from '../form/types';
 import type { RuleFormServices } from '../form/contexts';
 
@@ -26,7 +28,14 @@ export interface DynamicRuleFormFlyoutProps {
   /** Required services */
   services: RuleFormServices;
   /**
-   * Caller-supplied validation errors.
+   * ES|QL control variables from Discover. When provided, the flyout inlines
+   * resolvable `?param` / `??param` tokens via Composer and blocks save for
+   * any that remain unresolved.
+   */
+  esqlVariables?: ESQLControlVariable[];
+  /**
+   * Caller-supplied validation errors (merged with any unresolved-variable
+   * errors computed internally).
    */
   validationErrors?: string[];
 }
@@ -46,8 +55,19 @@ const DynamicRuleFormFlyoutInner = ({
   onClose,
   query,
   services,
+  esqlVariables,
   validationErrors,
 }: DynamicRuleFormFlyoutProps) => {
+  const inlineResult = useMemo(
+    () => inlineEsqlVariables(query, esqlVariables),
+    [query, esqlVariables]
+  );
+
+  const allErrors = useMemo(
+    () => [...inlineResult.unresolved, ...(validationErrors ?? [])],
+    [inlineResult.unresolved, validationErrors]
+  );
+
   const { createRule, isLoading } = useCreateRule({
     http: services.http,
     notifications: services.notifications,
@@ -57,7 +77,7 @@ const DynamicRuleFormFlyoutInner = ({
     createRule(values, { onSuccess: onClose });
   };
 
-  const hasValidationErrors = (validationErrors?.length ?? 0) > 0;
+  const hasValidationErrors = allErrors.length > 0;
 
   return (
     <RuleFormFlyout
@@ -81,7 +101,7 @@ const DynamicRuleFormFlyoutInner = ({
               <FormattedMessage
                 id="xpack.alertingV2.ruleForm.validationErrors.description"
                 defaultMessage="The following items must be resolved before this rule can be saved: {names}"
-                values={{ names: (validationErrors ?? []).join(', ') }}
+                values={{ names: allErrors.join(', ') }}
               />
             </p>
           </EuiCallOut>
@@ -91,7 +111,7 @@ const DynamicRuleFormFlyoutInner = ({
       <DynamicRuleForm
         onSubmit={handleSubmit}
         isSubmitting={isLoading}
-        query={query}
+        query={inlineResult.query}
         services={services}
         layout="flyout"
       />

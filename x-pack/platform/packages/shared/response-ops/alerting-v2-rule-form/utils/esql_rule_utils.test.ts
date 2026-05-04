@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esql } from '@elastic/esql';
@@ -141,9 +139,6 @@ describe('inlineEsqlVariables', () => {
     });
 
     it('falls back when Composer throws, surfacing leftover tokens as unresolved', () => {
-      // Force Composer to throw deterministically rather than relying on a
-      // specific malformed input string — that way this test keeps covering
-      // the catch path even if Composer's parser becomes more lenient.
       esqlMock.mockImplementationOnce(() => {
         throw new Error('forced Composer failure');
       });
@@ -151,8 +146,6 @@ describe('inlineEsqlVariables', () => {
       const result = inlineEsqlVariables('FROM logs* | WHERE host == ?host | LIMIT 5', [
         makeVar({ key: 'host', type: ESQLVariableType.VALUES, value: 'web-1' }),
       ]);
-      // ?host survives the catch fallback — must be reported as unresolved so
-      // the caller blocks save instead of persisting a raw placeholder.
       expect(result.unresolved).toEqual(['?host']);
     });
   });
@@ -291,8 +284,6 @@ describe('inlineEsqlVariables', () => {
         'FROM logs* | KEEP ??col | WHERE ?col IS NOT NULL | LIMIT 5',
         [makeVar({ key: 'col', type: ESQLVariableType.FIELDS, value: 'message' })]
       );
-      // Ambiguous: include in params would substitute the wrong-shape token too.
-      // Refusing leaves both placeholders for the residual scan.
       expect(result.query).toContain('??col');
       expect(result.query).toContain('?col');
       expect(result.unresolved).toEqual(expect.arrayContaining(['?col', '??col']));

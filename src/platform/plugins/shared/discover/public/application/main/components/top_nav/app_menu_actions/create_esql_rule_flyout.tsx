@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { DiscoverServices } from '../../../../../build_services';
-import { inlineEsqlVariables } from './esql_rule_utils';
 
 const getEsqlQuery = (getState: () => DiscoverInternalState, tabId: string): string | null => {
   const { query } = selectTab(getState(), tabId).appState;
@@ -47,11 +46,6 @@ export function CreateESQLRuleFlyout({
 
   const query = useSyncExternalStore(subscribe, getQuery);
   const esqlVariables = useSyncExternalStore(subscribe, getVariables);
-
-  const inlineResult = useMemo(
-    () => inlineEsqlVariables(query ?? '', esqlVariables),
-    [query, esqlVariables]
-  );
 
   const { history, core, alertingVTwo } = services;
   const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
@@ -95,11 +89,5 @@ export function CreateESQLRuleFlyout({
     return null;
   }
 
-  return (
-    <RuleFormFlyout
-      query={inlineResult.query}
-      onClose={onClose}
-      validationErrors={inlineResult.unresolved}
-    />
-  );
+  return <RuleFormFlyout query={query} onClose={onClose} esqlVariables={esqlVariables} />;
 }

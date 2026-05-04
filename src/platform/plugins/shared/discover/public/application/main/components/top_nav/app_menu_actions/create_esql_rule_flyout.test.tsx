@@ -70,7 +70,7 @@ describe('CreateESQLRuleFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('should render DynamicRuleFormFlyout with the current ES|QL query', async () => {
+  it('should pass the raw ES|QL query to DynamicRuleFormFlyout', async () => {
     const onClose = jest.fn();
     const { RuleFormFlyout } = await renderFlyout({
       esqlQuery: 'FROM my_index | WHERE status = "error"',
@@ -84,6 +84,18 @@ describe('CreateESQLRuleFlyout', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('should pass esqlVariables through to DynamicRuleFormFlyout', async () => {
+    const vars = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+    const { RuleFormFlyout } = await renderFlyout({
+      esqlQuery: 'FROM logs* | WHERE host == ?host | LIMIT 5',
+      esqlVariables: vars,
+    });
+
+    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
+    expect(lastCall.query).toBe('FROM logs* | WHERE host == ?host | LIMIT 5');
+    expect(lastCall.esqlVariables).toEqual(vars);
   });
 
   it('should NOT close flyout when query parameters change but pathname stays the same', async () => {
@@ -126,7 +138,6 @@ describe('CreateESQLRuleFlyout', () => {
     await toolkit.initializeTabs();
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const tabId = toolkit.getCurrentTab().id;
-    // No ES|QL query dispatched — tab stays in its default (non-ES|QL) state.
     const onClose = jest.fn();
 
     render(
@@ -153,37 +164,13 @@ describe('CreateESQLRuleFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('should inline bound `?param` Controls into the query passed to the rule form', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE host == ?host | LIMIT 5',
-      esqlVariables: [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }],
-    });
-
-    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
-    expect(lastCall.query).toContain('"web-1"');
-    expect(lastCall.query).not.toContain('?host');
-    expect(lastCall.validationErrors).toEqual([]);
-  });
-
-  it('should forward unresolved `?param` names as validationErrors', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE host == ?host AND env == ?env | LIMIT 5',
-      esqlVariables: [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }],
-    });
-
-    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ validationErrors: ['?env'] }),
-      expect.anything()
-    );
-  });
-
-  it('should re-evaluate inlined query and validationErrors when esqlVariables change', async () => {
+  it('should update esqlVariables when store state changes', async () => {
     const { RuleFormFlyout, toolkit } = await renderFlyout({
       esqlQuery: 'FROM logs* | WHERE host == ?host | LIMIT 5',
     });
 
     expect(RuleFormFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ validationErrors: ['?host'] }),
+      expect.objectContaining({ esqlVariables: [] }),
       expect.anything()
     );
 
@@ -196,95 +183,8 @@ describe('CreateESQLRuleFlyout', () => {
     });
 
     const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
-    expect(lastCall.query).toContain('"web-2"');
-    expect(lastCall.validationErrors).toEqual([]);
-  });
-
-  it('should inline `??field` identifier Controls via Composer (no ??token left)', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | KEEP ??col | LIMIT 5',
-      esqlVariables: [{ key: 'col', value: 'message', type: ESQLVariableType.FIELDS }],
-    });
-
-    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
-    expect(lastCall.query).toContain('message');
-    expect(lastCall.query).not.toContain('??col');
-    expect(lastCall.validationErrors).toEqual([]);
-  });
-
-  it('should inline non-empty homogeneous `multi_values` Controls as a list literal', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE env IN (?envs) | LIMIT 5',
-      esqlVariables: [
-        { key: 'envs', value: ['prod', 'staging'], type: ESQLVariableType.MULTI_VALUES },
-      ],
-    });
-
-    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
-    expect(lastCall.query).toContain('"prod"');
-    expect(lastCall.query).toContain('"staging"');
-    expect(lastCall.query).not.toContain('?envs');
-    expect(lastCall.validationErrors).toEqual([]);
-  });
-
-  it('should treat empty `multi_values` as unresolved', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE env IN (?envs) | LIMIT 5',
-      esqlVariables: [{ key: 'envs', value: [], type: ESQLVariableType.MULTI_VALUES }],
-    });
-
-    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        validationErrors: ['?envs'],
-        query: 'FROM logs* | WHERE env IN (?envs) | LIMIT 5',
-      }),
-      expect.anything()
-    );
-  });
-
-  it('should treat mixed-type `multi_values` as unresolved (Composer rejects heterogeneous lists)', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE x IN (?mixed) | LIMIT 5',
-      esqlVariables: [{ key: 'mixed', value: ['a', 1], type: ESQLVariableType.MULTI_VALUES }],
-    });
-
-    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        validationErrors: ['?mixed'],
-        query: 'FROM logs* | WHERE x IN (?mixed) | LIMIT 5',
-      }),
-      expect.anything()
-    );
-  });
-
-  it('should treat `time_literal` Controls as unresolved (Composer cannot inline durations without quoting)', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE @timestamp > NOW() - ?duration | LIMIT 5',
-      esqlVariables: [{ key: 'duration', value: '15m', type: ESQLVariableType.TIME_LITERAL }],
-    });
-
-    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        validationErrors: ['?duration'],
-        query: 'FROM logs* | WHERE @timestamp > NOW() - ?duration | LIMIT 5',
-      }),
-      expect.anything()
-    );
-  });
-
-  it('should treat a `?param` with no matching Control as unresolved', async () => {
-    const { RuleFormFlyout } = await renderFlyout({
-      esqlQuery: 'FROM logs* | WHERE @timestamp > NOW() - ?new | LIMIT 20',
-      // Controls exist, but none with key 'new'
-      esqlVariables: [{ key: 'mytest', value: '15m', type: ESQLVariableType.TIME_LITERAL }],
-    });
-
-    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        validationErrors: ['?new'],
-        query: 'FROM logs* | WHERE @timestamp > NOW() - ?new | LIMIT 20',
-      }),
-      expect.anything()
-    );
+    expect(lastCall.esqlVariables).toEqual([
+      { key: 'host', value: 'web-2', type: ESQLVariableType.VALUES },
+    ]);
   });
 });
