@@ -10,7 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
-import React, { ChangeEvent, useCallback, useMemo, useState } from 'react';
+import type { ChangeEvent} from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiFieldSearch,

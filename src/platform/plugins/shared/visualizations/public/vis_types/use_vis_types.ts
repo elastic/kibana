@@ -8,8 +8,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { BaseVisType } from './base_vis_type';
-import { TypesStart } from './types_service';
+import type { BaseVisType } from './base_vis_type';
+import type { TypesStart } from './types_service';
 
 export function useVisTypes(visTypesRegistry: TypesStart) {
   const [isLoading, setIsLoading] = useState(false);

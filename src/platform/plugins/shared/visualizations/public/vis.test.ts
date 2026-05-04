@@ -8,7 +8,8 @@
  */
 
 import { Vis } from './vis';
-import { BaseVisType, VisTypeDefinition } from './vis_types';
+import type { VisTypeDefinition } from './vis_types';
+import { BaseVisType } from './vis_types';
 
 jest.mock('./services', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
