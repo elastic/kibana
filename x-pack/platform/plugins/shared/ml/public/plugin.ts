@@ -243,7 +243,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
-    registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
+    if (this.enabledFeatures.ad) {
+      registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
+    }
     registerMlUiActions(pluginsSetup.uiActions, core);
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
