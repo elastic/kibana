@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { CloudLinks } from './cloud_links';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -17,6 +17,13 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const createCloudMock = (overrides: Record<string, unknown> = {}) => ({
   isCloudEnabled: true,
   baseUrl: 'https://cloud.elastic.co',
+  getUrls: jest.fn().mockReturnValue({
+    baseUrl: 'https://cloud.elastic.co',
+    organizationUrl: 'https://cloud.elastic.co/account/members',
+  }),
+  getPrivilegedUrls: jest.fn().mockResolvedValue({
+    billingUrl: 'https://cloud.elastic.co/billing',
+  }),
   ...overrides,
 });
 
@@ -47,36 +54,64 @@ describe('CloudLinks', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders cloud logo and all links when cloud is enabled', () => {
+  it('renders cloud logo and all links when cloud is enabled', async () => {
     setCloudMock(createCloudMock());
     const { getByTestId } = render(<CloudLinks />);
 
     expect(getByTestId('searchHomepageCloudLink-home')).toBeInTheDocument();
     expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toBeInTheDocument();
-    expect(getByTestId('searchHomepageCloudLink-usage')).toBeInTheDocument();
     expect(getByTestId('searchHomepageCloudLink-organization')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByTestId('searchHomepageCloudLink-usage')).toBeInTheDocument();
+    });
   });
 
-  it('constructs correct hrefs from baseUrl', () => {
-    setCloudMock(createCloudMock({ baseUrl: 'https://cloud.elastic.co/' }));
+  it('uses URLs from cloud.getUrls() and cloud.getPrivilegedUrls()', async () => {
+    setCloudMock(createCloudMock());
     const { getByTestId } = render(<CloudLinks />);
 
     expect(getByTestId('searchHomepageCloudLink-home')).toHaveAttribute(
       'href',
-      'https://cloud.elastic.co/home'
+      'https://cloud.elastic.co'
     );
     expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toHaveAttribute(
       'href',
-      'https://cloud.elastic.co/home'
-    );
-    expect(getByTestId('searchHomepageCloudLink-usage')).toHaveAttribute(
-      'href',
-      'https://cloud.elastic.co/billing/usage'
+      'https://cloud.elastic.co'
     );
     expect(getByTestId('searchHomepageCloudLink-organization')).toHaveAttribute(
       'href',
       'https://cloud.elastic.co/account/members'
     );
+
+    await waitFor(() => {
+      expect(getByTestId('searchHomepageCloudLink-usage')).toHaveAttribute(
+        'href',
+        'https://cloud.elastic.co/billing'
+      );
+    });
+  });
+
+  it('does not render usage link when user lacks billing access', () => {
+    setCloudMock(
+      createCloudMock({
+        getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+      })
+    );
+    const { queryByTestId } = render(<CloudLinks />);
+
+    expect(queryByTestId('searchHomepageCloudLink-usage')).not.toBeInTheDocument();
+  });
+
+  it('does not render usage link when getPrivilegedUrls rejects', () => {
+    setCloudMock(
+      createCloudMock({
+        getPrivilegedUrls: jest.fn().mockRejectedValue(new Error('forbidden')),
+      })
+    );
+    const { queryByTestId } = render(<CloudLinks />);
+
+    expect(queryByTestId('searchHomepageCloudLink-usage')).not.toBeInTheDocument();
   });
 
   it('opens links in a new tab', () => {
@@ -85,17 +120,6 @@ describe('CloudLinks', () => {
 
     expect(getByTestId('searchHomepageCloudLink-home')).toHaveAttribute('target', '_blank');
     expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toHaveAttribute('target', '_blank');
-    expect(getByTestId('searchHomepageCloudLink-usage')).toHaveAttribute('target', '_blank');
     expect(getByTestId('searchHomepageCloudLink-organization')).toHaveAttribute('target', '_blank');
-  });
-
-  it('strips trailing slash from baseUrl', () => {
-    setCloudMock(createCloudMock({ baseUrl: 'https://cloud.elastic.co/' }));
-    const { getByTestId } = render(<CloudLinks />);
-
-    expect(getByTestId('searchHomepageCloudLink-usage')).toHaveAttribute(
-      'href',
-      'https://cloud.elastic.co/billing/usage'
-    );
   });
 });

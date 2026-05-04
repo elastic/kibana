@@ -5,36 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
-const CLOUD_LINKS = [
-  {
-    id: 'elasticCloud',
-    label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
-      defaultMessage: 'Elastic Cloud',
-    }),
-    path: '/home',
-  },
-  {
-    id: 'usage',
-    label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
-      defaultMessage: 'Usage',
-    }),
-    path: '/billing/usage',
-  },
-  {
-    id: 'organization',
-    label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
-      defaultMessage: 'Organization',
-    }),
-    path: '/account/members',
-  },
-];
+interface CloudLink {
+  id: string;
+  label: string;
+  href: string;
+}
 
 export const CloudLinks = () => {
   const {
@@ -42,11 +24,61 @@ export const CloudLinks = () => {
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
+  const [billingUrl, setBillingUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    cloud
+      ?.getPrivilegedUrls()
+      .then((urls) => {
+        if (urls.billingUrl) {
+          setBillingUrl(urls.billingUrl);
+        }
+      })
+      .catch(() => {});
+  }, [cloud]);
+
+  const cloudLinks = useMemo(() => {
+    if (!cloud?.isCloudEnabled) return [];
+
+    const { baseUrl, organizationUrl } = cloud.getUrls();
+    const links: CloudLink[] = [];
+
+    if (baseUrl) {
+      links.push({
+        id: 'elasticCloud',
+        label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
+          defaultMessage: 'Elastic Cloud',
+        }),
+        href: baseUrl,
+      });
+    }
+
+    if (billingUrl) {
+      links.push({
+        id: 'usage',
+        label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
+          defaultMessage: 'Usage',
+        }),
+        href: billingUrl,
+      });
+    }
+
+    if (organizationUrl) {
+      links.push({
+        id: 'organization',
+        label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
+          defaultMessage: 'Organization',
+        }),
+        href: organizationUrl,
+      });
+    }
+
+    return links;
+  }, [cloud, billingUrl]);
+
   if (!cloud?.isCloudEnabled || !cloud?.baseUrl) {
     return null;
   }
-
-  const baseUrl = cloud.baseUrl.replace(/\/$/, '');
 
   return (
     <EuiFlexGroup
@@ -61,7 +93,7 @@ export const CloudLinks = () => {
     >
       <EuiFlexItem grow={false}>
         <EuiLink
-          href={`${baseUrl}/home`}
+          href={cloud.baseUrl}
           target="_blank"
           external={false}
           aria-label={i18n.translate('xpack.searchHomepage.cloudLinks.homeAriaLabel', {
@@ -72,10 +104,10 @@ export const CloudLinks = () => {
           <EuiIcon type="logoCloud" size="m" aria-hidden={true} />
         </EuiLink>
       </EuiFlexItem>
-      {CLOUD_LINKS.map((link) => (
+      {cloudLinks.map((link) => (
         <EuiFlexItem grow={false} key={link.id}>
           <EuiLink
-            href={`${baseUrl}${link.path}`}
+            href={link.href}
             target="_blank"
             external={false}
             data-test-subj={`searchHomepageCloudLink-${link.id}`}
