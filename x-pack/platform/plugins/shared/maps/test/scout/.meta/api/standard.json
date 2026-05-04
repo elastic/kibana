@@ -1,5 +1,5 @@
 {
-  "sha1": "4f235e06d8b15c06bf14e286452cc10104da64e0",
+  "sha1": "a2f39b6334c1b0dd3e74c22126cedf751999d303",
   "tests": [
     {
       "id": "79abdadc4886132-c537aed5c2bba8c",
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/maps_telemetry.spec.ts",
-        "line": 26,
+        "line": 29,
         "column": 10
       }
     },

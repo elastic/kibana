@@ -230,23 +230,27 @@ const TakeActionComponent: React.FC<Props> = ({
   const items: React.JSX.Element[] = useMemo(
     () =>
       [
-        <EuiContextMenuItem
-          data-test-subj="addToCase"
-          disabled={addToCaseDisabled}
-          key="addToCase"
-          onClick={onClickAddToNewCase}
-        >
-          {i18n.ADD_TO_NEW_CASE}
-        </EuiContextMenuItem>,
+        !addToCaseDisabled
+          ? [
+              <EuiContextMenuItem
+                data-test-subj="addToCase"
+                disabled={addToCaseDisabled}
+                key="addToCase"
+                onClick={onClickAddToNewCase}
+              >
+                {i18n.ADD_TO_NEW_CASE}
+              </EuiContextMenuItem>,
 
-        <EuiContextMenuItem
-          data-test-subj="addToExistingCase"
-          disabled={addToCaseDisabled}
-          key="addToExistingCase"
-          onClick={onClickAddToExistingCase}
-        >
-          {i18n.ADD_TO_EXISTING_CASE}
-        </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                data-test-subj="addToExistingCase"
+                disabled={addToCaseDisabled}
+                key="addToExistingCase"
+                onClick={onClickAddToExistingCase}
+              >
+                {i18n.ADD_TO_EXISTING_CASE}
+              </EuiContextMenuItem>,
+            ]
+          : [],
 
         attackDiscoveries.length === 1 ? (
           <EuiContextMenuItem
