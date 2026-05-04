@@ -100,10 +100,18 @@ And you should **not**:
         };
       }
 
+      // Workflow attachments carry { yaml, workflowId?, name? } in their data
+      // payload. workflowId is the link to the persisted workflow on disk —
+      // we must propagate it across edits so subsequent "save" operations
+      // from the UI keep targeting the same workflow.
+      const sourceData = sourceAttachment?.data.data as
+        | { yaml?: string; workflowId?: string; name?: string }
+        | undefined;
+
       let workflowDef: GenerateWorkflowEdit | undefined;
-      if (sourceAttachment) {
+      if (sourceAttachment && sourceData?.yaml) {
         workflowDef = {
-          yaml: (sourceAttachment.data.data as any).yaml,
+          yaml: sourceData.yaml,
         };
       }
 
@@ -123,6 +131,9 @@ And you should **not**:
         const attachmentData = {
           name: workflow.name,
           yaml: stringifyWorkflowDefinition(workflow),
+          // Preserve the link to the persisted workflow on disk when
+          // editing an existing attachment.
+          ...(sourceData?.workflowId ? { workflowId: sourceData.workflowId } : {}),
         };
 
         const newAttachment = sourceAttachment
