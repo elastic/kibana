@@ -9,9 +9,9 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-
 import Boom from '@hapi/boom';
 
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { FleetServerHostUnauthorizedError } from '../../errors';
@@ -23,6 +23,23 @@ import type {
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
 } from '../../types';
+
+function validateFleetServerHostSsl(fleetServerHost: Partial<FleetServerHost>) {
+  throwIfSslPathInvalid([
+    ...(fleetServerHost.ssl?.certificate_authorities ?? []),
+    fleetServerHost.ssl?.certificate,
+    fleetServerHost.ssl?.key,
+    ...(fleetServerHost.ssl?.es_certificate_authorities ?? []),
+    fleetServerHost.ssl?.es_certificate,
+    fleetServerHost.ssl?.es_key,
+    ...(fleetServerHost.ssl?.agent_certificate_authorities ?? []),
+    fleetServerHost.ssl?.agent_certificate,
+    fleetServerHost.ssl?.agent_key,
+    fleetServerHost.secrets?.ssl?.key,
+    fleetServerHost.secrets?.ssl?.es_key,
+    fleetServerHost.secrets?.ssl?.agent_key,
+  ]);
+}
 
 function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
   if (fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) {
@@ -69,6 +86,7 @@ export const postFleetServerHost: RequestHandler<
   await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
 
   const { id, ...data } = request.body;
+  validateFleetServerHostSsl(data);
   ensureNoDuplicateSecrets(data);
 
   const FleetServerHost = await fleetServerHostService.create(
@@ -147,6 +165,7 @@ export const putFleetServerHostHandler: RequestHandler<
     if (request.body.host_urls) {
       await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
     }
+    validateFleetServerHostSsl(request.body);
     ensureNoDuplicateSecrets(request.body);
 
     const item = await fleetServerHostService.update(
