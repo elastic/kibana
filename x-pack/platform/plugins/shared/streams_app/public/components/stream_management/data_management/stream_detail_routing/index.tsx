@@ -18,6 +18,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { StatefulStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
@@ -77,7 +78,9 @@ export function StreamDetailRoutingImpl() {
     },
   } = useKibana();
 
-  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+  const { cancelChanges, saveChanges, createNewRule, editRule } = useStreamRoutingEvents();
+
+  const { query: routeQuery } = useStreamsAppParams('/{key}/management/{tab}');
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   // StreamDetailRoutingImpl is only rendered for wired streams (classic uses ClassicStreamPartitioningImpl)
@@ -143,6 +146,26 @@ export function StreamDetailRoutingImpl() {
     openConfirm: core.overlays.openConfirm,
     shouldPromptOnReplace: false,
   });
+
+  // Deep-link: pre-trigger routing actions when query params are present.
+  // Only fires once on mount; additive — no-ops when params are absent.
+  const { action: deepLinkAction, editRoutingRuleId } = routeQuery ?? {};
+  useEffect(() => {
+    if (!deepLinkAction && !editRoutingRuleId) return;
+
+    if (deepLinkAction === 'addChild') {
+      createNewRule();
+      return;
+    }
+
+    if (editRoutingRuleId) {
+      const matchingRule = routing.find((rule) => rule.destination === editRoutingRuleId);
+      if (matchingRule) {
+        editRule(matchingRule.id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
   const {

@@ -192,6 +192,18 @@ export function StreamListView() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={router.link('/_flow')}
+                iconType="visNetwork"
+                size="s"
+                data-test-subj="streamsIngestFlowButton"
+              >
+                {i18n.translate('xpack.streams.streamsListView.ingestFlowButtonLabel', {
+                  defaultMessage: 'Ingest flow',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
             {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton

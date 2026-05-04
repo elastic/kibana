@@ -73,6 +73,12 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { CloudPipelinesMockClient } from './lib/mock_ingest_sources/cloud_pipelines/client';
+import { CloudPipelinesStore } from './lib/mock_ingest_sources/cloud_pipelines/storage';
+import { seedCloudPipelines } from './lib/mock_ingest_sources/cloud_pipelines/seed';
+import { PrometheusMockClient } from './lib/mock_ingest_sources/prometheus/client';
+import { PrometheusStore } from './lib/mock_ingest_sources/prometheus/storage';
+import { seedPrometheusScrapers } from './lib/mock_ingest_sources/prometheus/seed';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -148,6 +154,16 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
+
+    // Mock ingest sources — in-memory only, resets on restart (by design)
+    const cloudPipelinesStore = new CloudPipelinesStore();
+    seedCloudPipelines(cloudPipelinesStore);
+    const cloudPipelinesMock = new CloudPipelinesMockClient(cloudPipelinesStore);
+
+    const prometheusStore = new PrometheusStore();
+    seedPrometheusScrapers(prometheusStore, cloudPipelinesStore);
+    const prometheusMock = new PrometheusMockClient(prometheusStore);
+
     const getScopedClients = async ({
       request,
     }: {
@@ -221,6 +237,9 @@ export class StreamsPlugin
         this.logger
       );
 
+      const fleetAgentClient = pluginsStart.fleet?.agentService.asScoped(request);
+      const fleetAgentPolicyService = pluginsStart.fleet?.agentPolicyService;
+
       return {
         scopedClusterClient,
         soClient,
@@ -239,6 +258,10 @@ export class StreamsPlugin
         streamsSettingsStorageClient,
         isSecurityEnabled,
         tuningConfig,
+        fleetAgentClient,
+        fleetAgentPolicyService,
+        cloudPipelinesMock,
+        prometheusMock,
       };
     };
 

@@ -37,6 +37,7 @@ import { internalEligibleStreamsRoutes } from './internal/sig_events/extraction/
 import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
+import { flowRoutes } from './internal/streams/flow/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -62,6 +63,7 @@ export const streamsRouteRepository = {
   ...internalEligibleStreamsRoutes,
   ...internalSignificantEventsSettingsRoutes,
   ...internalMemoryRoutes,
+  ...flowRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

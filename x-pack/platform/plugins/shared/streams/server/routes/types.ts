@@ -13,6 +13,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -28,6 +29,8 @@ import type { InsightClient } from '../lib/sig_events/insights/client/insight_cl
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
+import type { CloudPipelinesMockClient } from '../lib/mock_ingest_sources/cloud_pipelines/client';
+import type { PrometheusMockClient } from '../lib/mock_ingest_sources/prometheus/client';
 
 export type GetScopedClients = ({
   request,
@@ -53,6 +56,10 @@ export interface RouteHandlerScopedClients {
   streamsSettingsStorageClient: StreamsSettingsStorageClient;
   isSecurityEnabled: boolean;
   tuningConfig: SigEventsTuningConfig;
+  fleetAgentClient?: AgentClient;
+  fleetAgentPolicyService?: AgentPolicyServiceInterface;
+  cloudPipelinesMock: CloudPipelinesMockClient;
+  prometheusMock: PrometheusMockClient;
 }
 
 export interface RouteDependencies {

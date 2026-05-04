@@ -48,3 +48,21 @@ export {
 } from './get_streams_location/get_streams_location';
 
 export type { StreamSummary } from './stream_summary';
+export {
+  flowHealthSchema,
+  flowThroughputSchema,
+  flowFailureRateSchema,
+  flowNodeSchema,
+  flowEdgeSchema,
+  flowGraphPayloadSchema,
+  flowThroughputPayloadSchema,
+} from './flow';
+export type {
+  FlowHealth,
+  FlowThroughput,
+  FlowFailureRate,
+  FlowNode,
+  FlowEdge,
+  FlowGraphPayload,
+  FlowThroughputPayload,
+} from './flow';

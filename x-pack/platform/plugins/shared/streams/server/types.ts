@@ -42,6 +42,7 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { StreamsConfig } from '../common/config';
 import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
@@ -95,4 +96,5 @@ export interface StreamsPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  fleet?: FleetStartContract;
 }

@@ -17,6 +17,7 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
+import { IngestFlowView } from '../components/ingest_flow_view';
 
 /**
  * Optional time range query params.
@@ -38,6 +39,9 @@ const managementQueryParams = t.partial({
   openFlyout: t.string,
   // Data quality page state
   pageState: t.string,
+  // Ingest flow deep-link params
+  editRoutingRuleId: t.string,
+  action: t.literal('addChild'),
 });
 
 /**
@@ -64,6 +68,12 @@ const streamsAppRoutes = {
     children: {
       '/': {
         element: <StreamListView />,
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
+      },
+      '/_flow': {
+        element: <IngestFlowView />,
         params: t.partial({
           query: timeRangeQueryParams,
         }),
