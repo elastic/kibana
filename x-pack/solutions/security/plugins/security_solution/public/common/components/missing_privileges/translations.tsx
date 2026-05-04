@@ -8,8 +8,7 @@
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import type { ReactNode } from 'react';
+import React, { type ComponentProps } from 'react';
 import {
   DEFAULT_ITEMS_INDEX,
   DEFAULT_LISTS_INDEX,
@@ -18,7 +17,8 @@ import {
 } from '../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
 import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
-import { DetectionsRequirementsLink, SecuritySolutionRequirementsLink } from '../links_to_docs';
+import { DocLink } from '../links_to_docs/doc_link';
+import * as linksI18n from '../links_to_docs/links_translations';
 
 export const PRIVILEGES_MISSING_TITLE = i18n.translate(
   'xpack.securitySolution.common.onboarding.assistantCard.missingPrivileges.title',
@@ -69,16 +69,22 @@ const CANNOT_EDIT_ALERTS = i18n.translate(
   }
 );
 
-const DEFAULT_DOC_LINKS: ReactNode[] = [
-  <DetectionsRequirementsLink />,
-  <SecuritySolutionRequirementsLink />,
+const DEFAULT_DOC_LINKS = [
+  {
+    docPath: linksI18n.DETECTIONS_REQUIREMENTS_LINK_PATH,
+    linkText: linksI18n.DETECTIONS_REQUIREMENTS_LINK_TEXT,
+  },
+  {
+    docPath: linksI18n.SOLUTION_REQUIREMENTS_LINK_PATH,
+    linkText: linksI18n.SOLUTION_REQUIREMENTS_LINK_TEXT,
+  },
 ];
 
 export const missingPrivilegesCallOutBody = ({
   indexPrivileges,
   featurePrivileges = [],
   docs = DEFAULT_DOC_LINKS,
-}: MissingPrivileges & { docs?: ReactNode[] }) => {
+}: MissingPrivileges & { docs?: Array<ComponentProps<typeof DocLink>> }) => {
   return (
     <FormattedMessage
       id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.messageDetail"
@@ -128,8 +134,10 @@ export const missingPrivilegesCallOutBody = ({
                 defaultMessage="Related documentation:"
               />
               <ul>
-                {docs.map((link, i) => (
-                  <li key={i}>{link}</li>
+                {docs.map(({ docPath, linkText }) => (
+                  <li key={docPath}>
+                    <DocLink docPath={docPath} linkText={linkText} />
+                  </li>
                 ))}
               </ul>
             </>
