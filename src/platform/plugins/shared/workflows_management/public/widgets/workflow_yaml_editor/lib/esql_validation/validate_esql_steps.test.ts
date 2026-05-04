@@ -309,6 +309,38 @@ describe('validateEsqlSteps — Liquid policy', () => {
       expect(markers[0].severity).toBe('warning');
     });
 
+    it('clamps an out-of-bounds column so the marker stays inside the ES|QL region', async () => {
+      // The query body is a single line `FROM x` (6 chars). A diagnostic that
+      // claims `endColumn: 999` must not be allowed to push the marker offset
+      // past the line into the surrounding YAML.
+      const text = buildStep('FROM x');
+      const model = createTextModel(text);
+      const queryStartInFile = text.indexOf('FROM x');
+      const queryEndInFile = queryStartInFile + 'FROM x'.length;
+      mockValidate.mockResolvedValue({
+        errors: [
+          {
+            message: 'runaway range',
+            code: 'esql.runaway',
+            severity: 'error',
+            startLineNumber: 1,
+            startColumn: 1,
+            endLineNumber: 1,
+            endColumn: 999,
+          },
+        ],
+        warnings: [],
+      });
+      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      expect(markers).toHaveLength(1);
+      const marker = markers[0];
+      // Reconstruct the marker's end offset and confirm it doesn't escape the
+      // region — the bug allowed it to land deep in the YAML below.
+      const endOffset = model.getValue().split('\n').slice(0, marker.endLineNumber - 1).join('\n')
+        .length + (marker.endLineNumber > 1 ? 1 : 0) + (marker.endColumn - 1);
+      expect(endOffset).toBeLessThanOrEqual(queryEndInFile);
+    });
+
     it('maps Monaco numeric severities (Warning=4, Info=2) on EditorError diagnostics', async () => {
       const text = buildStep('FROM logs-* | LIMIT 1000000');
       const model = createTextModel(text);

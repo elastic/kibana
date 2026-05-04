@@ -233,7 +233,13 @@ function lineColToOffset(text: string, line: number, column: number): number | n
     offset = idx + 1;
     currentLine += 1;
   }
-  return offset + (column - 1);
+  // Clamp column to the line's bounds so a malformed diagnostic can't push the
+  // offset past the line end into unrelated YAML content (the caller maps this
+  // offset back into the document and clamps only against the full length).
+  const nextNewline = text.indexOf('\n', offset);
+  const lineEnd = nextNewline === -1 ? text.length : nextNewline;
+  const clampedColumn = Math.min(column - 1, lineEnd - offset);
+  return offset + clampedColumn;
 }
 
 function rangeFullyInsideMask(
