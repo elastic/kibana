@@ -15,6 +15,10 @@ export interface PersistedCompositeSummary {
   members?: CompositeSLOMemberSummary[];
 }
 
+export function buildCompositeSloSummaryDocId(spaceId: string, compositeId: string): string {
+  return `${spaceId}:${compositeId}`;
+}
+
 export function mapCompositeSummaryIndexSource(
   source: unknown
 ): PersistedCompositeSummary | undefined {
@@ -51,21 +55,27 @@ export async function fetchCompositeSloSummariesFromIndex(
     return result;
   }
 
+  const docIds = compositeIds.map((id) => buildCompositeSloSummaryDocId(spaceId, id));
+
   const response = await esClient.search({
     index: COMPOSITE_SUMMARY_INDEX_NAME,
     size: compositeIds.length,
     query: {
       bool: {
-        filter: [{ ids: { values: [...compositeIds] } }, { term: { spaceId } }],
+        filter: [{ ids: { values: docIds } }, { term: { spaceId } }],
       },
     },
   });
 
+  const docIdToCompositeId = new Map(docIds.map((docId, i) => [docId, compositeIds[i]]));
+
   for (const hit of response.hits.hits) {
-    if (!hit._source) continue;
+    if (!hit._source || !hit._id) continue;
+    const compositeId = docIdToCompositeId.get(hit._id);
+    if (!compositeId) continue;
     const persisted = mapCompositeSummaryIndexSource(hit._source);
     if (persisted) {
-      result.set(hit._id as string, persisted);
+      result.set(compositeId, persisted);
     }
   }
 

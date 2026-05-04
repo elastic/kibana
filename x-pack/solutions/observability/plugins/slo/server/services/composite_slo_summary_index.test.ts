@@ -112,12 +112,12 @@ describe('composite_slo_summary_index', () => {
   });
 
   describe('fetchCompositeSloSummariesFromIndex', () => {
-    it('searches by ids + spaceId and maps found sources by _id', async () => {
+    it('searches by spaceId-prefixed ids + spaceId filter and maps found sources by composite id', async () => {
       const search = jest.fn().mockResolvedValue({
         hits: {
           hits: [
             {
-              _id: 'comp-a',
+              _id: 'default:comp-a',
               _source: {
                 sliValue: 0.99,
                 status: 'HEALTHY',
@@ -145,7 +145,10 @@ describe('composite_slo_summary_index', () => {
         size: 2,
         query: {
           bool: {
-            filter: [{ ids: { values: ['comp-a', 'comp-b'] } }, { term: { spaceId: 'default' } }],
+            filter: [
+              { ids: { values: ['default:comp-a', 'default:comp-b'] } },
+              { term: { spaceId: 'default' } },
+            ],
           },
         },
       });

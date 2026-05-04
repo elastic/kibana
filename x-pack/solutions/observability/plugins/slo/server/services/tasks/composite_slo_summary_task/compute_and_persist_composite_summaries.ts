@@ -29,6 +29,7 @@ import { toRichRollingTimeWindow, type TimeWindow } from '../../../domain/models
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
+import { buildCompositeSloSummaryDocId } from '../../composite_slo_summary_index';
 import { DefaultSummaryClient } from '../../summary_client';
 import { computeCompositeSummary, type MemberSummaryData } from '../../compute_composite_summary';
 
@@ -304,7 +305,10 @@ function buildBulkOps(
           memberSummaries
         );
         bulkOps.push({
-          index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: compositeSlo.id },
+          index: {
+            _index: COMPOSITE_SUMMARY_INDEX_NAME,
+            _id: buildCompositeSloSummaryDocId(spaceId, compositeSlo.id),
+          },
         });
         bulkOps.push(
           buildSummaryDoc(compositeSlo, compositeSummary, members, spaceId, unresolvedMemberIds)

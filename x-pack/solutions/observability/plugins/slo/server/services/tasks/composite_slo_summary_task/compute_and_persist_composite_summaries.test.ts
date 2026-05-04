@@ -242,7 +242,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           operations: expect.arrayContaining([
-            { index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: COMPOSITE_ID } },
+            { index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `default:${COMPOSITE_ID}` } },
           ]),
         }),
         expect.any(Object)
@@ -309,7 +309,9 @@ describe('computeAndPersistCompositeSummaries', () => {
 
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          operations: expect.arrayContaining([expect.objectContaining({ spaceId: 'my-space' })]),
+          operations: expect.arrayContaining([
+            { index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `my-space:${COMPOSITE_ID}` } },
+          ]),
         }),
         expect.any(Object)
       );
@@ -328,7 +330,7 @@ describe('computeAndPersistCompositeSummaries', () => {
       });
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
-      expect(bulkCall.operations[1].spaceId).toBe('default');
+      expect(bulkCall.operations[0].index._id).toBe(`default:${COMPOSITE_ID}`);
     });
   });
 

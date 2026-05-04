@@ -11,17 +11,19 @@ import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import { deleteCompositeSummaryDoc } from './delete_composite_slo';
 
 describe('deleteCompositeSummaryDoc', () => {
+  const spaceId = 'my-space';
   const id = 'composite-slo-id';
+  const docId = `${spaceId}:${id}`;
 
   it('deletes the summary document with the correct index and id', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggerMock.create();
 
-    await deleteCompositeSummaryDoc(esClient, id, logger);
+    await deleteCompositeSummaryDoc(esClient, spaceId, id, logger);
 
     expect(esClient.delete).toHaveBeenCalledWith({
       index: COMPOSITE_SUMMARY_INDEX_NAME,
-      id,
+      id: docId,
     });
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -31,7 +33,7 @@ describe('deleteCompositeSummaryDoc', () => {
     const logger = loggerMock.create();
     esClient.delete.mockRejectedValueOnce({ statusCode: 404 });
 
-    await expect(deleteCompositeSummaryDoc(esClient, id, logger)).resolves.toBeUndefined();
+    await expect(deleteCompositeSummaryDoc(esClient, spaceId, id, logger)).resolves.toBeUndefined();
     expect(logger.error).not.toHaveBeenCalled();
   });
 
@@ -41,9 +43,9 @@ describe('deleteCompositeSummaryDoc', () => {
     const err = { statusCode: 503, message: 'service unavailable' };
     esClient.delete.mockRejectedValueOnce(err);
 
-    await expect(deleteCompositeSummaryDoc(esClient, id, logger)).resolves.toBeUndefined();
+    await expect(deleteCompositeSummaryDoc(esClient, spaceId, id, logger)).resolves.toBeUndefined();
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(`Failed to delete composite summary doc [${id}]`)
+      expect.stringContaining(`Failed to delete composite summary doc [${docId}]`)
     );
   });
 });
