@@ -1,19 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/response-ops-form-generator', () => {
+  const actual = jest.requireActual(
+    '@kbn/response-ops-form-generator'
+  ) as typeof import('@kbn/response-ops-form-generator');
+  return {
+    ...actual,
+    generateFormFields: jest.fn(() => null),
+  };
+});
+
+import React, { Suspense } from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { z, ZodDiscriminatedUnion, ZodObject } from '@kbn/zod/v4';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
+import {
+  type ConnectorZodSchema,
+  connectorsSpecs,
+  serializeConnectorSpec,
+} from '@kbn/connector-specs';
+import * as formGenerator from '@kbn/response-ops-form-generator';
 import {
   fetchConnectorSpec,
   transformSpecToActionTypeModel,
   type ConnectorSpecResponse,
 } from './action_type_model_utils';
+
+const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
+
+type LooseConnectorFormTransform = (data: Record<string, unknown>) => Record<string, unknown>;
+
+function listSecretsAuthTypeLiterals(schema: ConnectorZodSchema): string[] {
+  const { secrets } = schema.shape;
+  if (!(secrets instanceof ZodDiscriminatedUnion)) {
+    return [];
+  }
+  const discriminator = secrets.def.discriminator;
+  return secrets.options
+    .map((option) => {
+      if (!(option instanceof ZodObject)) {
+        return undefined;
+      }
+      const discField = option.shape[discriminator];
+      if (discField instanceof z.ZodLiteral && typeof discField.value === 'string') {
+        return discField.value;
+      }
+      return undefined;
+    })
+    .filter((id): id is string => Boolean(id));
+}
 
 describe('action_type_model_utils', () => {
   describe('fetchConnectorSpec', () => {
@@ -163,7 +206,7 @@ describe('action_type_model_utils', () => {
 
     it('creates validateParams function that returns empty errors', async () => {
       const model = transformSpecToActionTypeModel(baseSpec);
-      const result = await model.validateParams({});
+      const result = await model.validateParams({}, null);
       expect(result).toEqual({ errors: {} });
     });
 
@@ -194,12 +237,80 @@ describe('action_type_model_utils', () => {
       });
     });
 
+    describe('actionConnectorFields authMode narrowing', () => {
+      const sharepointSpecResponse = (): ConnectorSpecResponse => ({
+        metadata: {
+          id: '.sharepoint-online',
+          displayName: 'SharePoint Online',
+          description: 'Test connector',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: ['alerting'],
+          isTechnicalPreview: true,
+        },
+        schema: serializeConnectorSpec(connectorsSpecs.SharepointOnline).schema as Record<
+          string,
+          unknown
+        >,
+      });
+
+      beforeEach(() => {
+        jest.mocked(formGenerator.generateFormFields).mockClear();
+      });
+
+      async function renderConnectorFieldsAndGetSchemaLiterals(
+        authMode: 'shared' | 'per-user' | undefined
+      ) {
+        const model = transformSpecToActionTypeModel(sharepointSpecResponse());
+        const LazyFields = model.actionConnectorFields;
+        if (!LazyFields) {
+          throw new Error('expected actionConnectorFields');
+        }
+        render(
+          React.createElement(
+            Suspense,
+            { fallback: null },
+            React.createElement(LazyFields, {
+              readOnly: false,
+              isEdit: false,
+              authMode,
+              registerPreSubmitValidator: jest.fn(),
+            })
+          )
+        );
+        await waitFor(() =>
+          expect(jest.mocked(formGenerator.generateFormFields)).toHaveBeenCalled()
+        );
+        const passedSchema = jest.mocked(formGenerator.generateFormFields).mock.calls[0][0]
+          .schema as ConnectorZodSchema;
+        return listSecretsAuthTypeLiterals(passedSchema);
+      }
+
+      it('passes a full secrets union to generateFormFields when authMode is undefined', async () => {
+        const literals = await renderConnectorFieldsAndGetSchemaLiterals(undefined);
+        expect(literals).toContain('oauth_client_credentials');
+        expect(literals).toContain('oauth_authorization_code');
+      });
+
+      it("passes only shared auth branches to generateFormFields when authMode is 'shared'", async () => {
+        const literals = await renderConnectorFieldsAndGetSchemaLiterals('shared');
+        expect(literals).toContain('oauth_client_credentials');
+        expect(literals).not.toContain('oauth_authorization_code');
+        expect(literals).not.toContain('ears');
+      });
+
+      it("passes only per-user auth branches to generateFormFields when authMode is 'per-user'", async () => {
+        const literals = await renderConnectorFieldsAndGetSchemaLiterals('per-user');
+        expect(literals).not.toContain('oauth_client_credentials');
+        expect(literals).toContain('oauth_authorization_code');
+      });
+    });
+
     describe('getHideInUi', () => {
       const workflowsOnlySpec: ConnectorSpecResponse = {
         ...baseSpec,
         metadata: {
           ...baseSpec.metadata,
-          supportedFeatureIds: [WorkflowsConnectorFeatureId],
+          supportedFeatureIds: [WORKFLOWS_CONNECTOR_FEATURE_ID],
         },
       };
 
@@ -244,7 +355,7 @@ describe('action_type_model_utils', () => {
       };
 
       const model = transformSpecToActionTypeModel(spec);
-      const serializer = model.connectorForm?.serializer;
+      const serializer = model.connectorForm?.serializer as LooseConnectorFormTransform | undefined;
 
       const formData = {
         name: 'My Connector',
@@ -274,7 +385,7 @@ describe('action_type_model_utils', () => {
       };
 
       const model = transformSpecToActionTypeModel(spec);
-      const serializer = model.connectorForm?.serializer;
+      const serializer = model.connectorForm?.serializer as LooseConnectorFormTransform | undefined;
 
       const formData = {
         name: 'My Connector',
@@ -302,7 +413,9 @@ describe('action_type_model_utils', () => {
       };
 
       const model = transformSpecToActionTypeModel(spec);
-      const deserializer = model.connectorForm?.deserializer;
+      const deserializer = model.connectorForm?.deserializer as
+        | LooseConnectorFormTransform
+        | undefined;
 
       const apiData = {
         name: 'My Connector',
@@ -329,7 +442,9 @@ describe('action_type_model_utils', () => {
       };
 
       const model = transformSpecToActionTypeModel(spec);
-      const deserializer = model.connectorForm?.deserializer;
+      const deserializer = model.connectorForm?.deserializer as
+        | LooseConnectorFormTransform
+        | undefined;
 
       const apiData = {
         name: 'My Connector',
@@ -355,7 +470,9 @@ describe('action_type_model_utils', () => {
       };
 
       const model = transformSpecToActionTypeModel(spec);
-      const deserializer = model.connectorForm?.deserializer;
+      const deserializer = model.connectorForm?.deserializer as
+        | LooseConnectorFormTransform
+        | undefined;
 
       const apiData = {
         name: 'My Connector',
@@ -365,7 +482,6 @@ describe('action_type_model_utils', () => {
 
       const result = deserializer?.(apiData);
 
-      // Should keep the existing authType in secrets
       expect(result?.secrets).toEqual({ authType: 'bearer_token' });
     });
 
@@ -382,7 +498,9 @@ describe('action_type_model_utils', () => {
       };
 
       const model = transformSpecToActionTypeModel(spec);
-      const deserializer = model.connectorForm?.deserializer;
+      const deserializer = model.connectorForm?.deserializer as
+        | LooseConnectorFormTransform
+        | undefined;
 
       const apiData = {
         name: 'My Connector',

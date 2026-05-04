@@ -27,6 +27,8 @@ export {
   getMeta,
   serializeConnectorSpec,
   fromConnectorSpecSchema,
+  narrowSecretsSchemaForAuthMode,
+  AUTH_MODE_BY_AUTH_TYPE_ID,
   type SerializeConnectorSpecOptions,
   type ConnectorZodSchema,
 } from './src/lib';

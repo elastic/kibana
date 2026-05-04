@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
+  EuiButton,
   EuiFlyout,
   EuiFlyoutBody,
   EuiConfirmModal,
@@ -37,7 +38,7 @@ import { EditConnectorTabs } from '../../../../types';
 import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
-import { useActionTypeModel } from '../../../hooks/use_action_type_model';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -83,6 +84,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const {
     docLinks,
     http,
+    uiSettings,
     application: { capabilities },
   } = useKibana().services;
 
@@ -179,7 +181,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     actionTypeModel,
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
-  } = useActionTypeModel(actionTypeRegistry, resolvedActionType);
+    refetch: refetchConnectorSpec,
+  } = useActionTypeModel({ actionTypeRegistry, actionType: resolvedActionType, http, uiSettings });
 
   const showButtons =
     canSave &&
@@ -377,6 +380,17 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                         }
                       )}
                     </p>
+                    <EuiSpacer size="s" />
+                    <EuiButton
+                      color="danger"
+                      data-test-subj="connector-spec-load-retry"
+                      onClick={() => refetchConnectorSpec()}
+                    >
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorRetry',
+                        { defaultMessage: 'Retry' }
+                      )}
+                    </EuiButton>
                   </EuiCallOut>
                   <EuiSpacer size="m" />
                 </>
@@ -419,6 +433,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
+    refetchConnectorSpec,
   ]);
 
   const renderTestTab = useCallback(() => {

@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { ActionType } from '@kbn/actions-types';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs';
-import type { ActionType, ActionTypeModel, ActionTypeRegistryContract } from '../../types';
-import { useKibana } from '../../common/lib/kibana';
-import { fetchConnectorSpec, transformSpecToActionTypeModel } from './action_type_model_utils';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
+import {
+  fetchConnectorSpec,
+  transformSpecToActionTypeModel,
+} from '../utils/action_type_model_utils';
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
 
@@ -44,14 +50,20 @@ export interface UseActionTypeModelResult {
  * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
  * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
  *
- * Uses React Query for caching - spec data is cached indefinitely since specs don't change at runtime.
+ * Uses React Query for caching - connector specs are fresh for 5 minutes, then refetched on
+ * the next mount; window focus does not trigger refetches.
  */
-export function useActionTypeModel(
-  actionTypeRegistry: ActionTypeRegistryContract,
-  actionType: ActionType | null
-): UseActionTypeModelResult {
-  const { http, uiSettings } = useKibana().services;
-
+export function useActionTypeModel({
+  actionTypeRegistry,
+  actionType,
+  http,
+  uiSettings,
+}: {
+  actionTypeRegistry: ActionTypeRegistryContract;
+  actionType: ActionType | null;
+  http: HttpSetup;
+  uiSettings?: IUiSettingsClient;
+}): UseActionTypeModelResult {
   const registeredModel = useMemo(() => {
     if (actionType == null) {
       return null;
@@ -82,9 +94,8 @@ export function useActionTypeModel(
       return spec;
     },
     enabled: shouldFetchSpec,
-    staleTime: Infinity, // Specs don't change during a session
+    staleTime: 5 * 60 * 1000, // Spec responses align with config that only changes after restart; re-fetch after 5 min covers long-lived tabs
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
   });
 
   const specBasedModel = useMemo(() => {

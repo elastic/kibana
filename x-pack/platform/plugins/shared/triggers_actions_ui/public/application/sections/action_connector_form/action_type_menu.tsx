@@ -21,7 +21,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { shouldHideWorkflowsOnlyConnector } from '../../hooks/action_type_model_utils';
+import { shouldHideWorkflowsOnlyConnector } from '@kbn/alerts-ui-shared';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -86,7 +86,6 @@ export const ActionTypeMenu = ({
       try {
         setLoadingActionTypes(true);
         const availableActionTypes = await loadActionTypes({ http, featureId });
-        setLoadingActionTypes(false);
 
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
@@ -115,6 +114,8 @@ export const ActionTypeMenu = ({
             ),
           });
         }
+      } finally {
+        setLoadingActionTypes(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

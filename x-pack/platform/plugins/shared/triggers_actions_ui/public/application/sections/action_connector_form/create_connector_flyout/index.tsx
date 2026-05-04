@@ -36,7 +36,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import { useActionTypeModel } from '../../../hooks/use_action_type_model';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import type { ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { FlyoutHeader } from './header';
@@ -65,6 +65,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 }) => {
   const {
     application: { capabilities },
+    http,
+    uiSettings,
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
@@ -115,7 +117,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel(actionTypeRegistry, actionType);
+  } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
@@ -310,7 +312,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   isFullWidth
                   buttonSize="m"
                   color="primary"
-                  legend=""
+                  legend={i18n.translate(
+                    'xpack.triggersActionsUI.sections.createConnectorFlyout.subtypeGroupLegend',
+                    { defaultMessage: 'Connector subtype' }
+                  )}
                   options={groupActionButtons}
                   idSelected={actionType.id}
                   onChange={onChangeGroupAction}

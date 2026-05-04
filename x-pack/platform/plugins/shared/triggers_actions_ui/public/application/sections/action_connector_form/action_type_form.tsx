@@ -71,6 +71,7 @@ import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -158,6 +159,7 @@ export const ActionTypeForm = ({
     notifications,
     unifiedSearch,
     data,
+    uiSettings,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -431,10 +433,15 @@ export const ActionTypeForm = ({
     />
   );
 
-  const actionTypeRegistered = actionTypeRegistry.has(actionConnector.actionTypeId)
-    ? actionTypeRegistry.get(actionConnector.actionTypeId)
-    : undefined;
-  if (!actionTypeRegistered) return null;
+  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
+    useActionTypeModel({
+      actionTypeRegistry,
+      actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+      http,
+      uiSettings,
+    });
+
+  if (isLoadingActionTypeModel || !actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
   const showActionGroupErrorIcon = (): boolean => {

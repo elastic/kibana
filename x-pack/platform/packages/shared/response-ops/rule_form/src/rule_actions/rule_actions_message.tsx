@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
+import { ActionConnectorMode, useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
 import type { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
@@ -48,7 +48,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
   } = props;
 
   const {
-    plugins: { actionTypeRegistry },
+    plugins: { actionTypeRegistry, http },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
@@ -56,17 +56,24 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     showMustacheAutocompleteSwitch,
   } = useRuleFormState();
 
-  const actionTypeModel = actionTypeRegistry.has(action.actionTypeId)
-    ? actionTypeRegistry.get(action.actionTypeId)
-    : undefined;
+  const actionType = useMemo(
+    () => connectorTypes.find((ct) => ct.id === action.actionTypeId) ?? null,
+    [connectorTypes, action.actionTypeId]
+  );
+
+  const { actionTypeModel, isLoading, error } = useActionTypeModel({
+    actionTypeRegistry,
+    actionType,
+    http,
+  });
 
   const ParamsFieldsComponent = actionTypeModel?.actionParamsFields;
 
   const actionsParamsError = actionsParamsErrors[action.uuid!] || {};
 
   const isSystemAction = useMemo(() => {
-    return connectorTypes.some((actionType) => {
-      return actionType.id === action.actionTypeId && actionType.isSystemActionType;
+    return connectorTypes.some((ct) => {
+      return ct.id === action.actionTypeId && ct.isSystemActionType;
     });
   }, [action, connectorTypes]);
 
@@ -93,7 +100,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
       : selectedActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
   }, [isSystemAction, action, selectedRuleTypeModel, selectedActionGroup]);
 
-  if (!ParamsFieldsComponent) {
+  if (isLoading || error || !actionTypeModel || !ParamsFieldsComponent) {
     return null;
   }
 

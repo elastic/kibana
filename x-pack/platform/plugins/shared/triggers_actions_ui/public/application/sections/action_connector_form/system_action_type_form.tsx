@@ -44,6 +44,7 @@ import type { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 
 export type SystemActionTypeFormProps = {
   actionItem: RuleSystemAction;
@@ -85,7 +86,7 @@ export const SystemActionTypeForm = ({
   ruleTypeId,
   disableErrorMessages,
 }: SystemActionTypeFormProps) => {
-  const { http } = useKibana().services;
+  const { http, uiSettings } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
@@ -193,10 +194,15 @@ export const SystemActionTypeForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem, disableErrorMessages, actionConnector]);
 
-  const actionTypeRegistered = actionTypeRegistry.has(actionConnector.actionTypeId)
-    ? actionTypeRegistry.get(actionConnector.actionTypeId)
-    : undefined;
-  if (!actionTypeRegistered) return null;
+  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
+    useActionTypeModel({
+      actionTypeRegistry,
+      actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+      http,
+      uiSettings,
+    });
+
+  if (isLoadingActionTypeModel || !actionTypeRegistered) return null;
 
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));

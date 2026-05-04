@@ -9,21 +9,19 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
-import { useKibana } from '../../common/lib/kibana';
-import { useActionTypeModel } from './use_action_type_model';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import type { ActionType, ActionTypeModel } from '../../types';
 
-jest.mock('../../common/lib/kibana');
-
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
 describe('useActionTypeModel', () => {
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
   let queryClient: QueryClient;
+  let mockHttp: { get: jest.Mock };
+  let mockUiSettings: { get: jest.Mock };
 
   const mockActionTypeModel: ActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'test-connector',
@@ -51,12 +49,8 @@ describe('useActionTypeModel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock.mockReturnValue({
-      services: {
-        http: { get: jest.fn() },
-        uiSettings: { get: jest.fn().mockReturnValue(true) },
-      },
-    } as ReturnType<typeof useKibanaMock>);
+    mockHttp = { get: jest.fn() };
+    mockUiSettings = { get: jest.fn().mockReturnValue(true) };
     actionTypeRegistry = actionTypeRegistryMock.create();
     queryClient = new QueryClient({
       defaultOptions: {
@@ -77,9 +71,16 @@ describe('useActionTypeModel', () => {
   });
 
   it('returns null when actionType is null', async () => {
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, null), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: null,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     expect(result.current).toEqual({
       actionTypeModel: null,
@@ -99,14 +100,23 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
     };
 
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(mockActionTypeModel);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, stackActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: stackActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     // Should return immediately without loading
     expect(result.current.actionTypeModel).toBe(mockActionTypeModel);
@@ -115,7 +125,7 @@ describe('useActionTypeModel', () => {
     expect(result.current.isFromSpec).toBe(false);
 
     // Should not call HTTP get for registered connectors
-    expect(useKibanaMock().services.http.get).not.toHaveBeenCalled();
+    expect(mockHttp.get).not.toHaveBeenCalled();
   });
 
   it('fetches spec from API for spec-based connectors not in registry', async () => {
@@ -127,15 +137,24 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
+    mockHttp.get.mockResolvedValue(mockSpecResponse);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     // Initially loading
     expect(result.current.isLoading).toBe(true);
@@ -147,7 +166,7 @@ describe('useActionTypeModel', () => {
     });
 
     // Verify API was called
-    expect(useKibanaMock().services.http.get).toHaveBeenCalledWith(
+    expect(mockHttp.get).toHaveBeenCalledWith(
       '/internal/actions/connector_types/spec-connector/spec',
       expect.objectContaining({ signal: expect.any(AbortSignal) })
     );
@@ -168,6 +187,8 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
@@ -178,11 +199,18 @@ describe('useActionTypeModel', () => {
     const promise = new Promise<typeof mockSpecResponse>((resolve) => {
       resolvePromise = resolve;
     });
-    useKibanaMock().services.http.get = jest.fn().mockReturnValue(promise);
+    mockHttp.get.mockReturnValue(promise);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     // Should be loading
     expect(result.current.isLoading).toBe(true);
@@ -208,11 +236,13 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
+    mockHttp.get.mockResolvedValue({
       ...mockSpecResponse,
       schema: {
         type: 'object',
@@ -223,9 +253,16 @@ describe('useActionTypeModel', () => {
       },
     });
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -248,16 +285,25 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
     const fetchError = new Error('Failed to fetch spec');
-    useKibanaMock().services.http.get = jest.fn().mockRejectedValue(fetchError);
+    mockHttp.get.mockRejectedValue(fetchError);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -277,15 +323,23 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
+    mockHttp.get.mockResolvedValue(mockSpecResponse);
 
     // First render
     const { result, rerender } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, specActionType),
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
       { wrapper: createWrapper() }
     );
 
@@ -293,14 +347,14 @@ describe('useActionTypeModel', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(useKibanaMock().services.http.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
 
     // Rerender (simulate component re-render)
     rerender();
 
     // Should still have the cached data, no new fetch
     expect(result.current.actionTypeModel).not.toBeNull();
-    expect(useKibanaMock().services.http.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
   });
 
   it('does not fetch for non-spec connectors not in registry', async () => {
@@ -312,14 +366,23 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       // No source field - not a spec connector
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, unknownActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: unknownActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     // Should not be loading (no fetch triggered)
     expect(result.current.isLoading).toBe(false);
@@ -328,7 +391,7 @@ describe('useActionTypeModel', () => {
     expect(result.current.isFromSpec).toBe(false);
 
     // Should not call HTTP get for non-spec connectors
-    expect(useKibanaMock().services.http.get).not.toHaveBeenCalled();
+    expect(mockHttp.get).not.toHaveBeenCalled();
   });
 
   it('transforms spec response into ActionTypeModel with correct properties', async () => {
@@ -340,15 +403,24 @@ describe('useActionTypeModel', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
+    mockHttp.get.mockResolvedValue(mockSpecResponse);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: mockUiSettings as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -372,17 +444,12 @@ describe('useActionTypeModel', () => {
       metadata: {
         ...mockSpecResponse.metadata,
         id: 'workflows-spec-connector',
-        supportedFeatureIds: [WorkflowsConnectorFeatureId],
+        supportedFeatureIds: [WORKFLOWS_CONNECTOR_FEATURE_ID],
       },
     };
 
     const uiSettingsGet = jest.fn().mockReturnValue(false);
-    useKibanaMock.mockReturnValue({
-      services: {
-        http: { get: jest.fn().mockResolvedValue(workflowsSpecResponse) },
-        uiSettings: { get: uiSettingsGet },
-      },
-    } as ReturnType<typeof useKibanaMock>);
+    mockHttp.get.mockResolvedValue(workflowsSpecResponse);
 
     const specActionType: ActionType = {
       id: 'workflows-spec-connector',
@@ -391,15 +458,24 @@ describe('useActionTypeModel', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
-      supportedFeatureIds: [WorkflowsConnectorFeatureId],
+      supportedFeatureIds: [WORKFLOWS_CONNECTOR_FEATURE_ID],
+      isSystemActionType: false,
+      isDeprecated: false,
       source: ACTION_TYPE_SOURCES.spec,
     };
 
     actionTypeRegistry.has.mockReturnValue(false);
 
-    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionType: specActionType,
+          http: mockHttp as any,
+          uiSettings: { get: uiSettingsGet } as any,
+        }),
+      { wrapper: createWrapper() }
+    );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -407,5 +483,109 @@ describe('useActionTypeModel', () => {
 
     expect(result.current.actionTypeModel?.getHideInUi?.([])).toBe(true);
     expect(uiSettingsGet).toHaveBeenCalledWith('workflows:ui:enabled', true);
+  });
+
+  describe('stale time window', () => {
+    const specActionType: ActionType = {
+      id: 'spec-connector',
+      name: 'Spec Connector',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
+      isDeprecated: false,
+      source: ACTION_TYPE_SOURCES.spec,
+    };
+
+    const mockNow = { value: 1_000_000 };
+
+    beforeEach(() => {
+      jest.spyOn(Date, 'now').mockImplementation(() => mockNow.value);
+      actionTypeRegistry.has.mockReturnValue(false);
+      mockHttp.get.mockResolvedValue(mockSpecResponse);
+      mockNow.value = 1_000_000;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('re-fetches spec after stale time window expires', async () => {
+      const { result, unmount } = renderHook(
+        () =>
+          useActionTypeModel({
+            actionTypeRegistry,
+            actionType: specActionType,
+            http: mockHttp as any,
+            uiSettings: mockUiSettings as any,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockHttp.get).toHaveBeenCalledTimes(1);
+
+      unmount();
+      mockNow.value += 5 * 60 * 1000 + 1;
+
+      renderHook(
+        () =>
+          useActionTypeModel({
+            actionTypeRegistry,
+            actionType: specActionType,
+            http: mockHttp as any,
+            uiSettings: mockUiSettings as any,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(mockHttp.get).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('does not re-fetch spec within stale time window', async () => {
+      const { result, unmount } = renderHook(
+        () =>
+          useActionTypeModel({
+            actionTypeRegistry,
+            actionType: specActionType,
+            http: mockHttp as any,
+            uiSettings: mockUiSettings as any,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockHttp.get).toHaveBeenCalledTimes(1);
+
+      unmount();
+      mockNow.value += 5 * 60 * 1000 - 1;
+
+      const { result: resultAfterRemount } = renderHook(
+        () =>
+          useActionTypeModel({
+            actionTypeRegistry,
+            actionType: specActionType,
+            http: mockHttp as any,
+            uiSettings: mockUiSettings as any,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(resultAfterRemount.current.actionTypeModel).not.toBeNull();
+      });
+
+      expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    });
   });
 });

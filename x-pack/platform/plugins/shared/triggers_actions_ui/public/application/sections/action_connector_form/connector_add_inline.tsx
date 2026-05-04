@@ -184,7 +184,7 @@ export const AddConnectorInline = ({
                   content={
                     <FormattedMessage
                       defaultMessage="Unable to load connector"
-                      id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle'"
+                      id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle"
                     />
                   }
                 />

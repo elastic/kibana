@@ -1,26 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazy } from 'react';
-import type { ActionType } from '@kbn/actions-plugin/common';
+import { lazy, useMemo } from 'react';
+import { ACTION_TYPE_SOURCES, type ActionType } from '@kbn/actions-types';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { fromConnectorSpecSchema, getMeta, setMeta } from '@kbn/connector-specs';
+import {
+  fromConnectorSpecSchema,
+  getMeta,
+  narrowSecretsSchemaForAuthMode,
+  setMeta,
+  type ConnectorZodSchema,
+} from '@kbn/connector-specs';
 import { generateFormFields } from '@kbn/response-ops-form-generator';
-import type { ActionTypeModel } from '../../types';
+import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';
+
+const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
 export function shouldHideWorkflowsOnlyConnector(
   supportedFeatureIds: string[],
   uiSettings?: IUiSettingsClient
 ): boolean {
-  if (supportedFeatureIds.length !== 1 || supportedFeatureIds[0] !== WorkflowsConnectorFeatureId) {
+  if (
+    supportedFeatureIds.length !== 1 ||
+    supportedFeatureIds[0] !== WORKFLOWS_CONNECTOR_FEATURE_ID
+  ) {
     return false;
   }
   return !(uiSettings?.get<boolean>('workflows:ui:enabled', true) ?? true);
@@ -92,18 +103,26 @@ export function transformSpecToActionTypeModel(
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(() => {
-      const zodSchema = fromConnectorSpecSchema(spec.schema);
-      if (!zodSchema) {
+      const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
+      if (!parsedZodSchema) {
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
       }
+      const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
+      function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
+        const narrowedSchema = useMemo(
+          () => narrowSecretsSchemaForAuthMode(connectorZodSchema, authMode),
+          // connectorZodSchema is stable for the lifetime of this lazy-loaded module; it is intentionally omitted from deps.
+
+          [authMode]
+        );
+        return generateFormFields({
+          schema: narrowedSchema,
+          formConfig: { disabled: readOnly, isEdit },
+          metaFunctions: { getMeta, setMeta },
+        });
+      }
       return Promise.resolve({
-        default: (props: { readOnly?: boolean; isEdit?: boolean }) => {
-          return generateFormFields({
-            schema: zodSchema,
-            formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
-            metaFunctions: { getMeta, setMeta },
-          });
-        },
+        default: SpecConnectorFormFields,
       });
     }),
     // Spec-based connectors don't have custom action params UI
@@ -111,8 +130,12 @@ export function transformSpecToActionTypeModel(
     // Validation is handled server-side via the Zod schema
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
-      serializer: createConnectorFormSerializer(),
-      deserializer: createConnectorFormDeserializer(),
+      serializer: createConnectorFormSerializer() as unknown as NonNullable<
+        ActionTypeModel['connectorForm']
+      >['serializer'],
+      deserializer: createConnectorFormDeserializer() as unknown as NonNullable<
+        ActionTypeModel['connectorForm']
+      >['deserializer'],
     },
   };
 }

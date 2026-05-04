@@ -32,6 +32,7 @@ import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuleFormParamsErrors } from '../common/types';
@@ -105,20 +106,16 @@ export const RuleActionsConnectorsBody = ({
   const onSelectConnectorInternal = useCallback(
     async (connector: ActionConnector) => {
       const { id, actionTypeId } = connector;
-      if (!actionTypeRegistry.has(actionTypeId)) {
-        return;
-      }
       const uuid = uuidv4();
       const group = selectedRuleType.defaultActionGroupId;
-      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
       const connectorConfig = 'config' in connector ? connector.config : undefined;
+      const actionTypeModel = actionTypeRegistry.has(actionTypeId)
+        ? actionTypeRegistry.get(actionTypeId)
+        : undefined;
 
-      const params =
-        getDefaultParams({
-          group,
-          ruleType: selectedRuleType,
-          actionTypeModel,
-        }) || {};
+      const params = actionTypeModel
+        ? getDefaultParams({ group, ruleType: selectedRuleType, actionTypeModel }) || {}
+        : {};
 
       dispatch({
         type: 'addAction',
@@ -132,9 +129,10 @@ export const RuleActionsConnectorsBody = ({
         },
       });
 
-      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
-        .get(actionTypeId)
-        .validateParams(params, connectorConfig);
+      // Spec-backed connectors handle validation server-side; skip client validateParams.
+      const res: { errors: RuleFormParamsErrors } = actionTypeModel
+        ? await actionTypeModel.validateParams(params, connectorConfig)
+        : { errors: {} };
 
       dispatch({
         type: 'setActionParamsError',
@@ -158,17 +156,7 @@ export const RuleActionsConnectorsBody = ({
     return connectors.filter(({ actionTypeId }) => {
       const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
 
-      if (!actionTypeRegistry.has(actionTypeId)) {
-        return false;
-      }
-
-      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
-
       if (!actionType) {
-        return false;
-      }
-
-      if (!actionTypeModel?.actionParamsFields) {
         return false;
       }
 
@@ -178,6 +166,21 @@ export const RuleActionsConnectorsBody = ({
       );
 
       if (!actionType.enabledInConfig && !checkEnabledResult.isEnabled) {
+        return false;
+      }
+
+      // Spec-backed connectors are shown without a registry model
+      if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        return true;
+      }
+
+      if (!actionTypeRegistry.has(actionTypeId)) {
+        return false;
+      }
+
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+
+      if (!actionTypeModel?.actionParamsFields) {
         return false;
       }
 
@@ -393,15 +396,23 @@ export const RuleActionsConnectorsBody = ({
       <EuiFlexGroup direction="column">
         {filteredConnectors.map((connector) => {
           const { id, actionTypeId, name } = connector;
-          if (!actionTypeRegistry.has(actionTypeId)) {
-            return null;
-          }
-          const actionTypeModel = actionTypeRegistry.get(actionTypeId);
           const actionType = connectorTypes.find((item) => item.id === actionTypeId);
 
           if (!actionType) {
             return null;
           }
+
+          const actionTypeModel = actionTypeRegistry.has(actionTypeId)
+            ? actionTypeRegistry.get(actionTypeId)
+            : undefined;
+
+          // For non-spec connectors without a registry model, skip rendering
+          if (!actionTypeModel && actionType.source !== ACTION_TYPE_SOURCES.spec) {
+            return null;
+          }
+
+          const iconClass = actionTypeModel?.iconClass ?? 'plugs';
+          const selectMessage = actionTypeModel?.selectMessage ?? actionType.description ?? '';
 
           const checkEnabledResult = checkActionFormActionTypeEnabled(
             actionType,
@@ -410,7 +421,7 @@ export const RuleActionsConnectorsBody = ({
 
           const isSystemActionsSelected = Boolean(
             actionType.isSystemActionType &&
-              actions.find((action) => action.actionTypeId === actionTypeModel.id)
+              actions.find((action) => action.actionTypeId === actionTypeId)
           );
 
           const shouldDisableSystemAction =
@@ -429,14 +440,14 @@ export const RuleActionsConnectorsBody = ({
               icon={
                 <div style={{ marginInlineEnd: `16px` }}>
                   <Suspense fallback={<EuiLoadingSpinner />}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                    <EuiIcon size="l" type={iconClass} />
                   </Suspense>
                 </div>
               }
               title={name}
               description={
                 <>
-                  <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
+                  <EuiText size="xs">{selectMessage}</EuiText>
                   <EuiSpacer size="s" />
                   <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
                     <strong>{actionType?.name}</strong>

@@ -39,7 +39,7 @@ import type {
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
-import { useActionTypeModel } from '../../hooks/use_action_type_model';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import type { ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorForm } from './connector_form';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -61,6 +61,7 @@ const ConnectorAddModal = ({
   const {
     application: { capabilities },
     http,
+    uiSettings,
     notifications: { toasts },
   } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType>(tempActionType);
@@ -83,7 +84,7 @@ const ConnectorAddModal = ({
     actionTypeModel,
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
-  } = useActionTypeModel(actionTypeRegistry, actionType);
+  } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
     ? (actionTypeModel?.subtype ?? [])
@@ -233,7 +234,6 @@ const ConnectorAddModal = ({
       try {
         setLoadingActionTypes(true);
         const availableActionTypes = await loadActionTypes({ http });
-        setLoadingActionTypes(false);
 
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
@@ -249,6 +249,8 @@ const ConnectorAddModal = ({
             ),
           });
         }
+      } finally {
+        setLoadingActionTypes(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -308,7 +310,7 @@ const ConnectorAddModal = ({
             <SectionLoading>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.connectorAddModal.loadingConnectorTypesDescription"
-                defaultMessage="Loading connector types…"
+                defaultMessage="Loading connector…"
               />
             </SectionLoading>
           ) : (
@@ -341,7 +343,10 @@ const ConnectorAddModal = ({
                         isFullWidth
                         buttonSize="m"
                         color="primary"
-                        legend=""
+                        legend={i18n.translate(
+                          'xpack.triggersActionsUI.sections.connectorAddModal.subtypeGroupLegend',
+                          { defaultMessage: 'Connector subtype' }
+                        )}
                         options={groupActionButtons}
                         idSelected={actionType.id}
                         onChange={onChangeGroupAction}

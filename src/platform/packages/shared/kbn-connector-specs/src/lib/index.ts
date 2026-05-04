@@ -16,3 +16,7 @@ export {
   type SerializeConnectorSpecOptions,
 } from './serialize_connector_spec';
 export { fromConnectorSpecSchema, type ConnectorZodSchema } from './deserialize_connector_spec';
+export {
+  narrowSecretsSchemaForAuthMode,
+  AUTH_MODE_BY_AUTH_TYPE_ID,
+} from './narrow_secrets_schema_for_auth_mode';

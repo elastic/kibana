@@ -6,4 +6,4 @@
  */
 
 export { useSubAction } from './use_sub_action';
-export { useActionTypeModel, type UseActionTypeModelResult } from './use_action_type_model';
+export { useActionTypeModel, type UseActionTypeModelResult } from '@kbn/alerts-ui-shared';
