@@ -2,7 +2,62 @@
   "id": "@kbn/content-list-assembly",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.isCustomSkeletonNode",
+        "type": "Function",
+        "tags": [],
+        "label": "isCustomSkeletonNode",
+        "description": [
+          "\nType guard for the `{ node }` escape-hatch variant."
+        ],
+        "signature": [
+          "(output: ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.SkeletonOutput",
+            "text": "SkeletonOutput"
+          },
+          ") => output is { node: React.ReactNode; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/skeleton.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.isCustomSkeletonNode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.SkeletonOutput",
+                "text": "SkeletonOutput"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/skeleton.ts",
+            "lineNumber": 62,
+            "columnNumber": 38,
+            "deprecated": false,
+            "docsReferencedTypeName": "SkeletonOutput",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-list-assembly",
@@ -34,7 +89,7 @@
           "<TName>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-        "lineNumber": 167,
+        "lineNumber": 198,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -52,7 +107,7 @@
               "TName"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 177,
+            "lineNumber": 208,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -82,7 +137,7 @@
               "<TPresetMap, TOutput, TContext>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 180,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -97,7 +152,7 @@
                   "- The part definition."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 208,
+                "lineNumber": 239,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -112,7 +167,7 @@
                       "- Part name (e.g., `'column'`, `'filter'`)."
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 209,
+                    "lineNumber": 240,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -153,7 +208,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 212,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -171,7 +226,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 235,
+                "lineNumber": 266,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "ReactNode",
@@ -188,7 +243,7 @@
                   "- Optional parsing options."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 236,
+                "lineNumber": 267,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -206,7 +261,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 236,
+                    "lineNumber": 267,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -409,7 +464,7 @@
           "<TPresetMap, TOutput, TContext>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -431,13 +486,29 @@
                 "section": "def-public.resolve",
                 "text": "resolve"
               },
+              ".\n\nOptionally provide a `skeleton` callback that describes the shape of a\nloading placeholder for this preset (used by renderers to draw a\ncolumn-aware skeleton during initial load). When omitted, the renderer\nfalls back to its own inference rules. See ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.resolveSkeleton",
+                "text": "resolveSkeleton"
+              },
               ".\n"
             ],
             "signature": [
-              "<K extends keyof TPresetMap & string>(definition: { name: K; resolve?: ((attributes: TPresetMap[K], context: TContext) => TOutput | undefined) | undefined; }) => React.FC<TPresetMap[K]>"
+              "<K extends keyof TPresetMap & string>(definition: { name: K; resolve?: ((attributes: TPresetMap[K], context: TContext) => TOutput | undefined) | undefined; skeleton?: ((attributes: TPresetMap[K], context: TContext) => ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.SkeletonOutput",
+                "text": "SkeletonOutput"
+              },
+              " | undefined) | undefined; }) => React.FC<TPresetMap[K]>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -452,7 +523,7 @@
                   "- The preset definition."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 97,
+                "lineNumber": 105,
                 "columnNumber": 67,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -470,7 +541,7 @@
                       "K"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 98,
+                    "lineNumber": 106,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -488,7 +559,7 @@
                       "((attributes: TPresetMap[K], context: TContext) => TOutput | undefined) | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 99,
+                    "lineNumber": 107,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -504,7 +575,7 @@
                           "TPresetMap[K]"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 99,
+                        "lineNumber": 107,
                         "columnNumber": 16,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -521,8 +592,72 @@
                           "TContext"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 99,
+                        "lineNumber": 107,
                         "columnNumber": 43,
+                        "deprecated": false,
+                        "docsReferencedTypeName": "TContext",
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.PartFactory.createPreset.$1.skeleton",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "skeleton",
+                    "description": [
+                      "- Optional callback returning a skeleton shape"
+                    ],
+                    "signature": [
+                      "((attributes: TPresetMap[K], context: TContext) => ",
+                      {
+                        "pluginId": "@kbn/content-list-assembly",
+                        "scope": "public",
+                        "docId": "kibKbnContentListAssemblyPluginApi",
+                        "section": "def-public.SkeletonOutput",
+                        "text": "SkeletonOutput"
+                      },
+                      " | undefined) | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 108,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createPreset.$1.skeleton.$1",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "attributes",
+                        "description": [],
+                        "signature": [
+                          "TPresetMap[K]"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 108,
+                        "columnNumber": 17,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      },
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createPreset.$1.skeleton.$2",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "context",
+                        "description": [],
+                        "signature": [
+                          "TContext"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 108,
+                        "columnNumber": 44,
                         "deprecated": false,
                         "docsReferencedTypeName": "TContext",
                         "trackAdoption": false,
@@ -559,7 +694,7 @@
               ", context: TContext) => TOutput | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 102,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -583,7 +718,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 114,
+                "lineNumber": 123,
                 "columnNumber": 13,
                 "deprecated": false,
                 "docsReferencedTypeName": "ParsedPart",
@@ -603,7 +738,7 @@
                   "TContext"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 114,
+                "lineNumber": 123,
                 "columnNumber": 31,
                 "deprecated": false,
                 "docsReferencedTypeName": "TContext",
@@ -613,6 +748,91 @@
             ],
             "returnComment": [
               "The resolved output, or `undefined`."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.PartFactory.resolveSkeleton",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveSkeleton",
+            "description": [
+              "\nResolve a parsed part into its skeleton shape descriptor by dispatching\nto the `skeleton` callback registered via `createPreset` or\n`createComponent`.\n\nReturns `undefined` when no skeleton resolver is registered for this\npreset or custom component — renderers should treat that as \"fall back\nto inference\" rather than an error.\n"
+            ],
+            "signature": [
+              "(part: ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.ParsedPart",
+                "text": "ParsedPart"
+              },
+              ", context: TContext) => ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.SkeletonOutput",
+                "text": "SkeletonOutput"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.resolveSkeleton.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "part",
+                "description": [
+                  "- A parsed part from `parseChildren`."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-assembly",
+                    "scope": "public",
+                    "docId": "kibKbnContentListAssemblyPluginApi",
+                    "section": "def-public.ParsedPart",
+                    "text": "ParsedPart"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 138,
+                "columnNumber": 21,
+                "deprecated": false,
+                "docsReferencedTypeName": "ParsedPart",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.resolveSkeleton.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [
+                  "- Context passed through to the skeleton callback."
+                ],
+                "signature": [
+                  "TContext"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 138,
+                "columnNumber": 39,
+                "deprecated": false,
+                "docsReferencedTypeName": "TContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The skeleton shape descriptor, or `undefined`."
             ]
           },
           {
@@ -636,7 +856,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 116,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -654,7 +874,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 126,
+                "lineNumber": 150,
                 "columnNumber": 19,
                 "deprecated": false,
                 "docsReferencedTypeName": "ReactNode",
@@ -675,13 +895,29 @@
             ],
             "label": "createComponent",
             "description": [
-              "\nCreate a component without a preset (e.g., custom columns).\n\nUse this for parts that get their identity from `props.id` rather\nthan a static preset name. Optionally provide a `resolve` callback\nto handle custom parts in `part.resolve()`, eliminating the need\nfor manual casts in consumer code.\n"
+              "\nCreate a component without a preset (e.g., custom columns).\n\nUse this for parts that get their identity from `props.id` rather\nthan a static preset name. Optionally provide a `resolve` callback\nto handle custom parts in `part.resolve()`, eliminating the need\nfor manual casts in consumer code.\n\nOptionally provide a `skeleton` callback — the fallback skeleton\nresolver invoked by ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.resolveSkeleton",
+                "text": "resolveSkeleton"
+              },
+              " when no preset skeleton\nis registered.\n"
             ],
             "signature": [
-              "<P>(options?: { resolve?: ((attributes: P, context: TContext) => TOutput | undefined) | undefined; } | undefined) => React.FC<P>"
+              "<P>(options?: { resolve?: ((attributes: P, context: TContext) => TOutput | undefined) | undefined; skeleton?: ((attributes: P, context: TContext) => ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.SkeletonOutput",
+                "text": "SkeletonOutput"
+              },
+              " | undefined) | undefined; } | undefined) => React.FC<P>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 128,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -696,7 +932,7 @@
                   "- Optional configuration."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 142,
+                "lineNumber": 172,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -714,7 +950,7 @@
                       "((attributes: P, context: TContext) => TOutput | undefined) | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 143,
+                    "lineNumber": 173,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -730,7 +966,7 @@
                           "P"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 143,
+                        "lineNumber": 173,
                         "columnNumber": 16,
                         "deprecated": false,
                         "docsReferencedTypeName": "P",
@@ -748,8 +984,73 @@
                           "TContext"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 143,
+                        "lineNumber": 173,
                         "columnNumber": 31,
+                        "deprecated": false,
+                        "docsReferencedTypeName": "TContext",
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.PartFactory.createComponent.$1.skeleton",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "skeleton",
+                    "description": [
+                      "- Fallback skeleton resolver for parts without"
+                    ],
+                    "signature": [
+                      "((attributes: P, context: TContext) => ",
+                      {
+                        "pluginId": "@kbn/content-list-assembly",
+                        "scope": "public",
+                        "docId": "kibKbnContentListAssemblyPluginApi",
+                        "section": "def-public.SkeletonOutput",
+                        "text": "SkeletonOutput"
+                      },
+                      " | undefined) | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 174,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createComponent.$1.skeleton.$1",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "attributes",
+                        "description": [],
+                        "signature": [
+                          "P"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 174,
+                        "columnNumber": 17,
+                        "deprecated": false,
+                        "docsReferencedTypeName": "P",
+                        "trackAdoption": false,
+                        "isRequired": true
+                      },
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createComponent.$1.skeleton.$2",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "context",
+                        "description": [],
+                        "signature": [
+                          "TContext"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 174,
+                        "columnNumber": 32,
                         "deprecated": false,
                         "docsReferencedTypeName": "TContext",
                         "trackAdoption": false,
@@ -780,7 +1081,7 @@
               "<C extends (...args: any[]) => null>(component: C, options?: { preset?: (keyof TPresetMap & string) | undefined; } | undefined) => C"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 146,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -798,7 +1099,7 @@
                   "C"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 158,
+                "lineNumber": 189,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "C",
@@ -815,7 +1116,7 @@
                   "- Optional preset name."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 159,
+                "lineNumber": 190,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -831,7 +1132,7 @@
                       "(keyof TPresetMap & string) | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 159,
+                    "lineNumber": 190,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -940,7 +1241,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-        "lineNumber": 278,
+        "lineNumber": 309,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -974,6 +1275,84 @@
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
         "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.SkeletonDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "SkeletonDescriptor",
+        "description": [],
+        "signature": [
+          "{ shape: \"text\"; width?: string | number | undefined; lines?: ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.SkeletonTextLines",
+            "text": "SkeletonTextLines"
+          },
+          " | undefined; } | { shape: \"rectangle\"; width?: string | number | undefined; height?: string | number | undefined; } | { shape: \"circle\"; size?: string | number | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/skeleton.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.SkeletonOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "SkeletonOutput",
+        "description": [
+          "\nResult returned by a preset's `skeleton` callback.\n\nEither a ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.SkeletonDescriptor",
+            "text": "SkeletonDescriptor"
+          },
+          " (the common case — renderer picks the\nEUI primitive) or `{ node }` as an escape hatch for exotic shapes that\ncan't be expressed as a single primitive (e.g. a row of icon buttons)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.SkeletonDescriptor",
+            "text": "SkeletonDescriptor"
+          },
+          " | { node: React.ReactNode; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/skeleton.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.SkeletonTextLines",
+        "type": "Type",
+        "tags": [],
+        "label": "SkeletonTextLines",
+        "description": [
+          "\nDeclarative shape hint for a skeleton cell, selected from the common\nloading-state primitives offered by EUI\n(`EuiSkeletonText` / `EuiSkeletonRectangle` / `EuiSkeletonCircle`).\n\nRenderers map the discriminator (`shape`) to the matching EUI component.\n\nPermitted `lines` values for a text-shape skeleton. Mirrors EUI's\n`EuiSkeletonText`'s `LineRange` so descriptors compose with the\nrenderer without a cast."
+        ],
+        "signature": [
+          "2 | 1 | 3 | 10 | 9 | 8 | 7 | 6 | 5 | 4"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/skeleton.ts",
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

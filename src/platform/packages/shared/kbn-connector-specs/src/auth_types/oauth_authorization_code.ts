@@ -11,7 +11,10 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
+import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
+
+export const OAUTH_AUTHORIZATION_CODE_AUTH_ID = 'oauth_authorization_code';
 
 const authSchema = z
   .object({
@@ -96,7 +99,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * The _start_oauth_flow and _oauth_callback routes are generic and work with any provider.
  */
 export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
-  id: 'oauth_authorization_code',
+  id: OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   schema: authSchema,
   authMode: 'per-user',
   configure: async (
@@ -120,6 +123,9 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
         tokenType: secret.tokenType,
       });
     } catch (error) {
+      if (isConnectorAuthorizationError(error)) {
+        throw error;
+      }
       throw new Error(
         `Unable to retrieve/refresh the access token. User may need to re-authorize: ${error.message}`
       );
