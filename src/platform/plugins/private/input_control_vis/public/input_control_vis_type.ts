@@ -29,7 +29,6 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Input controls',
     }),
     icon: 'controls',
-    group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
