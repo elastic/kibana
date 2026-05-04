@@ -77,7 +77,7 @@ export const AppMenuComponent = ({
   const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
 
   const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId(openPopoverId === id ? null : id);
+    setOpenPopoverId((prev) => (prev === id ? null : id));
   };
 
   const handleOnPopoverClose = () => {
