@@ -14,6 +14,9 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
+    // telemtry takes inventory of saved objects
+    // make sure there are no unexpected saved objects before running test
+    await kbnClient.savedObjects.clean({ types: ['dashboard', 'index-pattern', 'map'] });
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
