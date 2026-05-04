@@ -104,6 +104,11 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             convertSOQueriesToPack(attributes.queries),
             ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
           ),
+          ...(attributes.schedule_type != null ? { schedule_type: attributes.schedule_type } : {}),
+          ...(attributes.interval != null ? { interval: attributes.interval } : {}),
+          ...(attributes.rrule_schedule != null
+            ? { rrule_schedule: attributes.rrule_schedule }
+            : {}),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,

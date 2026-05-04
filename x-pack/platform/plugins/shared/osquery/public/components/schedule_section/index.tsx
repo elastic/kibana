@@ -22,9 +22,12 @@ interface ScheduleSectionProps {
 }
 
 const ScheduleSectionComponent: React.FC<ScheduleSectionProps> = ({ isDisabled = false }) => {
+  // `defaultValue` is intentionally omitted: passing one to `useWatch` would
+  // shadow the form's `defaultValues.schedule_type` on the first render
+  // (RHF 7.x quirk), making the panel render IntervalField even when the
+  // pack was loaded with `schedule_type: 'rrule'`.
   const scheduleType = useWatch<{ schedule_type: ScheduleType }, 'schedule_type'>({
     name: 'schedule_type',
-    defaultValue: 'interval',
   });
 
   const intervalEuiFieldProps = useMemo(() => ({ append: 's', isDisabled }), [isDisabled]);
