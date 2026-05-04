@@ -14,7 +14,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
 import type { ParsedMetricItem } from '../../../types';
-import { BadgeGroup, MetricTypeBadge } from '../components';
+import { BadgeGroup, MetricTypeBadge, StrongTitle } from '../components';
 import { METRIC_SOURCE_KIND, type MetricSourceKind } from '../hooks/use_metric_source_kind';
 
 const SOURCE_LABEL: Record<MetricSourceKind, string> = {
@@ -51,17 +51,11 @@ export const OverviewTabMetadata = ({
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * 11.25;
 
-    const title = (text: string) => (
-      <EuiText size="xs">
-        <strong>{text}</strong>
-      </EuiText>
-    );
-
     const sourceRow =
       metadataSourceKind && metricItem.dataStream
         ? [
             {
-              title: title(SOURCE_LABEL[metadataSourceKind]),
+              title: <StrongTitle text={SOURCE_LABEL[metadataSourceKind]} />,
               description: (
                 <EuiText
                   color="primary"
@@ -82,10 +76,12 @@ export const OverviewTabMetadata = ({
     const rowsInner = [
       ...sourceRow,
       {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-            defaultMessage: 'Field type',
-          })
+        title: (
+          <StrongTitle
+            text={i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+              defaultMessage: 'Field type',
+            })}
+          />
         ),
         description: (
           <BadgeGroup
@@ -98,10 +94,12 @@ export const OverviewTabMetadata = ({
         ),
       },
       {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-            defaultMessage: 'Metric unit',
-          })
+        title: (
+          <StrongTitle
+            text={i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+              defaultMessage: 'Metric unit',
+            })}
+          />
         ),
         description: (
           <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
@@ -115,10 +113,12 @@ export const OverviewTabMetadata = ({
         ),
       },
       {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-            defaultMessage: 'Metric type',
-          })
+        title: (
+          <StrongTitle
+            text={i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+              defaultMessage: 'Metric type',
+            })}
+          />
         ),
         description: (
           <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
