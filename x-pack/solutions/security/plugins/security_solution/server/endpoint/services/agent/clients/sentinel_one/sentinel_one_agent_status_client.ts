@@ -14,7 +14,6 @@ import type { RawSentinelOneInfo } from './types';
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
-import { AgentStatusClientError } from '../errors';
 
 const SENTINEL_ONE_AGENT_INDEX_PATTERN = `logs-sentinel_one.agent-*`;
 
@@ -126,13 +125,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
 
       return response;
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch SentinelOne agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }
