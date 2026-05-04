@@ -145,7 +145,7 @@ export function OverrideSwitch({
           position="right"
         >
           <span tabIndex={0}>
-            {rowLabel} <EuiIcon type="question" color="subdued" />
+            {rowLabel} <EuiIcon type="question" color="subdued" aria-hidden={true} />
           </span>
         </EuiToolTip>
       }
@@ -585,7 +585,7 @@ export function PanelMenu({
               position="right"
             >
               <span tabIndex={0}>
-                Show custom action <EuiIcon type="question" color="subdued" />
+                Show custom action <EuiIcon type="question" color="subdued" aria-hidden={true} />
               </span>
             </EuiToolTip>
           }
