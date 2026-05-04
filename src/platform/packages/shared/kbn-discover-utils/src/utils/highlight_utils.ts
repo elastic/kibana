@@ -21,18 +21,14 @@ const ES_HIGHLIGHT_PRE_TAG = '@kibana-highlighted-field@';
 const ES_HIGHLIGHT_POST_TAG = '@/kibana-highlighted-field@';
 
 const ARRAY_HIGHLIGHT_PRE_TAG = '<span class="ffArray__highlight">';
-const ARRAY_HIGHLIGHT_POST_TAG = '</span>';
 
-// Matches all candidate tags in one pass; state tracking below decides which to preserve.
-const TAGS_REGEX = new RegExp(
-  [
-    HTML_HIGHLIGHT_PRE_TAG,
-    HTML_HIGHLIGHT_POST_TAG,
-    ARRAY_HIGHLIGHT_PRE_TAG,
-    ARRAY_HIGHLIGHT_POST_TAG,
-  ]
-    .map((tag) => tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .join('|'),
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Matches complete known tag pairs. Groups 1-3 capture mark open/content/close;
+// group 0 is used as-is for array spans (content is only [ ] , — no HTML-special chars).
+const PRESERVED_TAGS_PATTERN = new RegExp(
+  `(${esc(HTML_HIGHLIGHT_PRE_TAG)})([\\s\\S]*?)(${esc(HTML_HIGHLIGHT_POST_TAG)})` +
+    `|${esc(ARRAY_HIGHLIGHT_PRE_TAG)}[^<]*${esc('</span>')}`,
   'g'
 );
 
@@ -40,38 +36,21 @@ const TAGS_REGEX = new RegExp(
  * Escapes HTML in a string while preserving field-format highlight <mark> tags
  * and array-formatting <span class="ffArray__highlight"> tags.
  * Used for values already processed by formatFieldValue / getHighlightHtml (e.g. resource badges).
- *
- * Closing tags are only preserved when a matching opening tag was already seen, so orphaned
- * </mark> or </span> in arbitrary input are still escaped.
  */
 export function escapeAndPreserveHighlightTags(value: string): string {
   const parts: string[] = [];
   let lastIndex = 0;
-  let inSearchHighlight = false;
-  let inArrayHighlight = false;
 
-  for (const match of value.matchAll(TAGS_REGEX)) {
-    const tag = match[0];
-    const before = value.slice(lastIndex, match.index);
-
-    if (tag === HTML_HIGHLIGHT_PRE_TAG) {
-      parts.push(escape(before), tag);
-      inSearchHighlight = true;
-    } else if (tag === HTML_HIGHLIGHT_POST_TAG && inSearchHighlight) {
-      parts.push(escape(before), tag);
-      inSearchHighlight = false;
-    } else if (tag === ARRAY_HIGHLIGHT_PRE_TAG) {
-      parts.push(escape(before), tag);
-      inArrayHighlight = true;
-    } else if (tag === ARRAY_HIGHLIGHT_POST_TAG && inArrayHighlight) {
-      parts.push(escape(before), tag);
-      inArrayHighlight = false;
+  for (const match of value.matchAll(PRESERVED_TAGS_PATTERN)) {
+    parts.push(escape(value.slice(lastIndex, match.index!)));
+    if (match[1]) {
+      // mark tag: preserve open/close, escape inner content
+      parts.push(match[1], escape(match[2]), match[3]);
     } else {
-      // Orphaned closing tag — escape it along with the preceding text
-      parts.push(escape(before + tag));
+      // array span: preserve as-is
+      parts.push(match[0]);
     }
-
-    lastIndex = match.index! + tag.length;
+    lastIndex = match.index! + match[0].length;
   }
 
   parts.push(escape(value.slice(lastIndex)));
