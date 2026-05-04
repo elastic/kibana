@@ -16,7 +16,7 @@ interface DatasetSettings {
   format?: 'parquet' | 'csv' | 'ndjson' | 'orc';
   errorMode?: 'fail_fast' | 'skip_row' | 'null_field';
   maxErrors?: number;
-  maxErrorRation?: number; // between 0 and 1
+  maxErrorRatio?: number; // between 0 and 1
   partitionDetection?: 'auto' | 'hive' | 'template' | 'none';
   partitionPath?: string;
   hivePartitioning?: boolean;
