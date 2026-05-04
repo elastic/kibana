@@ -174,6 +174,7 @@ export function MetricAppearanceSettings({
               value={state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode}
               options={fontSizeOptions}
               onChange={(id) => {
+                setIsCustomStyle(false);
                 setState({ ...state, valueFontMode: id });
               }}
               dataTestSubj="lens-metric-appearance-primary-metric-font-size-btn"
@@ -219,6 +220,7 @@ export function MetricAppearanceSettings({
               value={state.secondaryAlign ?? LENS_METRIC_STATE_DEFAULTS.secondaryAlign}
               options={alignmentOptions}
               onChange={(id) => {
+                setIsCustomStyle(false);
                 setState({ ...state, secondaryAlign: id });
               }}
               isDisabled={disabledStates.secondaryAlign}
@@ -258,6 +260,7 @@ export function MetricAppearanceSettings({
               value={state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign}
               options={iconPositionOptions}
               onChange={(id) => {
+                setIsCustomStyle(false);
                 setState({ ...state, iconAlign: id });
               }}
               isDisabled={disabledStates.iconAlign}
