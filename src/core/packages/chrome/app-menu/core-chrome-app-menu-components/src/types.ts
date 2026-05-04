@@ -134,7 +134,7 @@ type AppMenuLinkItem = AppMenuItemBase & {
   /**
    * The HTML target attribute for the item. Only used if `items` is not provided.
    */
-  target: string;
+  target?: string;
   /**
    * Function to run when the item is clicked. Only used if `items` is not provided.
    */
