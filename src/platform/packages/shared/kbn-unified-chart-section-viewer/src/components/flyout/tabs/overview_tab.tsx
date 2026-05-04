@@ -56,7 +56,17 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     localMetricSourceName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamFlyout
       ? renderStreamFlyout({ streamName: localMetricSourceName })
       : null;
-  const metadataSourceKind = streamSection ? undefined : sourceKind;
+
+  const staticSource = useMemo(() => {
+    if (streamSection || !metricItem.dataStream) {
+      return undefined;
+    }
+
+    return {
+      name: metricItem.dataStream,
+      kind: sourceKind,
+    };
+  }, [metricItem.dataStream, sourceKind, streamSection]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -102,7 +112,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
 
       {streamSection}
 
-      <OverviewTabMetadata metricItem={metricItem} metadataSourceKind={metadataSourceKind} />
+      <OverviewTabMetadata metricItem={metricItem} staticSource={staticSource} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

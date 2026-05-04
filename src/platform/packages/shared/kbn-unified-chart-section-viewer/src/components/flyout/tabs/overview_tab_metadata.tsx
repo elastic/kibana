@@ -32,46 +32,47 @@ const SOURCE_TEST_SUBJ: Record<MetricSourceKind, string> = {
   [METRIC_SOURCE_KIND.DATA_STREAM]: 'metricsExperienceFlyoutOverviewTabDataStreamLabel',
 };
 
+interface StaticSource {
+  name: string;
+  kind: MetricSourceKind;
+}
+
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
   /**
-   * When set, prepends a `<Label>: <metricItem.dataStream>` row above the
-   * standard metadata. The label is derived from the kind (Index or Data
-   * stream). The row is only rendered if `metricItem.dataStream` is also set.
+   * When set, prepends a static `<Label>: <name>` row above the standard
+   * metadata. The label is derived from `kind` (Index or Data stream). Used
+   * when the source is not rendered through the streams flyout.
    */
-  metadataSourceKind?: MetricSourceKind;
+  staticSource?: StaticSource;
 }
 
-export const OverviewTabMetadata = ({
-  metricItem,
-  metadataSourceKind,
-}: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem, staticSource }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * 11.25;
 
-    const sourceRow =
-      metadataSourceKind && metricItem.dataStream
-        ? [
-            {
-              title: <StrongTitle text={SOURCE_LABEL[metadataSourceKind]} />,
-              description: (
-                <EuiText
-                  color="primary"
-                  size="s"
-                  css={css`
-                    word-break: break-word;
-                    overflow-wrap: anywhere;
-                  `}
-                  data-test-subj={SOURCE_TEST_SUBJ[metadataSourceKind]}
-                >
-                  {metricItem.dataStream}
-                </EuiText>
-              ),
-            },
-          ]
-        : [];
+    const sourceRow = staticSource
+      ? [
+          {
+            title: <StrongTitle text={SOURCE_LABEL[staticSource.kind]} />,
+            description: (
+              <EuiText
+                color="primary"
+                size="s"
+                css={css`
+                  word-break: break-word;
+                  overflow-wrap: anywhere;
+                `}
+                data-test-subj={SOURCE_TEST_SUBJ[staticSource.kind]}
+              >
+                {staticSource.name}
+              </EuiText>
+            ),
+          },
+        ]
+      : [];
 
     const rowsInner = [
       ...sourceRow,
@@ -136,8 +137,7 @@ export const OverviewTabMetadata = ({
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
   }, [
     euiTheme.base,
-    metadataSourceKind,
-    metricItem.dataStream,
+    staticSource,
     metricItem.fieldTypes,
     metricItem.metricTypes,
     metricItem.units,

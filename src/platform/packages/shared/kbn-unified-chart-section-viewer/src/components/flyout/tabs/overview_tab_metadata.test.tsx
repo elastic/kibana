@@ -44,7 +44,7 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('basic rendering', () => {
-    it('renders the description list and hides the source row when no metadataSourceKind is provided', () => {
+    it('renders the description list and hides the source row when no staticSource is provided', () => {
       const metricItem = createMockMetric({
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -66,11 +66,11 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('source row', () => {
-    it('renders the Index row when metadataSourceKind is index', () => {
+    it('renders the static Index row when staticSource is an index', () => {
       const { getByTestId, getByText } = render(
         <OverviewTabMetadata
-          metricItem={createMockMetric({ dataStream: 'my-source' })}
-          metadataSourceKind={METRIC_SOURCE_KIND.INDEX}
+          metricItem={createMockMetric()}
+          staticSource={{ name: 'my-source', kind: METRIC_SOURCE_KIND.INDEX }}
         />
       );
 
@@ -80,11 +80,11 @@ describe('OverviewTabMetadata', () => {
       );
     });
 
-    it('renders the Data stream row when metadataSourceKind is data_stream', () => {
+    it('renders the static Data stream row when staticSource is a data stream', () => {
       const { getByTestId, getByText } = render(
         <OverviewTabMetadata
-          metricItem={createMockMetric({ dataStream: 'logs-foo-default' })}
-          metadataSourceKind={METRIC_SOURCE_KIND.DATA_STREAM}
+          metricItem={createMockMetric()}
+          staticSource={{ name: 'logs-foo-default', kind: METRIC_SOURCE_KIND.DATA_STREAM }}
         />
       );
 
@@ -94,16 +94,17 @@ describe('OverviewTabMetadata', () => {
       );
     });
 
-    it('hides the source row when metricItem.dataStream is empty even if metadataSourceKind is set', () => {
+    it('omits the static source row when staticSource is not provided', () => {
       const { queryByTestId, queryByText } = render(
-        <OverviewTabMetadata
-          metricItem={createMockMetric({ dataStream: '' })}
-          metadataSourceKind={METRIC_SOURCE_KIND.INDEX}
-        />
+        <OverviewTabMetadata metricItem={createMockMetric({ dataStream: 'my-source' })} />
       );
 
       expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(
+        queryByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')
+      ).not.toBeInTheDocument();
       expect(queryByText('Index')).not.toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
     });
   });
 
