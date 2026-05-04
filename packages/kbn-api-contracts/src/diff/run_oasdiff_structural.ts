@@ -14,7 +14,11 @@ import { execFileSync } from 'child_process';
 const DIFF_TIMEOUT = 240_000;
 const MAX_BUFFER = 50 * 1024 * 1024;
 
-const validateFilePath = (filePath: string, label: string): void => {
+interface OasdiffStructuralOptions {
+  matchPath?: string;
+}
+
+const assertAbsoluteExistingPath = (filePath: string, label: string): void => {
   if (!path.isAbsolute(filePath)) {
     throw new Error(`${label} must be an absolute path, got: ${filePath}`);
   }
@@ -23,31 +27,26 @@ const validateFilePath = (filePath: string, label: string): void => {
   }
 };
 
-interface OasdiffStructuralOptions {
-  matchPath?: string;
-}
-
-export const runOasdiffStructural = (
+// Note: we intentionally do NOT pass --flatten-allof. On the full Kibana
+// spec, oasdiff 1.15.1 stack-overflows during allOf flattening. Instead, the
+// detector walks `allOf.modified[i].diff` branches itself, alongside
+// `oneOf` and `anyOf`.
+const buildArgs = (
   basePath: string,
   currentPath: string,
   options?: OasdiffStructuralOptions
-): unknown => {
-  validateFilePath(basePath, 'basePath');
-  validateFilePath(currentPath, 'currentPath');
+): string[] => [
+  'diff',
+  basePath,
+  currentPath,
+  '--format',
+  'json',
+  ...(options?.matchPath ? ['--match-path', options.matchPath] : []),
+];
 
-  const bin = process.env.OASDIFF_BIN ?? 'oasdiff';
-  // Note: we intentionally do NOT pass --flatten-allof. On the full Kibana
-  // spec, oasdiff 1.15.1 stack-overflows during allOf flattening. Instead, the
-  // detector walks `allOf.modified[i].diff` branches itself, alongside
-  // `oneOf` and `anyOf`.
-  const args = ['diff', basePath, currentPath, '--format', 'json'];
-  if (options?.matchPath) {
-    args.push('--match-path', options.matchPath);
-  }
-
-  let output: string;
+const execOasdiff = (bin: string, args: string[]): string => {
   try {
-    output = execFileSync(bin, args, {
+    return execFileSync(bin, args, {
       encoding: 'utf-8',
       maxBuffer: MAX_BUFFER,
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -55,15 +54,21 @@ export const runOasdiffStructural = (
     });
   } catch (error: unknown) {
     if ((error as { status?: number }).status === 1) {
-      output = (error as { stdout?: string }).stdout ?? '';
-    } else {
-      throw error;
+      return (error as { stdout?: string }).stdout ?? '';
     }
+    throw error;
   }
+};
 
-  const trimmed = output.trim();
-  if (!trimmed) {
-    return {};
-  }
-  return JSON.parse(trimmed);
+export const runOasdiffStructural = (
+  basePath: string,
+  currentPath: string,
+  options?: OasdiffStructuralOptions
+): unknown => {
+  assertAbsoluteExistingPath(basePath, 'basePath');
+  assertAbsoluteExistingPath(currentPath, 'currentPath');
+
+  const bin = process.env.OASDIFF_BIN ?? 'oasdiff';
+  const output = execOasdiff(bin, buildArgs(basePath, currentPath, options)).trim();
+  return output ? JSON.parse(output) : {};
 };
