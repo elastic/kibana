@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
@@ -85,21 +85,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
   }, [initialConnector, allActionTypes, actionType]);
 
-  const emptyConnector = {
-    actionTypeId: actionType?.id ?? '',
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-    isMissingSecrets: false,
-    isConnectorTypeDeprecated: false,
-  };
-
-  const defaultConnector = initialConnector
-    ? {
-        ...emptyConnector,
-        ...initialConnector,
-      }
-    : emptyConnector;
+  const defaultConnector = useMemo(() => {
+    const empty = {
+      actionTypeId: actionType?.id ?? '',
+      isDeprecated: false,
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+      isConnectorTypeDeprecated: false,
+    };
+    return initialConnector ? { ...empty, ...initialConnector } : empty;
+  }, [actionType?.id, initialConnector]);
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
@@ -136,10 +132,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
-  const setResetForm = (reset: ResetForm) => {
+  const setResetForm = useCallback((reset: ResetForm) => {
     resetConnectorForm.current = reset;
     setShowFormErrors(false);
-  };
+  }, []);
 
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
