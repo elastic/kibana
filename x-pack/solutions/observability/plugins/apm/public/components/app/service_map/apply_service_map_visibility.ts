@@ -22,13 +22,13 @@ export interface ServiceMapViewFilters {
   alertStatusFilter: AlertStatus[];
   sloStatusFilter: SloStatus[];
   /** Empty = show all. If non-empty, service ML severity (from anomaly score) must match one of the selected bands. */
-  anomalyStatusFilter: ML_ANOMALY_SEVERITY[];
+  anomalySeverityFilter: ML_ANOMALY_SEVERITY[];
 }
 
 export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   alertStatusFilter: [],
   sloStatusFilter: [],
-  anomalyStatusFilter: [],
+  anomalySeverityFilter: [],
 };
 
 /**
@@ -80,9 +80,9 @@ function serviceMatchesFilters(data: ServiceNodeData, filters: ServiceMapViewFil
     }
   }
 
-  if (filters.anomalyStatusFilter.length > 0) {
+  if (filters.anomalySeverityFilter.length > 0) {
     const severity = getMlSeverityForServiceMapNode(data);
-    if (!filters.anomalyStatusFilter.includes(severity)) {
+    if (!filters.anomalySeverityFilter.includes(severity)) {
       return false;
     }
   }

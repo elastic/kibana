@@ -141,11 +141,11 @@ export const AllAnomalyScores: StoryObj = {
             agentName: 'nodejs',
             serviceAnomalyStats: {
               transactionType: 'request',
-              anomalyScore: 3,
+              anomalyScore: 1,
             },
           })}
         />
-        <LabelText>Low (score)</LabelText>
+        <LabelText>LOW (0–3)</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
@@ -156,11 +156,41 @@ export const AllAnomalyScores: StoryObj = {
             agentName: 'python',
             serviceAnomalyStats: {
               transactionType: 'request',
-              anomalyScore: 15,
+              anomalyScore: 10,
             },
           })}
         />
-        <LabelText>Warning (score)</LabelText>
+        <LabelText>WARNING (3–25)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'minor',
+            label: 'minor-service',
+            isService: true,
+            agentName: 'go',
+            serviceAnomalyStats: {
+              transactionType: 'request',
+              anomalyScore: 35,
+            },
+          })}
+        />
+        <LabelText>MINOR (25–50)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'major',
+            label: 'major-service',
+            isService: true,
+            agentName: 'dotnet',
+            serviceAnomalyStats: {
+              transactionType: 'request',
+              anomalyScore: 65,
+            },
+          })}
+        />
+        <LabelText>MAJOR (50–75)</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
@@ -175,7 +205,7 @@ export const AllAnomalyScores: StoryObj = {
             },
           })}
         />
-        <LabelText>Critical (score)</LabelText>
+        <LabelText>CRITICAL (75–100)</LabelText>
       </div>
     </div>
   ),

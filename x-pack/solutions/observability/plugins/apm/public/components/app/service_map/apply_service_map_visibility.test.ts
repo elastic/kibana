@@ -154,7 +154,7 @@ describe('applyServiceMapVisibility', () => {
 
     const { nodes: onlyCritical } = applyServiceMapVisibility(nodes, edges, {
       ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
-      anomalyStatusFilter: [ML_ANOMALY_SEVERITY.CRITICAL],
+      anomalySeverityFilter: [ML_ANOMALY_SEVERITY.CRITICAL],
     });
     const hiddenCrit = Object.fromEntries(onlyCritical.map((n) => [n.id, n.hidden]));
     expect(hiddenCrit.crit).toBe(false);
@@ -163,7 +163,7 @@ describe('applyServiceMapVisibility', () => {
 
     const { nodes: criticalOrMajor } = applyServiceMapVisibility(nodes, edges, {
       ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
-      anomalyStatusFilter: [ML_ANOMALY_SEVERITY.CRITICAL, ML_ANOMALY_SEVERITY.MAJOR],
+      anomalySeverityFilter: [ML_ANOMALY_SEVERITY.CRITICAL, ML_ANOMALY_SEVERITY.MAJOR],
     });
     const hiddenBoth = Object.fromEntries(criticalOrMajor.map((n) => [n.id, n.hidden]));
     expect(hiddenBoth.crit).toBe(false);

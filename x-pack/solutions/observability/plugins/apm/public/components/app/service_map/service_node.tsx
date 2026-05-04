@@ -39,38 +39,32 @@ export const ServiceNode = memo(
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
 
-    const borderColor = useMemo(() => {
-      const stats = data.serviceAnomalyStats;
-      if (stats?.anomalyScore !== undefined) {
-        return getSeverityColor(stats.anomalyScore);
+    const { borderColor, borderWidth, borderStyle } = useMemo(() => {
+      const score = data.serviceAnomalyStats?.anomalyScore;
+
+      if (score !== undefined) {
+        const severity = getSeverity(score);
+        const isHighSeverity =
+          severity === ML_ANOMALY_SEVERITY.CRITICAL || severity === ML_ANOMALY_SEVERITY.MAJOR;
+
+        return {
+          borderColor: getSeverityColor(score),
+          borderWidth:
+            isHighSeverity || selected
+              ? `${NODE_BORDER_WIDTH_SELECTED}px`
+              : `${NODE_BORDER_WIDTH_DEFAULT}px`,
+          borderStyle: isHighSeverity ? ('double' as const) : ('solid' as const),
+        };
       }
-      if (selected) {
-        return euiTheme.colors.primary;
-      }
-      return euiTheme.colors.mediumShade;
+
+      return {
+        borderColor: selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade,
+        borderWidth: selected
+          ? `${NODE_BORDER_WIDTH_SELECTED}px`
+          : `${NODE_BORDER_WIDTH_DEFAULT}px`,
+        borderStyle: 'solid' as const,
+      };
     }, [data.serviceAnomalyStats, selected, euiTheme]);
-
-    const borderWidth = useMemo(() => {
-      const stats = data.serviceAnomalyStats;
-      if (stats?.anomalyScore !== undefined) {
-        const severity = getSeverity(stats.anomalyScore);
-        if (severity === ML_ANOMALY_SEVERITY.CRITICAL || severity === ML_ANOMALY_SEVERITY.MAJOR) {
-          return `${NODE_BORDER_WIDTH_SELECTED}px`;
-        }
-      }
-      return selected ? `${NODE_BORDER_WIDTH_SELECTED}px` : `${NODE_BORDER_WIDTH_DEFAULT}px`;
-    }, [data.serviceAnomalyStats, selected]);
-
-    const borderStyle = useMemo(() => {
-      const stats = data.serviceAnomalyStats;
-      if (stats?.anomalyScore !== undefined) {
-        const severity = getSeverity(stats.anomalyScore);
-        if (severity === ML_ANOMALY_SEVERITY.CRITICAL || severity === ML_ANOMALY_SEVERITY.MAJOR) {
-          return 'double';
-        }
-      }
-      return 'solid';
-    }, [data.serviceAnomalyStats]);
 
     const iconUrl = useMemo(() => {
       if (data.agentName) {
