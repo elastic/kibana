@@ -21,7 +21,6 @@ import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { type ConnectorSpec, connectorsSpecs } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Logger } from '@kbn/logging';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   PublicStepDefinition,
@@ -42,18 +41,6 @@ export default {
   decorators: [kibanaReactDecorator],
 };
 
-const nullLogger: Logger = {
-  debug: () => {},
-  info: () => {},
-  warn: () => {},
-  error: () => {},
-  fatal: () => {},
-  trace: () => {},
-  log: () => {},
-  get: () => nullLogger,
-  isLevelEnabled: () => false,
-} as unknown as Logger;
-
 interface LoadedExtensions {
   stepDefs: PublicStepDefinition[];
   triggerDefs: PublicTriggerDefinition[];
@@ -63,7 +50,7 @@ interface LoadedExtensions {
 // defs from other plugins (cases, agent_builder, …) are intentionally absent — the
 // Catalog story calls that out.
 const loadExtensions = async (): Promise<LoadedExtensions> => {
-  const stepRegistry = new PublicStepRegistry(nullLogger);
+  const stepRegistry = new PublicStepRegistry();
   const triggerRegistry = new PublicTriggerRegistry();
   registerInternalStepDefinitions(stepRegistry);
   registerInternalTriggerDefinitions(triggerRegistry);
