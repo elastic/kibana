@@ -91,8 +91,8 @@ And you should **not**:
     ) => {
       const model = await modelProvider.getDefaultModel();
 
-      const attachment = attachmentId ? attachments.get(attachmentId) : undefined;
-      if (attachment && attachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
+      const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
+      if (sourceAttachment && sourceAttachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
         return {
           results: [
             errorResult(`Attachment with ID '${attachmentId}' is not a workflow attachment.`),
@@ -101,14 +101,14 @@ And you should **not**:
       }
 
       let workflowDef: GenerateWorkflowEdit | undefined;
-      if (attachment) {
+      if (sourceAttachment) {
         workflowDef = {
-          yaml: (attachment.data.data as any).yaml,
+          yaml: (sourceAttachment.data.data as any).yaml,
         };
       }
 
       try {
-        const { workflow } = await generateWorkflow({
+        const { workflow, response: generationComment } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
           additionalContext: context,
@@ -120,22 +120,26 @@ And you should **not**:
           workflowsApi,
         });
 
-        // TODO: update attachment if exists instead of creating
-        const newAttachment = await attachments.add({
-          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          data: {
-            name: workflow.name,
-            yaml: stringifyWorkflowDefinition(workflow),
-          },
-        });
+        const attachmentData = {
+          name: workflow.name,
+          yaml: stringifyWorkflowDefinition(workflow),
+        };
+
+        const newAttachment = sourceAttachment
+          ? await attachments.update(sourceAttachment.id, { data: attachmentData })
+          : await attachments.add({
+              type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+              data: attachmentData,
+            });
 
         return {
           results: [
             otherResult({
-              attachmentId: newAttachment.id,
-              attachmentVersion: newAttachment.current_version,
+              attachment_id: newAttachment!.id,
+              attachment_version: newAttachment!.current_version,
+              comment: generationComment,
               success: true,
-              created: true,
+              ...(sourceAttachment ? { updated: true } : { created: true }),
             }),
           ],
         };
