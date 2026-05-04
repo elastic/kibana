@@ -27,12 +27,39 @@ describe('buildResolutionGroupingQuery', () => {
     expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_ID);
   });
 
+  it('registers a bucketRiskScore runtime field of type double with a non-empty Painless script', () => {
+    const result = buildResolutionGroupingQuery(defaultParams);
+
+    const runtimeField = result.runtime_mappings?.bucketRiskScore;
+    expect(runtimeField?.type).toBe('double');
+
+    const script = runtimeField?.script;
+    const scriptSource = (
+      typeof script === 'object' && script !== null && 'source' in script ? script.source : script
+    ) as string;
+    expect(typeof scriptSource).toBe('string');
+    expect(scriptSource.length).toBeGreaterThan(0);
+
+    expect(scriptSource).toContain(ENTITY_FIELDS.RESOLVED_TO);
+    expect(scriptSource).toContain(ENTITY_FIELDS.RESOLUTION_RISK_SCORE);
+    expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_RISK);
+  });
+
   it('includes resolutionRiskScore max aggregation', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
     const aggs = result.aggs?.groupByFields?.aggs;
     expect(aggs?.resolutionRiskScore).toEqual({
       max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
+    });
+  });
+
+  it('includes bucketRiskScore max aggregation over the runtime field', () => {
+    const result = buildResolutionGroupingQuery(defaultParams);
+
+    const aggs = result.aggs?.groupByFields?.aggs;
+    expect(aggs?.bucketRiskScore).toEqual({
+      max: { field: 'bucketRiskScore' },
     });
   });
 
@@ -44,11 +71,11 @@ describe('buildResolutionGroupingQuery', () => {
     expect(aggs).not.toHaveProperty('resolutionEntityType');
   });
 
-  it('orders by resolutionRiskScore desc then _count desc', () => {
+  it('orders by bucketRiskScore desc then _count desc', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
     const order = result.aggs?.groupByFields?.terms?.order;
-    expect(order).toEqual([{ resolutionRiskScore: 'desc' }, { _count: 'desc' }]);
+    expect(order).toEqual([{ bucketRiskScore: 'desc' }, { _count: 'desc' }]);
   });
 
   it('applies pagination via bucket_sort', () => {
