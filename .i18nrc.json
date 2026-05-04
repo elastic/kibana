@@ -25,6 +25,7 @@
     "controls": "src/platform/plugins/shared/controls",
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
+    "dashboardMarkdown": "src/platform/plugins/shared/dashboard_markdown",
     "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": [
       "packages/default-nav",
