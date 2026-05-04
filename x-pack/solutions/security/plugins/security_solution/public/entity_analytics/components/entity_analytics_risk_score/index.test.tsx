@@ -54,7 +54,14 @@ jest.mock('../../../common/containers/query_toggle', () => {
     useQueryToggle: () => mockUseQueryToggle(),
   };
 });
-const defaultProps = {
+const defaultProps: {
+  data: unknown[] | undefined;
+  inspect: unknown;
+  refetch: () => void;
+  hasEngineBeenInstalled: boolean;
+  isAuthorized: boolean;
+  loading: boolean;
+} = {
   data: undefined,
   inspect: null,
   refetch: () => {},

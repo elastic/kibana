@@ -6,8 +6,8 @@
  */
 import { useMemo } from 'react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
-import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
-import type { InitEntityStoreResponse } from '../../../common/api/entity_analytics/entity_store/enable.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
+import type { InitEntityStoreResponse } from '@kbn/entity-store/common';
 import type {
   StartEntityEngineResponse,
   StopEntityEngineResponse,

@@ -12,7 +12,7 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 
 import type { EntityType } from '../../../../common/search_strategy';
-import type { ListEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type { ListEntitiesResponse } from '@kbn/entity-store/common';
 import type { InspectResponse } from '../../../types';
 import type { inputsModel } from '../../../common/store';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';

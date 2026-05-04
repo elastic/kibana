@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineStatusHeaderAction } from './engine_status_header_action';
 import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
 import { isEngineLoading } from '../helpers';
-import type { GetEntityStoreStatusResponse } from '../../../../../../../common/api/entity_analytics/entity_store/status.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../../../../common/mock';
 import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';

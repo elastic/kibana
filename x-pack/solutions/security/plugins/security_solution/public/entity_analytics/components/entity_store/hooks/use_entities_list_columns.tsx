@@ -24,7 +24,7 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { RiskScoreLevel } from '../../severity/common';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../../explore/components/paginated_table';
-import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type { Entity } from '@kbn/entity-store/common';
 import { type CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import {
@@ -62,7 +62,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
 
-        const value = record.entity.name;
+        const value = record.entity!.name;
         const onClick = () => {
           const id = EntityPanelKeyByType[entityType];
 
@@ -74,7 +74,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
                   [EntityPanelParamByType[entityType] ?? '']: value,
                   contextID: ENTITIES_LIST_TABLE_ID,
                   scopeId: ENTITIES_LIST_TABLE_ID,
-                  entityId: record.entity.id,
+                  entityId: record.entity!.id,
                 },
               },
             });
@@ -116,7 +116,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         return (
           <span>
             <EuiIcon type={EntityIconByType[entityType]} aria-hidden />
-            <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
+            <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity!.name}</span>
           </span>
         );
       },

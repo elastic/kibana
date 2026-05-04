@@ -14,7 +14,7 @@ import {
   extractIsPrivileged,
   entityTypeLabel,
 } from './utils';
-import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType as EntityTypeOpenAPI } from '@kbn/entity-store/common';
 
 const MODULE_ID = 'temporal_state_analysis';
 const MODULE_NAME = 'Temporal State Analysis';

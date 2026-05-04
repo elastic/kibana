@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
-import type { GetEntityStoreStatusResponse } from '../../../../../../../common/api/entity_analytics/entity_store/status.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import { isEngineLoading } from '../helpers';
 
 export function EngineStatusHeaderAction({

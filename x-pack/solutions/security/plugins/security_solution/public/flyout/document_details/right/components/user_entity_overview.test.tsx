@@ -10,7 +10,6 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { USER_PREVIEW_BANNER, UserEntityOverview } from './user_entity_overview';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -32,8 +31,6 @@ import { useAlertsByStatus } from '../../../../overview/components/detection_res
 const userName = 'user';
 const identityFields = { 'user.name': userName };
 const domain = 'n54bg2lfc7';
-const lastSeen = '2022-04-08T18:35:45.064Z';
-const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
@@ -95,9 +92,6 @@ jest.mock('../../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
-
-const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-jest.mock('../../../../common/containers/use_first_last_seen');
 
 const renderUserEntityOverview = () =>
   render(

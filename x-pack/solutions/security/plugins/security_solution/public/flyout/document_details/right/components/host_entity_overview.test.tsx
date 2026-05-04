@@ -11,7 +11,6 @@ import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks
 import { TestProviders } from '../../../../common/mock';
 import { HostEntityOverview, HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
@@ -35,8 +34,6 @@ import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_ent
 const hostName = 'host';
 const identityFields = { 'host.name': hostName };
 const osFamily = 'Windows';
-const lastSeen = '2022-04-08T18:35:45.064Z';
-const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
@@ -106,9 +103,6 @@ jest.mock('../../../../explore/hosts/containers/hosts/details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
-
-const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-jest.mock('../../../../common/containers/use_first_last_seen');
 
 const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
 jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');

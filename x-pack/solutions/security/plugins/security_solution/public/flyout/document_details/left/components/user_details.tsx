@@ -285,7 +285,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
     identityFields: userIdentityFields ?? {},
-    entityId: entityFromStoreResult?.entityRecord?.entity.id,
+    entityId: entityFromStoreResult?.entityRecord?.entity!.id,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,

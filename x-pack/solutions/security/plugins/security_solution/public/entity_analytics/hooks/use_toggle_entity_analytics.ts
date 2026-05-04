@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import { StoreStatusEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
+import { StoreStatusEnum } from '../../../common/entity_analytics/entity_store/types';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
