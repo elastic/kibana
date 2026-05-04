@@ -37,6 +37,7 @@ export const readStreamRoute = createServerRoute({
     oasOperationObject: () => ({
       responses: {
         200: {
+          description: 'Stream definition and associated metadata.',
           content: {
             'application/json': {
               examples: {
@@ -54,7 +55,7 @@ export const readStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
   }),
   handler: async ({
     params,
@@ -146,6 +147,11 @@ export const editStreamRoute = createServerRoute({
           },
         },
       },
+      responses: {
+        200: {
+          description: 'The stream was created or updated successfully.',
+        },
+      },
     }),
   },
   security: {
@@ -155,7 +161,7 @@ export const editStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: Streams.all.UpsertRequest.right,
   }),
@@ -211,6 +217,13 @@ export const deleteStreamRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'The stream was deleted successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -219,7 +232,7 @@ export const deleteStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {

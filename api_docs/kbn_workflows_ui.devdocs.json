@@ -1712,6 +1712,53 @@
       },
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.getWorkflowsCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "getWorkflowsCapabilities",
+        "description": [],
+        "signature": [
+          "(capabilities: ",
+          "Capabilities",
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.WorkflowsManagementCapabilities",
+            "text": "WorkflowsManagementCapabilities"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getWorkflowsCapabilities.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              "Capabilities"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.processWorkflowsToOptions",
         "type": "Function",
         "tags": [],
@@ -2035,7 +2082,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 28,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4050,7 +4097,7 @@
           "\"canCreateWorkflow\" | \"canReadWorkflow\" | \"canUpdateWorkflow\" | \"canDeleteWorkflow\" | \"canExecuteWorkflow\" | \"canReadWorkflowExecution\" | \"canCancelWorkflowExecution\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4343,7 +4390,7 @@
           "{ canCreateWorkflow: boolean; canReadWorkflow: boolean; canUpdateWorkflow: boolean; canDeleteWorkflow: boolean; canExecuteWorkflow: boolean; canReadWorkflowExecution: boolean; canCancelWorkflowExecution: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
