@@ -31,7 +31,7 @@ import type {
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   InternalUploadAssetCriticalityV2CsvResponse,
-  ListEntitiesRequestQuery,
+  EntityType,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
   PrivMonHealthResponse,
@@ -970,4 +970,14 @@ export const useEntityAnalyticsRoutes = () => {
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
 
-export type FetchEntitiesListParams = SnakeToCamelCase<ListEntitiesRequestQuery>;
+// CamelCased mirror of `ListEntitiesRequestQuery` for ergonomic UI usage.
+// Hand-written instead of derived via `SnakeToCamelCase` because that utility
+// requires a type literal, while lint requires the source to be an interface.
+export interface FetchEntitiesListParams {
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  perPage?: number;
+  filterQuery?: string;
+  entityTypes: EntityType[];
+}

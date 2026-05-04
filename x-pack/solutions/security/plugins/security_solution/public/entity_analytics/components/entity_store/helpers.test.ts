@@ -190,7 +190,7 @@ describe('helpers', () => {
       } as unknown as Entity;
 
       expect(() => getEntityType(unknownEntity)).toThrow(
-        'Unexpected entity: {"@timestamp":"2021-08-02T14:00:00.000Z","entity":{"name":"unknown_entity","source":"logs-test"}}'
+        'Unexpected entity: {"@timestamp":"2021-08-02T14:00:00.000Z","entity":{"name":"unknown_entity","source":["logs-test"]}}'
       );
     });
   });

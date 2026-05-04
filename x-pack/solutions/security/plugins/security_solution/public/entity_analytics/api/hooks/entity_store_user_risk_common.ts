@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { UserEntity } from '@kbn/entity-store/common';
-import type { ListEntitiesResponse } from '@kbn/entity-store/common';
+import type { UserEntity, ListEntitiesResponse } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
   RiskScoreSortField,

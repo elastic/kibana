@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { HostEntity } from '@kbn/entity-store/common';
-import type { ListEntitiesResponse } from '@kbn/entity-store/common';
+import type { HostEntity, ListEntitiesResponse } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
   HostRiskScore,

@@ -7,16 +7,16 @@
 
 import { EntityStoreStatus, type EntityType } from '@kbn/entity-store/common';
 
-// Snake-cased query for the v2 GET /entities route. Matches the on-the-wire shape;
-// callers (e.g. `FetchEntitiesListParams`) typically work with a camel-cased mirror.
-export type ListEntitiesRequestQuery = {
+// Snake-cased query for the v2 GET /entities route. Matches the on-the-wire shape.
+// Callers consume `FetchEntitiesListParams` (camelCase) defined in `public/entity_analytics/api/api.ts`.
+export interface ListEntitiesRequestQuery {
   sort_field?: string;
   sort_order?: 'asc' | 'desc';
   page?: number;
   per_page?: number;
   filterQuery?: string;
   entity_types: EntityType[];
-};
+}
 
 export interface StartEntityEngineResponse {
   started: boolean;

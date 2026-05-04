@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  EntityRiskLevels,
-  EntityRiskScoreRecord,
-} from '../../api/entity_analytics/common/common.gen';
 import type {
   Entity,
   EntityField,
@@ -17,6 +13,10 @@ import type {
   ServiceEntity,
   UserEntity,
 } from '@kbn/entity-store/common';
+import {
+  EntityRiskLevels,
+  EntityRiskScoreRecord,
+} from '../../api/entity_analytics/common/common.gen';
 import { EntityType } from '../types';
 
 const ALLOWED_ENTITY_ATTRIBUTE_KEYS = ['privileged', 'asset', 'managed', 'mfa_enabled'] as const;

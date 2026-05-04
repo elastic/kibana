@@ -10,8 +10,7 @@ import { noop } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 
-import type { UserEntity } from '@kbn/entity-store/common';
-import type { ListEntitiesResponse } from '@kbn/entity-store/common';
+import type { UserEntity, ListEntitiesResponse } from '@kbn/entity-store/common';
 import type { User } from '../../../../../common/search_strategy/security_solution/users/all';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy/security_solution/risk_score/all';
@@ -40,7 +39,7 @@ const mapUserEntityRecordToUser = (record: UserEntity): User | null => {
     return null;
   }
 
-  const lastSeenIso = record.entity!.lifecycle?.last_seen;
+  const lastSeenIso = record.entity?.lifecycle?.last_seen;
   const domainValues = record.user?.domain;
   const domain = domainValues != null && domainValues.length > 0 ? domainValues[0] : '';
   const riskLevel = record.user?.risk?.calculated_level as RiskSeverity | undefined;
@@ -58,7 +57,7 @@ const mapUserEntityRecordToUser = (record: UserEntity): User | null => {
     domain,
     risk: riskLevel,
     criticality: record.asset?.criticality,
-    entityId: record.entity!.id,
+    entityId: record.entity?.id,
     identityFields,
   };
 };

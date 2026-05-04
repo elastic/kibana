@@ -12,8 +12,8 @@ import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/managemen
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
-import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
+import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import { useKibana, useUiSetting } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityStoreStatus } from '../../entity_analytics/components/entity_store/hooks/use_entity_store';
