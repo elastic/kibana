@@ -6,7 +6,9 @@
  */
 
 export * from './rule_data_schema';
+export * from './rule_attachment_schema';
 export * from './constants';
+export { durationSchema } from './common';
 export {
   validateDuration,
   validateMaxDuration,

@@ -18,7 +18,7 @@ import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
 
 /** Primitives */
 
-const esqlQuerySchema = z
+export const esqlQuerySchema = z
   .string()
   .min(1)
   .max(10000)
@@ -31,54 +31,61 @@ const esqlQuerySchema = z
 
 /** Kind */
 
-export const ruleKindSchema = z.enum(['alert', 'signal']).describe('The kind of rule.');
+export const ruleKindSchema = z
+  .enum(['alert', 'signal'])
+  .describe(
+    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
+  );
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 /** Metadata (required) */
 
-const metadataSchema = z
+export const metadataSchema = z
   .object({
-    name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
+    name: z.string().min(1).max(256).describe('Rule name (must be unique within the space).'),
     description: z
       .string()
       .max(1024)
       .optional()
-      .describe('Optional human-readable description of the rule.'),
+      .describe('Human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
     tags: z
       .array(z.string().max(MAX_TAG_LENGTH))
       .max(100)
       .optional()
-      .describe('Tags for categorization.'),
+      .describe('Tags for categorization, e.g. ["production", "infra"].'),
   })
   .strict()
   .describe('Rule metadata.');
 
 /** Schedule (required) */
 
-const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
+/** Duration with an additional minimum-interval guard for schedule frequency. */
+export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
   if (error) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
   }
 });
 
-const scheduleSchema = z
+export const scheduleSchema = z
   .object({
-    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m.'),
+    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m, 1h.'),
     lookback: durationSchema
       .optional()
-      .describe('Lookback window for the query (can also be expressed in ES|QL).'),
+      .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
   })
   .strict()
   .describe('Execution schedule configuration.');
 
 /** Evaluation (required) */
 
-const evaluationQuerySchema = z
+export const evaluationQuerySchema = z
   .object({
-    base: esqlQuerySchema.describe('Base ES|QL query.'),
+    base: esqlQuerySchema.describe(
+      'Base ES|QL query. Time filters are applied automatically via the lookback window.'
+    ),
   })
   .strict();
 
@@ -95,25 +102,27 @@ export const recoveryPolicyTypeSchema = z.enum(['query', 'no_breach']);
 export const recoveryPolicyType = recoveryPolicyTypeSchema.enum;
 export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
 
-const recoveryPolicySchema = z
+export const recoveryPolicySchema = z
   .object({
-    type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
+    type: recoveryPolicyTypeSchema.describe('Recovery detection type: "query" or "no_breach".'),
     query: z
       .object({
-        base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
+        base: esqlQuerySchema
+          .optional()
+          .describe('Recovery ES|QL query. Required when type is "query".'),
       })
       .strict()
       .optional()
-      .describe('Recovery query when type is query.'),
+      .describe('Recovery query configuration; required when type is "query".'),
   })
   .strict()
   .describe('Recovery detection configuration.');
 
 /** State transition (optional, alert-only) */
 
-const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
+export const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
 
-const stateTransitionSchema = z
+export const stateTransitionSchema = z
   .object({
     pending_operator: stateTransitionOperatorSchema
       .optional()
@@ -124,8 +133,10 @@ const stateTransitionSchema = z
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive breaches before active.'),
-    pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
+      .describe('Consecutive breaches before transitioning to active.'),
+    pending_timeframe: durationSchema
+      .optional()
+      .describe('Time window for pending evaluation, e.g. 5m, 15m.'),
     recovering_operator: stateTransitionOperatorSchema
       .optional()
       .describe('How to combine count and timeframe for recovering.'),
@@ -135,10 +146,10 @@ const stateTransitionSchema = z
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive recoveries before inactive.'),
+      .describe('Consecutive recoveries before transitioning to inactive.'),
     recovering_timeframe: durationSchema
       .optional()
-      .describe('Time window for recovering evaluation.'),
+      .describe('Time window for recovering evaluation, e.g. 5m, 15m.'),
   })
   .strict()
   .describe('Episode state transition thresholds (alert-only).')
@@ -147,12 +158,14 @@ const stateTransitionSchema = z
 
 /** Grouping (optional) */
 
-const groupingSchema = z
+export const groupingSchema = z
   .object({
     fields: z
       .array(z.string().max(256))
       .max(16)
-      .describe('Fields to group by (convention: use ES|QL GROUP BY fields).'),
+      .describe(
+        'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
+      ),
   })
   .strict()
   .describe('Grouping configuration.');
@@ -165,7 +178,9 @@ const noDataSchema = z
       .enum(['no_data', 'last_status', 'recover'])
       .optional()
       .describe('Behavior when no data is detected.'),
-    timeframe: durationSchema.optional().describe('Time window after which no data is detected.'),
+    timeframe: durationSchema
+      .optional()
+      .describe('Time window after which no data is detected, e.g. 10m, 1h.'),
   })
   .strict()
   .describe('No data handling configuration.');
@@ -217,28 +232,28 @@ const createRuleDataBaseSchema = z
   })
   .strip();
 
-/**
- * The `.refine` method adds a custom validation to the schema.
- * In this case, it enforces that the `state_transition` property is only allowed when `kind` is "alert".
- * The predicate `data.kind === 'alert' || data.state_transition == null` means:
- * - If the rule kind is "alert", `state_transition` may be present (or absent).
- * - For any other `kind`, `state_transition` must be `null` or `undefined`.
- * If validation fails, the specified error message will be associated with the `state_transition` field.
- */
+/** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
+
+export const isStateTransitionAllowed = (data: {
+  kind?: string;
+  state_transition?: unknown;
+}): boolean => data.kind === 'alert' || data.state_transition == null;
+
+export const isRecoveryPolicyQueryProvided = (data: {
+  recovery_policy?: { type?: string; query?: { base?: string } };
+}): boolean =>
+  data.recovery_policy?.type !== 'query' ||
+  (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0);
+
 export const createRuleDataSchema = createRuleDataBaseSchema
-  .refine((data) => data.kind === 'alert' || data.state_transition == null, {
+  .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine(
-    (data) =>
-      data.recovery_policy?.type !== 'query' ||
-      (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0),
-    {
-      message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
-      path: ['recovery_policy', 'query', 'base'],
-    }
-  );
+  .refine(isRecoveryPolicyQueryProvided, {
+    message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
+    path: ['recovery_policy', 'query', 'base'],
+  });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
