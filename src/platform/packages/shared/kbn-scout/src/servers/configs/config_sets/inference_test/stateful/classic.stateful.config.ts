@@ -17,10 +17,37 @@ const pluginPath = `--plugin-path=${resolve(
   'x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture'
 )}`;
 
+/**
+ * Two fake preconfigured OpenAI connectors used by Scout API tests that need a
+ * non-empty connector catalog (e.g. per-space connector isolation tests).
+ * The API keys are intentionally bogus — the connectors are only queried for
+ * their IDs, never actually invoked.
+ */
+const preconfiguredConnectors = `--xpack.actions.preconfigured=${JSON.stringify({
+  'inference-test-connector-1': {
+    name: 'Inference Test Connector 1',
+    actionTypeId: '.gen-ai',
+    config: {
+      apiProvider: 'OpenAI',
+      apiUrl: 'https://api.openai.com/v1/chat/completions',
+    },
+    secrets: { apiKey: 'test-key-1' },
+  },
+  'inference-test-connector-2': {
+    name: 'Inference Test Connector 2',
+    actionTypeId: '.gen-ai',
+    config: {
+      apiProvider: 'OpenAI',
+      apiUrl: 'https://api.openai.com/v1/chat/completions',
+    },
+    secrets: { apiKey: 'test-key-2' },
+  },
+})}`;
+
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath, preconfiguredConnectors],
   },
 };
