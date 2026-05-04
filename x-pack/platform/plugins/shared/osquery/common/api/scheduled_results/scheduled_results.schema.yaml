@@ -202,7 +202,7 @@ paths:
       operationId: OsqueryExportScheduledQueryResults
       x-codegen-enabled: true
       x-labels: [ ]
-      # TODO: Uncomment when feature flag exportResults is set to tru
+      # TODO: Uncomment when feature flag exportResults is set to true
       #      x-labels: [ess]
       #      x-state: Added in 9.5.0
       parameters:
