@@ -52,8 +52,8 @@ const makeInsight = (overrides: Record<string, unknown> = {}) => ({
   summary: 'Rules are duplicates',
   justification: 'Same query and conditions',
   rule_ids: ['rule-1', 'rule-2'],
-  current: null,
-  proposed: null,
+  current: {},
+  proposed: {},
   space_id: 'default',
   ...overrides,
 });

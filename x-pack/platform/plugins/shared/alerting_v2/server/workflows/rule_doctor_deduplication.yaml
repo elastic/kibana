@@ -13,35 +13,17 @@ settings:
 
 steps:
   - name: fetch_rules
-    type: elasticsearch.request
+    type: kibana.request
     with:
-      method: POST
-      path: '/.kibana_alerting_cases/_search'
-      body:
-        size: 1000
-        query:
-          bool:
-            filter:
-              - term:
-                  type: alerting_rule
-              - term:
-                  namespaces: '{{ inputs.space_id }}'
-        _source:
-          includes:
-            - alerting_rule.name
-            - alerting_rule.rule_type_id
-            - alerting_rule.params
-            - alerting_rule.schedule
-            - alerting_rule.enabled
-            - alerting_rule.tags
-            - alerting_rule.evaluation
-            - alerting_rule.grouping
-            - alerting_rule.metadata
+      method: GET
+      path: '/api/alerting/v2/rules'
+      query:
+        perPage: 200
 
   - name: set_rules_context
     type: data.set
     with:
-      rule_count: '{{ steps.fetch_rules.output.hits.total.value }}'
+      rule_count: '{{ steps.fetch_rules.output.total }}'
 
   - name: analyze_duplicates
     type: ai.prompt
@@ -56,26 +38,27 @@ steps:
         ES|QL queries are worded differently.
 
         ## Rules to analyze
-        {{ steps.fetch_rules.output.hits.hits | json }}
+        {{ steps.fetch_rules.output.items | json }}
 
         ## Analysis criteria
         Compare each pair of rules on:
-        - `alerting_rule.params` or `alerting_rule.rule_type_id` — do the queries target the same index patterns, metrics, or fields?
-        - `alerting_rule.tags` — shared domain tags?
-        - `alerting_rule.schedule` — similar execution intervals?
-        - `alerting_rule.name` — similar naming patterns?
+        - `evaluation` — do the queries target the same index patterns, metrics, or fields?
+        - `metadata.tags` — shared domain tags?
+        - `schedule` — similar execution intervals?
+        - `metadata.name` — similar naming patterns?
 
         Two rules are duplicates if they would fire on largely the same conditions for the same
         infrastructure, even if one uses a slightly different threshold or filtering approach.
         Rules with the same schedule but monitoring completely different things are NOT duplicates.
 
         For each duplicate group:
-        - Populate `rule_ids` with the _id field of all affected rules from the Elasticsearch hits.
+        - Populate `rule_ids` with the exact `id` values from the rule objects above. Use the raw UUID
+          (e.g. "c34ab297-50fe-450e-adde-44619c28c5c7"). Do NOT add any prefix like "alerting_rule:".
         - Set `title` to a short plain-text description of the duplicate group.
         - Set `summary` explaining why these rules overlap.
         - Set `justification` with detailed reasoning about which fields/conditions overlap.
-        - Set `current` to an object keyed by rule_id containing each rule's key fields (name, query/params, schedule, tags).
-        - Set `proposed` to an object keyed by rule_id. For the retained/merged rule, the value is the new configuration (name, query/params, schedule, tags). For rules being deleted, the value is null.
+        - Set `current` to an object keyed by the rule's `id` (raw UUID) containing each rule's key fields (name, query/params, schedule, tags).
+        - Set `proposed` to an object keyed by the rule's `id` (raw UUID). For the retained/merged rule, the value is the new configuration (name, query/params, schedule, tags). For rules being deleted, the value is null.
         - Set `diffs` to an array describing the field-level differences between current rules and the proposed configuration.
 
         If no duplicates are found, return an empty insights array.
@@ -190,7 +173,7 @@ steps:
             - title: string (short plain-text description)
             - summary: string (plain-text explanation)
             - justification: string (plain-text detailed reasoning, 2-3 sentences)
-            - rule_ids: array of strings (Elasticsearch document _id values)
+            - rule_ids: array of strings (rule id values)
             - current: object keyed by rule_id with each rule's key config fields (optional)
             - proposed: object keyed by rule_id with post-action config for each rule, null for deleted rules (optional)
             - diffs: array of {field, previous, proposed} objects (optional)
@@ -265,7 +248,7 @@ steps:
         with:
           has_invalid: '${{ steps.revalidate_insights.output.hasInvalid }}'
           invalid_insights: '${{ steps.revalidate_insights.output.invalidInsights }}'
-          loop_valid_insights: '${{ steps.revalidate_insights.output.validInsights }}'
+          loop_valid_insights: '${{ variables.loop_valid_insights | concat: steps.revalidate_insights.output.validInsights }}'
 
   - name: merge_all_valid
     type: data.set
@@ -325,5 +308,5 @@ steps:
     type: alerting_v2.persist_findings
     with:
       insights: '${{ variables.valid_insights }}'
-      dismiss_ids: '${{ steps.evaluate_existing.output.content.dismissals }}'
+      dismiss_ids: '${{ steps.evaluate_existing.output.content.dismissals | default: [] }}'
       space_id: '{{ inputs.space_id }}'

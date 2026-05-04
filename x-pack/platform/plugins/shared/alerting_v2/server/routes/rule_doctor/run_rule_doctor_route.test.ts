@@ -27,6 +27,9 @@ describe('RunRuleDoctorRoute', () => {
   const logger = loggingSystemMock.createLogger();
   const uiSettings = uiSettingsServiceMock.createStartContract();
   const savedObjects = savedObjectsServiceMock.createStartContract();
+  const resourceManager = {
+    ensureResourceReady: jest.fn().mockResolvedValue(undefined),
+  } as any;
 
   const mockUiSettingsClient = uiSettingsServiceMock.createClient();
   mockUiSettingsClient.get.mockResolvedValue('mock-connector-id');
@@ -67,7 +70,8 @@ describe('RunRuleDoctorRoute', () => {
       spaceContext,
       uiSettings,
       savedObjects,
-      logger
+      logger,
+      resourceManager
     );
     await route.handle();
 
@@ -115,7 +119,8 @@ describe('RunRuleDoctorRoute', () => {
       spaceContext,
       uiSettings,
       savedObjects,
-      logger
+      logger,
+      resourceManager
     );
     await route.handle();
 
@@ -154,7 +159,8 @@ describe('RunRuleDoctorRoute', () => {
       spaceContext,
       uiSettings,
       savedObjects,
-      logger
+      logger,
+      resourceManager
     );
     await route.handle();
 

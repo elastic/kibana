@@ -50,8 +50,7 @@ export async function ensureRuleDoctorWorkflow(
     logger.info(`Created rule doctor workflow ${RULE_DOCTOR_DEDUP_WORKFLOW_ID}`);
   }
 
-  const workflow =
-    existing ?? (await managementApi.getWorkflow(RULE_DOCTOR_DEDUP_WORKFLOW_ID, spaceId))!;
+  const workflow = (await managementApi.getWorkflow(RULE_DOCTOR_DEDUP_WORKFLOW_ID, spaceId))!;
 
   return {
     id: workflow.id,

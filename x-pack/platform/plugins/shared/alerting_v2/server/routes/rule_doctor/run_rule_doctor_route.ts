@@ -24,6 +24,8 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { SpaceContext } from '../rule_doctor_insights/space_context';
 import { WorkflowsManagementApiToken } from '../../lib/dispatcher/steps/dispatch_step_tokens';
 import { ensureRuleDoctorWorkflow } from '../../workflows/load_workflows';
+import { ResourceManager } from '../../lib/services/resource_service/resource_manager';
+import { RULE_DOCTOR_INSIGHTS_INDEX } from '../../resources/indices/rule_doctor_insights';
 
 const runRuleDoctorBodySchema = z.object({
   type: z.enum(['deduplication']).describe('The type of Rule Doctor analysis to run'),
@@ -62,7 +64,8 @@ export class RunRuleDoctorRoute extends BaseAlertingRoute {
     @inject(SpaceContext) private readonly spaceContext: SpaceContext,
     @inject(CoreStart('uiSettings')) private readonly uiSettings: UiSettingsServiceStart,
     @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
-    @inject(DILogger) private readonly logger: Logger
+    @inject(DILogger) private readonly logger: Logger,
+    @inject(ResourceManager) private readonly resourceManager: ResourceManager
   ) {
     super(ctx);
   }
@@ -73,6 +76,7 @@ export class RunRuleDoctorRoute extends BaseAlertingRoute {
     const spaceId = this.spaceContext.spaceId;
     const connectorId = await this.getDefaultConnectorId();
 
+    await this.resourceManager.ensureResourceReady(`index:${RULE_DOCTOR_INSIGHTS_INDEX}`);
     const workflow = await this.ensureWorkflow(type, spaceId);
 
     await this.workflowsManagement.scheduleWorkflow(

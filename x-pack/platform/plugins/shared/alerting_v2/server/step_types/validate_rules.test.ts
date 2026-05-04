@@ -46,8 +46,8 @@ describe('validate_rules step', () => {
         summary: 'Rules A and B monitor the same metric',
         justification: 'Both rules query the same index with identical conditions',
         rule_ids: ['rule-1', 'rule-2'],
-        current: null,
-        proposed: null,
+        current: {},
+        proposed: {},
       },
     ];
 
@@ -101,8 +101,8 @@ describe('validate_rules step', () => {
         summary: 'Test summary',
         justification: 'Test justification',
         rule_ids: [],
-        current: null,
-        proposed: null,
+        current: {},
+        proposed: {},
       },
     ];
 
