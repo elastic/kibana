@@ -171,24 +171,17 @@ export function getConnectorType(
 
 type EmailRecipientField = 'to' | 'cc' | 'bcc' | 'replyTo';
 
-function getRecipientFields(
-  actionParams: EmailActionParams,
-  field: EmailRecipientField,
-  { dropEmpty }: { dropEmpty: boolean }
-): string[] {
+function getRecipientFields(actionParams: EmailActionParams, field: EmailRecipientField): string[] {
   const value = actionParams[field];
   if (!Array.isArray(value)) return [];
-  return dropEmpty ? value.filter((email) => email.trim().length > 0) : value;
+  return value.filter((email) => email.trim().length > 0);
 }
 
-const getToFields = (actionParams: EmailActionParams) =>
-  getRecipientFields(actionParams, 'to', { dropEmpty: true });
+const getToFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'to');
 
-const getCcFields = (actionParams: EmailActionParams) =>
-  getRecipientFields(actionParams, 'cc', { dropEmpty: true });
+const getCcFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'cc');
 
-const getBccFields = (actionParams: EmailActionParams) =>
-  getRecipientFields(actionParams, 'bcc', { dropEmpty: true });
+const getBccFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'bcc');
 
 const getReplyToFields = (actionParams: EmailActionParams) =>
-  getRecipientFields(actionParams, 'replyTo', { dropEmpty: false });
+  getRecipientFields(actionParams, 'replyTo');
