@@ -14,7 +14,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
-import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
 import { chunk, merge } from 'lodash';
@@ -30,6 +29,7 @@ import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
 import { buildCompositeSloSummaryDocId } from '../../composite_slo_summary_index';
+import { buildCompositeSummaryDoc } from '../../composite_summary_writer';
 import { DefaultSummaryClient } from '../../summary_client';
 import { computeCompositeSummary, type MemberSummaryData } from '../../compute_composite_summary';
 
@@ -311,7 +311,13 @@ function buildBulkOps(
           },
         });
         bulkOps.push(
-          buildSummaryDoc(compositeSlo, compositeSummary, members, spaceId, unresolvedMemberIds)
+          buildCompositeSummaryDoc(
+            compositeSlo,
+            compositeSummary,
+            members,
+            spaceId,
+            unresolvedMemberIds
+          )
         );
       } catch (err) {
         stats.computeErrors++;
@@ -398,69 +404,4 @@ function decodeStoredSLO(
   }
 
   return result.right;
-}
-
-interface CompositeSummaryDoc {
-  spaceId: string;
-  summaryUpdatedAt: string;
-  compositeSlo: {
-    id: string;
-    name: string;
-    description: string;
-    tags: string[];
-    objective: { target: number };
-    timeWindow: { duration: string; type: string };
-    budgetingMethod: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  sliValue: number;
-  status: string;
-  errorBudgetInitial: number;
-  errorBudgetConsumed: number;
-  errorBudgetRemaining: number;
-  errorBudgetIsEstimated: boolean;
-  fiveMinuteBurnRate: number;
-  oneHourBurnRate: number;
-  oneDayBurnRate: number;
-  unresolvedMemberIds: string[];
-  members: CompositeSLOMemberSummary[];
-}
-
-function buildSummaryDoc(
-  compositeSlo: CompositeSLODefinition,
-  summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
-  members: CompositeSLOMemberSummary[],
-  spaceId: string,
-  unresolvedMemberIds: string[]
-): CompositeSummaryDoc {
-  return {
-    spaceId,
-    summaryUpdatedAt: new Date().toISOString(),
-    compositeSlo: {
-      id: compositeSlo.id,
-      name: compositeSlo.name,
-      description: compositeSlo.description,
-      tags: compositeSlo.tags,
-      objective: { target: compositeSlo.objective.target },
-      timeWindow: {
-        duration: compositeSlo.timeWindow.duration,
-        type: compositeSlo.timeWindow.type,
-      },
-      budgetingMethod: compositeSlo.budgetingMethod,
-      createdAt: compositeSlo.createdAt,
-      updatedAt: compositeSlo.updatedAt,
-    },
-    sliValue: summary.sliValue,
-    status: summary.status,
-    errorBudgetInitial: summary.errorBudget.initial,
-    errorBudgetConsumed: summary.errorBudget.consumed,
-    errorBudgetRemaining: summary.errorBudget.remaining,
-    errorBudgetIsEstimated: summary.errorBudget.isEstimated,
-    fiveMinuteBurnRate: summary.fiveMinuteBurnRate,
-    oneHourBurnRate: summary.oneHourBurnRate,
-    oneDayBurnRate: summary.oneDayBurnRate,
-    unresolvedMemberIds,
-    members,
-  };
 }

@@ -9,7 +9,10 @@ import type { CompositeSLOMember } from '@kbn/slo-schema';
 import { createCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { IllegalArgumentError } from '../../../errors';
+import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
 import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
+import { persistCompositeSummaryDoc } from '../../../services/composite_summary_writer';
+import { DefaultSummaryClient } from '../../../services/summary_client';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -50,8 +53,11 @@ export const createCompositeSLORoute = createSloServerRoute({
 
     validateCompositeSloMembers(params.body.members);
 
-    const { soClient } = await getScopedClients({ request, logger });
-    const repository = new DefaultCompositeSLORepository(soClient, logger);
+    const { soClient, scopedClusterClient, repository, spaceId } = await getScopedClients({
+      request,
+      logger,
+    });
+    const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
 
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username ?? 'unknown';
@@ -69,6 +75,22 @@ export const createCompositeSLORoute = createSloServerRoute({
       updatedBy: userId,
     };
 
-    return await repository.create(compositeSlo);
+    const created = await compositeSloRepository.create(compositeSlo);
+
+    const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
+    const summaryClient = new DefaultSummaryClient(
+      scopedClusterClient.asCurrentUser,
+      burnRatesClient
+    );
+    await persistCompositeSummaryDoc({
+      esClient: scopedClusterClient.asCurrentUser,
+      summaryClient,
+      sloDefinitionRepository: repository,
+      logger,
+      spaceId,
+      compositeSlo: created,
+    });
+
+    return created;
   },
 });

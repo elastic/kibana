@@ -6,7 +6,10 @@
  */
 
 import { updateCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
 import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
+import { persistCompositeSummaryDoc } from '../../../services/composite_summary_writer';
+import { DefaultSummaryClient } from '../../../services/summary_client';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 import { validateCompositeSloMembers } from './create_composite_slo';
@@ -23,10 +26,13 @@ export const updateCompositeSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient } = await getScopedClients({ request, logger });
-    const repository = new DefaultCompositeSLORepository(soClient, logger);
+    const { soClient, scopedClusterClient, repository, spaceId } = await getScopedClients({
+      request,
+      logger,
+    });
+    const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
 
-    const existing = await repository.findById(params.path.id);
+    const existing = await compositeSloRepository.findById(params.path.id);
 
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username;
@@ -40,6 +46,22 @@ export const updateCompositeSLORoute = createSloServerRoute({
 
     validateCompositeSloMembers(updated.members);
 
-    return await repository.update(updated);
+    const result = await compositeSloRepository.update(updated);
+
+    const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
+    const summaryClient = new DefaultSummaryClient(
+      scopedClusterClient.asCurrentUser,
+      burnRatesClient
+    );
+    await persistCompositeSummaryDoc({
+      esClient: scopedClusterClient.asCurrentUser,
+      summaryClient,
+      sloDefinitionRepository: repository,
+      logger,
+      spaceId,
+      compositeSlo: result,
+    });
+
+    return result;
   },
 });
