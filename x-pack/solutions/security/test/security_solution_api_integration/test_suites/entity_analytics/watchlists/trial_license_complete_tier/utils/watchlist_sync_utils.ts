@@ -73,6 +73,7 @@ export const WatchlistSyncUtils = (
         type: 'index',
         name: `Source for ${sourceIndexName}`,
         indexPattern: sourceIndexName,
+        identifierField: 'user.name',
         enabled: true,
         range: range ?? { start: 'now-10d', end: 'now' },
       },
