@@ -8,7 +8,6 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
-import {} from '../../schema/charts/xy';
 import type { XYConfig } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';

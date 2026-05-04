@@ -64,7 +64,7 @@ export function mergeNormalizers<T extends LensAttributes>(
   ignore: string[] = []
 ): AttributesNormalizer<T> {
   return function (attributes: NormalizedStates<T>): NormalizedStates<T> {
-    const sortedNormalizers = normalizers.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const sortedNormalizers = [...normalizers].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     return flow([...sortedNormalizers, { ignore }].map(normalize))(attributes);
   };
 }
