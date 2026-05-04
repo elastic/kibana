@@ -17,9 +17,9 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
-# `SCOUT_DISCOVERY_TARGET` is computed at pipeline-generation time from
-# `GITHUB_PR_TARGET_BRANCH` in .buildkite/pipelines/flaky_tests/pipeline.ts and
-# injected as step-level env. Hard-require it here so a missing value fails
+# `SCOUT_DISCOVERY_TARGET` is computed at pipeline-generation time from the
+# `branch` field in package.json in .buildkite/pipelines/flaky_tests/pipeline.ts
+# and injected as step-level env. Hard-require it here so a missing value fails
 # loudly instead of silently defaulting to a wrong target.
 : "${SCOUT_DISCOVERY_TARGET:?SCOUT_DISCOVERY_TARGET must be set by the flaky pipeline generator}"
 

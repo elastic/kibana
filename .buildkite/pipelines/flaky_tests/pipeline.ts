@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import { groups } from './groups.json';
 import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
@@ -40,13 +41,10 @@ const MAX_JOBS = 500;
 // they request too many repetitions for a single config.
 const MAX_SCOUT_COUNT_PER_CONFIG = 50;
 
-// Scout discovery target for the flaky-setup step. Flaky builds pin BUILDKITE_BRANCH to
-// `refs/pull/<N>/head` and run with build_pull_requests=false, so the regular pipeline's
-// `BUILDKITE_PULL_REQUEST_BASE_BRANCH` check doesn't apply. We use GITHUB_PR_TARGET_BRANCH
-// (set by the trigger) to decide: main-targeting PRs get `local` (stateful + serverless),
-// anything else (release branches) gets `local-stateful-only`.
-const scoutDiscoveryTarget =
-  process.env.GITHUB_PR_TARGET_BRANCH === 'main' ? 'local' : 'local-stateful-only';
+// Scout discovery target for the flaky-setup step. We read the branch name
+// from `package.json` (set when forking a release branch).
+const trackedBranch = JSON.parse(Fs.readFileSync('package.json', 'utf8')).branch;
+const scoutDiscoveryTarget = trackedBranch === 'main' ? 'local' : 'local-stateful-only';
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
