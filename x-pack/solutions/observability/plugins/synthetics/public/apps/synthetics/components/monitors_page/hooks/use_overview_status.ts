@@ -7,7 +7,6 @@
 
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';
 import {
@@ -15,7 +14,29 @@ import {
   quietFetchOverviewStatusAction,
   selectOverviewStatus,
 } from '../../../state/overview_status';
+import { useGetUrlParams } from '../../../hooks';
 
+/**
+ * Read-only hook — returns overview status data from the Redux store without
+ * triggering any fetches. Use this in child components that just need the data.
+ * The fetch is triggered once by `useOverviewStatus` in the page-level component.
+ */
+export function useOverviewStatusState() {
+  const { status, error, loaded, loading, allConfigs } = useSelector(selectOverviewStatus);
+  return {
+    status,
+    error,
+    loading,
+    loaded,
+    allConfigs: allConfigs ?? [],
+  };
+}
+
+/**
+ * Fetching hook — triggers the initial overview status fetch and re-fetches on
+ * pageState or refresh changes. Should be called ONCE per page, typically in the
+ * top-level route component (e.g. `MonitorManagementPage`).
+ */
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
   const { status, error, loaded, loading, allConfigs } = useSelector(selectOverviewStatus);
@@ -25,44 +46,37 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
 
   const dispatch = useDispatch();
 
-  // Periodically refresh
+  const paramsRef = useRef({ pageState, scopeStatusByLocation, loaded });
+  paramsRef.current = { pageState, scopeStatusByLocation, loaded };
+
+  const { query: urlQuery } = useGetUrlParams();
+  const hasUnsyncedUrlQuery = Boolean(urlQuery) && urlQuery !== (pageState.query || '');
+
   useEffect(() => {
     if (!isInitialMount.current) {
-      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+      const { pageState: ps, scopeStatusByLocation: scope } = paramsRef.current;
+      dispatch(quietFetchOverviewStatusAction.get({ pageState: ps, scopeStatusByLocation: scope }));
     }
-    // specifically only want to run this on refreshInterval change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh]);
+  }, [dispatch, lastRefresh]);
 
-  // On initial mount, load the page
-  useDebounce(
-    () => {
-      if (isInitialMount.current) {
-        if (loaded) {
-          dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-        } else {
-          dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-        }
-      }
-    },
-    100,
-    // we don't use pageState or scopeStatus here, for pageState, useDebounce will handle it
-    [dispatch]
-  );
-
-  useDebounce(
-    () => {
-      // Don't load on initial mount, only meant to handle pageState changes
-      if (isInitialMount.current || !loaded) {
-        // setting false here to account for debounce timing
-        isInitialMount.current = false;
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (hasUnsyncedUrlQuery) {
+        // URL query param hasn't been synced to Redux yet (the sync runs in
+        // a separate useEffect in useMonitorFiltersState). Skip this stale
+        // fetch — the sync will update pageState and re-trigger this effect.
         return;
       }
+    }
+
+    const { loaded: isLoaded } = paramsRef.current;
+    if (isLoaded) {
       dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-    },
-    100,
-    [pageState, scopeStatusByLocation]
-  );
+    } else {
+      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+    }
+  }, [dispatch, pageState, scopeStatusByLocation, hasUnsyncedUrlQuery]);
 
   return {
     status,
