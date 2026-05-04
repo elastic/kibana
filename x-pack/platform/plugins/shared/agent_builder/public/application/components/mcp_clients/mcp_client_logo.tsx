@@ -10,11 +10,11 @@ import { EuiIcon } from '@elastic/eui';
 import type { OAuthClientLogo } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 
-export interface McpClientAvatarProps {
+export interface McpClientLogoProps {
   clientLogo?: OAuthClientLogo;
 }
 
-export const McpClientLogo = ({ clientLogo }: McpClientAvatarProps) => {
+export const McpClientLogo = ({ clientLogo }: McpClientLogoProps) => {
   if (!clientLogo) {
     return null;
   }

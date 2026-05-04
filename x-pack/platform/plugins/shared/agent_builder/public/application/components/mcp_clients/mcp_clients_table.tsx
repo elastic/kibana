@@ -79,7 +79,7 @@ export const McpClientsTable = memo(() => {
       items={tableClients}
       itemId="id"
       columns={columns}
-      sorting={{ sort: { field: 'name', direction: 'asc' } }}
+      sorting={{ sort: { field: 'client_name', direction: 'asc' } }}
       search={searchConfig}
       pagination={{
         pageIndex,
@@ -107,7 +107,15 @@ export const McpClientsTable = memo(() => {
           ) : (
             <EuiEmptyPrompt
               css={emptyPromptStyles}
-              icon={<EuiImage src={illustrationGenai} alt="No MCP clients" size="150px" />}
+              icon={
+                <EuiImage
+                  src={illustrationGenai}
+                  alt={i18n.translate('xpack.agentBuilder.mcpClients.noMcpClientsPromptIconAlt', {
+                    defaultMessage: 'Empty MCP clients list image',
+                  })}
+                  size="150px"
+                />
+              }
               title={<h2>{labels.tools.mcpClients.noMcpClientsPromptTitle}</h2>}
               body={<p>{labels.tools.mcpClients.noMcpClientsPromptBody}</p>}
               // TODO: Implement as part of "[Agent Builder] OAuth Client registration and management flows"

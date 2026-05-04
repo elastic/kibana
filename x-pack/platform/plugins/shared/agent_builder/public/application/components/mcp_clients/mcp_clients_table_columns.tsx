@@ -42,7 +42,7 @@ export const useMcpClientsTableColumns = (): Array<EuiBasicTableColumn<OAuthClie
       width: '20%',
       render: (activeConnectionCount: number) => (
         <EuiNotificationBadge color="subdued" size="m">
-          {activeConnectionCount}
+          {activeConnectionCount ?? 0}
         </EuiNotificationBadge>
       ),
     };
