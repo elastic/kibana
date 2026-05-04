@@ -19,8 +19,7 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
 
-// Failing: See https://github.com/elastic/kibana/issues/264299
-apiTest.describe.skip('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
