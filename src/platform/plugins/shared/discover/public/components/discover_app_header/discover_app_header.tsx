@@ -9,8 +9,8 @@
 
 import React, { useMemo } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { ChromeAppHeader } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/core-chrome-browser';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getReadOnlyBadge } from '../../application/discover_router';
 
@@ -28,7 +28,7 @@ const chromeBadgeToHeaderBadge = (badge: {
 
 export interface DiscoverAppHeaderProps {
   title: string;
-  back?: AppHeaderBack;
+  back?: string | AppHeaderBack;
   appMenu?: AppMenuConfig;
   badges?: AppHeaderBadge[];
 }
@@ -56,14 +56,5 @@ export const DiscoverAppHeader: React.FC<DiscoverAppHeaderProps> = ({
     return result.length > 0 ? result : undefined;
   }, [capabilities, extraBadges]);
 
-  return (
-    <AppHeader
-      title={title}
-      back={back}
-      menu={appMenu}
-      badges={badges}
-      fallback={null}
-      sticky
-    />
-  );
+  return <ChromeAppHeader title={title} back={back} menu={appMenu} badges={badges} />;
 };

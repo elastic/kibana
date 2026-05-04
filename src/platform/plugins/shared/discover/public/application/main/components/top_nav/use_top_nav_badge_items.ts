@@ -9,8 +9,7 @@
 
 import { useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import type { ChromeBreadcrumbsBadge, AppHeaderBadge } from '@kbn/core-chrome-browser';
 import { discoverTopNavMenuContext } from './discover_topnav_menu';
 
 const chromeBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({

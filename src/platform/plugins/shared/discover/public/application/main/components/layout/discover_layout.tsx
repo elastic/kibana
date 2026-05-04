@@ -37,7 +37,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { APP_HEADER_HEIGHT_CSS_VAR_NAME } from '@kbn/app-header';
+
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -455,10 +455,7 @@ export function DiscoverLayout() {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            height: calc(
-              var(--kbn-application--content-height) - 40px -
-                var(${APP_HEADER_HEIGHT_CSS_VAR_NAME}, 0px)
-            );
+            height: calc(var(--kbn-application--content-height) - 40px);
           }
         `,
       ]}

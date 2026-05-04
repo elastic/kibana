@@ -32,8 +32,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import { ChromeAppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/core-chrome-browser';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -413,14 +413,12 @@ export function InternalDashboardTopNav({
   return (
     <>
       {visibilityProps.showTopNavMenu && viewMode !== 'print' && (
-        <AppHeader
+        <ChromeAppHeader
           title={dashboardTitle}
           back="/app/dashboards#/list"
           menu={appMenuConfig}
           badges={appHeaderBadges}
           favorite={chromeNextHeaderFavoriteGlobalAction}
-          fallback={null}
-          sticky
         />
       )}
       <div css={styles.container}>
@@ -488,7 +486,7 @@ const topNavStyles = {
         width: '100%',
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
-        top: `calc(var(--kbn-application--sticky-headers-offset, 0px) + var(--kbn-appHeader--height, 0px))`,
+        top: `var(--kbn-application--sticky-headers-offset, 0px)`,
         background: euiTheme.colors.backgroundBasePlain,
 
         [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {

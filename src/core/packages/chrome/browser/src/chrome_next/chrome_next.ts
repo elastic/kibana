@@ -47,7 +47,7 @@ export interface AppHeaderTab {
 /** @public */
 export interface AppHeaderConfig {
   title?: string;
-  back?: AppHeaderBack | AppHeaderBack[];
+  back?: string | AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;

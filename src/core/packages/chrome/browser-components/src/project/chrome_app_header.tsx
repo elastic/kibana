@@ -73,11 +73,9 @@ function useAppHeaderConfig(): AppHeaderConfig | undefined {
 }
 
 function normalizeAppHeaderBack(
-  back: AppHeaderBack | AppHeaderBack[] | undefined
-): AppHeaderBack | AppHeaderBack[] | undefined {
-  if (Array.isArray(back)) {
-    return back.length > 0 ? back : undefined;
-  }
+  back: string | AppHeaderBack | undefined
+): AppHeaderBack | undefined {
+  if (typeof back === 'string') return { href: back };
   return back;
 }
 
@@ -98,9 +96,7 @@ export function useHasChromeAppHeaderContent(): boolean {
   return hasExplicitAppHeaderContent(config) || fallback.hasContent;
 }
 
-function useMeasuredAppHeaderHeight(
-  hasContent: boolean
-): React.RefCallback<HTMLDivElement> {
+function useMeasuredAppHeaderHeight(hasContent: boolean): React.RefCallback<HTMLDivElement> {
   const updateLayout = useLayoutUpdate();
   const observerRef = useRef<ResizeObserver | null>(null);
 
