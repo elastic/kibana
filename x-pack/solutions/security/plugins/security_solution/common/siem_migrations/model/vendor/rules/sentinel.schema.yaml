@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Sentinel Vendor Rule Schema
+  version: '1.0.0'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    SentinelRuleProperties:
+      type: object
+      description: Properties of a Microsoft Sentinel Scheduled Analytics Rule
+      required:
+        - displayName
+        - query
+      properties:
+        displayName:
+          type: string
+          description: The rule display name
+        description:
+          type: string
+          description: The rule description
+        query:
+          type: string
+          description: The KQL query for the rule
+        severity:
+          type: string
+          description: The rule severity
+        tactics:
+          type: array
+          items:
+            type: string
+          description: MITRE ATT&CK tactic names
+        techniques:
+          type: array
+          items:
+            type: string
+          description: MITRE ATT&CK technique IDs
+        enabled:
+          type: boolean
+          description: Whether the rule is enabled
+
+    SentinelArmResource:
+      type: object
+      description: A resource entry from a Microsoft Sentinel ARM template export
+      properties:
+        id:
+          type: string
+          description: The ARM resource identifier
+        name:
+          type: string
+          description: The ARM resource name
+        kind:
+          type: string
+          description: The rule kind (e.g. Scheduled)
+        type:
+          type: string
+          description: The ARM resource type
+        properties:
+          $ref: '#/components/schemas/SentinelRuleProperties'
+          description: The rule properties
+
+    CreateSentinelRulesBody:
+      type: object
+      description: Request body for creating Sentinel rule migration rules from an ARM template export
+      required:
+        - resources
+      properties:
+        resources:
+          type: array
+          description: The ARM template resources array containing Sentinel analytics rules
+          items:
+            $ref: '#/components/schemas/SentinelArmResource'
+          minItems: 1

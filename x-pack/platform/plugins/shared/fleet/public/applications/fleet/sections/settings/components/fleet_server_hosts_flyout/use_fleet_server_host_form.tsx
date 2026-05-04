@@ -22,6 +22,7 @@ import {
   useSecretInput,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetServerHost } from '../../../../types';
 import type { ClientAuth, NewFleetServerHost, ValueOf } from '../../../../../../../common/types';
@@ -172,28 +173,36 @@ export function useFleetServerHostsForm(
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslCertificateInput = useInput(
     fleetServerHost?.ssl?.certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
 
   const sslEsCertificateAuthoritiesInput = useComboInput(
     'sslEsCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.es_certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslEsCertificateInput = useInput(
     fleetServerHost?.ssl?.es_certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
-  const sslKeyInput = useInput(fleetServerHost?.ssl?.key ?? '', undefined, isEditDisabled);
-  const sslESKeyInput = useInput(fleetServerHost?.ssl?.es_key ?? '', undefined, isEditDisabled);
+  const sslKeyInput = useInput(
+    fleetServerHost?.ssl?.key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
+  const sslESKeyInput = useInput(
+    fleetServerHost?.ssl?.es_key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
 
   const sslKeySecretInput = useSecretInput(
     (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
@@ -215,12 +224,12 @@ export function useFleetServerHostsForm(
   const sslAgentCertificateAuthoritiesInput = useComboInput(
     'sslAgentCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.agent_certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslAgentCertificateInput = useInput(
     fleetServerHost?.ssl?.agent_certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
   const sslAgentKeySecretInput = useSecretInput(
@@ -230,7 +239,7 @@ export function useFleetServerHostsForm(
   );
   const sslAgentKeyInput = useInput(
     fleetServerHost?.ssl?.agent_key ?? '',
-    undefined,
+    validateSslPathInput,
     isEditDisabled
   );
 
@@ -378,8 +387,19 @@ export function useFleetServerHostsForm(
     isEditDisabled ||
     isLoading ||
     !hasChanged ||
+    !nameInput.value ||
+    !hostUrlsInput.value.some((v) => v.trim()) ||
     hostUrlsInput.props.isInvalid ||
-    nameInput.props.isInvalid;
+    nameInput.props.isInvalid ||
+    sslCertificateAuthoritiesInput.props.isInvalid ||
+    sslCertificateInput.props.isInvalid ||
+    sslKeyInput.props.isInvalid ||
+    sslEsCertificateAuthoritiesInput.props.isInvalid ||
+    sslEsCertificateInput.props.isInvalid ||
+    sslESKeyInput.props.isInvalid ||
+    sslAgentCertificateAuthoritiesInput.props.isInvalid ||
+    sslAgentCertificateInput.props.isInvalid ||
+    sslAgentKeyInput.props.isInvalid;
 
   return {
     isLoading,

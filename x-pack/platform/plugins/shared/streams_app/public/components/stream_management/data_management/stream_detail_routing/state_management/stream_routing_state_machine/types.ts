@@ -18,6 +18,10 @@ import type { DocumentMatchFilterOptions } from '.';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
+export type PartitionableDefinition =
+  | Streams.ingest.all.GetResponse
+  | Streams.QueryStream.GetResponse;
+
 export interface StreamRoutingServiceDependencies {
   forkSuccessNotifier?: (streamName: string) => void;
   refreshDefinition: () => void;
@@ -29,7 +33,7 @@ export interface StreamRoutingServiceDependencies {
 }
 
 export interface StreamRoutingInput {
-  definition: Streams.ingest.all.GetResponse;
+  definition: PartitionableDefinition;
 }
 
 export interface BulkForkItem {
@@ -44,7 +48,7 @@ export interface BulkForkResult {
 
 export interface StreamRoutingContext {
   currentRuleId: string | null;
-  definition: Streams.ingest.all.GetResponse;
+  definition: PartitionableDefinition;
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
   suggestedRuleId: string | null;
@@ -89,7 +93,7 @@ export type StreamRoutingEvent =
       toggle?: boolean;
     }
   | { type: 'routingRule.reviewSuggested'; id: string }
-  | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
+  | { type: 'stream.received'; definition: PartitionableDefinition }
   | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
   | { type: 'suggestion.changeName'; name: string }
   | { type: 'suggestion.changeCondition'; condition: Condition }
