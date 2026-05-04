@@ -1,5 +1,5 @@
 {
-  "sha1": "b0e694a57fc4c12ddb5b304fd3981a9b3d594de9",
+  "sha1": "419e30440ee98947cf1c3248751c32221ec0f24c",
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -148,7 +148,7 @@
     {
       "id": "09420caa5b9785f-1887bb9ce43cc37",
       "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -157,14 +157,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 35,
+        "line": 34,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-b4d285151fca090",
       "title": "Observability Landing Page redirects to Discover logs when logs data exists",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -173,14 +173,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 58,
+        "line": 56,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-1089e5f36b13719",
       "title": "Observability Landing Page redirects to APM services when only APM data exists",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -189,14 +189,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 77,
+        "line": 75,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-b8a96bff3cd83db",
       "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -205,14 +205,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 96,
+        "line": 94,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-00e86e3614855e3",
       "title": "Observability Landing Page redirects to onboarding when no data exists",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -221,14 +221,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 122,
+        "line": 120,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-d5a54704b60249e",
       "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -237,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 130,
+        "line": 128,
         "column": 9
       }
     },

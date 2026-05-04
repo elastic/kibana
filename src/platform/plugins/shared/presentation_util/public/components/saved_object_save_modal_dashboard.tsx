@@ -124,7 +124,7 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
   const saveDashboardLabel = i18n.translate(
     'presentationUtil.saveModalDashboard.saveAndGoToDashboardLabel',
     {
-      defaultMessage: 'Save and go to Dashboard',
+      defaultMessage: 'Save and go to dashboard',
     }
   );
 

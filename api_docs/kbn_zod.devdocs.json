@@ -167,7 +167,11 @@
         "label": "_endsWith",
         "description": [],
         "signature": [
-          "(suffix: string, params: any) => ",
+          "(suffix: string, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckEndsWith"
         ],
@@ -197,19 +201,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._endsWith.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 193,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -603,7 +611,13 @@
         "signature": [
           "(value: ",
           "Numeric",
-          ", params: any) => ",
+          ", params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckGreaterThan<",
           "Numeric",
@@ -635,19 +649,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._gt.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 159,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -663,7 +683,13 @@
         "signature": [
           "(value: ",
           "Numeric",
-          ", params: any) => ",
+          ", params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckGreaterThan<",
           "Numeric",
@@ -695,19 +721,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._gte.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 160,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -721,7 +753,11 @@
         "label": "_includes",
         "description": [],
         "signature": [
-          "(includes: string, params: any) => ",
+          "(includes: string, params: string | { abort?: boolean | undefined; position?: number | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckIncludes"
         ],
@@ -751,19 +787,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._includes.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; position?: number | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 189,
             "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -905,7 +945,11 @@
         "label": "_lowercase",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckLowerCase"
         ],
@@ -918,19 +962,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._lowercase.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 185,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -946,7 +994,13 @@
         "signature": [
           "(value: ",
           "Numeric",
-          ", params: any) => ",
+          ", params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckLessThan<",
           "Numeric",
@@ -978,19 +1032,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._lt.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 153,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1006,7 +1066,13 @@
         "signature": [
           "(value: ",
           "Numeric",
-          ", params: any) => ",
+          ", params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckLessThan<",
           "Numeric",
@@ -1038,19 +1104,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._lte.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 154,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1064,7 +1136,13 @@
         "label": "_maxLength",
         "description": [],
         "signature": [
-          "(maximum: number, params: any) => ",
+          "(maximum: number, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "HasLength",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckMaxLength<",
           "HasLength",
@@ -1096,19 +1174,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._maxLength.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 177,
             "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1122,7 +1206,13 @@
         "label": "_maxSize",
         "description": [],
         "signature": [
-          "(maximum: number, params: any) => ",
+          "(maximum: number, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "HasSize",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckMaxSize<",
           "HasSize",
@@ -1154,19 +1244,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._maxSize.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 171,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1182,7 +1278,11 @@
         "signature": [
           "(types: ",
           "MimeTypes",
-          "[], params: any) => ",
+          "[], params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckMimeType<",
           "File",
@@ -1215,19 +1315,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._mime.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 199,
             "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1241,7 +1345,13 @@
         "label": "_minLength",
         "description": [],
         "signature": [
-          "(minimum: number, params: any) => ",
+          "(minimum: number, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "HasLength",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckMinLength<",
           "HasLength",
@@ -1273,19 +1383,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._minLength.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 179,
             "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1299,7 +1415,13 @@
         "label": "_minSize",
         "description": [],
         "signature": [
-          "(minimum: number, params: any) => ",
+          "(minimum: number, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "HasSize",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckMinSize<",
           "HasSize",
@@ -1331,19 +1453,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._minSize.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 173,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1357,7 +1485,11 @@
         "label": "_multipleOf",
         "description": [],
         "signature": [
-          "(value: number | bigint, params: any) => ",
+          "(value: number | bigint, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckMultipleOf<number | bigint>"
         ],
@@ -1387,19 +1519,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._multipleOf.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 169,
             "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1413,7 +1549,13 @@
         "label": "_negative",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckLessThan<",
           "Numeric",
@@ -1428,19 +1570,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._negative.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 165,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1454,7 +1602,13 @@
         "label": "_nonnegative",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckGreaterThan<",
           "Numeric",
@@ -1469,19 +1623,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._nonnegative.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 167,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1495,7 +1655,13 @@
         "label": "_nonpositive",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckLessThan<",
           "Numeric",
@@ -1510,19 +1676,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._nonpositive.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 166,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1660,7 +1832,13 @@
         "label": "_positive",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "Numeric",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckGreaterThan<",
           "Numeric",
@@ -1675,19 +1853,25 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._positive.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 164,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1701,7 +1885,11 @@
         "label": "_property",
         "description": [],
         "signature": [
-          "(property: K, schema: T, params: any) => ",
+          "(property: K, schema: T, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssue> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckProperty<{ [k in K]: ",
           "output",
@@ -1752,19 +1940,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._property.$3",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 195,
             "columnNumber": 105,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1778,7 +1970,11 @@
         "label": "_regex",
         "description": [],
         "signature": [
-          "(pattern: RegExp, params: any) => ",
+          "(pattern: RegExp, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckRegex"
         ],
@@ -1809,19 +2005,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._regex.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 183,
             "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1835,7 +2035,17 @@
         "label": "_size",
         "description": [],
         "signature": [
-          "(size: number, params: any) => ",
+          "(size: number, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<",
+          "HasSize",
+          "> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<",
+          "HasSize",
+          ">> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckSizeEquals<",
           "HasSize",
@@ -1867,19 +2077,29 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._size.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              "> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 175,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1914,7 +2134,11 @@
         "label": "_startsWith",
         "description": [],
         "signature": [
-          "(prefix: string, params: any) => ",
+          "(prefix: string, params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckStartsWith"
         ],
@@ -1944,19 +2168,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._startsWith.$2",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 191,
             "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2079,7 +2307,11 @@
         "label": "_uppercase",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => ",
           "node_modules/zod/v4/core/checks",
           "$ZodCheckUpperCase"
         ],
@@ -2092,19 +2324,23 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common._uppercase.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/core/api.d.ts",
             "lineNumber": 187,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3657,7 +3893,15 @@
         "label": "float32",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidType<unknown> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<\"number\"> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => ",
           "ZodFloat32"
         ],
         "path": "node_modules/zod/v4/classic/schemas.d.ts",
@@ -3669,19 +3913,27 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.float32.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 329,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3695,7 +3947,15 @@
         "label": "float64",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidType<unknown> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<\"number\"> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => ",
           "ZodFloat64"
         ],
         "path": "node_modules/zod/v4/classic/schemas.d.ts",
@@ -3707,19 +3967,27 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.float64.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 332,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4201,7 +4469,15 @@
         "label": "int",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidType<unknown> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<\"number\"> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => ",
           "ZodInt"
         ],
         "path": "node_modules/zod/v4/classic/schemas.d.ts",
@@ -4213,19 +4489,27 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.int.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 326,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4239,7 +4523,15 @@
         "label": "int32",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidType<unknown> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<\"number\"> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => ",
           "ZodInt32"
         ],
         "path": "node_modules/zod/v4/classic/schemas.d.ts",
@@ -4251,19 +4543,27 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.int32.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 335,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -8089,7 +8389,15 @@
         "label": "uint32",
         "description": [],
         "signature": [
-          "(params: any) => ",
+          "(params: string | { abort?: boolean | undefined; error?: string | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodErrorMap<",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueInvalidType<unknown> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooBig<\"number\"> | ",
+          "node_modules/zod/v4/core/errors",
+          "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => ",
           "ZodUInt32"
         ],
         "path": "node_modules/zod/v4/classic/schemas.d.ts",
@@ -8101,19 +8409,27 @@
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.uint32.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 338,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -8616,7 +8932,13 @@
             "label": "gte",
             "description": [],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 346,
@@ -8644,19 +8966,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.gte.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 346,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8671,7 +8999,13 @@
               "Alias of `.gte()`"
             ],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 347,
@@ -8699,19 +9033,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 348,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8724,7 +9064,13 @@
             "label": "gt",
             "description": [],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 349,
@@ -8752,19 +9098,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.gt.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 349,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8779,7 +9131,13 @@
               "Alias of `.lte()`"
             ],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 350,
@@ -8807,19 +9165,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.lte.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 351,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8832,7 +9196,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 352,
@@ -8860,19 +9230,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 352,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8885,7 +9261,13 @@
             "label": "lt",
             "description": [],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 353,
@@ -8913,19 +9295,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.lt.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 353,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8938,7 +9326,13 @@
             "label": "positive",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 354,
@@ -8949,19 +9343,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.positive.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 354,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8974,7 +9374,13 @@
             "label": "negative",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 355,
@@ -8985,19 +9391,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.negative.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 355,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9010,7 +9422,13 @@
             "label": "nonpositive",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 356,
@@ -9021,19 +9439,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.nonpositive.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 356,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9046,7 +9470,13 @@
             "label": "nonnegative",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 357,
@@ -9057,19 +9487,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.nonnegative.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 357,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9082,7 +9518,11 @@
             "label": "multipleOf",
             "description": [],
             "signature": [
-              "(value: bigint, params?: any) => this"
+              "(value: bigint, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 358,
@@ -9110,19 +9550,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodBigInt.multipleOf.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 358,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9226,7 +9670,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(value: number | Date, params?: any) => this"
+              "(value: number | Date, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 405,
@@ -9254,19 +9704,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodDate.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 405,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9279,7 +9735,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(value: number | Date, params?: any) => this"
+              "(value: number | Date, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 406,
@@ -9307,19 +9769,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodDate.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 406,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9392,7 +9860,13 @@
             "label": "gt",
             "description": [],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 287,
@@ -9420,19 +9894,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.gt.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 287,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9447,7 +9927,13 @@
               "Identical to .min()"
             ],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 288,
@@ -9475,19 +9961,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.gte.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 289,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9500,7 +9992,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 290,
@@ -9528,19 +10026,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 290,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9553,7 +10057,13 @@
             "label": "lt",
             "description": [],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 291,
@@ -9581,19 +10091,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.lt.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 291,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9608,7 +10124,13 @@
               "Identical to .max()"
             ],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 292,
@@ -9636,19 +10158,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.lte.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 293,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9661,7 +10189,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 294,
@@ -9689,19 +10223,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 294,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9716,7 +10256,15 @@
               "Consider `z.int()` instead. This API is considered *legacy*; it will never be removed but a better alternative exists."
             ],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 295,
@@ -9727,19 +10275,27 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.int.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidType<unknown> | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<\"number\"> | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 296,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9754,7 +10310,15 @@
             "label": "safe",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<\"number\"> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 297,
@@ -9766,19 +10330,27 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.safe.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidType<unknown> | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<\"number\"> | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<\"number\">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 298,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9791,7 +10363,13 @@
             "label": "positive",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 299,
@@ -9802,19 +10380,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.positive.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 299,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9827,7 +10411,13 @@
             "label": "nonnegative",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 300,
@@ -9838,19 +10428,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.nonnegative.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 300,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9863,7 +10459,13 @@
             "label": "negative",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 301,
@@ -9874,19 +10476,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.negative.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 301,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9899,7 +10507,13 @@
             "label": "nonpositive",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "Numeric",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 302,
@@ -9910,19 +10524,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.nonpositive.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "Numeric",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 302,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9935,7 +10555,11 @@
             "label": "multipleOf",
             "description": [],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 303,
@@ -9963,19 +10587,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.multipleOf.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 303,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9990,7 +10618,11 @@
             "label": "step",
             "description": [],
             "signature": [
-              "(value: number, params?: any) => this"
+              "(value: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 304,
@@ -10019,19 +10651,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodNumber.step.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueNotMultipleOf<number | bigint>> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 305,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10274,7 +10910,11 @@
             "label": "regex",
             "description": [],
             "signature": [
-              "(regex: RegExp, params?: any) => this"
+              "(regex: RegExp, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 91,
@@ -10303,19 +10943,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.regex.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 91,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10328,7 +10972,11 @@
             "label": "includes",
             "description": [],
             "signature": [
-              "(value: string, params?: any) => this"
+              "(value: string, params?: string | { abort?: boolean | undefined; position?: number | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 92,
@@ -10356,19 +11004,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.includes.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; position?: number | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 92,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10381,7 +11033,11 @@
             "label": "startsWith",
             "description": [],
             "signature": [
-              "(value: string, params?: any) => this"
+              "(value: string, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 93,
@@ -10409,19 +11065,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.startsWith.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 93,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10434,7 +11094,11 @@
             "label": "endsWith",
             "description": [],
             "signature": [
-              "(value: string, params?: any) => this"
+              "(value: string, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 94,
@@ -10462,19 +11126,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.endsWith.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 94,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10487,7 +11155,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(minLength: number, params?: any) => this"
+              "(minLength: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 95,
@@ -10515,19 +11189,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasLength",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 95,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10540,7 +11220,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(maxLength: number, params?: any) => this"
+              "(maxLength: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 96,
@@ -10568,19 +11254,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasLength",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 96,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10646,7 +11338,13 @@
             "label": "nonempty",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 98,
@@ -10657,19 +11355,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.nonempty.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasLength",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 98,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10682,7 +11386,11 @@
             "label": "lowercase",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 99,
@@ -10693,19 +11401,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.lowercase.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 99,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10718,7 +11430,11 @@
             "label": "uppercase",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 100,
@@ -10729,19 +11445,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common._ZodString.uppercase.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { pattern?: RegExp | undefined; abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidStringFormat> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 100,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -10913,13 +11633,13 @@
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly maximum: number | bigint; readonly inclusive?: boolean | undefined; readonly input?: unknown; readonly code: \"too_big\"; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly minimum: number | bigint; readonly inclusive?: boolean | undefined; readonly input?: unknown; readonly code: \"too_small\"; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
@@ -10947,13 +11667,13 @@
               "node_modules/zod/v4/core/checks",
               "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: ",
               "node_modules/zod/v4/core/errors",
-              "$ZodIssue[][]; readonly input?: unknown; readonly code: \"invalid_union\"; readonly inclusive?: true | undefined; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodIssue[][]; readonly inclusive?: true | undefined; readonly input?: unknown; readonly code: \"invalid_union\"; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: []; readonly input?: unknown; readonly code: \"invalid_union\"; readonly inclusive: false; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: []; readonly inclusive: false; readonly input?: unknown; readonly code: \"invalid_union\"; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
@@ -11013,13 +11733,13 @@
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly maximum: number | bigint; readonly inclusive?: boolean | undefined; readonly input?: unknown; readonly code: \"too_big\"; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly minimum: number | bigint; readonly inclusive?: boolean | undefined; readonly input?: unknown; readonly code: \"too_small\"; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
@@ -11047,13 +11767,13 @@
                   "node_modules/zod/v4/core/checks",
                   "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: ",
                   "node_modules/zod/v4/core/errors",
-                  "$ZodIssue[][]; readonly input?: unknown; readonly code: \"invalid_union\"; readonly inclusive?: true | undefined; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodIssue[][]; readonly inclusive?: true | undefined; readonly input?: unknown; readonly code: \"invalid_union\"; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: []; readonly input?: unknown; readonly code: \"invalid_union\"; readonly inclusive: false; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: []; readonly inclusive: false; readonly input?: unknown; readonly code: \"invalid_union\"; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
@@ -11269,7 +11989,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(minLength: number, params?: any) => this"
+              "(minLength: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 418,
@@ -11297,19 +12023,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodArray.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasLength",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 418,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -11322,7 +12054,13 @@
             "label": "nonempty",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 419,
@@ -11333,19 +12071,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodArray.nonempty.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasLength",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 419,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -11358,7 +12102,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(maxLength: number, params?: any) => this"
+              "(maxLength: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasLength",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 420,
@@ -11386,19 +12136,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodArray.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasLength",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 420,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -13004,7 +13760,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(size: number, params?: any) => this"
+              "(size: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 568,
@@ -13032,19 +13794,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodFile.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 568,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -13057,7 +13825,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(size: number, params?: any) => this"
+              "(size: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 569,
@@ -13085,19 +13859,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodFile.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 569,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -13114,7 +13894,11 @@
               "MimeTypes",
               " | ",
               "MimeTypes",
-              "[], params?: any) => this"
+              "[], params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 570,
@@ -13145,19 +13929,23 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodFile.mime.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 570,
                 "columnNumber": 57,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -14198,7 +14986,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(minSize: number, params?: any) => this"
+              "(minSize: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 520,
@@ -14226,19 +15020,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodMap.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 520,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -14251,7 +15051,13 @@
             "label": "nonempty",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 521,
@@ -14262,19 +15068,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodMap.nonempty.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 521,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -14287,7 +15099,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(maxSize: number, params?: any) => this"
+              "(maxSize: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 522,
@@ -14315,19 +15133,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodMap.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 522,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -14340,7 +15164,17 @@
             "label": "size",
             "description": [],
             "signature": [
-              "(size: number, params?: any) => this"
+              "(size: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              "> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 523,
@@ -14368,19 +15202,29 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodMap.size.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  "> | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 523,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -15410,7 +16254,7 @@
               "node_modules/zod/v4/core/schemas",
               "$ZodLooseShape>(shape: U) => ",
               "ZodObject",
-              "<{ [x: string]: any; }, Config>"
+              "<{ [k in keyof (keyof Shape & keyof U extends never ? Shape & U : { [K in keyof Shape as K extends keyof U ? never : K]: Shape[K]; } & { [K in keyof U]: U[K]; })]: (keyof Shape & keyof U extends never ? Shape & U : { [K in keyof Shape as K extends keyof U ? never : K]: Shape[K]; } & { [K in keyof U]: U[K]; })[k]; }, Config>"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 447,
@@ -17120,7 +17964,13 @@
             "label": "min",
             "description": [],
             "signature": [
-              "(minSize: number, params?: any) => this"
+              "(minSize: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 529,
@@ -17148,19 +17998,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodSet.min.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 529,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -17173,7 +18029,13 @@
             "label": "nonempty",
             "description": [],
             "signature": [
-              "(params?: any) => this"
+              "(params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 530,
@@ -17184,19 +18046,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodSet.nonempty.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 530,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -17209,7 +18077,13 @@
             "label": "max",
             "description": [],
             "signature": [
-              "(maxSize: number, params?: any) => this"
+              "(maxSize: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 531,
@@ -17237,19 +18111,25 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodSet.max.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 531,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -17262,7 +18142,17 @@
             "label": "size",
             "description": [],
             "signature": [
-              "(size: number, params?: any) => this"
+              "(size: number, params?: string | { abort?: boolean | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooSmall<",
+              "HasSize",
+              "> | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueTooBig<",
+              "HasSize",
+              ">> | undefined; message?: string | undefined; } | undefined) => this"
             ],
             "path": "node_modules/zod/v4/classic/schemas.d.ts",
             "lineNumber": 532,
@@ -17290,19 +18180,29 @@
               {
                 "parentPluginId": "@kbn/zod",
                 "id": "def-common.ZodSet.size.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | { abort?: boolean | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooSmall<",
+                  "HasSize",
+                  "> | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueTooBig<",
+                  "HasSize",
+                  ">> | undefined; message?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/v4/classic/schemas.d.ts",
                 "lineNumber": 532,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -29727,13 +30627,13 @@
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly maximum: number | bigint; readonly inclusive?: boolean | undefined; readonly input: unknown; readonly code: \"too_big\"; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly minimum: number | bigint; readonly inclusive?: boolean | undefined; readonly input: unknown; readonly code: \"too_small\"; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
@@ -29761,13 +30661,13 @@
           "node_modules/zod/v4/core/checks",
           "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: ",
           "node_modules/zod/v4/core/errors",
-          "$ZodIssue[][]; readonly input: unknown; readonly code: \"invalid_union\"; readonly inclusive?: true | undefined; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodIssue[][]; readonly inclusive?: true | undefined; readonly input: unknown; readonly code: \"invalid_union\"; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: []; readonly input: unknown; readonly code: \"invalid_union\"; readonly inclusive: false; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly errors: []; readonly inclusive: false; readonly input: unknown; readonly code: \"invalid_union\"; readonly discriminator?: string | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
@@ -31013,10 +31913,6 @@
           {
             "plugin": "entityStore",
             "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/utils/validator.ts"
-          },
-          {
-            "plugin": "entityStore",
-            "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/utils/log_extraction_validator.ts"
           },
           {
             "plugin": "entityStore",

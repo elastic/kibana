@@ -108,7 +108,7 @@
         "label": "MarkdownCreateResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; created_by?: string | undefined; updated_by?: string | undefined; owner?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; settings: Readonly<{} & { open_links_in_new_tab: boolean; }>; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; owner?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; settings: Readonly<{} & { open_links_in_new_tab: boolean; }>; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/types.ts",
         "lineNumber": 14,
@@ -142,7 +142,7 @@
         "label": "MarkdownReadResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; created_by?: string | undefined; updated_by?: string | undefined; owner?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; settings: Readonly<{} & { open_links_in_new_tab: boolean; }>; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; owner?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; settings: Readonly<{} & { open_links_in_new_tab: boolean; }>; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/types.ts",
         "lineNumber": 13,
@@ -159,7 +159,7 @@
         "label": "MarkdownUpdateResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; created_by?: string | undefined; updated_by?: string | undefined; owner?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; settings: Readonly<{} & { open_links_in_new_tab: boolean; }>; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; owner?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; settings: Readonly<{} & { open_links_in_new_tab: boolean; }>; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/update/types.ts",
         "lineNumber": 14,

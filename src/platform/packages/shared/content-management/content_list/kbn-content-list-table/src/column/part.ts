@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import type { SkeletonOutput } from '@kbn/content-list-assembly';
 import { table } from '../assembly';
 import type { ColumnBuilderContext } from './types';
 import type { NameColumnProps } from './name/name_builder';
@@ -41,6 +42,14 @@ export interface ColumnProps extends ColumnLayoutProps {
   field?: string;
   /** Optional test subject for the column header/cells. */
   'data-test-subj'?: string;
+  /**
+   * Optional skeleton descriptor for this custom column during initial load.
+   *
+   * Use this when the column renders something richer than ordinary text,
+   * such as an avatar, badge, icon, or multi-line cell. When omitted, the
+   * table infers a text-like skeleton from the resolved column metadata.
+   */
+  skeleton?: SkeletonOutput | ((context: ColumnBuilderContext) => SkeletonOutput | undefined);
   /** Render function for the column cells. */
   render: (item: ContentListItem) => ReactNode;
 }
@@ -120,6 +129,17 @@ const resolveCustomColumn = (
   };
 };
 
+const resolveCustomColumnSkeleton = (
+  { skeleton }: ColumnProps,
+  context: ColumnBuilderContext
+): SkeletonOutput | undefined => {
+  if (typeof skeleton === 'function') {
+    return skeleton(context);
+  }
+
+  return skeleton;
+};
+
 /**
  * Column component for custom columns.
  *
@@ -147,4 +167,5 @@ const resolveCustomColumn = (
  */
 export const Column = column.createComponent<ColumnProps>({
   resolve: resolveCustomColumn,
+  skeleton: resolveCustomColumnSkeleton,
 });
