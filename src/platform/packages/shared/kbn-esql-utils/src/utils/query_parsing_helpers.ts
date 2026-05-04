@@ -700,18 +700,16 @@ export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
 
 /**
  * Returns true if the ES|QL query contains a CHANGE_POINT command.
- * Matches both top-level CHANGE_POINT and CHANGE_POINT inside FORK branches.
  * @param esql - The ES|QL query string
  */
 export const hasChangePointCommand = (esql?: string): boolean => {
   if (!esql) return false;
   try {
     const { root } = Parser.parse(esql);
-    const changePointCommands = Walker.findAll(
-      root,
-      (node) => node.type === 'command' && node.name === 'change_point'
-    );
-    return changePointCommands.length > 0;
+    // Only check top-level pipeline commands. Walker.findAll would descend into FORK
+    // sub-queries, falsely matching CHANGE_POINT commands that belong to FORK branches
+    // rather than the outer pipeline.
+    return root.commands.some((cmd) => cmd.name === CommandNames.CHANGE_POINT);
   } catch {
     return false;
   }
@@ -732,7 +730,7 @@ export const getChangePointOutputColumnNames = (
     const { root } = Parser.parse(esql);
     const changePointCommands = Walker.findAll(
       root,
-      (node) => node.type === 'command' && node.name === 'change_point'
+      (node) => node.type === 'command' && node.name === CommandNames.CHANGE_POINT
     );
     const changePointCommand = changePointCommands[0];
     if (!changePointCommand) return undefined;
@@ -768,38 +766,6 @@ export interface BuildChangePointLineDataQueryOptions {
 }
 
 const isSourceCommandName = (name: string | undefined): boolean => name === 'from' || name === 'ts';
-
-export interface ForkWithChangePointInfo {
-  root: ESQLAstQueryExpression;
-  forkCommand: ESQLAstForkCommand;
-  forkIndex: number;
-}
-
-/**
- * Locates the first top-level FORK whose branches contain CHANGE_POINT.
- */
-export const getForkWithChangePoint = (esql?: string): ForkWithChangePointInfo | undefined => {
-  if (!esql) return undefined;
-  try {
-    const { root } = Parser.parse(esql);
-    const forkIndex = root.commands.findIndex((c) => c.name === 'fork');
-    if (forkIndex < 0) return undefined;
-    const forkCommand = root.commands[forkIndex] as ESQLAstForkCommand;
-    const forkArgs = forkCommand.args as ESQLForkParens[] | undefined;
-    if (!forkArgs?.length) return undefined;
-
-    const someBranchHasChangePoint = forkArgs.some((parens) => {
-      const branch = parens?.child;
-      if (branch?.type !== 'query' || !branch.commands) return false;
-      return branch.commands.some((cmd) => cmd.name === 'change_point');
-    });
-    if (!someBranchHasChangePoint) return undefined;
-
-    return { root, forkCommand, forkIndex };
-  } catch {
-    return undefined;
-  }
-};
 
 const literalNodeToComparable = (node: ESQLAstItem): unknown => {
   if (!isLiteral(node)) return undefined;
@@ -883,7 +849,7 @@ const forkRowLiteralMatchesCell = (cell: unknown, literalValue: unknown): boolea
     if (typeof cell === 'number' && Number.isFinite(cell)) return cell === literalValue;
     if (typeof cell === 'string') {
       const n = Number(cell);
-      return !Number.isNaN(n) && n === literalValue;
+      return cell.length > 0 && !Number.isNaN(n) && n === literalValue;
     }
     return false;
   }
@@ -917,7 +883,6 @@ export const formatEsqlLiteral = (value: unknown): string | undefined => {
     return String(value);
   }
   if (typeof value === 'string') {
-    if (value.length === 0) return undefined;
     return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -963,58 +928,6 @@ export const appendEntityFiltersToChangePointLineEsql = (
 };
 
 /**
- * When a FORK + CHANGE_POINT query omits a `_fork` column in tabular results, every row defaults to
- * branch 0. This resolves the branch index by matching {@code entityColumnIds} cell values to
- * literals in each branch's {@code WHERE} / {@code EVAL} commands before {@code CHANGE_POINT}.
- *
- * @returns The first matching branch index, or {@code undefined} if the query has no such FORK or
- * no branch could be matched.
- */
-export const resolveChangePointForkBranchIndexForEntityRow = (
-  esql: string,
-  row: Record<string, unknown>,
-  entityColumnIds: readonly string[]
-): number | undefined => {
-  if (!esql || entityColumnIds.length === 0) return undefined;
-  try {
-    const { root } = Parser.parse(esql);
-    const forkIdx = root.commands.findIndex((c) => c.name === 'fork');
-    if (forkIdx < 0) return undefined;
-
-    const forkCmd = root.commands[forkIdx] as ESQLAstForkCommand;
-    const forkArgs = forkCmd.args as ESQLForkParens[] | undefined;
-    if (!forkArgs?.length) return undefined;
-
-    const entitySet = new Set(entityColumnIds);
-
-    for (let i = 0; i < forkArgs.length; i++) {
-      const branchQuery = forkArgs[i].child as ESQLAstQueryExpression;
-      if (branchQuery?.type !== 'query' || !branchQuery.commands) continue;
-      const cpIdx = branchQuery.commands.findIndex((c) => c.name === 'change_point');
-      if (cpIdx < 0) continue;
-
-      const literals = collectEntityLiteralsFromCommands(
-        branchQuery.commands.slice(0, cpIdx),
-        entitySet
-      );
-      if (literals.size === 0) continue;
-
-      let allMatch = true;
-      for (const [col, litVal] of literals) {
-        if (!forkRowLiteralMatchesCell(row[col], litVal)) {
-          allMatch = false;
-          break;
-        }
-      }
-      if (allMatch) return i;
-    }
-    return undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-/**
  * Metric (value) and time column names from the first CHANGE_POINT in the query (same rule as
  * {@link getChangePointOutputColumnNames}). FORK queries should use parallel naming across branches.
  */
@@ -1026,7 +939,7 @@ export const getChangePointSeriesColumns = (
     const { root } = Parser.parse(esql);
     const changePointCommands = Walker.findAll(
       root,
-      (node) => node.type === 'command' && node.name === 'change_point'
+      (node) => node.type === 'command' && node.name === CommandNames.CHANGE_POINT
     );
     const cp = changePointCommands[0] as ESQLAstChangePointCommand | undefined;
     if (!cp?.value?.parts?.length) return undefined;
@@ -1051,7 +964,7 @@ export const getChangePointByColumns = (esql?: string): string[] | undefined => 
     const { root } = Parser.parse(esql);
     const changePointCommands = Walker.findAll(
       root,
-      (node) => node.type === 'command' && node.name === 'change_point'
+      (node) => node.type === 'command' && node.name === CommandNames.CHANGE_POINT
     );
     const cp = changePointCommands[0] as ESQLAstChangePointCommand | undefined;
     if (!cp) return undefined;
@@ -1094,7 +1007,7 @@ export const buildChangePointLineDataQuery = (
       const branchQuery = branchParen.child as ESQLAstQueryExpression;
       if (branchQuery?.type !== 'query' || !branchQuery.commands) return undefined;
 
-      const cpIdx = branchQuery.commands.findIndex((c) => c.name === 'change_point');
+      const cpIdx = branchQuery.commands.findIndex((c) => c.name === CommandNames.CHANGE_POINT);
       if (cpIdx < 0) return undefined;
 
       const prefixBeforeFork = root.commands.slice(0, forkIndex) as ESQLAstCommand[];
@@ -1113,7 +1026,7 @@ export const buildChangePointLineDataQuery = (
       return normalizePrintedEsql(BasicPrettyPrinter.print(synthetic));
     }
 
-    const cpIdx = root.commands.findIndex((c) => c.name === 'change_point');
+    const cpIdx = root.commands.findIndex((c) => c.name === CommandNames.CHANGE_POINT);
     if (cpIdx < 0) return undefined;
     const prefix = stripTrailingSortCommands(root.commands.slice(0, cpIdx) as ESQLAstCommand[]);
     const synthetic: ESQLAstQueryExpression = { ...root, commands: prefix };
@@ -1122,12 +1035,3 @@ export const buildChangePointLineDataQuery = (
     return undefined;
   }
 };
-
-/**
- * Returns the line-source ES|QL from FORK branch 0 (commands before FORK + that branch’s pipeline
- * before CHANGE_POINT). Equivalent to {@link buildChangePointLineDataQuery} with
- * `forkBranchIndex: 0` for FORK queries; use {@link buildChangePointLineDataQuery} with a non-zero
- * index for other branches.
- */
-export const getTemplateSourceQueryFromForkWithChangePoint = (esql?: string): string | undefined =>
-  buildChangePointLineDataQuery(esql, { forkBranchIndex: 0 });

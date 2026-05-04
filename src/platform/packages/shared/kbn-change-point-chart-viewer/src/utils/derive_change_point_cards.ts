@@ -86,7 +86,7 @@ export const formatAnnotationTimestamp = (value: unknown): string | undefined =>
   }
   if (typeof value === 'string' && value.length > 0) {
     const asNum = Number(value);
-    if (!Number.isNaN(asNum) && value.length < 13) {
+    if (!Number.isNaN(asNum) && value.length <= 13) {
       return new Date(asNum).toISOString();
     }
     const d = Date.parse(value);
@@ -234,7 +234,10 @@ const getChangePointCardsBuildContext = (params: {
  *   if the result table has no rows yet. The chart always renders so the source data line is
  *   visible regardless of whether any change points were detected.
  * - Split (entity columns present via BY clause or heuristic): true when at least one entity
- *   group exists.
+ *   group contains at least one valid annotation event (row with a parseable timestamp and, for
+ *   non-BY mode, a non-empty type and defined p-value). Mirrors the skip logic in
+ *   {@link buildChangePointCards} so the predicate never returns `true` when the builder would
+ *   return `undefined`.
  */
 export const hasChangePointChartCards = (params: {
   table: Datatable | undefined;
@@ -248,8 +251,23 @@ export const hasChangePointChartCards = (params: {
     return Boolean(buildChangePointLineDataQuery(ctx.esql));
   }
 
-  // Split: require at least one entity group and a buildable line query.
-  return ctx.groups.size > 0 && Boolean(buildChangePointLineDataQuery(ctx.esql));
+  // Split: require a buildable line query AND at least one group with a valid annotation.
+  // This mirrors the `if (isSplitQuery && annotationEvents.length === 0) continue` guard and the
+  // timestamp checks inside buildChangePointCards, ensuring the predicate and the builder agree.
+  if (!buildChangePointLineDataQuery(ctx.esql)) return false;
+
+  for (const { rows } of ctx.groups.values()) {
+    for (const row of rows) {
+      const isAnnotation = ctx.isByMode
+        ? true
+        : isChangePointTableRow(row, ctx.typeColumnId, ctx.pvalueColumnId);
+      if (!isAnnotation) continue;
+      const timeCell = pickTimestampCell(row, ctx.timeColumn, ctx.table, ctx.timestampReservedIds);
+      if (formatAnnotationTimestamp(timeCell) !== undefined) return true;
+    }
+  }
+
+  return false;
 };
 
 export const buildChangePointCards = (params: {

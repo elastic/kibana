@@ -14,15 +14,17 @@ import type {
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { useEuiTheme } from '@elastic/eui';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useStableCallback } from '@kbn/react-hooks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
+  catchError,
   filter,
   Observable,
   distinctUntilChanged,
+  EMPTY,
   from,
   merge,
   shareReplay,
@@ -49,6 +51,18 @@ export type ChangePointLensProps = Pick<
   | 'userMessages'
 >;
 
+/**
+ * Builds and keeps the Lens embeddable props up-to-date for a single change point chart card.
+ *
+ * The hook returns `undefined` while the first build is in flight.
+ *
+ * Two independent signals trigger a rebuild:
+ *  - `configUpdates$` — fires whenever the card's ES|QL query, title, layers, or error change.
+ *  - `discoverFetch$`  — fires whenever Discover triggers a new search (time range, filters, etc.).
+ *
+ * Builds are skipped while the chart's DOM element is not visible in the viewport, resuming
+ * automatically once it scrolls into view (IntersectionObserver, 10 % threshold).
+ */
 export const useChangePointLensProps = ({
   lensInstanceId,
   title,
@@ -63,7 +77,9 @@ export const useChangePointLensProps = ({
   userMessages,
 }: {
   lensInstanceId: string;
+  /** Human-readable label shown in the Lens panel header, e.g. `"web-server-1"`. */
   title: string;
+  /** The ES|QL query driving this chart (the filtered line-data sub-query). */
   query: string;
   discoverFetch$: UnifiedChangePointGridProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
@@ -74,15 +90,41 @@ export const useChangePointLensProps = ({
   userMessages?: EmbeddableComponentProps['userMessages'];
 } & Pick<UnifiedChangePointGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
+
+  // Signal emitted whenever any card-level config prop changes (query, title, layers, error).
+  // Merged with discoverFetch$ below to form the full set of rebuild triggers.
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
   }, [query, title, chartLayers, error, userMessages]);
 
+  // Wrapped in useLatest so the RxJS pipeline always invokes the most recent closure
+  // (with the latest query/title/layers) without needing to be listed as a dependency —
+  // adding it to deps would teardown and recreate the entire subscription on every render.
   const buildAttributesFn = useLatest(async () => {
+    // Nothing to render: no layers and no error overlay.
     if (!chartLayers.length && !error) return null;
 
+    // LensXYConfig is the high-level, framework-agnostic description of the chart.
+    // Example shape for a split card with one series layer and one annotation layer:
+    //
+    //   {
+    //     chartType: 'xy',
+    //     dataset: { esql: 'FROM logs | CHANGE_POINT metric BY host.name | FORK ...' },
+    //     title: 'web-server-1',
+    //     description: 'host.name: web-server-1',
+    //     layers: [
+    //       { type: 'series', seriesType: 'line',
+    //         xAxis: { type: 'dateHistogram', field: '@timestamp', minimumInterval: 'auto' },
+    //         yAxis: [{ value: 'metric', label: 'metric' }] },
+    //       { type: 'annotation',
+    //         events: [{ name: 'step_change', datetime: '2024-01-15T12:00:00.000Z',
+    //                    icon: 'triangle', color: '#BD271E' }] }
+    //     ],
+    //     legend: { show: false },
+    //     fittingFunction: 'Linear',
+    //   }
     const lensParams: LensXYConfig = {
       chartType: 'xy',
       dataset: {
@@ -103,6 +145,21 @@ export const useChangePointLensProps = ({
 
     const builder = new LensConfigBuilder(services.dataViews);
 
+    // builder.build() compiles LensXYConfig → LensSavedObjectAttributes (the full Lens document).
+    // Example result shape:
+    //
+    //   {
+    //     title: 'web-server-1',
+    //     description: 'host.name: web-server-1',   // set below when description is provided
+    //     visualizationType: 'lnsXY',
+    //     state: {
+    //       datasourceStates: { textBased: { layers: { '<uuid>': { query: { esql: '...' } } } } },
+    //       visualization: { layers: [...], fittingFunction: 'Linear', ... },
+    //       query: { esql: '...' },
+    //       filters: [],
+    //     },
+    //     references: [],
+    //   }
     const result = (await builder.build(lensParams, {
       query: {
         esql: (lensParams.dataset as LensESQLDataset).esql,
@@ -112,8 +169,12 @@ export const useChangePointLensProps = ({
     return result;
   });
 
-  const buildLensProps = useCallback(
-    (attributes: LensAttributes) =>
+  const [lensPropsContext, setLensPropsContext] = useState<ChangePointLensProps>();
+
+  // useStableCallback always invokes the latest closure, so fetchParams / timeRangeOverride
+  // values are always current without needing a dep array (unlike useCallback).
+  const updateLensPropsContext = useStableCallback((attributes: LensAttributes) =>
+    setLensPropsContext(
       getChangePointLensProps({
         id: lensInstanceId,
         searchSessionId: fetchParams.searchSessionId,
@@ -122,27 +183,17 @@ export const useChangePointLensProps = ({
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         userMessages,
-      }),
-    [
-      lensInstanceId,
-      fetchParams.searchSessionId,
-      timeRangeOverride,
-      fetchParams.relativeTimeRange,
-      fetchParams.lastReloadRequestTime,
-      fetchParams.esqlVariables,
-      userMessages,
-    ]
-  );
-
-  const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
-  const updateLensPropsContext = useStableCallback((attributes: LensAttributes) =>
-    setLensPropsContext(buildLensProps(attributes))
+      })
+    )
   );
 
   useEffect(() => {
     const chartRefCurrent = chartRef?.current;
     const configUpdates$ = chartConfigUpdates$.current;
 
+    // Emits true/false as the chart scrolls in/out of the viewport.
+    // When no DOM ref is provided (e.g. in tests) we emit true immediately and complete,
+    // so every trigger results in a build.
     const intersecting$ = new Observable<boolean>((subscriber) => {
       const observer = new IntersectionObserver(
         ([entry]) => subscriber.next(entry.isIntersecting),
@@ -159,11 +210,27 @@ export const useChangePointLensProps = ({
       return () => observer.disconnect();
     }).pipe(distinctUntilChanged(), shareReplay(1));
 
+    // triggers$ fires on every config change or Discover fetch, then immediately
+    // calls buildAttributesFn to produce the updated LensAttributes.
     const triggers$ = merge(configUpdates$, discoverFetch$).pipe(
-      switchMap(() => from(buildAttributesFn.current())),
+      switchMap(() =>
+        from(buildAttributesFn.current()).pipe(
+          // Catch synchronous throws and Promise rejections from the builder inside the inner
+          // observable so errors do not propagate to the outer subscription and terminate it.
+          // EMPTY completes the inner stream without emitting, keeping triggers$ alive for the
+          // next emission from configUpdates$ or discoverFetch$.
+          catchError((err) => {
+            // eslint-disable-next-line no-console
+            console.error('[useChangePointLensProps] Failed to build Lens attributes', err);
+            return EMPTY;
+          })
+        )
+      ),
       filter((attributes): attributes is LensAttributes => attributes !== null)
     );
 
+    // Only update the rendered props when both a fresh set of attributes is available AND
+    // the chart is currently visible — avoids building Lens expressions for off-screen cards.
     const subscription = combineLatest([triggers$, intersecting$])
       .pipe(
         filter(([, isIntersecting]) => isIntersecting),

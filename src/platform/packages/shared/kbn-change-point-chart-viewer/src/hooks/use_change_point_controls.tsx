@@ -102,7 +102,7 @@ export const useChangePointControls = (
       opts.push({
         value: 'pvalue',
         text: i18n.translate('changePointChartViewer.controls.sort.pvalue', {
-          defaultMessage: 'P-value',
+          defaultMessage: 'p-value',
         }),
       });
     }

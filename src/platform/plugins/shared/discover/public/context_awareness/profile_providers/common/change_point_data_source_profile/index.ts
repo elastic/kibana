@@ -13,9 +13,5 @@ export {
   CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
   isChangePointDataSourceContext,
 } from './change_point_context';
-export type {
-  ChangePointLensDataSourceContext,
-  ChangePointLensDocContext,
-  ChangePointLensFetchSlice,
-} from './change_point_context';
+export type { ChangePointLensDataSourceContext } from './change_point_context';
 export type { ChangePointPvalueCellContext } from './change_point_pvalue_cell';

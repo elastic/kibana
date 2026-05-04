@@ -38,8 +38,6 @@ import {
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
   buildChangePointLineDataQuery,
-  getTemplateSourceQueryFromForkWithChangePoint,
-  resolveChangePointForkBranchIndexForEntityRow,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
@@ -1170,14 +1168,24 @@ describe('esql query helpers', () => {
       ).toBe(true);
     });
 
-    it('should return true when CHANGE_POINT is inside FORK branches', () => {
+    it('should return false when CHANGE_POINT only appears inside FORK branches', () => {
+      // FORK sub-queries are not top-level pipeline commands; the change-point data source
+      // profile must not activate for FORK-only queries.
       const forkQuery = `FROM gallery-*
 | FORK
   ( WHERE referer == "http://domainsigma.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
   ( WHERE referer == "https://www.google.com/" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
 | WHERE type IS NOT NULL
 | KEEP provider, bucket, avg_bytes, type, pvalue`;
-      expect(hasChangePointCommand(forkQuery)).toBe(true);
+      expect(hasChangePointCommand(forkQuery)).toBe(false);
+    });
+
+    it('should return true when CHANGE_POINT is a top-level command after FORK', () => {
+      const mixedQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://domainsigma.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket )
+| CHANGE_POINT avg_bytes ON bucket`;
+      expect(hasChangePointCommand(mixedQuery)).toBe(true);
     });
   });
 
@@ -1265,15 +1273,6 @@ describe('esql query helpers', () => {
       expect(line).not.toContain('SORT bucket');
     });
 
-    it('respects forkBranchIndex', () => {
-      const forkQuery = `FROM gallery-*
-| FORK
-  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
-  ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )`;
-      const line = buildChangePointLineDataQuery(forkQuery, { forkBranchIndex: 1 });
-      expect(line).toContain('WHERE referer == "http://b.com"');
-    });
-
     it('excludes commands after FORK (e.g. filter on change-point output)', () => {
       const forkQuery = `FROM gallery-*
 | FORK
@@ -1298,57 +1297,6 @@ describe('esql query helpers', () => {
       expect(line1).toContain('EVAL prep = 1');
       expect(line1).toContain('http://b.com');
     });
-
-    it('getTemplateSourceQueryFromForkWithChangePoint matches branch 0 line query', () => {
-      const forkQuery = `FROM gallery-*
-| FORK
-  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
-  ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )`;
-      expect(getTemplateSourceQueryFromForkWithChangePoint(forkQuery)).toBe(
-        buildChangePointLineDataQuery(forkQuery, { forkBranchIndex: 0 })
-      );
-    });
-  });
-
-  describe('resolveChangePointForkBranchIndexForEntityRow', () => {
-    const forkWithEval = `FROM gallery-*
-| FORK
-  ( WHERE clientip == "192.96.204.42" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | EVAL clientip = "192.96.204.42" | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
-  ( WHERE clientip == "5.255.253.75" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | EVAL clientip = "5.255.253.75" | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
-| WHERE type IS NOT NULL`;
-
-    it('matches FORK branch from WHERE + EVAL literals when entity columns are provided', () => {
-      expect(
-        resolveChangePointForkBranchIndexForEntityRow(forkWithEval, { clientip: '192.96.204.42' }, [
-          'clientip',
-        ])
-      ).toBe(0);
-      expect(
-        resolveChangePointForkBranchIndexForEntityRow(forkWithEval, { clientip: '5.255.253.75' }, [
-          'clientip',
-        ])
-      ).toBe(1);
-    });
-
-    it('returns undefined without entity columns', () => {
-      expect(
-        resolveChangePointForkBranchIndexForEntityRow(
-          forkWithEval,
-          { clientip: '192.96.204.42' },
-          []
-        )
-      ).toBeUndefined();
-    });
-
-    it('returns undefined for queries without FORK', () => {
-      const q =
-        'FROM gallery-* | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
-      expect(
-        resolveChangePointForkBranchIndexForEntityRow(q, { clientip: '192.96.204.42' }, [
-          'clientip',
-        ])
-      ).toBeUndefined();
-    });
   });
 
   describe('appendEntityFiltersToChangePointLineEsql', () => {
@@ -1367,8 +1315,8 @@ describe('esql query helpers', () => {
     });
 
     describe('formatEsqlLiteral', () => {
-      it('returns undefined for empty string', () => {
-        expect(formatEsqlLiteral('')).toBeUndefined();
+      it('formats empty string as an empty ES|QL string literal', () => {
+        expect(formatEsqlLiteral('')).toBe('""');
       });
 
       it('quotes strings', () => {
@@ -1409,11 +1357,23 @@ describe('esql query helpers', () => {
         );
       });
 
-      it('skips columns with no literal (null / empty)', () => {
+      it('skips columns with no literal (null / undefined)', () => {
+        const q = 'FROM idx | STATS m = AVG(x) BY host, t';
+        expect(
+          appendEntityFiltersToChangePointLineEsql(q, { host: null, other: 'ok' }, [
+            'host',
+            'other',
+          ])
+        ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE other == "ok"');
+      });
+
+      it('appends WHERE for entity columns with empty string values', () => {
+        // Regression: formatEsqlLiteral("") previously returned undefined, silently dropping the
+        // filter. Empty strings are valid ES|QL literals and must produce host == "".
         const q = 'FROM idx | STATS m = AVG(x) BY host, t';
         expect(
           appendEntityFiltersToChangePointLineEsql(q, { host: '', other: 'ok' }, ['host', 'other'])
-        ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE other == "ok"');
+        ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE host == "" AND other == "ok"');
       });
 
       it('does not duplicate WHERE when pipeline already constrains the entity via WHERE', () => {

@@ -19,14 +19,19 @@ import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { useMemo, useRef } from 'react';
-import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../constants';
+import { ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL } from '../constants';
 import { useChangePointLensProps } from '../hooks/use_change_point_lens_props';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import type { UnifiedChangePointGridProps } from '../types';
 
 const CHART_HEIGHT_PX = 230;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
+const DEFAULT_DISABLED_ACTIONS = [
+  'ACTION_CUSTOMIZE_PANEL',
+  'ACTION_EXPORT_CSV',
+  'alertRule',
+  'ACTION_OPEN_IN_DISCOVER',
+];
 
 const chartContainerCss = css`
   position: relative;
@@ -119,6 +124,8 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     );
 
     return earliestAnnotation < from ? { from: earliestAnnotation, to } : relativeTimeRange;
+    // fetchParams.relativeTimeRange is covered by the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card.annotationEvents, fetchParams.relativeTimeRange]);
 
   const lensProps = useChangePointLensProps({
@@ -144,7 +151,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
         type: 'actionButton',
         getDisplayName() {
           return i18n.translate('changePointChartViewer.lens.exploreInDiscover', {
-            defaultMessage: 'Explore',
+            defaultMessage: 'Open in a Discover tab',
           });
         },
         getIconType() {
@@ -177,7 +184,11 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
       {lensProps ? (
         <div css={chartContainerCss}>
           <EmbeddableRendererContext.Provider
-            value={{ quickActions: { view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] } }}
+            value={{
+              quickActions: {
+                view: [ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL],
+              },
+            }}
           >
             <EmbeddableComponent
               {...lensProps}

@@ -37,14 +37,10 @@ export {
   getChangePointSeriesColumns,
   getChangePointByColumns,
   buildChangePointLineDataQuery,
-  getForkWithChangePoint,
-  getTemplateSourceQueryFromForkWithChangePoint,
-  resolveChangePointForkBranchIndexForEntityRow,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
   type BuildChangePointLineDataQueryOptions,
-  type ForkWithChangePointInfo,
 } from './utils/query_parsing_helpers';
 export {
   getIndexPatternFromESQLQuery,

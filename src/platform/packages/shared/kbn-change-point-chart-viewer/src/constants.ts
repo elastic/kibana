@@ -15,3 +15,5 @@ export const CHANGE_POINT_TYPE_COLUMN = 'type';
 export const CHANGE_POINT_PVALUE_COLUMN = 'pvalue';
 
 export const ACTION_EXPLORE_IN_DISCOVER_TAB = 'ACTION_CHANGE_POINT_CHART_EXPLORE_IN_DISCOVER_TAB';
+export const ACTION_INSPECT_PANEL = 'openInspector';
+export const ADD_TO_EXISTING_CASE_ACTION_ID = 'embeddable_addToExistingCase';

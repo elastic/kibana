@@ -75,14 +75,12 @@ export const ChangePointPvalueCell: FC<ChangePointPvalueCellProps> = ({
   }
 
   const level = getImpactLevel(pvalue);
-  const color = IMPACT_LEVEL_COLORS[level];
-  const label = IMPACT_LEVEL_LABELS[level];
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiBadge color={color} title={String(pvalue)}>
-          {label}
+        <EuiBadge color={IMPACT_LEVEL_COLORS[level]} title={String(pvalue)}>
+          {IMPACT_LEVEL_LABELS[level]}
         </EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{formatPvalue(pvalue)}</EuiFlexItem>

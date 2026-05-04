@@ -10,7 +10,5 @@
 export { LazyChangePointExperienceGrid } from './src/lazy_change_point_experience_grid';
 export type {
   ChangePointChartSectionActions,
-  ChangePointLensDocContext,
-  ChangePointLensFetchSlice,
   UnifiedChangePointGridProps,
 } from './src/types';

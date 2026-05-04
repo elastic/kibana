@@ -11,7 +11,7 @@ import { EuiDelayRender, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import { getChangePointSeriesColumns } from '@kbn/esql-utils';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ChangePointExperienceGridContent } from './change_point_experience_grid_content';
 import type { UnifiedChangePointGridProps } from './types';
@@ -26,7 +26,6 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
     isChartLoading,
     isComponentVisible = true,
     fetchParams,
-    changePointLensContext$,
   } = props;
 
   const esql = useMemo(() => getEsqlQuery(fetchParams.query), [fetchParams.query]);
@@ -43,23 +42,6 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
     () => (esql ? getChangePointSeriesColumns(esql) : undefined),
     [esql]
   );
-
-  useEffect(() => {
-    if (!changePointLensContext$) return;
-    changePointLensContext$.next({
-      lensAttributesByRecordId: {},
-      fetchSlice: {
-        relativeTimeRange: fetchParams.relativeTimeRange,
-        esqlVariables: fetchParams.esqlVariables,
-        searchSessionId: fetchParams.searchSessionId,
-      },
-    });
-  }, [
-    changePointLensContext$,
-    fetchParams.esqlVariables,
-    fetchParams.relativeTimeRange,
-    fetchParams.searchSessionId,
-  ]);
 
   const hasTableRows = Boolean(fetchParams.table?.rows?.length);
   const canRenderChangePointCharts = Boolean(cards?.length);
@@ -122,8 +104,7 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
             body={
               <p>
                 {i18n.translate('changePointChartViewer.empty.body', {
-                  defaultMessage:
-                    'Ensure the result includes change point rows (type column is set) to see charts.',
+                  defaultMessage: 'No change points detected.',
                 })}
               </p>
             }

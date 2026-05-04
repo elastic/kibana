@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 const TOOLTIP_TITLE = i18n.translate(
   'discover.contextAwareness.changePointPvalueColumnHeader.tooltipTitle',
-  { defaultMessage: 'P-value' }
+  { defaultMessage: 'p-value' }
 );
 
 const TOOLTIP_CONTENT = i18n.translate(
@@ -26,30 +26,26 @@ const TOOLTIP_CONTENT = i18n.translate(
 
 interface ChangePointPvalueColumnHeaderProps {
   columnDisplayName?: string;
-  headerRowHeight?: number;
 }
 
 export const ChangePointPvalueColumnHeader: React.FC<ChangePointPvalueColumnHeaderProps> = ({
   columnDisplayName,
-  headerRowHeight = 1,
-}) => {
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false} component="span">
-        <EuiIconTip
-          data-test-subj="change-point-pvalue-header-icon"
-          type="info"
-          content={TOOLTIP_CONTENT}
-          title={TOOLTIP_TITLE}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        component="span"
-        css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-      >
-        {columnDisplayName ?? 'pvalue'}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+}) => (
+  <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexItem grow={false} component="span">
+      <EuiIconTip
+        data-test-subj="change-point-pvalue-header-icon"
+        type="info"
+        content={TOOLTIP_CONTENT}
+        title={TOOLTIP_TITLE}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      component="span"
+      css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+    >
+      {columnDisplayName ?? 'pvalue'}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

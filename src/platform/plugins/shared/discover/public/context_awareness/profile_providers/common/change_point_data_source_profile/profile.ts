@@ -16,7 +16,6 @@ import type {
   CustomGridColumnsConfiguration,
   CustomGridColumnProps,
 } from '@kbn/unified-data-table';
-import { BehaviorSubject } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -25,7 +24,6 @@ import { ChangePointPvalueColumnHeader } from './change_point_pvalue_column_head
 import {
   CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
   type ChangePointLensDataSourceContext,
-  type ChangePointLensDocContext,
 } from './change_point_context';
 import type { ChangePointPvalueCellContext } from './change_point_pvalue_cell';
 
@@ -46,7 +44,6 @@ export const createChangePointDataSourceProfileProvider =
             React.createElement(LazyChangePointExperienceGrid, {
               ...props,
               actions: params.actions,
-              changePointLensContext$: context.changePointLensContext$,
             }),
           replaceDefaultChart: true as const,
           localStorageKeyPrefix: CHANGE_POINT_CHART_LOCAL_STORAGE_KEY,
@@ -60,11 +57,10 @@ export const createChangePointDataSourceProfileProvider =
           if (!pvalueColumnId) return base;
           return {
             ...base,
-            [pvalueColumnId]: ({ column, headerRowHeight }: CustomGridColumnProps) => ({
+            [pvalueColumnId]: ({ column }: CustomGridColumnProps) => ({
               ...column,
               display: React.createElement(ChangePointPvalueColumnHeader, {
                 columnDisplayName: column.displayAsText,
-                headerRowHeight,
               }),
             }),
           };
@@ -108,9 +104,6 @@ export const createChangePointDataSourceProfileProvider =
           category: DataSourceCategory.Default,
           pvalueColumnId,
           typeColumnId,
-          changePointLensContext$: new BehaviorSubject<ChangePointLensDocContext | undefined>(
-            undefined
-          ),
         },
       };
     },

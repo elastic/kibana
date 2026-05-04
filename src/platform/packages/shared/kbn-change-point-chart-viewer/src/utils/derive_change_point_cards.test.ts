@@ -30,6 +30,14 @@ describe('derive_change_point_cards', () => {
       const s = '2021-12-20T00:00:00.000-07:00';
       expect(formatAnnotationTimestamp(s)).toBe(new Date(s).toISOString());
     });
+
+    it('parses 13-digit epoch-millisecond strings', () => {
+      // Regression: value.length < 13 excluded 13-digit strings from the numeric branch, and
+      // Date.parse() returns NaN for plain numeric strings, so they fell through to undefined.
+      expect(formatAnnotationTimestamp('1700000000000')).toBe(
+        new Date(1700000000000).toISOString()
+      );
+    });
   });
 
   describe('buildChangePointCards', () => {
@@ -151,6 +159,38 @@ describe('derive_change_point_cards', () => {
 
       expect(hasChangePointChartCards({ table: undefined, esql: esqlLocal })).toBe(false);
       expect(buildChangePointCards({ table: undefined, esql: esqlLocal })).toBeUndefined();
+    });
+
+    it('hasChangePointChartCards returns false for split query when all groups lack annotations', () => {
+      // Regression: groups.size > 0 is not enough — every group must have at least one valid
+      // annotation (row with parseable timestamp + type/pvalue in non-BY mode) or buildChangePointCards
+      // returns undefined for split queries.
+      const esqlWithHost =
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
+      const tableNoAnnotations = {
+        type: 'datatable' as const,
+        columns: [
+          { id: 'host', name: 'host', meta: { type: 'string' as const } },
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
+        ],
+        rows: [
+          // Both entity groups have rows but no valid change-point annotations (type empty / pvalue null).
+          { host: 'a', bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 10, type: '', pvalue: null },
+          { host: 'b', bucket: '2023-11-16T00:00:00.000Z', avg_bytes: 20, type: '', pvalue: null },
+        ],
+      };
+
+      const cards = buildChangePointCards({ table: tableNoAnnotations, esql: esqlWithHost });
+      // Builder skips all groups → returns undefined.
+      expect(cards).toBeUndefined();
+
+      // Predicate must agree with the builder.
+      expect(
+        hasChangePointChartCards({ table: tableNoAnnotations, esql: esqlWithHost })
+      ).toBe(false);
     });
 
     it('skips annotation markers when type is set but p-value is null', () => {

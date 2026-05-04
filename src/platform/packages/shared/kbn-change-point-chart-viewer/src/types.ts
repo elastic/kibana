@@ -8,20 +8,7 @@
  */
 
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { BehaviorSubject } from 'rxjs';
-
-export type ChangePointLensFetchSlice = Pick<
-  ChartSectionProps['fetchParams'],
-  'relativeTimeRange' | 'esqlVariables' | 'searchSessionId'
->;
-
-/** Mirrors Discover `change_point_context` for the document tab bridge. */
-export interface ChangePointLensDocContext {
-  lensAttributesByRecordId: Record<string, TypedLensByValueInput['attributes']>;
-  fetchSlice: ChangePointLensFetchSlice;
-}
 
 export interface ChangePointChartSectionActions {
   openInNewTab?: (params: {
@@ -35,5 +22,4 @@ export interface ChangePointChartSectionActions {
 /** Props for the Discover chart section (lazy bundle). Chart data comes from `fetchParams.query` and `fetchParams.table`. */
 export type UnifiedChangePointGridProps = ChartSectionProps & {
   actions?: ChangePointChartSectionActions;
-  changePointLensContext$?: BehaviorSubject<ChangePointLensDocContext | undefined>;
 };
