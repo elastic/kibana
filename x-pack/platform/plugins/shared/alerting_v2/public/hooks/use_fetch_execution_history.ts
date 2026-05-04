@@ -13,12 +13,18 @@ import {
 } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
 
-export const useFetchExecutionHistory = () => {
+interface UseFetchExecutionHistoryParams {
+  page: number;
+  perPage: number;
+}
+
+export const useFetchExecutionHistory = ({ page, perPage }: UseFetchExecutionHistoryParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
   return useQuery<PolicyExecutionHistoryResponse, Error>({
-    queryKey: executionHistoryKeys.list(),
-    queryFn: () => executionHistoryApi.listExecutionHistory(),
+    queryKey: executionHistoryKeys.list({ page, perPage }),
+    queryFn: () => executionHistoryApi.listExecutionHistory({ page, perPage }),
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 };

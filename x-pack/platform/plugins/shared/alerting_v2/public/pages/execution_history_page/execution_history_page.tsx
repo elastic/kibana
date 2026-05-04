@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -108,13 +109,34 @@ const rulesPlaceholder = (
   />
 );
 
+const DEFAULT_PER_PAGE = 50;
+
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(POLICIES_TAB_ID);
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
-  const { data, isFetching } = useFetchExecutionHistory();
+  const { data, isFetching } = useFetchExecutionHistory({ page: page + 1, perPage });
   const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+
+  const onTableChange = ({
+    page: tablePage,
+  }: CriteriaWithPagination<PolicyExecutionHistoryItem>) => {
+    if (tablePage) {
+      setPage(tablePage.index);
+      setPerPage(tablePage.size);
+    }
+  };
+
+  const pagination = {
+    pageIndex: page,
+    pageSize: perPage,
+    totalItemCount: total,
+    pageSizeOptions: [10, 25, 50, 100],
+  };
 
   const tabs: Array<{ id: TabId; label: string }> = [
     {
@@ -160,6 +182,8 @@ export const ExecutionHistoryPage = () => {
           columns={columns}
           loading={isFetching}
           noItemsMessage={policiesEmptyState}
+          pagination={pagination}
+          onChange={onTableChange}
         />
       ) : (
         rulesPlaceholder

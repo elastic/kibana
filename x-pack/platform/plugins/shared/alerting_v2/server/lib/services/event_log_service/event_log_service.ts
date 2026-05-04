@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { fromKueryExpression } from '@kbn/es-query';
 import type {
   IEvent,
   IEventLogClientService,
@@ -24,23 +24,24 @@ import type { AlertingServerStartDependencies } from '../../../types';
 import { EventLoggerToken } from './tokens';
 
 const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_PAGE = 1;
 
-interface ActionPolicyExecutionCursorPayload {
-  search_after: SortResults;
-}
+const EXECUTION_HISTORY_AUTH_FILTER = fromKueryExpression(
+  `event.provider: ${ACTION_POLICY_EVENT_PROVIDER} AND (event.action: ${ACTION_POLICY_EVENT_ACTIONS.DISPATCHED} OR event.action: ${ACTION_POLICY_EVENT_ACTIONS.THROTTLED})`
+);
 
 export interface FindActionPolicyExecutionEventsParams {
   request: KibanaRequest;
   startDate?: string;
-  policyIds: string[];
-  cursor?: string;
-  pageSize?: number;
+  page?: number;
+  perPage?: number;
 }
 
 export interface FindActionPolicyExecutionEventsResult {
   events: IValidatedEvent[];
-  cursor: string | null;
-  hasMore: boolean;
+  page: number;
+  perPage: number;
+  total: number;
 }
 
 export interface EventLogServiceContract {
@@ -65,53 +66,29 @@ export class EventLogService implements EventLogServiceContract {
   public async findActionPolicyExecutionEvents({
     request,
     startDate,
-    policyIds,
-    cursor,
-    pageSize = DEFAULT_PAGE_SIZE,
+    page = DEFAULT_PAGE,
+    perPage = DEFAULT_PAGE_SIZE,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
-    if (policyIds.length === 0) {
-      return { events: [], cursor: null, hasMore: false };
-    }
-
     const client = this.clientService.getClient(request);
-    const searchAfter = cursor ? decodeCursor(cursor) : undefined;
 
-    const result = await client.findEventsBySavedObjectIdsSearchAfter(
+    const result = await client.findEventsWithAuthFilter(
       ACTION_POLICY_SAVED_OBJECT_TYPE,
-      policyIds,
+      [],
+      EXECUTION_HISTORY_AUTH_FILTER,
+      undefined, // don't we need to specify a namespace here?
       {
-        per_page: pageSize,
-        sort: [
-          { sort_field: '@timestamp', sort_order: 'desc' },
-          { sort_field: 'event.sequence', sort_order: 'desc' },
-        ],
-        filter: `event.provider: ${ACTION_POLICY_EVENT_PROVIDER} AND (event.action: ${ACTION_POLICY_EVENT_ACTIONS.DISPATCHED} OR event.action: ${ACTION_POLICY_EVENT_ACTIONS.THROTTLED})`,
-        start: startDate,
-        ...(searchAfter ? { search_after: searchAfter } : {}),
+        page,
+        per_page: perPage,
+        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+        ...(startDate ? { start: startDate } : {}),
       }
     );
 
-    const hasMore = result.data.length === pageSize;
-    const nextCursor =
-      hasMore && result.search_after ? encodeCursor({ search_after: result.search_after }) : null;
-
     return {
       events: result.data,
-      cursor: nextCursor,
-      hasMore,
+      page: result.page,
+      perPage: result.per_page,
+      total: result.total,
     };
-  }
-}
-
-function encodeCursor(payload: ActionPolicyExecutionCursorPayload): string {
-  return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64');
-}
-
-function decodeCursor(cursor: string): SortResults | undefined {
-  try {
-    const decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf8'));
-    return Array.isArray(decoded?.search_after) ? (decoded.search_after as SortResults) : undefined;
-  } catch {
-    return undefined;
   }
 }

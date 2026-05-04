@@ -22,17 +22,29 @@ export interface PolicyExecutionHistoryItem {
 
 export interface PolicyExecutionHistoryResponse {
   items: PolicyExecutionHistoryItem[];
-  cursor: string | null;
-  has_more: boolean;
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface ListExecutionHistoryParams {
+  page?: number;
+  perPage?: number;
 }
 
 @injectable()
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listExecutionHistory() {
+  public async listExecutionHistory(params: ListExecutionHistoryParams = {}) {
     return this.http.get<PolicyExecutionHistoryResponse>(
-      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH
+      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
+      {
+        query: {
+          page: params.page,
+          perPage: params.perPage,
+        },
+      }
     );
   }
 }

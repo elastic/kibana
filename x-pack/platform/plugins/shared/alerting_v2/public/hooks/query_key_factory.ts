@@ -53,5 +53,6 @@ export const actionPolicyKeys = {
 
 export const executionHistoryKeys = {
   all: ['executionHistory'] as const,
-  list: () => [...executionHistoryKeys.all, 'list'] as const,
+  list: (filters: { page: number; perPage: number }) =>
+    [...executionHistoryKeys.all, 'list', filters] as const,
 };

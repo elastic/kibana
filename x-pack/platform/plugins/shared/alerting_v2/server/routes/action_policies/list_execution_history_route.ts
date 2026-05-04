@@ -10,7 +10,6 @@ import { Request } from '@kbn/core-di-server';
 import { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../../lib/dispatcher/steps/constants';
@@ -21,11 +20,19 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
-const DEFAULT_PAGE_SIZE = 100;
-const MAX_POLICY_LOOKUP = 1000;
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 100;
+const MAX_PER_PAGE = DEFAULT_PER_PAGE;
+const TIME_WINDOW_HOURS = 24;
 
 const listExecutionHistoryQuerySchema = z.object({
-  cursor: z.string().optional().describe('Pagination cursor from a previous response.'),
+  page: z.coerce.number().min(1).optional().describe('Page number (1-indexed).'),
+  perPage: z.coerce
+    .number()
+    .min(1)
+    .max(MAX_PER_PAGE)
+    .optional()
+    .describe('Number of events per page.'),
 });
 
 const policyExecutionHistoryItemSchema = z.object({
@@ -40,8 +47,9 @@ const policyExecutionHistoryItemSchema = z.object({
 
 const listExecutionHistoryResponseSchema = z.object({
   items: z.array(policyExecutionHistoryItemSchema),
-  cursor: z.string().nullable(),
-  has_more: z.boolean(),
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
 });
 
 type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
@@ -83,53 +91,33 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
       z.infer<typeof listExecutionHistoryQuerySchema>,
       unknown
     >,
-    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
     @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
   ) {
     super(ctx);
   }
 
   protected async execute() {
+    const { page = DEFAULT_PAGE, perPage = DEFAULT_PER_PAGE } = this.request.query ?? {};
 
-    try {
+    const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
 
+    const result = await this.eventLogService.findActionPolicyExecutionEvents({
+      request: this.request,
+      startDate,
+      page,
+      perPage,
+    });
 
-      const { cursor } = this.request.query ?? {};
+    const items = result.events.flatMap(denormalizeEvent);
 
-      // ToDo: handle pagination properly when we have more than 1000 policies
-      const policies = await this.actionPolicyClient.findActionPolicies({
-        perPage: MAX_POLICY_LOOKUP,
-      });
-      const policyIds = policies.items.map((policy) => policy.id);
-
-      const {
-        events,
-        cursor: nextCursor,
-        hasMore,
-      } = await this.eventLogService.findActionPolicyExecutionEvents({
-        request: this.request,
-        startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // last 24 hours
-        policyIds,
-        cursor,
-        pageSize: DEFAULT_PAGE_SIZE,
-      });
-
-      const items = events.flatMap(denormalizeEvent);
-
-      return this.ctx.response.ok({
-        body: {
-          items,
-          cursor: nextCursor,
-          has_more: hasMore,
-        },
-      });
-    } catch (error) {
-      this.ctx.logger.error(`Error listing action policy execution history: ${error}`);
-      return this.ctx.response.customError({
-        statusCode: 500,
-        body: { message: 'An error occurred while listing action policy execution history.' },
-      });
-    }
+    return this.ctx.response.ok({
+      body: {
+        items,
+        page: result.page,
+        perPage: result.perPage,
+        total: result.total,
+      },
+    });
   }
 }
 
@@ -143,8 +131,8 @@ function denormalizeEvent(event: IValidatedEvent): PolicyExecutionHistoryItem[] 
     event.event?.action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
       ? ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
       : event.event?.action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED
-        ? ACTION_POLICY_EVENT_ACTIONS.THROTTLED
-        : undefined;
+      ? ACTION_POLICY_EVENT_ACTIONS.THROTTLED
+      : undefined;
   if (!action) return [];
 
   const timestamp = event['@timestamp'];
