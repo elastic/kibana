@@ -6,15 +6,15 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
 import { flattenObject } from '@kbn/object-utils';
-import { EsServiceScopedToken } from '../es_service/tokens';
-import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
+import { inject, injectable } from 'inversify';
 import {
   ALERT_EVENTS_DATA_STREAM,
   alertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { EsServiceScopedToken } from '../es_service/tokens';
+import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
 import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
