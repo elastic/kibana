@@ -35,13 +35,13 @@ ajv@6.14.0
 ajv@8.18.0
 babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
-browserslist@4.28.1
+browserslist@4.28.2
 buffer-from@1.1.1
-caniuse-lite@1.0.30001781
+caniuse-lite@1.0.30001791
 chrome-trace-event@1.0.2
 commander@2.20.3
 common-path-prefix@3.0.0
-electron-to-chromium@1.5.321
+electron-to-chromium@1.5.349
 enhanced-resolve@5.20.0
 es-module-lexer@1.5.4
 escalade@3.2.0
@@ -75,7 +75,7 @@ monaco-types@0.1.0
 monaco-worker-manager@2.0.1
 monaco-yaml@5.1.0
 neo-async@2.6.2
-node-releases@2.0.27
+node-releases@2.0.38
 p-limit@4.0.0
 p-locate@6.0.0
 path-browserify@1.0.1
