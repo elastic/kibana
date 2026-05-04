@@ -34,17 +34,11 @@ Whether you are writing a new component or fixing existing code, work top-down a
 
 ## Localization (i18n)
 
-User-visible or assistive-tech strings (`aria-label`, `tableCaption`, tooltip `content`, labels, titles, body copy) use **`i18n.translate`** from `@kbn/i18n` — never raw literals. Programmatic tokens (`name` on radios, internal ids) stay as plain strings.
+Visible and assistive-tech strings (`aria-label`, `tableCaption`, tooltip `content`, `label`, `title`, error messages, body copy) must be localized — never raw literals. Programmatic tokens (`name` on radios, internal ids) stay as plain strings.
 
-```tsx
-i18n.translate('messageId', { defaultMessage: 'English fallback' })
-```
+For i18n APIs, message id conventions, and validation, follow the **kibana-i18n** skill. Component guides and examples in this skill assume that pattern.
 
-- If the file already uses a shared object (e.g. `i18nTexts.modalTitle`), follow that pattern for new strings.
-- Add an `i18n` import only when you add a new `i18n.translate` call; merge with existing imports.
-- Message ids: reuse an existing id for the same message; otherwise `fileOrComponent.attribute` (e.g. `myTable.tableCaption`); one id ↔ one `defaultMessage` per file.
-
-Full guide: `src/platform/packages/shared/kbn-i18n/GUIDELINE.md`.
+When a file already exposes a shared object (e.g. `i18nTexts.modalTitle`), follow that local pattern for new strings instead of adding inline `i18n.translate` calls.
 
 ## HTML ids
 

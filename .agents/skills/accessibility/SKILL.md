@@ -1,19 +1,6 @@
 ---
 name: accessibility
-description: >
-  Apply this skill when: (1) writing, refactoring, or reviewing Kibana JSX that
-  uses one or more of the EUI components covered by this skill (see
-  references/components/index.md for the full list); (2) fixing a lint error
-  from the @elastic/eui ESLint plugin; (3) answering an accessibility question
-  about ARIA wiring, focus, keyboard interaction, accessible names, or HTML ids
-  in a Kibana codebase.
-  Covered components — EuiModal, EuiFlyout, EuiFlyoutResizable, EuiConfirmModal,
-  EuiPopover, EuiBasicTable, EuiInMemoryTable, EuiCallOut, EuiIcon, EuiIconTip,
-  EuiToolTip, EuiButton, EuiButtonIcon, EuiLink, EuiFormRow, EuiFieldText,
-  EuiFieldNumber, EuiFilePicker, EuiComboBox, EuiTextArea, EuiSelect,
-  EuiSuperSelect, EuiRadio, EuiRadioGroup, EuiBetaBadge, EuiPagination,
-  EuiTreeView, EuiBreadcrumbs.
-  
+description: Accessibility guidance for Kibana. Use this skill when working with or reviewing EUI components, resolving a11y-related (@elastic/eui) ESLint issues, and ensuring proper use of ARIA attributes, focus management, keyboard interactions, and accessible naming conventions.
 ---
 
 # Kibana Accessibility
