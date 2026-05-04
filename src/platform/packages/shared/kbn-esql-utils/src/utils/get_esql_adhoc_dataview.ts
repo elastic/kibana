@@ -96,19 +96,19 @@ export async function getESQLAdHocDataview({
       type: ESQL_TYPE,
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
-      timeFieldName,
-      fields:
-        skipFetchFields && timeFieldName && timeFieldType
-          ? {
-              [timeFieldName]: {
-                name: timeFieldName,
-                type: 'date',
-                esTypes: [timeFieldType],
-                searchable: true,
-                aggregatable: true,
-              },
-            }
-          : undefined,
+      timeFieldName: timeFieldName || undefined,
+      // fields:
+      //   skipFetchFields && timeFieldName && timeFieldType
+      //     ? {
+      //         [timeFieldName]: {
+      //           name: timeFieldName,
+      //           type: 'date',
+      //           esTypes: [timeFieldType],
+      //           searchable: true,
+      //           aggregatable: true,
+      //         },
+      //       }
+      //     : undefined,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields
