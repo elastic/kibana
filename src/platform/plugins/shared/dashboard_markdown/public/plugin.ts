@@ -23,8 +23,8 @@ import {
 import { setKibanaServices } from './services/kibana_services';
 import type { MarkdownEmbeddableState } from '../server';
 import { setupLegacyVis } from './legacy_vis/setup';
-import { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 export interface MarkdownSetupDeps {
   contentManagement: ContentManagementPublicSetup;

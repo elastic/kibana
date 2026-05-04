@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionsPublicPlugin } from "@kbn/expressions-plugin/public/plugin";
-import { VisualizationsSetup } from "@kbn/visualizations-plugin/public";
+import type { ExpressionsPublicPlugin } from "@kbn/expressions-plugin/public/plugin";
+import type { VisualizationsSetup } from "@kbn/visualizations-plugin/public";
 import { createMarkdownVisFn } from "./markdown_fn";
 import { getMarkdownVisRenderer } from "./markdown_renderer";
 import { markdownVisType } from "./markdown_vis";
