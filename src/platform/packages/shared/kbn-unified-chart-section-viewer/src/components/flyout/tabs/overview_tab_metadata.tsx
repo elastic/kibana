@@ -16,6 +16,8 @@ import { getUnitLabel } from '../../../common/utils';
 import type { ParsedMetricItem } from '../../../types';
 import { BadgeGroup, MetricTypeBadge } from '../components';
 
+const LABEL_WIDTH_MULTIPLIER = 11.25;
+
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
 }
@@ -24,7 +26,7 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
-    const labelMinWidthPxInner = euiTheme.base * 11.25;
+    const labelMinWidthPxInner = euiTheme.base * LABEL_WIDTH_MULTIPLIER;
 
     const title = (text: string) => (
       <EuiText size="xs">
