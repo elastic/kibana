@@ -96,6 +96,7 @@ export function AddStop({
               type="plus"
               height={16}
               width={16}
+              aria-hidden={true}
               css={css`
                 position: absolute;
                 top: 0;
