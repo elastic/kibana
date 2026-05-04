@@ -40,10 +40,6 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
       emitEvent: jest.fn(),
       managedWorkflows: createManagedWorkflowsMock(),
     }),
-    getManagedWorkflowsClient: jest.fn().mockResolvedValue({
-      install: jest.fn().mockResolvedValue(undefined),
-      uninstall: jest.fn().mockResolvedValue(undefined),
-    }),
     initManagedWorkflowsClient: jest.fn().mockResolvedValue({
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),

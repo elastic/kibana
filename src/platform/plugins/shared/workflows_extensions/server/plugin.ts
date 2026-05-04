@@ -139,16 +139,6 @@ export class WorkflowsExtensionsServerPlugin
         }
         return this.workflowsClientProvider(request);
       },
-      getManagedWorkflowsClient: async (pluginId: string) => {
-        if (!pluginId) {
-          throw new Error('pluginId is required to get managed workflows client');
-        }
-
-        if (!this.managedWorkflowsSystemApiProvider) {
-          return this.getNoopManagedWorkflowsLifecycleClient();
-        }
-        return this.managedWorkflowsSystemApiProvider(pluginId);
-      },
       initManagedWorkflowsClient: async (pluginId: string) => {
         if (!pluginId) {
           throw new Error('pluginId is required to initialize managed workflows client');

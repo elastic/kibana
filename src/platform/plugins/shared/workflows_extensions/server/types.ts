@@ -14,7 +14,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   ManagedWorkflowsSystemApiProvider,
   PluginScopedManagedWorkflowsApi,
-  RegisteredManagedWorkflowsLifecycleApi,
   WorkflowsApiRequestHandlerContext,
   WorkflowsClient,
   WorkflowsClientProvider,
@@ -96,12 +95,6 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The workflows client
      */
     getClient(request: KibanaRequest): Promise<WorkflowsClient>;
-
-    /**
-     * Get the requestless managed workflows client for startup/system operations.
-     * @returns Lifecycle API scoped to the plugin id
-     */
-    getManagedWorkflowsClient(pluginId: string): Promise<RegisteredManagedWorkflowsLifecycleApi>;
 
     /**
      * Initialize a plugin-scoped managed workflows client. The plugin id is bound once
