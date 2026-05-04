@@ -28,7 +28,7 @@ export const LENS_METRIC_GROUP_ID = {
 } as const;
 
 export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconAlign'> = {
-  iconAlign: 'left',
+  iconAlign: 'left' as const,
 };
 
 /**

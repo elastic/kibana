@@ -7,13 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_METRIC_STATE_DEFAULTS, LENS_METRIC_STYLE_TEMPLATE } from './constants';
+import {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_STYLE_TEMPLATE,
+} from './constants';
 import type {
+  IconPosition,
   MetricLayoutWithDefault,
   PrimaryMetricPosition,
   MetricStyleTemplateId,
   MetricStyleTemplatePresetId,
 } from './types';
+
+/**
+ * Returns the effective iconAlign value for a given state, mirroring the logic used
+ * during expression rendering:
+ * - If an icon is present but iconAlign is not stored (legacy state), fall back to the
+ *   legacy default ('left') — the same default applied by the old metric vis renderer.
+ * - Otherwise, use the stored value or the current shared default ('right').
+ */
+export function getEffectiveIconAlign(state: {
+  icon?: string;
+  iconAlign?: IconPosition;
+}): IconPosition {
+  if (state.icon && state.icon !== 'empty') {
+    return state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign;
+  }
+  return state.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign;
+}
 
 /**
  * Infers the active style template by comparing the given layout fields against
@@ -29,11 +51,14 @@ export function inferStyleTemplate(state: {
   primaryAlign?: string;
   secondaryAlign?: string;
   valueFontMode?: string;
-  iconAlign?: string;
+  iconAlign?: IconPosition;
+  icon?: string;
 }): MetricStyleTemplateId {
   const presets = Object.entries(LENS_METRIC_STYLE_TEMPLATE) as Array<
     [MetricStyleTemplatePresetId, Required<MetricLayoutWithDefault>]
   >;
+
+  const effectiveIconAlign = getEffectiveIconAlign(state);
 
   for (const [id, preset] of presets) {
     const positionMatch =
@@ -50,9 +75,7 @@ export function inferStyleTemplate(state: {
     const valueFontModeMatch =
       (state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode) ===
       LENS_METRIC_STATE_DEFAULTS.valueFontMode;
-    const iconAlignMatch =
-      (state.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign) ===
-      LENS_METRIC_STATE_DEFAULTS.iconAlign;
+    const iconAlignMatch = effectiveIconAlign === LENS_METRIC_STATE_DEFAULTS.iconAlign;
 
     if (
       positionMatch &&

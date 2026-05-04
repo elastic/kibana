@@ -380,7 +380,7 @@ export {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   LENS_METRIC_AVAILABLE_METRIC_ICONS,
 } from './visualizations/metric/constants';
-export { inferStyleTemplate } from './visualizations/metric/utils';
+export { inferStyleTemplate, getEffectiveIconAlign } from './visualizations/metric/utils';
 export {
   PARTITION_CHART_TYPES,
   PARTITION_EMPTY_SIZE_RADIUS,

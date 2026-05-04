@@ -18,10 +18,10 @@ import { hasIcon } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { DatasourceLayers, MetricVisualizationState } from '@kbn/lens-common';
 import {
-  LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_STYLE_TEMPLATE,
   inferStyleTemplate,
+  getEffectiveIconAlign,
 } from '@kbn/lens-common';
 import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
@@ -191,15 +191,7 @@ export const toExpression = (
     LENS_METRIC_STATE_DEFAULTS.secondaryAlign;
 
   const hasMetricIcon = hasIcon(state.icon);
-  // If an icon is present but no iconAlign is set (legacy state), default to 'left' alignment;
-  // otherwise, use the configured or default alignment
-  let iconAlign: 'right' | 'left';
-  if (hasMetricIcon) {
-    // Legacy: If iconAlign is missing, default to 'left'
-    iconAlign = state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign;
-  } else {
-    iconAlign = LENS_METRIC_STATE_DEFAULTS.iconAlign;
-  }
+  const iconAlign = getEffectiveIconAlign(state);
 
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
