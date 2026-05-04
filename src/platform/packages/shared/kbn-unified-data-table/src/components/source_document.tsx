@@ -72,6 +72,15 @@ export function SourceDocument({
       ).slice(0, maxEntries)
     : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
 
+  const hasVisiblePairs = pairs.some(
+    ([, , fieldName]) =>
+      !(isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null)
+  );
+
+  if (!hasVisiblePairs) {
+    return <span className={CELL_CLASS}>—</span>;
+  }
+
   return (
     <EuiDescriptionList
       type="inline"
