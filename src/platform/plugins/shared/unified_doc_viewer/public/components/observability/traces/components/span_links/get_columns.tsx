@@ -14,7 +14,7 @@ import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import { EBT_CLICK_ACTION_VIEW_SPAN, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click-actions';
+import { EBT_CLICK_ACTION_VIEW_SPAN, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';

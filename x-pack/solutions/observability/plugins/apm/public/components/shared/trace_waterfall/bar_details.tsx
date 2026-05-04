@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AgentIcon } from '@kbn/custom-icons';
-import { EBT_CLICK_ACTION_VIEW_ERROR, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click-actions';
+import { EBT_CLICK_ACTION_VIEW_ERROR, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';

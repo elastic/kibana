@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/ebt-click-actions",
+  "id": "@kbn/ebt-click",
   "owner": [
     "@elastic/obs-exploration"
   ],

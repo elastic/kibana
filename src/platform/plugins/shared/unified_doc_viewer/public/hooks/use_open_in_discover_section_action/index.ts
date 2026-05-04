@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { EBT_CLICK_ACTION_OPEN_IN_DISCOVER } from '@kbn/ebt-click-actions';
+import { EBT_CLICK_ACTION_OPEN_IN_DISCOVER } from '@kbn/ebt-click';
 import type { Action } from '../../components/content_framework/section/section_actions';
 import {
   OPEN_IN_DISCOVER_LABEL,
