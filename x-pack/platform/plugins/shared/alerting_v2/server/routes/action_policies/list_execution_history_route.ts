@@ -64,7 +64,6 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    access: 'internal',
     summary: 'List action policy execution history',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
