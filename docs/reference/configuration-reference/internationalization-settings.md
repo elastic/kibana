@@ -50,7 +50,7 @@ When a user sets a preferred language, it is stored in their user profile and ta
 #### About the `KBN_LOCALE` cookie
 
 {{kib}} sets a `KBN_LOCALE` cookie on every rendered response containing
-the resolved locale id (e.g. `KBN_LOCALE=ja-JP`). Attributes:
+the resolved locale id (for example, `KBN_LOCALE=ja-JP`). Attributes:
 
 - Path scoped to the {{kib}} `serverBasePath`.
 - `SameSite=Lax`, `Max-Age` of one year, and `Secure` when the response is over HTTPS.
