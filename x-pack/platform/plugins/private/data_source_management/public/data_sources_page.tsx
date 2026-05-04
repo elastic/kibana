@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { DataSourceWithSecrets, DataSource } from '../common';
+import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
+import { HttpDataSetsClient } from './http_data_sets_client';
 import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
@@ -37,9 +38,10 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   httpClient,
 }) => {
   const dataClient = useMemo(() => new HttpDataSourcesClient(httpClient), [httpClient]);
+  const dataSetsClient = useMemo(() => new HttpDataSetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
-  const [dataSetItems, setDataSetItems] = useState<DataSource[]>([]);
+  const [dataSetItems, setDataSetItems] = useState<DataSetWithName[]>([]);
   const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
 
   useEffect(() => {
@@ -58,22 +60,29 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const nextItems = await dataClient.get();
-      if (!cancelled) {
-        setDataSetItems(nextItems);
+      try {
+        const nextItems = await dataSetsClient.get();
+        if (!cancelled) {
+          setDataSetItems(nextItems);
+        }
+      } catch {
+        if (!cancelled) {
+          setDataSetItems([]);
+        }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [dataClient]);
+  }, [dataSetsClient]);
 
   const handleCreateDataSourceSave = useCallback(
-    async (dataSource: DataSourceWithSecrets): Promise<string | void> => {
+    async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
         await dataClient.add(dataSource);
         setItems(await dataClient.get());
         setCreateFlyoutOpen(false);
+        return null;
       } catch (e) {
         return e instanceof Error ? e.message : 'Unknown error';
       }
@@ -115,7 +124,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     []
   );
 
-  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
+  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetWithName>>>(
     () => [
       {
         field: 'name',
@@ -123,17 +132,26 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        width: '22%',
+        width: '18%',
         'data-test-subj': 'dataSourceManagementSetsColName',
       },
       {
-        field: 'sourceName',
-        name: i18n.translate('dataSourceManagement.dataSetsTable.columnSourceName', {
-          defaultMessage: 'Source name',
+        field: 'data_source',
+        name: i18n.translate('dataSourceManagement.dataSetsTable.columnDataSourceId', {
+          defaultMessage: 'Data source',
+        }),
+        sortable: true,
+        width: '18%',
+        'data-test-subj': 'dataSourceManagementSetsColDataSourceId',
+      },
+      {
+        field: 'resource',
+        name: i18n.translate('dataSourceManagement.dataSetsTable.columnResource', {
+          defaultMessage: 'Resource',
         }),
         sortable: true,
         width: '22%',
-        'data-test-subj': 'dataSourceManagementSetsColSourceName',
+        'data-test-subj': 'dataSourceManagementSetsColResource',
       },
       {
         field: 'description',
@@ -263,9 +281,9 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         content: (
           <>
             <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSource>
+            <EuiInMemoryTable<DataSetWithName>
               items={dataSetItems}
-              itemId="id"
+              itemId="name"
               columns={dataSetColumns}
               search={{
                 box: {
@@ -277,8 +295,9 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                   schema: {
                     fields: {
                       name: { type: 'string' },
+                      dataSourceId: { type: 'string' },
+                      resource: { type: 'string' },
                       description: { type: 'string' },
-                      sourceName: { type: 'string' },
                     },
                   },
                 },
@@ -296,7 +315,11 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                     data-test-subj="dataSourceManagementSetsRefreshButton"
                     onClick={() => {
                       void (async () => {
-                        setDataSetItems(await dataClient.get());
+                        try {
+                          setDataSetItems(await dataSetsClient.get());
+                        } catch {
+                          setDataSetItems([]);
+                        }
                       })();
                     }}
                   />
@@ -322,7 +345,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         ),
       },
     ],
-    [columns, dataClient, dataSetColumns, dataSetItems, items, selectedItems]
+    [columns, dataClient, dataSetColumns, dataSetItems, dataSetsClient, items, selectedItems]
   );
 
   return (

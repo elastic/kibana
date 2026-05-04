@@ -12,7 +12,13 @@ export interface Dataset {
   settings?: DatasetSettings;
 }
 
-interface DatasetSettings {
+/**
+ * Dataset as returned from the list API or when creating, including the document
+ * id (`name`) used in `PUT/DELETE /.../data_sets/{id}`.
+ */
+export type DataSetWithName = Dataset & { name: string };
+
+export interface DatasetSettings {
   format?: 'parquet' | 'csv' | 'ndjson' | 'orc';
   errorMode?: 'fail_fast' | 'skip_row' | 'null_field';
   maxErrors?: number;

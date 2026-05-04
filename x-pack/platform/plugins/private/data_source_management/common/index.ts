@@ -31,6 +31,24 @@ export function getDataSourceByIdApiPath(id: string): string {
   return DATA_SOURCE_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
 }
 
+/** GET — list data sets (proxies to Elasticsearch `GET /_query/data_set`). */
+export const DATA_SETS_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/dataset` as const;
+
+/**
+ * By-id data set routes (Kibana path; `{id}` is a path parameter).
+ * - GET → Elasticsearch `GET /_query/data_set/{id}`
+ * - PUT → Elasticsearch `PUT /_query/data_set/{id}` (create data set)
+ * - DELETE → Elasticsearch `DELETE /_query/data_set/{id}`
+ */
+export const DATA_SET_BY_ID_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/dataset/{id}` as const;
+
+/** Resolves `DATA_SET_BY_ID_ROUTE_PATH` with a URL-encoded id segment. */
+export function getDataSetByIdApiPath(id: string): string {
+  return DATA_SET_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
+}
+
+export type { Dataset, DataSetWithName, DatasetSettings } from './dataset_types';
+
 export const PLUGIN_NAME = i18n.translate('dataSourceManagement.pluginName', {
   defaultMessage: 'Data sources',
 });
