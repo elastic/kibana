@@ -42,6 +42,10 @@ tar-fs
 browserslist
 react-day-picker
 jszip
+@rsdoctor/rspack-plugin
+@rspack/core
+@rspack/plugin-react-refresh
+@swc/helpers
 patch-package
 @opentelemetry/resources
 @opentelemetry/exporter-logs-otlp-grpc
