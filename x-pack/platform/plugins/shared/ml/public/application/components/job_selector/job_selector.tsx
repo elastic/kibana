@@ -28,7 +28,6 @@ import { AnomalyResultsViewSelector } from '../anomaly_results_view_selector';
 import type { ExplorerJob } from '../../explorer/explorer_utils';
 import { IdBadges } from './id_badges';
 import { BADGE_LIMIT } from './job_selector_flyout';
-import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
@@ -216,10 +215,6 @@ export function JobSelector({
           </EuiFlexItem>
 
           <EuiFlexItem />
-
-          <EuiFlexItem grow={false}>
-            <FeedBackButton jobIds={selectedIds} />
-          </EuiFlexItem>
 
           {canGetJobs ? (
             <EuiFlexItem grow={false}>

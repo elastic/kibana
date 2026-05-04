@@ -83,7 +83,6 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-ui-settings-server'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/search-inference-endpoints'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
@@ -96,6 +95,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod

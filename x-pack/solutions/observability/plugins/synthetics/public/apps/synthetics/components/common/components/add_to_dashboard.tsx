@@ -23,7 +23,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../common/embeddables/monitors_overview/constants';
-import { selectOverviewState } from '../../../state';
+import { selectOverviewView } from '../../../state';
 import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
 import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/types';
@@ -101,7 +101,7 @@ export const AddToDashboard = ({
   asButton?: boolean;
   isLoading?: boolean;
 }) => {
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   const { setDashboardAttachmentReady, MaybeSavedObjectSaveModalDashboard } = useAddToDashboard(
     type === SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE ? { type } : { type, embeddableInput: { view } }
