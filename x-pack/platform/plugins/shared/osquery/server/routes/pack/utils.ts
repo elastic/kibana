@@ -19,19 +19,29 @@ import {
   difference,
   intersection,
   flatMap,
+  mapValues,
 } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
+import { MAX_SPLAY_SECONDS } from '../../../common';
+import { isSplayWithinMax, parseSplay } from '../../../common/utils/splay_utils';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 export interface PackQueryInput {
   name?: string;
   query: string;
-  interval: number;
+  /**
+   * Legacy per-query interval (seconds). Optional because a query may opt out
+   * of interval scheduling via `schedule_type: 'rrule'` + `rrule_schedule`,
+   * in which case `interval` is intentionally omitted from the SO and the
+   * Fleet config (see `convertPackQueriesToSO` and
+   * `convertSOQueriesToPackConfig`).
+   */
+  interval?: number;
   platform?: string;
   version?: string;
   snapshot?: boolean;
@@ -263,4 +273,211 @@ export const findMatchingShards = (agentPolicies: AgentPolicy[] | undefined, sha
   }
 
   return policyShards;
+};
+
+/**
+ * Subset of fields shared by pack-level and per-query inputs that participate
+ * in scheduling. The helper is structural rather than typed against the route
+ * body so it can validate both shapes uniformly.
+ */
+interface ScheduleInputFields {
+  schedule_type?: ScheduleType;
+  interval?: number;
+  rrule_schedule?: RRuleScheduleConfig;
+}
+
+const isValidIsoDate = (value: string): boolean => {
+  const ts = Date.parse(value);
+
+  return !Number.isNaN(ts);
+};
+
+const validateRruleConfig = (config: RRuleScheduleConfig): string | null => {
+  if (!config.rrule || typeof config.rrule !== 'string' || config.rrule.trim() === '') {
+    return '`rrule_schedule.rrule` must be a non-empty RFC 5545 string';
+  }
+
+  if (!config.start_date || !isValidIsoDate(config.start_date)) {
+    return '`rrule_schedule.start_date` must be a valid ISO 8601 datetime string';
+  }
+
+  if (config.end_date != null) {
+    if (!isValidIsoDate(config.end_date)) {
+      return '`rrule_schedule.end_date` must be a valid ISO 8601 datetime string';
+    }
+
+    if (Date.parse(config.end_date) <= Date.parse(config.start_date)) {
+      return '`rrule_schedule.end_date` must be after `rrule_schedule.start_date`';
+    }
+  }
+
+  if (config.splay != null) {
+    let parsed;
+    try {
+      parsed = parseSplay(config.splay);
+    } catch (err) {
+      return `\`rrule_schedule.splay\` is invalid: ${err.message}`;
+    }
+
+    if (!isSplayWithinMax(parsed)) {
+      return `\`rrule_schedule.splay\` exceeds the maximum of ${MAX_SPLAY_SECONDS} seconds (1 hour)`;
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Validates pack-level OR per-query schedule fields. Used by route handlers
+ * before persisting the pack SO so the API rejects inputs that would be
+ * silently coerced by `convertSOQueriesToPackConfig`.
+ *
+ * Pack-level rules:
+ *  - When `interval` or `rrule_schedule` is present, `schedule_type` is required.
+ *  - `schedule_type === 'rrule'` requires `rrule_schedule` and forbids `interval`.
+ *  - `schedule_type === 'interval'` requires `interval` and forbids `rrule_schedule`.
+ *
+ * Per-query rules: identical, except `interval` may also be present without
+ * `schedule_type` (legacy behavior — the existing per-query interval mode).
+ */
+export const validateScheduleFields = (
+  scope: 'pack' | 'query',
+  fields: ScheduleInputFields
+): string | null => {
+  const { schedule_type: type, interval, rrule_schedule: rrule } = fields;
+
+  if (type === 'rrule') {
+    if (!rrule) {
+      return `\`schedule_type: 'rrule'\` requires \`rrule_schedule\``;
+    }
+
+    if (interval != null) {
+      return `\`schedule_type: 'rrule'\` is mutually exclusive with \`interval\``;
+    }
+
+    return validateRruleConfig(rrule);
+  }
+
+  if (type === 'interval') {
+    if (interval == null) {
+      return `\`schedule_type: 'interval'\` requires \`interval\``;
+    }
+
+    if (rrule) {
+      return `\`schedule_type: 'interval'\` is mutually exclusive with \`rrule_schedule\``;
+    }
+
+    return null;
+  }
+
+  // No `schedule_type` set:
+  //  - Pack scope: any presence of new pack-level scheduling fields requires an
+  //    explicit `schedule_type` so we never silently emit ambiguous configs.
+  //  - Query scope: legacy per-query `interval` is allowed bare; only RRULE
+  //    presence forces an explicit discriminator.
+  if (scope === 'pack' && (interval != null || rrule)) {
+    return '`schedule_type` is required when `interval` or `rrule_schedule` is provided';
+  }
+
+  if (scope === 'query' && rrule) {
+    return '`schedule_type` is required when `rrule_schedule` is provided';
+  }
+
+  return null;
+};
+
+/**
+ * Strips pack-level RRULE/scheduling fields and per-query RRULE override fields
+ * from a request body. Used when the `rruleScheduling` feature flag is off so
+ * unknown fields do not leak into the SO or Fleet config.
+ *
+ * Note: per-query `interval` is intentionally preserved — it predates the
+ * RRULE feature flag and is the legacy scheduling mechanism.
+ */
+export const stripScheduleFieldsFromBody = <
+  Body extends ScheduleInputFields & {
+    queries?: Record<string, ScheduleInputFields & Record<string, unknown>>;
+  } & Record<string, unknown>
+>(
+  body: Body
+): Body => {
+  const {
+    schedule_type: _packType,
+    interval: _packInterval,
+    rrule_schedule: _packRrule,
+    queries,
+    ...rest
+  } = body;
+
+  const cleanedQueries = queries
+    ? mapValues(queries, ({ schedule_type: _qt, rrule_schedule: _qr, ...queryRest }) => queryRest)
+    : queries;
+
+  return { ...rest, queries: cleanedQueries } as Body;
+};
+
+export interface PackScheduleExtractionResult<Queries> {
+  /** Pack-level schedule attributes ready to merge into the Pack SO. */
+  packSchedule: PackSchedule;
+  /** Queries with schedule fields normalized for the current feature-flag state. */
+  queries: Queries;
+}
+
+/**
+ * Extracts pack-level scheduling fields and the queries record from a route
+ * body, applying feature-flag gating and validation.
+ *
+ * - Feature flag OFF: all new RRULE/pack-interval fields are stripped — both
+ *   pack-level and per-query overrides — preserving legacy behavior.
+ * - Feature flag ON: pack-level and per-query schedule fields are validated
+ *   and surfaced; the route handler is responsible for storing them on the SO.
+ *
+ * Returns `{ ok: false, error }` when validation fails so the route can emit
+ * a 400 response with the same string.
+ */
+export const extractAndValidatePackScheduleFromBody = <
+  QueryShape extends ScheduleInputFields & Record<string, unknown>,
+  Body extends ScheduleInputFields & {
+    queries?: Record<string, QueryShape>;
+  } & Record<string, unknown>
+>(
+  body: Body,
+  isRruleFeatureEnabled: boolean
+):
+  | { ok: true; result: PackScheduleExtractionResult<Body['queries']> }
+  | { ok: false; error: string } => {
+  if (!isRruleFeatureEnabled) {
+    const cleaned = stripScheduleFieldsFromBody(body);
+
+    return {
+      ok: true,
+      result: { packSchedule: {}, queries: cleaned.queries as Body['queries'] },
+    };
+  }
+
+  const packError = validateScheduleFields('pack', body);
+  if (packError) {
+    return { ok: false, error: packError };
+  }
+
+  if (body.queries) {
+    for (const [queryId, queryData] of Object.entries(body.queries)) {
+      const queryError = validateScheduleFields('query', queryData);
+      if (queryError) {
+        return { ok: false, error: `Query "${queryId}": ${queryError}` };
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    result: {
+      packSchedule: {
+        schedule_type: body.schedule_type,
+        interval: body.interval,
+        rrule_schedule: body.rrule_schedule,
+      },
+      queries: body.queries as Body['queries'],
+    },
+  };
 };

@@ -9,6 +9,9 @@ import {
   convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  extractAndValidatePackScheduleFromBody,
+  stripScheduleFieldsFromBody,
+  validateScheduleFields,
 } from './utils';
 import type { RRuleScheduleConfig } from '../../../common';
 
@@ -425,6 +428,303 @@ describe('Pack utils', () => {
       });
 
       expect(result.q1).toEqual({ query: 'SELECT 1', rrule_schedule: packRrule });
+    });
+  });
+
+  describe('validateScheduleFields', () => {
+    const validRrule: RRuleScheduleConfig = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+
+    describe('pack scope', () => {
+      test('accepts empty object (legacy mode)', () => {
+        expect(validateScheduleFields('pack', {})).toBeNull();
+      });
+
+      test('accepts schedule_type="interval" with interval', () => {
+        expect(
+          validateScheduleFields('pack', { schedule_type: 'interval', interval: 3600 })
+        ).toBeNull();
+      });
+
+      test('accepts schedule_type="rrule" with rrule_schedule', () => {
+        expect(
+          validateScheduleFields('pack', { schedule_type: 'rrule', rrule_schedule: validRrule })
+        ).toBeNull();
+      });
+
+      test('rejects schedule_type="rrule" without rrule_schedule', () => {
+        expect(validateScheduleFields('pack', { schedule_type: 'rrule' })).toMatch(
+          /requires `rrule_schedule`/
+        );
+      });
+
+      test('rejects schedule_type="rrule" together with interval', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: validRrule,
+            interval: 3600,
+          })
+        ).toMatch(/mutually exclusive with `interval`/);
+      });
+
+      test('rejects schedule_type="interval" without interval', () => {
+        expect(validateScheduleFields('pack', { schedule_type: 'interval' })).toMatch(
+          /requires `interval`/
+        );
+      });
+
+      test('rejects schedule_type="interval" together with rrule_schedule', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'interval',
+            interval: 3600,
+            rrule_schedule: validRrule,
+          })
+        ).toMatch(/mutually exclusive with `rrule_schedule`/);
+      });
+
+      test('rejects pack-level interval without schedule_type', () => {
+        expect(validateScheduleFields('pack', { interval: 3600 })).toMatch(
+          /`schedule_type` is required/
+        );
+      });
+
+      test('rejects pack-level rrule_schedule without schedule_type', () => {
+        expect(validateScheduleFields('pack', { rrule_schedule: validRrule })).toMatch(
+          /`schedule_type` is required/
+        );
+      });
+
+      test('rejects rrule with empty rrule string', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: '   ', start_date: '2024-01-01T00:00:00.000Z' },
+          })
+        ).toMatch(/non-empty RFC 5545 string/);
+      });
+
+      test('rejects rrule with invalid start_date', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: 'not-a-date' },
+          })
+        ).toMatch(/`rrule_schedule.start_date`/);
+      });
+
+      test('rejects end_date that is before start_date', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-06-01T00:00:00.000Z',
+              end_date: '2024-01-01T00:00:00.000Z',
+            },
+          })
+        ).toMatch(/`rrule_schedule.end_date` must be after/);
+      });
+
+      test('rejects splay greater than 1 hour', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { ...validRrule, splay: '2h' },
+          })
+        ).toMatch(/exceeds the maximum of 3600 seconds/);
+      });
+
+      test('accepts splay of 1 hour', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { ...validRrule, splay: '1h' },
+          })
+        ).toBeNull();
+      });
+
+      test('rejects malformed splay duration string', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { ...validRrule, splay: '1d' },
+          })
+        ).toMatch(/`rrule_schedule.splay` is invalid/);
+      });
+    });
+
+    describe('query scope', () => {
+      test('accepts bare interval (legacy per-query mode)', () => {
+        expect(validateScheduleFields('query', { interval: 3600 })).toBeNull();
+      });
+
+      test('accepts empty object', () => {
+        expect(validateScheduleFields('query', {})).toBeNull();
+      });
+
+      test('rejects rrule_schedule without schedule_type at query level', () => {
+        expect(validateScheduleFields('query', { rrule_schedule: validRrule })).toMatch(
+          /`schedule_type` is required/
+        );
+      });
+
+      test('accepts schedule_type="rrule" with valid rrule_schedule', () => {
+        expect(
+          validateScheduleFields('query', { schedule_type: 'rrule', rrule_schedule: validRrule })
+        ).toBeNull();
+      });
+    });
+  });
+
+  describe('stripScheduleFieldsFromBody', () => {
+    test('removes pack-level schedule fields and per-query rrule fields', () => {
+      const cleaned = stripScheduleFieldsFromBody({
+        name: 'pack',
+        schedule_type: 'rrule' as const,
+        interval: 3600,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01T00:00:00.000Z' },
+        queries: {
+          q1: {
+            query: 'SELECT 1',
+            interval: 60,
+            schedule_type: 'rrule' as const,
+            rrule_schedule: { rrule: 'FREQ=HOURLY', start_date: '2024-01-01T00:00:00.000Z' },
+          },
+        },
+      });
+
+      expect(cleaned).toEqual({
+        name: 'pack',
+        queries: {
+          q1: { query: 'SELECT 1', interval: 60 },
+        },
+      });
+    });
+
+    test('preserves per-query interval (legacy field)', () => {
+      const cleaned = stripScheduleFieldsFromBody({
+        queries: { q1: { query: 'SELECT 1', interval: 60 } },
+      });
+      expect(cleaned.queries?.q1).toEqual({ query: 'SELECT 1', interval: 60 });
+    });
+
+    test('handles bodies without queries', () => {
+      const cleaned = stripScheduleFieldsFromBody({ name: 'p' });
+      expect(cleaned).toEqual({ name: 'p', queries: undefined });
+    });
+  });
+
+  describe('extractAndValidatePackScheduleFromBody', () => {
+    const validRrule: RRuleScheduleConfig = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+
+    test('feature flag OFF strips all schedule fields and returns empty pack schedule', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          schedule_type: 'rrule' as const,
+          rrule_schedule: validRrule,
+          queries: {
+            q1: {
+              query: 'SELECT 1',
+              interval: 60,
+              schedule_type: 'rrule' as const,
+              rrule_schedule: validRrule,
+            },
+          },
+        },
+        false
+      );
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.result.packSchedule).toEqual({});
+      expect(result.result.queries?.q1).toEqual({ query: 'SELECT 1', interval: 60 });
+    });
+
+    test('feature flag ON with valid pack RRULE returns packSchedule', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          schedule_type: 'rrule' as const,
+          rrule_schedule: validRrule,
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+        true
+      );
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.result.packSchedule).toEqual({
+        schedule_type: 'rrule',
+        interval: undefined,
+        rrule_schedule: validRrule,
+      });
+    });
+
+    test('feature flag ON with valid pack interval returns packSchedule', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        { schedule_type: 'interval' as const, interval: 1800, queries: {} },
+        true
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.result.packSchedule).toEqual({
+        schedule_type: 'interval',
+        interval: 1800,
+        rrule_schedule: undefined,
+      });
+    });
+
+    test('feature flag ON with invalid pack schedule returns error', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          schedule_type: 'rrule' as const,
+          interval: 3600,
+          rrule_schedule: validRrule,
+          queries: {},
+        },
+        true
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toMatch(/mutually exclusive/);
+    });
+
+    test('feature flag ON with invalid per-query override returns error prefixed by query id', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          queries: {
+            q_bad: {
+              query: 'SELECT 1',
+              interval: 60,
+              rrule_schedule: validRrule,
+            },
+          },
+        },
+        true
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toMatch(/^Query "q_bad":/);
+    });
+
+    test('feature flag ON with no schedule fields returns empty pack schedule (legacy)', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        { queries: { q1: { query: 'SELECT 1', interval: 60 } } },
+        true
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.result.packSchedule).toEqual({
+        schedule_type: undefined,
+        interval: undefined,
+        rrule_schedule: undefined,
+      });
     });
   });
 });

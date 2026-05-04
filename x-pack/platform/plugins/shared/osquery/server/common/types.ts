@@ -22,7 +22,12 @@ export interface PackSavedObject {
     id: string;
     name: string;
     query: string;
-    interval: number;
+    /**
+     * Legacy per-query interval (seconds). Optional because queries that opt
+     * into `schedule_type: 'rrule'` intentionally omit `interval` per
+     * `convertPackQueriesToSO`'s mutual-exclusivity logic.
+     */
+    interval?: number;
     timeout?: number;
     snapshot?: boolean;
     removed?: boolean;

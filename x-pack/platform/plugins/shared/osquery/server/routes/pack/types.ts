@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import type { SOShard } from '../../common/types';
 import type { PackQueryInput } from './utils';
 
@@ -24,6 +25,12 @@ export interface PackResponseData {
   policy_ids?: string[];
   shards?: SOShard;
   read_only?: boolean;
+  /** Pack-level schedule discriminator (only present when set on the SO). */
+  schedule_type?: ScheduleType;
+  /** Pack-level interval (seconds) — present when `schedule_type === 'interval'`. */
+  interval?: number;
+  /** Pack-level RRULE schedule — present when `schedule_type === 'rrule'`. */
+  rrule_schedule?: RRuleScheduleConfig;
 }
 
 export interface ReadPackResponseData {
@@ -47,4 +54,7 @@ export interface ReadPackResponseData {
   migrationVersion?: Record<string, string>;
   managed?: boolean;
   coreMigrationVersion?: string;
+  schedule_type?: ScheduleType;
+  interval?: number;
+  rrule_schedule?: RRuleScheduleConfig;
 }

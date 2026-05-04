@@ -15,6 +15,19 @@ const ecsMappingItemSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+const scheduleTypeSchema = schema.oneOf([schema.literal('interval'), schema.literal('rrule')]);
+
+const rruleScheduleConfigSchema = schema.object(
+  {
+    rrule: schema.string(),
+    start_date: schema.string(),
+    end_date: schema.maybe(schema.string()),
+    splay: schema.maybe(schema.string()),
+    timeout: schema.maybe(schema.number()),
+  },
+  { unknowns: 'allow' }
+);
+
 const packQuerySchema = schema.object(
   {
     query: schema.maybe(schema.string()),
@@ -35,6 +48,8 @@ const packQuerySchema = schema.object(
     ),
     saved_query_id: schema.maybe(schema.nullable(schema.string())),
     name: schema.maybe(schema.string()),
+    schedule_type: schema.maybe(scheduleTypeSchema),
+    rrule_schedule: schema.maybe(rruleScheduleConfigSchema),
   },
   { unknowns: 'allow' }
 );
@@ -73,6 +88,9 @@ const packDataSchema = schema.object(
       )
     ),
     read_only: schema.maybe(schema.boolean()),
+    schedule_type: schema.maybe(scheduleTypeSchema),
+    interval: schema.maybe(schema.number()),
+    rrule_schedule: schema.maybe(rruleScheduleConfigSchema),
   },
   { unknowns: 'allow' }
 );
@@ -104,6 +122,9 @@ export const readPackResponseSchema = schema.object({
       migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
       managed: schema.maybe(schema.boolean()),
       coreMigrationVersion: schema.maybe(schema.string()),
+      schedule_type: schema.maybe(scheduleTypeSchema),
+      interval: schema.maybe(schema.number()),
+      rrule_schedule: schema.maybe(rruleScheduleConfigSchema),
     },
     { unknowns: 'allow' }
   ),
