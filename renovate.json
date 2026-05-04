@@ -55,6 +55,23 @@
       "enabled": true
     },
     {
+      "groupName": "@rspack",
+      "matchDepNames": [
+        "@rspack/core",
+        "@rspack/plugin-react-refresh",
+        "@rsdoctor/rspack-plugin"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": [
+        "Team:Operations",
+        "backport:skip",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "30 days",
+      "enabled": true
+    },
+    {
       "groupName": "devcontainer",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2528,8 +2545,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "groupName": "@swc",
+      "matchDepNames": ["@swc/core", "@swc/helpers"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
