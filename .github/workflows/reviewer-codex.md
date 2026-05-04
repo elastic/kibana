@@ -19,6 +19,7 @@ imports:
   - .github/agents/code-reviewer.md
 engine:  
   id: codex
+  version: "0.118.0"
   model: gpt-5.5
   args:
     - -c
@@ -34,6 +35,9 @@ engine:
     # Force reasoning on
     - -c
     - model_supports_reasoning_summaries=true
+    # Reasoning effort: minimal | low | medium | high.
+    - -c
+    - model_reasoning_effort=medium
     # Reasoning summary verbosity: auto | concise | detailed | none.
     - -c
     - model_reasoning_summary=auto
