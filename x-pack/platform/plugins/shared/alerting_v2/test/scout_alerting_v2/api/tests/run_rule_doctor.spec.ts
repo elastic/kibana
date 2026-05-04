@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { RULE_DOCTOR_DEDUP_WORKFLOW_ID } from '../../../../server/workflows/load_workflows';
 import {
   API_HEADERS,
   RULE_DOCTOR_RUN_API_PATH,
@@ -27,7 +28,12 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    await apiClient.delete(
+      `/api/workflows/workflow/${RULE_DOCTOR_DEDUP_WORKFLOW_ID}?force=true`,
+      { headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader } }
+    );
+
     await kbnClient.uiSettings.update({
       [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
     });
@@ -53,6 +59,8 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.statusCode).toBe(400);
+    expect(typeof response.body.message).toBe('string');
   });
 
   apiTest('should return 403 for a viewer without write privileges', async ({ apiClient }) => {
