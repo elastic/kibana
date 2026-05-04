@@ -44,7 +44,7 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('basic rendering', () => {
-    it('renders the description list and hides the source row when no staticSource is provided', () => {
+    it('renders the description list and hides the source row when no staticIndexName is provided', () => {
       const metricItem = createMockMetric({
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -66,11 +66,11 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('source row', () => {
-    it('renders the static Index row when staticSource is an index', () => {
+    it('renders the static Index row when staticIndexName is an index', () => {
       const { getByTestId, getByText } = render(
         <OverviewTabMetadata
           metricItem={createMockMetric()}
-          staticSource={{ name: 'my-source', kind: METRIC_SOURCE_KIND.INDEX }}
+          staticIndexName={{ indexName: 'my-source', kind: METRIC_SOURCE_KIND.INDEX }}
         />
       );
 
@@ -80,11 +80,11 @@ describe('OverviewTabMetadata', () => {
       );
     });
 
-    it('renders the static Data stream row when staticSource is a data stream', () => {
+    it('renders the static Data stream row when staticIndexName is a data stream', () => {
       const { getByTestId, getByText } = render(
         <OverviewTabMetadata
           metricItem={createMockMetric()}
-          staticSource={{ name: 'logs-foo-default', kind: METRIC_SOURCE_KIND.DATA_STREAM }}
+          staticIndexName={{ indexName: 'logs-foo-default', kind: METRIC_SOURCE_KIND.DATA_STREAM }}
         />
       );
 
@@ -94,7 +94,7 @@ describe('OverviewTabMetadata', () => {
       );
     });
 
-    it('omits the static source row when staticSource is not provided', () => {
+    it('omits the static source row when staticIndexName is not provided', () => {
       const { queryByTestId, queryByText } = render(
         <OverviewTabMetadata metricItem={createMockMetric({ dataStream: 'my-source' })} />
       );

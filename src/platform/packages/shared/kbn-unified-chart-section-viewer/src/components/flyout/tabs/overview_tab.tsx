@@ -57,13 +57,13 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       ? renderStreamField({ streamName: localIndexName })
       : null;
 
-  const staticSource = useMemo(() => {
+  const staticIndexName = useMemo(() => {
     if (streamSection || !metricItem.dataStream) {
       return undefined;
     }
 
     return {
-      name: metricItem.dataStream,
+      indexName: metricItem.dataStream,
       kind: sourceKind,
     };
   }, [metricItem.dataStream, sourceKind, streamSection]);
@@ -112,7 +112,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
 
       {streamSection}
 
-      <OverviewTabMetadata metricItem={metricItem} staticSource={staticSource} />
+      <OverviewTabMetadata metricItem={metricItem} staticIndexName={staticIndexName} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

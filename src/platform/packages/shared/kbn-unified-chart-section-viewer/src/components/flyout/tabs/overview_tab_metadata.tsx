@@ -32,8 +32,8 @@ const SOURCE_TEST_SUBJ: Record<MetricSourceKind, string> = {
   [METRIC_SOURCE_KIND.DATA_STREAM]: 'metricsExperienceFlyoutOverviewTabDataStreamLabel',
 };
 
-interface StaticSource {
-  name: string;
+interface StaticIndexName {
+  indexName: string;
   kind: MetricSourceKind;
 }
 
@@ -42,23 +42,23 @@ const LABEL_WIDTH_MULTIPLIER = 11.25;
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
   /**
-   * When set, prepends a static `<Label>: <name>` row above the standard
+   * When set, prepends a static `<Label>: <indexName>` row above the standard
    * metadata. The label is derived from `kind` (Index or Data stream). Used
-   * when the source is not rendered through the streams flyout.
+   * when the index name is not rendered through the streams flyout.
    */
-  staticSource?: StaticSource;
+  staticIndexName?: StaticIndexName;
 }
 
-export const OverviewTabMetadata = ({ metricItem, staticSource }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem, staticIndexName }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * LABEL_WIDTH_MULTIPLIER;
 
-    const sourceRow = staticSource
+    const indexNameRow = staticIndexName
       ? [
           {
-            title: <StrongTitle text={SOURCE_LABEL[staticSource.kind]} />,
+            title: <StrongTitle text={SOURCE_LABEL[staticIndexName.kind]} />,
             description: (
               <EuiText
                 color="primary"
@@ -67,9 +67,9 @@ export const OverviewTabMetadata = ({ metricItem, staticSource }: OverviewTabMet
                   word-break: break-word;
                   overflow-wrap: anywhere;
                 `}
-                data-test-subj={SOURCE_TEST_SUBJ[staticSource.kind]}
+                data-test-subj={SOURCE_TEST_SUBJ[staticIndexName.kind]}
               >
-                {staticSource.name}
+                {staticIndexName.indexName}
               </EuiText>
             ),
           },
@@ -77,7 +77,7 @@ export const OverviewTabMetadata = ({ metricItem, staticSource }: OverviewTabMet
       : [];
 
     const rowsInner = [
-      ...sourceRow,
+      ...indexNameRow,
       {
         title: (
           <StrongTitle
@@ -139,7 +139,7 @@ export const OverviewTabMetadata = ({ metricItem, staticSource }: OverviewTabMet
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
   }, [
     euiTheme.base,
-    staticSource,
+    staticIndexName,
     metricItem.fieldTypes,
     metricItem.metricTypes,
     metricItem.units,
