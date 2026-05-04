@@ -77,5 +77,40 @@ describe('useOverviewStatus', () => {
       );
       expect(initialFetchCalls).toHaveLength(1);
     });
+
+    it('re-fetches when pageState changes before initial load completes (URL sync)', () => {
+      const stateRef: { current: any } = { current: undefined };
+
+      const wrapper = ({ children }: React.PropsWithChildren<{}>) =>
+        React.createElement(WrappedHelper, { state: stateRef.current }, children);
+
+      const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
+        wrapper,
+      });
+
+      expect(dispatchMockFn).toHaveBeenCalledWith(
+        expect.objectContaining({ type: fetchOverviewStatusAction.get.type })
+      );
+      dispatchMockFn.mockClear();
+
+      stateRef.current = {
+        overview: {
+          pageState: {
+            ...mockState.overview.pageState,
+            query: '"Observability UI"',
+          },
+        },
+      };
+      rerender();
+
+      expect(dispatchMockFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: fetchOverviewStatusAction.get.type,
+          payload: expect.objectContaining({
+            pageState: expect.objectContaining({ query: '"Observability UI"' }),
+          }),
+        })
+      );
+    });
   });
 });
