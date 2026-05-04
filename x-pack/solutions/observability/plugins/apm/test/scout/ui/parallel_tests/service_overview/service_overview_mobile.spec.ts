@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe(
   'Service Overview - Mobile Services',
@@ -25,6 +25,7 @@ test.describe(
       await serviceInventoryPage.gotoServiceInventory({
         rangeFrom: testData.START_DATE,
         rangeTo: testData.END_DATE,
+        environment: PRODUCTION_ENVIRONMENT,
       });
 
       await test.step('Click on android mobile service', async () => {
@@ -47,6 +48,7 @@ test.describe(
       await serviceInventoryPage.gotoServiceInventory({
         rangeFrom: testData.START_DATE,
         rangeTo: testData.END_DATE,
+        environment: PRODUCTION_ENVIRONMENT,
       });
 
       await test.step('Click on iOS mobile service', async () => {
