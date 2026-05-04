@@ -2688,16 +2688,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createSharedExceptionList:
+                value:
+                  description: This is a sample detection type exception list.
+                  list_id: simple_list
+                  name: Sample Detection Exception List
+                  namespace_type: single
+                  os_types:
+                    - linux
+                  tags:
+                    - malware
             schema:
-              example:
-                description: This is a sample detection type exception list.
-                list_id: simple_list
-                name: Sample Detection Exception List
-                namespace_type: single
-                os_types:
-                  - linux
-                tags:
-                  - malware
               type: object
               properties:
                 description:
