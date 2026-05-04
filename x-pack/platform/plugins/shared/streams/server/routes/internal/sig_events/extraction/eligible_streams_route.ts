@@ -25,7 +25,7 @@ import {
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { classifyStreams, parseExcludePatterns, type StreamCandidate } from './classify_streams';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
-import { areFeaturesRecentBatch } from '../../../../lib/sig_events/features/are_features_recent';
+import { areFeaturesRecentBatch } from '../../../../lib/sig_events/features/should_identify_features';
 import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../../common/constants';
 import { WorkflowExecutionClient } from '../../../../lib/workflows/workflow_execution_client';
 
