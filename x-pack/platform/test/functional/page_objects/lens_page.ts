@@ -618,7 +618,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await browser.execute(() => {
+          const btn = document.querySelector(
+            '[data-test-subj="lns-indexPattern-dimensionContainerClose"]'
+          ) as HTMLElement;
+          if (btn) btn.click();
+        });
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
       });
     },
@@ -994,16 +999,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getSelectedAxisSide() {
-      const axisSideGroups = await find.allByCssSelector(
-        `[data-test-subj^="lnsXY_axisSide_groups_"]`
-      );
-      for (const axisSideGroup of axisSideGroups) {
-        const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
-        const isSelected = ariaPressed === 'true';
-        if (isSelected) {
-          return axisSideGroup?.getVisibleText();
+      return retry.try(async () => {
+        const axisSideGroups = await find.allByCssSelector(
+          `[data-test-subj^="lnsXY_axisSide_groups_"]`
+        );
+        for (const axisSideGroup of axisSideGroups) {
+          const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
+          const isSelected = ariaPressed === 'true';
+          if (isSelected) {
+            const text = await axisSideGroup.getVisibleText();
+            if (!text) {
+              throw new Error('Axis side button text not yet rendered');
+            }
+            return text;
+          }
         }
-      }
+        throw new Error('No axis side button is selected');
+      });
     },
 
     async getDonutHoleSize() {
