@@ -417,6 +417,70 @@ describe('ContentListTable', () => {
     });
   });
 
+  describe('trailing spacer (CSS pseudo-cell)', () => {
+    /**
+     * Excess horizontal space on wide pages is absorbed by a CSS `::after`
+     * pseudo-cell on every `<tr>`, not by a real `<td>` column. The visible
+     * layout effect can only be observed in a real browser (jsdom doesn't
+     * lay out tables), but we can — and should — assert that no phantom
+     * DOM column has crept back in. The visual outcome is exercised by the
+     * storybook stories under `Content List / Dashboard Listing`.
+     */
+    it('does not add any phantom <td>/<th> columns to the rendered table', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListTable title="Dashboards" />
+        </Wrapper>
+      );
+
+      expect(await screen.findByText('Dashboard One')).toBeInTheDocument();
+
+      // Default columns (no children) resolve to Name + UpdatedAt; selection
+      // checkboxes add one more cell per row. No trailing spacer column.
+      const expectedCellsPerRow = 3;
+
+      const headerRow = screen.getByRole('table').querySelector('thead tr');
+      expect(headerRow?.children).toHaveLength(expectedCellsPerRow);
+
+      const bodyRows = screen.getByRole('table').querySelectorAll('tbody tr');
+      expect(bodyRows).toHaveLength(mockItems.length);
+      bodyRows.forEach((row) => {
+        expect(row.children).toHaveLength(expectedCellsPerRow);
+      });
+    });
+
+    it('keeps cell counts in lockstep when consumers add their own columns', async () => {
+      const { Column } = ContentListTable;
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListTable title="Dashboards">
+            <Column.Name />
+            <Column
+              id="type"
+              name="Type"
+              render={(item) => <span>{item.type ?? 'unknown'}</span>}
+            />
+          </ContentListTable>
+        </Wrapper>
+      );
+
+      expect(await screen.findByText('Dashboard One')).toBeInTheDocument();
+
+      // 2 consumer columns (Name, Type) + 1 selection checkbox cell.
+      const expectedCellsPerRow = 3;
+
+      const headerRow = screen.getByRole('table').querySelector('thead tr');
+      expect(headerRow?.children).toHaveLength(expectedCellsPerRow);
+
+      screen
+        .getByRole('table')
+        .querySelectorAll('tbody tr')
+        .forEach((row) => expect(row.children).toHaveLength(expectedCellsPerRow));
+    });
+  });
+
   describe('getRowId', () => {
     it('generates stable row IDs', () => {
       expect(getRowId('abc')).toBe('content-list-table-row-abc');
