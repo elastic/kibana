@@ -336,7 +336,25 @@ exports.EcsCustomPropertyMappings = {
         ignore_above: 1024,
       },
       cps_scope_linked_projects: {
-        type: 'flattened',
+        type: 'nested',
+        properties: {
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          alias: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          type: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          organization: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+        },
       },
       space_ids: {
         type: 'keyword',
