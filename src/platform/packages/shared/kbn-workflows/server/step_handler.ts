@@ -10,8 +10,8 @@
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { OrStringRecursive } from '@kbn/utility-types';
 import type { z } from '@kbn/zod/v4';
-import type { BaseStepDefinition } from '../spec/step_definition_types';
 import type { StepContext } from '../spec/schema';
+import type { BaseStepDefinition } from '../spec/step_definition_types';
 
 /**
  * Definition of a server-side workflow step extension.

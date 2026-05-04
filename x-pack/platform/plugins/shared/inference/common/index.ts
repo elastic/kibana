@@ -16,4 +16,33 @@ export type {
 
 export { createRestClient } from './rest/create_client';
 
-export * from './workflow_steps';
+export {
+  AiPromptStepTypeId,
+  AiPromptStepCommonDefinition,
+  AiPromptOutputSchema,
+  getStructuredOutputSchema,
+  AiPromptMetadataSchema,
+  AiPromptConfigSchema,
+  AiPromptInputSchema,
+  AiPromptOutputSchemaFull,
+  AiPromptStepConfigSchema,
+  AiPromptStepInputSchema,
+  AiPromptStepOutputSchema,
+  AiSummarizeStepTypeId,
+  AiSummarizeStepCommonDefinition,
+  AiSummarizeConfigSchema,
+  AiSummarizeInputSchema,
+  AiSummarizeOutputSchema,
+  AiSummarizeStepConfigSchema,
+  AiSummarizeStepInputSchema,
+  AiSummarizeStepOutputSchema,
+  AiClassifyStepTypeId,
+  AiClassifyStepCommonDefinition,
+  buildStructuredOutputSchema,
+  AiClassifyConfigSchema,
+  AiClassifyInputSchema,
+  AiClassifyOutputSchema,
+  AiClassifyStepConfigSchema,
+  AiClassifyStepInputSchema,
+  AiClassifyStepOutputSchema,
+} from './workflow_steps';
