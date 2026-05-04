@@ -271,6 +271,31 @@ describe('detectAdditionalPropertiesTightening', () => {
     ]);
   });
 
+  it('walks allOf branches in the structural diff', () => {
+    const diff = inlineDiff({
+      allOf: {
+        modified: [
+          {
+            base: { index: 0 },
+            revision: { index: 0 },
+            diff: { additionalPropertiesAllowed: { from: null, to: false } },
+          },
+        ],
+      },
+    });
+    const result = detectAdditionalPropertiesTightening(diff, new Map());
+    expect(result.entries).toEqual([
+      {
+        id: REQUEST_ADDITIONAL_PROPERTIES_TIGHTENED_ID,
+        level: 3,
+        text: TIGHTENING_TEXT,
+        operation: 'POST',
+        path: '/api/test',
+        source: '/requestBody/content/application/json/schema/allOf/0',
+      },
+    ]);
+  });
+
   it('walks anyOf branches in the structural diff', () => {
     const diff = inlineDiff({
       anyOf: {

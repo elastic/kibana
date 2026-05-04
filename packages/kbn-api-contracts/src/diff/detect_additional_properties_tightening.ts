@@ -53,7 +53,7 @@ const collectTighteningsInSchemaDiff = (
     collectTighteningsInSchemaDiff(schemaDiff.items, `${pointer}/items`, out);
   }
 
-  for (const composition of ['oneOf', 'anyOf'] as const) {
+  for (const composition of ['oneOf', 'anyOf', 'allOf'] as const) {
     const branchContainer = schemaDiff[composition];
     if (!isObject(branchContainer)) continue;
     const modifiedBranches = branchContainer.modified;

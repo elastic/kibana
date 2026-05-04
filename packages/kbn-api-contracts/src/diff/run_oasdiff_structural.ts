@@ -36,7 +36,11 @@ export const runOasdiffStructural = (
   validateFilePath(currentPath, 'currentPath');
 
   const bin = process.env.OASDIFF_BIN ?? 'oasdiff';
-  const args = ['diff', basePath, currentPath, '--format', 'json', '--flatten-allof'];
+  // Note: we intentionally do NOT pass --flatten-allof. On the full Kibana
+  // spec, oasdiff 1.15.1 stack-overflows during allOf flattening. Instead, the
+  // detector walks `allOf.modified[i].diff` branches itself, alongside
+  // `oneOf` and `anyOf`.
+  const args = ['diff', basePath, currentPath, '--format', 'json'];
   if (options?.matchPath) {
     args.push('--match-path', options.matchPath);
   }

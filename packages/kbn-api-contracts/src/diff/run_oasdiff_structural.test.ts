@@ -86,7 +86,7 @@ describe('runOasdiffStructural', () => {
     expect(mockExecFileSync).not.toHaveBeenCalled();
   });
 
-  it('invokes oasdiff with diff/--format/json/--flatten-allof and returns parsed JSON', () => {
+  it('invokes oasdiff with diff/--format/json and returns parsed JSON', () => {
     mockExecFileSync.mockReturnValue(JSON.stringify(sampleDiff));
 
     const result = runOasdiffStructural('/tmp/base.yaml', '/tmp/current.yaml');
@@ -94,7 +94,7 @@ describe('runOasdiffStructural', () => {
     expect(result).toEqual(sampleDiff);
     expect(mockExecFileSync).toHaveBeenCalledWith(
       'oasdiff',
-      ['diff', '/tmp/base.yaml', '/tmp/current.yaml', '--format', 'json', '--flatten-allof'],
+      ['diff', '/tmp/base.yaml', '/tmp/current.yaml', '--format', 'json'],
       expect.objectContaining({ encoding: 'utf-8', timeout: 240_000 })
     );
   });
@@ -145,7 +145,6 @@ describe('runOasdiffStructural', () => {
         '/tmp/current.yaml',
         '--format',
         'json',
-        '--flatten-allof',
         '--match-path',
         '/api/actions/connector|/api/alerting/rule',
       ],
@@ -160,7 +159,7 @@ describe('runOasdiffStructural', () => {
 
     expect(mockExecFileSync).toHaveBeenCalledWith(
       'oasdiff',
-      ['diff', '/tmp/base.yaml', '/tmp/current.yaml', '--format', 'json', '--flatten-allof'],
+      ['diff', '/tmp/base.yaml', '/tmp/current.yaml', '--format', 'json'],
       expect.any(Object)
     );
   });
