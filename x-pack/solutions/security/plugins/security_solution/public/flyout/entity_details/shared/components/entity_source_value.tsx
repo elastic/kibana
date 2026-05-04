@@ -120,7 +120,7 @@ export const TruncatedBadgeList = memo(
       >
         {visible.map((value) => (
           <EuiFlexItem grow={false} key={value}>
-            <EuiText size="s">{value}</EuiText>
+            {value}
           </EuiFlexItem>
         ))}
         {hidden.length > 0 && (
