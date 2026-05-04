@@ -82,8 +82,8 @@ function createScenarioTest(scenario: AlertScenario) {
         {
           retries: 10,
           factor: 2,
-          minTimeout: 2000,
-          maxTimeout: 15_000,
+          minTimeout: 3000,
+          maxTimeout: 20_000,
           onFailedAttempt: (error) => {
             if (error.retriesLeft === 0) {
               log.error(
