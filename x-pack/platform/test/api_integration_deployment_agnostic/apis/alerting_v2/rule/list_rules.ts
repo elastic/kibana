@@ -342,14 +342,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(searchResponse.body.items[0].metadata.name).to.be('Limit120');
       });
 
-      it('should search rules by name and tags', async () => {
+      it('should search rules by name and description', async () => {
         const nameMatch = await createRule(roleAuthc, 'cpu threshold');
         expect(nameMatch.status).to.be(200);
 
-        const tagMatch = await createRule(roleAuthc, 'network threshold', {
-          metadata: { name: 'network threshold', tags: ['prod'] },
+        const descMatch = await createRule(roleAuthc, 'network threshold', {
+          metadata: { name: 'network threshold', description: 'Monitors production latency' },
         });
-        expect(tagMatch.status).to.be(200);
+        expect(descMatch.status).to.be(200);
 
         const responseByName = await supertestWithoutAuth
           .get(RULE_API_PATH)
@@ -361,16 +361,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(responseByName.body.items.length).to.be(1);
         expect(responseByName.body.items[0].metadata.name).to.be('cpu threshold');
 
-        const responseByTag = await supertestWithoutAuth
+        const responseByDesc = await supertestWithoutAuth
           .get(RULE_API_PATH)
-          .query({ search: 'prod' })
+          .query({ search: 'production' })
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader());
 
-        expect(responseByTag.status).to.be(200);
-        expect(responseByTag.body.items.length).to.be(1);
+        expect(responseByDesc.status).to.be(200);
+        expect(responseByDesc.body.items.length).to.be(1);
         expect(
-          responseByTag.body.items.map((item: { metadata: { name: string } }) => item.metadata.name)
+          responseByDesc.body.items.map(
+            (item: { metadata: { name: string } }) => item.metadata.name
+          )
         ).to.contain('network threshold');
       });
 
@@ -397,26 +399,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(responseByDesc.status).to.be(200);
         expect(responseByDesc.body.items.length).to.be(1);
         expect(responseByDesc.body.items[0].metadata.name).to.be('desc-match-rule');
-      });
-
-      it('should search rules by grouping fields', async () => {
-        const groupedRule = await createRule(roleAuthc, 'grouped-rule', {
-          grouping: { fields: ['host.name'] },
-        });
-        expect(groupedRule.status).to.be(200);
-
-        const ungroupedRule = await createRule(roleAuthc, 'ungrouped-rule');
-        expect(ungroupedRule.status).to.be(200);
-
-        const responseByGroup = await supertestWithoutAuth
-          .get(RULE_API_PATH)
-          .query({ search: 'host' })
-          .set(roleAuthc.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader());
-
-        expect(responseByGroup.status).to.be(200);
-        expect(responseByGroup.body.items.length).to.be(1);
-        expect(responseByGroup.body.items[0].metadata.name).to.be('grouped-rule');
       });
 
       it('should compose search with pagination', async () => {

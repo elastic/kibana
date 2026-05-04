@@ -13,7 +13,7 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerWorkflowRoutes } from '.';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
+import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
@@ -22,6 +22,10 @@ jest.mock('../utils/route_error_handlers', () => ({
 }));
 
 const createLicensingContext = () => ({
+  workflows: Promise.resolve({
+    isWorkflowsAvailable: true,
+    emitEvent: jest.fn(),
+  }),
   licensing: Promise.resolve({
     license: {
       isAvailable: true,
@@ -113,7 +117,7 @@ describe('Workflow routes', () => {
       api: mockApi as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
-      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
+      audit: createWorkflowManagementAuditLogMock(),
     } as unknown as RouteDependencies);
   });
 

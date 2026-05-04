@@ -109,7 +109,14 @@ export const _lensApiConfigSchema: any = objectUnion(
     ...treemapConfigSchema.getUnionTypes(),
     ...waffleConfigSchema.getUnionTypes(),
   ],
-  { meta: { id: 'lensApiConfig', title: 'Visualizations' } }
+  {
+    meta: {
+      id: 'lensApiConfig',
+      title: 'Visualizations',
+      description:
+        'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
+    },
+  }
 );
 
 export type LensApiConfig =

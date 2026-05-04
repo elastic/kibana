@@ -62,7 +62,7 @@ export const createLensEmbeddableFactory = (
     }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const initialRuntimeState = await deserializeState(services, initialState);
 
