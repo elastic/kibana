@@ -51,7 +51,6 @@ export interface WorkflowsExecutionEnginePluginStart {
   cancelWorkflowExecution: CancelWorkflowExecution;
   cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
   resumeWorkflowExecution: ResumeWorkflowExecution;
-  internalResumeWorkflowExecution: InternalResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;

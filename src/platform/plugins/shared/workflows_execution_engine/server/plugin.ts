@@ -124,6 +124,8 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
+  /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
+  private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -245,6 +247,7 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -353,6 +356,7 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -572,6 +576,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -824,6 +829,7 @@ export class WorkflowsExecutionEnginePlugin
           dependencies,
           workflowsExecutionEngine,
           meteringService: this.meteringService,
+          internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
@@ -1245,6 +1251,8 @@ export class WorkflowsExecutionEnginePlugin
       });
     };
 
+    this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
+
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
       this.logger,
@@ -1276,7 +1284,6 @@ export class WorkflowsExecutionEnginePlugin
       cancelWorkflowExecution,
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
-      internalResumeWorkflowExecution,
       triggerEvents,
     };
   }

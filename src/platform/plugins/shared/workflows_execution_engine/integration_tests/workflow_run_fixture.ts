@@ -62,6 +62,7 @@ export class WorkflowRunFixture {
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
   public readonly taskManagerMock = TaskManagerMock.create();
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
+  public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
 
   constructor() {
     // Mock repository constructors to return our mock instances
@@ -131,6 +132,7 @@ export class WorkflowRunFixture {
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
     });
   }
 
@@ -144,6 +146,7 @@ export class WorkflowRunFixture {
       fakeRequest: this.fakeKibanaRequest,
       dependencies: this.dependencies,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
     });
   }
 
@@ -187,6 +190,7 @@ export class WorkflowRunFixture {
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
     });
   }
 

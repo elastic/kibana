@@ -155,12 +155,9 @@ export class WorkflowExecuteSyncStrategy {
       }
 
       if (!isTerminalStatus(execution.status)) {
-        return {
-          status: 'failed',
-          error: new Error(
-            `Sub-workflow ${state.executionId} is still ${execution.status} (expected terminal)`
-          ),
-        };
+        // Child still running (e.g. parent idle-timeout task fired before child finished).
+        // Stay in WAITING_FOR_CHILD so workflow timeout zones can run; do not fail the parent step.
+        return { status: 'waiting' };
       }
 
       if (execution.status !== ExecutionStatus.COMPLETED) {

@@ -25,6 +25,10 @@ export class WorkflowTaskManager {
   /**
    * Schedules or updates a single `workflow:resume` at the earliest idle deadline (HITL /
    * sync child). Skips TM writes when runAt and params already match.
+   *
+   * Uses `taskManager.get` once per schedule attempt to dedupe: callers invoke this when
+   * entering `handleExecutionDelay` after a step completes (once per `runNode` pass while the
+   * workflow is waiting), not in an inner hot loop over unchanged state.
    */
   async scheduleWorkflowGlobalTimeoutResumeTask({
     workflowExecution,

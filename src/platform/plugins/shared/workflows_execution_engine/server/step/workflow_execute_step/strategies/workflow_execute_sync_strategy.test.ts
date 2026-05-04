@@ -244,7 +244,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
       expect(result.error!.message).toContain('timed_out');
     });
 
-    it('should return failed when child is not terminal', async () => {
+    it('should return waiting when child is not terminal (e.g. parent resume before child completes)', async () => {
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
         status: ExecutionStatus.RUNNING,
@@ -252,8 +252,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
-      expect(result.status).toBe('failed');
-      expect(result.error!.message).toContain('still running');
+      expect(result).toEqual({ status: 'waiting' });
     });
 
     it('should return failed when child execution not found', async () => {
@@ -293,6 +292,23 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(result).toEqual({ status: 'completed', output: { result: 'done' } });
       expect(mockEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('should return waiting when child is still non-terminal on resume()', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        workflowId: 'child-workflow-id',
+        executionId: 'child-exec-1',
+        startedAt: '2024-01-01T00:00:00Z',
+      });
+
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.WAITING,
+      } as any);
+
+      const result = await strategy.resume('default');
+
+      expect(result).toEqual({ status: 'waiting' });
     });
 
     it('should return failed when no wait state', async () => {

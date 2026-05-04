@@ -14,7 +14,10 @@ import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -28,6 +31,7 @@ export async function resumeWorkflow({
   fakeRequest,
   workflowsExecutionEngine,
   meteringService,
+  internalResumeWorkflowExecution,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -38,6 +42,7 @@ export async function resumeWorkflow({
   dependencies: ContextDependencies;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
 }): Promise<void> {
   const {
     workflowRuntime,
@@ -101,7 +106,7 @@ export async function resumeWorkflow({
     logger,
     fakeRequest,
     workflowExecutionRepository,
-    internalResumeWorkflowExecution: workflowsExecutionEngine?.internalResumeWorkflowExecution,
+    internalResumeWorkflowExecution,
     workflowTaskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,

@@ -19,7 +19,10 @@ import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -33,6 +36,7 @@ export async function runWorkflow({
   dependencies,
   workflowsExecutionEngine,
   meteringService,
+  internalResumeWorkflowExecution,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -43,6 +47,7 @@ export async function runWorkflow({
   dependencies: ContextDependencies;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -165,7 +170,7 @@ export async function runWorkflow({
     logger,
     fakeRequest,
     workflowExecutionRepository,
-    internalResumeWorkflowExecution: workflowsExecutionEngine?.internalResumeWorkflowExecution,
+    internalResumeWorkflowExecution,
     workflowTaskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
