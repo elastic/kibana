@@ -202,11 +202,40 @@ describe('actions column builder', () => {
         expect(result).toMatchObject({ width: '5em', minWidth: '5em', maxWidth: '5em' });
       });
 
-      it('computes a default width from the action count when not specified', () => {
+      it('computes default width / minWidth / maxWidth from the action count when not specified', () => {
         const result = buildActionsColumn({}, defaultContext);
 
         // `2 * 32` (icon-button width) + `1 * 4` (gap) + `2 * 8` (cell padding) = 84px.
-        expect(result).toMatchObject({ width: '84px', minWidth: '84px' });
+        // `minWidth: 'max-content'` lets translated headers expand the column
+        // when wider than the icon row; `maxWidth` pins it to the derived
+        // width so the column never absorbs slack on full-width pages.
+        expect(result).toMatchObject({
+          width: '84px',
+          minWidth: 'max-content',
+          maxWidth: '84px',
+        });
+      });
+
+      it('falls back maxWidth to the consumer-supplied width when only width is overridden', () => {
+        const result = buildActionsColumn({ width: '128px' }, defaultContext);
+
+        expect(result).toMatchObject({
+          width: '128px',
+          minWidth: 'max-content',
+          maxWidth: '128px',
+        });
+      });
+
+      it('treats explicit `undefined` as an opt-out — clears the cap so the column can absorb slack', () => {
+        const result = buildActionsColumn(
+          { maxWidth: undefined } satisfies ActionsColumnProps,
+          defaultContext
+        );
+
+        // The derived width (84px for two actions) and the `'max-content'`
+        // floor are still applied — only the cap is cleared.
+        expect(result).toMatchObject({ width: '84px', minWidth: 'max-content' });
+        expect(result).not.toHaveProperty('maxWidth');
       });
 
       it('sticks the actions column by default', () => {
