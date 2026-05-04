@@ -75,9 +75,6 @@ export const CloudLinks = () => {
             href={`${baseUrl}${link.path}`}
             target="_blank"
             external={false}
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
             data-test-subj={`searchHomepageCloudLink-${link.id}`}
           >
             {link.label}
