@@ -6,7 +6,11 @@
  */
 
 import crypto from 'node:crypto';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  CoreAuthenticationService,
+  ElasticsearchClient,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -16,9 +20,14 @@ import type {
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
-import type { IChangeTrackingService, RuleChange } from '.';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type {
+  ChangeTrackingServiceInitializeParams,
+  IChangeTrackingService,
+  IScopedChangeTrackingService,
+  RuleChange,
+} from './types';
+import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
 
 export class ChangeTrackingService implements IChangeTrackingService {
   private clients: Record<RuleTypeSolution, ChangeHistoryClient>;
@@ -26,6 +35,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
   private kibanaVersion: string;
   private modules: RuleTypeSolution[];
   private dataset = ALERTING_RULE_DATASET;
+  private authService?: CoreAuthenticationService;
 
   constructor(logger: Logger, kibanaVersion: string) {
     this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
@@ -34,7 +44,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
     this.modules = [];
   }
 
-  register(module: RuleTypeSolution) {
+  register(module: RuleTypeSolution): void {
     if (this.modules.includes(module)) {
       return;
     }
@@ -45,12 +55,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
     this.logger.debug(`Change tracking registered for [${module}, ${this.dataset}]`);
   }
 
-  isInitialized(module: RuleTypeSolution) {
+  isInitialized(module: RuleTypeSolution): boolean {
     return !!this.clients[module]?.isInitialized();
   }
 
-  initialize(elasticsearchClient: ElasticsearchClient) {
+  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams): void {
     this.logger.debug(`Initializing change tracking..`);
+    this.authService = authService;
+
     void this.initializeAll(elasticsearchClient).catch((cause) => {
       const error = new Error(
         `Unexpected failure initializing change tracking for [${this.dataset}]`,
@@ -60,7 +72,35 @@ export class ChangeTrackingService implements IChangeTrackingService {
     });
   }
 
-  async initializeAll(elasticsearchClient: ElasticsearchClient) {
+  asScoped(request: KibanaRequest): IScopedChangeTrackingService {
+    if (!this.authService) {
+      throw new Error(
+        'ChangeTrackingService.asScoped called before initialize(); authentication service is not available.'
+      );
+    }
+
+    const user = this.authService.getCurrentUser(request);
+    const username = user?.username ?? '';
+    const userProfileId = user?.profile_uid;
+
+    return {
+      log: async (change, opts) =>
+        this.log(change, {
+          ...opts,
+          username,
+          userProfileId,
+        }),
+      logBulk: async (changes, opts) =>
+        this.logBulk(changes, {
+          ...opts,
+          username,
+          userProfileId,
+        }),
+      getHistory: this.getHistory.bind(this),
+    };
+  }
+
+  private async initializeAll(elasticsearchClient: ElasticsearchClient) {
     // Initialize each change history client (in sequence - better than in parallel)
     for (const [module, client] of Object.entries(this.clients)) {
       try {
@@ -76,11 +116,11 @@ export class ChangeTrackingService implements IChangeTrackingService {
     }
   }
 
-  async log(change: RuleChange, opts: LogChangeHistoryOptions) {
+  private async log(change: RuleChange, opts: LogChangeHistoryOptions) {
     return this.logBulk([change], opts);
   }
 
-  async logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions) {
+  private async logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions) {
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
@@ -128,7 +168,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
     }
   }
 
-  async getHistory(
+  private async getHistory(
     module: RuleTypeSolution,
     spaceId: string,
     ruleId: string,
