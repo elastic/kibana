@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFailError } from '@kbn/dev-cli-errors';
 import { generateScoutConfigManifest } from './manifests';
 import { playwrightCLI } from '../playwright/cli_wrapper';
 
@@ -39,10 +40,13 @@ describe('generateScoutConfigManifest', () => {
     );
   });
 
-  it(`throws when '--list' exits non-zero (real discovery failure)`, async () => {
+  it(`throws a FailError when '--list' exits non-zero (real discovery failure)`, async () => {
     playwrightTestMock.mockResolvedValueOnce({ exitCode: 1 });
 
-    await expect(generateScoutConfigManifest(configPath)).rejects.toThrow(
+    const error = await generateScoutConfigManifest(configPath).catch((e) => e);
+
+    expect(isFailError(error)).toBe(true);
+    expect(error.message).toMatch(
       /Failed to discover tests for Scout config at '.*playwright\.config\.ts': playwright --list exited with code 1/
     );
   });

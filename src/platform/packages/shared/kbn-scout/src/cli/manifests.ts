@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import CliTable3 from 'cli-table3';
@@ -45,7 +46,7 @@ export async function generateScoutConfigManifest(configPath: string, log?: Tool
   );
 
   if (result.exitCode !== 0) {
-    throw new Error(
+    throw createFailError(
       `Failed to discover tests for Scout config at '${configPath}': ` +
         `playwright --list exited with code ${result.exitCode}. ` +
         `This usually means the config has a real error (e.g. a syntax/transpilation error) ` +
