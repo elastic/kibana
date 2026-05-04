@@ -136,7 +136,7 @@ export const inlineEsqlVariables = (
   // placeholders stay unresolved and block save until proper support is added.
   const shapesByName = collectPlaceholderShapesByName(query);
   const params = esqlVariables.reduce<Record<string, ComposerParamValue>>((acc, v) => {
-    if (!esqlControlVariableIsComposerInlinable(v)) {
+    if (!esqlControlVariableIsComposerInlinable(v) || RESERVED_RULE_PARAM_NAMES.has(v.key)) {
       return acc;
     }
     const seenShapes = shapesByName.get(v.key);

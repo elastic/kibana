@@ -228,6 +228,15 @@ describe('inlineEsqlVariables', () => {
       expect(result.query).toContain('?_tend');
       expect(result.unresolved).toEqual([]);
     });
+
+    it('does not inline a control whose key collides with a reserved param name', () => {
+      const result = inlineEsqlVariables('FROM logs* | WHERE @timestamp >= ?_tstart | LIMIT 10', [
+        makeVar({ key: '_tstart', type: ESQLVariableType.VALUES, value: '2024-01-01' }),
+      ]);
+      expect(result.query).toContain('?_tstart');
+      expect(result.query).not.toContain('"2024-01-01"');
+      expect(result.unresolved).toEqual([]);
+    });
   });
 
   describe('shape gating (token vs control type)', () => {
