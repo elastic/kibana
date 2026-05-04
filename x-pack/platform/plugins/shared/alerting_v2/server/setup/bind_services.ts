@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
+import { Logger, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
@@ -264,7 +264,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new RuleDoctorInsightsClient(esClient, loggerService);
+      const resourceManager = get(ResourceManager);
+      const logger = get(Logger);
+      return new RuleDoctorInsightsClient(esClient, loggerService, resourceManager, logger);
     })
     .inSingletonScope();
 

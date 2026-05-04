@@ -94,6 +94,45 @@ describe('ResourceManager', () => {
     }
   });
 
+  it('isRegistered returns true for registered resources and false for unknown keys', () => {
+    const manager = createManager();
+    const init = createInitializer(async () => {});
+
+    expect(manager.isRegistered('r1')).toBe(false);
+
+    manager.registerResource('r1', init);
+    expect(manager.isRegistered('r1')).toBe(true);
+    expect(manager.isRegistered('unknown')).toBe(false);
+  });
+
+  describe('ensureResourceRegistered', () => {
+    it('registers and initializes a new resource', async () => {
+      const manager = createManager();
+      const init = createInitializer(async () => {});
+
+      await manager.ensureResourceRegistered('lazy', init);
+
+      expect(manager.isRegistered('lazy')).toBe(true);
+      expect(manager.isReady('lazy')).toBe(true);
+      expect(init.initialize).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips registration when the resource already exists', async () => {
+      const manager = createManager();
+      const first = createInitializer(async () => {});
+      const second = createInitializer(async () => {});
+
+      manager.registerResource('r1', first);
+      manager.startInitialization();
+      await manager.waitUntilReady();
+
+      await manager.ensureResourceRegistered('r1', second);
+
+      expect(first.initialize).toHaveBeenCalledTimes(1);
+      expect(second.initialize).not.toHaveBeenCalled();
+    });
+  });
+
   it('throws if ensureResourceReady is called for an unregistered resource', async () => {
     const manager = createManager();
     await expect(manager.ensureResourceReady('missing')).rejects.toThrow(

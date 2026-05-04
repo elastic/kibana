@@ -13,8 +13,10 @@ export function createMockResourceManager() {
     registerResource: jest.fn(),
     startInitialization: jest.fn(),
     waitUntilReady: jest.fn(),
+    isRegistered: jest.fn(),
     isReady: jest.fn(),
     ensureResourceReady: jest.fn(),
+    ensureResourceRegistered: jest.fn(),
   } satisfies ResourceManagerMock;
 
   return resourceManager;

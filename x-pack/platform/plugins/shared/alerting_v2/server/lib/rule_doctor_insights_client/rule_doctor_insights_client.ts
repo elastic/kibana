@@ -7,12 +7,15 @@
 
 import Boom from '@hapi/boom';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
+import type { ResourceManagerContract } from '../services/resource_service/resource_manager';
+import { IndexInitializer } from '../services/resource_service/index_initializer';
 import {
   RULE_DOCTOR_INSIGHTS_INDEX,
+  getRuleDoctorInsightsResourceDefinition,
   ruleDoctorInsightStatus,
   type RuleDoctorInsightDoc,
   type RuleDoctorInsightStatus,
@@ -31,8 +34,19 @@ const DEFAULT_PAGE_SIZE = 20;
 export class RuleDoctorInsightsClient {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    private readonly resourceManager?: ResourceManagerContract,
+    private readonly rawLogger?: Logger
   ) {}
+
+  public async ensureIndex(): Promise<void> {
+    if (!this.resourceManager || !this.rawLogger) {
+      return;
+    }
+    const def = getRuleDoctorInsightsResourceDefinition();
+    const initializer = new IndexInitializer(this.rawLogger, this.esClient, def);
+    await this.resourceManager.ensureResourceRegistered(def.key, initializer, { optional: true });
+  }
 
   public async listInsights(params: ListInsightsParams): Promise<ListInsightsResult> {
     const { from = 0, size = DEFAULT_PAGE_SIZE } = params;

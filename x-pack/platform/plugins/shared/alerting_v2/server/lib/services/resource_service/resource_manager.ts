@@ -41,8 +41,14 @@ export interface ResourceManagerContract {
   ): void;
   startInitialization(options?: { resourceKeys?: string[] }): void;
   waitUntilReady(): Promise<void>;
+  isRegistered(key: string): boolean;
   isReady(key: string): boolean;
   ensureResourceReady(key: string): Promise<void>;
+  ensureResourceRegistered(
+    key: string,
+    initializer: IResourceInitializer,
+    options?: RegisterResourceOptions
+  ): Promise<void>;
 }
 
 @injectable()
@@ -132,6 +138,10 @@ export class ResourceManager implements ResourceManagerContract {
     }
   }
 
+  public isRegistered(key: string): boolean {
+    return this.resources.has(key);
+  }
+
   public isReady(key: string): boolean {
     return this.resources.get(key)?.status === 'ready';
   }
@@ -143,6 +153,23 @@ export class ResourceManager implements ResourceManagerContract {
    */
   public async ensureResourceReady(key: string): Promise<void> {
     await this.initResource(key);
+  }
+
+  /**
+   * Register a resource if not already registered, then ensure it is ready.
+   *
+   * Safe to call from concurrent requests: only the first caller registers;
+   * subsequent callers coalesce on the existing initialization promise.
+   */
+  public async ensureResourceRegistered(
+    key: string,
+    initializer: IResourceInitializer,
+    options?: RegisterResourceOptions
+  ): Promise<void> {
+    if (!this.resources.has(key)) {
+      this.registerResource(key, initializer, options);
+    }
+    await this.ensureResourceReady(key);
   }
 
   private async initResource(key: string): Promise<void> {

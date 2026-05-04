@@ -6,51 +6,57 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import DEDUPLICATION_WORKFLOW_YAML from './rule_doctor_deduplication.yaml';
 
 export const RULE_DOCTOR_DEDUP_WORKFLOW_ID = 'rule-doctor-deduplication';
 
-const WORKFLOW_UPDATE_PATCH: Partial<EsWorkflow> = {
-  yaml: DEDUPLICATION_WORKFLOW_YAML,
-  enabled: true,
+const WORKFLOW_REGISTRY: Record<string, { id: string; yaml: string }> = {
+  deduplication: { id: RULE_DOCTOR_DEDUP_WORKFLOW_ID, yaml: DEDUPLICATION_WORKFLOW_YAML },
 };
 
-export async function ensureRuleDoctorWorkflow(
+export async function ensureRuleDoctorAnalysisWorkflow(
+  type: string,
   managementApi: WorkflowsServerPluginSetup['management'],
   spaceId: string,
   request: KibanaRequest,
   logger: Logger
 ): Promise<WorkflowExecutionEngineModel> {
-  const existing = await managementApi.getWorkflow(RULE_DOCTOR_DEDUP_WORKFLOW_ID, spaceId);
+  const entry = WORKFLOW_REGISTRY[type];
+  if (!entry) {
+    throw new Error(`Unknown rule doctor analysis type: ${type}`);
+  }
+  return ensureWorkflow(entry.id, entry.yaml, managementApi, spaceId, request, logger);
+}
+
+export async function ensureWorkflow(
+  workflowId: string,
+  yaml: string,
+  managementApi: WorkflowsServerPluginSetup['management'],
+  spaceId: string,
+  request: KibanaRequest,
+  logger: Logger
+): Promise<WorkflowExecutionEngineModel> {
+  const existing = await managementApi.getWorkflow(workflowId, spaceId);
 
   if (existing) {
-    if (existing.yaml !== DEDUPLICATION_WORKFLOW_YAML || !existing.enabled || !existing.valid) {
+    if (existing.yaml !== yaml || !existing.enabled || !existing.valid) {
       await managementApi.updateWorkflow(
-        RULE_DOCTOR_DEDUP_WORKFLOW_ID,
-        WORKFLOW_UPDATE_PATCH,
+        workflowId,
+        { yaml, enabled: true },
         spaceId,
         request
       );
-      logger.info(`Updated rule doctor workflow ${RULE_DOCTOR_DEDUP_WORKFLOW_ID}`);
+      logger.info(`Updated workflow ${workflowId}`);
     }
   } else {
-    await managementApi.createWorkflow(
-      { yaml: DEDUPLICATION_WORKFLOW_YAML, id: RULE_DOCTOR_DEDUP_WORKFLOW_ID },
-      spaceId,
-      request
-    );
-    await managementApi.updateWorkflow(
-      RULE_DOCTOR_DEDUP_WORKFLOW_ID,
-      WORKFLOW_UPDATE_PATCH,
-      spaceId,
-      request
-    );
-    logger.info(`Created rule doctor workflow ${RULE_DOCTOR_DEDUP_WORKFLOW_ID}`);
+    await managementApi.createWorkflow({ yaml, id: workflowId }, spaceId, request);
+    await managementApi.updateWorkflow(workflowId, { yaml, enabled: true }, spaceId, request);
+    logger.info(`Created workflow ${workflowId}`);
   }
 
-  const workflow = (await managementApi.getWorkflow(RULE_DOCTOR_DEDUP_WORKFLOW_ID, spaceId))!;
+  const workflow = (await managementApi.getWorkflow(workflowId, spaceId))!;
 
   return {
     id: workflow.id,

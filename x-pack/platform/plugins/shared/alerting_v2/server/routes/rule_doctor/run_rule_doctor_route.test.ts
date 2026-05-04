@@ -27,8 +27,8 @@ describe('RunRuleDoctorRoute', () => {
   const logger = loggingSystemMock.createLogger();
   const uiSettings = uiSettingsServiceMock.createStartContract();
   const savedObjects = savedObjectsServiceMock.createStartContract();
-  const resourceManager = {
-    ensureResourceReady: jest.fn().mockResolvedValue(undefined),
+  const insightsClient = {
+    ensureIndex: jest.fn().mockResolvedValue(undefined),
   } as any;
 
   const mockUiSettingsClient = uiSettingsServiceMock.createClient();
@@ -71,7 +71,7 @@ describe('RunRuleDoctorRoute', () => {
       uiSettings,
       savedObjects,
       logger,
-      resourceManager
+      insightsClient
     );
     await route.handle();
 
@@ -120,7 +120,7 @@ describe('RunRuleDoctorRoute', () => {
       uiSettings,
       savedObjects,
       logger,
-      resourceManager
+      insightsClient
     );
     await route.handle();
 
@@ -138,6 +138,31 @@ describe('RunRuleDoctorRoute', () => {
       'default',
       request
     );
+    expect(response.accepted).toHaveBeenCalled();
+  });
+
+  it('ensures insights index is ready before scheduling', async () => {
+    const { ctx, response } = createRouteDependencies();
+    const request = httpServerMock.createKibanaRequest({
+      body: { type: 'deduplication' },
+    });
+
+    (workflowsManagement.getWorkflow as jest.Mock).mockResolvedValue(persistedWorkflow);
+    (workflowsManagement.scheduleWorkflow as jest.Mock).mockResolvedValueOnce('wf-exec-789');
+
+    const route = new RunRuleDoctorRoute(
+      ctx,
+      request,
+      workflowsManagement,
+      spaceContext,
+      uiSettings,
+      savedObjects,
+      logger,
+      insightsClient
+    );
+    await route.handle();
+
+    expect(insightsClient.ensureIndex).toHaveBeenCalled();
     expect(response.accepted).toHaveBeenCalled();
   });
 
@@ -160,7 +185,7 @@ describe('RunRuleDoctorRoute', () => {
       uiSettings,
       savedObjects,
       logger,
-      resourceManager
+      insightsClient
     );
     await route.handle();
 

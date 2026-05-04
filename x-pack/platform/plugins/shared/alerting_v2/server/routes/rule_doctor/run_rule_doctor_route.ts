@@ -23,9 +23,9 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { SpaceContext } from '../rule_doctor_insights/space_context';
 import { WorkflowsManagementApiToken } from '../../lib/dispatcher/steps/dispatch_step_tokens';
-import { ensureRuleDoctorWorkflow } from '../../workflows/load_workflows';
-import { ResourceManager } from '../../lib/services/resource_service/resource_manager';
-import { RULE_DOCTOR_INSIGHTS_INDEX } from '../../resources/indices/rule_doctor_insights';
+import { ensureRuleDoctorAnalysisWorkflow } from '../../workflows/load_workflows';
+import { InsightsClientInternalToken } from '../../lib/rule_doctor_insights_client/tokens';
+import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 
 const runRuleDoctorBodySchema = z.object({
   type: z.enum(['deduplication']).describe('The type of Rule Doctor analysis to run'),
@@ -65,7 +65,8 @@ export class RunRuleDoctorRoute extends BaseAlertingRoute {
     @inject(CoreStart('uiSettings')) private readonly uiSettings: UiSettingsServiceStart,
     @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
     @inject(DILogger) private readonly logger: Logger,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManager
+    @inject(InsightsClientInternalToken)
+    private readonly insightsClient: RuleDoctorInsightsClient
   ) {
     super(ctx);
   }
@@ -76,8 +77,14 @@ export class RunRuleDoctorRoute extends BaseAlertingRoute {
     const spaceId = this.spaceContext.spaceId;
     const connectorId = await this.getDefaultConnectorId();
 
-    await this.resourceManager.ensureResourceReady(`index:${RULE_DOCTOR_INSIGHTS_INDEX}`);
-    const workflow = await this.ensureWorkflow(type, spaceId);
+    await this.insightsClient.ensureIndex();
+    const workflow = await ensureRuleDoctorAnalysisWorkflow(
+      type,
+      this.workflowsManagement,
+      spaceId,
+      this.request,
+      this.logger
+    );
 
     await this.workflowsManagement.scheduleWorkflow(
       workflow,
@@ -96,19 +103,5 @@ export class RunRuleDoctorRoute extends BaseAlertingRoute {
     const soClient = this.savedObjects.getScopedClient(this.request);
     const client = this.uiSettings.asScopedToClient(soClient);
     return client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  }
-
-  private async ensureWorkflow(type: string, spaceId: string) {
-    switch (type) {
-      case 'deduplication':
-        return ensureRuleDoctorWorkflow(
-          this.workflowsManagement,
-          spaceId,
-          this.request,
-          this.logger
-        );
-      default:
-        throw new Error(`Unknown rule doctor analysis type: ${type}`);
-    }
   }
 }
