@@ -39,7 +39,7 @@ module.exports = {
     schema: [],
     messages: {
       noPromiseAll:
-        'Don\'t use `Promise.all` with Playwright wait APIs. Parallel waits share one timeout window and amplify backend contention, producing flaky timeouts. Await sequentially or iterate with a `for` loop. See `docs/extend/scout/ui-best-practices.md` § "Don\'t use `Promise.all` with Playwright APIs".',
+        "Don't use `Promise.all` with Playwright wait APIs. Parallel waits share one timeout window and amplify backend contention, producing flaky timeouts. Await sequentially or iterate with a `for` loop.",
     },
   },
 
