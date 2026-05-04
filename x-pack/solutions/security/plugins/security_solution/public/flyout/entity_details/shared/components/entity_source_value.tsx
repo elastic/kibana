@@ -108,7 +108,7 @@ export const TruncatedBadgeList = memo(
     );
 
     if (formattedValues.length === 0) {
-      return <EuiText size="s">{getEmptyTagValue()}</EuiText>;
+      return <EuiText size={textSize}>{getEmptyTagValue()}</EuiText>;
     }
 
     const safeMaxVisible = Math.max(1, maxVisible);
