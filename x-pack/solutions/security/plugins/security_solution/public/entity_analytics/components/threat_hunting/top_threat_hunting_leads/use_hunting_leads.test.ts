@@ -196,4 +196,39 @@ describe('useHuntingLeads', () => {
 
     expect(result.current.isGenerating).toBe(true);
   });
+
+  it('returns readPermissionError true when privileges indicate no read access', () => {
+    mockUseQuery.mockImplementation((config: { queryKey?: string[]; queryFn?: () => unknown }) => {
+      if (config.queryKey?.[0] === 'lead-generation-privileges') {
+        return {
+          data: { has_read_permissions: false, has_write_permissions: false },
+          isLoading: false,
+          refetch: jest.fn(),
+        };
+      }
+      return { data: undefined, isLoading: false, refetch: jest.fn() };
+    });
+
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(result.current.readPermissionError).toBe(true);
+  });
+
+  it('returns writePermissionError true when privileges indicate no write access', () => {
+    mockUseQuery.mockImplementation((config: { queryKey?: string[]; queryFn?: () => unknown }) => {
+      if (config.queryKey?.[0] === 'lead-generation-privileges') {
+        return {
+          data: { has_read_permissions: true, has_write_permissions: false },
+          isLoading: false,
+          refetch: jest.fn(),
+        };
+      }
+      return { data: undefined, isLoading: false, refetch: jest.fn() };
+    });
+
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(result.current.writePermissionError).toBe(true);
+    expect(result.current.readPermissionError).toBe(false);
+  });
 });

@@ -15,9 +15,11 @@ export const ENABLE_LEAD_GENERATION_URL = `${LEAD_GENERATION_URL}/enable` as con
 export const DISABLE_LEAD_GENERATION_URL = `${LEAD_GENERATION_URL}/disable` as const;
 export const LEAD_GENERATION_PRIVILEGES_URL = `${LEAD_GENERATION_URL}/privileges` as const;
 
-export const LEADS_INDEX_PATTERN = '.entity_analytics.entity-leads-*' as const;
+const LEADS_INDEX_PREFIX = '.entity_analytics.entity-leads' as const;
+
+export const LEADS_INDEX_PATTERN = `${LEADS_INDEX_PREFIX}-*` as const;
 
 export type LeadGenerationMode = 'adhoc' | 'scheduled';
 
 export const getLeadsIndexName = (spaceId: string, mode: LeadGenerationMode = 'adhoc'): string =>
-  `.entity_analytics.entity-leads-${mode}.entity-${spaceId}`;
+  `${LEADS_INDEX_PREFIX}-${mode}.entity-${spaceId}`;
