@@ -95,11 +95,12 @@ class DashboardUserActivitySession {
     start: number,
     end: number
   ) {
+    const state = this.api.getSerializedState();
     const meta = {
-      time_range: this.api.timeRange$.getValue(),
-      query: this.api.query$.getValue(),
-      filters: this.api.filters$.getValue(),
-      panel_count: Object.keys(this.api.children$.getValue()).length,
+      time_range: state.attributes.time_range,
+      query: state.attributes.query,
+      filters: state.attributes.filters,
+      panel_count: state.attributes.panels.length,
       errors: Object.entries(this.api.children$.getValue()).reduce(
         (prev: Array<{ panel_id: string; error: string }>, [id, child]) => {
           if (apiPublishesBlockingError(child)) {
@@ -114,9 +115,10 @@ class DashboardUserActivitySession {
       ),
     };
 
+    const dashboardId = this.api.savedObjectId$.getValue() ?? this.api.uuid;
     const result = await coreServices.http.post(
       `/internal/dashboard/user_activity/${encodeURIComponent(type)}/${encodeURIComponent(
-        this.api.uuid
+        dashboardId
       )}`,
       {
         body: JSON.stringify({
