@@ -23,6 +23,7 @@ import { createFormatter } from '../../lib/format_results';
 import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 
 export interface ExportRouteParams {
   /** KQL base filter (e.g. `action_id: "abc"` or `schedule_id: "x" AND ...`) */
@@ -109,6 +110,11 @@ export const createExportRouteHandler =
       }
     }
 
+    const coreContext = await context.core;
+    // Uses internal user — osquery_manager / fleet indices require it (matches search strategy in server/search_strategy/osquery/index.ts).
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+
     // Resolve space-aware index
     let index = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
@@ -133,16 +139,15 @@ export const createExportRouteHandler =
       }
     }
 
+    // Apply CCS prefix to match the search strategy's index handling.
+    index = prefixIndexPatternsWithCcs(index, ccsEnabled);
+
     // Get user info for metadata
     const user = await getUserInfo({
       request,
       security: osqueryContext.security,
       logger,
     });
-
-    const coreContext = await context.core;
-    // Uses internal user — osquery_manager / fleet indices require it (matches search strategy in server/search_strategy/osquery/index.ts).
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
 
     const formatter = createFormatter(format);
     const timestamp = new Date().toISOString();

@@ -30,7 +30,22 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
 }));
 
+jest.mock('../../utils/ccs_utils', () => ({
+  hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+  prefixIndexPatternsWithCcs: jest.fn((index: string, ccsEnabled: boolean) =>
+    ccsEnabled ? `${index},*:${index}` : index
+  ),
+}));
+
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+
+const mockHasConnectedRemoteClusters = hasConnectedRemoteClusters as jest.MockedFunction<
+  typeof hasConnectedRemoteClusters
+>;
+const mockPrefixIndexPatternsWithCcs = prefixIndexPatternsWithCcs as jest.MockedFunction<
+  typeof prefixIndexPatternsWithCcs
+>;
 
 const mockExportResultsToStream = exportResultsToStream as jest.MockedFunction<
   typeof exportResultsToStream
@@ -357,6 +372,33 @@ describe('createExportRouteHandler', () => {
     expect(mockExportResultsToStream).toHaveBeenCalledWith(
       expect.objectContaining({ esClient: mockAsInternalUser })
     );
+  });
+
+  it('applies CCS prefix to the resolved index when ccsEnabled is true', async () => {
+    mockHasConnectedRemoteClusters.mockResolvedValueOnce(true);
+    mockPrefixIndexPatternsWithCcs.mockImplementationOnce((idx: string) => `${idx},*:${idx}`);
+
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({ query: { format: 'ndjson' }, body: {} });
+
+    await handler(createContext(), request, response, baseParams);
+
+    const indexArg = mockExportResultsToStream.mock.calls[0][0].index;
+    expect(indexArg).toContain('*:');
+  });
+
+  it('does not apply CCS prefix when ccsEnabled is false', async () => {
+    mockHasConnectedRemoteClusters.mockResolvedValueOnce(false);
+
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({ query: { format: 'ndjson' }, body: {} });
+
+    await handler(createContext(), request, response, baseParams);
+
+    const indexArg = mockExportResultsToStream.mock.calls[0][0].index;
+    expect(indexArg).not.toContain('*:');
   });
 
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {
