@@ -472,7 +472,7 @@ export const PresentationPanelHoverActions = ({
                 </EuiToolTip>
               )
             )}
-            {contextMenuPanels.length ? (
+            {contextMenuPanels.some(({ items }) => items?.length) ? (
               <EuiPopover
                 repositionOnScroll
                 panelPaddingSize="none"
