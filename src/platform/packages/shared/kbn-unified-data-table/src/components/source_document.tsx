@@ -72,10 +72,9 @@ export function SourceDocument({
       ).slice(0, maxEntries)
     : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
 
-  const hasVisiblePairs = pairs.some(
-    ([, , fieldName]) =>
-      !(isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null)
-  );
+  const hasVisiblePairs =
+    !isPlainRecord ||
+    pairs.some(([, , fieldName]) => !(fieldName && (row.flattened[fieldName] ?? null) === null));
 
   if (!hasVisiblePairs) {
     return <span className={CELL_CLASS}>—</span>;
