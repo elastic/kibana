@@ -11,6 +11,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { StreamsServer } from '../../../types';
@@ -26,10 +27,12 @@ export function createDemoteEventTool({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): BuiltinSkillBoundedTool<typeof demoteEventSchema> {
   return {
     id: STREAMS_DEMOTE_EVENT_TOOL_ID,
@@ -53,6 +56,11 @@ export function createDemoteEventTool({
           eventId: toolParams.event_id,
         });
 
+        telemetry.trackAgentToolEventDemote({
+          success: true,
+          event_id: toolParams.event_id,
+        });
+
         return {
           results: [
             {
@@ -69,6 +77,12 @@ export function createDemoteEventTool({
         } else {
           logger.debug(String(error));
         }
+
+        telemetry.trackAgentToolEventDemote({
+          success: false,
+          event_id: toolParams.event_id,
+          error_message: message,
+        });
 
         return {
           results: [

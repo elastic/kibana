@@ -24,6 +24,7 @@ jest.mock('./handler', () => ({
 describe('event_create tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as unknown as StreamsServer;
+  const telemetry = { trackAgentToolEventCreate: jest.fn() };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +32,7 @@ describe('event_create tool', () => {
 
   it('uses expected tool id', () => {
     const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
-    const tool = createEventTool({ getScopedClients, server, logger });
+    const tool = createEventTool({ getScopedClients, server, logger, telemetry: telemetry as never });
 
     expect(tool.id).toBe(STREAMS_CREATE_EVENT_TOOL_ID);
     expect(tool.id).toBe('platform.streams.sig_events.event_create');
@@ -39,7 +40,7 @@ describe('event_create tool', () => {
 
   it('uses always confirmation policy with custom prompt', async () => {
     const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
-    const tool = createEventTool({ getScopedClients, server, logger });
+    const tool = createEventTool({ getScopedClients, server, logger, telemetry: telemetry as never });
 
     expect(tool.confirmation?.askUser).toBe('always');
 
@@ -81,6 +82,7 @@ describe('event_create tool', () => {
       getScopedClients: getScopedClients as unknown as GetScopedClients,
       server,
       logger,
+      telemetry: telemetry as never,
     });
 
     const result = await invokeHandler(
@@ -118,6 +120,7 @@ describe('event_create tool', () => {
       getScopedClients: getScopedClients as unknown as GetScopedClients,
       server,
       logger,
+      telemetry: telemetry as never,
     });
 
     const result = await invokeHandler(

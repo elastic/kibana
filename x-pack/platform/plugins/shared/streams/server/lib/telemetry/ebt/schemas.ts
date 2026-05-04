@@ -16,6 +16,8 @@ import type {
   StreamsFeaturesIdentifiedProps,
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventDemoteProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -418,6 +420,56 @@ const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentTool
     },
   };
 
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+const streamsAgentToolEventDemoteSchema: RootSchema<StreamsAgentToolEventDemoteProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event demotion succeeded',
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The identifier of the demoted significant event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event demotion fails',
+      optional: true,
+    },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -428,4 +480,6 @@ export {
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
   streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventDemoteSchema,
 };

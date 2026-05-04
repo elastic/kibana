@@ -24,6 +24,7 @@ jest.mock('./handler', () => ({
 describe('event_demote tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as unknown as StreamsServer;
+  const telemetry = { trackAgentToolEventDemote: jest.fn() };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +32,7 @@ describe('event_demote tool', () => {
 
   it('uses expected tool id', () => {
     const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
-    const tool = createDemoteEventTool({ getScopedClients, server, logger });
+    const tool = createDemoteEventTool({ getScopedClients, server, logger, telemetry: telemetry as never });
 
     expect(tool.id).toBe(STREAMS_DEMOTE_EVENT_TOOL_ID);
     expect(tool.id).toBe('platform.streams.sig_events.event_demote');
@@ -55,6 +56,7 @@ describe('event_demote tool', () => {
       getScopedClients: getScopedClients as unknown as GetScopedClients,
       server,
       logger,
+      telemetry: telemetry as never,
     });
 
     const result = await invokeHandler(
@@ -84,6 +86,7 @@ describe('event_demote tool', () => {
       getScopedClients: getScopedClients as unknown as GetScopedClients,
       server,
       logger,
+      telemetry: telemetry as never,
     });
 
     const result = await invokeHandler(

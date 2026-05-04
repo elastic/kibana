@@ -11,6 +11,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { sigEventSchema } from '@kbn/streams-schema';
 import dedent from 'dedent';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { StreamsServer } from '../../../types';
@@ -24,10 +25,12 @@ export function createEventTool({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): BuiltinSkillBoundedTool<typeof createEventSchema> {
   return {
     id: STREAMS_CREATE_EVENT_TOOL_ID,
@@ -66,6 +69,11 @@ export function createEventTool({
           eventInput: toolParams,
         });
 
+        telemetry.trackAgentToolEventCreate({
+          success: true,
+          stream_names: toolParams.stream_names,
+        });
+
         return {
           results: [
             {
@@ -82,6 +90,12 @@ export function createEventTool({
         } else {
           logger.debug(String(error));
         }
+
+        telemetry.trackAgentToolEventCreate({
+          success: false,
+          stream_names: toolParams.stream_names,
+          error_message: message,
+        });
 
         return {
           results: [

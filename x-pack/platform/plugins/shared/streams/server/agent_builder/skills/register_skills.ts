@@ -39,6 +39,7 @@ export const registerAgentBuilderSkills = ({
       getScopedClients,
       server,
       logger,
+      telemetry,
     }),
     createKiIdentificationManagementSkill({ getScopedClients, telemetry }),
   ];
