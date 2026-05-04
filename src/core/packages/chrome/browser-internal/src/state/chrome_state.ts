@@ -23,6 +23,7 @@ import type {
   ChromeNextGlobalSearchConfig,
   ChromeNextSpaceSelectorConfig,
   ChromeUserBanner,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
@@ -87,6 +88,7 @@ export interface ChromeState {
 
   /** Whether an inline AppHeader is currently mounted by the active app */
   inlineAppHeader: State<boolean>;
+  appHeader: State<AppHeaderConfig | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -145,6 +147,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // Inline AppHeader presence (managed by @kbn/app-header)
   const inlineAppHeader = createState<boolean>(false);
 
+  // App header config (managed by chrome.next.appHeader.set)
+  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
+
   return {
     visibility,
     style,
@@ -175,5 +180,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     feedbackHandler,
     newsfeedHandler,
     inlineAppHeader,
+    appHeader,
   };
 }

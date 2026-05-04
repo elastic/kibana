@@ -30,6 +30,7 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -143,5 +144,8 @@ export interface InternalChromeNext extends ChromeNext {
   inlineAppHeader: {
     get$(): Observable<boolean>;
     set(mounted: boolean): void;
+  };
+  appHeader: ChromeNext['appHeader'] & {
+    get$(): Observable<AppHeaderConfig | undefined>;
   };
 }

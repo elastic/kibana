@@ -9,7 +9,7 @@
 
 import React, { type ReactNode } from 'react';
 import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
-import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
+import type { ChromeNextAiButton, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
@@ -60,6 +60,8 @@ export function createChromeApi({
       );
     }
   };
+
+  let appHeaderRegistrationId = 0;
 
   const hasHeaderBanner$ = state.headerBanner.$.pipe(
     map((banner) => Boolean(banner)),
@@ -213,6 +215,18 @@ export function createChromeApi({
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,
         set: state.inlineAppHeader.set,
+      },
+      appHeader: {
+        get$: () => state.appHeader.$,
+        set: (config: AppHeaderConfig) => {
+          const registrationId = ++appHeaderRegistrationId;
+          state.appHeader.set(config);
+          return () => {
+            if (registrationId === appHeaderRegistrationId) {
+              state.appHeader.set(undefined);
+            }
+          };
+        },
       },
     },
 
