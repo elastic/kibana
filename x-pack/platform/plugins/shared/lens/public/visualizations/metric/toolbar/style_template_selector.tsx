@@ -12,6 +12,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { MetricStyleTemplateId } from '@kbn/lens-common';
 
+const styleTemplateSelectorLabel = i18n.translate('xpack.lens.metric.styleTemplate.selectorLabel', {
+  defaultMessage: 'Style template',
+});
+
 const customLabel = i18n.translate('xpack.lens.metric.styleTemplate.custom', {
   defaultMessage: 'Custom',
 });
@@ -52,7 +56,7 @@ export function StyleTemplateSelector({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div>
+    <div role="radiogroup" aria-label={styleTemplateSelectorLabel}>
       <EuiFlexGroup gutterSize="s" wrap>
         {styleTemplates.map(({ id, label, preview }) => (
           <EuiFlexItem
