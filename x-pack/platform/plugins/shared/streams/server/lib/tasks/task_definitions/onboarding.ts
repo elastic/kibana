@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
-  GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
   OnboardingResult,
   SignificantEventsQueriesGenerationResult,
@@ -15,14 +14,12 @@ import type {
 } from '@kbn/streams-schema';
 import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
-import type { QueryClient } from '../../streams/assets/query/query_client';
-import type { StreamsClient } from '../../streams/client';
+import { persistQueries } from '../../sig_events/persist_queries';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
@@ -44,7 +41,6 @@ export interface OnboardingTaskParams {
   from: number;
   to: number;
   steps: OnboardingStep[];
-  saveQueries: boolean;
   connectors?: {
     features?: string;
     queries?: string;
@@ -53,9 +49,8 @@ export interface OnboardingTaskParams {
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
-  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
-  return saveQueries ? base : `${base}_no_save_queries`;
+export function getOnboardingTaskId(streamName: string) {
+  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
 }
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
@@ -96,12 +91,13 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               }
               const { fakeRequest } = runContext;
 
-              const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
-                .taskInstance.params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
+                .params as TaskParams<OnboardingTaskParams>;
 
               const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
                   request: fakeRequest,
+                  rulesClientOptions: { cloneApiKeysOnCreate: true },
                 });
 
               try {
@@ -175,12 +171,10 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
-                      if (saveQueries) {
-                        await persistQueries(streamName, queriesTaskResult.queries, {
-                          queryClient: await getQueryClient(),
-                          streamsClient,
-                        });
-                      }
+                      await persistQueries(streamName, queriesTaskResult.queries, {
+                        queryClient: await getQueryClient(),
+                        streamsClient,
+                      });
                       break;
 
                     default:
@@ -195,7 +189,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   { featuresTaskResult, queriesTaskResult }
@@ -271,7 +264,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   errorMessage
@@ -372,37 +364,4 @@ async function scheduleQueriesGenerationTask(
   });
 
   return id;
-}
-
-export async function persistQueries(
-  streamName: string,
-  queries: GeneratedSignificantEventQuery[],
-  deps: {
-    queryClient: QueryClient;
-    streamsClient: StreamsClient;
-  }
-) {
-  const { queryClient, streamsClient } = deps;
-
-  if (queries.length === 0) {
-    return;
-  }
-
-  const definition = await streamsClient.getStream(streamName);
-
-  await queryClient.bulk(
-    definition,
-    queries.map((query) => ({
-      index: {
-        id: v4(),
-        type: query.type,
-        esql: query.esql,
-        title: query.title,
-        description: query.description,
-        severity_score: query.severity_score,
-        evidence: query.evidence,
-      },
-    })),
-    { createRules: false }
-  );
 }

@@ -7,15 +7,15 @@
 
 import React from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { PhaseName } from '@kbn/streams-schema';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 
 import { useIlmPhasesColorAndDescription } from '../../../hooks/use_ilm_phases_color_and_description';
+import { useStyles } from '../use_styles';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { DeleteSearchableSnapshotToggleField, MinAgeField, ReadOnlyToggleField } from '../form';
-import { READONLY_ALLOWED_PHASES, TIME_UNIT_OPTIONS } from '../constants';
+import { TIME_UNIT_OPTIONS } from '../constants';
 import { DownsampleFieldSection } from './downsample_field_section';
 import { PhaseFieldsMount } from './phase_fields_mount';
 import { RemovePhaseButton } from './remove_phase_button';
@@ -26,7 +26,6 @@ export interface PhasePanelProps {
   selectedPhase: PhaseName | undefined;
   enabledPhases: PhaseName[];
   setSelectedPhase: (phase: PhaseName | undefined) => void;
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   dataTestSubj: string;
   sectionStyles: SerializedStyles;
   searchableSnapshotRepositories: string[];
@@ -35,7 +34,6 @@ export interface PhasePanelProps {
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
   isMetricsStream: boolean;
-  phaseDescriptionStyles: SerializedStyles;
 }
 
 export const PhasePanel = ({
@@ -43,7 +41,6 @@ export const PhasePanel = ({
   selectedPhase,
   enabledPhases,
   setSelectedPhase,
-  form,
   dataTestSubj,
   sectionStyles,
   searchableSnapshotRepositories,
@@ -52,9 +49,10 @@ export const PhasePanel = ({
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
   isMetricsStream,
-  phaseDescriptionStyles,
 }: PhasePanelProps) => {
   const isHidden = selectedPhase !== phase;
+  const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
+  const { phaseDescriptionStyles, phaseDescriptionNoBottomPaddingStyles } = useStyles();
 
   const { ilmPhases } = useIlmPhasesColorAndDescription();
 
@@ -66,17 +64,32 @@ export const PhasePanel = ({
   const showSearchableSnapshotSectionForCold =
     canCreateRepository || searchableSnapshotRepositories.length > 0;
 
-  const downsampleEnabledPath = `_meta.${phase}.downsampleEnabled`;
-  useFormData({
-    form,
-    watch: isHotPhase || isWarmPhase || isColdPhase ? downsampleEnabledPath : undefined,
+  const [hotDownsampleEnabled, warmDownsampleEnabled, coldDownsampleEnabled] = useWatch({
+    control,
+    name: [
+      '_meta.hot.downsampleEnabled',
+      '_meta.warm.downsampleEnabled',
+      '_meta.cold.downsampleEnabled',
+    ],
   });
-  const isDownsampleEnabled = Boolean(form.getFields()[downsampleEnabledPath]?.value);
+  const isDownsampleEnabled =
+    phase === 'hot'
+      ? Boolean(hotDownsampleEnabled)
+      : phase === 'warm'
+      ? Boolean(warmDownsampleEnabled)
+      : phase === 'cold'
+      ? Boolean(coldDownsampleEnabled)
+      : false;
+
+  const descriptionStyles =
+    isHotPhase && isDownsampleEnabled
+      ? phaseDescriptionStyles
+      : phaseDescriptionNoBottomPaddingStyles;
 
   return (
     <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-${phase}`}>
       <PhaseFieldsMount phase={phase} />
-      <EuiText size="s" color="subdued" css={phaseDescriptionStyles}>
+      <EuiText size="s" color="subdued" css={descriptionStyles}>
         {ilmPhases[phase].description}
       </EuiText>
       {(!isHotPhase || !isDownsampleEnabled) && (
@@ -93,22 +106,13 @@ export const PhasePanel = ({
 
           {(isHotPhase || isWarmPhase || isColdPhase) && !isDownsampleEnabled && (
             <EuiFlexItem grow={false}>
-              <ReadOnlyToggleField
-                form={form}
-                phaseName={phase}
-                dataTestSubj={dataTestSubj}
-                allowedPhases={READONLY_ALLOWED_PHASES}
-              />
+              <ReadOnlyToggleField phaseName={phase} dataTestSubj={dataTestSubj} />
             </EuiFlexItem>
           )}
 
           {isDeletePhase && (
             <EuiFlexItem grow={false}>
-              <DeleteSearchableSnapshotToggleField
-                form={form}
-                phaseName={phase}
-                dataTestSubj={dataTestSubj}
-              />
+              <DeleteSearchableSnapshotToggleField phaseName={phase} dataTestSubj={dataTestSubj} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -119,7 +123,6 @@ export const PhasePanel = ({
           <EuiHorizontalRule margin="none" />
           <div css={sectionStyles}>
             <DownsampleFieldSection
-              form={form}
               phaseName={phase}
               dataTestSubj={dataTestSubj}
               isMetricsStream={isMetricsStream}
@@ -133,7 +136,6 @@ export const PhasePanel = ({
           <EuiHorizontalRule margin="none" />
           <div css={sectionStyles}>
             <SearchableSnapshotFieldSection
-              form={form}
               phaseName={phase}
               dataTestSubj={dataTestSubj}
               searchableSnapshotRepositories={searchableSnapshotRepositories}
@@ -151,7 +153,6 @@ export const PhasePanel = ({
           <EuiHorizontalRule margin="none" />
           <div css={sectionStyles}>
             <RemovePhaseButton
-              form={form}
               phaseName={phase}
               enabledPhases={enabledPhases}
               dataTestSubj={dataTestSubj}

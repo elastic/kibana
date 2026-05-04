@@ -222,6 +222,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   return (
     <div style={containerStyles} data-test-subj="bulk-actions-button-container" aria-hidden>
       <EuiPopover
+        aria-label={i18n.BULK_ACTIONS_ARIA_LABEL}
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
         panelPaddingSize="none"

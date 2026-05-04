@@ -41,8 +41,6 @@ import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_f
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
-import { PromotionCallout } from './promotion_callout/promotion_callout';
-import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -159,7 +157,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
-  const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
@@ -209,13 +206,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <PromotionCallout
-            streamName={definition.stream.name}
-            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
-          />
-        </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
@@ -315,13 +305,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           onClose={closeFlyout}
         />
       ) : null}
-
-      {isSuggestedRulesFlyoutOpen && (
-        <SuggestedRulesFlyout
-          streamName={definition.stream.name}
-          onClose={() => setIsSuggestedRulesFlyoutOpen(false)}
-        />
-      )}
     </>
   );
 }

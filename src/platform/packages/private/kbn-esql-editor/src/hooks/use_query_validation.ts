@@ -81,6 +81,11 @@ export const useQueryValidation = ({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
+  const editorMessagesRef = useRef(editorMessages);
+  useEffect(() => {
+    editorMessagesRef.current = editorMessages;
+  }, [editorMessages]);
+
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
       if (editorModel.current) {
@@ -283,6 +288,7 @@ export const useQueryValidation = ({
 
   return {
     editorMessages,
+    editorMessagesRef,
     queryValidation,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,

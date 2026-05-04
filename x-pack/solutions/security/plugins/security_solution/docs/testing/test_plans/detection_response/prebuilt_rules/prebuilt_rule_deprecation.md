@@ -45,7 +45,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Deprecation review: with ids filter](#deprecation-review-with-ids-filter)
     - [**Scenario: Review filters by installed rule SO ids**](#scenario-review-filters-by-installed-rule-so-ids)
     - [**Scenario: Review returns empty when filtered rule is not deprecated**](#scenario-review-returns-empty-when-filtered-rule-is-not-deprecated)
-    - [**Scenario: Review returns empty when filtered id does not exist**](#scenario-review-returns-empty-when-filtered-id-does-not-exist)
+    - [**Scenario: Review returns 400 when filtered id does not exist**](#scenario-review-returns-400-when-filtered-id-does-not-exist)
   - [Deprecation review: edge cases](#deprecation-review-edge-cases)
     - [**Scenario: Review respects MAX\_DEPRECATED\_RULES\_TO\_RETURN limit**](#scenario-review-respects-max_deprecated_rules_to_return-limit)
     - [**Scenario: Review handles package with no deprecated rules**](#scenario-review-handles-package-with-no-deprecated-rules)
@@ -239,14 +239,14 @@ When the user requests the deprecation review filtered to rule D
 Then the response contains an empty rules array
 ```
 
-#### **Scenario: Review returns empty when filtered id does not exist**
+#### **Scenario: Review returns 400 when filtered id does not exist**
 
 **Automation**: API integration tests.
 
 ```Gherkin
 Given a non-existent rule SO id
 When the user requests the deprecation review filtered to the non-existent id
-Then the response contains an empty rules array
+Then the endpoint returns a 400 error with message "No rules found for bulk get"
 ```
 
 ### Deprecation review: edge cases

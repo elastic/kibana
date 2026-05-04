@@ -217,6 +217,7 @@
                 "lineNumber": 89,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaResponseFactory",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -276,6 +277,7 @@
             "lineNumber": 45,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "InitMetricsOptions",
             "trackAdoption": false,
             "isRequired": true
           }

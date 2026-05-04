@@ -42,13 +42,15 @@ paths:
                     still_running: ['generic', 'user', 'service']
               schema:
                 type: object
-                properties:      
+                properties:
                   deleted:
                     type: array
+                    description: Entity types whose engines were successfully deleted.
                     items:
                       $ref: '../common.schema.yaml#/components/schemas/EntityType'
                   still_running:
                     type: array
+                    description: Entity types whose engines are still running.
                     items:
                       $ref: '../common.schema.yaml#/components/schemas/EntityType'
 
@@ -93,7 +95,8 @@ paths:
                     deleted: true
               schema:
                 type: object
-                properties:      
+                properties:
                   deleted:
                     type: boolean
+                    description: Whether the engine was successfully deleted.
                  

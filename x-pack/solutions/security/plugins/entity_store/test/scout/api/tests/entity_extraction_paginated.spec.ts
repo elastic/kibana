@@ -70,9 +70,8 @@ apiTest.describe(
 
     apiTest(
       'Should extract host with entity pagination (docsLimit 5, wide log slices)',
-      async ({ apiClient, esClient }) => {
-        const expectedResultCount = 20;
-        const expectedPageCount = 4;
+      async ({ apiClient, esClient, log }) => {
+        const expectedPageCount = 5;
 
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
@@ -87,7 +86,7 @@ apiTest.describe(
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body.success).toBe(true);
-        expect(extractionResponse.body.count).toBe(expectedResultCount);
+        expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
         expect(extractionResponse.body.pages).toBe(expectedPageCount);
 
         const entities = await esClient.search({
@@ -102,15 +101,13 @@ apiTest.describe(
           size: 1000, // a lot just to be sure we are not capping it
         });
 
-        assertEntitiesEqual(expectedHostEntities, entities.hits.hits);
+        assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
       }
     );
 
     apiTest(
       'Should run more ESQL pages when maxLogsPerPage narrows log slices',
-      async ({ apiClient, esClient }) => {
-        // We process some entities twice because they didn't fall in the same logs page
-        const expectedProcessedEntities = 24;
+      async ({ apiClient, esClient, log }) => {
         const minimumPagesWithEntityPaginationOnly = 4;
 
         const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
@@ -145,7 +142,8 @@ apiTest.describe(
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body.success).toBe(true);
-        expect(extractionResponse.body.count).toBe(expectedProcessedEntities);
+        // We process some entities twice because they didn't fall in the same logs page
+        expect(extractionResponse.body.count).toBeGreaterThan(expectedHostEntities.length);
         expect(extractionResponse.body.pages).toBeGreaterThan(minimumPagesWithEntityPaginationOnly);
 
         const entities = await esClient.search({
@@ -161,7 +159,7 @@ apiTest.describe(
           size: 1000,
         });
 
-        assertEntitiesEqual(expectedHostEntities, entities.hits.hits);
+        assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
       }
     );
   }

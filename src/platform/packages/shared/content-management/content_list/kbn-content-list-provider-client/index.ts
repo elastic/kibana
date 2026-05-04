@@ -15,10 +15,14 @@ export type { ContentListClientProviderProps } from './src/provider';
 export { createClientStrategy } from './src/strategy';
 export type { ClientStrategy } from './src/strategy';
 
+// Content editor.
+export type { ContentEditorConfig } from './src/content_editor';
+
 // Types.
 export type {
   ContentListClientServices,
   TableListViewFindItemsFn,
+  TableListViewFindItemsOptions,
   TableListViewFindItemsResult,
   SavedObjectReference,
 } from './src/types';

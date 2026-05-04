@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -14,7 +15,11 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions
 import { wrapMiddlewares } from '../middleware';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe('Entity types to uninstall. Defaults to all installed types.'),
 });
 
 export function registerUninstall(router: EntityStorePluginRouter) {
@@ -22,6 +27,12 @@ export function registerUninstall(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.public.UNINSTALL,
       access: 'public',
+      summary: 'Uninstall the Entity Store',
+      description:
+        'Uninstall the Entity Store, removing engines and associated resources for the specified entity types.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -34,6 +45,9 @@ export function registerUninstall(router: EntityStorePluginRouter) {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_uninstall.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res) => {

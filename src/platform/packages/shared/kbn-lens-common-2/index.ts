@@ -26,7 +26,7 @@ import type {
   SerializedTitles,
   SerializedTimeRange,
 } from '@kbn/presentation-publishing';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import type {
   LensByValueBase,
@@ -51,7 +51,7 @@ type LensPersistableState = SerializedTitles & // title, description, hide_title
 
 export type LensByValueSerializedAPIConfig = LensPersistableState & {
   // Temporarily allow both old and new attributes until all chart types are supported and feature flag removed
-  attributes: LensApiSchemaType | LensByValueBase['attributes'];
+  attributes: LensApiConfig | LensByValueBase['attributes'];
   ref_id?: string; // really should be never but creates type issues
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 
 /**
  * Determines if a point should be included based on its score and selected severity thresholds

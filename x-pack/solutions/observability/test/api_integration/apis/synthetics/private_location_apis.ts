@@ -46,8 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
-      await testPrivateLocations.installSyntheticsPackage();
-
       await kServer.savedObjects.clean({
         types: [legacyPrivateLocationsSavedObjectName, privateLocationSavedObjectName],
       });

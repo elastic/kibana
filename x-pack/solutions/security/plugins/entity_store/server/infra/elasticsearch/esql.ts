@@ -8,6 +8,7 @@
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 
@@ -15,12 +16,14 @@ interface ExecuteEsqlQueryParams {
   esClient: ElasticsearchClient;
   query: string;
   abortController?: AbortController;
+  excludeColdFrozenTiers?: boolean;
 }
 
 export const executeEsqlQuery = async ({
   esClient,
   query,
   abortController,
+  excludeColdFrozenTiers = true,
 }: ExecuteEsqlQueryParams): Promise<ESQLSearchResponse> => {
   const options: TransportRequestOptions = {};
   if (abortController?.signal) {
@@ -32,6 +35,7 @@ export const executeEsqlQuery = async ({
       query,
       drop_null_columns: true,
       allow_partial_results: true,
+      filter: buildDslFilters(excludeColdFrozenTiers),
     },
     options
   )) as unknown as ESQLSearchResponse;
@@ -64,3 +68,21 @@ export const esqlResponseToBulkObjects = (
   }
   return objects;
 };
+
+function buildDslFilters(excludeColdFrozenTiers: boolean) {
+  const dslFilter: QueryDslQueryContainer = {};
+
+  if (excludeColdFrozenTiers) {
+    dslFilter.bool = {
+      must_not: [
+        {
+          terms: {
+            _tier: ['data_cold', 'data_frozen'],
+          },
+        },
+      ],
+    };
+  }
+
+  return dslFilter;
+}

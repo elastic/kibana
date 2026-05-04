@@ -241,7 +241,6 @@ export function StreamListView() {
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
-              canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
               wiredStreamsStatus={wiredStreamsStatus}
               openFlyout={() => setIsSettingsFlyoutOpen(true)}
             />

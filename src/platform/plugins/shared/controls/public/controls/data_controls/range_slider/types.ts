@@ -8,12 +8,13 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishesUnsavedChanges, PublishingSubject } from '@kbn/presentation-publishing';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataControlApi } from '../types';
 
 export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
-  DataControlApi & {
+  DataControlApi &
+  PublishesUnsavedChanges & {
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
   };

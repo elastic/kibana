@@ -71,6 +71,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ICluster",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -128,6 +129,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -180,6 +182,7 @@
             "lineNumber": 31,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "EsClientForTestingOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -206,7 +209,7 @@
           "<Options>"
         ],
         "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-        "lineNumber": 197,
+        "lineNumber": 203,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -222,9 +225,10 @@
               "Options"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 199,
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -610,6 +614,24 @@
           },
           {
             "parentPluginId": "@kbn/test-es-server",
+            "id": "def-common.CreateTestEsClusterOptions.clean",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "clean",
+            "description": [
+              "\nClean existing serverless object store data before startup.\n\nDefaults to `true` for backwards compatibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-es-server",
             "id": "def-common.CreateTestEsClusterOptions.files",
             "type": "Array",
             "tags": [],
@@ -621,7 +643,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 172,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -639,7 +661,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 176,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -21,6 +21,17 @@ echo "--- Upload Build Artifacts"
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
-cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-default.tar.gz
-buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.zst" kibana-default.tar.zst
+buildkite-agent artifact upload "./*.tar.zst;./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+cd -
+
+# [rspack-transition] Upload build type marker for cache validation.
+# Delete this block when the legacy optimizer is removed.
+if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
+  echo "rspack" > "$KIBANA_DIR/target/kibana-build-type.txt"
+else
+  echo "legacy" > "$KIBANA_DIR/target/kibana-build-type.txt"
+fi
+cd "$KIBANA_DIR/target"
+buildkite-agent artifact upload "kibana-build-type.txt"
 cd -

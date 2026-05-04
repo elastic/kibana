@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
+import { EisCloudConnectPromoCallout, useCloudConnectStatus } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../../common/constants';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
@@ -36,8 +38,15 @@ import {
   type TaskTypeCategory,
 } from '../../utils/eis_utils';
 import { ModelFamilyFilter } from './model_family_filter';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ElasticInferenceServiceModelsPage = () => {
+  const {
+    services: { application, cloud, cloudConnect },
+  } = useKibana();
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
+    cloudConnect?.hooks.useCloudConnectStatus
+  );
   const queryClient = useQueryClient();
   const { data: endpoints, isLoading, isError } = useEisModels();
   const {
@@ -104,6 +113,17 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   return (
     <>
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="elasticInferencePage"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="top"
+        />
+      )}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>

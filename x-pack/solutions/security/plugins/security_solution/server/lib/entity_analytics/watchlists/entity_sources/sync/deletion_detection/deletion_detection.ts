@@ -35,13 +35,29 @@ export const createDeletionDetectionService = ({
 
   const findStaleEntities = async (
     sourceId: string,
-    currentEuids: string[]
+    currentEuids: string[],
+    range?: { gt?: string; lte?: string }
   ): Promise<StaleEntity[]> => {
+    const rangeFilter =
+      range && (range.gt !== undefined || range.lte !== undefined)
+        ? [
+            {
+              range: {
+                'entity.id': {
+                  ...(range.gt !== undefined ? { gt: range.gt } : {}),
+                  ...(range.lte !== undefined ? { lte: range.lte } : {}),
+                },
+              },
+            },
+          ]
+        : [];
+
     const query: Record<string, unknown> = {
       bool: {
         must: [
           { term: { 'labels.source_ids': sourceId } },
           { term: { 'watchlist.id': watchlist.id } },
+          ...rangeFilter,
         ],
         ...(currentEuids.length > 0
           ? { must_not: [{ terms: { 'entity.id': currentEuids } }] }
@@ -80,7 +96,8 @@ export const createDeletionDetectionService = ({
   const deletionDetection = async (
     source: MonitoringEntitySource,
     currentEuids: string[],
-    watchlistsByEuid: WatchlistsByEuid
+    watchlistsByEuid: WatchlistsByEuid,
+    range?: { gt?: string; lte?: string }
   ): Promise<void> => {
     if (source.type === 'entity_analytics_integration') {
       const hasNewFullSync = await syncMarkersService.detectNewFullSync(source);
@@ -92,7 +109,7 @@ export const createDeletionDetectionService = ({
       }
     }
 
-    const staleEntities = await findStaleEntities(source.id, currentEuids);
+    const staleEntities = await findStaleEntities(source.id, currentEuids, range);
 
     if (staleEntities.length === 0) {
       logger.debug(`[WatchlistSync] No stale entities for source ${source.id}`);

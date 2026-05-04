@@ -8,8 +8,8 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
-import { xyStateSchema } from '../../schema/charts/xy';
-import type { XYState } from '../../schema/charts/xy';
+import { xyConfigSchema } from '../../schema/charts/xy';
+import type { XYConfig } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -65,64 +65,64 @@ describe('XY', () => {
     describe('Data only', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should convert a minimal ${type} chart with one data layer`, () => {
-          validateConverter(setSeriesType(minimalAttributesXY, type), xyStateSchema);
+          validateConverter(setSeriesType(minimalAttributesXY, type), xyConfigSchema);
         });
       }
 
       it(`should convert a full xy chart with one data layer`, () => {
-        validateConverter(fullBasicXY, xyStateSchema);
+        validateConverter(fullBasicXY, xyConfigSchema);
       });
 
       it(`should convert a xy chart with multiple metrics`, () => {
-        validateConverter(multipleMetricsXY, xyStateSchema);
+        validateConverter(multipleMetricsXY, xyConfigSchema);
       });
 
       it(`should convert a xy chart with multiple metrics and a breakdown`, () => {
-        validateConverter(breakdownXY, xyStateSchema);
+        validateConverter(breakdownXY, xyConfigSchema);
       });
 
       it('should convert a bar chart with 2 layers', () => {
-        validateConverter(barWithTwoLayersAttributes, xyStateSchema);
+        validateConverter(barWithTwoLayersAttributes, xyConfigSchema);
       });
 
       it('should convert a mixed chart with 3 layers', () => {
-        validateConverter(mixedChartAttributes, xyStateSchema);
+        validateConverter(mixedChartAttributes, xyConfigSchema);
       });
 
       it('should convert a chart with formula ref columns and rank_by in the terms bucket operation', () => {
         validateConverter(
           xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
-          xyStateSchema
+          xyConfigSchema
         );
       });
 
       it('should convert an esql xy with collapse by breakdown', () => {
-        validateConverter(esqlXYWithCollapseByBreakdown, xyStateSchema);
+        validateConverter(esqlXYWithCollapseByBreakdown, xyConfigSchema);
       });
     });
 
     describe('Reference lines', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for a reference line with a ${type} chart`, () => {
-          validateConverter(setSeriesType(referenceLineXY, type), xyStateSchema);
+          validateConverter(setSeriesType(referenceLineXY, type), xyConfigSchema);
         });
       }
 
       it('should work for both horizontal and vertical reference lines', () => {
-        validateConverter(dualReferenceLineXY, xyStateSchema);
+        validateConverter(dualReferenceLineXY, xyConfigSchema);
       });
     });
 
     describe('Annotations', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
-          validateConverter(setSeriesType(annotationXY, type), xyStateSchema);
+          validateConverter(setSeriesType(annotationXY, type), xyConfigSchema);
         });
       }
 
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for a by-reference annotation with a ${type} chart`, () => {
-          validateConverter(setSeriesType(byRefAnnotationXY, type), xyStateSchema);
+          validateConverter(setSeriesType(byRefAnnotationXY, type), xyConfigSchema);
         });
       }
     });
@@ -130,13 +130,16 @@ describe('XY', () => {
     describe('ES|QL panels', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
-          validateConverter(setSeriesType(esqlChart, type), xyStateSchema);
+          validateConverter(setSeriesType(esqlChart, type), xyConfigSchema);
         });
       }
 
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an ES|QL ${type} chart with breakdown and color mapping`, () => {
-          validateConverter(setSeriesType(esqlChartWithBreakdownColorMapping, type), xyStateSchema);
+          validateConverter(
+            setSeriesType(esqlChartWithBreakdownColorMapping, type),
+            xyConfigSchema
+          );
         });
       }
 
@@ -196,7 +199,7 @@ describe('XY', () => {
             },
           };
 
-          validateConverter(esqlChartWithDateColumn, xyStateSchema);
+          validateConverter(esqlChartWithDateColumn, xyConfigSchema);
         });
 
         it('should detect linear scale for ES|QL chart with numeric column', () => {
@@ -254,11 +257,11 @@ describe('XY', () => {
             },
           };
 
-          validateConverter(esqlChartWithNumericColumn, xyStateSchema);
+          validateConverter(esqlChartWithNumericColumn, xyConfigSchema);
         });
 
         it('should default to ordinal scale for form-based chart', () => {
-          validateConverter(minimalAttributesXY, xyStateSchema);
+          validateConverter(minimalAttributesXY, xyConfigSchema);
         });
       });
     });
@@ -295,7 +298,7 @@ describe('XY', () => {
             },
           ],
         },
-        xyStateSchema
+        xyConfigSchema
       );
     });
 
@@ -320,7 +323,7 @@ describe('XY', () => {
             },
           ],
         },
-        xyStateSchema
+        xyConfigSchema
       );
     });
 
@@ -346,7 +349,7 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       }
     );
@@ -386,7 +389,7 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       }
     );
@@ -539,21 +542,21 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       }
     );
 
     it('should correctly transform no title and inside legend - bug 248611', () => {
-      validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
+      validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyConfigSchema);
     });
 
     it('should correctly transform top list layout', () => {
-      validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
+      validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyConfigSchema);
     });
 
     it('should correctly transform with custom position legend - bug 248611', () => {
-      validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+      validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyConfigSchema);
     });
 
     it('should convert API with by-reference annotation layer', () => {
@@ -575,7 +578,7 @@ describe('XY', () => {
             },
           ],
         },
-        xyStateSchema
+        xyConfigSchema
       );
     });
 
@@ -605,7 +608,7 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       });
 
@@ -633,7 +636,7 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       });
 
@@ -655,7 +658,7 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       });
 
@@ -683,7 +686,7 @@ describe('XY', () => {
               },
             ],
           },
-          xyStateSchema
+          xyConfigSchema
         );
       });
     });
@@ -703,11 +706,11 @@ describe('XY', () => {
             y: [{ operation: 'count', empty_as_null: false }],
           },
         ],
-      } satisfies XYState;
+      } satisfies XYConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
 
       const dataLayer = apiOutput.layers[0];
       expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
@@ -730,11 +733,11 @@ describe('XY', () => {
             breakdown_by: { column: 'product' },
           },
         ],
-      } satisfies XYState;
+      } satisfies XYConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
 
       const dataLayer = apiOutput.layers[0];
       expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
@@ -759,11 +762,11 @@ describe('XY', () => {
             breakdown_by: { column: 'product' },
           },
         ],
-      } satisfies XYState;
+      } satisfies XYConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
 
       const dataLayer = apiOutput.layers[0];
       expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
@@ -802,11 +805,11 @@ describe('XY', () => {
             ],
           },
         ],
-      } satisfies XYState;
+      } satisfies XYConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
 
       const refLineLayer = apiOutput.layers.find((l) => 'thresholds' in l);
       expect(refLineLayer).toBeDefined();
@@ -849,11 +852,11 @@ describe('XY', () => {
             ],
           },
         ],
-      } satisfies XYState;
+      } satisfies XYConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
 
       const annotationLayer = apiOutput.layers.find((l) => 'events' in l);
       expect(annotationLayer).toBeDefined();

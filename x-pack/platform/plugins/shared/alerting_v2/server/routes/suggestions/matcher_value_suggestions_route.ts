@@ -33,7 +33,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [
-        ALERTING_V2_API_PRIVILEGES.notificationPolicies.read,
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
         ALERTING_V2_API_PRIVILEGES.rules.read,
       ],
     },
@@ -41,7 +41,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get matcher value suggestions',
     description:
-      'Get suggestions for notification policy matcher values based on an optional search query.',
+      'Get suggestions for action policy matcher values based on an optional search query.',
   } as const;
   static validate = {
     request: {

@@ -8,6 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { getSafe } from '@kbn/std';
 import { filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
@@ -265,13 +266,14 @@ export function initializeLayoutManager(
   // API definition
   // --------------------------------------------------------------------------------------
   function getDashboardPanelFromId(panelId: string) {
-    const childLayout = layout$.value.panels[panelId];
+    const childLayout =
+      getSafe(layout$.value.panels, panelId) ?? getSafe(layout$.value.pinnedPanels, panelId);
     const childApi = children$.value[panelId];
-
     if (!childApi || !childLayout) throw new PanelNotFoundError();
+    const isPinned = !('grid' in childLayout);
     return {
       type: childLayout.type,
-      grid: childLayout.grid,
+      grid: !isPinned ? childLayout.grid : null,
       serializedState: apiHasSerializableState(childApi) ? childApi.serializeState() : {},
     };
   }

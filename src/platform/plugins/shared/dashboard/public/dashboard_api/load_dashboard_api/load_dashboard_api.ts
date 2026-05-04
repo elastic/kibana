@@ -78,7 +78,8 @@ export async function loadDashboardApi({
   if (droppedPanelsCount) {
     coreServices.notifications.toasts.addWarning(
       i18n.translate('dashboard.droppedPanelsWarning', {
-        defaultMessage: '{droppedPanelsCount} panels have been removed from dashboard',
+        defaultMessage:
+          '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed from the dashboard.',
         values: { droppedPanelsCount },
       })
     );

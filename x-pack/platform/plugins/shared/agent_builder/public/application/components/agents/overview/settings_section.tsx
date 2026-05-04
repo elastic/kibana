@@ -76,7 +76,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           <EuiCard
             hasBorder
             display="plain"
-            paddingSize="l"
+            paddingSize="m"
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
@@ -119,7 +119,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           <EuiCard
             hasBorder
             display="plain"
-            paddingSize="l"
+            paddingSize="m"
             title={overviewLabels.agentSettingsCardTitle}
             titleElement="h3"
             titleSize="xs"
@@ -147,7 +147,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiText
-                          color={enableElasticCapabilities ? 'textPrimary' : 'subdued'}
+                          color={
+                            enableElasticCapabilities ? 'textPrimary' : euiTheme.colors.textDisabled
+                          }
                           size="s"
                         >
                           {overviewLabels.autoIncludeTitle}
@@ -185,7 +187,10 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                       <EuiFlexItem grow>
                         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                           <EuiFlexItem grow={false}>
-                            <EuiText size="s" color={hasWorkflows ? 'textPrimary' : 'subdued'}>
+                            <EuiText
+                              size="s"
+                              color={hasWorkflows ? 'textPrimary' : euiTheme.colors.textDisabled}
+                            >
                               {overviewLabels.preExecutionWorkflowTitle}
                             </EuiText>
                           </EuiFlexItem>

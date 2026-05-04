@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
-import { Form, useForm, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,15 +22,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import { FormProvider, useForm, useFormState, useWatch, type FieldPath } from 'react-hook-form';
 import type { EditIlmPhasesFlyoutChangeMeta, EditIlmPhasesFlyoutProps } from './types';
 import {
-  createIlmPhasesFlyoutDeserializer,
-  createIlmPhasesFlyoutSerializer,
+  createMapFormValuesToIlmPolicyPhases,
   getIlmPhasesFlyoutFormSchema,
+  ILM_PHASES_FLYOUT_TAB_ERROR_INDICATOR_WATCH_PATHS,
   type IlmPhasesFlyoutFormInternal,
-  OnFieldErrorsChangeProvider,
-  toMilliseconds,
+  mapIlmPolicyPhasesToFormValues,
   useIlmPhasesFlyoutTabErrors,
+  zodResolver,
 } from './form';
 import { DEFAULT_NEW_PHASE_MIN_AGE, ILM_PHASE_ORDER } from './constants';
 import { GlobalFieldsMount, PhasePanel, PhaseTabsRow } from './sections';
@@ -56,45 +56,33 @@ export const EditIlmPhasesFlyout = ({
   'data-test-subj': dataTestSubjProp,
 }: EditIlmPhasesFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditIlmPhasesFlyoutTitle' });
+  const formId = useGeneratedHtmlId({ prefix: 'streamsEditIlmPhasesFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditIlmPhasesFlyout';
-  const { footerStyles, headerStyles, sectionStyles, phaseDescriptionStyles } = useStyles();
+  const { footerStyles, headerStyles, sectionStyles } = useStyles();
 
   const initialPhasesRef = useRef<IlmPolicyPhases>(initialPhases);
 
   const schema = useMemo(() => getIlmPhasesFlyoutFormSchema(), []);
-  const serializer = useMemo(() => createIlmPhasesFlyoutSerializer(initialPhasesRef.current), []);
-  const deserializer = useMemo(() => createIlmPhasesFlyoutDeserializer(), []);
-
-  const { form } = useForm<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>({
-    schema,
-    defaultValue: initialPhasesRef.current,
-    serializer,
-    deserializer,
-    onSubmit: async (data, isValid) => {
-      if (!isValid) return;
-      onSave(data);
-    },
-  });
-
-  const enabledPhaseWatchPaths = useMemo(
-    () => ILM_PHASE_ORDER.map((p) => `_meta.${p}.enabled`),
+  const mapFormValuesToIlmPolicyPhases = useMemo(
+    () => createMapFormValuesToIlmPolicyPhases(initialPhasesRef.current),
     []
   );
 
-  const [formData] = useFormData<IlmPhasesFlyoutFormInternal, IlmPolicyPhases>({
-    form,
-    watch: [
-      ...enabledPhaseWatchPaths,
-      // Enable/disable toggles that gate validations (tabs need to update when these change).
-      '_meta.hot.downsampleEnabled',
-      '_meta.warm.downsampleEnabled',
-      '_meta.cold.downsampleEnabled',
-      '_meta.cold.searchableSnapshotEnabled',
-      '_meta.searchableSnapshot.repository',
-    ],
+  const methods = useForm<IlmPhasesFlyoutFormInternal>({
+    defaultValues: mapIlmPolicyPhasesToFormValues(initialPhasesRef.current),
+    resolver: zodResolver(schema),
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+    shouldUnregister: false,
   });
 
-  const meta = (formData as Partial<IlmPhasesFlyoutFormInternal> | undefined)?._meta;
+  const { errors, isSubmitting } = useFormState({ control: methods.control });
+
+  const formData = useWatch({ control: methods.control });
+
+  useWatch({ control: methods.control, name: ILM_PHASES_FLYOUT_TAB_ERROR_INDICATOR_WATCH_PATHS });
+
+  const meta = formData?._meta;
   const isMetaReady = Boolean(meta);
 
   const enabledPhases = useMemo(
@@ -108,7 +96,7 @@ export const EditIlmPhasesFlyout = ({
     [isMetaReady, meta]
   );
 
-  const { onFieldErrorsChange, tabHasErrors } = useIlmPhasesFlyoutTabErrors(formData);
+  const { tabHasErrors } = useIlmPhasesFlyoutTabErrors(formData, errors);
 
   const onChangeRef = useRef(onChange);
   useEffect(() => {
@@ -124,38 +112,24 @@ export const EditIlmPhasesFlyout = ({
   });
 
   const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
-  const pendingOnChangeOutputRef = useRef<IlmPolicyPhases | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastAppliedInitialPhasesRef = useRef<IlmPolicyPhases>(initialPhases);
-
-  useEffect(() => {
-    if (lastAppliedInitialPhasesRef.current === initialPhases) return;
-    lastAppliedInitialPhasesRef.current = initialPhases;
-
-    // Keep `hook_form_lib`'s defaultValue in sync with the latest draft owned by the parent.
-    // This allows fields to rehydrate correctly if flyout contents are remounted (e.g. push↔overlay).
-    lastEmittedOutputRef.current = initialPhases;
-
-    if (pendingOnChangeTimeoutRef.current) {
-      clearTimeout(pendingOnChangeTimeoutRef.current);
-      pendingOnChangeTimeoutRef.current = null;
-    }
-    pendingOnChangeOutputRef.current = null;
-
-    form.updateFieldValues(initialPhases);
-  }, [form, initialPhases]);
+  const pendingOnChangeEmitScheduledRef = useRef(false);
+  const pendingOnChangeEmitScheduleIdRef = useRef(0);
 
   const scheduleOnChangeEmit = useCallback(() => {
+    pendingOnChangeEmitScheduleIdRef.current += 1;
+    const scheduledId = pendingOnChangeEmitScheduleIdRef.current;
+
     if (pendingOnChangeTimeoutRef.current) {
       clearTimeout(pendingOnChangeTimeoutRef.current);
+      pendingOnChangeTimeoutRef.current = null;
     }
 
-    pendingOnChangeTimeoutRef.current = setTimeout(() => {
-      pendingOnChangeTimeoutRef.current = null;
-      const toEmit = pendingOnChangeOutputRef.current;
-      pendingOnChangeOutputRef.current = null;
+    pendingOnChangeEmitScheduledRef.current = true;
 
-      if (!toEmit) return;
+    const emit = () => {
+      pendingOnChangeEmitScheduledRef.current = false;
+      const toEmit = mapFormValuesToIlmPolicyPhases(methods.getValues());
 
       const metaToEmit: EditIlmPhasesFlyoutChangeMeta = {
         invalidPhases: buildInvalidPhases(),
@@ -171,44 +145,45 @@ export const EditIlmPhasesFlyout = ({
       lastEmittedOutputRef.current = toEmit;
       lastEmittedMetaRef.current = metaToEmit;
       onChangeRef.current(toEmit, metaToEmit);
+    };
+
+    if (onChangeDebounceMs === 0) {
+      pendingOnChangeTimeoutRef.current = setTimeout(() => {
+        pendingOnChangeTimeoutRef.current = null;
+        if (pendingOnChangeEmitScheduleIdRef.current !== scheduledId) return;
+        emit();
+      }, 0);
+      return;
+    }
+
+    pendingOnChangeTimeoutRef.current = setTimeout(() => {
+      pendingOnChangeTimeoutRef.current = null;
+      if (pendingOnChangeEmitScheduleIdRef.current !== scheduledId) return;
+      emit();
     }, onChangeDebounceMs);
-  }, [buildInvalidPhases, onChangeDebounceMs]);
+  }, [buildInvalidPhases, mapFormValuesToIlmPolicyPhases, methods, onChangeDebounceMs]);
 
   useEffect(() => {
-    const sub = form.subscribe(({ data }) => {
-      const next = data.format();
-
-      const metaForNext: EditIlmPhasesFlyoutChangeMeta = {
-        invalidPhases: buildInvalidPhases(),
-      };
-
-      if (
-        isEqual(next, lastEmittedOutputRef.current) &&
-        isEqual(metaForNext, lastEmittedMetaRef.current)
-      ) {
-        return;
-      }
-
-      pendingOnChangeOutputRef.current = next;
-      scheduleOnChangeEmit();
-    });
-
     return () => {
       if (pendingOnChangeTimeoutRef.current) {
         clearTimeout(pendingOnChangeTimeoutRef.current);
         pendingOnChangeTimeoutRef.current = null;
       }
-      pendingOnChangeOutputRef.current = null;
-      sub.unsubscribe();
+      pendingOnChangeEmitScheduledRef.current = false;
+      pendingOnChangeEmitScheduleIdRef.current += 1;
     };
-  }, [buildInvalidPhases, form, scheduleOnChangeEmit]);
+  }, []);
+
+  useEffect(() => {
+    if (!meta) return;
+    scheduleOnChangeEmit();
+  }, [formData, meta, scheduleOnChangeEmit]);
 
   useEffect(() => {
     // Re-emit meta when tab errors change without any form data change.
     // If we already have a scheduled emit (due to form changes), that emit will compute meta at
     // emit-time, so we don't need to reschedule.
-    if (pendingOnChangeTimeoutRef.current) return;
-    pendingOnChangeOutputRef.current = lastEmittedOutputRef.current;
+    if (pendingOnChangeEmitScheduledRef.current) return;
     scheduleOnChangeEmit();
   }, [buildInvalidPhases, scheduleOnChangeEmit]);
 
@@ -227,19 +202,17 @@ export const EditIlmPhasesFlyout = ({
 
       // Default to 2x the closest enabled previous phase's min_age.
       const previousPhases = phases.slice(0, index).reverse();
-      const fields = form.getFields();
+      const values = methods.getValues();
 
       for (const previousPhase of previousPhases) {
-        const isPhaseEnabled = Boolean(fields[`_meta.${previousPhase}.enabled`]?.value);
+        const isPhaseEnabled = Boolean(values._meta[previousPhase].enabled);
         if (!isPhaseEnabled) continue;
 
-        const previousValue = String(
-          fields[`_meta.${previousPhase}.minAgeValue`]?.value ?? ''
-        ).trim();
+        const previousValue = String(values._meta[previousPhase].minAgeValue ?? '').trim();
         if (previousValue === '') continue;
 
         const previousUnit = String(
-          fields[`_meta.${previousPhase}.minAgeUnit`]?.value ?? 'd'
+          values._meta[previousPhase].minAgeUnit ?? 'd'
         ) as PreservedTimeUnit;
 
         const previousNum = Number(previousValue);
@@ -256,7 +229,7 @@ export const EditIlmPhasesFlyout = ({
 
       return DEFAULT_NEW_PHASE_MIN_AGE;
     },
-    [form]
+    [methods]
   );
 
   const ensurePhaseEnabledWithDefaults = useCallback(
@@ -269,43 +242,39 @@ export const EditIlmPhasesFlyout = ({
         return true;
       }
 
-      form.setFieldValue(`_meta.${phase}.enabled`, true);
+      methods.setValue(`_meta.${phase}.enabled`, true);
 
       if (phase === 'frozen' && searchableSnapshotRepositories.length === 1) {
-        const repositoryField = form.getFields()['_meta.searchableSnapshot.repository'];
-        const currentValue = String(repositoryField?.value ?? '').trim();
-        if (repositoryField && currentValue === '') {
-          repositoryField.setValue(searchableSnapshotRepositories[0]);
+        const currentValue = String(
+          methods.getValues('_meta.searchableSnapshot.repository') ?? ''
+        ).trim();
+        if (currentValue === '') {
+          methods.setValue(
+            '_meta.searchableSnapshot.repository',
+            searchableSnapshotRepositories[0]
+          );
         }
       }
 
       if (phase !== 'hot') {
-        const valuePath = `_meta.${phase}.minAgeValue`;
-        const unitPath = `_meta.${phase}.minAgeUnit`;
-        const millisPath = `_meta.${phase}.minAgeToMilliSeconds`;
-
-        const valueField = form.getFields()[valuePath];
-        const unitField = form.getFields()[unitPath];
+        const valuePath =
+          `_meta.${phase}.minAgeValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+        const unitPath =
+          `_meta.${phase}.minAgeUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
         // When enabling a previously-disabled phase, preserve existing values.
         // Otherwise default based on the closest enabled previous phase.
-        if (valueField && String(valueField.value ?? '').trim() === '') {
+        if (String(methods.getValues(valuePath) ?? '').trim() === '') {
           const { value, unit } = getDefaultMinAgeForPhase(phase);
-          valueField.setValue(value);
-          unitField?.setValue(unit);
+          methods.setValue(valuePath, value);
+          methods.setValue(unitPath, unit);
         }
-
-        const resolvedValue = String(form.getFields()[valuePath]?.value ?? '');
-        const resolvedUnit = String(form.getFields()[unitPath]?.value ?? 'd') as PreservedTimeUnit;
-        const millis =
-          resolvedValue.trim() === '' ? -1 : toMilliseconds(resolvedValue, resolvedUnit);
-        form.setFieldValue(millisPath, millis);
       }
 
       // Force re-validation for the (re-)enabled phase.
       // Phases are not unmounted when disabled, so fields may have been validated while the phase
       // was disabled (validators no-op) and would otherwise remain "valid" when re-enabled.
-      const fieldsToValidate: string[] = [];
+      const fieldsToValidate: Array<FieldPath<IlmPhasesFlyoutFormInternal>> = [];
       if (phase !== 'hot') {
         fieldsToValidate.push(`_meta.${phase}.minAgeValue`);
       }
@@ -316,22 +285,25 @@ export const EditIlmPhasesFlyout = ({
         fieldsToValidate.push('_meta.searchableSnapshot.repository');
       }
       if (fieldsToValidate.length > 0) {
-        // Delay to the next tick so `hook_form_lib` has time to propagate the field value changes
-        // into the form's flattened `formData` snapshot that validators read from.
+        // Delay to the next tick so RHF updates are visible to dependent validations.
         setTimeout(() => {
-          void form.validateFields(fieldsToValidate, /* onlyBlocking */ true);
+          void methods.trigger(fieldsToValidate);
         }, 0);
       }
 
       return true;
     },
-    [canSelectFrozen, enabledPhases, form, getDefaultMinAgeForPhase, searchableSnapshotRepositories]
+    [
+      canSelectFrozen,
+      enabledPhases,
+      getDefaultMinAgeForPhase,
+      methods,
+      searchableSnapshotRepositories,
+    ]
   );
 
   useEffect(() => {
-    // During initial mount, `_meta` can be temporarily missing while fields mount.
-    // Avoid clobbering the controlled `selectedPhase` during that transient state.
-    if (!isMetaReady) return;
+    if (!meta) return;
     if (enabledPhases.length === 0) return;
 
     if (!selectedPhase) {
@@ -343,19 +315,20 @@ export const EditIlmPhasesFlyout = ({
     if (!isPhaseCorrectlyEnabled) {
       setSelectedPhase(enabledPhases[0]);
     }
-  }, [enabledPhases, ensurePhaseEnabledWithDefaults, isMetaReady, selectedPhase, setSelectedPhase]);
+  }, [enabledPhases, ensurePhaseEnabledWithDefaults, meta, selectedPhase, setSelectedPhase]);
 
-  const hasFormErrors = form.getErrors().length > 0;
-  const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;
-  const isSaveDisabled = isSaveDisabledDueToInvalid || form.isSubmitting;
+  const hasFormErrors = Object.keys(errors).length > 0;
+  const isSaveDisabledDueToInvalid = hasFormErrors;
+  const isSaveDisabled = isSaveDisabledDueToInvalid || isSubmitting;
 
   const renderSaveButton = () => {
     const button = (
       <EuiButton
         fill
-        isLoading={Boolean(isSaving) || form.isSubmitting}
+        type="submit"
+        form={formId}
+        isLoading={Boolean(isSaving) || isSubmitting}
         data-test-subj={`${dataTestSubj}SaveButton`}
-        onClick={() => form.submit()}
         disabled={isSaveDisabled}
       >
         {i18n.translate('xpack.streams.editIlmPhasesFlyout.save', {
@@ -418,8 +391,12 @@ export const EditIlmPhasesFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <Form form={form}>
-          <OnFieldErrorsChangeProvider value={onFieldErrorsChange}>
+        <FormProvider {...methods}>
+          <form
+            id={formId}
+            onSubmit={methods.handleSubmit((data) => onSave(mapFormValuesToIlmPolicyPhases(data)))}
+            noValidate
+          >
             <GlobalFieldsMount />
 
             {ILM_PHASE_ORDER.map((phase) => (
@@ -429,7 +406,6 @@ export const EditIlmPhasesFlyout = ({
                 selectedPhase={selectedPhase}
                 enabledPhases={enabledPhases}
                 setSelectedPhase={setSelectedPhase}
-                form={form}
                 dataTestSubj={dataTestSubj}
                 sectionStyles={sectionStyles}
                 searchableSnapshotRepositories={searchableSnapshotRepositories}
@@ -438,11 +414,10 @@ export const EditIlmPhasesFlyout = ({
                 onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
                 onCreateSnapshotRepository={onCreateSnapshotRepository}
                 isMetricsStream={isMetricsStream}
-                phaseDescriptionStyles={phaseDescriptionStyles}
               />
             ))}
-          </OnFieldErrorsChangeProvider>
-        </Form>
+          </form>
+        </FormProvider>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -454,6 +429,7 @@ export const EditIlmPhasesFlyout = ({
         >
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              type="button"
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"

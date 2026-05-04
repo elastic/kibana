@@ -132,6 +132,7 @@
                 "lineNumber": 19,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }

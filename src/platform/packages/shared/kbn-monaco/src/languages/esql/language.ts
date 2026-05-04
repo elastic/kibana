@@ -9,6 +9,7 @@
 
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
+import type { ESQLMessage } from '@kbn/esql-language';
 import {
   getSignatureHelp,
   getHoverItem,
@@ -17,6 +18,7 @@ import {
   suggest,
   validateQuery,
   getIndexSourcesFromQuery,
+  getQuickFixForMessage,
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
@@ -30,8 +32,10 @@ import {
   getDecorationHoveredMessages,
   filterSuggestionsWithCustomCommands,
   monacoPositionToOffset,
+  findMessageByMarker,
 } from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
+import { wrapAsMonacoCodeAction } from './lib/converters/code_actions';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -43,12 +47,16 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
   code: string;
 
   // By default warnings are not underlined, use this flag to indicate it should be
-  underlinedWarning?: boolean;
+  underlinedWarning?: ESQLMessage['underlinedWarning'];
 };
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
+    /**
+     * Latest validation messages (errors + warnings) for the current model.
+     */
+    getEditorMessages?: () => { errors: MonacoMessage[]; warnings: MonacoMessage[] };
     /**
      * Optional resolver to provide model-specific dependencies.
      *
@@ -56,7 +64,7 @@ export type ESQLDependencies = ESQLCallbacks &
      * editors on the same page (e.g. Discover top bar + flyout). This allows the provider to
      * pick the correct callbacks for the specific editor model requesting suggestions.
      */
-    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLCallbacks | undefined;
+    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLDependencies | undefined;
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
@@ -105,6 +113,37 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
   },
+  getCodeActionProvider: (deps?: ESQLDependencies): monaco.languages.CodeActionProvider => ({
+    async provideCodeActions(model, _range, context, _token) {
+      const actions: monaco.languages.CodeAction[] = [];
+      const modelDeps = deps?.getModelDependencies?.(model);
+      const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
+
+      const editorMessages = resolvedDeps?.getEditorMessages?.();
+      const allMessages = editorMessages
+        ? [...editorMessages.errors, ...editorMessages.warnings]
+        : [];
+
+      const queryString = model.getValue();
+
+      await Promise.all(
+        context.markers.map(async (marker) => {
+          const message = findMessageByMarker(allMessages, marker);
+          if (!message) return [];
+          const quickFix = await getQuickFixForMessage({
+            queryString,
+            message,
+            callbacks: resolvedDeps,
+          });
+
+          if (quickFix) {
+            actions.push(wrapAsMonacoCodeAction(model, marker, quickFix));
+          }
+        })
+      );
+      return { actions, dispose: () => {} };
+    },
+  }),
   getHoverProvider: (deps?: ESQLDependencies): monaco.languages.HoverProvider => {
     let lastHoveredWord: string;
 
