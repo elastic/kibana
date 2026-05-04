@@ -6,13 +6,14 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { escapeKuery, buildQueryFromFilters } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ExportResultsRequestOptions } from '../../../../../common/search_strategy/osquery';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
+import { composeExportKuery } from '../../../../lib/compose_export_kuery';
 
 export const buildExportResultsQuery = ({
   baseFilter,
@@ -29,20 +30,7 @@ export const buildExportResultsQuery = ({
 }: ExportResultsRequestOptions & { ccsEnabled?: boolean }): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
-  // Compose the full KQL filter string. Wrap in outer parentheses so that
-  // caller-supplied kuery cannot escape the baseFilter gate via OR precedence.
-  const filterParts: string[] = [`(${baseFilter})`];
-
-  if (agentIds && agentIds.length > 0) {
-    const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
-    filterParts.push(`(${agentFilter})`);
-  }
-
-  if (kuery) {
-    filterParts.push(`(${kuery})`);
-  }
-
-  const filter = `(${filterParts.join(' AND ')})`;
+  const filter = composeExportKuery({ baseFilter, kuery, agentIds });
   const kqlFilterClause = getQueryFilter({ filter });
 
   const { filter: esFilterClauses, must_not: esFilterMustNotClauses } =

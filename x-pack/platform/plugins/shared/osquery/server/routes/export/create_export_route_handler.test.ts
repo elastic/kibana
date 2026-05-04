@@ -32,11 +32,24 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
 }));
 
+jest.mock('../../lib/format_results', () => {
+  const actual = jest.requireActual('../../lib/format_results');
+
+  return {
+    ...actual,
+    createFormatter: jest.fn(actual.createFormatter),
+  };
+});
+
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
+import { getUserInfo } from '../../lib/get_user_info';
+import { createFormatter } from '../../lib/format_results';
 
 const mockExportResultsToStream = exportResultsToStream as jest.MockedFunction<
   typeof exportResultsToStream
 >;
+const mockGetUserInfo = getUserInfo as jest.MockedFunction<typeof getUserInfo>;
+const mockCreateFormatter = createFormatter as jest.MockedFunction<typeof createFormatter>;
 
 const auditLoggerLog = jest.fn();
 
@@ -438,5 +451,123 @@ describe('createExportRouteHandler', () => {
     // The embedded double-quote must be replaced so the header value is valid
     expect(disposition).not.toContain('"evil"');
     expect(disposition).toMatch(/^attachment; filename="[^"]*\.csv"$/);
+  });
+
+  it('returns badRequest when esFilters is not a filters array shape', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'csv' },
+      body: {
+        esFilters: [{ foo: 'bar' }],
+      },
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(response.badRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          message: expect.stringMatching(/^Invalid esFilters:/),
+        }),
+      })
+    );
+    expect(mockExportResultsToStream).not.toHaveBeenCalled();
+  });
+
+  it('closes PIT and returns 500 when getUserInfo throws after PIT is opened', async () => {
+    mockGetUserInfo.mockRejectedValueOnce(new Error('Auth backend failure'));
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(mockExportResultsToStream).not.toHaveBeenCalled();
+  });
+
+  it('closes PIT and returns 500 when createFormatter throws after PIT is opened', async () => {
+    mockCreateFormatter.mockImplementationOnce(() => {
+      throw new Error('Formatter init failure');
+    });
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(mockExportResultsToStream).not.toHaveBeenCalled();
+  });
+
+  it('closes PIT and returns 500 when context.search rejects after PIT is opened', async () => {
+    const context = {
+      ...createContext(),
+      search: Promise.reject(new Error('Search context unavailable')),
+    } as unknown as ReturnType<typeof createContext>;
+
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(context, request, response, baseParams);
+
+    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(mockExportResultsToStream).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when openPointInTime throws (no closePit needed)', async () => {
+    mockOpenPointInTime.mockRejectedValueOnce(
+      Object.assign(new Error('ES cluster unavailable'), { statusCode: 503 })
+    );
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockClosePointInTime).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+  });
+
+  it('audits a failure event when the export fails after PIT open', async () => {
+    mockGetUserInfo.mockRejectedValueOnce(new Error('Auth failure'));
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'csv' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(auditLoggerLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Osquery export failed',
+        event: expect.objectContaining({
+          action: 'osquery_export',
+          outcome: 'failure',
+        }),
+        labels: expect.objectContaining({
+          action_id: 'abc',
+        }),
+      })
+    );
   });
 });

@@ -211,6 +211,47 @@ describe('format_results', () => {
       expect(formatter.contentType).toBe('text/csv');
       expect(formatter.fileExtension).toBe('csv');
     });
+
+    describe('formula injection mitigation', () => {
+      it('prefixes a single-quote on cells starting with =', () => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: '=SUM(A1:A2)' }, true);
+        const lines = row.split('\n').filter(Boolean);
+        expect(lines[1]).toBe("'=SUM(A1:A2)");
+      });
+
+      it.each([
+        ['+', '+1234'],
+        ['-', '-1234'],
+        ['@', '@user'],
+        ['\t', '\t tab'],
+      ])('prefixes a single-quote on cells starting with %s', (_label, value) => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: value }, true);
+        expect(row).toContain(`'${value}`);
+      });
+
+      it('still quotes when the prefixed cell contains a comma', () => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: '=HYPERLINK("http://evil.com","click,me")' }, true);
+        expect(row).toContain('"\'=HYPERLINK');
+      });
+
+      it('does not prefix plain numeric cells', () => {
+        const formatter = createCsvFormatter();
+        const row = formatter.row({ field: '1234' }, true);
+        const lines = row.split('\n').filter(Boolean);
+        expect(lines[1]).toBe('1234');
+      });
+
+      it('applies the formula-injection prefix to header columns', () => {
+        const formatter = createCsvFormatter();
+        formatter.finalizeColumns?.([{ '=evil_col': 'val' }]);
+        const row = formatter.row({ '=evil_col': 'val' }, true);
+        const lines = row.split('\n').filter(Boolean);
+        expect(lines[0]).toContain("'=evil_col");
+      });
+    });
   });
 
   describe('createFormatter', () => {

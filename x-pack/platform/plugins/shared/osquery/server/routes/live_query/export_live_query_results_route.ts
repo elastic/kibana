@@ -105,19 +105,12 @@ export const exportLiveQueryResultsRoute = (
           // Continue without metadata enrichment
         }
 
-        return handler(
-          context,
-          // The handler uses request.query.format and request.body; route params
-          // are not accessed inside the shared handler so the cast is safe.
-          request as Parameters<typeof handler>[1],
-          response,
-          {
-            baseFilter: `action_id: "${escapeKuery(actionId)}"`,
-            metadata: { action_id: actionId, query },
-            fileNamePrefix: `osquery-results-${actionId}`,
-            ecsMapping,
-          }
-        );
+        return handler(context, request, response, {
+          baseFilter: `action_id: "${escapeKuery(actionId)}"`,
+          metadata: { action_id: actionId, query },
+          fileNamePrefix: `osquery-results-${actionId}`,
+          ecsMapping,
+        });
       }
     );
 };

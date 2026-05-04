@@ -89,27 +89,20 @@ export const exportScheduledQueryResultsRoute = (
           );
         }
 
-        return handler(
-          context,
-          // The shared handler only reads request.query.format and request.body;
-          // route-specific params are not accessed inside it so the cast is safe.
-          request as Parameters<typeof handler>[1],
-          response,
-          {
-            // Mirror the KQL filter used by the results search strategy:
-            //   schedule_id AND osquery_meta.schedule_execution_count
-            baseFilter: `schedule_id: "${escapeKuery(
-              scheduleId
-            )}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
-            metadata: {
-              action_id: scheduleId,
-              execution_count: executionCount,
-              query,
-            },
-            fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
-            ecsMapping,
-          }
-        );
+        return handler(context, request, response, {
+          // Mirror the KQL filter used by the results search strategy:
+          //   schedule_id AND osquery_meta.schedule_execution_count
+          baseFilter: `schedule_id: "${escapeKuery(
+            scheduleId
+          )}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
+          metadata: {
+            action_id: scheduleId,
+            execution_count: executionCount,
+            query,
+          },
+          fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
+          ecsMapping,
+        });
       }
     );
 };

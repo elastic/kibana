@@ -12,7 +12,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { AuditEvent } from '@kbn/core-security-server';
 
 import type { Filter } from '@kbn/es-query';
-import { buildQueryFromFilters, escapeKuery } from '@kbn/es-query';
+import { buildQueryFromFilters, isFilters } from '@kbn/es-query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { getQueryFilter } from '../../utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -22,6 +22,8 @@ import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
+import { composeExportKuery } from '../../lib/compose_export_kuery';
+import type { ExportRequestBody } from './export_request_body_schema';
 
 export interface ExportRouteParams {
   /** KQL base filter (e.g. `action_id: "abc"` or `schedule_id: "x" AND ...`) */
@@ -42,11 +44,7 @@ export const createExportRouteHandler =
   (osqueryContext: OsqueryAppContext) =>
   async (
     context: RequestHandlerContext & DataRequestHandlerContext,
-    request: KibanaRequest<
-      unknown,
-      { format: ExportFormat },
-      { kuery?: string; agentIds?: string[]; esFilters?: unknown[] } | null
-    >,
+    request: KibanaRequest<unknown, { format: ExportFormat }, ExportRequestBody | null>,
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
@@ -61,17 +59,7 @@ export const createExportRouteHandler =
     // Validate the KQL filter at the route boundary so invalid kuery surfaces
     // as a 400 before any ES round-trips. Compose the full filter string the
     // same way the factory will so validation matches execution.
-    const filterParts: string[] = [`(${baseFilter})`];
-    if (agentIds && agentIds.length > 0) {
-      const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
-      filterParts.push(`(${agentFilter})`);
-    }
-
-    if (kuery) {
-      filterParts.push(`(${kuery})`);
-    }
-
-    const fullFilter = `(${filterParts.join(' AND ')})`;
+    const fullFilter = composeExportKuery({ baseFilter, kuery, agentIds });
 
     try {
       getQueryFilter({ filter: fullFilter });
@@ -87,20 +75,26 @@ export const createExportRouteHandler =
     // Validate esFilters at the route boundary — an invalid pill must NOT fall
     // through to an unfiltered export.
     let validatedEsFilters: Filter[] | undefined;
-    if (esFilters && esFilters.length > 0) {
-      try {
-        buildQueryFromFilters(esFilters as unknown as Filter[], undefined);
-        validatedEsFilters = esFilters as unknown as Filter[];
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        logger.warn(`Invalid esFilters in export request: ${message}`);
-
+    if (esFilters?.length) {
+      if (!isFilters(esFilters)) {
         return response.badRequest({
           body: {
-            message: `Invalid esFilters: ${message}`,
+            message: 'Invalid esFilters: not a valid filters array',
           },
         });
       }
+
+      try {
+        buildQueryFromFilters(esFilters, undefined);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+
+        return response.badRequest({
+          body: { message: `Invalid esFilters: ${message}` },
+        });
+      }
+
+      validatedEsFilters = esFilters;
     }
 
     const coreContext = await context.core;
@@ -130,16 +124,47 @@ export const createExportRouteHandler =
       }
     }
 
+    const auditLabels = {
+      action_id: routeMetadata.action_id,
+      format,
+      ...(routeMetadata.execution_count != null
+        ? { execution_count: routeMetadata.execution_count }
+        : {}),
+    };
+
     // Open PIT with the broad index pattern. Index resolution for per-namespace
     // scoping is the factory's responsibility; ES ignores the `index` in search
     // body when a PIT is provided, so the PIT scope is determined here.
     // ignore_unavailable mirrors query.all_results.dsl.ts.
-    const pitResponse = await esClient.openPointInTime({
-      index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
-      keep_alive: '5m',
-      ignore_unavailable: true,
-    });
-    const pitId = pitResponse.id;
+    // If openPointInTime throws, there is no PIT to close — handle separately.
+    let pitId: string;
+    try {
+      const pitResponse = await esClient.openPointInTime({
+        index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+        keep_alive: '5m',
+        ignore_unavailable: true,
+      });
+      pitId = pitResponse.id;
+    } catch (e) {
+      const failureAuditEvent: AuditEvent = {
+        message: 'Osquery export failed',
+        event: {
+          action: 'osquery_export',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'failure',
+        },
+        labels: auditLabels,
+      };
+      coreContext.security.audit.logger.log(failureAuditEvent);
+
+      const message = e instanceof Error ? e.message : String(e);
+
+      return response.customError({
+        statusCode: (e as { statusCode?: number }).statusCode ?? 500,
+        body: { message },
+      });
+    }
 
     const closePit = async (id: string) => {
       try {
@@ -151,88 +176,107 @@ export const createExportRouteHandler =
       }
     };
 
-    // Get user info for metadata
-    const user = await getUserInfo({
-      request,
-      security: osqueryContext.security,
-      logger,
-    });
+    try {
+      // Get user info for metadata
+      const user = await getUserInfo({
+        request,
+        security: osqueryContext.security,
+        logger,
+      });
 
-    const formatter = createFormatter(format);
-    const timestamp = new Date().toISOString();
-    // Strip characters that would break the quoted Content-Disposition filename token
-    // (double-quotes, backslashes, and CR/LF). The fileNamePrefix may contain
-    // user-supplied values such as scheduleId / actionId from URL params.
-    const safePrefix = fileNamePrefix.replace(/["\\\r\n]/g, '_');
-    const fileName = `${safePrefix}-${timestamp.replace(/[:.]/g, '-')}.${formatter.fileExtension}`;
+      const formatter = createFormatter(format);
+      const timestamp = new Date().toISOString();
+      // Strip characters that would break the quoted Content-Disposition filename token
+      // (double-quotes, backslashes, and CR/LF). The fileNamePrefix may contain
+      // user-supplied values such as scheduleId / actionId from URL params.
+      const safePrefix = fileNamePrefix.replace(/["\\\r\n]/g, '_');
+      const fileName = `${safePrefix}-${timestamp.replace(/[:.]/g, '-')}.${
+        formatter.fileExtension
+      }`;
 
-    const csvColumnsForEmptyExport =
-      format === 'csv' && ecsMapping
-        ? (['agent.name', 'agent.id', ...Object.keys(ecsMapping)] as string[])
-        : undefined;
+      const csvColumnsForEmptyExport =
+        format === 'csv' && ecsMapping
+          ? (['agent.name', 'agent.id', ...Object.keys(ecsMapping)] as string[])
+          : undefined;
 
-    const searchContext = await context.search;
+      const searchContext = await context.search;
 
-    const result = await exportResultsToStream({
-      search: searchContext,
-      pit: { id: pitId, keep_alive: '5m' },
-      closePit,
-      baseRequest: {
-        factoryQueryType: OsqueryQueries.exportResults,
-        baseFilter,
-        kuery,
-        agentIds,
-        esFilters: validatedEsFilters,
-        size: 1_000,
+      const result = await exportResultsToStream({
+        search: searchContext,
+        pit: { id: pitId, keep_alive: '5m' },
+        closePit,
+        baseRequest: {
+          factoryQueryType: OsqueryQueries.exportResults,
+          baseFilter,
+          kuery,
+          agentIds,
+          esFilters: validatedEsFilters,
+          size: 1_000,
+          ecsMapping,
+          integrationNamespaces,
+        },
+        formatter,
+        metadata: {
+          ...routeMetadata,
+          timestamp,
+          exported_by: user?.username ?? 'unknown',
+          format,
+          ...(csvColumnsForEmptyExport ? { csv_columns: csvColumnsForEmptyExport } : {}),
+        },
+        aborted$: request.events.aborted$,
+        logger,
         ecsMapping,
-        integrationNamespaces,
-      },
-      formatter,
-      metadata: {
-        ...routeMetadata,
-        timestamp,
-        exported_by: user?.username ?? 'unknown',
-        format,
-        ...(csvColumnsForEmptyExport ? { csv_columns: csvColumnsForEmptyExport } : {}),
-      },
-      aborted$: request.events.aborted$,
-      logger,
-      ecsMapping,
-    });
+      });
 
-    // Check if we got an error (max results exceeded)
-    if ('statusCode' in result) {
-      return response.badRequest({
-        body: { message: result.message },
+      // Check if we got an error (max results exceeded)
+      if ('statusCode' in result) {
+        return response.badRequest({
+          body: { message: result.message },
+        });
+      }
+
+      // Audit trail for data egress (no PII in application logs). Stream errors
+      // are logged separately with action_id correlation. Use Core request context
+      // (not deprecated plugins.security.audit).
+      const auditEvent: AuditEvent = {
+        message: 'Osquery export started',
+        event: {
+          action: 'osquery_export',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'unknown',
+        },
+        labels: auditLabels,
+      };
+      coreContext.security.audit.logger.log(auditEvent);
+
+      return response.ok({
+        body: result,
+        headers: {
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'Content-Type': formatter.contentType,
+        },
+      });
+    } catch (e) {
+      await closePit(pitId);
+
+      const failureAuditEvent: AuditEvent = {
+        message: 'Osquery export failed',
+        event: {
+          action: 'osquery_export',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'failure',
+        },
+        labels: auditLabels,
+      };
+      coreContext.security.audit.logger.log(failureAuditEvent);
+
+      const message = e instanceof Error ? e.message : String(e);
+
+      return response.customError({
+        statusCode: (e as { statusCode?: number }).statusCode ?? 500,
+        body: { message },
       });
     }
-
-    // Audit trail for data egress (no PII in application logs). Stream errors
-    // are logged separately with action_id correlation. Use Core request context
-    // (not deprecated plugins.security.audit).
-    const auditEvent: AuditEvent = {
-      message: 'Osquery export started',
-      event: {
-        action: 'osquery_export',
-        category: ['database'],
-        type: ['access'],
-        outcome: 'unknown',
-      },
-      labels: {
-        action_id: routeMetadata.action_id,
-        format,
-        ...(routeMetadata.execution_count != null
-          ? { execution_count: routeMetadata.execution_count }
-          : {}),
-      },
-    };
-    coreContext.security.audit.logger.log(auditEvent);
-
-    return response.ok({
-      body: result,
-      headers: {
-        'Content-Disposition': `attachment; filename="${fileName}"`,
-        'Content-Type': formatter.contentType,
-      },
-    });
   };

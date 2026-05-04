@@ -526,7 +526,7 @@ describe('exportResultsToStream', () => {
         logger,
       });
 
-      await collectStream(result as NodeJS.ReadableStream);
+      const output = await collectStream(result as NodeJS.ReadableStream);
 
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('first result page'),
@@ -537,6 +537,11 @@ describe('exportResultsToStream', () => {
           }),
         })
       );
+
+      // The late-arriving field must be silently dropped from the CSV output —
+      // it is not present in the header and its value does not appear in any row.
+      expect(output).not.toContain('osquery.appears_late');
+      expect(output).not.toContain('late');
     });
 
     it('should call row() with isFirst=true for the first row and isFirst=false for subsequent rows', async () => {
