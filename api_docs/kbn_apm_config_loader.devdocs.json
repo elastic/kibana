@@ -70,6 +70,7 @@
                 "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRawConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -442,6 +443,7 @@
             "lineNumber": 12,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentConfigOptions",
             "trackAdoption": false,
             "isRequired": false
           }

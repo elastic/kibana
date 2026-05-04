@@ -54,8 +54,11 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function checkIntermediateSessionCookiePropsDefault(sessionCookie: Cookie) {
-    expect(sessionCookie.sameSite).to.be('none');
-    expect(sessionCookie.secure).to.be(true);
+    // Over HTTPS the SAML provider overrides cookie attributes to allow the IdP redirect
+    // to set the `sid` cookie cross-site (`SameSite=None; Secure`). Over plain HTTP we fall
+    // back to the default cookie options so Safari does not drop the intermediate cookie.
+    expect(sessionCookie.sameSite).to.be(isSSlEnabled ? 'none' : undefined);
+    expect(sessionCookie.secure).to.be(isSSlEnabled);
   }
 
   async function checkSessionCookie(sessionCookie: Cookie, username = 'a@b.c') {

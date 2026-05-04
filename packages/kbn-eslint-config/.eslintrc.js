@@ -376,6 +376,7 @@ module.exports = {
     '@kbn/imports/no_group_crossing_imports': 'error',
     '@kbn/imports/no_direct_handlebars_import': 'error',
     '@kbn/imports/no_direct_monaco_import': 'warn',
+    '@kbn/imports/no_undeclared_plugin_target': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
@@ -391,5 +392,12 @@ module.exports = {
         message: 'For client-side, please use `useEuiTheme` instead.',
       },
     ],
+
+    /**
+     * a11y-related rules:
+     * all existing violations were fixed; keep this as error to prevent new ones.
+     */
+    '@elastic/eui/prefer-eui-icon-tip': 'error',
+    '@elastic/eui/sr-output-disabled-tooltip': 'error',
   },
 };

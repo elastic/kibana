@@ -301,6 +301,7 @@
                 "lineNumber": 32,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UserProfileGetCurrentParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -347,6 +348,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UserProfileBulkGetParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -393,6 +395,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UserProfileSuggestParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -451,6 +454,7 @@
                 "lineNumber": 24,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreUserProfileDelegateContract",
                 "trackAdoption": false,
                 "isRequired": true
               }

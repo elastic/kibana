@@ -99,6 +99,7 @@
                 "lineNumber": 35,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogMessageSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -118,6 +119,7 @@
                 "lineNumber": 35,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -188,6 +190,7 @@
                 "lineNumber": 46,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogMessageSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -207,6 +210,7 @@
                 "lineNumber": 46,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -277,6 +281,7 @@
                 "lineNumber": 57,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogMessageSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -296,6 +301,7 @@
                 "lineNumber": 57,
                 "columnNumber": 67,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -386,6 +392,7 @@
                 "lineNumber": 68,
                 "columnNumber": 82,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -476,6 +483,7 @@
                 "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -566,6 +574,7 @@
                 "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -608,6 +617,7 @@
                 "lineNumber": 115,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevelId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -621,7 +631,15 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nReturns a new {@link Logger} instance extending the current logger context.\n"
+              "\nReturns a new ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              " instance extending the current logger context.\n"
             ],
             "signature": [
               "(...childContextPaths: string[]) => ",

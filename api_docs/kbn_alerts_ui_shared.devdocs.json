@@ -89,6 +89,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -141,6 +142,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -190,6 +192,7 @@
             "lineNumber": 24,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertsSearchBarProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -421,6 +424,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -512,6 +516,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionType",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -631,6 +636,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionVariables",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -655,6 +661,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionVariables",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -679,6 +686,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionGroupWithMessageVariables",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -831,6 +839,7 @@
             "lineNumber": 51,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiTabbedContentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -906,6 +915,7 @@
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionVariables",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -930,6 +940,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionVariables",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -954,6 +965,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OmitMessageVariablesType",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -985,7 +997,15 @@
         "tags": [],
         "label": "useAlertsDataView",
         "description": [
-          "\nComputes a {@link DataViewBase} object for alerts indices based on the provided feature ids\n"
+          "\nComputes a ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.DataViewBase",
+            "text": "DataViewBase"
+          },
+          " object for alerts indices based on the provided feature ids\n"
         ],
         "signature": [
           "({ http, dataViewsService, toasts, ruleTypeIds, fetchUnifiedAlertsFields, }: ",
@@ -1031,12 +1051,29 @@
             "lineNumber": 96,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "UseAlertsDataViewParams",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "A {@link DataViewBase } object, intentionally not typed as a complete {@link DataView } object\nsince only Security Solution uses an actual in-memory data view (when `ruleTypeIds` only contains\nsiem rule types).\nIn all other cases the data view is computed from the index names and fields fetched from the\nalerting APIs."
+          "A ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.DataViewBase",
+            "text": "DataViewBase"
+          },
+          " object, intentionally not typed as a complete ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.DataView",
+            "text": "DataView"
+          },
+          " object\nsince only Security Solution uses an actual in-memory data view (when `ruleTypeIds` only contains\nsiem rule types).\nIn all other cases the data view is computed from the index names and fields fetched from the\nalerting APIs."
         ],
         "initialIsOpen": false
       },
@@ -1080,6 +1117,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaServices",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1101,6 +1139,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1117,7 +1156,15 @@
         ],
         "label": "useFetchAlertsIndexNamesQuery",
         "description": [
-          "\nFetch alerts index names feature ids\n\nWhen testing components that depend on this hook, prefer mocking the {@link fetchAlertsIndexNames} function instead of the hook itself."
+          "\nFetch alerts index names feature ids\n\nWhen testing components that depend on this hook, prefer mocking the ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.fetchAlertsIndexNames",
+            "text": "fetchAlertsIndexNames"
+          },
+          " function instead of the hook itself."
         ],
         "signature": [
           "({ http, ruleTypeIds }: ",
@@ -1150,6 +1197,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFetchAlertsIndexNamesQueryParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1171,6 +1219,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1216,6 +1265,7 @@
             "lineNumber": 21,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFetchFlappingSettingsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1307,6 +1357,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFetchUnifiedAlertsFieldsQueryParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1352,6 +1403,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1409,6 +1461,7 @@
             "lineNumber": 54,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "UseGetAlertsGroupAggregationsQueryProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1476,6 +1529,7 @@
             "lineNumber": 66,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "UseGetRuleTypesPermissionsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1527,6 +1581,7 @@
             "lineNumber": 32,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "UseHealthCheckProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1586,6 +1641,7 @@
             "lineNumber": 18,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "UseLoadAlertingFrameworkHealthProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1639,6 +1695,7 @@
             "lineNumber": 18,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "UseLoadUiHealthProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1731,6 +1788,7 @@
                 "lineNumber": 33,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorValidationFunc",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2070,6 +2128,7 @@
                 "lineNumber": 102,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuleActionParam",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -2544,6 +2603,7 @@
                 "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2630,6 +2690,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -2777,6 +2838,7 @@
                 "lineNumber": 153,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3815,6 +3877,7 @@
                 "lineNumber": 65,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "StatefulSearchBarProps",
                 "trackAdoption": false
               }
             ]
@@ -3950,6 +4013,7 @@
                 "lineNumber": 125,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionConnector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4009,6 +4073,7 @@
                 "lineNumber": 127,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionConnector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4098,6 +4163,7 @@
                 "lineNumber": 25,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "FilterControlConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5139,6 +5205,7 @@
                 "lineNumber": 117,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5201,6 +5268,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -5412,6 +5480,7 @@
                 "lineNumber": 96,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "Key",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5473,6 +5542,7 @@
                 "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Prop",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5533,6 +5603,7 @@
                 "lineNumber": 101,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetaData",
                 "trackAdoption": false,
                 "isRequired": true
               }

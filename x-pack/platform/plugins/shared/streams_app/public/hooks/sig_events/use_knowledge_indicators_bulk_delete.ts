@@ -7,11 +7,9 @@
 
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { i18n } from '@kbn/i18n';
-import { groupBy } from 'lodash';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
 import { useKibana } from '../use_kibana';
-import { useQueriesApi } from './use_queries_api';
 import type { BulkOperationResult } from './use_discovery_features_api';
 import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
 
@@ -31,10 +29,14 @@ export function useKnowledgeIndicatorsBulkDelete({
     core: {
       notifications: { toasts },
     },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
   const queryClient = useQueryClient();
   const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
-  const { deleteQueriesInBulk } = useQueriesApi();
 
   const mutation = useMutation<BulkDeleteResult, Error, KnowledgeIndicator[]>({
     mutationFn: async (knowledgeIndicators) => {
@@ -42,61 +44,52 @@ export function useKnowledgeIndicatorsBulkDelete({
         .filter((ki) => ki.kind === 'feature')
         .map((ki) => ki.feature);
 
-      const queries = knowledgeIndicators.filter((ki) => ki.kind === 'query');
+      const queryIds = knowledgeIndicators
+        .filter((ki) => ki.kind === 'query')
+        .map((ki) => ki.query.id);
 
-      const featuresPromise = features.length > 0 ? deleteFeaturesInBulk(features) : undefined;
+      // At most two HTTP requests regardless of how many streams are involved:
+      // one for the cross-stream feature bulk delete, one for the cross-stream
+      // query bulk delete. Both endpoints group by stream server-side.
+      const featuresPromise: Promise<BulkOperationResult> =
+        features.length > 0
+          ? deleteFeaturesInBulk(features)
+          : Promise.resolve({ succeededCount: 0, failedCount: 0 });
 
-      const queryPromises: Array<{ promise: Promise<void>; count: number }> = [];
-      if (queries.length > 0) {
-        const queriesByStream = groupBy(queries, 'stream_name');
-        for (const [streamName, streamQueries] of Object.entries(queriesByStream)) {
-          queryPromises.push({
-            promise: deleteQueriesInBulk({
-              queryIds: streamQueries.map((q) => q.query.id),
-              streamName,
-            }),
-            count: streamQueries.length,
-          });
-        }
-      }
+      const queriesPromise: Promise<BulkOperationResult> =
+        queryIds.length > 0
+          ? streamsRepositoryClient
+              .fetch('POST /internal/streams/queries/_bulk_delete', {
+                signal: null,
+                params: { body: { queryIds } },
+              })
+              .then(({ succeeded, failed }) => ({
+                succeededCount: succeeded,
+                failedCount: failed,
+              }))
+          : Promise.resolve({ succeededCount: 0, failedCount: 0 });
 
-      const [featuresSettled, querySettled] = await Promise.all([
-        featuresPromise
-          ? featuresPromise
-              .then(
-                (value): PromiseSettledResult<BulkOperationResult> => ({
-                  status: 'fulfilled',
-                  value,
-                })
-              )
-              .catch(
-                (reason): PromiseSettledResult<BulkOperationResult> => ({
-                  status: 'rejected',
-                  reason,
-                })
-              )
-          : undefined,
-        Promise.allSettled(queryPromises.map((q) => q.promise)),
+      const [featuresSettled, queriesSettled] = await Promise.allSettled([
+        featuresPromise,
+        queriesPromise,
       ]);
 
       let succeeded = 0;
       let failed = 0;
 
-      if (featuresSettled?.status === 'fulfilled') {
+      if (featuresSettled.status === 'fulfilled') {
         succeeded += featuresSettled.value.succeededCount;
         failed += featuresSettled.value.failedCount;
-      } else if (featuresSettled?.status === 'rejected') {
+      } else {
         failed += features.length;
       }
 
-      querySettled.forEach((result, index) => {
-        const count = queryPromises[index].count;
-        if (result.status === 'fulfilled') {
-          succeeded += count;
-        } else {
-          failed += count;
-        }
-      });
+      if (queriesSettled.status === 'fulfilled') {
+        succeeded += queriesSettled.value.succeededCount;
+        failed += queriesSettled.value.failedCount;
+      } else {
+        failed += queryIds.length;
+      }
 
       if (succeeded === 0 && failed > 0) {
         throw new Error(BULK_DELETE_REJECTED_ERROR_MESSAGE);

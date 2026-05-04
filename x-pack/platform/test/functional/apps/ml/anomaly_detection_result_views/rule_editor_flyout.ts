@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Test data: advanced job with partitioning fields so the Scope section is relevant.

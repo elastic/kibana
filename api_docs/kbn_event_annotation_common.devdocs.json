@@ -105,6 +105,7 @@
             "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -534,6 +535,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -593,6 +595,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -652,6 +655,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }

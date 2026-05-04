@@ -1751,6 +1751,40 @@ const firstOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -1802,6 +1836,40 @@ const firstOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'long',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -1831,6 +1899,23 @@ const firstOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'keyword',
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
@@ -2111,6 +2196,40 @@ const lastOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'the metric field to calculate the latest value for',
@@ -2162,6 +2281,40 @@ const lastOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'long',
           optional: false,
           description: 'the metric field to calculate the latest value for',
@@ -2191,6 +2344,23 @@ const lastOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'keyword',
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],

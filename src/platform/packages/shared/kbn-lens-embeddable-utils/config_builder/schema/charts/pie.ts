@@ -63,11 +63,13 @@ const pieStylingSchema = schema.object(
     labels: schema.maybe(
       schema.object(
         {
-          visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
+          visible: schema.maybe(
+            schema.boolean({ meta: { description: 'When `true`, displays slice labels.' } })
+          ),
           position: schema.maybe(
             schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
               meta: {
-                description: 'Renders pie chart slice labels inside or outside the pie',
+                description: 'Slice label position: `inside` or `outside`.',
               },
             })
           ),
@@ -82,7 +84,11 @@ const pieStylingSchema = schema.object(
     donut_hole: schema.maybe(
       schema.oneOf(
         [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
-        { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
+        {
+          meta: {
+            description: 'Donut hole size. Accepted values: `none` (full pie), `s`, `m`, `l`.',
+          },
+        }
       )
     ),
   },
@@ -150,7 +156,8 @@ export const pieConfigSchemaNoESQL = schema.object(
     styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionConfigPrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema,
+        'pieMetric'
       ),
       {
         minSize: 1,
@@ -160,7 +167,10 @@ export const pieConfigSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'pieGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,
