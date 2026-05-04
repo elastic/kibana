@@ -285,7 +285,7 @@ export class KibanaCodeEditorWrapper {
         const editor = (window as any).MonacoEnvironment?.monaco?.editor
           ?.getEditors()
           ?.find((e: any) => container?.contains(e.getDomNode()));
-        if (!editor) return;
+        if (!editor) throw new Error(`Monaco editor not found for test subject: "${id}"`);
         editor.focus();
         for (let i = 0; i < textToType.length; i++) {
           editor.trigger('keyboard', 'type', { text: textToType[i] });
