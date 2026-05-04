@@ -54,6 +54,7 @@ export interface HierarchicalActionsMenuProps {
       iconSide?: 'left' | 'right';
       color?: 'primary' | 'text' | 'accent' | 'success' | 'warning' | 'danger';
       fill?: boolean;
+      isLoading?: boolean;
     };
     children: React.ReactNode;
   };
@@ -178,6 +179,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       iconSide={button.props?.iconSide}
       color={button.props?.color}
       fill={button.props?.fill}
+      isLoading={button.props?.isLoading}
       onClick={toggleMenu}
       data-test-subj={dataTestSubj}
     >

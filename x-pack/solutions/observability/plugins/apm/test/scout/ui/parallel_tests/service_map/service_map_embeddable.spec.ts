@@ -14,7 +14,8 @@ const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
 
 const { SERVICE_MAP_TEST_SERVICE, SERVICE_MAP_TEST_ENVIRONMENT_STAGING } = testData;
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/265639
+test.describe.skip(
   'Service map embeddable',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -51,6 +52,10 @@ test.describe(
 
       await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
         await pageObjects.datePicker.setCommonlyUsedTime('Last_1_hour');
+        await page
+          .getByTestId('dateRangePickerControlButton')
+          .waitFor({ timeout: EXTENDED_TIMEOUT });
+        await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
       await test.step('open add panel flyout', async () => {
@@ -58,7 +63,7 @@ test.describe(
       });
 
       await test.step('add Service map panel with filters', async () => {
-        await expect(page.getByRole('heading', { name: 'Add panel' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Add to Dashboard' })).toBeVisible();
         const serviceMapMenuItem = page.getByRole('menuitem', {
           name: 'Service map',
           exact: true,
