@@ -10,28 +10,22 @@
 import { TIMESTAMP_FIELD } from '@kbn/discover-utils';
 import type { MetricsExperienceDataSourceProfileProvider } from '../profile';
 
-const NUMERIC_ESQL_TYPES = new Set(['double', 'long', 'integer', 'float', 'unsigned_long']);
-
 export const getDeepAnalysisPlaybook: MetricsExperienceDataSourceProfileProvider['profile']['getDeepAnalysisPlaybook'] =
-  () => (params) => {
-    const numericFields = (params.columns ?? [])
-      .filter((col) => col.type !== undefined && NUMERIC_ESQL_TYPES.has(col.type))
-      .map((col) => col.name);
-
-    return {
-      shapeId: 'metrics',
-      shapeLabel: 'TSDB metrics (TS commands)',
-      characteristicFields: [TIMESTAMP_FIELD, ...numericFields],
-      promptAddendum:
-        'This dataset is TSDB metrics queried via the ES|QL TS command. ALL ' +
-        'follow-up and drill-down queries against this index MUST start with ' +
-        '`TS <index>` (never `FROM <index>`). Use the form: ' +
-        '`TS <index> | STATS <agg> BY BUCKET(@timestamp, ...)`. Compare rates ' +
-        'and percentiles per dimension across time. Avoid raw row enumeration.',
-      interestingSignals: [
-        'rate-of-change spikes',
-        'percentile drift over the time window',
-        'dimensions with diverging trends',
-      ],
-    };
-  };
+  () => () => ({
+    shapeId: 'metrics',
+    shapeLabel: 'TSDB metrics (TS commands)',
+    characteristicFields: [TIMESTAMP_FIELD],
+    promptAddendum:
+      'This dataset is TSDB metrics queried via the ES|QL TS command. ALL ' +
+      'follow-up queries against this index MUST start with `TS <index>` ' +
+      '(never `FROM <index>`). FIRST run `TS <index> | TS_INFO` to discover ' +
+      'metric_name (the numeric series available) and dimension_fields ' +
+      '(valid groupings). Then aggregate with ' +
+      '`TS <index> | STATS <agg>(<metric>) BY <dimension>, BUCKET(@timestamp, ...)`. ' +
+      'Avoid raw row enumeration.',
+    interestingSignals: [
+      'metrics with the largest rate-of-change in the time window',
+      'dimensions with diverging trends for the same metric',
+      'percentile drift (p95/p99) over time',
+    ],
+  });

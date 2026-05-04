@@ -10,34 +10,22 @@
 import { getDeepAnalysisPlaybook } from './get_deep_analysis_playbook';
 
 describe('getDeepAnalysisPlaybook (metrics)', () => {
-  const invokeWith = (columns?: Array<{ name: string; type?: string }>) => {
+  const invoke = () => {
     const accessor = getDeepAnalysisPlaybook!(() => undefined, { context: {} as never });
-    return accessor({ dataView: undefined, query: undefined, columns });
+    return accessor({ dataView: undefined, query: undefined });
   };
 
-  it('returns a metrics shape contribution with @timestamp and detected numeric columns', () => {
-    const result = invokeWith([
-      { name: '@timestamp', type: 'date' },
-      { name: 'cpu.usage', type: 'double' },
-      { name: 'memory.bytes', type: 'long' },
-      { name: 'host.name', type: 'keyword' },
-    ]);
+  it('returns the metrics contribution with TS_INFO guidance', () => {
+    const result = invoke();
 
     expect(result?.shapeId).toBe('metrics');
-    expect(result?.characteristicFields).toEqual(['@timestamp', 'cpu.usage', 'memory.bytes']);
-    expect(result?.promptAddendum).toMatch(/BUCKET/);
-    expect(result?.promptAddendum.length).toBeLessThanOrEqual(600);
-  });
-
-  it('falls back to just @timestamp when no columns are provided', () => {
-    const result = invokeWith();
-
     expect(result?.characteristicFields).toEqual(['@timestamp']);
-  });
-
-  it('skips columns whose type is undefined', () => {
-    const result = invokeWith([{ name: 'cpu.usage', type: 'double' }, { name: 'unknown_field' }]);
-
-    expect(result?.characteristicFields).toEqual(['@timestamp', 'cpu.usage']);
+    expect(result?.promptAddendum).toContain('TS_INFO');
+    expect(result?.promptAddendum).toContain('metric_name');
+    expect(result?.promptAddendum).toContain('dimension_fields');
+    expect(result?.promptAddendum).toMatch(/TS </);
+    expect(result?.promptAddendum).toMatch(/never `?FROM/);
+    expect(result?.promptAddendum.length).toBeLessThanOrEqual(600);
+    expect((result?.interestingSignals ?? []).length).toBeLessThanOrEqual(5);
   });
 });
