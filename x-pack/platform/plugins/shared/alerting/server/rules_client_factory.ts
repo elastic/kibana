@@ -80,6 +80,7 @@ export interface RulesClientFactoryOpts {
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
   shouldGrantUiam: boolean;
+  uiamApiKeyExpiration?: string;
   isServerless: boolean;
   featureFlags: CoreStart['featureFlags'];
 }
@@ -110,6 +111,7 @@ export class RulesClientFactory {
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
   private shouldGrantUiam: boolean = false;
+  private uiamApiKeyExpiration?: string;
   private isServerless: boolean = false;
   private featureFlags!: CoreStart['featureFlags'];
 
@@ -142,6 +144,7 @@ export class RulesClientFactory {
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
     this.shouldGrantUiam = options.shouldGrantUiam;
+    this.uiamApiKeyExpiration = options.uiamApiKeyExpiration;
     this.isServerless = options.isServerless;
     this.featureFlags = options.featureFlags;
   }
@@ -206,6 +209,7 @@ export class RulesClientFactory {
     try {
       const result = await this.securityService.authc.apiKeys.uiam?.grant(request, {
         name: `uiam-${name}`,
+        ...(this.uiamApiKeyExpiration ? { expiration: this.uiamApiKeyExpiration } : {}),
       });
       if (!result) {
         this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`, {

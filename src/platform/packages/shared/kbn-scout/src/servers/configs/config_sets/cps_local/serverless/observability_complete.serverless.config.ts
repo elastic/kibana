@@ -36,6 +36,7 @@ export const servers: ScoutServerConfig = {
       ...uiamConfig.kbnTestServer.serverArgs,
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
+      '--xpack.alerting.rules.uiamApiKeyExpiration=1h',
     ],
   },
 };

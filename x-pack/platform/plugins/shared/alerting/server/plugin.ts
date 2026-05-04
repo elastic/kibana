@@ -695,6 +695,7 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      uiamApiKeyExpiration: this.config.rules.uiamApiKeyExpiration,
       isServerless: this.isServerless,
       featureFlags: core.featureFlags,
     });

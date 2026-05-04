@@ -65,6 +65,7 @@ const rulesSchema = schema.object({
   apiKeyType: schema.oneOf([schema.literal('es'), schema.literal('uiam')], {
     defaultValue: 'es',
   }),
+  uiamApiKeyExpiration: schema.maybe(schema.string({ validate: validateDurationSchema })),
 });
 
 const ruleChangeTrackingSolutions: Type<RuleTypeSolution | 'all'> = schema.oneOf([
