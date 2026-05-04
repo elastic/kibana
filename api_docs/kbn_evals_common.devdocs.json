@@ -189,52 +189,6 @@
       },
       {
         "parentPluginId": "@kbn/evals-common",
-        "id": "def-common.buildRouteValidationWithZod",
-        "type": "Function",
-        "tags": [],
-        "label": "buildRouteValidationWithZod",
-        "description": [],
-        "signature": [
-          "<T extends ",
-          "ZodType",
-          "<unknown, unknown, ",
-          "node_modules/zod/v4/core/schemas",
-          "$ZodTypeInternals<unknown, unknown>>>(schema: T) => ",
-          "RouteValidationFunction",
-          "<",
-          "output",
-          "<T>>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common.ts",
-        "lineNumber": 12,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/evals-common",
-            "id": "def-common.buildRouteValidationWithZod.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common.ts",
-            "lineNumber": 13,
-            "columnNumber": 23,
-            "deprecated": false,
-            "docsReferencedTypeName": "T",
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/evals-common",
         "id": "def-common.buildRunFilterQuery",
         "type": "Function",
         "tags": [],
@@ -957,7 +911,7 @@
           "{ examples: { input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 36,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -974,7 +928,7 @@
           "{ examples: { input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -991,7 +945,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 26,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1008,7 +962,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 32,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1025,7 +979,7 @@
           "{ added: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 46,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1042,7 +996,7 @@
           "{ input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1059,7 +1013,7 @@
           "{ build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 26,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1076,7 +1030,7 @@
           "{ run_id_a: string; run_id_b: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1093,7 +1047,7 @@
           "{ run_id_a: string; run_id_b: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 41,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1110,7 +1064,7 @@
           "{ results: { datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: number | null; }[]; pairing: { totalPairs: number; skippedMissingPairs: number; skippedNullScores: number; truncatedA: boolean; truncatedB: boolean; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 43,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1127,7 +1081,7 @@
           "{ name: string; description: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/create_dataset_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1144,7 +1098,7 @@
           "{ name: string; description: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/create_dataset_route.gen.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1161,7 +1115,7 @@
           "{ dataset_id: string; name: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/create_dataset_route.gen.ts",
-        "lineNumber": 28,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1195,7 +1149,7 @@
           "{ id: string; created_at: string; updated_at: string; input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1212,7 +1166,7 @@
           "{ id: string; name: string; description: string; examples_count: number; created_at: string; updated_at: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1229,7 +1183,7 @@
           "{ datasetId: string; exampleId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_example_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1246,7 +1200,7 @@
           "{ datasetId: string; exampleId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_example_route.gen.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1263,7 +1217,7 @@
           "{ success: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_example_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1280,7 +1234,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_dataset_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1297,7 +1251,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_dataset_route.gen.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1314,7 +1268,7 @@
           "{ success: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_dataset_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1586,7 +1540,7 @@
           "{ example_id: string; example_index: number | null; scores: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: { [x: string]: unknown; } | null | undefined; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: string | null | undefined; output?: { [x: string]: unknown; } | null | undefined; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: number | null | undefined; label?: string | null | undefined; explanation?: string | null | undefined; metadata?: { [x: string]: unknown; } | null | undefined; trace_id?: string | null | undefined; }; run_metadata: { total_repetitions: number; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 21,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1603,7 +1557,7 @@
           "{ run_id: string; timestamp: string; suite_id?: string | undefined; dataset_id?: string | null | undefined; dataset_name?: string | null | undefined; task_model?: { id: string; family?: string | undefined; provider?: string | undefined; } | undefined; evaluator_model?: { id: string; family?: string | undefined; provider?: string | undefined; } | undefined; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; total_repetitions?: number | undefined; ci?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 21,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1637,7 +1591,7 @@
           "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: { [x: string]: unknown; } | null | undefined; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: string | null | undefined; output?: { [x: string]: unknown; } | null | undefined; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: number | null | undefined; label?: string | null | undefined; explanation?: string | null | undefined; metadata?: { [x: string]: unknown; } | null | undefined; trace_id?: string | null | undefined; }; run_metadata: { total_repetitions: number; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 74,
+        "lineNumber": 110,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1654,7 +1608,7 @@
           "{ name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: number | null | undefined; label?: string | null | undefined; explanation?: string | null | undefined; metadata?: { [x: string]: unknown; } | null | undefined; trace_id?: string | null | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 56,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1671,7 +1625,7 @@
           "{ dataset_id: string; dataset_name: string; evaluator_name: string; stats: { mean: number; median: number; std_dev: number; min: number; max: number; count: number; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 98,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1688,7 +1642,7 @@
           "{ id: string; index: number; dataset: { id: string; name: string; }; input?: { [x: string]: unknown; } | null | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 37,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1705,7 +1659,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1722,7 +1676,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 33,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1739,7 +1693,7 @@
           "{ id: string; name: string; description: string; examples: { id: string; created_at: string; updated_at: string; input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }[]; created_at: string; updated_at: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 37,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1756,7 +1710,7 @@
           "{ page: number; per_page: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1773,7 +1727,7 @@
           "{ page?: unknown; per_page?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 34,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1790,7 +1744,7 @@
           "{ datasets: { id: string; name: string; description: string; examples_count: number; created_at: string; updated_at: string; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 38,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1807,7 +1761,7 @@
           "{ runId: string; datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 28,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1824,7 +1778,7 @@
           "{ runId: string; datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 35,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1841,7 +1795,7 @@
           "{ examples: { example_id: string; example_index: number | null; scores: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: { [x: string]: unknown; } | null | undefined; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: string | null | undefined; output?: { [x: string]: unknown; } | null | undefined; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: number | null | undefined; label?: string | null | undefined; explanation?: string | null | undefined; metadata?: { [x: string]: unknown; } | null | undefined; trace_id?: string | null | undefined; }; run_metadata: { total_repetitions: number; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 39,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1858,7 +1812,7 @@
           "{ runId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 34,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1875,7 +1829,7 @@
           "{ runId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 38,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1892,7 +1846,7 @@
           "{ suite_id?: string | undefined; model_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 21,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1909,7 +1863,7 @@
           "{ suite_id?: string | undefined; model_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1926,7 +1880,7 @@
           "{ run_id: string; stats: { dataset_id: string; dataset_name: string; evaluator_name: string; stats: { mean: number; median: number; std_dev: number; min: number; max: number; count: number; }; }[]; timestamp?: string | undefined; task_model?: { id: string; family?: string | undefined; provider?: string | undefined; } | undefined; evaluator_model?: { id: string; family?: string | undefined; provider?: string | undefined; } | undefined; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; ci?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; total_repetitions?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 40,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1943,7 +1897,7 @@
           "{ runId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 36,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1960,7 +1914,7 @@
           "{ runId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1977,7 +1931,7 @@
           "{ suite_id?: string | undefined; model_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 21,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1994,7 +1948,7 @@
           "{ suite_id?: string | undefined; model_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2011,7 +1965,7 @@
           "{ scores: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: { [x: string]: unknown; } | null | undefined; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: string | null | undefined; output?: { [x: string]: unknown; } | null | undefined; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: number | null | undefined; label?: string | null | undefined; explanation?: string | null | undefined; metadata?: { [x: string]: unknown; } | null | undefined; trace_id?: string | null | undefined; }; run_metadata: { total_repetitions: number; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 46,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2028,7 +1982,7 @@
           "{ page: number; per_page: number; suite_id?: string | undefined; model_id?: string | undefined; branch?: string | undefined; dataset_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 36,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2045,7 +1999,7 @@
           "{ suite_id?: string | undefined; model_id?: string | undefined; branch?: string | undefined; dataset_id?: string | undefined; page?: unknown; per_page?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 57,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2062,7 +2016,7 @@
           "{ runs: { run_id: string; timestamp: string; suite_id?: string | undefined; dataset_id?: string | null | undefined; dataset_name?: string | null | undefined; task_model?: { id: string; family?: string | undefined; provider?: string | undefined; } | undefined; evaluator_model?: { id: string; family?: string | undefined; provider?: string | undefined; } | undefined; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; total_repetitions?: number | undefined; ci?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 59,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2079,7 +2033,7 @@
           "{ exampleId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/examples/get_example_scores_route.gen.ts",
-        "lineNumber": 21,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2096,7 +2050,7 @@
           "{ exampleId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/examples/get_example_scores_route.gen.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2113,7 +2067,7 @@
           "{ scores: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: { [x: string]: unknown; } | null | undefined; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: string | null | undefined; output?: { [x: string]: unknown; } | null | undefined; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: number | null | undefined; label?: string | null | undefined; explanation?: string | null | undefined; metadata?: { [x: string]: unknown; } | null | undefined; trace_id?: string | null | undefined; }; run_metadata: { total_repetitions: number; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/examples/get_example_scores_route.gen.ts",
-        "lineNumber": 27,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2130,7 +2084,7 @@
           "{ projectName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 62,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2147,7 +2101,7 @@
           "{ projectName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 66,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2164,7 +2118,7 @@
           "{ sort_field: any; sort_order: any; page: number; per_page: number; from?: string | undefined; to?: string | undefined; name?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 41,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2181,7 +2135,7 @@
           "{ sort_field: any; sort_order: any; from?: string | undefined; to?: string | undefined; name?: string | undefined; page?: unknown; per_page?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 60,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2198,7 +2152,7 @@
           "{ traces: { trace_id: string; name: string; start_time: string; duration_ms: number; status?: string | undefined; total_spans?: number | undefined; input_preview?: string | undefined; output_preview?: string | undefined; error?: string | undefined; tokens?: { input?: number | undefined; output?: number | undefined; total?: number | undefined; } | undefined; prompt_id?: string | undefined; model?: string | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 68,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2215,7 +2169,7 @@
           "{ traceId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/traces/get_trace_route.gen.ts",
-        "lineNumber": 21,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2232,7 +2186,7 @@
           "{ traceId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/traces/get_trace_route.gen.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2249,7 +2203,7 @@
           "{ trace_id: string; spans: { span_id: string; trace_id: string; name: string; start_time: string; duration_ms: number; parent_span_id?: string | undefined; kind?: string | undefined; status?: string | undefined; end_time?: string | undefined; attributes?: { [x: string]: unknown; } | undefined; }[]; total_spans: number; duration_ms?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/traces/get_trace_route.gen.ts",
-        "lineNumber": 27,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2266,7 +2220,7 @@
           "{ page: number; per_page: number; from?: string | undefined; to?: string | undefined; name?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2283,7 +2237,7 @@
           "{ from?: string | undefined; to?: string | undefined; name?: string | undefined; page?: unknown; per_page?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 47,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2300,7 +2254,7 @@
           "{ projects: { name: string; trace_count: number; last_trace_time: string; error_rate?: number | undefined; p50_latency_ms?: number | undefined; p99_latency_ms?: number | undefined; total_tokens?: number | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 49,
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2368,7 +2322,7 @@
           "{ id: string; family?: string | undefined; provider?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2385,7 +2339,7 @@
           "{ datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: number | null; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2402,7 +2356,7 @@
           "{ total_repetitions: number; git_branch?: string | null | undefined; git_commit_sha?: string | null | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 67,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2436,7 +2390,7 @@
           "{ repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: string | null | undefined; output?: { [x: string]: unknown; } | null | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 48,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2470,7 +2424,7 @@
           "{ span_id: string; trace_id: string; name: string; start_time: string; duration_ms: number; parent_span_id?: string | undefined; kind?: string | undefined; status?: string | undefined; end_time?: string | undefined; attributes?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 113,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2487,7 +2441,7 @@
           "{ trace_id: string; name: string; start_time: string; duration_ms: number; status?: string | undefined; total_spans?: number | undefined; input_preview?: string | undefined; output_preview?: string | undefined; error?: string | undefined; tokens?: { input?: number | undefined; output?: number | undefined; total?: number | undefined; } | undefined; prompt_id?: string | undefined; model?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2504,7 +2458,7 @@
           "{ name: string; trace_count: number; last_trace_time: string; error_rate?: number | undefined; p50_latency_ms?: number | undefined; p99_latency_ms?: number | undefined; total_tokens?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2521,7 +2475,7 @@
           "{ input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 37,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2538,7 +2492,7 @@
           "{ input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 41,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2555,7 +2509,7 @@
           "{ datasetId: string; exampleId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 26,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2572,7 +2526,7 @@
           "{ datasetId: string; exampleId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 33,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2589,7 +2543,7 @@
           "{ id: string; dataset_id: string; created_at: string; updated_at: string; input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 45,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2606,7 +2560,7 @@
           "{ description: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2623,7 +2577,7 @@
           "{ description: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 33,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2640,7 +2594,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2657,7 +2611,7 @@
           "{ datasetId: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2674,7 +2628,7 @@
           "{ id: string; name: string; description: string; created_at: string; updated_at: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 37,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2691,7 +2645,7 @@
           "{ input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2708,7 +2662,7 @@
           "{ input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 19,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2725,7 +2679,7 @@
           "{ name: string; description: string; examples: { input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 26,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2742,7 +2696,7 @@
           "{ name: string; description: string; examples: { input?: { [x: string]: unknown; } | undefined; output?: { [x: string]: unknown; } | undefined; metadata?: { [x: string]: unknown; } | undefined; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 32,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2759,7 +2713,7 @@
           "{ dataset_id: string; added: number; removed: number; unchanged: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 36,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2811,7 +2765,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2833,7 +2787,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2855,7 +2809,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 49,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2899,7 +2853,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/add_examples_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2964,7 +2918,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2988,7 +2942,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3044,7 +2998,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 44,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3068,7 +3022,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/create_dataset_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3092,7 +3046,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/create_dataset_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3142,7 +3096,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3174,7 +3128,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3198,7 +3152,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_example_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3220,7 +3174,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_example_route.gen.ts",
-        "lineNumber": 33,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3242,7 +3196,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_dataset_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3264,7 +3218,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/delete_dataset_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3494,7 +3448,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3616,7 +3570,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3834,7 +3788,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 75,
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3904,7 +3858,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 57,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3946,7 +3900,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 99,
+        "lineNumber": 112,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3988,7 +3942,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 38,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4010,7 +3964,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4076,7 +4030,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_dataset_route.gen.ts",
-        "lineNumber": 38,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4108,7 +4062,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4148,7 +4102,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/get_datasets_route.gen.ts",
-        "lineNumber": 39,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4172,7 +4126,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 31,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4408,7 +4362,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_dataset_examples_route.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4430,7 +4384,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4458,7 +4412,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4594,7 +4548,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_route.gen.ts",
-        "lineNumber": 41,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4616,7 +4570,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 39,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4644,7 +4598,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4870,7 +4824,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_run_scores_route.gen.ts",
-        "lineNumber": 47,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4918,7 +4872,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5048,7 +5002,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/get_runs_route.gen.ts",
-        "lineNumber": 60,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5070,7 +5024,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/examples/get_example_scores_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5296,7 +5250,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/examples/get_example_scores_route.gen.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5318,7 +5272,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 63,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5362,7 +5316,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5444,7 +5398,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 69,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5466,7 +5420,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/traces/get_trace_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5534,7 +5488,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/traces/get_trace_route.gen.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5578,7 +5532,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5628,7 +5582,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 50,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5677,7 +5631,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5713,7 +5667,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5747,7 +5701,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 68,
+        "lineNumber": 77,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5799,7 +5753,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 49,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5853,7 +5807,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
-        "lineNumber": 114,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5927,7 +5881,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5969,7 +5923,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6013,7 +5967,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6037,7 +5991,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6089,7 +6043,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6111,7 +6065,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6133,7 +6087,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6163,7 +6117,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_dataset_route.gen.ts",
-        "lineNumber": 38,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6207,7 +6161,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/update_example_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6251,7 +6205,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6305,7 +6259,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6333,7 +6287,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/datasets/upsert_dataset_route.gen.ts",
-        "lineNumber": 37,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

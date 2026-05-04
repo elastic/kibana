@@ -16,10 +16,6 @@ export type TourStepConfig = Omit<EuiTourStepProps, 'children' | 'isStepOpen' | 
   stepId: StreamsTourStepId;
 };
 
-export interface TourStepsOptions {
-  attachmentsEnabled: boolean;
-}
-
 const tightContentCss = css`
   margin-top: -14px;
 `;
@@ -92,7 +88,7 @@ const ATTACHMENTS_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.attachments.content', {
         defaultMessage:
-          'Link dashboards, rules, SLOs, and other assets based on this stream’s data so you can manage them from a single page.',
+          'Link dashboards, rules, and SLOs based on this stream’s data so you can manage them from a single page.',
       })}
     </EuiText>
   ),
@@ -118,18 +114,14 @@ const ADVANCED_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
   maxWidth: 360,
 };
 
-export function getTourStepsConfig(options: TourStepsOptions): TourStepConfig[] {
+export function getTourStepsConfig(): TourStepConfig[] {
   const baseSteps: Array<Omit<TourStepConfig, 'step' | 'stepsTotal'>> = [
     STREAMS_LIST_STEP,
     RETENTION_STEP,
     PROCESSING_STEP,
+    ATTACHMENTS_STEP,
+    ADVANCED_STEP,
   ];
-
-  if (options.attachmentsEnabled) {
-    baseSteps.push(ATTACHMENTS_STEP);
-  }
-
-  baseSteps.push(ADVANCED_STEP);
 
   const stepsTotal = baseSteps.length;
 
