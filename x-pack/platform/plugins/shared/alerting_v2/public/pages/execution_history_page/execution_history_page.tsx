@@ -65,11 +65,12 @@ const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
     }),
   },
   {
-    field: 'workflow_ids',
+    field: 'workflows',
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.workflows', {
       defaultMessage: 'Workflows',
     }),
-    render: (workflowIds: string[]) => workflowIds.join(', '),
+    render: (workflows: PolicyExecutionHistoryItem['workflows']) =>
+      workflows.map((w) => w.name ?? w.id).join(', '),
   },
 ];
 

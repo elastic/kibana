@@ -17,7 +17,7 @@ export interface PolicyExecutionHistoryItem {
   outcome: 'dispatched' | 'throttled';
   episode_count: number;
   action_group_count: number;
-  workflow_ids: string[];
+  workflows: Array<{ id: string; name?: string | null }>;
 }
 
 export interface PolicyExecutionHistoryResponse {

@@ -42,7 +42,12 @@ const policyExecutionHistoryItemSchema = z.object({
   outcome: z.enum([ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, ACTION_POLICY_EVENT_ACTIONS.THROTTLED]),
   episode_count: z.number(),
   action_group_count: z.number(),
-  workflow_ids: z.array(z.string()),
+  workflows: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string().nullable().optional(),
+    })
+  ),
 });
 
 const listExecutionHistoryResponseSchema = z.object({
@@ -151,9 +156,9 @@ function denormalizeEvent(event: IValidatedEvent): PolicyExecutionHistoryItem[] 
   );
   const allRuleIds = [...ruleIdsFromRefs, ...ruleIdsSpillover];
 
-  const workflowIds = (dispatcher.workflow_ids ?? []).filter(
-    (id): id is string => typeof id === 'string'
-  );
+  const workflows = (dispatcher.workflow_ids ?? [])
+    .filter((id): id is string => typeof id === 'string')
+    .map((id) => ({ id }));
 
   return allRuleIds.map((ruleId) => ({
     '@timestamp': timestamp,
@@ -162,6 +167,6 @@ function denormalizeEvent(event: IValidatedEvent): PolicyExecutionHistoryItem[] 
     outcome: action,
     episode_count: Number(dispatcher.episode_count ?? 0),
     action_group_count: Number(dispatcher.action_group_count ?? 0),
-    workflow_ids: workflowIds,
+    workflows,
   }));
 }
