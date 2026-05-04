@@ -16,17 +16,23 @@ export interface FtrSelectiveResult {
   reason: string;
 }
 
+/** Spec-file suffixes safe to narrow against; anything else is treated as source code. */
+const SPEC_FILE_SUFFIXES = ['.spec.ts', '.spec.tsx', '.test.ts', '.test.tsx', '.cy.ts', '.cy.tsx'];
+
 /**
- * Narrow the set of FTR configs to only those whose "test territory" was touched
- * by the PR. Bails out (returns the input map unchanged with `applied=false`)
- * whenever the diff includes any file outside FTR test territory, or when the
- * narrowed set would be empty.
+ * Narrow the set of FTR configs to only those whose specs were touched by the
+ * PR. Bails out (returns the input map unchanged with `applied=false`) whenever
+ * the diff includes any file that is not a recognised spec file or a leaf FTR
+ * config, or when the narrowed set would be empty.
  *
- * "Test territory" is the directory tree rooted at the deepest ancestor of a
- * changed file that DIRECTLY contains an FTR config file. Anything alongside
- * or below such a directory is considered colocated. Files that have no
- * config-bearing directory among their ancestors are treated as non-test
- * source — we bail out and let the full suite run.
+ * Rationale: changes to non-spec files in test directories (services, page
+ * objects, fixtures, base configs) regularly affect FTR suites in *other*
+ * directories, so directory locality alone is unsafe. Restricting the gate to
+ * spec files and leaf configs keeps the cross-suite blast radius bounded.
+ *
+ * Mapping: each allowed file maps to a "test root" — the deepest ancestor
+ * directory that DIRECTLY contains an FTR config. The narrowed set is every
+ * config under any matched root.
  */
 export function filterFtrConfigsBySelectiveTesting({
   ftrConfigsByQueue,
@@ -44,16 +50,26 @@ export function filterFtrConfigsBySelectiveTesting({
     return { ftrConfigsByQueue, applied: false, reason: 'no FTR configs to narrow' };
   }
 
+  const allConfigsSet = new Set(allConfigs);
   const configDirs = collectConfigDirs(allConfigs);
   const matchedRoots = new Set<string>();
 
-  for (const file of prChangedFiles) {
+  for (const rawFile of prChangedFiles) {
+    const file = normalizePath(rawFile);
+    if (!isSpecFile(file) && !allConfigsSet.has(file)) {
+      return {
+        ftrConfigsByQueue,
+        applied: false,
+        reason: `non-spec file changed: ${rawFile}`,
+      };
+    }
+
     const root = findTestRoot(file, configDirs);
     if (!root) {
       return {
         ftrConfigsByQueue,
         applied: false,
-        reason: `non-test file changed: ${file}`,
+        reason: `spec file outside any FTR config dir: ${rawFile}`,
       };
     }
     matchedRoots.add(root);
@@ -138,6 +154,10 @@ function countConfigs(map: Map<string, string[]>): number {
   let n = 0;
   for (const v of map.values()) n += v.length;
   return n;
+}
+
+function isSpecFile(file: string): boolean {
+  return SPEC_FILE_SUFFIXES.some((suffix) => file.endsWith(suffix));
 }
 
 function normalizePath(p: string): string {

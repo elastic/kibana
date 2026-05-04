@@ -31,12 +31,12 @@ describe('filterFtrConfigsBySelectiveTesting', () => {
     expect(result.ftrConfigsByQueue.get('n2')).toEqual([FOO_CONFIG]);
   });
 
-  it('narrows to a single config when a colocated test file changed', () => {
+  it('narrows to a single config when a colocated spec file changed', () => {
     const input = buildMap([['n2', [FOO_CONFIG, BAR_CONFIG]]]);
 
     const result = filterFtrConfigsBySelectiveTesting({
       ftrConfigsByQueue: input,
-      prChangedFiles: ['x-pack/test/foo/services/helper.ts', 'x-pack/test/foo/specs/a.ts'],
+      prChangedFiles: ['x-pack/test/foo/specs/a.spec.ts'],
     });
 
     expect(result.applied).toBe(true);
@@ -48,14 +48,14 @@ describe('filterFtrConfigsBySelectiveTesting', () => {
 
     const result = filterFtrConfigsBySelectiveTesting({
       ftrConfigsByQueue: input,
-      prChangedFiles: ['x-pack/test/foo/specs/a.ts'],
+      prChangedFiles: ['x-pack/test/foo/specs/a.spec.ts'],
     });
 
     expect(result.applied).toBe(true);
     expect(result.ftrConfigsByQueue.get('n2')).toEqual([FOO_CONFIG, FOO_OTHER_CONFIG]);
   });
 
-  it('bails out when a non-test source file is changed', () => {
+  it('bails out when a non-spec source file is changed', () => {
     const input = buildMap([['n2', [FOO_CONFIG, BAR_CONFIG]]]);
 
     const result = filterFtrConfigsBySelectiveTesting({
@@ -64,20 +64,33 @@ describe('filterFtrConfigsBySelectiveTesting', () => {
     });
 
     expect(result.applied).toBe(false);
-    expect(result.reason).toContain('non-test file');
+    expect(result.reason).toContain('non-spec file');
     expect(result.ftrConfigsByQueue).toBe(input);
   });
 
-  it('bails out when a file under a test dir has no config-bearing ancestor', () => {
+  it('bails out when a non-spec file is changed inside a config-bearing dir', () => {
     const input = buildMap([['n2', [FOO_CONFIG]]]);
 
     const result = filterFtrConfigsBySelectiveTesting({
       ftrConfigsByQueue: input,
-      prChangedFiles: ['x-pack/test/services/shared.ts'],
+      // a service helper sitting next to the config — could be imported by any other suite
+      prChangedFiles: ['x-pack/test/foo/services/helper.ts'],
     });
 
     expect(result.applied).toBe(false);
-    expect(result.reason).toContain('non-test file');
+    expect(result.reason).toContain('non-spec file');
+  });
+
+  it('bails out when a spec file is outside any FTR config dir', () => {
+    const input = buildMap([['n2', [FOO_CONFIG]]]);
+
+    const result = filterFtrConfigsBySelectiveTesting({
+      ftrConfigsByQueue: input,
+      prChangedFiles: ['x-pack/test/services/shared.spec.ts'],
+    });
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toContain('outside any FTR config dir');
   });
 
   it('preserves queue grouping across multiple queues', () => {
@@ -88,7 +101,10 @@ describe('filterFtrConfigsBySelectiveTesting', () => {
 
     const result = filterFtrConfigsBySelectiveTesting({
       ftrConfigsByQueue: input,
-      prChangedFiles: ['x-pack/test/foo/specs/a.ts', 'x-pack/platform/test/baz/specs/b.ts'],
+      prChangedFiles: [
+        'x-pack/test/foo/specs/a.spec.ts',
+        'x-pack/platform/test/baz/specs/b.spec.ts',
+      ],
     });
 
     expect(result.applied).toBe(true);
