@@ -24,10 +24,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { useMutation } from '@kbn/react-query';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  HIGH_SEVERITY_THRESHOLD,
-  useUnbackedQueriesCount,
-} from '../../../../../hooks/sig_events/use_unbacked_queries_count';
+import { HIGH_SEVERITY_THRESHOLD } from '@kbn/streams-schema';
+import { useUnbackedQueriesCount } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import { useInvalidatePromoteRelatedQueries } from '../../../../../hooks/sig_events/use_invalidate_promote_queries';
 import { getFormattedError } from '../../../../../util/errors';

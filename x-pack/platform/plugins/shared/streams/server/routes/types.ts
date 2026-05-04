@@ -29,10 +29,13 @@ import type { StreamsSettingsStorageClient } from '../lib/streams/storage/stream
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
-export type GetScopedClients = ({
-  request,
-}: {
+export interface RulesClientOptions {
+  cloneApiKeysOnCreate?: boolean;
+}
+
+export type GetScopedClients = (params: {
   request: KibanaRequest;
+  rulesClientOptions?: RulesClientOptions;
 }) => Promise<RouteHandlerScopedClients>;
 
 export interface RouteHandlerScopedClients {

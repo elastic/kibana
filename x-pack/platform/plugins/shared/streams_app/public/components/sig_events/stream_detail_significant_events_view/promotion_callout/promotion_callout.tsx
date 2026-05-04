@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// TODO: The onboarding task now auto-creates rules for high-severity queries
+// (via cloneApiKeysOnCreate). For new onboarding runs this callout will show
+// 0 promotable queries. Once existing unbacked queries from pre-change runs
+// are no longer a concern, remove this component along with SuggestedRulesFlyout
+// and usePromotableQueries.
+
 import {
   EuiCallOut,
   EuiButton,

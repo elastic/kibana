@@ -150,8 +150,10 @@ export class StreamsPlugin
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
+      rulesClientOptions,
     }: {
       request: KibanaRequest;
+      rulesClientOptions?: { cloneApiKeysOnCreate?: boolean };
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -191,7 +193,8 @@ export class StreamsPlugin
         queryClientPromise ??= (async () => {
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
             request,
-            DEFAULT_SPACE_ID
+            DEFAULT_SPACE_ID,
+            rulesClientOptions
           );
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
