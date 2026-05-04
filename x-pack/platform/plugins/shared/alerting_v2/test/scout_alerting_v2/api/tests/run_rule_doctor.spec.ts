@@ -29,10 +29,9 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest.afterAll(async ({ apiClient, kbnClient }) => {
-    await apiClient.delete(
-      `/api/workflows/workflow/${RULE_DOCTOR_DEDUP_WORKFLOW_ID}?force=true`,
-      { headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader } }
-    );
+    await apiClient.delete(`/api/workflows/workflow/${RULE_DOCTOR_DEDUP_WORKFLOW_ID}?force=true`, {
+      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+    });
 
     await kbnClient.uiSettings.update({
       [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
