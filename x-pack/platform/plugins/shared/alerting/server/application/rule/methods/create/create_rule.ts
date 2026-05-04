@@ -28,6 +28,7 @@ import {
   generateAPIKeyName,
   apiKeyAsRuleDomainProperties,
   addMissingUiamKeyTagIfNeeded,
+  resolveRuleAPIKey,
 } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -140,19 +141,10 @@ export async function createRule<Params extends RuleParams = never>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
-            {
-              name: 'createAPIKey',
-              type: 'rules',
-            },
-            () => context.createAPIKey(name)
-          )
-      : null;
+    const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
