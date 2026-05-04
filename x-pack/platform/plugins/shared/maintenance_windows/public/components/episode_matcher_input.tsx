@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import React, { useCallback, useMemo } from 'react';
 import { useFetchEpisodeDataFields } from '../hooks/use_fetch_episode_data_fields';
 import { useKibana } from '../utils/kibana_react';
 

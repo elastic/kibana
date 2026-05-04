@@ -6,9 +6,9 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import type {
-  MaintenanceWindowUI,
-  MaintenanceWindowResponse,
   CreateMaintenanceWindowRequestBody,
+  MaintenanceWindowResponse,
+  MaintenanceWindowUI,
 } from '../../common';
 
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../common';

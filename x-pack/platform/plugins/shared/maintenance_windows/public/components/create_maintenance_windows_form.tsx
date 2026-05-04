@@ -73,9 +73,6 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
   label: timezoneOption,
 }));
 
-// Filters in the form may be flat (when restored from a saved object) or already
-// wrapped in a `query` object (when produced by the search bar). Normalize to the
-// `{ $state, meta, query }` shape the maintenance window API expects.
 const transformQueryFilters = (filtersToTransform: Filter[]): Filter[] => {
   return filtersToTransform.map((filter) => {
     const { $state, meta, ...rest } = filter;
@@ -246,9 +243,6 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     setEpisodeQueryErrors((prev) => (prev.length ? [] : prev));
   };
 
-  // Memoized so the prop identity stays stable across renders, allowing the
-  // memoized `MaintenanceWindowScopedQuery` child to skip re-renders that are
-  // unrelated to the search bar input.
   const onQueryChange = useCallback((newQuery: string) => {
     setScopedQueryErrors((prev) => (prev.length ? [] : prev));
     setQuery(newQuery);

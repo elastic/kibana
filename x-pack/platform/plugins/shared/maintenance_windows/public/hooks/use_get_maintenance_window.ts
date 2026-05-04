@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from '../utils/kibana_react';
-import { getMaintenanceWindow } from '../services/get';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
+import { getMaintenanceWindow } from '../services/get';
+import { useKibana } from '../utils/kibana_react';
 
 export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
   const {

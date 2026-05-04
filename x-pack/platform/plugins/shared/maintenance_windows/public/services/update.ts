@@ -6,8 +6,8 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import type {
-  MaintenanceWindowUI,
   MaintenanceWindowResponse,
+  MaintenanceWindowUI,
   UpdateMaintenanceWindowRequestBody,
 } from '../../common';
 
