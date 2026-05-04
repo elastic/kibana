@@ -47,7 +47,6 @@ if (!BUMP_TYPE) {
       pipeline.push('  - wait');
 
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
 
     if (BUMP_TYPE === 'minor') {
