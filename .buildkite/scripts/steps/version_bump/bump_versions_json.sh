@@ -8,6 +8,9 @@ source "$(dirname "$0")/wait_for_pr_merge.sh"
 git fetch origin main
 git checkout -B main origin/main
 
+# Re-source after the checkout so the Node version matches main's .node-version
+source .buildkite/scripts/common/setup_node.sh
+
 # --- Functions ---
 
 update_patch_versions_json() {
