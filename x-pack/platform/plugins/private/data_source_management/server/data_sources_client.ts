@@ -50,13 +50,15 @@ export class DataSourcesClient {
    * **Not implemented yet:** this route does not exist on Elasticsearch; the
    * request will fail until the API is added.
    */
-  public async put(id: string, body: Omit<DataSourceWithSecrets, 'id'>): Promise<unknown> {
+  public async put(id: string, body: Omit<DataSourceWithSecrets, 'name'>): Promise<unknown> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    const response = await this.esClient.transport.request({
       method: 'PUT',
       path: `/_query/data_source/${encoded}`,
       body,
     });
+    console.log('response', response);
+    return response;
   }
 
   /**

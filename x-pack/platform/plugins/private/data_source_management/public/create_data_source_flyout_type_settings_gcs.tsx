@@ -9,13 +9,16 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 
+import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { DataSourceWithSecrets } from '../common/datasource_types';
 
 export function CreateDataSourceFlyoutTypeSettingsGcs({
   control,
+  unregister,
 }: {
   control: Control<DataSourceWithSecrets, any>;
+  unregister: UseFormUnregister<DataSourceWithSecrets>;
 }) {
   const { field: projectIdField } = useController({
     defaultValue: '',
@@ -54,6 +57,16 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
       setCredentialsDraft(String(v));
     }
   }, [credentialsField.value]);
+
+  useEffect(() => {
+    return () => {
+      unregister('settings.project_id');
+      unregister('settings.endpoint');
+      unregister('settings.token_uri');
+      unregister('settings.auth');
+      unregister('settings.credentials');
+    };
+  }, [unregister]);
 
   const onCredentialsBlur = () => {
     const raw = credentialsDraft.trim();

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
+import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { DataSourceWithSecrets } from '../common/datasource_types';
 
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
+  unregister,
 }: {
   control: Control<DataSourceWithSecrets, any>;
+  unregister: UseFormUnregister<DataSourceWithSecrets>;
 }) {
   const { field: regionField } = useController({
     defaultValue: '',
@@ -42,6 +45,16 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
     name: 'settings.secret_key',
     control,
   });
+
+  useEffect(() => {
+    return () => {
+      unregister('settings.region');
+      unregister('settings.endpoint');
+      unregister('settings.auth');
+      unregister('settings.access_key');
+      unregister('settings.secret_key');
+    };
+  }, [unregister]);
 
   return (
     <>

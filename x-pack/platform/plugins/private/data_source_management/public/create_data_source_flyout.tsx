@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,15 +24,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useController, useForm } from 'react-hook-form';
-import { omit } from 'lodash';
 
 import type { DataSourceWithSecrets } from '../common';
 import { ALL_DATA_SOURCE_TYPES } from '../common';
 import type { DataSourceType } from '../common/datasource_types';
-import { buildOmitIdDataSource } from './build_create_data_source_payload';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
-import { emptyCreateDataSourceFormSettings } from './create_data_source_flyout_form_state';
-import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
@@ -52,14 +48,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     handleSubmit,
     control,
     // formState: { errors },
+    unregister,
   } = useForm<DataSourceWithSecrets>();
 
-  const [formSettings, setFormSettings] = useState<CreateDataSourceFlyoutFormSettings>(
-    emptyCreateDataSourceFormSettings
-  );
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [saveError, setSaveError] = useState<string | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
+  const nameError: string | undefined = undefined;
+  const saveError: string | undefined = undefined;
+  const isSaving = false;
 
   const { field: dataSourceTypeField } = useController({
     defaultValue: 's3' as DataSourceType,
@@ -125,10 +119,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   }, [dataSourceType, description, formSettings, name, onClose, onSave]);
   */
 
-  const handleSave = (data: DataSourceWithSecrets) => {
-    console.log('form data', data);
-    return onSave(data);
-  };
+  const handleSave = (data: DataSourceWithSecrets) => onSave(data);
 
   return (
     <EuiFlyout
@@ -197,8 +188,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <CreateDataSourceFlyoutTypeSettingsBlock
             control={control}
             dataSourceType={dataSourceTypeField.value as DataSourceType}
-            formSettings={formSettings}
-            onFormSettingsChange={setFormSettings}
+            unregister={unregister}
           />
         </EuiForm>
       </EuiFlyoutBody>
