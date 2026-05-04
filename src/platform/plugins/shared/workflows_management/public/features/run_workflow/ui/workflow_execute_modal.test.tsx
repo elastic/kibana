@@ -61,9 +61,9 @@ const baseWorkflowDefinition = {
 } as WorkflowYaml;
 
 // Mock the form components
-const mockWorkflowExecuteEventForm = jest.fn(() => null);
-jest.mock('./workflow_execute_event_form', () => ({
-  WorkflowExecuteEventForm: () => mockWorkflowExecuteEventForm(),
+const mockWorkflowExecuteAlertForm = jest.fn(() => null);
+jest.mock('./workflow_execute_alert_form', () => ({
+  WorkflowExecuteAlertForm: () => mockWorkflowExecuteAlertForm(),
 }));
 const mockWorkflowExecuteIndexForm = jest.fn(() => null);
 jest.mock('./workflow_execute_index_form', () => ({
@@ -121,7 +121,7 @@ describe('WorkflowExecuteModal', () => {
     });
     mockOnClose = jest.fn();
     mockOnSubmit = jest.fn();
-    mockWorkflowExecuteEventForm.mockClear();
+    mockWorkflowExecuteAlertForm.mockClear();
     mockWorkflowExecuteIndexForm.mockClear();
     mockWorkflowExecuteManualForm.mockClear();
     mockWorkflowExecuteHistoricalForm.mockClear();
@@ -391,7 +391,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       // Alert trigger is selected by default, so event form should be called
-      expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
       expect(mockWorkflowExecuteIndexForm).not.toHaveBeenCalled();
       expect(mockWorkflowExecuteManualForm).not.toHaveBeenCalled();
     });
@@ -407,7 +407,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       // Initially, event form should be called (alert is default)
-      expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
 
       // Click manual trigger
       const manualButton = getByText('Manual').closest('button');
@@ -416,7 +416,7 @@ describe('WorkflowExecuteModal', () => {
       await waitFor(() => {
         // Now manual form should be called
         expect(mockWorkflowExecuteManualForm).toHaveBeenCalledTimes(1);
-        expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1); // Still called once from initial render
+        expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1); // Still called once from initial render
         expect(mockWorkflowExecuteIndexForm).not.toHaveBeenCalled();
       });
     });
@@ -432,7 +432,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       // Initially, event form should be called (alert is default)
-      expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
 
       // Click index (Document) trigger
       const indexButton = getByText('Document').closest('button');
@@ -441,7 +441,7 @@ describe('WorkflowExecuteModal', () => {
       await waitFor(() => {
         // Now index form should be called
         expect(mockWorkflowExecuteIndexForm).toHaveBeenCalledTimes(1);
-        expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1); // Still called once from initial render
+        expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1); // Still called once from initial render
         expect(mockWorkflowExecuteManualForm).not.toHaveBeenCalled();
       });
     });

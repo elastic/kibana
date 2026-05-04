@@ -42,7 +42,7 @@ interface Alert {
   };
 }
 
-interface WorkflowExecuteEventFormProps {
+export interface WorkflowExecuteAlertFormProps {
   value: string;
   setValue: (data: string) => void;
   errors: string | null;
@@ -53,13 +53,13 @@ interface WorkflowExecuteEventFormProps {
   racQueriesEnabled?: boolean;
 }
 
-export const WorkflowExecuteEventForm = ({
-  value,
+export const WorkflowExecuteAlertForm = ({
+  value: _value,
   setValue,
   errors,
   setErrors,
   racQueriesEnabled = true,
-}: WorkflowExecuteEventFormProps): React.JSX.Element => {
+}: WorkflowExecuteAlertFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { http, notifications, data: dataService, unifiedSearch } = services;
@@ -387,3 +387,4 @@ export const WorkflowExecuteEventForm = ({
     </EuiFlexGroup>
   );
 };
+WorkflowExecuteAlertForm.displayName = 'WorkflowExecuteAlertForm';

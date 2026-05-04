@@ -19,7 +19,7 @@ import {
   createEventFormKibanaMocks,
   MockSearchBar,
 } from './test_utils/workflow_form_test_setup';
-import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
+import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const mockFetchAlertsIndexNames = fetchAlertsIndexNames as jest.MockedFunction<
@@ -65,7 +65,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   </QueryClientProvider>
 );
 
-describe('WorkflowExecuteEventForm', () => {
+describe('WorkflowExecuteAlertForm', () => {
   const mockSetValue = jest.fn();
   const mockSetErrors = jest.fn();
   const { mockSearchSource, mockData } = createEventFormKibanaMocks();
@@ -94,7 +94,7 @@ describe('WorkflowExecuteEventForm', () => {
   it('renders the form with search bar', async () => {
     const { getByTestId } = render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -113,7 +113,7 @@ describe('WorkflowExecuteEventForm', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -129,7 +129,7 @@ describe('WorkflowExecuteEventForm', () => {
   it('does not call RAC index API when racQueriesEnabled is false', async () => {
     render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -151,7 +151,7 @@ describe('WorkflowExecuteEventForm', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -171,7 +171,7 @@ describe('WorkflowExecuteEventForm', () => {
   it('fetches and displays alerts in table', async () => {
     const { getByText } = render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -192,7 +192,7 @@ describe('WorkflowExecuteEventForm', () => {
   it('displays message column in table', async () => {
     const { getByRole } = render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -209,7 +209,7 @@ describe('WorkflowExecuteEventForm', () => {
   it('handles query change without triggering fetch', async () => {
     const { getByTestId } = render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}
@@ -248,7 +248,7 @@ describe('WorkflowExecuteEventForm', () => {
   it('calls setValue when alerts are selected', async () => {
     const { getByRole, getByTestId } = render(
       <TestWrapper>
-        <WorkflowExecuteEventForm
+        <WorkflowExecuteAlertForm
           value=""
           setValue={mockSetValue}
           errors={null}

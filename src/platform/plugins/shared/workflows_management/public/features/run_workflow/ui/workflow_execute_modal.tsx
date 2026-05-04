@@ -32,7 +32,7 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
-import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
+import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
@@ -367,7 +367,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 `}
               >
                 {selectedTrigger === 'alert' && (
-                  <WorkflowExecuteEventForm
+                  <WorkflowExecuteAlertForm
                     value={executionInput}
                     setValue={handleInputChange}
                     errors={executionInputErrors}
