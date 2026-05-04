@@ -635,7 +635,7 @@ describe('RenderingService', () => {
   describe('preboot()', () => {
     it('calls `registerBootstrapRoute` with the correct parameters', async () => {
       const routerMock = mockRouter.create();
-      mockRenderingPrebootDeps.http.registerRoutes.mockImplementation((path, callback) =>
+      mockRenderingPrebootDeps.http.registerRoutes.mockImplementation((_path, callback) =>
         callback(routerMock)
       );
 
@@ -681,7 +681,7 @@ describe('RenderingService', () => {
       const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
       const getStringValue$ = jest
         .fn()
-        .mockImplementation((_, fallback) => themeName$.asObservable());
+        .mockImplementation((_, _fallback) => themeName$.asObservable());
       service.start({
         ...mockRenderingStartDeps,
         featureFlags: {
@@ -714,7 +714,7 @@ describe('RenderingService', () => {
       const themeName$ = new BehaviorSubject<ThemeName>('unknown' as any);
       const getStringValue$ = jest
         .fn()
-        .mockImplementation((_, fallback) => themeName$.asObservable());
+        .mockImplementation((_, _fallback) => themeName$.asObservable());
       service.start({
         ...mockRenderingStartDeps,
         featureFlags: {
@@ -758,7 +758,7 @@ describe('RenderingService', () => {
       };
       uiSettings.client.getRegistered.mockReturnValue({});
 
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       const preloadLinks = dom('link[rel="preload"][as="font"]');
@@ -784,7 +784,7 @@ describe('RenderingService', () => {
       };
       uiSettings.client.getRegistered.mockReturnValue({});
 
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       const preloadLinks = dom('link[rel="preload"][as="font"]');
