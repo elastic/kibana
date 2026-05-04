@@ -31,10 +31,10 @@ if (!BUMP_TYPE) {
       }
 
       // Step 2: Wait for ES build to complete, then bump package.json and other files on the release branch
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
-      );
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
+      // );
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
 
       // Step 3: Wait, then trigger DRA builds for both snapshot and staging (async).
       // If branch is main, we only run DRA snapshot, otherwise we run them both.
