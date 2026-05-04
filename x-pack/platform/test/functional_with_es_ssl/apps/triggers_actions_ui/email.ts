@@ -133,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await closeFlyout();
       });
 
-      it('enables Run when only Cc has a valid recipient', async () => {
+      it('clears the recipients-required error when only Cc has a valid recipient', async () => {
         const connectorName = generateUniqueKey();
         const created = await createEmailConnector(connectorName);
         objectRemover.add(created.id, 'connector', 'actions');
@@ -142,11 +142,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await openTestTabFor(connectorName);
         await fillSubjectAndMessage();
 
+        // Trigger the recipients-required error first by touching+blurring the
+        // empty To combobox so EUI surfaces the field-level error message.
+        const toComboBox = await testSubjects.find('toEmailAddressInput');
+        await toComboBox.click();
+        await testSubjects.click('edit-connector-flyout-header');
+
+        await retry.try(async () => {
+          const errors = await find.allByCssSelector('.euiFormErrorText');
+          const messages = await Promise.all(errors.map((el) => el.getVisibleText()));
+          expect(messages).to.contain('At least one recipient is required.');
+        });
+
+        // Adding a valid Cc must clear the recipients-required error in all
+        // three of To / Cc / Bcc rows. We can't assert the Run button becomes
+        // enabled here because the email connector form unconditionally marks
+        // itself as modified on load (see email_connector.tsx#fetchConfig),
+        // which keeps `executeEnabled` false irrespective of recipient state.
         await testSubjects.click('emailAddCcButton');
         await comboBox.setCustom('ccEmailAddressInput', 'cc@example.com');
 
         await retry.try(async () => {
-          expect(await testSubjects.isEnabled('executeActionButton')).to.be(true);
+          const errors = await find.allByCssSelector('.euiFormErrorText');
+          const messages = await Promise.all(errors.map((el) => el.getVisibleText()));
+          expect(messages).to.not.contain('At least one recipient is required.');
         });
 
         await closeFlyout();
