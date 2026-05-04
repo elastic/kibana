@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+.buildkite/scripts/bootstrap.sh
+
 source "$(dirname "$0")/wait_for_pr_merge.sh"
 
 branch_to_merge_into="${OVERRIDE_BRANCH:-$BRANCH}"
