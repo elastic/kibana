@@ -70,7 +70,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
-export interface RulesClientParams {
+interface RulesClientParams {
   services: {
     request: KibanaRequest;
     rulesSavedObjectService: RulesSavedObjectServiceContract;
