@@ -14,6 +14,7 @@ import { RiskScoreFields } from '../../../../common/search_strategy';
 describe('getUserRiskScoreColumns', () => {
   const defaultProps = {
     dispatchSeverityUpdate: jest.fn(),
+    openUserFlyout: jest.fn(),
   };
 
   test('should have expected fields', () => {
