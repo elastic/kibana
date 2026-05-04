@@ -140,7 +140,7 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
         },
         actions: [],
         schedule: {
-          interval: '1m',
+          interval: '10s',
         },
       },
       alertsIndex: '.alerts-observability.apm.alerts-default',

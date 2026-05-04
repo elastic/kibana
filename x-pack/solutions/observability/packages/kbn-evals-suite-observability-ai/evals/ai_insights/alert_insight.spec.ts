@@ -24,6 +24,8 @@ for (const scenario of scenarios) {
   createScenarioTest(scenario);
 }
 
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 function createScenarioTest(scenario: AlertScenario) {
   const scenarioLabel = `Alert AI Insights - ${scenario.id} (${scenario.snapshotName})`;
   const isTransactionDurationRule =
@@ -65,6 +67,12 @@ function createScenarioTest(scenario: AlertScenario) {
         method: 'POST',
         path: `/internal/alerting/rule/${ruleId}/_run_soon`,
       });
+
+      const prePollDelayMs = isTransactionDurationRule ? 8000 : 3000;
+      log.debug(
+        `Waiting ${prePollDelayMs}ms before polling for alert (task run + alert index write)`
+      );
+      await delay(prePollDelayMs);
 
       log.info('Polling for alert to be created');
 
