@@ -9,6 +9,7 @@
 
 import { parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { isTriggerType } from '@kbn/workflows';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowTriggerTab } from './types';
 
@@ -70,6 +71,27 @@ export function normalizeInputsFromDefinitionOrYaml(
   return undefined;
 }
 
+/**
+ * True when the workflow declares at least one event-driven (registered) trigger whose `type`
+ * is not a built-in trigger (`alert`, `scheduled`, `manual`).
+ */
+export function hasCustomEventTrigger(definition: WorkflowYaml | null): boolean {
+  if (!definition?.triggers?.length) {
+    return false;
+  }
+
+  for (const trigger of definition.triggers) {
+    if (trigger && typeof trigger === 'object' && 'type' in trigger) {
+      const type = (trigger as { type: unknown }).type;
+      if (typeof type === 'string' && !isTriggerType(type)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';
@@ -85,9 +107,17 @@ export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTrig
 }
 
 export function getFallbackTriggerTab(
-  normalizedInputs: NormalizedWorkflowInputs | undefined
+  normalizedInputs: NormalizedWorkflowInputs | undefined,
+  definition: WorkflowYaml | null = null,
+  canReadWorkflowExecution = false
 ): WorkflowTriggerTab {
-  return hasWorkflowInputFields(normalizedInputs) ? 'manual' : 'index';
+  if (hasWorkflowInputFields(normalizedInputs)) {
+    return 'manual';
+  }
+  if (definition && canReadWorkflowExecution && hasCustomEventTrigger(definition)) {
+    return 'event';
+  }
+  return 'index';
 }
 
 export function resolveInitialSelectedTrigger(
@@ -98,22 +128,35 @@ export function resolveInitialSelectedTrigger(
   normalizedInputs: NormalizedWorkflowInputs | undefined
 ): WorkflowTriggerTab {
   if (initialExecutionId) {
-    return canReadWorkflowExecution ? 'historical' : getFallbackTriggerTab(normalizedInputs);
+    return canReadWorkflowExecution
+      ? 'historical'
+      : getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
   }
 
   const hasAlertTrigger = Boolean(definition?.triggers?.some((t) => t.type === 'alert'));
+  const hasEventTrigger = hasCustomEventTrigger(definition);
 
   if (hasAlertTrigger) {
-    return hasAlertRacAccess ? 'alert' : getFallbackTriggerTab(normalizedInputs);
+    return hasAlertRacAccess
+      ? 'alert'
+      : getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
+  }
+
+  if (hasEventTrigger && canReadWorkflowExecution) {
+    return 'event';
+  }
+
+  if (hasEventTrigger && !canReadWorkflowExecution) {
+    return getFallbackTriggerTab(normalizedInputs, definition, false);
   }
 
   if (hasWorkflowInputFields(normalizedInputs)) {
-    return getFallbackTriggerTab(normalizedInputs);
+    return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
   }
 
   const preferred = getDefaultTrigger(definition);
   if (preferred === 'alert' && !hasAlertRacAccess) {
-    return getFallbackTriggerTab(normalizedInputs);
+    return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
   }
   return preferred;
 }

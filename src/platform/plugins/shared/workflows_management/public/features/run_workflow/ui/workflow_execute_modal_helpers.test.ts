@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { WorkflowYaml } from '@kbn/workflows';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import type { NormalizedWorkflowInputs } from './workflow_execute_modal_helpers';
+import {
+  getFallbackTriggerTab,
+  hasCustomEventTrigger,
+  resolveInitialSelectedTrigger,
+} from './workflow_execute_modal_helpers';
+
+const baseDefinition = {
+  version: '1',
+  name: 'wf',
+  enabled: true,
+  triggers: [],
+  steps: [],
+} as WorkflowYaml;
+
+/**
+ * Extension trigger IDs (e.g. `cases.created`) are valid at runtime but omitted from the strict
+ * `WorkflowYaml` trigger union used for authoring defaults.
+ */
+function workflowWithExtensionTriggers(
+  triggers: ReadonlyArray<{ type: string } & Record<string, unknown>>
+): WorkflowYaml {
+  return {
+    ...baseDefinition,
+    triggers: triggers as WorkflowYaml['triggers'],
+  };
+}
+
+describe('hasCustomEventTrigger', () => {
+  it('returns false when definition is null', () => {
+    expect(hasCustomEventTrigger(null)).toBe(false);
+  });
+
+  it('returns false when triggers are empty', () => {
+    expect(hasCustomEventTrigger({ ...baseDefinition, triggers: [] })).toBe(false);
+  });
+
+  it('returns false when only built-in triggers are present', () => {
+    expect(
+      hasCustomEventTrigger({
+        ...baseDefinition,
+        triggers: [
+          { type: 'alert' },
+          { type: 'manual' },
+          { type: 'scheduled', with: { every: '1h' } },
+        ],
+      })
+    ).toBe(false);
+  });
+
+  it('returns true when a registered custom trigger id is present', () => {
+    expect(hasCustomEventTrigger(workflowWithExtensionTriggers([{ type: 'cases.created' }]))).toBe(
+      true
+    );
+  });
+});
+
+describe('getFallbackTriggerTab', () => {
+  const normalizedWithOneField: NormalizedWorkflowInputs = normalizeFieldsToJsonSchema([
+    { name: 'x', type: 'string', required: true },
+  ]);
+
+  it('returns manual when workflow inputs define fields', () => {
+    expect(getFallbackTriggerTab(normalizedWithOneField, null, true)).toBe('manual');
+  });
+
+  it('returns event when no manual inputs, readExecution allowed, and custom trigger exists', () => {
+    const def = workflowWithExtensionTriggers([{ type: 'cases.created' }]);
+    expect(getFallbackTriggerTab(undefined, def, true)).toBe('event');
+  });
+
+  it('returns index when readExecution is denied even with custom trigger', () => {
+    const def = workflowWithExtensionTriggers([{ type: 'cases.created' }]);
+    expect(getFallbackTriggerTab(undefined, def, false)).toBe('index');
+  });
+
+  it('returns index when no custom trigger and no manual inputs', () => {
+    expect(
+      getFallbackTriggerTab(undefined, { ...baseDefinition, triggers: [{ type: 'alert' }] }, true)
+    ).toBe('index');
+  });
+});
+
+describe('resolveInitialSelectedTrigger', () => {
+  const customOnly = workflowWithExtensionTriggers([{ type: 'example.custom_trigger' }]);
+
+  it('selects event when workflow has only custom triggers and execution read is allowed', () => {
+    expect(resolveInitialSelectedTrigger(customOnly, undefined, true, true, undefined)).toBe(
+      'event'
+    );
+  });
+
+  it('falls back when custom triggers exist but execution read is denied', () => {
+    expect(resolveInitialSelectedTrigger(customOnly, undefined, true, false, undefined)).toBe(
+      'index'
+    );
+  });
+
+  it('prefers alert when an alert trigger exists alongside custom triggers', () => {
+    const def = workflowWithExtensionTriggers([{ type: 'alert' }, { type: 'cases.created' }]);
+    expect(resolveInitialSelectedTrigger(def, undefined, true, true, undefined)).toBe('alert');
+  });
+
+  it('selects historical when initialExecutionId is set and read is allowed', () => {
+    expect(resolveInitialSelectedTrigger(customOnly, 'exec-1', true, true, undefined)).toBe(
+      'historical'
+    );
+  });
+});

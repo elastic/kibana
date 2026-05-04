@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ENABLED_TRIGGER_TABS = ['alert', 'index', 'manual', 'historical'] as const;
+export const ENABLED_TRIGGER_TABS = ['alert', 'index', 'event', 'manual', 'historical'] as const;
 export const ENABLED_STEP_TRIGGER_TABS = ['manual', 'historical'] as const;

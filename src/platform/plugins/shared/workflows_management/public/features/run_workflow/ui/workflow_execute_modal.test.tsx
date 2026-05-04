@@ -153,6 +153,7 @@ describe('WorkflowExecuteModal', () => {
 
       expect(getByText('Alert')).toBeInTheDocument();
       expect(getByText('Document')).toBeInTheDocument();
+      expect(getByText('Event')).toBeInTheDocument();
       expect(getByText('Manual')).toBeInTheDocument();
       expect(getByText('Historical')).toBeInTheDocument();
     });
@@ -288,6 +289,24 @@ describe('WorkflowExecuteModal', () => {
       expect(getByTestId('workflowExecuteModalTrigger-historical')).toBeDisabled();
     });
 
+    it('disables the event trigger when the user lacks Read Workflow Execution', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canReadWorkflowExecution: false,
+      });
+
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByTestId('workflowExecuteModalTrigger-event')).toBeDisabled();
+    });
+
     it('renders trigger descriptions', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
@@ -300,6 +319,11 @@ describe('WorkflowExecuteModal', () => {
 
       expect(getByText('Provide custom JSON data manually')).toBeInTheDocument();
       expect(getByText('Choose a document from Elasticsearch')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Browse historical events for your trigger type, select one, and run with that payload'
+        )
+      ).toBeInTheDocument();
       expect(getByText('Choose an existing alert directly')).toBeInTheDocument();
       expect(getByText('Reuse input data from previous executions')).toBeInTheDocument();
     });
