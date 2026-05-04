@@ -38,7 +38,7 @@ type Props<P> = P &
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
 export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
-  const WithSolutionNav=(props: Props<P>) => {
+  const WithSolutionNav = (props: Props<P>) => {
     const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
