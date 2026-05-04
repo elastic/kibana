@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
-  describe.only('Console App CCS', function describeIndexTests() {
+  describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
