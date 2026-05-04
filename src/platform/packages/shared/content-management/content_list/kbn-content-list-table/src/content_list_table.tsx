@@ -135,6 +135,55 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
 `;
 
 /**
+ * Render a trailing spacer column purely in CSS, via a `::after`
+ * pseudo-cell on every `<tr>`.
+ *
+ * Browsers ignore `max-width` on table cells (per the
+ * [CSS Tables spec](https://drafts.csswg.org/css-tables/#computing-the-table-width)),
+ * so the only way to keep populated columns at their preferred widths on a
+ * wide page is to give the slack to a column that wants it. Without a
+ * trailing absorber, that role falls to whichever column has no explicit
+ * `width` (typically `Column.Name`), which then stretches to fill the table.
+ *
+ * Setting `display: table-cell` on a `tr::after` is the spec-defined way to
+ * inject an anonymous, unsized table cell into the layout algorithm without
+ * adding any markup. Because every preset ships with an explicit `width`,
+ * the pseudo-cell is the only column without one, so the browser hands it
+ * all the leftover horizontal space — populated columns sit left-aligned at
+ * their preferred widths and the trailing whitespace lives after the last
+ * populated column. On viewports too narrow to fit all preferred widths,
+ * the pseudo-cell collapses to `0` and the browser shrinks the populated
+ * columns proportionally (with `Column.Name` shrinking first because it
+ * has the most range between its `width` and `minWidth`).
+ *
+ * Why a pseudo-cell rather than a real `<td>` column:
+ * - **No DOM impact** — the rendered table has exactly the columns the
+ *   consumer declared.
+ * - **No accessibility impact** — pseudo-elements aren't in the
+ *   accessibility tree, so screen readers report the correct column count
+ *   and don't announce a phantom "blank cell" at the end of every row.
+ * - **No clipboard impact** — `content: ''` isn't selectable, so copying
+ *   rows into a spreadsheet doesn't add a trailing tab.
+ *
+ * `border-block` mirrors the `border-vertical: euiTheme.border.thin`
+ * declaration that EUI applies to every real `<th>` / `<td>` (see
+ * `table_row_cell.styles.js` and `table_cells_shared.styles.js` in
+ * `@elastic/eui`). Without it, the row separator would stop at the last
+ * populated cell and leave the trailing whitespace visually un-ruled.
+ *
+ * @see {@link DEFAULT_NAME_WIDTH} in `name_builder.tsx` for why
+ * `Column.Name` ships with an explicit `width`.
+ */
+const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
+  thead tr::after,
+  tbody tr::after {
+    content: '';
+    display: table-cell;
+    border-block: ${euiTheme.border.thin};
+  }
+`;
+
+/**
  * ContentListTable - Table renderer for content listings.
  *
  * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
@@ -157,7 +206,7 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
  * const { Column, Action } = ContentListTable;
  *
  * <ContentListTable title="My Dashboards">
- *   <Column.Name width="40%" />
+ *   <Column.Name />
  *   <Column.Actions>
  *     <Action.Edit />
  *     <Action.Delete />
@@ -200,6 +249,9 @@ const ContentListTableComponent = ({
   const tableCss = useMemo(
     () => [
       cssStickyCellRowStateSync(euiTheme),
+      // Excess horizontal space is absorbed by `cssTrailingSpacer` so it lands
+      // after the last populated column rather than stretching `Column.Name`.
+      cssTrailingSpacer(euiTheme),
       ...(supports.starred ? [cssFavoriteHoverWithinEuiTableRow(euiTheme)] : []),
     ],
     [euiTheme, supports.starred]
