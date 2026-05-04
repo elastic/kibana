@@ -238,6 +238,6 @@ export const useAppRoutes = () => {
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
 
   return {
-    ...(isCompleteOverviewEnabled ? { ...sigeventsAwareCompleteRoutes, ...routes } : { ...routes }),
+    ...(isCompleteOverviewEnabled ? { ...routes, ...sigeventsAwareCompleteRoutes } : { ...routes }),
   };
 };

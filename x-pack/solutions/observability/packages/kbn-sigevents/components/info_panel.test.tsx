@@ -104,5 +104,53 @@ describe('InfoPanel', () => {
       fireEvent.click(toggle);
       expect(screen.queryByText('togglable content')).not.toBeInTheDocument();
     });
+
+    it('toggles the children on Enter key press', () => {
+      renderWithIntl(
+        <InfoPanel title="Details" collapsible initialCollapsed>
+          <p>keyboard content</p>
+        </InfoPanel>
+      );
+
+      const toggle = screen.getByTestId('sigeventsOverviewInfoPanelToggle');
+      fireEvent.keyDown(toggle, { key: 'Enter' });
+      expect(screen.getByText('keyboard content')).toBeInTheDocument();
+
+      fireEvent.keyDown(toggle, { key: 'Enter' });
+      expect(screen.queryByText('keyboard content')).not.toBeInTheDocument();
+    });
+
+    it('toggles the children on Space key press', () => {
+      renderWithIntl(
+        <InfoPanel title="Details" collapsible initialCollapsed>
+          <p>space content</p>
+        </InfoPanel>
+      );
+
+      const toggle = screen.getByTestId('sigeventsOverviewInfoPanelToggle');
+      fireEvent.keyDown(toggle, { key: ' ' });
+      expect(screen.getByText('space content')).toBeInTheDocument();
+    });
+  });
+
+  it('renders title with icon when titleIcon is provided', () => {
+    render(
+      <InfoPanel title="With Icon" titleIcon={<span data-test-subj="testIcon">icon</span>}>
+        <p>Content</p>
+      </InfoPanel>
+    );
+    expect(screen.getByTestId('testIcon')).toBeInTheDocument();
+    expect(screen.getByText('With Icon')).toBeInTheDocument();
+  });
+
+  it('applies primary color palette', () => {
+    const { container } = render(
+      <InfoPanel title="Primary" color="primary">
+        <p>Content</p>
+      </InfoPanel>
+    );
+    expect(
+      container.querySelector('[data-test-subj="sigeventsOverviewInfoPanel"]')
+    ).toBeInTheDocument();
   });
 });

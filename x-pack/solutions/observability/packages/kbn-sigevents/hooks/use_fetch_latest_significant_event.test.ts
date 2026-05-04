@@ -141,7 +141,7 @@ describe('useFetchLatestSignificantEvent', () => {
     (console.error as jest.Mock).mockRestore();
   });
 
-  it('maps blast_radius to impactedServices', async () => {
+  it('maps blast_radius to impactedServices when present', async () => {
     const docWithBlastRadius = {
       ...promotedDocs[0],
       blast_radius: [
@@ -168,5 +168,156 @@ describe('useFetchLatestSignificantEvent', () => {
     expect(result.current.data!.impactedServices).toHaveLength(2);
     expect(result.current.data!.impactedServices[0].label).toBe('checkout');
     expect(result.current.data!.impactedServices[1].label).toBe('payment');
+  });
+
+  it('derives impactedServices from dependency_edges when blast_radius is absent', async () => {
+    const docWithEdges = {
+      ...promotedDocs[0],
+      dependency_edges: [
+        { source: 'checkout', target: 'payment', protocol: 'internal', exposure: 'exposed' },
+      ],
+      cause_kis: [{ name: 'payment-service', stream_name: 'logs.otel' }],
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: docWithEdges }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Services derived from edges
+    expect(result.current.data!.impactedServices).toHaveLength(2);
+    expect(result.current.data!.impactedServices[0].label).toBe('checkout');
+    expect(result.current.data!.impactedServices[1].label).toBe('payment');
+
+    // Cards: cause_kis mapped without requiring confirmed, plus exposed edge source
+    expect(result.current.data!.impactedCards).toHaveLength(2);
+    expect(result.current.data!.impactedCards[0]).toMatchObject({
+      label: 'Root Cause',
+      value: 'payment-service',
+    });
+    expect(result.current.data!.impactedCards[1]).toMatchObject({
+      label: 'Impacted',
+      value: 'checkout',
+    });
+  });
+
+  it('maps low impact to healthy state', async () => {
+    const lowDoc = {
+      ...promotedDocs[0],
+      impact: 'low',
+      criticality: 10,
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: lowDoc }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.state).toBe('healthy');
+    expect(result.current.data!.severityLabel).toBe('Low');
+    expect(result.current.data!.severityColor).toBe('subdued');
+  });
+
+  it('maps unknown impact to healthy/unknown state', async () => {
+    const unknownDoc = {
+      ...promotedDocs[0],
+      impact: 'something_else',
+      criticality: 5,
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: unknownDoc }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.state).toBe('healthy');
+    expect(result.current.data!.severityLabel).toBe('Unknown');
+    expect(result.current.data!.severityColor).toBe('subdued');
+  });
+
+  it('uses summary as description, falling back to first recommendation', async () => {
+    const docNoSummary = {
+      ...promotedDocs[0],
+      summary: '',
+      recommendations: ['Use this recommendation'],
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: docNoSummary }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data!.description).toBe('Use this recommendation');
+  });
+
+  it('handles a minimal doc with missing optional fields', async () => {
+    const minimalDoc = {
+      '@timestamp': timestamp,
+      event_id: 'minimal-1',
+      discovery_id: 'd-1',
+      discovery_slug: 'slug-1',
+      verdict: 'promoted',
+      title: 'Minimal event',
+      impact: 'critical',
+      verdict_id: 'v-1',
+      last_reviewed_at: timestamp,
+    };
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { hits: [{ _source: minimalDoc }], total: { value: 1, relation: 'eq' } },
+        },
+      })
+    );
+
+    const { result } = renderHook(() => useFetchLatestSignificantEvent(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.data).not.toBeNull();
+    expect(result.current.data!.mainEventTitle).toBe('Minimal event');
+    expect(result.current.data!.impactedServices).toHaveLength(0);
+    expect(result.current.data!.impactedCards).toHaveLength(0);
+    expect(result.current.data!.detailFields.summary).toBe('');
+    expect(result.current.data!.detailFields.rootCause).toBe('');
+    expect(result.current.data!.detailFields.recommendations).toHaveLength(0);
+    expect(result.current.data!.detailFields.streamNames).toHaveLength(0);
+    expect(result.current.data!.detailFields.evidences).toHaveLength(0);
+    expect(result.current.data!.detailFields.dependencyEdges).toHaveLength(0);
+    expect(result.current.data!.detailFields.causeKis).toHaveLength(0);
   });
 });

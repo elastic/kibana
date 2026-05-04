@@ -23,22 +23,22 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiBadgeProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { InfoPanel } from './info_panel';
 import { MetadataIconCard } from './metadata_icon_card';
 import { SignificantEventDetailBody } from './significant_event_detail_body';
-import type { RecommendationStep } from '.';
+import type { SignificantEventDetailFields } from './significant_event_detail_body';
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
 
-export interface SignificantEvent {
+export interface SignificantEvent extends Partial<SignificantEventDetailFields> {
   id: string;
   label: string;
   subtitle: string;
   severityLabel: string;
-  severityColor: EuiBadgeProps['color'];
+  severityColor: string;
+  timestamp?: string;
 }
 
 export interface SignificantEventsFlyoutProps {
@@ -48,7 +48,6 @@ export interface SignificantEventsFlyoutProps {
   affectedSystems?: number;
   atRiskCount?: number;
   summaryDescription?: string;
-  recommendationSteps?: RecommendationStep[];
   onAttachEvent?: (event: SignificantEvent) => void;
   onRemediate?: () => void;
   onOpenDetails?: () => void;
@@ -61,7 +60,6 @@ export function SignificantEventsFlyout({
   affectedSystems,
   atRiskCount,
   summaryDescription,
-  recommendationSteps,
   onAttachEvent,
   onRemediate,
   onOpenDetails,
@@ -324,18 +322,25 @@ export function SignificantEventsFlyout({
               <h2 id={childFlyoutHeadingId}>{selectedEvent.label}</h2>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('xpack.observability.significantEventsFlyout.p.janLabel', {
-                  defaultMessage: 'Jan 18, 2025 @ 14:12:31',
-                })}
-              </p>
-            </EuiText>
+            {selectedEvent.timestamp && (
+              <EuiText size="s" color="subdued">
+                <p>
+                  {new Date(selectedEvent.timestamp).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                  })}
+                </p>
+              </EuiText>
+            )}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <SignificantEventDetailBody
-              event={selectedEvent}
-              recommendationSteps={recommendationSteps}
+              event={selectedEvent as SignificantEventDetailFields}
               onRemediate={onRemediate}
               onOpenDetails={onOpenDetails}
             />

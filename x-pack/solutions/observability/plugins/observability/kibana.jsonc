@@ -65,8 +65,6 @@
       "cases",
       "data",
       "discover",
-      "fleet",
-      "logsShared",
       "kibanaReact",
       "kibanaUtils",
       "stackAlerts",

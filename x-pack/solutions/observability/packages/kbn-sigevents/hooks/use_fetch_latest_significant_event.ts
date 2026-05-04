@@ -29,10 +29,28 @@ interface BlastRadiusItem {
 }
 
 interface CauseKiItem {
-  ki_id: string;
+  ki_id?: string;
   name: string;
   stream_name: string;
-  confirmed: boolean;
+  confirmed?: boolean;
+}
+
+interface DependencyEdge {
+  source: string;
+  target: string;
+  protocol: string;
+  exposure: 'exposed' | 'not_exposed';
+}
+
+interface EvidenceDocument {
+  description: string;
+  esql_query: string;
+  result: string;
+  row_count: number;
+  collected_at: string;
+  rule_name: string;
+  stream_name: string;
+  confirmed?: boolean;
 }
 
 interface SignificantEventDocument {
@@ -46,10 +64,12 @@ interface SignificantEventDocument {
   root_cause: string;
   rule_names: string[];
   stream_names: string[];
-  blast_radius: BlastRadiusItem[];
+  blast_radius?: BlastRadiusItem[];
   cause_kis: CauseKiItem[];
+  dependency_edges?: DependencyEdge[];
+  evidences?: EvidenceDocument[];
   criticality: number;
-  recommended_action: 'escalate' | 'monitor' | 'resolve';
+  recommended_action: 'escalate' | 'monitor' | 'resolve' | 'investigate';
   impact: 'critical' | 'high' | 'medium' | 'low';
   recommendations: string[];
   verdict_id: string;
@@ -92,30 +112,67 @@ function mapImpactToSeverity(impact: SignificantEventDocument['impact']): {
 function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEventData {
   const severity = mapImpactToSeverity(doc.impact);
 
-  const confirmedServices = (doc.blast_radius ?? [])
+  // Prefer blast_radius (confirmed items) when available; fall back to dependency_edges
+  const confirmedBlastRadius = (doc.blast_radius ?? [])
     .filter((item) => item.confirmed)
     .map((item) => ({
       id: item.ki_id,
       label: item.name,
-      iconType: 'package' as const,
+      iconType: 'layers' as const,
     }));
 
-  const impactedCards: ImpactedCardItem[] = [
-    ...(doc.cause_kis ?? [])
-      .filter((item) => item.confirmed)
-      .map((item) => ({
-        id: `cause-${item.ki_id}`,
-        label: 'Root Cause',
-        value: item.name,
-        iconType: 'warning' as const,
-      })),
-    ...confirmedServices.slice(0, 2).map((service) => ({
-      id: `service-${service.id}`,
-      label: 'Service',
-      value: service.label,
-      iconType: 'package' as const,
-    })),
-  ];
+  const edgeDerivedServices: ImpactedService[] = (doc.dependency_edges ?? []).reduce<
+    ImpactedService[]
+  >((acc, edge) => {
+    for (const name of [edge.source, edge.target]) {
+      if (name && !acc.some((s) => s.id === name)) {
+        acc.push({ id: name, label: name, iconType: 'layers' as const });
+      }
+    }
+    return acc;
+  }, []);
+
+  const impactedServices =
+    confirmedBlastRadius.length > 0 ? confirmedBlastRadius : edgeDerivedServices;
+
+  // Build impacted cards from cause_kis (root cause) + exposed dependency edges
+  const causeCards: ImpactedCardItem[] = (doc.cause_kis ?? [])
+    .filter((item) => item.name)
+    .map((item) => ({
+      id: `cause-${item.ki_id ?? item.name}`,
+      label: 'Root Cause',
+      value: item.name,
+      iconType: 'crosshairs' as const,
+    }));
+
+  const exposedEdgeCards: ImpactedCardItem[] = (doc.dependency_edges ?? [])
+    .filter((edge) => edge.exposure === 'exposed')
+    .reduce<Array<{ source: string }>>((acc, edge) => {
+      if (!acc.some((e) => e.source === edge.source)) {
+        acc.push(edge);
+      }
+      return acc;
+    }, [])
+    .map((edge) => ({
+      id: `exposed-${edge.source}`,
+      label: 'Impacted',
+      value: edge.source,
+      iconType: 'dot' as const,
+    }));
+
+  // If blast_radius was available, use the old card logic; otherwise use edges
+  const impactedCards: ImpactedCardItem[] =
+    confirmedBlastRadius.length > 0
+      ? [
+          ...causeCards,
+          ...confirmedBlastRadius.slice(0, 2).map((service) => ({
+            id: `service-${service.id}`,
+            label: 'Service',
+            value: service.label,
+            iconType: 'layers' as const,
+          })),
+        ]
+      : [...causeCards, ...exposedEdgeCards];
 
   const detailFields: SignificantEventDetailFields = {
     id: doc.event_id,
@@ -123,6 +180,35 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     subtitle: (doc.stream_names ?? []).join(' · '),
     severityLabel: severity.label,
     severityColor: severity.color,
+    summary: doc.summary ?? '',
+    rootCause: doc.root_cause ?? '',
+    recommendations: doc.recommendations ?? [],
+    recommendedAction: doc.recommended_action ?? 'monitor',
+    criticality: doc.criticality ?? 0,
+    impact: doc.impact ?? 'low',
+    ruleNames: doc.rule_names ?? [],
+    streamNames: doc.stream_names ?? [],
+    evidences: (doc.evidences ?? []).map((ev) => ({
+      description: ev.description,
+      esqlQuery: ev.esql_query,
+      result: ev.result,
+      rowCount: ev.row_count,
+      collectedAt: ev.collected_at,
+      ruleName: ev.rule_name,
+      streamName: ev.stream_name,
+      confirmed: ev.confirmed,
+    })),
+    dependencyEdges: (doc.dependency_edges ?? []).map((edge) => ({
+      source: edge.source,
+      target: edge.target,
+      protocol: edge.protocol,
+      exposure: edge.exposure,
+    })),
+    causeKis: (doc.cause_kis ?? []).map((ki) => ({
+      name: ki.name,
+      streamName: ki.stream_name,
+    })),
+    timestamp: doc['@timestamp'],
   };
 
   return {
@@ -131,7 +217,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     blastRadiusScore: doc.criticality ?? 0,
     mainEventTitle: doc.title ?? '',
     description: doc.summary || (doc.recommendations ?? [])[0] || '',
-    impactedServices: confirmedServices,
+    impactedServices,
     impactedCards,
     severityLabel: severity.label,
     severityColor: severity.color,
@@ -154,7 +240,7 @@ export function useFetchLatestSignificantEvent(): {
     (): estypes.SearchRequest => ({
       index: SIGEVENTS_INDEX,
       query: {
-        term: { 'verdict.keyword': 'promoted' },
+        term: { verdict: 'promoted' },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
       size: 100,

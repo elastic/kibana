@@ -37,10 +37,10 @@ export const createNavigationTree = ({
       {
         id: 'observability_project_nav',
         title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.observability', {
-          defaultMessage: 'Observability',
+          defaultMessage: 'Nightshift',
         }),
         renderAs: 'home',
-        icon: 'logoObservability',
+        icon: 'visGauge',
         link: overviewAvailable
           ? ('observability-overview' as const)
           : ('observabilityOnboarding' as const),

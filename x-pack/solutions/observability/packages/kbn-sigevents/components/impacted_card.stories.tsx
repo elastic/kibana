@@ -21,7 +21,7 @@ export const Default: Story = {
   args: {
     label: 'Service',
     value: 'payment',
-    iconType: 'package',
+    iconType: 'layers',
   },
 };
 
@@ -29,7 +29,7 @@ export const CheckoutService: Story = {
   args: {
     label: 'Service',
     value: 'checkout',
-    iconType: 'package',
+    iconType: 'layers',
   },
 };
 
@@ -45,7 +45,7 @@ export const Clickable: Story = {
   args: {
     label: 'Service',
     value: 'payment',
-    iconType: 'package',
+    iconType: 'layers',
     onClick: action('onClick'),
   },
 };

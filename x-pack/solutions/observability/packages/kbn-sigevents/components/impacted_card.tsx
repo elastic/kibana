@@ -20,7 +20,7 @@ export interface ImpactedCardProps {
 export const ImpactedCard = ({
   label,
   value,
-  iconType = 'package',
+  iconType = 'layers',
   onClick,
 }: ImpactedCardProps) => {
   const { euiTheme } = useEuiTheme();

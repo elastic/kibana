@@ -53,6 +53,13 @@ const embeddableConversationWrapperStyles = css`
   [data-test-subj='agentBuilderEmbeddableConversation'] {
     background: transparent;
   }
+
+  /* Hide the lazy-load spinner so it doesn't cause layout shift */
+  > .euiFlexGroup {
+    .euiLoadingSpinner {
+      display: none;
+    }
+  }
 `;
 
 export function SigeventsOverviewPage() {
@@ -89,6 +96,7 @@ export function SigeventsOverviewPage() {
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
+  const [conversationKey, setConversationKey] = useState(0);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
   const returnFocusRef = useRef<Element | null>(null);
 
@@ -142,6 +150,7 @@ export function SigeventsOverviewPage() {
         values: { eventTitle },
       })
     );
+    setConversationKey((prev) => prev + 1);
   }, [eventData?.mainEventTitle]);
 
   const handleFlyoutRemediate = useCallback(() => {
@@ -157,6 +166,7 @@ export function SigeventsOverviewPage() {
         values: { eventTitle },
       })
     );
+    setConversationKey((prev) => prev + 1);
   }, []);
 
   const EmbeddableConversation = useMemo(
@@ -203,22 +213,45 @@ export function SigeventsOverviewPage() {
       color: ${euiTheme.colors.textAccent};
     `;
 
-    const serviceCount = overviewData.services.length;
+    const dangerValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.severity.danger};
+    `;
 
-    const getRiskCardStyling = (count: number) => {
-      const hasValue = count > 0;
+    const getSigEventStyling = (
+      count: number,
+      priority: 'critical' | 'high' | 'medium' | 'low'
+    ) => {
+      if (count === 0) {
+        return {
+          valueCss: successValueCss,
+          iconType: 'checkInCircleFilled' as const,
+          iconBackground: euiTheme.colors.backgroundLightSuccess,
+          iconColor: euiTheme.colors.severity.success,
+        };
+      }
+      if (priority === 'critical') {
+        return {
+          valueCss: dangerValueCss,
+          iconType: 'warning' as const,
+          iconBackground: euiTheme.colors.backgroundLightDanger,
+          iconColor: euiTheme.colors.severity.danger,
+        };
+      }
       return {
-        valueCss: hasValue ? accentValueCss : successValueCss,
-        iconBackground: hasValue
-          ? euiTheme.colors.backgroundLightAccent
-          : euiTheme.colors.backgroundLightSuccess,
-        iconColor: hasValue ? euiTheme.colors.textAccent : euiTheme.colors.severity.success,
+        valueCss: accentValueCss,
+        iconType: priority === 'low' ? 'eye' : 'warning',
+        iconBackground: euiTheme.colors.backgroundLightAccent,
+        iconColor: euiTheme.colors.textAccent,
       };
     };
 
-    const highStyling = getRiskCardStyling(overviewData.highCount);
-    const mediumStyling = getRiskCardStyling(overviewData.mediumCount);
-    const lowStyling = getRiskCardStyling(overviewData.lowCount);
+    const { sigEventsByPriority } = overviewData;
+    const criticalStyling = getSigEventStyling(sigEventsByPriority.critical.open, 'critical');
+    const highStyling = getSigEventStyling(sigEventsByPriority.high.open, 'high');
+    const mediumStyling = getSigEventStyling(sigEventsByPriority.medium.open, 'medium');
+    const lowStyling = getSigEventStyling(sigEventsByPriority.low.open, 'low');
 
     return [
       {
@@ -226,48 +259,68 @@ export function SigeventsOverviewPage() {
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.services', {
           defaultMessage: 'Services',
         }),
-        value: <span css={bigValueCss}>{serviceCount}</span>,
-        iconType: 'package',
+        value: <span css={bigValueCss}>{overviewData.serviceCount}</span>,
+        iconType: 'layers',
         iconBackground: euiTheme.colors.backgroundBaseSubdued,
         iconColor: euiTheme.colors.textParagraph,
       },
       {
-        id: 'detections',
-        label: i18n.translate('xpack.observability.sigeventsOverviewPage.detections', {
-          defaultMessage: 'Detections',
+        id: 'entities',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.entities', {
+          defaultMessage: 'Entities',
         }),
-        value: <span css={bigValueCss}>{overviewData.detectionCount}</span>,
-        iconType: 'eye',
+        value: <span css={bigValueCss}>{overviewData.entityCount}</span>,
+        iconType: 'submodule',
         iconBackground: euiTheme.colors.backgroundBaseSubdued,
         iconColor: euiTheme.colors.textParagraph,
       },
       {
-        id: 'highRisk',
+        id: 'technologies',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.technologies', {
+          defaultMessage: 'Technologies',
+        }),
+        value: <span css={bigValueCss}>{overviewData.technologyCount}</span>,
+        iconType: 'desktop',
+        iconBackground: euiTheme.colors.backgroundBaseSubdued,
+        iconColor: euiTheme.colors.textParagraph,
+      },
+      {
+        id: 'criticalSigEvents',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.critical', {
+          defaultMessage: 'Critical',
+        }),
+        value: <span css={criticalStyling.valueCss}>{sigEventsByPriority.critical.open}</span>,
+        iconType: criticalStyling.iconType,
+        iconBackground: criticalStyling.iconBackground,
+        iconColor: criticalStyling.iconColor,
+      },
+      {
+        id: 'highSigEvents',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.high', {
           defaultMessage: 'High',
         }),
-        value: <span css={highStyling.valueCss}>{overviewData.highCount}</span>,
-        iconType: 'warning',
+        value: <span css={highStyling.valueCss}>{sigEventsByPriority.high.open}</span>,
+        iconType: highStyling.iconType,
         iconBackground: highStyling.iconBackground,
         iconColor: highStyling.iconColor,
       },
       {
-        id: 'mediumRisk',
+        id: 'mediumSigEvents',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.medium', {
           defaultMessage: 'Medium',
         }),
-        value: <span css={mediumStyling.valueCss}>{overviewData.mediumCount}</span>,
-        iconType: 'warning',
+        value: <span css={mediumStyling.valueCss}>{sigEventsByPriority.medium.open}</span>,
+        iconType: mediumStyling.iconType,
         iconBackground: mediumStyling.iconBackground,
         iconColor: mediumStyling.iconColor,
       },
       {
-        id: 'lowRisk',
+        id: 'lowSigEvents',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.low', {
           defaultMessage: 'Low',
         }),
-        value: <span css={lowStyling.valueCss}>{overviewData.lowCount}</span>,
-        iconType: 'eye',
+        value: <span css={lowStyling.valueCss}>{sigEventsByPriority.low.open}</span>,
+        iconType: lowStyling.iconType,
         iconBackground: lowStyling.iconBackground,
         iconColor: lowStyling.iconColor,
       },
@@ -276,7 +329,7 @@ export function SigeventsOverviewPage() {
 
   return (
     <ObservabilityPageTemplate
-      isPageDataLoaded={!loading && !overviewLoading}
+      isPageDataLoaded={true}
       data-test-subj="obltSigeventsOverviewPageHeader"
       pageSectionProps={{
         grow: true,
@@ -299,16 +352,19 @@ export function SigeventsOverviewPage() {
           >
             <EuiFlexItem grow={false}>
               {loading || overviewLoading ? (
-                <EuiEmptyPrompt
-                  icon={<EuiLoadingSpinner size="xl" />}
-                  title={
-                    <h2>
-                      {i18n.translate('xpack.observability.sigeventsOverview.loadingTitle', {
-                        defaultMessage: 'Loading significant events...',
-                      })}
-                    </h2>
-                  }
-                />
+                <EuiFlexGroup
+                  direction="column"
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  css={css`
+                    padding: ${euiTheme.size.l};
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : error || overviewError ? (
                 <EuiEmptyPrompt
                   iconType="warning"
@@ -324,7 +380,7 @@ export function SigeventsOverviewPage() {
                 />
               ) : eventData ? (
                 <SigeventsOverview
-                  state="critical"
+                  state={eventData.state}
                   blastRadiusScore={eventData.blastRadiusScore}
                   mainEventTitle={eventData.mainEventTitle}
                   mainEventDescription={eventData.description}
@@ -358,6 +414,7 @@ export function SigeventsOverviewPage() {
                 style={{ minHeight: 0 }}
               >
                 <EmbeddableConversation
+                  key={conversationKey}
                   sessionTag="sigevents"
                   hideWelcomeTitle
                   hideCloseButton
@@ -365,6 +422,7 @@ export function SigeventsOverviewPage() {
                   initialMessage={remediationPrompt}
                   autoSendInitialMessage={!!remediationPrompt}
                   autoFocus={false}
+                  newConversation={conversationKey > 0}
                 />
               </EuiFlexItem>
             )}

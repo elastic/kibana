@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { OtherPromotedEvents } from './other_promoted_events';
+import type { LatestSignificantEventData } from '../hooks/use_fetch_latest_significant_event';
+
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(<IntlProvider locale="en">{ui}</IntlProvider>);
+
+const makeEvent = (
+  overrides: Partial<LatestSignificantEventData> = {}
+): LatestSignificantEventData => ({
+  raw: {
+    '@timestamp': '2026-04-30T19:30:00Z',
+    event_id: 'evt-1',
+    discovery_id: 'd-1',
+    discovery_slug: 'slug-1',
+    verdict: 'promoted',
+    title: 'Test event',
+    summary: 'Test summary',
+    root_cause: 'Root cause',
+    rule_names: ['Rule A'],
+    stream_names: ['logs.otel'],
+    cause_kis: [],
+    criticality: 70,
+    recommended_action: 'escalate',
+    impact: 'high',
+    recommendations: [],
+    verdict_id: 'v-1',
+    last_reviewed_at: '2026-04-30T19:30:00Z',
+  },
+  state: 'warning',
+  blastRadiusScore: 70,
+  mainEventTitle: 'Test event',
+  description: 'Test description',
+  impactedServices: [],
+  impactedCards: [],
+  severityLabel: 'High',
+  severityColor: 'warning',
+  detailFields: {
+    id: 'evt-1',
+    label: 'Test event',
+    subtitle: 'logs.otel',
+    severityLabel: 'High',
+    severityColor: 'warning',
+  },
+  timestamp: '2026-04-30T19:30:00Z',
+  ...overrides,
+});
+
+describe('OtherPromotedEvents', () => {
+  it('renders the section heading', () => {
+    renderWithIntl(<OtherPromotedEvents events={[makeEvent()]} />);
+    expect(screen.getByTestId('sigeventsOverviewOtherPromotedEvents')).toBeInTheDocument();
+    expect(screen.getByText('Other promoted events')).toBeInTheDocument();
+  });
+
+  it('renders each event with severity badge and title', () => {
+    const events = [
+      makeEvent({
+        mainEventTitle: 'Payment failures',
+        severityLabel: 'Critical',
+        severityColor: 'danger',
+        raw: { ...makeEvent().raw, event_id: 'e-1' },
+      }),
+      makeEvent({
+        mainEventTitle: 'Frontend errors',
+        severityLabel: 'High',
+        severityColor: 'warning',
+        raw: { ...makeEvent().raw, event_id: 'e-2' },
+      }),
+    ];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+
+    expect(screen.getByText('Payment failures')).toBeInTheDocument();
+    expect(screen.getByText('Frontend errors')).toBeInTheDocument();
+    expect(screen.getByText('Critical')).toBeInTheDocument();
+    expect(screen.getByText('High')).toBeInTheDocument();
+  });
+
+  it('renders event description when present', () => {
+    const events = [makeEvent({ description: 'A useful description' })];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+    expect(screen.getByText('A useful description')).toBeInTheDocument();
+  });
+
+  it('does not render description text when empty', () => {
+    const events = [makeEvent({ description: '' })];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+    // The title should still render but no extra description paragraph
+    expect(screen.getByText('Test event')).toBeInTheDocument();
+    // With empty description, only title and section header text nodes exist
+    const panels = screen.getByTestId('sigeventsOverviewOtherPromotedEvents');
+    expect(panels.querySelectorAll('h4')).toHaveLength(1);
+  });
+
+  it('renders severity badge colors correctly for all variants', () => {
+    const events = [
+      makeEvent({
+        severityLabel: 'Critical',
+        severityColor: 'danger',
+        raw: { ...makeEvent().raw, event_id: 'e-1' },
+      }),
+      makeEvent({
+        severityLabel: 'Medium',
+        severityColor: 'primary',
+        raw: { ...makeEvent().raw, event_id: 'e-2' },
+      }),
+      makeEvent({
+        severityLabel: 'Low',
+        severityColor: 'subdued',
+        raw: { ...makeEvent().raw, event_id: 'e-3' },
+      }),
+    ];
+    renderWithIntl(<OtherPromotedEvents events={events} />);
+
+    expect(screen.getByText('Critical')).toBeInTheDocument();
+    expect(screen.getByText('Medium')).toBeInTheDocument();
+    expect(screen.getByText('Low')).toBeInTheDocument();
+  });
+});

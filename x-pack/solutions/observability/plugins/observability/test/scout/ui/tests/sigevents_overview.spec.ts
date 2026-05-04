@@ -7,6 +7,7 @@
 
 import { apm, timerange } from '@kbn/synthtrace-client';
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
@@ -46,10 +47,55 @@ async function safeUpdateByQuery(esClient: Client, params: Parameters<Client['up
   }
 }
 
+/**
+ * Ensure an index exists with explicit keyword mappings for fields used in
+ * aggregations and term queries. If the index already exists this is a no-op.
+ */
+async function ensureIndex(
+  esClient: Client,
+  index: string,
+  properties: Record<string, MappingProperty>
+) {
+  const exists = await esClient.indices.exists({ index });
+  if (exists) {
+    // Verify the mapping is correct by checking if it has the expected field types.
+    // If the index was auto-created with wrong mappings, delete and recreate it.
+    const mapping = await esClient.indices.getMapping({ index });
+    const currentProps = mapping[index]?.mappings?.properties ?? {};
+    const needsRecreate = Object.entries(properties).some(
+      ([field, expected]) => currentProps[field]?.type !== expected.type
+    );
+    if (needsRecreate) {
+      await esClient.indices.delete({ index });
+    } else {
+      return;
+    }
+  }
+  await esClient.indices.create({
+    index,
+    mappings: { properties },
+  });
+}
+
 test.describe(
   'SKO FY27 Demo: Significant Events',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeAll(async ({ esClient }) => {
+      await ensureIndex(esClient, SIGEVENTS_EVENTS_INDEX, {
+        '@timestamp': { type: 'date' },
+        impact: { type: 'keyword' },
+        verdict: { type: 'keyword' },
+        event_id: { type: 'keyword' },
+        recommended_action: { type: 'keyword' },
+        criticality: { type: 'integer' },
+      });
+      await ensureIndex(esClient, SIGEVENTS_DETECTIONS_INDEX, {
+        '@timestamp': { type: 'date' },
+        detection_id: { type: 'keyword' },
+      });
+    });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
@@ -63,6 +109,21 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apmSynthtraceEsClient }) => {
+      // Restore any events that were demoted during tests
+      await safeUpdateByQuery(esClient, {
+        index: SIGEVENTS_EVENTS_INDEX,
+        refresh: true,
+        script: {
+          source: "ctx._source.verdict = 'promoted'",
+          lang: 'painless',
+        },
+        query: {
+          bool: {
+            must: [{ term: { 'verdict.keyword': 'demoted' } }],
+            must_not: [{ prefix: { 'event_id.keyword': 'scout-event-' } }],
+          },
+        },
+      });
       await safeDeleteByQuery(esClient, {
         index: SIGEVENTS_EVENTS_INDEX,
         refresh: true,
@@ -321,24 +382,6 @@ test.describe(
         await page.getByTestId('sigeventsViewAllKnowledgeIndicators').click();
         await page.waitForURL('**/app/streams/_discovery/knowledge_indicators');
         await expect(page).toHaveURL(/\/app\/streams\/_discovery\/knowledge_indicators/);
-      });
-
-      await test.step('restore promoted events', async () => {
-        // Restore any events that were demoted during this test
-        await safeUpdateByQuery(esClient, {
-          index: SIGEVENTS_EVENTS_INDEX,
-          refresh: true,
-          script: {
-            source: "ctx._source.verdict = 'promoted'",
-            lang: 'painless',
-          },
-          query: {
-            bool: {
-              must: [{ term: { 'verdict.keyword': 'demoted' } }],
-              must_not: [{ prefix: { 'event_id.keyword': 'scout-event-' } }],
-            },
-          },
-        });
       });
     });
 

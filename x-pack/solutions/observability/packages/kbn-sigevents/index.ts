@@ -11,4 +11,8 @@ export { useFetchLatestSignificantEvent } from './hooks/use_fetch_latest_signifi
 export type { LatestSignificantEventData } from './hooks/use_fetch_latest_significant_event';
 
 export { useFetchSystemOverview } from './hooks/use_fetch_system_overview';
-export type { SystemOverviewData } from './hooks/use_fetch_system_overview';
+export type {
+  SystemOverviewData,
+  SigEventPriority,
+  PriorityCounts,
+} from './hooks/use_fetch_system_overview';

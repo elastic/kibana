@@ -58,10 +58,10 @@ export const CustomImpactedServices: Story = {
     ...Default.args,
     title: 'Database connection pool exhausted affecting checkout and payment flows',
     impactedServices: [
-      { id: 'postgres', label: 'postgres', iconType: 'package' },
-      { id: 'checkout', label: 'checkout', iconType: 'package' },
-      { id: 'payment', label: 'payment', iconType: 'package' },
-      { id: 'auth', label: 'auth', iconType: 'package' },
+      { id: 'postgres', label: 'postgres', iconType: 'layers' },
+      { id: 'checkout', label: 'checkout', iconType: 'layers' },
+      { id: 'payment', label: 'payment', iconType: 'layers' },
+      { id: 'auth', label: 'auth', iconType: 'layers' },
     ],
   },
 };

@@ -10,14 +10,13 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBadgeProps, EuiHealthProps, EuiIconProps } from '@elastic/eui';
+import type { EuiBadgeProps, EuiIconProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { MetadataIconCard } from './metadata_icon_card';
@@ -28,7 +27,7 @@ export interface SignificantEventDetailHeaderProps {
   severityLabel: string;
   severityColor: EuiBadgeProps['color'];
   criticalityLabel?: string;
-  criticalityColor?: EuiHealthProps['color'];
+  criticalityColor?: EuiBadgeProps['color'];
   impactLabel?: string;
   impactColor?: EuiBadgeProps['color'];
   recommendedActionLabel?: string;
@@ -98,12 +97,11 @@ export const SignificantEventDetailHeader = ({
     { defaultMessage: 'Recommended action' }
   );
 
-  const resolvedCriticalityColor: EuiHealthProps['color'] = useMemo(() => {
+  const resolvedCriticalityColor: EuiBadgeProps['color'] = useMemo(() => {
     if (criticalityColor) return criticalityColor;
     if (severityColor === 'danger') return 'danger';
     if (severityColor === 'warning') return 'warning';
-    if (severityColor === 'success') return 'success';
-    return 'subdued';
+    return 'hollow';
   }, [criticalityColor, severityColor]);
 
   return (
@@ -137,7 +135,7 @@ export const SignificantEventDetailHeader = ({
               <MetadataIconCard
                 hideIcon
                 title={criticalityCardTitle}
-                value={<EuiHealth color={resolvedCriticalityColor}>{criticalityLabel}</EuiHealth>}
+                value={<EuiBadge color={resolvedCriticalityColor}>{criticalityLabel}</EuiBadge>}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>

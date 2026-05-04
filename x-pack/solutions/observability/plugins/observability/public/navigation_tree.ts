@@ -14,14 +14,15 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+import { NightshiftIcon } from './components/nightshift_icon';
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
-    defaultMessage: 'Observability',
+    defaultMessage: 'Nightshift',
   }
 );
-const icon = 'logoObservability';
+const icon = NightshiftIcon;
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -719,7 +720,7 @@ export const createDefinition = (
 ): AddSolutionNavigationArg => ({
   id: 'oblt',
   title,
-  icon: 'logoObservability',
+  icon: NightshiftIcon,
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),

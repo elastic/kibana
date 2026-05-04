@@ -373,23 +373,49 @@ export const makePromotedEventsData = (timestamp: string): LatestSignificantEven
   makePromotedEvents(timestamp).map((doc) => {
     const severity = mapImpactToSeverity(doc.impact);
     const causeKis = (doc.cause_kis ?? []) as Array<{ name: string; stream_name: string }>;
+    const edges = (doc.dependency_edges ?? []) as Array<{
+      source: string;
+      target: string;
+      protocol: string;
+      exposure: string;
+    }>;
+
+    // Derive impacted services from dependency edges (matching hook logic)
+    const edgeDerivedServices = edges.reduce<
+      Array<{ id: string; label: string; iconType: string }>
+    >((acc, edge) => {
+      for (const name of [edge.source, edge.target]) {
+        if (name && !acc.some((s) => s.id === name)) {
+          acc.push({ id: name, label: name, iconType: 'layers' });
+        }
+      }
+      return acc;
+    }, []);
+
+    const causeCards = causeKis.map((ki) => ({
+      id: `cause-${ki.name}`,
+      label: 'Root Cause',
+      value: ki.name,
+      iconType: 'crosshairs' as const,
+    }));
+
+    const exposedEdgeCards = edges
+      .filter((edge) => edge.exposure === 'exposed')
+      .map((edge) => ({
+        id: `exposed-${edge.source}`,
+        label: 'Impacted',
+        value: edge.source,
+        iconType: 'dot' as const,
+      }));
+
     return {
       raw: doc as unknown as LatestSignificantEventData['raw'],
       state: severity.state,
       blastRadiusScore: doc.criticality,
       mainEventTitle: doc.title,
       description: doc.summary,
-      impactedServices: causeKis.map((ki) => ({
-        id: ki.name,
-        label: ki.name,
-        iconType: 'package' as const,
-      })),
-      impactedCards: causeKis.map((ki) => ({
-        id: `cause-${ki.name}`,
-        label: 'Cause',
-        value: ki.name,
-        iconType: 'package' as const,
-      })),
+      impactedServices: edgeDerivedServices as LatestSignificantEventData['impactedServices'],
+      impactedCards: [...causeCards, ...exposedEdgeCards],
       severityLabel: severity.label,
       severityColor: severity.color,
       detailFields: {

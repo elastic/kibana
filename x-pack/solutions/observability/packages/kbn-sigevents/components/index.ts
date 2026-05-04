@@ -60,7 +60,13 @@ export { SignificantEventDetailBody } from './significant_event_detail_body';
 export type {
   SignificantEventDetailBodyProps,
   SignificantEventDetailFields,
+  EvidenceItem,
+  DependencyEdgeItem,
+  CauseKiItem,
 } from './significant_event_detail_body';
+
+export { DependencyChainMap } from './dependency_chain_map';
+export type { DependencyChainMapProps } from './dependency_chain_map';
 
 export { SignificantEventDetailHeader } from './significant_event_detail_header';
 export type { SignificantEventDetailHeaderProps } from './significant_event_detail_header';

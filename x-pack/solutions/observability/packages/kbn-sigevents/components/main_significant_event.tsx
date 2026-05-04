@@ -80,8 +80,8 @@ const DEFAULT_DESCRIPTION = i18n.translate(
 );
 
 const DEFAULT_IMPACTED_SERVICES: ImpactedService[] = [
-  { id: 'payment', label: 'payment', iconType: 'package' },
-  { id: 'checkout', label: 'checkout', iconType: 'package' },
+  { id: 'payment', label: 'payment', iconType: 'layers' },
+  { id: 'checkout', label: 'checkout', iconType: 'layers' },
 ];
 
 export function MainSignificantEvent(props: MainSignificantEventProps) {
@@ -225,7 +225,7 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
                       <EuiBadge
                         key={service.id}
                         color="hollow"
-                        iconType={service.iconType ?? 'package'}
+                        iconType={service.iconType ?? 'layers'}
                       >
                         {service.label}
                       </EuiBadge>

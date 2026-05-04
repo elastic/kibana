@@ -19,7 +19,6 @@ interface SigeventsKibanaServices {
 const TRACES_INDEX = 'traces-*';
 const LOGS_INDEX = 'logs-*';
 const EVENTS_INDEX = 'sigevents-events-ms';
-const DETECTIONS_INDEX = 'sigevents-detections-ms';
 
 export interface EventDocument {
   '@timestamp': string;
@@ -40,13 +39,19 @@ export interface EventDocument {
   last_reviewed_at: string;
 }
 
+export type SigEventPriority = 'critical' | 'high' | 'medium' | 'low';
+
+export interface PriorityCounts {
+  open: number;
+  resolved: number;
+}
+
 export interface SystemOverviewData {
-  services: Array<{ name: string; traceCount: number; logCount: number }>;
+  serviceCount: number;
+  entityCount: number;
+  technologyCount: number;
+  sigEventsByPriority: Record<SigEventPriority, PriorityCounts>;
   acknowledgedEvents: EventDocument[];
-  detectionCount: number;
-  highCount: number;
-  mediumCount: number;
-  lowCount: number;
 }
 
 interface ServiceAggBucket {
@@ -58,6 +63,22 @@ interface ServicesAggResponse {
   aggregations?: {
     services: {
       buckets: ServiceAggBucket[];
+    };
+  };
+}
+
+interface ImpactAggBucket {
+  key: string;
+  doc_count: number;
+  by_verdict: {
+    buckets: Array<{ key: string; doc_count: number }>;
+  };
+}
+
+interface ImpactAggResponse {
+  aggregations?: {
+    by_impact: {
+      buckets: ImpactAggBucket[];
     };
   };
 }
@@ -103,22 +124,27 @@ export function useFetchSystemOverview(): {
         index: EVENTS_INDEX,
         size: 5,
         query: {
-          term: { 'verdict.keyword': 'acknowledged' },
+          term: { verdict: 'acknowledged' },
         },
         sort: [{ criticality: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       };
 
-      const detectionsParams: estypes.SearchRequest = {
-        index: DETECTIONS_INDEX,
+      const priorityParams: estypes.SearchRequest = {
+        index: EVENTS_INDEX,
         size: 0,
-        query: {
-          bool: {
-            must_not: [{ term: { superseded: true } }],
+        aggs: {
+          by_impact: {
+            terms: { field: 'impact', size: 10 },
+            aggs: {
+              by_verdict: {
+                terms: { field: 'verdict', size: 10 },
+              },
+            },
           },
         },
       };
 
-      const [traceServicesResp, logServicesResp, eventsResp, detectionsResp] = await Promise.all([
+      const [traceServicesResp, logServicesResp, eventsResp, priorityResp] = await Promise.all([
         lastValueFrom(
           dataService.search.search<
             { params: estypes.SearchRequest },
@@ -140,67 +166,51 @@ export function useFetchSystemOverview(): {
         lastValueFrom(
           dataService.search.search<
             { params: estypes.SearchRequest },
-            { rawResponse: estypes.SearchResponse<unknown> }
-          >({ params: detectionsParams }, { abortSignal: signal })
+            { rawResponse: estypes.SearchResponse<unknown> & ImpactAggResponse }
+          >({ params: priorityParams }, { abortSignal: signal })
         ),
       ]);
 
-      const traceServiceMap = new Map<string, number>();
-      const traceBuckets = traceServicesResp.rawResponse.aggregations?.services?.buckets ?? [];
-      for (const bucket of traceBuckets) {
-        traceServiceMap.set(bucket.key, bucket.doc_count);
-      }
-
-      const logServiceMap = new Map<string, number>();
-      const logBuckets = logServicesResp.rawResponse.aggregations?.services?.buckets ?? [];
-      for (const bucket of logBuckets) {
-        logServiceMap.set(bucket.key, bucket.doc_count);
-      }
-
-      const allServiceNames = new Set([...traceServiceMap.keys(), ...logServiceMap.keys()]);
-      const servicesList = Array.from(allServiceNames).map((name) => ({
-        name,
-        traceCount: traceServiceMap.get(name) ?? 0,
-        logCount: logServiceMap.get(name) ?? 0,
-      }));
-
-      servicesList.sort((a, b) => b.traceCount + b.logCount - (a.traceCount + a.logCount));
+      const traceServiceNames = new Set(
+        (traceServicesResp.rawResponse.aggregations?.services?.buckets ?? []).map((b) => b.key)
+      );
+      const logServiceNames = new Set(
+        (logServicesResp.rawResponse.aggregations?.services?.buckets ?? []).map((b) => b.key)
+      );
+      const serviceCount = new Set([...traceServiceNames, ...logServiceNames]).size;
 
       const acknowledgedEvents = (eventsResp.rawResponse.hits.hits ?? [])
         .map((hit) => hit._source)
         .filter((doc): doc is EventDocument => doc !== undefined);
 
-      const detectionCount =
-        typeof detectionsResp.rawResponse.hits.total === 'object'
-          ? detectionsResp.rawResponse.hits.total.value
-          : detectionsResp.rawResponse.hits.total ?? 0;
+      const sigEventsByPriority: Record<SigEventPriority, PriorityCounts> = {
+        critical: { open: 0, resolved: 0 },
+        high: { open: 0, resolved: 0 },
+        medium: { open: 0, resolved: 0 },
+        low: { open: 0, resolved: 0 },
+      };
 
-      let highCount = 0;
-      let mediumCount = 0;
-      let lowCount = 0;
-
-      for (const ev of acknowledgedEvents) {
-        switch (ev.impact) {
-          case 'critical':
-          case 'high':
-            highCount++;
-            break;
-          case 'medium':
-            mediumCount++;
-            break;
-          case 'low':
-            lowCount++;
-            break;
+      const impactBuckets = priorityResp.rawResponse.aggregations?.by_impact?.buckets ?? [];
+      for (const bucket of impactBuckets) {
+        const priority = bucket.key as SigEventPriority;
+        if (!(priority in sigEventsByPriority)) {
+          continue;
+        }
+        for (const verdictBucket of bucket.by_verdict.buckets) {
+          if (verdictBucket.key === 'demoted') {
+            sigEventsByPriority[priority].resolved += verdictBucket.doc_count;
+          } else {
+            sigEventsByPriority[priority].open += verdictBucket.doc_count;
+          }
         }
       }
 
       return {
-        services: servicesList,
+        serviceCount,
+        entityCount: 0, // KI entity index not yet available
+        technologyCount: 0, // KI technology index not yet available
+        sigEventsByPriority,
         acknowledgedEvents,
-        detectionCount,
-        highCount,
-        mediumCount,
-        lowCount,
       };
     },
     {

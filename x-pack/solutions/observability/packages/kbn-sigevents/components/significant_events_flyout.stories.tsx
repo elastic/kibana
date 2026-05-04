@@ -16,6 +16,7 @@ const defaultEvents = [
     subtitle: 'logs · fleet-coordination',
     severityLabel: 'Critical',
     severityColor: 'danger' as const,
+    timestamp: '2025-01-18T14:12:31.000Z',
   },
   {
     id: '2',
@@ -23,6 +24,7 @@ const defaultEvents = [
     subtitle: 'metrics · identity',
     severityLabel: 'High',
     severityColor: 'warning' as const,
+    timestamp: '2025-01-17T09:45:00.000Z',
   },
   {
     id: '3',
@@ -30,6 +32,7 @@ const defaultEvents = [
     subtitle: 'logs · checkout',
     severityLabel: 'Critical',
     severityColor: 'danger' as const,
+    timestamp: '2025-01-16T22:30:15.000Z',
   },
   {
     id: '4',
@@ -37,6 +40,7 @@ const defaultEvents = [
     subtitle: 'metrics · edge-dns',
     severityLabel: 'High',
     severityColor: 'warning' as const,
+    timestamp: '2025-01-15T11:20:45.000Z',
   },
   {
     id: '5',
@@ -44,6 +48,7 @@ const defaultEvents = [
     subtitle: 'logs · api-gateway',
     severityLabel: 'Critical',
     severityColor: 'danger' as const,
+    timestamp: '2025-01-14T08:05:22.000Z',
   },
 ];
 
