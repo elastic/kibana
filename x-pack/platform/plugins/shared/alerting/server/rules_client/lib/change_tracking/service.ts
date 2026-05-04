@@ -26,7 +26,6 @@ import type {
   IChangeTrackingService,
   IScopedChangeTrackingService,
   RuleChange,
-  ScopedLogChangeHistoryOptions,
 } from './types';
 import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
 
