@@ -119,20 +119,20 @@ test.describe(
         },
         query: {
           bool: {
-            must: [{ term: { 'verdict.keyword': 'demoted' } }],
-            must_not: [{ prefix: { 'event_id.keyword': 'scout-event-' } }],
+            must: [{ term: { verdict: 'demoted' } }],
+            must_not: [{ prefix: { event_id: 'scout-event-' } }],
           },
         },
       });
       await safeDeleteByQuery(esClient, {
         index: SIGEVENTS_EVENTS_INDEX,
         refresh: true,
-        query: { prefix: { 'event_id.keyword': 'scout-event-' } },
+        query: { prefix: { event_id: 'scout-event-' } },
       });
       await safeDeleteByQuery(esClient, {
         index: SIGEVENTS_DETECTIONS_INDEX,
         refresh: true,
-        query: { prefix: { 'detection_id.keyword': 'scout-det-' } },
+        query: { prefix: { detection_id: 'scout-det-' } },
       });
       await apmSynthtraceEsClient.clean();
     });
@@ -142,12 +142,12 @@ test.describe(
         await safeDeleteByQuery(esClient, {
           index: SIGEVENTS_EVENTS_INDEX,
           refresh: true,
-          query: { prefix: { 'event_id.keyword': 'scout-event-' } },
+          query: { prefix: { event_id: 'scout-event-' } },
         });
         await safeDeleteByQuery(esClient, {
           index: SIGEVENTS_DETECTIONS_INDEX,
           refresh: true,
-          query: { prefix: { 'detection_id.keyword': 'scout-det-' } },
+          query: { prefix: { detection_id: 'scout-det-' } },
         });
         await safeUpdateByQuery(esClient, {
           index: SIGEVENTS_EVENTS_INDEX,
@@ -158,10 +158,7 @@ test.describe(
           },
           query: {
             bool: {
-              should: [
-                { term: { 'verdict.keyword': 'promoted' } },
-                { term: { 'verdict.keyword': 'acknowledged' } },
-              ],
+              should: [{ term: { verdict: 'promoted' } }, { term: { verdict: 'acknowledged' } }],
               minimum_should_match: 1,
             },
           },
@@ -256,12 +253,12 @@ test.describe(
         await safeDeleteByQuery(esClient, {
           index: SIGEVENTS_EVENTS_INDEX,
           refresh: true,
-          query: { prefix: { 'event_id.keyword': 'scout-event-' } },
+          query: { prefix: { event_id: 'scout-event-' } },
         });
         await safeDeleteByQuery(esClient, {
           index: SIGEVENTS_DETECTIONS_INDEX,
           refresh: true,
-          query: { prefix: { 'detection_id.keyword': 'scout-det-' } },
+          query: { prefix: { detection_id: 'scout-det-' } },
         });
 
         // Remove any promoted events so the page renders in healthy state
@@ -272,7 +269,7 @@ test.describe(
             source: "ctx._source.verdict = 'demoted'",
             lang: 'painless',
           },
-          query: { term: { 'verdict.keyword': 'promoted' } },
+          query: { term: { verdict: 'promoted' } },
         });
 
         await esClient.bulk({
@@ -394,12 +391,12 @@ test.describe(
         await safeDeleteByQuery(esClient, {
           index: SIGEVENTS_EVENTS_INDEX,
           refresh: true,
-          query: { prefix: { 'event_id.keyword': 'scout-event-' } },
+          query: { prefix: { event_id: 'scout-event-' } },
         });
         await safeDeleteByQuery(esClient, {
           index: SIGEVENTS_DETECTIONS_INDEX,
           refresh: true,
-          query: { prefix: { 'detection_id.keyword': 'scout-det-' } },
+          query: { prefix: { detection_id: 'scout-det-' } },
         });
 
         await esClient.bulk({

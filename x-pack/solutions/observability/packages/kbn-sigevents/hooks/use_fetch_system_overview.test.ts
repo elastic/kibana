@@ -43,42 +43,40 @@ describe('useFetchSystemOverview', () => {
   const acknowledgedDocs = makeAcknowledgedEvents(timestamp);
 
   const mockSearch = jest.fn();
+  const mockHttpFetch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockHttpFetch.mockResolvedValue({
+      features: [
+        {
+          type: 'entity',
+          subtype: 'service',
+          properties: { name: 'checkout-api', technology: 'go' },
+        },
+        {
+          type: 'entity',
+          subtype: 'service',
+          properties: { name: 'payment-service', technology: 'java' },
+        },
+        {
+          type: 'entity',
+          subtype: 'database',
+          properties: { name: 'orders-db', technology: 'postgresql' },
+        },
+        {
+          type: 'entity',
+          subtype: 'cache',
+          properties: { name: 'redis-cache', technology: 'redis' },
+        },
+        { type: 'technology', properties: { name: 'go' } },
+        { type: 'technology', properties: { name: 'postgresql' } },
+        { type: 'dependency', properties: { source: 'checkout-api', target: 'orders-db' } },
+      ],
+    });
+
     mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
-      if (params.index === 'traces-*') {
-        return of({
-          rawResponse: {
-            aggregations: {
-              services: {
-                buckets: [
-                  { key: 'frontend', doc_count: 500 },
-                  { key: 'payment', doc_count: 300 },
-                  { key: 'checkout', doc_count: 200 },
-                ],
-              },
-            },
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
-      if (params.index === 'logs-*') {
-        return of({
-          rawResponse: {
-            aggregations: {
-              services: {
-                buckets: [
-                  { key: 'frontend', doc_count: 1000 },
-                  { key: 'otel-collector', doc_count: 400 },
-                ],
-              },
-            },
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
       if (params.index === 'sigevents-events-ms' && params.size === 5) {
         return of({
           rawResponse: {
@@ -127,6 +125,7 @@ describe('useFetchSystemOverview', () => {
         data: {
           search: { search: mockSearch },
         },
+        http: { fetch: mockHttpFetch },
       },
     });
   });
@@ -139,7 +138,7 @@ describe('useFetchSystemOverview', () => {
     expect(result.current.data).toBeNull();
   });
 
-  it('counts unique services from traces and logs', async () => {
+  it('counts services, entities, and technologies from KI features', async () => {
     const { result } = renderHook(() => useFetchSystemOverview(), {
       wrapper: createWrapper(),
     });
@@ -149,17 +148,22 @@ describe('useFetchSystemOverview', () => {
     expect(result.current.error).toBeNull();
     expect(result.current.data).not.toBeNull();
 
-    // Should have 4 unique services: frontend, payment, checkout, otel-collector
-    expect(result.current.data!.serviceCount).toBe(4);
+    // 2 service entities, 4 total entities, 2 technologies
+    expect(result.current.data!.serviceCount).toBe(2);
+    expect(result.current.data!.entityCount).toBe(4);
+    expect(result.current.data!.technologyCount).toBe(2);
   });
 
-  it('returns zero for entity and technology counts (KI not available)', async () => {
+  it('returns zero for all counts when features API fails', async () => {
+    mockHttpFetch.mockRejectedValue(new Error('Forbidden'));
+
     const { result } = renderHook(() => useFetchSystemOverview(), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
+    expect(result.current.data!.serviceCount).toBe(0);
     expect(result.current.data!.entityCount).toBe(0);
     expect(result.current.data!.technologyCount).toBe(0);
   });
@@ -210,22 +214,6 @@ describe('useFetchSystemOverview', () => {
 
   it('skips unknown impact bucket keys without crashing', async () => {
     mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
-      if (params.index === 'traces-*') {
-        return of({
-          rawResponse: {
-            aggregations: { services: { buckets: [] } },
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
-      if (params.index === 'logs-*') {
-        return of({
-          rawResponse: {
-            aggregations: { services: { buckets: [] } },
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
       if (params.index === 'sigevents-events-ms' && params.size === 5) {
         return of({
           rawResponse: {
@@ -270,23 +258,9 @@ describe('useFetchSystemOverview', () => {
   });
 
   it('handles missing aggregations gracefully (null responses)', async () => {
+    mockHttpFetch.mockResolvedValue({ features: [] });
+
     mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
-      if (params.index === 'traces-*') {
-        return of({
-          rawResponse: {
-            aggregations: undefined,
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
-      if (params.index === 'logs-*') {
-        return of({
-          rawResponse: {
-            aggregations: undefined,
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
       if (params.index === 'sigevents-events-ms' && params.size === 5) {
         return of({
           rawResponse: {

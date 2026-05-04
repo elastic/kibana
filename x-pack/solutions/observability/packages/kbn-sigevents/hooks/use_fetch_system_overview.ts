@@ -14,11 +14,18 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
+  http: {
+    fetch: <T = unknown>(path: string, options?: { signal?: AbortSignal }) => Promise<T>;
+  };
 }
 
-const TRACES_INDEX = 'traces-*';
-const LOGS_INDEX = 'logs-*';
 const EVENTS_INDEX = 'sigevents-events-ms';
+
+interface KiFeatureDocument {
+  type: string;
+  subtype?: string;
+  properties: Record<string, unknown>;
+}
 
 export interface EventDocument {
   '@timestamp': string;
@@ -54,19 +61,6 @@ export interface SystemOverviewData {
   acknowledgedEvents: EventDocument[];
 }
 
-interface ServiceAggBucket {
-  key: string;
-  doc_count: number;
-}
-
-interface ServicesAggResponse {
-  aggregations?: {
-    services: {
-      buckets: ServiceAggBucket[];
-    };
-  };
-}
-
 interface ImpactAggBucket {
   key: string;
   doc_count: number;
@@ -90,7 +84,7 @@ export function useFetchSystemOverview(): {
   refetch: () => void;
 } {
   const { services } = useKibana<SigeventsKibanaServices>();
-  const { data: dataService } = services;
+  const { data: dataService, http } = services;
 
   const {
     data: result,
@@ -100,26 +94,6 @@ export function useFetchSystemOverview(): {
   } = useQuery<SystemOverviewData, Error>(
     ['systemOverview'],
     async ({ signal }) => {
-      const traceServicesParams: estypes.SearchRequest = {
-        index: TRACES_INDEX,
-        size: 0,
-        aggs: {
-          services: {
-            terms: { field: 'service.name', size: 100 },
-          },
-        },
-      };
-
-      const logServicesParams: estypes.SearchRequest = {
-        index: LOGS_INDEX,
-        size: 0,
-        aggs: {
-          services: {
-            terms: { field: 'service.name', size: 100 },
-          },
-        },
-      };
-
       const eventsParams: estypes.SearchRequest = {
         index: EVENTS_INDEX,
         size: 5,
@@ -144,19 +118,15 @@ export function useFetchSystemOverview(): {
         },
       };
 
-      const [traceServicesResp, logServicesResp, eventsResp, priorityResp] = await Promise.all([
-        lastValueFrom(
-          dataService.search.search<
-            { params: estypes.SearchRequest },
-            { rawResponse: estypes.SearchResponse<unknown> & ServicesAggResponse }
-          >({ params: traceServicesParams }, { abortSignal: signal })
-        ),
-        lastValueFrom(
-          dataService.search.search<
-            { params: estypes.SearchRequest },
-            { rawResponse: estypes.SearchResponse<unknown> & ServicesAggResponse }
-          >({ params: logServicesParams }, { abortSignal: signal })
-        ),
+      // Fetch KI features for entity and technology counts.
+      // Gracefully degrade when Streams is disabled or the user lacks access.
+      const featuresPromise = http?.fetch
+        ? http
+            .fetch<{ features: KiFeatureDocument[] }>('/internal/streams/_features', { signal })
+            .catch(() => ({ features: [] as KiFeatureDocument[] }))
+        : Promise.resolve({ features: [] as KiFeatureDocument[] });
+
+      const [eventsResp, priorityResp, featuresResp] = await Promise.all([
         lastValueFrom(
           dataService.search.search<
             { params: estypes.SearchRequest },
@@ -169,15 +139,8 @@ export function useFetchSystemOverview(): {
             { rawResponse: estypes.SearchResponse<unknown> & ImpactAggResponse }
           >({ params: priorityParams }, { abortSignal: signal })
         ),
+        featuresPromise,
       ]);
-
-      const traceServiceNames = new Set(
-        (traceServicesResp.rawResponse.aggregations?.services?.buckets ?? []).map((b) => b.key)
-      );
-      const logServiceNames = new Set(
-        (logServicesResp.rawResponse.aggregations?.services?.buckets ?? []).map((b) => b.key)
-      );
-      const serviceCount = new Set([...traceServiceNames, ...logServiceNames]).size;
 
       const acknowledgedEvents = (eventsResp.rawResponse.hits.hits ?? [])
         .map((hit) => hit._source)
@@ -205,10 +168,15 @@ export function useFetchSystemOverview(): {
         }
       }
 
+      const entities = featuresResp.features.filter((f) => f.type === 'entity');
+      const serviceCount = entities.filter((f) => f.subtype === 'service').length;
+      const entityCount = entities.length;
+      const technologyCount = featuresResp.features.filter((f) => f.type === 'technology').length;
+
       return {
         serviceCount,
-        entityCount: 0, // KI entity index not yet available
-        technologyCount: 0, // KI technology index not yet available
+        entityCount,
+        technologyCount,
         sigEventsByPriority,
         acknowledgedEvents,
       };
