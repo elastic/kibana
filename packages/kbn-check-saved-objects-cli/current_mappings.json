@@ -1476,10 +1476,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1626,6 +1622,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-store-global-state": {
     "dynamic": false,
@@ -3539,6 +3539,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "interval": {
+        "type": "integer"
+      },
       "name": {
         "type": "text"
       },
@@ -3568,6 +3571,13 @@
             "type": "keyword"
           }
         }
+      },
+      "rrule_schedule": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "schedule_type": {
+        "type": "keyword"
       },
       "shards": {
         "dynamic": false,
