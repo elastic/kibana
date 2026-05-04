@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { ExpressionsPublicPlugin } from "@kbn/expressions-plugin/public/plugin";
+import { VisualizationsSetup } from "@kbn/visualizations-plugin/public";
+import { createMarkdownVisFn } from "./markdown_fn";
+import { getMarkdownVisRenderer } from "./markdown_renderer";
+import { markdownVisType } from "./markdown_vis";
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+
+export function setupLegacyVis(
+  getStartDeps: StartServicesAccessor,
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>, 
+  visualizations: VisualizationsSetup
+) {
+  visualizations.createBaseVisualization(markdownVisType);
+  expressions.registerRenderer(getMarkdownVisRenderer(getStartDeps));
+  expressions.registerFunction(createMarkdownVisFn);
+}

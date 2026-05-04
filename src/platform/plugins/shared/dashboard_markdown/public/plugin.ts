@@ -22,10 +22,15 @@ import {
 } from '../common/constants';
 import { setKibanaServices } from './services/kibana_services';
 import type { MarkdownEmbeddableState } from '../server';
+import { setupLegacyVis } from './legacy_vis/setup';
+import { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 export interface MarkdownSetupDeps {
-  embeddable: EmbeddableSetup;
   contentManagement: ContentManagementPublicSetup;
+  embeddable: EmbeddableSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  visualizations: VisualizationsSetup;
 }
 
 export interface MarkdownStartDeps {
@@ -37,7 +42,7 @@ export class DashboardMarkdownPlugin
 {
   public setup(
     core: CoreSetup<MarkdownStartDeps>,
-    { embeddable, contentManagement }: MarkdownSetupDeps
+    { contentManagement, embeddable, expressions, visualizations }: MarkdownSetupDeps
   ) {
     embeddable.registerEmbeddablePublicDefinition(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
@@ -72,6 +77,8 @@ export class DashboardMarkdownPlugin
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
     });
+
+    setupLegacyVis(core.getStartServices, expressions, visualizations);
   }
 
   public start(core: CoreStart, plugins: MarkdownStartDeps) {
