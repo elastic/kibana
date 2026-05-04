@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { LinksList } from '../links_list';
 import { Footer } from '../footer';
-import { type FooterAction, type LinksListItem } from '../types';
+import type { ActionConfig, LinksListItem } from '../types';
 
 const BACK_BUTTON_ARIA_LABEL = i18n.translate(
   'contextSwitcherComponents.contextSubmenuView.backButtonAriaLabel',
@@ -33,7 +33,7 @@ export interface ContextSubmenuViewProps {
   readonly title: ReactNode;
   readonly onBack: () => void;
   readonly items: ReadonlyArray<LinksListItem>;
-  readonly footerAction?: FooterAction;
+  readonly footerAction?: ActionConfig;
 }
 
 /**

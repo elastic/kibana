@@ -21,7 +21,6 @@ import type {
   ChromeNavLink,
   ChromeNextAiButton,
   ChromeNextGlobalSearchConfig,
-  ChromeNextSpaceSelectorConfig,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
@@ -70,7 +69,7 @@ export interface ChromeState {
   aiButton: State<ReadonlySet<ChromeNextAiButton>>;
   globalSearch: State<ChromeNextGlobalSearchConfig | undefined>;
   userMenu: State<ReactNode>;
-  spaceSelector: State<ChromeNextSpaceSelectorConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -126,7 +125,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const aiButton = createState<ReadonlySet<ChromeNextAiButton>>(new Set());
   const globalSearch = createState<ChromeNextGlobalSearchConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
-  const spaceSelector = createState<ChromeNextSpaceSelectorConfig | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
 
   // Help System
@@ -164,7 +163,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     aiButton,
     globalSearch,
     userMenu,
-    spaceSelector,
+    contextSwitcher,
     customNavLink,
     appMenu,
     help: {

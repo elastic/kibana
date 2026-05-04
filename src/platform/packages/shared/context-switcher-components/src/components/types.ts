@@ -10,15 +10,15 @@
 import type { ReactElement, ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 
-export const POPOVER_WIDTH = 400;
+export const POPOVER_WIDTH = 360;
 export const SELECTABLE_ROW_HEIGHT = 40;
 export const CONTEXT_ROW_HEIGHT = 48;
 
 export interface SpaceItem {
   id: string;
   name: string;
-  /** Avatar or icon to display. */
-  avatar?: ReactElement;
+  /** Render function for the space avatar. Accepts EUI avatar size. */
+  avatar?: (size: 's' | 'l') => ReactElement;
   /** Optional solution badge or metadata shown alongside. */
   badge?: ReactNode;
   /** Solution name (e.g. "Security", "Observability"). Used to derive labels and icons. */
@@ -37,9 +37,9 @@ export interface ContextSwitcherSpacesConfig {
   /** Optional search config. */
   search?: { placeholder?: string; threshold?: number };
   /** Header action (e.g. "Manage" button). */
-  headerAction?: ReactNode;
+  headerAction?: ActionConfig;
   /** Footer action (e.g. "Create space"). */
-  footerAction?: FooterAction;
+  footerAction?: ActionConfig;
   isLoading?: boolean;
 }
 
@@ -50,7 +50,7 @@ export interface ContextSwitcherEnvironmentConfig {
   /** Submenu link items (e.g. "Manage project", "View all deployments"). */
   submenuItems: LinksListItem[];
   /** Submenu footer action (e.g. "Create project"). */
-  submenuFooterAction?: FooterAction;
+  submenuFooterAction?: ActionConfig;
 }
 
 export interface ContextSwitcherProps {
@@ -64,6 +64,8 @@ export interface ContextSwitcherProps {
   environmentContext?: ContextSwitcherEnvironmentConfig;
   /** Optional footer links (e.g. "Connection details", "Manage deployments"). */
   footerLinks?: LinksListItem[];
+  /** Called when the popover opens. */
+  onOpen?: () => void;
 }
 
 export interface LinksListItem {
@@ -77,7 +79,7 @@ export interface LinksListItem {
   ['data-test-subj']?: string;
 }
 
-export interface FooterAction {
+export interface ActionConfig {
   id: string;
   label: string;
   href?: string;

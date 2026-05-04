@@ -65,5 +65,4 @@ export type {
   ChromeNextHeaderGlobalActions,
   ChromeNextHeaderMetadataSlotItem,
   ChromeNextHeaderTab,
-  ChromeNextSpaceSelectorConfig,
 } from './src';

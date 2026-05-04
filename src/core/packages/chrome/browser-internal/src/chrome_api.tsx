@@ -201,9 +201,9 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
         get$: () => state.userMenu.$,
         set: state.userMenu.set,
       },
-      spaceSelector: {
-        get$: () => state.spaceSelector.$,
-        set: state.spaceSelector.set,
+      contextSwitcher: {
+        get$: () => state.contextSwitcher.$,
+        set: state.contextSwitcher.set,
       },
     },
 
