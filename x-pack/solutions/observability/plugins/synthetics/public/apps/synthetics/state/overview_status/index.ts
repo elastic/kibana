@@ -11,6 +11,7 @@ import type {
   OverviewStalePriorRun,
   OverviewStatusMetaData,
   OverviewStatusState,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
 import { isRunStale } from '../../../../../common/lib';
@@ -26,7 +27,7 @@ import {
 export interface OverviewStatusStateReducer {
   loading: boolean;
   loaded: boolean;
-  status: OverviewStatusState | null;
+  status: PaginatedOverviewStatus | null;
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   // Raw "latest run before the window" facts from the supplementary stale lookup,
@@ -45,6 +46,7 @@ export interface OverviewStatusStateReducer {
   // empty overview.
   settled: boolean;
   isInitialLoad: boolean;
+  total?: number;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -138,7 +140,14 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
   }
 
   if (changed) {
-    state.allConfigs = buildAllConfigs(status);
+    const rebuilt = buildAllConfigs(status);
+    if (status.configs) {
+      const byConfigId = new Map(rebuilt.map((config) => [config.configId, config]));
+      status.configs = status.configs.map((config) => byConfigId.get(config.configId) ?? config);
+      state.allConfigs = status.configs;
+    } else {
+      state.allConfigs = rebuilt;
+    }
   }
 };
 
@@ -148,13 +157,19 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.status = null;
       state.loading = true;
     })
-    .addCase(quietFetchOverviewStatusAction.get, (_state) => {
-      // intentionally no loading state for quiet/background refreshes
+    .addCase(quietFetchOverviewStatusAction.get, (state) => {
+      state.loading = true;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
 
-      state.allConfigs = buildAllConfigs(state.status);
+      if (action.payload.configs) {
+        state.allConfigs = action.payload.configs;
+        state.total = action.payload.total;
+      } else {
+        state.allConfigs = buildAllConfigs(state.status);
+        state.total = state.allConfigs.length;
+      }
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
       state.loading = false;

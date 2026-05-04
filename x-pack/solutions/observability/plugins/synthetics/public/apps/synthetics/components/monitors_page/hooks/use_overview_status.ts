@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';
+import { setOverviewPageStateAction } from '../../../state/overview';
 import {
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
@@ -23,7 +24,7 @@ import { useGetUrlParams } from '../../../hooks';
  * The fetch is triggered once by `useOverviewStatus` in the page-level component.
  */
 export function useOverviewStatusState() {
-  const { status, error, loaded, loading, allConfigs } = useSelector(selectOverviewStatus);
+  const { status, error, loaded, loading, allConfigs, total } = useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   return {
     status,
@@ -32,6 +33,7 @@ export function useOverviewStatusState() {
     loaded,
     settled,
     allConfigs: allConfigs ?? [],
+    total,
   };
 }
 
@@ -42,16 +44,26 @@ export function useOverviewStatusState() {
  */
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
-  const { status, error, loaded, loading, allConfigs } = useSelector(selectOverviewStatus);
+  const { status, error, loaded, loading, allConfigs, total } = useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   const isInitialMount = useRef(true);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const { statusFilter } = useGetUrlParams();
 
   const dispatch = useDispatch();
 
   const paramsRef = useRef({ pageState, scopeStatusByLocation, loaded });
   paramsRef.current = { pageState, scopeStatusByLocation, loaded };
+
+  // When the status filter changes, reset to page 1.
+  const prevStatusFilterRef = useRef(statusFilter);
+  useEffect(() => {
+    if (prevStatusFilterRef.current !== statusFilter) {
+      prevStatusFilterRef.current = statusFilter;
+      dispatch(setOverviewPageStateAction({ page: 1 }));
+    }
+  }, [dispatch, statusFilter]);
 
   const { query: urlQuery } = useGetUrlParams();
   const hasUnsyncedUrlQuery = Boolean(urlQuery) && urlQuery !== (pageState.query || '');
@@ -59,28 +71,43 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   useEffect(() => {
     if (!isInitialMount.current) {
       const { pageState: ps, scopeStatusByLocation: scope } = paramsRef.current;
-      dispatch(quietFetchOverviewStatusAction.get({ pageState: ps, scopeStatusByLocation: scope }));
+      dispatch(
+        quietFetchOverviewStatusAction.get({
+          pageState: ps,
+          scopeStatusByLocation: scope,
+          statusFilter,
+        })
+      );
     }
-  }, [dispatch, lastRefresh]);
+  }, [dispatch, lastRefresh, statusFilter]);
 
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       if (hasUnsyncedUrlQuery) {
-        // URL query param hasn't been synced to Redux yet (the sync runs in
-        // a separate useEffect in useMonitorFiltersState). Skip this stale
-        // fetch — the sync will update pageState and re-trigger this effect.
         return;
       }
     }
 
     const { loaded: isLoaded } = paramsRef.current;
     if (isLoaded) {
-      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+      dispatch(
+        quietFetchOverviewStatusAction.get({
+          pageState,
+          scopeStatusByLocation,
+          statusFilter,
+        })
+      );
     } else {
-      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+      dispatch(
+        fetchOverviewStatusAction.get({
+          pageState,
+          scopeStatusByLocation,
+          statusFilter,
+        })
+      );
     }
-  }, [dispatch, pageState, scopeStatusByLocation, hasUnsyncedUrlQuery]);
+  }, [dispatch, pageState, scopeStatusByLocation, hasUnsyncedUrlQuery, statusFilter]);
 
   return {
     status,
@@ -89,5 +116,6 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     loaded,
     settled,
     allConfigs: allConfigs ?? [],
+    total,
   };
 }
