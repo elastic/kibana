@@ -13,6 +13,7 @@ import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
+  refreshReplayedSourceIndices,
 } from '../../src/data_generators/replay';
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
 import { evaluate } from './evaluate_ai_insights';
@@ -25,6 +26,7 @@ for (const scenario of scenarios) {
 
 function createScenarioTest(scenario: AlertScenario) {
   const scenarioLabel = `Alert AI Insights - ${scenario.id} (${scenario.snapshotName})`;
+  const isTransactionDurationRule = scenario.alertRule.ruleParams.rule_type_id === 'apm.transaction_duration';
 
   evaluate.describe(scenarioLabel, { tag: tags.serverless.observability.complete }, () => {
     let ruleId: string;
@@ -49,6 +51,15 @@ function createScenarioTest(scenario: AlertScenario) {
         scenario.gcs
       );
 
+      if (!replayResult.success) {
+        throw new Error(
+          `Snapshot replay failed for scenario ${scenario.id}: ${
+            replayResult.errors.length > 0 ? replayResult.errors.join('; ') : 'no error details'
+          }`
+        );
+      }
+      await refreshReplayedSourceIndices(esClient, replayResult);
+
       await kbnClient.request<void>({
         method: 'POST',
         path: `/internal/alerting/rule/${ruleId}/_run_soon`,
@@ -58,6 +69,9 @@ function createScenarioTest(scenario: AlertScenario) {
 
       alertId = await pRetry(
         async () => {
+          if (isTransactionDurationRule) {
+            await refreshReplayedSourceIndices(esClient, replayResult);
+          }
           await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
 
           const alertsResponse = await esClient.search({
@@ -80,10 +94,10 @@ function createScenarioTest(scenario: AlertScenario) {
           return alertDoc._id as string;
         },
         {
-          retries: 10,
+          retries: isTransactionDurationRule ? 20 : 10,
           factor: 2,
-          minTimeout: 3000,
-          maxTimeout: 20_000,
+          minTimeout: isTransactionDurationRule ? 3000 : 2000,
+          maxTimeout: isTransactionDurationRule ? 20_000 : 15_000,
           onFailedAttempt: (error) => {
             if (error.retriesLeft === 0) {
               log.error(
