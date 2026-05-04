@@ -126,7 +126,6 @@ describe('metric visualization', () => {
         titlesTextAlign: 'left',
         primaryPosition: 'bottom',
         primaryAlign: 'right',
-        iconAlign: 'right',
         secondaryAlign: 'right',
       });
     });
@@ -692,35 +691,6 @@ describe('metric visualization', () => {
           "type": "expression",
         }
       `);
-    });
-
-    it('infers top style template from layout fields and applies preset iconAlign', () => {
-      const expression = visualization.toExpression(
-        {
-          ...fullState,
-          icon: 'sortUp',
-          // These fields match the 'top' preset exactly
-          titlesTextAlign: 'left',
-          primaryAlign: 'left',
-          primaryPosition: 'top',
-          secondaryAlign: 'left',
-          // This is overridden by the inferred 'top' preset
-          iconAlign: 'left',
-          breakdownByAccessor: undefined,
-          collapseFn: undefined,
-        },
-        datasourceLayers
-      ) as ExpressionAstExpression;
-
-      const metricVisFn = expression.chain.find(
-        (fn): fn is ExpressionAstFunction => fn.type === 'function' && fn.function === 'metricVis'
-      );
-
-      expect(metricVisFn?.arguments.titlesTextAlign).toEqual(['left']);
-      expect(metricVisFn?.arguments.primaryAlign).toEqual(['left']);
-      expect(metricVisFn?.arguments.primaryPosition).toEqual(['top']);
-      expect(metricVisFn?.arguments.secondaryAlign).toEqual(['left']);
-      expect(metricVisFn?.arguments.iconAlign).toEqual(['right']);
     });
 
     describe('trendline expression', () => {

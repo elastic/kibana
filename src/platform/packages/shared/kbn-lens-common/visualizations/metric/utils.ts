@@ -20,13 +20,15 @@ import type {
  * the known presets. Returns the matching preset id, or 'custom' if no preset matches.
  *
  * `secondaryAlign` is included only when it is set on state; if it is absent, it does not
- * affect which preset matches.
+ * affect which preset matches. `valueFontMode` and `iconAlign` must match shared defaults.
  */
 export function inferStyleTemplate(state: {
   primaryPosition?: PrimaryMetricPosition;
   titlesTextAlign?: string;
   primaryAlign?: string;
   secondaryAlign?: string;
+  valueFontMode?: string;
+  iconAlign?: string;
 }): MetricStyleTemplateId {
   const presets = Object.entries(LENS_METRIC_STYLE_TEMPLATE) as Array<
     [MetricStyleTemplatePresetId, Required<MetricLayoutWithDefault>]
@@ -44,7 +46,21 @@ export function inferStyleTemplate(state: {
     const secondaryAlignMatch =
       state.secondaryAlign == null || state.secondaryAlign === preset.secondaryAlign;
 
-    if (positionMatch && titlesMatch && primaryAlignMatch && secondaryAlignMatch) {
+    const valueFontModeMatch =
+      (state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode) ===
+      LENS_METRIC_STATE_DEFAULTS.valueFontMode;
+    const iconAlignMatch =
+      (state.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign) ===
+      LENS_METRIC_STATE_DEFAULTS.iconAlign;
+
+    if (
+      positionMatch &&
+      titlesMatch &&
+      primaryAlignMatch &&
+      secondaryAlignMatch &&
+      valueFontModeMatch &&
+      iconAlignMatch
+    ) {
       return id;
     }
   }

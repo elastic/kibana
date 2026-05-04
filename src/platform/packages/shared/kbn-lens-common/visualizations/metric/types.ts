@@ -107,7 +107,6 @@ export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 export type MetricLayoutWithDefault = Required<
   Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign' | 'primaryPosition'>
 > & {
-  iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
 

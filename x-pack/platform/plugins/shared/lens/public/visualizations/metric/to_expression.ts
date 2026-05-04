@@ -196,8 +196,7 @@ export const toExpression = (
   let iconAlign: 'right' | 'left';
   if (hasMetricIcon) {
     // Legacy: If iconAlign is missing, default to 'left'
-    iconAlign =
-      templateLayout?.iconAlign ?? state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign;
+    iconAlign = state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign;
   } else {
     iconAlign = LENS_METRIC_STATE_DEFAULTS.iconAlign;
   }

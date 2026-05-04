@@ -42,21 +42,18 @@ export const LENS_METRIC_STYLE_TEMPLATE: Record<
     titlesTextAlign: 'left',
     primaryPosition: 'bottom',
     primaryAlign: 'right',
-    iconAlign: 'right',
     secondaryAlign: 'right',
   },
   middle: {
     titlesTextAlign: 'center',
     primaryPosition: 'middle',
     primaryAlign: 'center',
-    iconAlign: 'right',
     secondaryAlign: 'center',
   },
   top: {
     titlesTextAlign: 'left',
     primaryPosition: 'top',
     primaryAlign: 'left',
-    iconAlign: 'right',
     secondaryAlign: 'left',
   },
 } as const;
@@ -69,6 +66,7 @@ const defaultStyleTemplate = LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE];
  */
 export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   ...defaultStyleTemplate,
+  iconAlign: 'right',
   valueFontMode: 'default',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',

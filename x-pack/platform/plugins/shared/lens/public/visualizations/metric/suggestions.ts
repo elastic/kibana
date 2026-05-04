@@ -8,7 +8,6 @@
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization, MetricVisualizationState } from '@kbn/lens-common';
-import { LENS_METRIC_STYLE_TEMPLATE } from '@kbn/lens-common';
 import { metricLabel, supportedDataTypes } from './visualization';
 
 const MAX_BUCKETED_COLUMNS = 1;
@@ -55,7 +54,6 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
 
   const baseSuggestion = {
     state: {
-      ...(!isActive ? LENS_METRIC_STYLE_TEMPLATE.bottom : {}),
       ...state,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,

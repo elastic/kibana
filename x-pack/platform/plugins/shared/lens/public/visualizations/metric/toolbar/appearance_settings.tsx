@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { hasIcon, IconSelect } from '@kbn/visualization-ui-components';
 import type {
-  MetricLayoutWithDefault,
   MetricVisualizationState,
   MetricStyleTemplateId,
   MetricStyleTemplatePresetId,
@@ -34,19 +33,21 @@ import {
 } from './option_configs';
 import { StyleTemplateSelector } from './style_template_selector';
 
-const getDefaultLayoutConfig = (
-  primaryMetricPosition: MetricStyleTemplatePresetId,
-  { hasMetricIcon }: { hasMetricIcon: boolean }
-): MetricLayoutWithDefault => {
-  let config: MetricLayoutWithDefault = { ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition] };
-
-  if (!hasMetricIcon) {
-    const { iconAlign, ...rest } = config;
-    config = rest;
-  }
-
-  return config;
-};
+const getTemplateAppearanceDefaults = (
+  primaryMetricPosition: MetricStyleTemplatePresetId
+): Pick<
+  MetricVisualizationState,
+  | 'primaryPosition'
+  | 'titlesTextAlign'
+  | 'primaryAlign'
+  | 'secondaryAlign'
+  | 'valueFontMode'
+  | 'iconAlign'
+> => ({
+  ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition],
+  valueFontMode: LENS_METRIC_STATE_DEFAULTS.valueFontMode,
+  iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+});
 
 const applyIconChange = (
   state: MetricVisualizationState,
@@ -117,7 +118,7 @@ export function MetricAppearanceSettings({
           setIsCustomStyle(false);
           setState({
             ...state,
-            ...getDefaultLayoutConfig(template, { hasMetricIcon }),
+            ...getTemplateAppearanceDefaults(template),
           });
         }}
       />

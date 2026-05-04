@@ -49,7 +49,7 @@ const fullState: Required<
   primaryAlign: 'right',
   secondaryAlign: 'right',
   primaryPosition: 'bottom',
-  iconAlign: 'left',
+  iconAlign: 'right',
   valueFontMode: 'default',
   secondaryTrend: { type: 'none' },
   secondaryLabelPosition: 'before',
@@ -313,6 +313,35 @@ describe('appearance settings', () => {
     );
   });
 
+  it('shows custom template when font size differs from defaults', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      valueFontMode: 'fit',
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('shows custom template when icon position differs from defaults', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      icon: 'sortUp',
+      iconAlign: 'left',
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
   it('infers bottom preset when secondaryAlign is absent without secondary metric', () => {
     renderComponent({
       primaryPosition: 'bottom',
@@ -343,11 +372,14 @@ describe('appearance settings', () => {
     );
   });
 
-  it('applies preset layout fields to state when a template card is selected', () => {
+  it('applies full appearance defaults when a template card is selected', () => {
     renderComponent({
       primaryPosition: 'bottom',
       titlesTextAlign: 'left',
       primaryAlign: 'right',
+      secondaryAlign: 'right',
+      valueFontMode: 'fit',
+      iconAlign: 'left',
     });
 
     fireEvent.click(screen.getByTestId('lens-metric-style-template-top'));
@@ -357,6 +389,32 @@ describe('appearance settings', () => {
         primaryPosition: 'top',
         titlesTextAlign: 'left',
         primaryAlign: 'left',
+        secondaryAlign: 'left',
+        valueFontMode: 'default',
+        iconAlign: 'right',
+      })
+    );
+  });
+
+  it('applies secondary and icon defaults even when controls are disabled', () => {
+    renderComponent({
+      secondaryMetricAccessor: undefined,
+      icon: undefined,
+      secondaryAlign: undefined,
+      iconAlign: undefined,
+      valueFontMode: 'fit',
+    });
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-middle'));
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'middle',
+        titlesTextAlign: 'center',
+        primaryAlign: 'center',
+        secondaryAlign: 'center',
+        valueFontMode: 'default',
+        iconAlign: 'right',
       })
     );
   });
