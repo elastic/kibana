@@ -19,6 +19,7 @@ const metadataSchema = schema.recordOf(
 
 const roleKibanaPrivilegeResponseSchema = schema.object(
   {
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema for role privileges sourced from Elasticsearch, not user HTTP input
     spaces: schema.arrayOf(
       schema.string({
         meta: {
@@ -27,6 +28,7 @@ const roleKibanaPrivilegeResponseSchema = schema.object(
         },
       })
     ),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema for role privileges sourced from Elasticsearch, not user HTTP input
     base: schema.arrayOf(
       schema.string({
         meta: { description: 'A base Kibana privilege.' },
@@ -34,6 +36,7 @@ const roleKibanaPrivilegeResponseSchema = schema.object(
     ),
     feature: schema.recordOf(
       schema.string({ meta: { description: 'The name of a Kibana feature.' } }),
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema for role privileges sourced from Elasticsearch, not user HTTP input
       schema.arrayOf(
         schema.string({
           meta: { description: 'A privilege the role member has for the feature.' },
@@ -41,6 +44,7 @@ const roleKibanaPrivilegeResponseSchema = schema.object(
       )
     ),
     _reserved: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema for role privileges sourced from Elasticsearch, not user HTTP input
       schema.arrayOf(
         schema.string({
           meta: { description: 'A reserved Kibana privilege granted globally.' },
@@ -59,7 +63,9 @@ const roleKibanaPrivilegeResponseSchema = schema.object(
 const roleKibanaApplicationSchema = schema.object(
   {
     application: schema.string(),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema for ES application privileges, not user HTTP input
     privileges: schema.arrayOf(schema.string()),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema for ES application privileges, not user HTTP input
     resources: schema.arrayOf(schema.string()),
   },
   {
@@ -75,6 +81,7 @@ const roleTransformErrorSchema = schema.object(
     reason: schema.string({
       meta: { description: 'The reason the role could not be fully transformed.' },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema describing role transform diagnostics, not user HTTP input
     state: schema.maybe(schema.arrayOf(roleKibanaApplicationSchema)),
   },
   {
@@ -93,11 +100,14 @@ export const roleResponseSchema = schema.object(
       schema.string({ meta: { description: 'A description for the role.' } })
     ),
     elasticsearch: elasticsearchRoleSchema,
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema describing roles fetched from Elasticsearch, not user HTTP input
     kibana: schema.arrayOf(roleKibanaPrivilegeResponseSchema),
     metadata: schema.maybe(metadataSchema),
     transient_metadata: schema.maybe(metadataSchema),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema describing roles fetched from Elasticsearch, not user HTTP input
     _transform_error: schema.maybe(schema.arrayOf(roleTransformErrorSchema)),
     _unrecognized_applications: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema describing roles fetched from Elasticsearch, not user HTTP input
       schema.arrayOf(
         schema.string({
           meta: {
@@ -115,10 +125,12 @@ export const roleResponseSchema = schema.object(
   }
 );
 
+// codeql[js/kibana/unbounded-array-in-schema] Response schema for GET /api/security/role, server-populated from Elasticsearch
 export const getRolesResponseSchema = schema.arrayOf(roleResponseSchema);
 
 export const queryRolesResponseSchema = schema.object(
   {
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema for paginated roles query, server-populated from Elasticsearch
     roles: schema.arrayOf(roleResponseSchema),
     count: schema.number({
       meta: { description: 'The number of roles returned in this response page.' },
@@ -154,16 +166,19 @@ const bulkRolesErrorDetailsSchema = schema.recordOf(
 export const bulkCreateOrUpdateRolesResponseSchema = schema.object(
   {
     created: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema mirroring caller's bulk request size, not new user input
       schema.arrayOf(
         schema.string({ meta: { description: 'The name of a role that was created.' } })
       )
     ),
     updated: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema mirroring caller's bulk request size, not new user input
       schema.arrayOf(
         schema.string({ meta: { description: 'The name of a role that was updated.' } })
       )
     ),
     noop: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema mirroring caller's bulk request size, not new user input
       schema.arrayOf(
         schema.string({
           meta: { description: 'The name of a role that was unchanged by the request.' },
