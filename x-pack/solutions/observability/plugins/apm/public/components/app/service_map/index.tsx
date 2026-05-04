@@ -305,6 +305,7 @@ export function ServiceMap({
               nodes={nodesForGraph}
               edges={data.edges}
               serviceName={serviceName}
+              highlightedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}
