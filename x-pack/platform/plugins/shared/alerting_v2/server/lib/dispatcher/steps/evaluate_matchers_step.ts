@@ -33,60 +33,59 @@ export class EvaluateMatchersStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [], rules = new Map(), policies = new Map() } = state;
 
-    const matched = evaluateMatchers(dispatchable, rules, policies, this.logger);
+    const matched = this.evaluateMatchers(dispatchable, rules, policies);
 
     return { type: 'continue', data: { matched } };
   }
-}
 
-export function evaluateMatchers(
-  dispatchable: readonly AlertEpisode[],
-  rules: ReadonlyMap<RuleId, Rule>,
-  policies: ReadonlyMap<ActionPolicyId, ActionPolicy>,
-  logger: LoggerServiceContract
-): MatchedPair[] {
-  const matched: MatchedPair[] = [];
+  private evaluateMatchers(
+    dispatchable: readonly AlertEpisode[],
+    rules: ReadonlyMap<RuleId, Rule>,
+    policies: ReadonlyMap<ActionPolicyId, ActionPolicy>
+  ): MatchedPair[] {
+    const matched: MatchedPair[] = [];
 
-  const policiesBySpace = Map.groupBy(policies.values(), (policy) => policy.spaceId);
+    const policiesBySpace = Map.groupBy(policies.values(), (policy) => policy.spaceId);
 
-  for (const episode of dispatchable) {
-    const rule = rules.get(episode.rule_id);
-    if (!rule) continue;
+    for (const episode of dispatchable) {
+      const rule = rules.get(episode.rule_id);
+      if (!rule) continue;
 
-    const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
-    let context: MatcherContext | undefined;
+      const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
+      let context: MatcherContext | undefined;
 
-    for (const policy of spacePolicies) {
-      if (!policy.enabled) continue;
-      if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+      for (const policy of spacePolicies) {
+        if (!policy.enabled) continue;
+        if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
 
-      if (!policy.matcher) {
-        matched.push({ episode, policy });
-        continue;
-      }
+        if (!policy.matcher) {
+          matched.push({ episode, policy });
+          continue;
+        }
 
-      context ??= createMatcherContext(episode, rule);
-      let isMatch = false;
-      try {
-        isMatch = evaluateKql(policy.matcher, context);
-      } catch (err) {
-        const rawReason = err instanceof Error ? err.message : String(err);
-        const reason = truncate(rawReason, MAX_LOGGED_TEXT_LENGTH);
-        const truncatedMatcher = truncate(policy.matcher, MAX_LOGGED_TEXT_LENGTH);
-        logger.warn({
-          message: () =>
-            `Failed to evaluate KQL matcher for policy ${policy.id} (rule ${rule.id}, episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
-        });
-        continue;
-      }
+        context ??= createMatcherContext(episode, rule);
+        let isMatch = false;
+        try {
+          isMatch = evaluateKql(policy.matcher, context);
+        } catch (err) {
+          const rawReason = err instanceof Error ? err.message : String(err);
+          const reason = truncate(rawReason, MAX_LOGGED_TEXT_LENGTH);
+          const truncatedMatcher = truncate(policy.matcher, MAX_LOGGED_TEXT_LENGTH);
+          this.logger.warn({
+            message: () =>
+              `Failed to evaluate KQL matcher for policy ${policy.id} (rule ${rule.id}, episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
+          });
+          continue;
+        }
 
-      if (isMatch) {
-        matched.push({ episode, policy });
+        if (isMatch) {
+          matched.push({ episode, policy });
+        }
       }
     }
-  }
 
-  return matched;
+    return matched;
+  }
 }
 
 const MAX_LOGGED_TEXT_LENGTH = 500;
