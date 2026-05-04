@@ -193,7 +193,9 @@ describe('Table', () => {
   it('should render the boolean template (false)', async () => {
     renderTable();
 
-    expect(getRowByText('conflictingField')).not.toHaveTextContent('Is searchable');
+    expect((await screen.findByText('conflictingField')).closest('tr')).not.toHaveTextContent(
+      'Is searchable'
+    );
   });
 
   it('should render normal type', async () => {

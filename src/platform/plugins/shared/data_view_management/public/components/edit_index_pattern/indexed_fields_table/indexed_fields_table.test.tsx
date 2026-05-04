@@ -167,7 +167,7 @@ describe('IndexedFieldsTable', () => {
     jest.restoreAllMocks();
   });
 
-  test('should render normally', async () => {
+  it('should render normally', async () => {
     renderIndexedFieldsTable({});
 
     await expectFieldTypeIconVisible('Keyword');
@@ -175,7 +175,7 @@ describe('IndexedFieldsTable', () => {
     expectVisibleFields(['Elastic', 'timestamp', 'conflictingField', 'amount', 'runtime']);
   });
 
-  test('should filter based on the query bar', async () => {
+  it('should filter based on the query bar', async () => {
     renderIndexedFieldsTable({ fieldFilter: 'Elast' });
 
     await expectFieldTypeIconVisible('Keyword');
@@ -183,7 +183,7 @@ describe('IndexedFieldsTable', () => {
     expectHiddenFields(['timestamp', 'conflictingField', 'amount', 'runtime']);
   });
 
-  test('should filter based on the type filter', async () => {
+  it('should filter based on the type filter', async () => {
     renderIndexedFieldsTable({ indexedFieldTypeFilter: ['date'] });
 
     await expectFieldTypeIconVisible('Date');
@@ -191,7 +191,7 @@ describe('IndexedFieldsTable', () => {
     expectHiddenFields(['Elastic', 'conflictingField', 'amount', 'runtime']);
   });
 
-  test('should filter based on the schema filter', async () => {
+  it('should filter based on the schema filter', async () => {
     renderIndexedFieldsTable({ schemaFieldTypeFilter: ['runtime'] });
 
     await expectFieldTypeIconVisible('Number');
@@ -200,7 +200,7 @@ describe('IndexedFieldsTable', () => {
   });
 
   describe('IndexedFieldsTable with rollup index pattern', () => {
-    test('should render normally', async () => {
+    it('should render normally', async () => {
       renderIndexedFieldsTable({ indexPattern: rollupIndexPattern });
 
       await expectFieldTypeIconVisible('Keyword');

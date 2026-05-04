@@ -13,7 +13,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
 describe('Header', () => {
-  test('should render normally', () => {
+  it('should render normally', () => {
     renderWithI18n(<Header />);
 
     expect(
