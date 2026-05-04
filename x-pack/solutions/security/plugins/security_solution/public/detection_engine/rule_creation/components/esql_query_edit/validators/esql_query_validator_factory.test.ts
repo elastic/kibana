@@ -20,6 +20,7 @@ const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
 
 describe('esqlQueryValidator', () => {
   beforeEach(() => {
+    getESQLQueryColumnsMock.mockClear();
     getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }]);
   });
 
@@ -136,11 +137,56 @@ describe('esqlQueryValidator', () => {
       });
     });
   });
+
+  describe('cancellation and unmount behavior', () => {
+    it('returns undefined without fetching columns when the component is already unmounted', async () => {
+      const isUnmountedRef = { current: true };
+      const validator = createValidator({ isUnmountedRef });
+
+      const result = await validator({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(result).toBeUndefined();
+      expect(getESQLQueryColumnsMock).not.toHaveBeenCalled();
+    });
+
+    it('aborts the previous in-flight request when a new validation starts', async () => {
+      const previousController = new AbortController();
+      const abortSpy = jest.spyOn(previousController, 'abort');
+      const abortControllerRef = { current: previousController };
+      const validator = createValidator({ abortControllerRef });
+
+      await validator({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(abortSpy).toHaveBeenCalled();
+    });
+
+    it('sets abortControllerRef.current to a new AbortController after each validation', async () => {
+      const abortControllerRef = { current: null as AbortController | null };
+      const validator = createValidator({ abortControllerRef });
+
+      await validator({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(abortControllerRef.current).toBeInstanceOf(AbortController);
+    });
+  });
 });
 
 type EsqlQueryValidatorArgs = ValidationFuncArg<FormData, FieldValueQueryBar>;
 
-function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar> {
+interface CreateValidatorOptions {
+  abortControllerRef?: { current: AbortController | null };
+  isUnmountedRef?: { current: boolean };
+}
+
+function createValidator(
+  options: CreateValidatorOptions = {}
+): ValidationFunc<FormData, string, FieldValueQueryBar> {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -149,7 +195,7 @@ function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar>
     },
   });
 
-  return esqlQueryValidatorFactory({ queryClient });
+  return esqlQueryValidatorFactory({ queryClient, ...options });
 }
 
 function createEsqlQueryFieldValue(esqlQuery: string): Readonly<FieldValueQueryBar> {
