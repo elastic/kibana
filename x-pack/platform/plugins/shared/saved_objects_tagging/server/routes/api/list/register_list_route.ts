@@ -21,7 +21,7 @@ export const registerListRoute = (router: TagsPluginRouter, usageCounter?: Usage
     summary: 'List tags',
     ...routeConfig,
     description:
-      'Returns tags. By default (no query parameters), returns all tags. If `query`, `page`, or `per_page` are provided, results are filtered and/or paginated.',
+      'Returns a paginated list of tags. If `page` or `per_page` are not provided, defaults are applied.',
   });
 
   listRoute.addVersion(

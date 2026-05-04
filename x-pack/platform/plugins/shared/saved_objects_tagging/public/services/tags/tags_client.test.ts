@@ -169,29 +169,23 @@ describe('TagsClient', () => {
         createTag({ id: 'tag-2' }),
         createTag({ id: 'tag-3' }),
       ];
-      http.get.mockResolvedValue({
-        tags: expectedTags.map(toResponseItem),
-        total: expectedTags.length,
-        page: 1,
-      });
+      http.get.mockResolvedValue({ tags: expectedTags });
     });
 
     it('calls `http.get` with the correct parameters', async () => {
       await tagsClient.getAll();
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(TAGS_API_PATH, {
+      expect(http.get).toHaveBeenCalledWith('/internal/saved_objects_tagging/tags/_all', {
         asSystemRequest: undefined,
-        version: TAGS_API_VERSION,
       });
     });
     it('allows `asSystemRequest` option to be set', async () => {
       await tagsClient.getAll({ asSystemRequest: true });
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(TAGS_API_PATH, {
+      expect(http.get).toHaveBeenCalledWith('/internal/saved_objects_tagging/tags/_all', {
         asSystemRequest: true,
-        version: TAGS_API_VERSION,
       });
     });
     it('returns the tag objects from the response', async () => {

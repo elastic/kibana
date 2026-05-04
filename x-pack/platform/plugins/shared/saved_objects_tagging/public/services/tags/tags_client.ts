@@ -16,7 +16,7 @@ import type {
   TagWithRelations,
 } from '../../../common/types';
 import { TAGS_API_PATH, TAGS_API_VERSION } from '../../../common/api_constants';
-import type { TagResponseItem, TagsListResponseBody } from '../../../server/routes/api/schemas';
+import type { TagResponseItem } from '../../../server/routes/api/schemas';
 import type { ITagsChangeListener } from './tags_cache';
 
 const BULK_DELETE_TAG_EVENT = 'bulkDeleteTag';
@@ -134,9 +134,11 @@ export class TagsClient implements ITagInternalClient {
 
   public async getAll({ asSystemRequest }: GetAllTagsOptions = {}) {
     const startTime = window.performance.now();
-    const fetchOptions = { asSystemRequest, version: TAGS_API_VERSION };
-    const { tags: items } = await this.http.get<TagsListResponseBody>(TAGS_API_PATH, fetchOptions);
-    const tags = items.map(toTag);
+    const fetchOptions = { asSystemRequest };
+    const { tags } = await this.http.get<{ tags: Tag[] }>(
+      '/internal/saved_objects_tagging/tags/_all',
+      fetchOptions
+    );
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: GET_ALL_TAGS_EVENT,

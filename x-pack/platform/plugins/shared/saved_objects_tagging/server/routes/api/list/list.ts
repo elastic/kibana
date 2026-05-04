@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
 import type { TagAttributes } from '../../../../common/types';
 import { tagSavedObjectTypeName } from '../../../../common/constants';
 import type { TagsHandlerContext } from '../../../types';
@@ -19,42 +18,18 @@ export const list = async (
   const { client } = (await requestContext.core).savedObjects;
 
   const { query, page, per_page: perPage } = requestQuery;
-  const isPaginatedOrFilteredRequest =
-    query !== undefined || page !== undefined || perPage !== undefined;
-
-  if (isPaginatedOrFilteredRequest) {
-    const soResponse = await client.find<TagAttributes>({
-      type: [tagSavedObjectTypeName],
-      search: query,
-      searchFields: ['name', 'description'],
-      defaultSearchOperator: 'AND',
-      page: page ?? 1,
-      perPage: perPage ?? 20,
-    });
-
-    return {
-      tags: soResponse.saved_objects.map(getTagResponseItem),
-      total: soResponse.total,
-      page: soResponse.page,
-    };
-  }
-
-  const pitFinder = client.createPointInTimeFinder<TagAttributes>({
-    type: tagSavedObjectTypeName,
-    perPage: 1000,
+  const soResponse = await client.find<TagAttributes>({
+    type: [tagSavedObjectTypeName],
+    search: query,
+    searchFields: ['name', 'description'],
+    defaultSearchOperator: 'AND',
+    page: page ?? 1,
+    perPage: perPage ?? 20,
   });
 
-  const results: Array<SavedObject<TagAttributes>> = [];
-  for await (const response of pitFinder.find()) {
-    results.push(...response.saved_objects);
-  }
-  await pitFinder.close();
-
-  const tags = results.map(getTagResponseItem);
-
   return {
-    tags,
-    total: tags.length,
-    page: 1,
+    tags: soResponse.saved_objects.map(getTagResponseItem),
+    total: soResponse.total,
+    page: soResponse.page,
   };
 };

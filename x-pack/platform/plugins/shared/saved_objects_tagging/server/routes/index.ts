@@ -19,7 +19,11 @@ import {
   registerUpdateTagsAssignmentsRoute,
   registerGetAssignableTypesRoute,
 } from './assignments';
-import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
+import {
+  registerInternalFindTagsRoute,
+  registerInternalBulkDeleteRoute,
+  registerInternalGetAllTagsRoute,
+} from './internal';
 import type { TagsPluginRouter } from '../types';
 
 export const registerRoutes = ({
@@ -45,4 +49,5 @@ export const registerRoutes = ({
   // internal API
   registerInternalFindTagsRoute(router);
   registerInternalBulkDeleteRoute(router);
+  registerInternalGetAllTagsRoute(router);
 };
