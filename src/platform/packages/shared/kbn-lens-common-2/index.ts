@@ -42,14 +42,14 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 
 /**
- * Panel-level state that should be persisted for by-value Lens panels.
+ * Panel-level connfigurations that should be persisted for by-value Lens panels.
  * Excludes runtime/inherited state from unified search and dashboard contexts.
  */
-type LensPersistableState = SerializedTitles & // title, description, hide_title
+export type LensByValuePanelConfigs = SerializedTitles & // title, description, hide_title
   SerializedDrilldowns &
   SerializedTimeRange;
 
-export type LensByValueSerializedAPIConfig = LensPersistableState & {
+export type LensByValueSerializedAPIConfig = LensByValuePanelConfigs & {
   // Temporarily allow both old and new attributes until all chart types are supported and feature flag removed
   attributes: LensApiConfig | LensByValueBase['attributes'];
   ref_id?: string; // really should be never but creates type issues
@@ -59,7 +59,7 @@ export type LensByValueSerializedAPIConfig = LensPersistableState & {
  * By-value Lens panel config in flattened wire shape (dashboard app API with `lens.apiFormat`).
  * Chart API fields from {@link LensApiConfig} sit at the root next to panel metadata.
  */
-export type LensByValueFlattenedSerializedAPIConfig = LensPersistableState & LensApiConfig;
+export type LensByValueFlattenedSerializedAPIConfig = LensByValuePanelConfigs & LensApiConfig;
 
 export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
 

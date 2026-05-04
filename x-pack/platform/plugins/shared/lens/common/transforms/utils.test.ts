@@ -6,9 +6,12 @@
  */
 
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
-import type { LensByValueSerializedAPIConfig } from '@kbn/lens-common-2';
+import type {
+  LensByValueFlattenedSerializedAPIConfig,
+  LensByValueSerializedAPIConfig,
+} from '@kbn/lens-common-2';
 
-import { flattenApiConfig, isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
+import { flattenAPIConfig, isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
 
 describe('isFlattenedAPIConfig', () => {
   it('returns true for a flattened config with a type discriminant', () => {
@@ -52,22 +55,22 @@ describe('isFlattenedAPIConfig', () => {
   });
 });
 
-describe('flattenApiConfig / unflattenAPIConfig', () => {
+describe('flattenAPIConfig / unflattenAPIConfig', () => {
   it('round-trips panel metadata and API chart fields', () => {
     const chartFields = { type: 'xy' } as LensApiConfig;
-    const nested: LensByValueSerializedAPIConfig = {
+    const nested = {
       title: 'Panel',
       attributes: chartFields,
-    };
+    } satisfies LensByValueSerializedAPIConfig;
 
-    const flat = flattenApiConfig(nested);
+    const flat = flattenAPIConfig(nested);
 
     expect(isFlattenedAPIConfig(flat)).toBe(true);
     expect('attributes' in flat).toBe(false);
-    expect(flat.type).toBe('xy');
+    expect('type' in flat && flat.type).toBe('xy');
     expect(flat.title).toBe('Panel');
 
-    const back = unflattenAPIConfig(flat);
+    const back = unflattenAPIConfig(flat as LensByValueFlattenedSerializedAPIConfig);
     expect(back.title).toBe('Panel');
     expect(back.attributes).toEqual(chartFields);
   });
@@ -78,17 +81,18 @@ describe('flattenApiConfig / unflattenAPIConfig', () => {
       title: 'Chart Title',
       description: 'Chart Desc',
     } as LensApiConfig;
-    const nested: LensByValueSerializedAPIConfig = {
+    const nested = {
       title: 'Panel Title',
       description: 'Panel Desc',
       attributes: chartFields,
-    };
+    } satisfies LensByValueSerializedAPIConfig;
 
-    const flat = flattenApiConfig(nested);
+    const flat = flattenAPIConfig(nested);
 
+    expect(isFlattenedAPIConfig(flat)).toBe(true);
     expect(flat.title).toBe('Panel Title');
     expect(flat.description).toBe('Panel Desc');
-    expect(flat.type).toBe('xy');
+    expect('type' in flat && flat.type).toBe('xy');
   });
 
   it('strips chart-level title/description even when no panel-level ones are set', () => {
@@ -97,14 +101,21 @@ describe('flattenApiConfig / unflattenAPIConfig', () => {
       title: 'Chart Title',
       description: 'Chart Desc',
     } as LensApiConfig;
-    const nested: LensByValueSerializedAPIConfig = {
+    const nested = {
       attributes: chartFields,
-    };
+    } satisfies LensByValueSerializedAPIConfig;
 
-    const flat = flattenApiConfig(nested);
+    const flat = flattenAPIConfig(nested);
 
+    expect(isFlattenedAPIConfig(flat)).toBe(true);
     expect(flat.title).toBeUndefined();
     expect(flat.description).toBeUndefined();
-    expect(flat.type).toBe('metric');
+    expect('type' in flat && flat.type).toBe('metric');
+  });
+
+  it('passes through by-ref configs unchanged', () => {
+    const byRef = { ref_id: '123' };
+    const result = flattenAPIConfig(byRef);
+    expect(result).toBe(byRef);
   });
 });

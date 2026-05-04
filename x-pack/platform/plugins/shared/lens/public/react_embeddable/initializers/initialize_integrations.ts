@@ -11,7 +11,6 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 import type {
   LegacyLensStateApi,
   LensByRefSerializedAPIConfig,
@@ -19,7 +18,7 @@ import type {
 } from '@kbn/lens-common-2';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { stripInheritedContext } from '../../../common/transforms/helpers';
-import { flattenApiConfig } from '../../../common/transforms/utils';
+import { flattenAPIConfig } from '../../../common/transforms/utils';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
@@ -53,17 +52,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
           } satisfies LensByRefSerializedAPIConfig;
         }
 
-        const transformedState = transformToApiConfig(currentState);
-
-        if (
-          'attributes' in transformedState &&
-          transformedState.attributes &&
-          isLensAPIFormat(transformedState.attributes)
-        ) {
-          return flattenApiConfig(transformedState);
-        }
-
-        return transformedState;
+        return flattenAPIConfig(transformToApiConfig(currentState));
       },
       getLegacySerializedState: (): LensSerializedState => {
         const currentState = getLatestState();

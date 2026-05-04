@@ -20,7 +20,7 @@ import type {
   LensWireAPIConfig,
 } from '@kbn/lens-common-2';
 
-import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 import { DOC_TYPE } from '../constants';
 
@@ -76,17 +76,21 @@ export function unflattenAPIConfig(
 }
 
 /**
- * Inverse of {@link unflattenAPIConfig}: merges nested `attributes` (Lens API chart shape)
- * into the root object for dashboard app wire format when `lens.apiFormat` is enabled.
+ * Counterpart of {@link unflattenAPIConfig}: moves chart fields from nested `attributes`
+ * to the root, producing the flat dashboard app wire shape used with `lens.apiFormat`.
  *
- * Panel-level `title`/`description` take precedence over chart-level ones
+ * Chart-level `title`/`description` are stripped because the panel-level ones
+ * (already at the root) are the source of truth. This makes the operation lossy:
+ * `unflatten(flatten(x))` may differ from `x` when the chart carried its own title/description.
+ *
+ * Returns the input unchanged for by-ref configs or when `attributes` is not in API format.
  */
-export function flattenApiConfig(
-  config: LensByValueSerializedAPIConfig
-): LensByValueFlattenedSerializedAPIConfig {
-  const { attributes, ...panelState } = config;
-  const { title: _title, description: _description, ...chartFields } = attributes as LensApiConfig;
-
+export function flattenAPIConfig(config: LensSerializedAPIConfig): LensWireAPIConfig {
+  if (!('attributes' in config) || !config.attributes || !isLensAPIFormat(config.attributes)) {
+    return config;
+  }
+  const { title: _title, description: _description, ...chartFields } = config.attributes;
+  const { attributes: _attributes, ...panelState } = config;
   return {
     ...panelState,
     ...chartFields,
