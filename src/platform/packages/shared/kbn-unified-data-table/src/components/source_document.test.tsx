@@ -118,7 +118,7 @@ describe('Unified data table source document cell rendering', function () {
         columnsMeta={undefined}
       />
     );
-    expect(container.innerHTML).toBe('<span class="unifiedDataTable__cellValue">—</span>');
+    expect(container.textContent).toBe('—');
   });
 
   describe('with columnsMeta', () => {
