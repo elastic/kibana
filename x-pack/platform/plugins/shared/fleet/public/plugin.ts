@@ -14,6 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
@@ -161,6 +162,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
   private appUpdater$ = new Subject<AppUpdater>();
+  private logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
@@ -169,6 +171,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       this.config.experimentalFeatures || {}
     );
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
@@ -277,12 +280,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Register components for home/add data integration
     if (deps.home) {
       const { home } = deps;
-      import('./components/home_integration').then(
-        ({ TutorialDirectoryHeaderLink, TutorialModuleNotice }) => {
+      import('./components/home_integration')
+        .then(({ TutorialDirectoryHeaderLink, TutorialModuleNotice }) => {
           home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
           home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
-        }
-      );
+        })
+        .catch(() => {
+          this.logger.error('Failed to load home integration components.');
+        });
 
       deps.home.featureCatalogue.register({
         id: 'fleet',
@@ -302,14 +307,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     if (deps.globalSearch) {
       const { globalSearch } = deps;
-      import('./search_provider').then(
-        ({ createPackageSearchProvider, createCustomIntegrationsSearchProvider }) => {
+      import('./search_provider')
+        .then(({ createPackageSearchProvider, createCustomIntegrationsSearchProvider }) => {
           globalSearch.registerResultProvider(createPackageSearchProvider(core));
           globalSearch.registerResultProvider(
             createCustomIntegrationsSearchProvider(deps.customIntegrations)
           );
-        }
-      );
+        })
+        .catch(() => {
+          this.logger.error('Failed to load search providers.');
+        });
     }
 
     return {};
