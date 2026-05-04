@@ -22,7 +22,7 @@ export const ControlSettingTooltipLabel = ({
   label: string;
   tooltip: string;
 }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} aria-label={label}>
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false} css={rowStyles}>
       <EuiIconTip
