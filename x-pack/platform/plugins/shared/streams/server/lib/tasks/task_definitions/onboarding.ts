@@ -97,14 +97,16 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       const isFeaturesOnlyStep =
                         steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
 
-                      const { shouldIdentify } = await shouldIdentifyFeatures({
-                        featureClient,
-                        streamName,
-                        thresholdHours: FEATURES_IDENTIFICATION_THRESHOLD_HOURS,
-                      });
+                      if (!isFeaturesOnlyStep) {
+                        const { shouldIdentify } = await shouldIdentifyFeatures({
+                          featureClient,
+                          streamName,
+                          thresholdHours: FEATURES_IDENTIFICATION_THRESHOLD_HOURS,
+                        });
 
-                      if (!isFeaturesOnlyStep && !shouldIdentify) {
-                        break; // exits switch case, loop continues to next step
+                        if (!shouldIdentify) {
+                          break;
+                        }
                       }
 
                       await scheduleFeaturesIdentificationTask(

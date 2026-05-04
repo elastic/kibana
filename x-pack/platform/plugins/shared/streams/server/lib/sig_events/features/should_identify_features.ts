@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isComputedFeature } from '@kbn/streams-schema';
+import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
 import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 
@@ -24,21 +24,17 @@ export async function shouldIdentifyFeatures({
   streamName: string;
   thresholdHours: number;
 }): Promise<ShouldIdentifyFeaturesResult> {
-  // We only need the newest inferred feature, but computed features are
-  // filtered out in JS, so fetch enough to guarantee at least one inferred
-  // hit is included (computed types are few, so 100 is a safe upper bound).
   const { hits } = await featureClient.getFeatures(streamName, {
-    limit: 100,
+    type: [...INFERRED_FEATURE_TYPES],
+    limit: MIN_INFERRED_FEATURES + 1,
     sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
   });
 
-  const inferredHits = hits.filter((hit) => !isComputedFeature(hit));
-
-  if (inferredHits.length <= MIN_INFERRED_FEATURES) {
+  if (hits.length <= MIN_INFERRED_FEATURES) {
     return { shouldIdentify: true };
   }
 
-  const newestTimestamp = new Date(inferredHits[0].last_seen).getTime();
+  const newestTimestamp = new Date(hits[0].last_seen).getTime();
 
   if (Number.isNaN(newestTimestamp)) {
     return { shouldIdentify: true };
