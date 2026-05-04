@@ -125,40 +125,38 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   }
 }
 
+type PolicyOutcome =
+  | typeof ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
+  | typeof ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
+
+const isString = (v: unknown): v is string => typeof v === 'string';
+
+const isPolicyOutcome = (action: unknown): action is PolicyOutcome =>
+  action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED ||
+  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
+
 function denormalizeEvent(event: IValidatedEvent): PolicyExecutionHistoryItem[] {
   if (!event) return [];
 
-  const action:
-    | typeof ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
-    | typeof ACTION_POLICY_EVENT_ACTIONS.THROTTLED
-    | undefined =
-    event.event?.action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
-      ? ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
-      : event.event?.action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED
-      ? ACTION_POLICY_EVENT_ACTIONS.THROTTLED
-      : undefined;
-  if (!action) return [];
-
   const timestamp = event['@timestamp'];
-  if (!timestamp) return [];
+  const action = event.event?.action;
+  if (!timestamp || !isPolicyOutcome(action)) return [];
 
   const savedObjects = event.kibana?.saved_objects ?? [];
   const policyId = savedObjects.find((so) => so.type === ACTION_POLICY_SAVED_OBJECT_TYPE)?.id;
   if (!policyId) return [];
 
   const dispatcher = event.kibana?.alerting_v2?.dispatcher ?? {};
-  const ruleIdsFromRefs = savedObjects
-    .filter((so) => so.type === RULE_SAVED_OBJECT_TYPE)
-    .map((so) => so.id)
-    .filter((id): id is string => typeof id === 'string');
-  const ruleIdsSpillover = (dispatcher.rule_ids ?? []).filter(
-    (id): id is string => typeof id === 'string'
-  );
-  const allRuleIds = [...ruleIdsFromRefs, ...ruleIdsSpillover];
 
-  const workflows = (dispatcher.workflow_ids ?? [])
-    .filter((id): id is string => typeof id === 'string')
-    .map((id) => ({ id }));
+  const referencedRuleIds = savedObjects.filter((so) => so.type === RULE_SAVED_OBJECT_TYPE).map((so) => so.id);
+  const spilloverRuleIds = dispatcher.rule_ids ?? [];
+  
+  const allRuleIds = [
+    ...referencedRuleIds,
+    ...spilloverRuleIds,
+  ].filter(isString);
+
+  const workflows = (dispatcher.workflow_ids ?? []).filter(isString).map((id) => ({ id })); // ToDo: enrich with names
 
   return allRuleIds.map((ruleId) => ({
     '@timestamp': timestamp,
