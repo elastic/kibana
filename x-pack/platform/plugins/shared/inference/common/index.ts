@@ -15,3 +15,5 @@ export type {
 } from './http_apis';
 
 export { createRestClient } from './rest/create_client';
+
+export * from './workflow_steps';

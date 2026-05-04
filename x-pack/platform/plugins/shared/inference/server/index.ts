@@ -28,6 +28,8 @@ export {
   runAndValidateEsqlQuery,
 } from './tasks/nl_to_esql';
 
+export { createAiWorkflowStepDefinitions } from './workflow_steps';
+
 export const plugin: PluginInitializer<
   InferenceServerSetup,
   InferenceServerStart,

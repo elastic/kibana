@@ -12,6 +12,16 @@ export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
+export type {
+  ServerStepDefinition,
+  StepHandler,
+  OnCancelHandler,
+  StepHandlerContext,
+  StepHandlerResult,
+  ContextManager,
+} from './step_handler';
+export { createServerStepDefinition } from './step_handler';
+
 export {
   getStepExecutionsByIds,
   getStepExecutionsByWorkflowExecution,
