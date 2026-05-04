@@ -114,7 +114,7 @@ export function Card({
       display="plain"
       hasBorder={false}
       paddingSize="m"
-      isDisabled={isCardDisabled}
+      isDisabled={onClick ? isCardDisabled : undefined}
       onClick={isClickable ? onClick : undefined}
       css={cardStyle}
       aria-pressed={isSelected}
