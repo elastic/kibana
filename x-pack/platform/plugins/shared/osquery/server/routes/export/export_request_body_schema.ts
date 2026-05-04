@@ -17,8 +17,8 @@ export const exportRequestBodySchema = schema.nullable(
     kuery: schema.maybe(schema.string()),
     /** Optional agent-id allowlist. When provided only these agents' rows are exported. */
     agentIds: schema.maybe(schema.arrayOf(schema.string())),
-    /** Optional SearchBar filter pills serialised as a JSON array. */
-    esFilters: schema.maybe(schema.arrayOf(schema.any())),
+    /** Optional SearchBar filter pills serialised as a JSON array. Capped at 100 to limit DoS surface. */
+    esFilters: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
   })
 );
 

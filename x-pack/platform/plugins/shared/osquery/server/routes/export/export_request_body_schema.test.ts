@@ -70,6 +70,18 @@ describe('exportRequestBodySchema', () => {
       exportRequestBodySchema.validate({ esFilters: { term: { 'agent.id': 'x' } } })
     ).toThrow();
   });
+
+  it('accepts esFilters with exactly 100 entries', () => {
+    const filters = Array.from({ length: 100 }, (_, i) => ({ match_all: { index: i } }));
+    expect(() => exportRequestBodySchema.validate({ esFilters: filters })).not.toThrow();
+  });
+
+  it('rejects esFilters with 101 entries', () => {
+    const filters = Array.from({ length: 101 }, (_, i) => ({ match_all: { index: i } }));
+    expect(() => exportRequestBodySchema.validate({ esFilters: filters })).toThrow(
+      /array size is \[101\]/
+    );
+  });
 });
 
 describe('exportQuerySchema', () => {
