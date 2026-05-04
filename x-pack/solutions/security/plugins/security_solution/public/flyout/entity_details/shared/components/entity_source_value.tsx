@@ -117,14 +117,15 @@ export const TruncatedBadgeList = memo(
         alignItems="center"
         responsive={false}
         data-test-subj={dataTestSubj}
+        css={{ width: '100%' }}
       >
         {visible.map((value) => (
-          <EuiFlexItem grow={false} key={value}>
+          <EuiFlexItem grow={false} key={value} css={{ minWidth: 0, overflow: 'hidden' }}>
             {value}
           </EuiFlexItem>
         ))}
         {hidden.length > 0 && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
             <EuiToolTip position="top" title={overflowTooltipTitle} content={hidden.join(', ')}>
               <EuiBadge
                 color="hollow"

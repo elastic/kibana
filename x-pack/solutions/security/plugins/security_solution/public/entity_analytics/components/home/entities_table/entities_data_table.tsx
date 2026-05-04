@@ -154,7 +154,7 @@ const COLUMN_HEADERS: Record<string, string> = {
 const DEFAULT_COLUMNS: DefaultColumn[] = [
   { id: ENTITY_FIELDS.ENTITY_NAME, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_ID, width: 300 },
-  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 200 },
+  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 216 },
   { id: ENTITY_FIELDS.RESOLVED_TO, width: 300 },
   { id: ENTITY_FIELDS.ENTITY_TYPE, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_RISK, width: 200 },
