@@ -26,6 +26,7 @@ const userSettingsDataPath = 'userSettings';
 export interface InternalUserSettingsServiceSetup {
   getUserSettingDarkMode: (request: KibanaRequest) => Promise<DarkModeValue | undefined>;
   getUserSettingLocale: (request: KibanaRequest) => Promise<string | undefined>;
+  getUserSettingRememberSelectedSpace: (request: KibanaRequest) => Promise<boolean>;
 }
 
 /**
@@ -48,6 +49,10 @@ export class UserSettingsService {
       getUserSettingLocale: async (request: KibanaRequest) => {
         const userSettings = await this.getSettings(request);
         return getUserSettingLocale(userSettings);
+      },
+      getUserSettingRememberSelectedSpace: async (request: KibanaRequest) => {
+        const userSettings = await this.getSettings(request);
+        return getUserSettingRememberSelectedSpace(userSettings);
       },
     };
   }
@@ -90,4 +95,10 @@ const getUserSettingLocale = (
   userSettings: NonNullable<UserProfileData['userSettings']>
 ): string | undefined => {
   return userSettings.locale || undefined;
+};
+
+const getUserSettingRememberSelectedSpace = (
+  userSettings: NonNullable<UserProfileData['userSettings']>
+): boolean => {
+  return userSettings.rememberSelectedSpace === true;
 };

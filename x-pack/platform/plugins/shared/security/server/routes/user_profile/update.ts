@@ -22,6 +22,7 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.agentBuilderAnnouncementModalSeen',
   'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
   'userSettings.locale',
+  'userSettings.rememberSelectedSpace',
 ];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
@@ -57,6 +58,7 @@ const userProfileUpdateSchema = schema.object({
         schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
       ),
       locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      rememberSelectedSpace: schema.maybe(schema.boolean()),
     })
   ),
 });

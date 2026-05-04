@@ -24,6 +24,7 @@ import {
   EuiPopover,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -128,6 +129,7 @@ export interface UserProfileFormValues {
       darkMode: DarkModeValue;
       contrastMode: ContrastModeValue;
       locale: LocaleValue;
+      rememberSelectedSpace: boolean;
     };
   };
   avatarType: 'initials' | 'image';
@@ -661,6 +663,70 @@ function UserPasswordEditor({
   );
 }
 
+function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+  const rememberSelectedSpaceLabelId = useGeneratedHtmlId({
+    prefix: 'rememberSelectedSpace',
+  });
+
+  if (!formik.values.data) {
+    return null;
+  }
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupTitle"
+            defaultMessage="Space Configuration"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupDescription"
+          defaultMessage="Spaces related configuration for Kibana."
+        />
+      }
+    >
+      <FormRow
+        name="data.userSettings.rememberSelectedSpace"
+        label={
+          <FormLabel for="data.userSettings.rememberSelectedSpace">
+            <span id={rememberSelectedSpaceLabelId}>
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceLabel"
+                defaultMessage="Remember selected space"
+              />
+            </span>
+          </FormLabel>
+        }
+        fullWidth
+      >
+        <FormField
+          label={
+            <EuiText id={rememberSelectedSpaceLabelId}>
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceLabel"
+                defaultMessage="Remember the last selected space for you when you log in."
+              />
+            </EuiText>
+          }
+          as={EuiSwitch}
+          name="data.userSettings.rememberSelectedSpace"
+          checked={formik.values.data.userSettings.rememberSelectedSpace || false}
+          aria-describedby={rememberSelectedSpaceLabelId}
+          onChange={async (e) => {
+            await formik.setFieldTouched('data.userSettings.rememberSelectedSpace', true);
+            await formik.setFieldValue('data.userSettings.rememberSelectedSpace', e.target.checked);
+          }}
+        />
+      </FormRow>
+    </EuiDescribedFormGroup>
+  );
+}
+
 const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -853,6 +919,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   )}
                   {/* Cloud users change language via the Language modal in the user menu */}
                   {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
+                  <UserSpaceConfigEditor formik={formik} />
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
@@ -898,6 +965,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             locale:
               data.userSettings?.locale ||
               toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
+            rememberSelectedSpace: data.userSettings?.rememberSelectedSpace || false,
           },
         }
       : undefined,
@@ -953,7 +1021,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       if (
         initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
         initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
-        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale ||
+        initialValues.data?.userSettings.rememberSelectedSpace !==
+          values.data?.userSettings.rememberSelectedSpace
       ) {
         isRefreshRequired = true;
       }

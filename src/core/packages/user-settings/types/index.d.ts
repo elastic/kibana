@@ -47,6 +47,7 @@ export interface UserSettingsData {
   contrastMode?: ContrastModeValue;
   locale?: LocaleValue;
   solutionNavOptOut?: boolean;
+  rememberSelectedSpace?: boolean;
   /**
    * Whether the Agent Builder announcement modal was dismissed for the current user (all spaces).
    */
