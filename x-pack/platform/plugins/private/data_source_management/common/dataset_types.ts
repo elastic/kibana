@@ -6,7 +6,7 @@
  */
 
 export interface Dataset {
-  dataSourceId: string;
+  data_source: string;
   resource: string;
   description?: string;
   settings?: DatasetSettings;

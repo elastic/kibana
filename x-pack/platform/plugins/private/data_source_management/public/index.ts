@@ -7,6 +7,8 @@
 
 import { DataSourceManagementPlugin } from './plugin';
 
+export type { CreateDatasetFlyoutProps, CreateDatasetFormValues } from './create_dataset_flyout';
+export { CreateDatasetFlyout } from './create_dataset_flyout';
 export type { CreateDataSourceFlyoutProps } from './create_data_source_flyout';
 export { CreateDataSourceFlyout } from './create_data_source_flyout';
 export { HttpDataSetsClient } from './http_data_sets_client';

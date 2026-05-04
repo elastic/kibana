@@ -8,6 +8,7 @@
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import type { DataSourceManagementPluginStart } from './plugin_start_contract';
 import type { SetupDependencies, StartDependencies } from './types';
@@ -42,6 +43,7 @@ export class DataSourceManagementPlugin
   public start(): DataSourceManagementPluginStart {
     return {
       CreateDataSourceFlyout,
+      CreateDatasetFlyout,
     };
   }
 }

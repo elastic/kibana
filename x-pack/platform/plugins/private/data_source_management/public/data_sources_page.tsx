@@ -23,6 +23,7 @@ import {
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
+import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { HttpDataSetsClient } from './http_data_sets_client';
 import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
@@ -43,6 +44,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [dataSetItems, setDataSetItems] = useState<DataSetWithName[]>([]);
   const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
+  const [isCreateDatasetFlyoutOpen, setCreateDatasetFlyoutOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,6 +90,20 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       }
     },
     [dataClient]
+  );
+
+  const handleCreateDatasetSave = useCallback(
+    async (dataSet: DataSetWithName): Promise<string | null> => {
+      try {
+        await dataSetsClient.add(dataSet);
+        setDataSetItems(await dataSetsClient.get());
+        setCreateDatasetFlyoutOpen(false);
+        return null;
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Unknown error';
+      }
+    },
+    [dataSetsClient]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
@@ -302,27 +318,43 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                   },
                 },
                 toolsRight: (
-                  <EuiButtonIcon
-                    color="primary"
-                    display="fill"
-                    iconType="refresh"
-                    aria-label={i18n.translate(
-                      'dataSourceManagement.dataSetsRefreshButtonAriaLabel',
-                      {
-                        defaultMessage: 'Refresh data sets',
-                      }
-                    )}
-                    data-test-subj="dataSourceManagementSetsRefreshButton"
-                    onClick={() => {
-                      void (async () => {
-                        try {
-                          setDataSetItems(await dataSetsClient.get());
-                        } catch {
-                          setDataSetItems([]);
-                        }
-                      })();
-                    }}
-                  />
+                  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="primary"
+                        data-test-subj="dataSourceManagementSetsCreateButton"
+                        iconType="plusInCircle"
+                        onClick={() => setCreateDatasetFlyoutOpen(true)}
+                      >
+                        {i18n.translate('dataSourceManagement.dataSetsAddButtonLabel', {
+                          defaultMessage: 'Add',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        color="primary"
+                        display="fill"
+                        iconType="refresh"
+                        aria-label={i18n.translate(
+                          'dataSourceManagement.dataSetsRefreshButtonAriaLabel',
+                          {
+                            defaultMessage: 'Refresh data sets',
+                          }
+                        )}
+                        data-test-subj="dataSourceManagementSetsRefreshButton"
+                        onClick={() => {
+                          void (async () => {
+                            try {
+                              setDataSetItems(await dataSetsClient.get());
+                            } catch {
+                              setDataSetItems([]);
+                            }
+                          })();
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 ),
               }}
               rowHeader="name"
@@ -366,6 +398,13 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         <CreateDataSourceFlyout
           onClose={() => setCreateFlyoutOpen(false)}
           onSave={handleCreateDataSourceSave}
+        />
+      ) : null}
+      {isCreateDatasetFlyoutOpen ? (
+        <CreateDatasetFlyout
+          dataSources={items}
+          onClose={() => setCreateDatasetFlyoutOpen(false)}
+          onSave={handleCreateDatasetSave}
         />
       ) : null}
     </>

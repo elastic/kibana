@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { CreateDatasetFlyoutProps } from './create_dataset_flyout';
 import type { CreateDataSourceFlyoutProps } from './create_data_source_flyout';
 
 export interface DataSourceManagementPluginStart {
@@ -13,4 +14,6 @@ export interface DataSourceManagementPluginStart {
    * Same flyout UI as Stack Management, for embedding in other plugin surfaces.
    */
   CreateDataSourceFlyout: ComponentType<CreateDataSourceFlyoutProps>;
+  /** Create data set flyout (name, description, data source, resource). */
+  CreateDatasetFlyout: ComponentType<CreateDatasetFlyoutProps>;
 }

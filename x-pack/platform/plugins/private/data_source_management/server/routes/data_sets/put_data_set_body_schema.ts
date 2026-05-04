@@ -14,7 +14,7 @@ const optionalString = schema.maybe(schema.string());
  * the path supplies the id).
  */
 export const putDataSetBodySchema = schema.object({
-  dataSourceId: schema.string(),
+  data_source: schema.string(),
   resource: schema.string(),
   description: optionalString,
   settings: schema.maybe(
