@@ -5,16 +5,30 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { LoggerService } from '../../services/logger_service/logger_service';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
+  createActionPolicy,
   createAlertEpisode,
   createDispatcherPipelineState,
-  createActionPolicy,
   createRule,
 } from '../fixtures/test_utils';
 import { EvaluateMatchersStep, evaluateMatchers } from './evaluate_matchers_step';
 
+let loggerService: LoggerService;
+let mockLogger: jest.Mocked<Logger>;
+
+beforeEach(() => {
+  ({ loggerService, mockLogger } = createLoggerService());
+});
+
 describe('EvaluateMatchersStep', () => {
-  const step = new EvaluateMatchersStep();
+  let step: EvaluateMatchersStep;
+
+  beforeEach(() => {
+    step = new EvaluateMatchersStep(loggerService);
+  });
 
   it('returns matched pairs for episodes with global catch-all policies', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
@@ -64,7 +78,8 @@ describe('evaluateMatchers', () => {
       new Map([
         ['p1', p1],
         ['p2', p2],
-      ])
+      ]),
+      loggerService
     );
 
     expect(matched).toHaveLength(2);
@@ -73,7 +88,7 @@ describe('evaluateMatchers', () => {
   it('skips episodes whose rule is not found', () => {
     const episode = createAlertEpisode({ rule_id: 'unknown-rule' });
 
-    const matched = evaluateMatchers([episode], new Map(), new Map());
+    const matched = evaluateMatchers([episode], new Map(), new Map(), loggerService);
 
     expect(matched).toHaveLength(0);
   });
@@ -83,7 +98,12 @@ describe('evaluateMatchers', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p1', matcher: 'episode_status: active' });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(0);
   });
@@ -93,7 +113,12 @@ describe('evaluateMatchers', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p1', matcher: 'episode_status: active' });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(1);
     expect(matched[0].episode).toBe(episode);
@@ -112,7 +137,12 @@ describe('evaluateMatchers', () => {
       matcher: 'episode_status: active and group_hash: critical-group',
     });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(1);
   });
@@ -125,7 +155,12 @@ describe('evaluateMatchers', () => {
       matcher: 'episode_status: active or episode_status: recovering',
     });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(1);
   });
@@ -142,7 +177,12 @@ describe('evaluateMatchers', () => {
       matcher: 'episode_status: active and group_hash: critical-group',
     });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(0);
   });
@@ -152,7 +192,12 @@ describe('evaluateMatchers', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p1', enabled: false });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(0);
   });
@@ -163,7 +208,12 @@ describe('evaluateMatchers', () => {
     const futureDate = new Date(Date.now() + 3_600_000).toISOString();
     const policy = createActionPolicy({ id: 'p1', snoozedUntil: futureDate });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(0);
   });
@@ -174,7 +224,12 @@ describe('evaluateMatchers', () => {
     const pastDate = new Date(Date.now() - 3_600_000).toISOString();
     const policy = createActionPolicy({ id: 'p1', snoozedUntil: pastDate });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(1);
   });
@@ -184,9 +239,112 @@ describe('evaluateMatchers', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p1', enabled: true });
 
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
 
     expect(matched).toHaveLength(1);
+  });
+
+  it('skips policies with invalid KQL matchers and logs a warning', () => {
+    const episode = createAlertEpisode({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p1', matcher: 'invalid kql (((' });
+
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p1', policy]]),
+      loggerService
+    );
+
+    expect(matched).toHaveLength(0);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('continues evaluating sibling policies when one matcher throws', () => {
+    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+    const rule = createRule({ id: 'r1' });
+    const badPolicy = createActionPolicy({ id: 'p-bad', matcher: 'invalid kql (((' });
+    const goodPolicy = createActionPolicy({
+      id: 'p-good',
+      matcher: 'episode_status: active',
+    });
+
+    const matched = evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([
+        ['p-bad', badPolicy],
+        ['p-good', goodPolicy],
+      ]),
+      loggerService
+    );
+
+    expect(matched).toHaveLength(1);
+    expect(matched[0].policy).toBe(goodPolicy);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('continues evaluating subsequent episodes when a matcher throws on a previous episode', () => {
+    const e1 = createAlertEpisode({ episode_id: 'e1', rule_id: 'r1' });
+    const e2 = createAlertEpisode({ episode_id: 'e2', rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const badPolicy = createActionPolicy({ id: 'p-bad', matcher: 'invalid kql (((' });
+    const catchAllPolicy = createActionPolicy({ id: 'p-catchall' });
+
+    const matched = evaluateMatchers(
+      [e1, e2],
+      new Map([['r1', rule]]),
+      new Map([
+        ['p-bad', badPolicy],
+        ['p-catchall', catchAllPolicy],
+      ]),
+      loggerService
+    );
+
+    expect(matched).toHaveLength(2);
+    expect(matched.map(({ episode }) => episode)).toEqual([e1, e2]);
+    expect(matched.every(({ policy }) => policy === catchAllPolicy)).toBe(true);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('warn message includes policy id, rule id, episode id, and matcher', () => {
+    const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p-broken', matcher: 'invalid kql (((' });
+
+    evaluateMatchers(
+      [episode],
+      new Map([['r1', rule]]),
+      new Map([['p-broken', policy]]),
+      loggerService
+    );
+
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    const messageArg = mockLogger.warn.mock.calls[0][0];
+    const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
+    expect(rendered).toContain('p-broken');
+    expect(rendered).toContain('r1');
+    expect(rendered).toContain('ep-42');
+    expect(rendered).toContain('invalid kql (((');
+  });
+
+  it('truncates matchers longer than 500 chars in the warn message', () => {
+    const longMatcher = '('.repeat(600);
+    const episode = createAlertEpisode({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p1', matcher: longMatcher });
+
+    evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]), loggerService);
+
+    const messageArg = mockLogger.warn.mock.calls[0][0];
+    const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
+    expect(rendered).toContain(`${longMatcher.slice(0, 500)}…`);
+    expect(rendered).not.toContain(longMatcher);
   });
 
   describe('rule-aware KQL matching', () => {
@@ -201,7 +359,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(1);
@@ -218,7 +377,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(1);
@@ -235,7 +395,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(1);
@@ -252,7 +413,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(0);
@@ -269,7 +431,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(0);
@@ -291,7 +454,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(1);
@@ -311,7 +475,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(0);
@@ -328,7 +493,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(0);
@@ -348,7 +514,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(1);
@@ -368,7 +535,8 @@ describe('evaluateMatchers', () => {
       const matched = evaluateMatchers(
         [episode],
         new Map([['r1', rule]]),
-        new Map([['p1', policy]])
+        new Map([['p1', policy]]),
+        loggerService
       );
 
       expect(matched).toHaveLength(1);

@@ -7,7 +7,11 @@
 
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
@@ -24,10 +28,12 @@ import type {
 export class EvaluateMatchersStep implements DispatcherStep {
   public readonly name = 'evaluate_matchers';
 
+  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [], rules = new Map(), policies = new Map() } = state;
 
-    const matched = evaluateMatchers(dispatchable, rules, policies);
+    const matched = evaluateMatchers(dispatchable, rules, policies, this.logger);
 
     return { type: 'continue', data: { matched } };
   }
@@ -36,7 +42,8 @@ export class EvaluateMatchersStep implements DispatcherStep {
 export function evaluateMatchers(
   dispatchable: readonly AlertEpisode[],
   rules: ReadonlyMap<RuleId, Rule>,
-  policies: ReadonlyMap<ActionPolicyId, ActionPolicy>
+  policies: ReadonlyMap<ActionPolicyId, ActionPolicy>,
+  logger: LoggerServiceContract
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
 
@@ -59,7 +66,20 @@ export function evaluateMatchers(
       }
 
       context ??= createMatcherContext(episode, rule);
-      const isMatch = evaluateKql(policy.matcher, context);
+      let isMatch = false;
+      try {
+        isMatch = evaluateKql(policy.matcher, context);
+      } catch (err) {
+        const rawReason = err instanceof Error ? err.message : String(err);
+        const reason = truncate(rawReason, MAX_LOGGED_TEXT_LENGTH);
+        const truncatedMatcher = truncate(policy.matcher, MAX_LOGGED_TEXT_LENGTH);
+        logger.warn({
+          message: () =>
+            `Failed to evaluate KQL matcher for policy ${policy.id} (rule ${rule.id}, episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
+        });
+        continue;
+      }
+
       if (isMatch) {
         matched.push({ episode, policy });
       }
@@ -67,6 +87,12 @@ export function evaluateMatchers(
   }
 
   return matched;
+}
+
+const MAX_LOGGED_TEXT_LENGTH = 500;
+
+function truncate(value: string, max: number): string {
+  return value.length > max ? `${value.slice(0, max)}…` : value;
 }
 
 function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
