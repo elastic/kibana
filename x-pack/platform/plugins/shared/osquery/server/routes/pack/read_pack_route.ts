@@ -102,7 +102,11 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           saved_object_id: id,
           queries: mapValues(
             convertSOQueriesToPack(attributes.queries),
-            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+            // `schedule_id` is preserved so the pack-detail UI can query
+            // scheduled-result docs by their stable `schedule_id` field
+            // (`logs-osquery_manager.result-*` no longer carries a derivable
+            // `action_id` for native osqueryd-scheduled queries).
+            ({ start_date: _d, ...restQuery }) => restQuery
           ),
           ...(attributes.schedule_type != null ? { schedule_type: attributes.schedule_type } : {}),
           ...(attributes.interval != null ? { interval: attributes.interval } : {}),

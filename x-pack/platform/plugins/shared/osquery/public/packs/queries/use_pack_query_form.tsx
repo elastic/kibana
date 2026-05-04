@@ -48,6 +48,13 @@ export interface PackSOQueryFormData {
   schedule_type?: ScheduleType;
   /** Per-query RRULE override (set when `schedule_type === 'rrule'`). */
   rrule_schedule?: RRuleScheduleConfig;
+  /**
+   * Stable UUID assigned to each scheduled pack query, written onto every
+   * scheduled-result document in `logs-osquery_manager.result-*`. Read-only on
+   * the client — the server generates and persists this value. Used by the
+   * pack-detail status table to query result docs by `schedule_id`.
+   */
+  schedule_id?: string;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
@@ -89,6 +96,13 @@ export interface PackQueryFormData extends ScheduleFormData {
    * value on submit.
    */
   rrule_schedule?: RRuleScheduleConfig;
+  /**
+   * Read-only `schedule_id` carried through the field array round-trip so the
+   * pack-detail status table can query scheduled-result documents by it. Not
+   * bound to any form input — flows from the API → form state → status table
+   * column renderers.
+   */
+  schedule_id?: string;
 }
 
 const buildDefaultScheduleFields = (packDefaultSchedule?: ScheduleFormData): ScheduleFormData =>

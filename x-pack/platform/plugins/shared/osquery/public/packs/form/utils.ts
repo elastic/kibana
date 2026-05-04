@@ -27,6 +27,7 @@ type FieldArrayQueryValue = Pick<
   | 'ecs_mapping'
   | 'schedule_type'
   | 'rrule_schedule'
+  | 'schedule_id'
 >;
 
 export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFormData, 'id'>>) =>
@@ -50,6 +51,9 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
           'ecs_mapping',
           'schedule_type',
           'rrule_schedule',
+          // Read-only passthrough for the pack-detail status table — server
+          // owns this value, the client only reads it.
+          'schedule_id',
         ]),
       };
 
