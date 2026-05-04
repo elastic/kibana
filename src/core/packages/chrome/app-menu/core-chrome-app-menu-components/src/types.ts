@@ -43,11 +43,8 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
   | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'

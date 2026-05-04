@@ -22,7 +22,6 @@ export interface SplitButtonWithNotificationProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   isMainButtonLoading?: boolean;
-  isMainButtonDisabled?: boolean;
   isSelected?: boolean;
   href?: string;
   target?: string;
@@ -34,9 +33,7 @@ export interface SplitButtonWithNotificationProps {
 
   secondaryButtonIcon: IconType;
   secondaryButtonAriaLabel: string;
-  secondaryButtonTitle?: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
-  isSecondaryButtonLoading?: boolean;
   isSecondaryButtonDisabled?: boolean;
 
   showNotificationIndicator?: boolean;
@@ -54,7 +51,6 @@ export const SplitButtonWithNotification = ({
   onClick,
   iconType,
   isMainButtonLoading = false,
-  isMainButtonDisabled = false,
   isSelected,
   href,
   target,
@@ -63,9 +59,7 @@ export const SplitButtonWithNotification = ({
 
   secondaryButtonIcon,
   secondaryButtonAriaLabel,
-  secondaryButtonTitle,
   onSecondaryButtonClick,
-  isSecondaryButtonLoading,
   isSecondaryButtonDisabled,
 
   showNotificationIndicator = false,
@@ -101,7 +95,6 @@ export const SplitButtonWithNotification = ({
           onClick={onClick as MouseEventHandler}
           iconType={iconType}
           iconSize="m"
-          isDisabled={isMainButtonDisabled}
           isLoading={isMainButtonLoading}
           isSelected={isSelected}
           href={href}
@@ -115,10 +108,8 @@ export const SplitButtonWithNotification = ({
           data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
           iconType={secondaryButtonIcon}
           aria-label={secondaryButtonAriaLabel}
-          title={secondaryButtonTitle}
           onClick={onSecondaryButtonClick}
           isDisabled={isSecondaryButtonDisabled}
-          isLoading={isSecondaryButtonLoading}
         />
       </EuiSplitButton>
       {showNotificationIndicator && (
@@ -145,7 +136,7 @@ export const SplitButtonWithNotification = ({
               content={notificationIndicatorTooltipContent}
               iconProps={{
                 onClick:
-                  isDisabled || isLoading || isMainButtonDisabled || isMainButtonLoading
+                  isDisabled || isLoading || isMainButtonLoading
                     ? undefined
                     : (onClick as MouseEventHandler),
               }}
