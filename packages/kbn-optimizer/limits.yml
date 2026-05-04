@@ -67,7 +67,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 11834
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
-  expressions: 105076
+  expressions: 104955
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
@@ -114,7 +114,7 @@ pageLoadAssetSize:
   logstash: 15882
   maintenanceWindows: 8775
   management: 14304
-  maps: 45917
+  maps: 42451
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
