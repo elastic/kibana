@@ -167,10 +167,6 @@ export class CasesClientFactory {
     const spaceId =
       this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
-    const casesEventMetadata = {
-      request,
-      spaceId,
-    };
     const { closeReasonValidator } = this.options;
     const boundCloseReasonValidator = closeReasonValidator
       ? (closeReason: string, owner: string) => closeReasonValidator(closeReason, owner, request)
@@ -195,7 +191,7 @@ export class CasesClientFactory {
       usageCounter: this.options.usageCounter,
       config: this.options.config,
       casesEventBus: this.options.casesEventBus,
-      casesEventMetadata,
+      request,
       closeReasonValidator: boundCloseReasonValidator,
     });
   }

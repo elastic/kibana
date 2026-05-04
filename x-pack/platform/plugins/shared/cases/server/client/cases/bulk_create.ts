@@ -160,7 +160,7 @@ export const bulkCreate = async (
     const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
 
     createdCasesResponse.cases.forEach((createdCase) => {
-      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.casesEventMetadata, {
+      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
         caseId: createdCase.id,
         owner: createdCase.owner as Owner,
       });

@@ -75,12 +75,12 @@ describe('bulkCreate', () => {
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledTimes(2);
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
         1,
-        clientArgs.casesEventMetadata,
+        clientArgs.request,
         { caseId: 'mock-id-1', owner: caseSO.attributes.owner }
       );
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
         2,
-        clientArgs.casesEventMetadata,
+        clientArgs.request,
         { caseId: 'mock-id-2', owner: caseSO.attributes.owner }
       );
     });

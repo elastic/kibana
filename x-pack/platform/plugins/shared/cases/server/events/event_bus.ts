@@ -7,13 +7,13 @@
 
 import { EventEmitter } from 'events';
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CasesEventPayload,
   CasesDomainEventType,
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
   CommentAddedEventPayload,
-  CasesEventMetadata,
 } from './types';
 
 export const CASE_CREATED_EVENT = 'caseCreated';
@@ -39,16 +39,16 @@ export class CasesEventBus extends EventEmitter {
     this.setMaxListeners(50);
   }
 
-  emitCaseCreated(metadata: CasesEventMetadata, payload: CaseCreatedEventPayload): void {
-    this.emit(CASE_CREATED_EVENT, { type: 'caseCreated', payload, metadata });
+  emitCaseCreated(request: KibanaRequest, payload: CaseCreatedEventPayload): void {
+    this.emit(CASE_CREATED_EVENT, { type: 'caseCreated', payload, request });
   }
 
-  emitCaseUpdated(metadata: CasesEventMetadata, payload: CaseUpdatedEventPayload): void {
-    this.emit(CASE_UPDATED_EVENT, { type: 'caseUpdated', payload, metadata });
+  emitCaseUpdated(request: KibanaRequest, payload: CaseUpdatedEventPayload): void {
+    this.emit(CASE_UPDATED_EVENT, { type: 'caseUpdated', payload, request });
   }
 
-  emitCommentAdded(metadata: CasesEventMetadata, payload: CommentAddedEventPayload): void {
-    this.emit(COMMENT_ADDED_EVENT, { type: 'commentAdded', payload, metadata });
+  emitCommentAdded(request: KibanaRequest, payload: CommentAddedEventPayload): void {
+    this.emit(COMMENT_ADDED_EVENT, { type: 'commentAdded', payload, request });
   }
 
   onCaseCreated(listener: CasesEventBusListener<'caseCreated'>): void {

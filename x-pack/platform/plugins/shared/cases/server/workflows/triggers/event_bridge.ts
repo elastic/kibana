@@ -26,32 +26,24 @@ export function registerCasesWorkflowEventBridge(
     return;
   }
 
-  const forward = async (
-    eventType: string,
-    payload: unknown,
-    metadata: { request: KibanaRequest; spaceId: string }
-  ) => {
+  const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
+    const client = await workflowsExtensions.getClient(request);
     try {
-      await workflowsExtensions.emitEvent({
-        triggerId: eventType,
-        payload: payload as Record<string, unknown>,
-        request: metadata.request,
-        spaceId: metadata.spaceId,
-      });
+      await client.emitEvent(eventType, payload as Record<string, unknown>);
     } catch (error) {
       logger.warn(`Failed to emit workflow trigger "${eventType}": ${error}`);
     }
   };
 
   casesEventBus.onCaseCreated((event) => {
-    void forward(CaseCreatedTriggerId, event.payload, event.metadata);
+    void forward(CaseCreatedTriggerId, event.payload, event.request);
   });
 
   casesEventBus.onCaseUpdated((event) => {
-    void forward(CaseUpdatedTriggerId, event.payload, event.metadata);
+    void forward(CaseUpdatedTriggerId, event.payload, event.request);
   });
 
   casesEventBus.onCommentAdded((event) => {
-    void forward(CommentAddedTriggerId, event.payload, event.metadata);
+    void forward(CommentAddedTriggerId, event.payload, event.request);
   });
 }

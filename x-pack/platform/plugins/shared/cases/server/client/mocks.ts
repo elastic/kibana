@@ -272,10 +272,7 @@ export const createCasesClientMockArgs = () => {
     fileService: createFileServiceMock(),
     config: ConfigSchema.validate({}),
     casesEventBus: createCasesEventBusMock(),
-    casesEventMetadata: {
-      request: httpServerMock.createKibanaRequest(),
-      spaceId: 'default',
-    },
+    request: httpServerMock.createKibanaRequest(),
   };
 };
 

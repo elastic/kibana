@@ -14,7 +14,7 @@ export function emitCommentAddedEvent(
   updatedCase: Case,
   newCommentIds: string[]
 ): void {
-  clientArgs.casesEventBus?.emitCommentAdded(clientArgs.casesEventMetadata, {
+  clientArgs.casesEventBus?.emitCommentAdded(clientArgs.request, {
     caseId: updatedCase.id,
     caseCommentIds: newCommentIds,
     owner: updatedCase.owner as Owner,

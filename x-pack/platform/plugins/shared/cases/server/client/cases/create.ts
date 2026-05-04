@@ -176,7 +176,7 @@ export const create = async (
 
     const createdCase = decodeOrThrow(CaseRt)(res);
 
-    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.casesEventMetadata, {
+    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
       caseId: createdCase.id,
       owner: createdCase.owner as Owner,
     });

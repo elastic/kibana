@@ -52,13 +52,10 @@ describe('create', () => {
 
       await create(theCase, clientArgs, casesClientMock);
 
-      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(
-        clientArgs.casesEventMetadata,
-        {
-          caseId: caseSO.id,
-          owner: caseSO.attributes.owner,
-        }
-      );
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(clientArgs.request, {
+        caseId: caseSO.id,
+        owner: caseSO.attributes.owner,
+      });
     });
   });
 

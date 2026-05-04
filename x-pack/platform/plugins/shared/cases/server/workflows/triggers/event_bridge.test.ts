@@ -26,41 +26,41 @@ describe('registerCasesWorkflowEventBridge', () => {
     const logger = loggingSystemMock.createLogger();
     const request = httpServerMock.createKibanaRequest();
 
+    const mockClient = { emitEvent: jest.fn() };
+    workflowsExtensions.getClient.mockResolvedValue(mockClient);
+
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
 
-    eventBus.emitCaseCreated(
-      { request, spaceId: 'default' },
-      { caseId: 'case-1', owner: 'securitySolution' }
-    );
-    eventBus.emitCaseUpdated(
-      { request, spaceId: 'default' },
-      { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['status'] }
-    );
-    eventBus.emitCommentAdded(
-      { request, spaceId: 'default' },
-      { caseId: 'case-1', caseCommentIds: [], owner: 'securitySolution' }
-    );
+    eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
+    eventBus.emitCaseUpdated(request, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
+      updatedFields: ['status'],
+    });
+    eventBus.emitCommentAdded(request, {
+      caseId: 'case-1',
+      caseCommentIds: [],
+      owner: 'securitySolution',
+    });
 
     await flushMicrotasks();
 
-    expect(workflowsExtensions.emitEvent).toHaveBeenCalledTimes(3);
-    expect(workflowsExtensions.emitEvent).toHaveBeenNthCalledWith(1, {
-      triggerId: CaseCreatedTriggerId,
-      payload: { caseId: 'case-1', owner: 'securitySolution' },
-      request,
-      spaceId: 'default',
+    expect(workflowsExtensions.getClient).toHaveBeenCalledTimes(3);
+    expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
+    expect(mockClient.emitEvent).toHaveBeenCalledTimes(3);
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, CaseCreatedTriggerId, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
     });
-    expect(workflowsExtensions.emitEvent).toHaveBeenNthCalledWith(2, {
-      triggerId: CaseUpdatedTriggerId,
-      payload: { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['status'] },
-      request,
-      spaceId: 'default',
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseUpdatedTriggerId, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
+      updatedFields: ['status'],
     });
-    expect(workflowsExtensions.emitEvent).toHaveBeenNthCalledWith(3, {
-      triggerId: CommentAddedTriggerId,
-      payload: { caseId: 'case-1', caseCommentIds: [], owner: 'securitySolution' },
-      request,
-      spaceId: 'default',
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, CommentAddedTriggerId, {
+      caseId: 'case-1',
+      caseCommentIds: [],
+      owner: 'securitySolution',
     });
   });
 
@@ -70,13 +70,11 @@ describe('registerCasesWorkflowEventBridge', () => {
     const logger = loggingSystemMock.createLogger();
     const request = httpServerMock.createKibanaRequest();
 
-    workflowsExtensions.emitEvent.mockRejectedValue(new Error('boom'));
+    const mockClient = { emitEvent: jest.fn().mockRejectedValue(new Error('boom')) };
+    workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
 
-    eventBus.emitCaseCreated(
-      { request, spaceId: 'default' },
-      { caseId: 'case-1', owner: 'securitySolution' }
-    );
+    eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
 
     await flushMicrotasks();
 

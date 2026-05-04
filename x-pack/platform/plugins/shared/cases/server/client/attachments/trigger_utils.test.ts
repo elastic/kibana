@@ -22,7 +22,7 @@ describe('emitCommentAddedEvent', () => {
     emitCommentAddedEvent(clientArgs, updatedCase, ['comment-1']);
 
     expect(clientArgs.casesEventBus.emitCommentAdded).toHaveBeenCalledWith(
-      clientArgs.casesEventMetadata,
+      clientArgs.request,
       { caseId: 'case-1', caseCommentIds: ['comment-1'], owner: 'securitySolution' }
     );
   });

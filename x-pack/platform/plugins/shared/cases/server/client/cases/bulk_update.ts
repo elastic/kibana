@@ -677,7 +677,7 @@ export const bulkUpdate = async (
 
     for (const updatedCase of updatedCasesResponse) {
       const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
-      clientArgs.casesEventBus?.emitCaseUpdated(clientArgs.casesEventMetadata, {
+      clientArgs.casesEventBus?.emitCaseUpdated(clientArgs.request, {
         caseId: updatedCase.id,
         owner: updatedCase.owner as Owner,
         ...(updatedFields != null ? { updatedFields } : {}),

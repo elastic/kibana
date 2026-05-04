@@ -9,14 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Owner } from '../../common/constants/types';
 
 /**
- * Base metadata carried with every Cases domain event for routing.
- */
-export interface CasesEventMetadata {
-  readonly request: KibanaRequest;
-  readonly spaceId: string;
-}
-
-/**
  * Event: case created
  */
 interface BaseCaseEventPayload {
@@ -54,5 +46,5 @@ export type CasesDomainEventType = keyof CasesDomainEventPayloadByType;
 export interface CasesEventPayload<TType extends CasesDomainEventType = CasesDomainEventType> {
   readonly type: TType;
   readonly payload: CasesDomainEventPayloadByType[TType];
-  readonly metadata: CasesEventMetadata;
+  readonly request: KibanaRequest;
 }
