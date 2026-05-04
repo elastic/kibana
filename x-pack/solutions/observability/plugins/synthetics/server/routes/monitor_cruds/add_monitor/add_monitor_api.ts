@@ -42,7 +42,7 @@ import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -171,7 +171,7 @@ export class AddEditMonitorAPI {
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations']
   ) {
-    const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
+    const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
     const {
       locations,
@@ -195,11 +195,34 @@ export class AddEditMonitorAPI {
 
     if (!locations && !privateLocations && prevLocations) {
       locationsVal = prevLocations;
+
+      const prevPrivateLocations = prevLocations.filter((loc) => !loc.isServiceManaged);
+      if (prevPrivateLocations.length > 0) {
+        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+        const namespacesForLookup = [
+          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
+        ].filter(Boolean);
+        const internalClient =
+          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
+          internalClient,
+          namespacesForLookup
+        );
+      }
     } else {
       const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 
       if (monitorLocations.privateLocations.length > 0) {
-        this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);
+        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+        const namespacesForLookup = [
+          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
+        ].filter(Boolean);
+        const internalClient =
+          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
+          internalClient,
+          namespacesForLookup
+        );
       } else {
         this.allPrivateLocations = [];
       }
