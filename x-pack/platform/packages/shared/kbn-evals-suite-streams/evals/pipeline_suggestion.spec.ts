@@ -259,7 +259,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       const documents = await fetchSampleDocuments(
         esClient,
         input.stream_name,
-        input.sample_document_count
+        input.sample_document_count ?? 0
       );
 
       if (!documents || documents.length === 0) {
