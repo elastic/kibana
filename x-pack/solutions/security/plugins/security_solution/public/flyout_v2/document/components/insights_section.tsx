@@ -37,6 +37,7 @@ import {
 } from '../../shared/hooks/use_default_flyout_properties';
 import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../shared/components/open_flyout_link';
+import { HOST_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -173,7 +174,9 @@ export const InsightsSection = memo(
     }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
 
     const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
+      (props: OpenFlyoutLinkProps) => (
+        <OpenFlyoutLink {...props} isStandalone={props.field === HOST_NAME_FIELD_NAME} />
+      ),
       []
     );
 
