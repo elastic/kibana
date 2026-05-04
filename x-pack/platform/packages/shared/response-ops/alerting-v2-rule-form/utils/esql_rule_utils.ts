@@ -54,6 +54,10 @@ export const esqlControlVariableIsComposerInlinable = (v: ESQLControlVariable): 
  * Names the alerting v2 rule executor substitutes itself with the rule's time
  * window at execution time (see `get_query_payload.ts`). They are valid in a
  * persisted rule and must not be flagged as unresolved.
+ *
+ * Side-effect: a user-created control whose key collides with one of these
+ * names will be silently ignored — the placeholder stays in the query for the
+ * executor to bind at run time.
  */
 const RESERVED_RULE_PARAM_NAMES: ReadonlySet<string> = new Set(['_tstart', '_tend']);
 
@@ -116,7 +120,13 @@ export const inlineEsqlVariables = (
   query: string,
   esqlVariables: ESQLControlVariable[] | undefined
 ): InlineEsqlVariablesResult => {
-  if (!esqlVariables || esqlVariables.length === 0) {
+  // undefined → caller doesn't use ES|QL controls at all; skip scanning so
+  // queries with literal ?param tokens (e.g. ?_tstart) don't block save.
+  // [] → caller uses controls but none are bound; scan for leftover tokens.
+  if (esqlVariables === undefined) {
+    return { query, unresolved: [] };
+  }
+  if (esqlVariables.length === 0) {
     return { query, unresolved: findPlaceholderTokens(query) };
   }
 
@@ -145,6 +155,11 @@ export const inlineEsqlVariables = (
     try {
       inlinedQuery = esql(query, params).inlineParams().print('basic');
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[esql_rule_utils] Composer inlineParams failed, falling back to raw query',
+        err
+      );
       inlinedQuery = query;
     }
   }

@@ -28,9 +28,12 @@ export interface DynamicRuleFormFlyoutProps {
   /** Required services */
   services: RuleFormServices;
   /**
-   * ES|QL control variables from Discover. When provided, the flyout inlines
-   * resolvable `?param` / `??param` tokens via Composer and blocks save for
-   * any that remain unresolved.
+   * ES|QL control variables from Discover. When provided (including `[]`),
+   * the flyout inlines resolvable `?param` / `??param` tokens via Composer
+   * and blocks save for any that remain unresolved.
+   *
+   * When `undefined`, the flyout treats the query as-is — no placeholder
+   * scanning, no save gating — so non-ES|QL-control callers are unaffected.
    */
   esqlVariables?: ESQLControlVariable[];
   /**

@@ -108,10 +108,10 @@ describe('inlineEsqlVariables', () => {
   describe('substitution', () => {
     const query = 'FROM logs* | WHERE host == ?host | LIMIT 10';
 
-    it('returns the original query unchanged when esqlVariables is undefined', () => {
+    it('returns the original query and no unresolved tokens when esqlVariables is undefined (opt-out)', () => {
       const result = inlineEsqlVariables(query, undefined);
       expect(result.query).toBe(query);
-      expect(result.unresolved).toEqual(['?host']);
+      expect(result.unresolved).toEqual([]);
     });
 
     it('returns the original query unchanged when esqlVariables is empty', () => {
