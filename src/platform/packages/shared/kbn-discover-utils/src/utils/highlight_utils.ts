@@ -20,29 +20,62 @@ const HTML_HIGHLIGHT_POST_TAG = '</mark>';
 const ES_HIGHLIGHT_PRE_TAG = '@kibana-highlighted-field@';
 const ES_HIGHLIGHT_POST_TAG = '@/kibana-highlighted-field@';
 
+const ARRAY_HIGHLIGHT_PRE_TAG = '<span class="ffArray__highlight">';
+const ARRAY_HIGHLIGHT_POST_TAG = '</span>';
+
+// Matches all candidate tags in one pass; state tracking below decides which to preserve.
+const TAGS_REGEX = new RegExp(
+  [
+    HTML_HIGHLIGHT_PRE_TAG,
+    HTML_HIGHLIGHT_POST_TAG,
+    ARRAY_HIGHLIGHT_PRE_TAG,
+    ARRAY_HIGHLIGHT_POST_TAG,
+  ]
+    .map((tag) => tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|'),
+  'g'
+);
+
 /**
- * Escapes HTML in a string while preserving field-format highlight <mark> tags.
+ * Escapes HTML in a string while preserving field-format highlight <mark> tags
+ * and array-formatting <span class="ffArray__highlight"> tags.
  * Used for values already processed by formatFieldValue / getHighlightHtml (e.g. resource badges).
+ *
+ * Closing tags are only preserved when a matching opening tag was already seen, so orphaned
+ * </mark> or </span> in arbitrary input are still escaped.
  */
 export function escapeAndPreserveHighlightTags(value: string): string {
-  if (!value.includes(HTML_HIGHLIGHT_PRE_TAG)) {
-    return escape(value);
+  const parts: string[] = [];
+  let lastIndex = 0;
+  let inSearchHighlight = false;
+  let inArrayHighlight = false;
+
+  for (const match of value.matchAll(TAGS_REGEX)) {
+    const tag = match[0];
+    const before = value.slice(lastIndex, match.index);
+
+    if (tag === HTML_HIGHLIGHT_PRE_TAG) {
+      parts.push(escape(before), tag);
+      inSearchHighlight = true;
+    } else if (tag === HTML_HIGHLIGHT_POST_TAG && inSearchHighlight) {
+      parts.push(escape(before), tag);
+      inSearchHighlight = false;
+    } else if (tag === ARRAY_HIGHLIGHT_PRE_TAG) {
+      parts.push(escape(before), tag);
+      inArrayHighlight = true;
+    } else if (tag === ARRAY_HIGHLIGHT_POST_TAG && inArrayHighlight) {
+      parts.push(escape(before), tag);
+      inArrayHighlight = false;
+    } else {
+      // Orphaned closing tag — escape it along with the preceding text
+      parts.push(escape(before + tag));
+    }
+
+    lastIndex = match.index! + tag.length;
   }
 
-  return value
-    .split(HTML_HIGHLIGHT_PRE_TAG)
-    .map((segment, index) => {
-      if (index === 0) return escape(segment);
-
-      const postTagIndex = segment.indexOf(HTML_HIGHLIGHT_POST_TAG);
-      if (postTagIndex === -1) return escape(segment);
-
-      const highlighted = segment.substring(0, postTagIndex);
-      const rest = segment.substring(postTagIndex + HTML_HIGHLIGHT_POST_TAG.length);
-
-      return HTML_HIGHLIGHT_PRE_TAG + escape(highlighted) + HTML_HIGHLIGHT_POST_TAG + escape(rest);
-    })
-    .join('');
+  parts.push(escape(value.slice(lastIndex)));
+  return parts.join('');
 }
 
 /**
