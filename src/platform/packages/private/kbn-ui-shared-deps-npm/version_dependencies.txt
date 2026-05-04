@@ -468,7 +468,7 @@ supports-color@8.1.1
 supports-preserve-symlinks-flag@1.0.0
 symbol-observable@4.0.0
 tabbable@5.3.3
-tapable@2.3.0
+tapable@2.3.2
 terser-webpack-plugin@5.3.17
 terser@5.40.0
 text-diff@1.0.1
