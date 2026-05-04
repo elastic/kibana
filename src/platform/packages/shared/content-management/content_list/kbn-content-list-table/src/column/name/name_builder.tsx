@@ -30,10 +30,13 @@ const DEFAULT_NAME_COLUMN_TITLE = i18n.translate(
  * length for descriptive text. Set as `width` (not just `maxWidth`) so the
  * column actually stops at this size on wide pages — `max-width` is ignored
  * by browsers on `<th>` / `<td>` regardless of `table-layout`, so a `width`
- * is the only way to lock the column. The `ContentListTable` then appends
- * a trailing spacer column to absorb the leftover slack, putting the
- * trailing whitespace after the populated columns instead of inside the
- * Name cell. See the package README's "Defaults" section for the full
+ * is the only way to lock the column.
+ *
+ * On viewports above EUI's `xl` breakpoint, `ContentListTable` appends a
+ * trailing spacer column (no explicit `width`) that absorbs all leftover
+ * horizontal space, keeping `Column.Name` near this preferred width. On
+ * narrower viewports the spacer is omitted and `Column.Name` grows naturally
+ * to fill the table. See the package README's "Defaults" section for the full
  * width / minWidth / maxWidth contract.
  *
  * On viewports narrower than the sum of all column widths, the browser

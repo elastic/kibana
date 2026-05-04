@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
@@ -135,55 +135,6 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
 `;
 
 /**
- * Render a trailing spacer column purely in CSS, via a `::after`
- * pseudo-cell on every `<tr>`.
- *
- * Browsers ignore `max-width` on table cells (per the
- * [CSS Tables spec](https://drafts.csswg.org/css-tables/#computing-the-table-width)),
- * so the only way to keep populated columns at their preferred widths on a
- * wide page is to give the slack to a column that wants it. Without a
- * trailing absorber, that role falls to whichever column has no explicit
- * `width` (typically `Column.Name`), which then stretches to fill the table.
- *
- * Setting `display: table-cell` on a `tr::after` is the spec-defined way to
- * inject an anonymous, unsized table cell into the layout algorithm without
- * adding any markup. Because every preset ships with an explicit `width`,
- * the pseudo-cell is the only column without one, so the browser hands it
- * all the leftover horizontal space — populated columns sit left-aligned at
- * their preferred widths and the trailing whitespace lives after the last
- * populated column. On viewports too narrow to fit all preferred widths,
- * the pseudo-cell collapses to `0` and the browser shrinks the populated
- * columns proportionally (with `Column.Name` shrinking first because it
- * has the most range between its `width` and `minWidth`).
- *
- * Why a pseudo-cell rather than a real `<td>` column:
- * - **No DOM impact** — the rendered table has exactly the columns the
- *   consumer declared.
- * - **No accessibility impact** — pseudo-elements aren't in the
- *   accessibility tree, so screen readers report the correct column count
- *   and don't announce a phantom "blank cell" at the end of every row.
- * - **No clipboard impact** — `content: ''` isn't selectable, so copying
- *   rows into a spreadsheet doesn't add a trailing tab.
- *
- * `border-block` mirrors the `border-vertical: euiTheme.border.thin`
- * declaration that EUI applies to every real `<th>` / `<td>` (see
- * `table_row_cell.styles.js` and `table_cells_shared.styles.js` in
- * `@elastic/eui`). Without it, the row separator would stop at the last
- * populated cell and leave the trailing whitespace visually un-ruled.
- *
- * @see {@link DEFAULT_NAME_WIDTH} in `name_builder.tsx` for why
- * `Column.Name` ships with an explicit `width`.
- */
-const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
-  thead tr::after,
-  tbody tr::after {
-    content: '';
-    display: table-cell;
-    border-block: ${euiTheme.border.thin};
-  }
-`;
-
-/**
  * ContentListTable - Table renderer for content listings.
  *
  * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
@@ -241,21 +192,92 @@ const ContentListTableComponent = ({
 
   const { requestDelete, deleteModal } = useDeleteConfirmation();
 
+  // Add the spacer column on viewports wider than this threshold (px).
+  // Uses window.matchMedia so the value is not tied to a named EUI breakpoint.
+  const SPACER_BREAKPOINT_PX = 1560;
+  const [isAboveXl, setIsAboveXl] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth >= SPACER_BREAKPOINT_PX
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${SPACER_BREAKPOINT_PX}px)`);
+    setIsAboveXl(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsAboveXl(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
   const resolvedColumns = useColumns(children, requestDelete);
-  const basicTableColumns = useMemo(() => resolvedColumns.map((r) => r.column), [resolvedColumns]);
+
+  /**
+   * A layout-only column appended at > xl to absorb excess horizontal space
+   * after the actions column. It has no content, no header label, is not
+   * sortable, and carries no width so the browser gives it all leftover slack.
+   *
+   * ARIA attributes (`aria-hidden`, `role="presentation"`) are applied
+   * imperatively via the `tableRef` effect below because EUI's column API does
+   * not expose `thProps` / `tdProps`.
+   */
+  const spacerColumn = useMemo(
+    () => ({
+      name: '',
+      render: () => null,
+      'data-test-subj': 'content-list-table-column-spacer',
+    }),
+    []
+  );
+
+  // On wide viewports the name column can comfortably be wider than its
+  // default 64em cap. The spacer column still absorbs whatever remains.
+  const WIDE_NAME_WIDTH = '90em';
+
+  const basicTableColumns = useMemo(
+    () => [
+      ...resolvedColumns.map((r) => {
+        const col = r.column;
+        if (
+          isAboveXl &&
+          (col as { 'data-test-subj'?: string })['data-test-subj'] ===
+            'content-list-table-column-name'
+        ) {
+          return { ...col, width: WIDE_NAME_WIDTH, maxWidth: WIDE_NAME_WIDTH };
+        }
+        return col;
+      }),
+      ...(isAboveXl ? [spacerColumn] : []),
+    ],
+    [resolvedColumns, isAboveXl, spacerColumn]
+  );
+
   const { sorting, onChange } = useSorting();
   const { selection } = useSelection();
 
   const tableCss = useMemo(
     () => [
       cssStickyCellRowStateSync(euiTheme),
-      // Excess horizontal space is absorbed by `cssTrailingSpacer` so it lands
-      // after the last populated column rather than stretching `Column.Name`.
-      cssTrailingSpacer(euiTheme),
       ...(supports.starred ? [cssFavoriteHoverWithinEuiTableRow(euiTheme)] : []),
     ],
     [euiTheme, supports.starred]
   );
+
+  /**
+   * Mark the spacer column's `<th>` and `<td>` elements as purely
+   * presentational so assistive technologies do not announce them as real
+   * columns. EUI's column API has no `thProps`/`tdProps`, so we set the
+   * attributes imperatively after each render that could add or remove rows.
+   *
+   * The effect re-runs whenever `isAboveXl` or `items` changes — the two
+   * events that add/remove the spacer cells from the DOM.
+   */
+  const tableRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!tableRef.current || !isAboveXl) return;
+    tableRef.current
+      .querySelectorAll('[data-test-subj="content-list-table-column-spacer"]')
+      .forEach((cell) => {
+        cell.setAttribute('aria-hidden', 'true');
+        cell.setAttribute('role', 'presentation');
+      });
+  }, [isAboveXl, items]);
 
   if (isLoading) {
     return (
@@ -275,24 +297,26 @@ const ContentListTableComponent = ({
 
   return (
     <>
-      <EuiBasicTable
-        tableCaption={title}
-        columns={basicTableColumns}
-        compressed={compressed}
-        css={tableCss}
-        error={error?.message}
-        itemId={(item) => getRowId(item.id)}
-        items={items}
-        loading={isFetching}
-        noItemsMessage={noItemsMessage}
-        onChange={onChange}
-        sorting={sorting}
-        selection={selection}
-        scrollableInline={scrollableInline}
-        responsiveBreakpoint={responsiveBreakpoint}
-        tableLayout={tableLayout}
-        data-test-subj={dataTestSubj}
-      />
+      <div ref={tableRef}>
+        <EuiBasicTable
+          tableCaption={title}
+          columns={basicTableColumns}
+          compressed={compressed}
+          css={tableCss}
+          error={error?.message}
+          itemId={(item) => getRowId(item.id)}
+          items={items}
+          loading={isFetching}
+          noItemsMessage={noItemsMessage}
+          onChange={onChange}
+          sorting={sorting}
+          selection={selection}
+          scrollableInline={scrollableInline}
+          responsiveBreakpoint={responsiveBreakpoint}
+          tableLayout={tableLayout}
+          data-test-subj={dataTestSubj}
+        />
+      </div>
       {deleteModal}
     </>
   );
