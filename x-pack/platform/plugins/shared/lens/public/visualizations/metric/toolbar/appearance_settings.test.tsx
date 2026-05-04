@@ -440,12 +440,21 @@ describe('appearance settings', () => {
   });
 
   it('infers template from new field values after editing a layout option', () => {
-    // Start with the top preset layout
-    renderComponent({
+    // Start with all four layout fields matching the 'top' preset exactly.
+    // icon/iconAlign are cleared so the legacy iconAlign fallback doesn't interfere.
+    const { rerender } = renderComponent({
       primaryPosition: 'top',
       titlesTextAlign: 'left',
       primaryAlign: 'left',
+      secondaryAlign: 'left',
+      icon: undefined,
+      iconAlign: undefined,
     });
+
+    expect(screen.getByTestId('lens-metric-style-template-top')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
 
     const btnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-primary-metric-alignment-btn'
@@ -453,6 +462,11 @@ describe('appearance settings', () => {
     btnGroup.select('Right');
 
     expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ primaryAlign: 'right' }));
+
+    // Re-render with the updated state to verify inference recalculates to 'custom'
+    const newState = mockSetState.mock.calls[0][0] as MetricVisualizationState;
+    rerender(<MetricAppearanceSettings state={newState} setState={mockSetState} />);
+
     expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
       'aria-checked',
       'true'
