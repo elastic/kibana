@@ -70,6 +70,9 @@ describe('extractWorkflowMetadata', () => {
     constCount: 0,
     triggerCount: 0,
     hasTriggerConditions: false,
+    hasTriggerWorkflowEventsIgnore: false,
+    hasTriggerWorkflowEventsAllow: false,
+    hasTriggerWorkflowEventsAvoidLoop: false,
     settingsUsed: [],
     hasDescription: false,
     tagCount: 0,
@@ -88,6 +91,9 @@ describe('extractWorkflowMetadata', () => {
         constCount: 0,
         triggerCount: 0,
         hasTriggerConditions: false,
+        hasTriggerWorkflowEventsIgnore: false,
+        hasTriggerWorkflowEventsAllow: false,
+        hasTriggerWorkflowEventsAvoidLoop: false,
         settingsUsed: [],
         hasDescription: false,
         tagCount: 0,
@@ -285,6 +291,66 @@ describe('extractWorkflowMetadata', () => {
 
       expect(withCondition.hasTriggerConditions).toBe(true);
       expect(withoutCondition.hasTriggerConditions).toBe(false);
+    });
+
+    it('tracks on.workflowEvents per known enum string', () => {
+      const allowOnly = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'cases.updated', on: { workflowEvents: 'allow-all' } },
+          ]),
+        })
+      );
+      expect(allowOnly.hasTriggerWorkflowEventsAllow).toBe(true);
+      expect(allowOnly.hasTriggerWorkflowEventsIgnore).toBe(false);
+      expect(allowOnly.hasTriggerWorkflowEventsAvoidLoop).toBe(false);
+
+      const ignoreOnly = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'cases.updated', on: { workflowEvents: 'ignore' } },
+          ]),
+        })
+      );
+      expect(ignoreOnly.hasTriggerWorkflowEventsIgnore).toBe(true);
+      expect(ignoreOnly.hasTriggerWorkflowEventsAllow).toBe(false);
+      expect(ignoreOnly.hasTriggerWorkflowEventsAvoidLoop).toBe(false);
+
+      const avoidLoopExplicit = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'cases.updated', on: { workflowEvents: 'avoid-loop' } },
+          ]),
+        })
+      );
+      expect(avoidLoopExplicit.hasTriggerWorkflowEventsAvoidLoop).toBe(true);
+      expect(avoidLoopExplicit.hasTriggerWorkflowEventsIgnore).toBe(false);
+      expect(avoidLoopExplicit.hasTriggerWorkflowEventsAllow).toBe(false);
+
+      const twoTriggers = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'cases.updated', on: { workflowEvents: 'ignore' } },
+            { type: 'cases.comment_added', on: { workflowEvents: 'allow-all' } },
+          ]),
+        })
+      );
+      expect(twoTriggers.hasTriggerWorkflowEventsIgnore).toBe(true);
+      expect(twoTriggers.hasTriggerWorkflowEventsAllow).toBe(true);
+    });
+
+    it('ignores unknown or non-string on.workflowEvents values', () => {
+      const result = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'cases.updated', on: { workflowEvents: 'maybeLater' } },
+            { type: 'cases.other', on: { workflowEvents: false as unknown as string } },
+          ]),
+        })
+      );
+      expect(result.hasTriggerWorkflowEventsIgnore).toBe(false);
+      expect(result.hasTriggerWorkflowEventsAllow).toBe(false);
+      expect(result.hasTriggerWorkflowEventsAvoidLoop).toBe(false);
     });
 
     it('reflects root field: inputs (array length)', () => {

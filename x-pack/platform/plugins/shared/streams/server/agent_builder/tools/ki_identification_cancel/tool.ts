@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
-import { classifyError } from '../error_utils';
+import { classifyError } from '../../utils/error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 export const STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID =

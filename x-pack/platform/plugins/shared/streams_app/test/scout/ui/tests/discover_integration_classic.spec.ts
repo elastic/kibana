@@ -14,7 +14,7 @@ const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
 test.describe(
   'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
-  { tag: tags.serverless.observability.complete },
+  { tag: tags.serverless.observability.all },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data for a classic stream

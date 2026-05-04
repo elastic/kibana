@@ -105,7 +105,7 @@ function collectBugs(spec) {
 function toTarget(jsonpath) {
   return jsonpath
     .replace(/\.components\.schemas\.([\w-]+)/g, ".components.schemas['$1']")
-    .replace(/\.paths\.(\/[^\s[\]]+)/g, (_, s) => `.paths['${s}']`)
+    .replace(/\.paths\.(\/[^.\s[\]]+)/g, (_, s) => `.paths['${s}']`)
     .replace(/\.content\.([^\s.'[\]]+\/[^\s.'[\]]+)/g, (_, s) => `.content['${s}']`);
 }
 

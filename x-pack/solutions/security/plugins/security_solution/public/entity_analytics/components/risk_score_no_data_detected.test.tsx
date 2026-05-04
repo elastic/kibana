@@ -34,7 +34,7 @@ describe('RiskScoresNoDataDetected', () => {
     expect(screen.getByText(/No user risk score data available to display/i)).toBeInTheDocument();
   });
 
-  it('renders helpful message about checking filters and risk engine timing', () => {
+  it('renders helpful message about checking filters and risk score maintainer timing', () => {
     const { container } = render(
       <TestProviders>
         <RiskScoresNoDataDetected entityType={EntityType.host} />
@@ -46,6 +46,6 @@ describe('RiskScoresNoDataDetected', () => {
     // Check for key phrases in the message (using more flexible matching)
     expect(bodyText).toMatch(/haven.*found.*host.*risk.*score.*data/i);
     expect(bodyText).toMatch(/Check.*global.*filters/i);
-    expect(bodyText).toMatch(/risk.*engine.*might.*need.*hour/i);
+    expect(bodyText).toMatch(/risk.*score.*maintainer.*might.*need.*hour/i);
   });
 });

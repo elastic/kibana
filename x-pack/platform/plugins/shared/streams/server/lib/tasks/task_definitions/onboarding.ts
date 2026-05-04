@@ -97,6 +97,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
                   request: fakeRequest,
+                  rulesClientOptions: { cloneApiKeysOnCreate: true },
                 });
 
               try {
