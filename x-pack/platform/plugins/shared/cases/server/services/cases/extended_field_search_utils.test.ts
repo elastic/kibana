@@ -1464,8 +1464,14 @@ describe('resolveFieldLabelSearch', () => {
     ]);
   });
 
-  it('bare word substring-matches partial labels', () => {
+  it('exact token does not substring-match partial labels', () => {
     const result = resolveFieldLabelSearch([{ text: 'start', exact: true }], templates);
+
+    expect(result).toEqual([]);
+  });
+
+  it('substring token matches partial labels', () => {
+    const result = resolveFieldLabelSearch([{ text: 'start', exact: false }], templates);
 
     expect(result).toHaveLength(2);
     expect(result).toEqual(

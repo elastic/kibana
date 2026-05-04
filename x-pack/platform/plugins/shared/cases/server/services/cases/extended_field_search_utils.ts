@@ -362,7 +362,9 @@ export const resolveFieldLabelSearch = (
     const normalizedText = token.text.toLowerCase();
 
     for (const [labelKey, metas] of labelToMetas) {
-      if (labelKey.includes(normalizedText)) {
+      const isMatch = token.exact ? labelKey === normalizedText : labelKey.includes(normalizedText);
+
+      if (isMatch) {
         matchingMetas.push(...metas.values());
       }
     }
