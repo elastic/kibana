@@ -25,7 +25,7 @@ export const transformListTypesResponse = (
       subFeature,
       isDeprecated,
       allowMultipleSystemActions,
-      selectMessage,
+      description,
       isExperimental,
     }) => ({
       id,
@@ -40,7 +40,7 @@ export const transformListTypesResponse = (
       sub_feature: subFeature,
       is_deprecated: isDeprecated,
       allow_multiple_system_actions: allowMultipleSystemActions,
-      select_message: selectMessage,
+      description,
       is_experimental: isExperimental,
     })
   );

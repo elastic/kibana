@@ -13,9 +13,9 @@ import {
   fetchConnectorSpec,
   transformSpecToActionTypeModel,
   type ConnectorSpecResponse,
-} from './use_action_type_model_utils';
+} from './action_type_model_utils';
 
-describe('use_action_type_model_utils', () => {
+describe('action_type_model_utils', () => {
   describe('fetchConnectorSpec', () => {
     const http = httpServiceMock.createStartContract();
 

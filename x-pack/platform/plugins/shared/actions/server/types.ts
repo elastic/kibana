@@ -243,9 +243,9 @@ export interface ActionTypeCoreFields<
    */
   allowMultipleSystemActions?: boolean;
   /**
-   * A message shown when selecting this connector type in the UI.
+   * Description of this connector type.
    */
-  selectMessage?: string;
+  description?: string;
   /**
    * When true, the connector type is shown as technical preview in the UI.
    */

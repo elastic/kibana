@@ -319,9 +319,23 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
 
             {isLoadingActionTypeModel && (
-              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+              <EuiFlexGroup
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                style={{ minHeight: 200 }}
+                aria-live="polite"
+              >
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="xl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.loadingConnectorConfiguration',
+                    {
+                      defaultMessage: 'Loading connector configuration...',
+                    }
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
@@ -341,7 +355,15 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                     }
                   )}
                 >
-                  <p>{actionTypeModelError.message}</p>
+                  <p>
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
+                      {
+                        defaultMessage:
+                          'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+                      }
+                    )}
+                  </p>
                 </EuiCallOut>
                 <EuiSpacer size="m" />
               </>

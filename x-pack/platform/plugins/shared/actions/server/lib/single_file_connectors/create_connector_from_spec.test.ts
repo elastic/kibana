@@ -82,6 +82,20 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBe(true);
   });
 
+  it('sets description from metadata.description', () => {
+    const spec = createMockSpec({
+      metadata: {
+        id: 'connector-with-description',
+        displayName: 'Connector with description',
+        description: 'Connector description',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+    expect(connectorType.description).toBe('Connector description');
+  });
+
   it('creates connector type with executor and params for workflows connectors with multiple feature IDs', () => {
     const spec = createMockSpec({
       metadata: {

@@ -333,12 +333,22 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               )}
               {isLoadingActionTypeModel && (
                 <EuiFlexGroup
+                  direction="column"
                   justifyContent="center"
                   alignItems="center"
                   style={{ minHeight: 200 }}
+                  aria-live="polite"
                 >
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="xl" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.loadingConnectorConfiguration',
+                      {
+                        defaultMessage: 'Loading connector configuration...',
+                      }
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
@@ -358,7 +368,15 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                       }
                     )}
                   >
-                    <p>{actionTypeModelError.message}</p>
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorDescription',
+                        {
+                          defaultMessage:
+                            'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+                        }
+                      )}
+                    </p>
                   </EuiCallOut>
                   <EuiSpacer size="m" />
                 </>
@@ -450,7 +468,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         return false;
       }
       const source = actionTypeModel?.source ?? resolvedActionType?.source;
-      return source == null || source === ACTION_TYPE_SOURCES.stack;
+      return source === ACTION_TYPE_SOURCES.stack;
     })();
 
   return (

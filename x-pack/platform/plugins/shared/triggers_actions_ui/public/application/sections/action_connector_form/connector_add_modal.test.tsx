@@ -186,7 +186,7 @@ describe('connector_add_modal', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['workflows'],
       source: 'spec',
-      selectMessage: 'Spec modal description',
+      description: 'Spec modal description',
     });
 
     const mockSpecResponse = {

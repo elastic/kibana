@@ -11,9 +11,19 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs';
 import type { ActionType, ActionTypeModel, ActionTypeRegistryContract } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
-import { fetchConnectorSpec, transformSpecToActionTypeModel } from './use_action_type_model_utils';
+import { fetchConnectorSpec, transformSpecToActionTypeModel } from './action_type_model_utils';
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
+
+const normalizeError = (error: unknown): Error | null => {
+  if (error == null) {
+    return null;
+  }
+  if (error instanceof Error) {
+    return error;
+  }
+  return new Error(String(error));
+};
 
 export interface UseActionTypeModelResult {
   /** The action type model, either from registry or derived from spec */
@@ -85,7 +95,7 @@ export function useActionTypeModel(
     () => ({
       actionTypeModel: registeredModel ?? specBasedModel,
       isLoading: shouldFetchSpec && isLoading,
-      error: error as Error | null,
+      error: normalizeError(error),
       isFromSpec: registeredModel == null && specBasedModel != null,
     }),
     [registeredModel, specBasedModel, shouldFetchSpec, isLoading, error]

@@ -115,5 +115,30 @@ describe('fromConnectorSpecSchema', () => {
 
       expect(authTypes).toEqual(expect.arrayContaining(['basic', 'bearer', 'api_key_header']));
     });
+
+    it('handles connector without auth types', () => {
+      const testSpec = {
+        metadata: {
+          id: '.test-no-auth',
+          displayName: 'Test No Auth',
+          description: 'Test connector without auth',
+          minimumLicense: 'basic' as const,
+          supportedFeatureIds: ['workflows' as const],
+        },
+        actions: {
+          testAction: {
+            input: z.object({}),
+            handler: async () => ({ success: true }),
+          },
+        },
+      };
+
+      const serialized = serializeConnectorSpec(testSpec);
+      const zodSchema = fromConnectorSpecSchema(serialized.schema);
+
+      expect(zodSchema).toBeDefined();
+      expect(zodSchema?.shape.config).toBeInstanceOf(z.ZodObject);
+      expect(zodSchema?.shape.secrets).toBeInstanceOf(z.ZodObject);
+    });
   });
 });

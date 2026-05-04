@@ -21,7 +21,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { shouldHideWorkflowsOnlyConnector } from '../../hooks/use_action_type_model_utils';
+import { shouldHideWorkflowsOnlyConnector } from '../../hooks/action_type_model_utils';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -145,7 +145,7 @@ export const ActionTypeMenu = ({
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
         return {
           iconClass: getConnectorIcon(actionType.id),
-          selectMessage: actionType.selectMessage ?? '',
+          selectMessage: actionType.description ?? '',
           actionType,
           name: actionType.name,
           isExperimental: actionType.isExperimental ?? false,

@@ -33,7 +33,7 @@ export interface ActionType {
   validate?: {
     params: PublicValidatorType;
   };
-  selectMessage?: string;
+  description?: string;
   isExperimental?: boolean;
 }
 

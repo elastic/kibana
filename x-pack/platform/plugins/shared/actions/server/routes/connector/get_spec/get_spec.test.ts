@@ -87,6 +87,22 @@ describe('getConnectorSpecRoute', () => {
     expect(config.options?.access).toBe('internal');
   });
 
+  it('registers the route with explicit authorization opt-out', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
+
+    const [config] = router.get.mock.calls[0];
+    expect(config.security).toEqual({
+      authz: {
+        enabled: false,
+        reason:
+          'This API returns connector type metadata and does not require Kibana feature privileges.',
+      },
+    });
+  });
+
   it('returns 200 with serialized spec for valid connector ID', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

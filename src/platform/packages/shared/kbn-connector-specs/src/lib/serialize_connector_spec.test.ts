@@ -12,21 +12,6 @@ import * as connectorsSpecs from '../all_specs';
 import * as generateSecretsModule from './generate_secrets_schema_from_spec';
 import { serializeConnectorSpec } from './serialize_connector_spec';
 
-function getSecretAuthTypesFromSerializedSchema(schema: Record<string, unknown>): string[] {
-  const properties = schema.properties as Record<string, unknown> | undefined;
-  const secrets = properties?.secrets as Record<string, unknown> | undefined;
-  if (!secrets) {
-    return [];
-  }
-  type Branch = { properties?: { authType?: { const?: string } } };
-  const anyOf = secrets['anyOf'] as Branch[] | undefined;
-  const oneOf = secrets['oneOf'] as Branch[] | undefined;
-  const branches = anyOf ?? oneOf ?? [];
-  return branches
-    .map((opt) => opt.properties?.authType?.const)
-    .filter((v): v is string => typeof v === 'string');
-}
-
 describe('serializeConnectorSpec', () => {
   describe('basic structure', () => {
     it('returns object with metadata and schema properties', () => {
@@ -314,13 +299,23 @@ describe('serializeConnectorSpec', () => {
 
       const defaultEars = serializeConnectorSpec(spec);
       const earsOn = serializeConnectorSpec(spec, { isEarsEnabled: true });
+      type SecretBranch = { properties?: { authType?: { const?: string } } };
 
-      expect(
-        getSecretAuthTypesFromSerializedSchema(defaultEars.schema as Record<string, unknown>)
-      ).toEqual(['basic']);
-      expect(
-        getSecretAuthTypesFromSerializedSchema(earsOn.schema as Record<string, unknown>)
-      ).toEqual(['basic', 'ears']);
+      const defaultProperties = defaultEars.schema.properties as Record<string, unknown>;
+      const defaultSecrets = defaultProperties.secrets as Record<string, SecretBranch[]>;
+      const defaultBranches = defaultSecrets.anyOf ?? defaultSecrets.oneOf ?? [];
+
+      const earsOnProperties = earsOn.schema.properties as Record<string, unknown>;
+      const earsOnSecrets = earsOnProperties.secrets as Record<string, SecretBranch[]>;
+      const earsOnBranches = earsOnSecrets.anyOf ?? earsOnSecrets.oneOf ?? [];
+
+      expect(defaultBranches.map((branch) => branch.properties?.authType?.const)).toEqual([
+        'basic',
+      ]);
+      expect(earsOnBranches.map((branch) => branch.properties?.authType?.const)).toEqual([
+        'basic',
+        'ears',
+      ]);
     });
   });
 

@@ -13,7 +13,6 @@ import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
 import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 // Pre-index specs by ID for O(1) lookup
 const specsByIdMap = new Map(
@@ -36,7 +35,12 @@ export const getConnectorSpecRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types/{id}/spec`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This API returns connector type metadata and does not require Kibana feature privileges.',
+        },
+      },
       options: {
         access: 'internal',
         summary: 'Get connector type specification',

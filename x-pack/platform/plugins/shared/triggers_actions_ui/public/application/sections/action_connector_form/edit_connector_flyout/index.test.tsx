@@ -893,7 +893,7 @@ describe('EditConnectorFlyout spec loading', () => {
     minimumLicenseRequired: 'basic' as const,
     supportedFeatureIds: ['workflows'],
     source: 'spec',
-    selectMessage: 'Test spec connector description',
+    description: 'Test spec connector description',
   };
 
   const mockSpecResponse = {

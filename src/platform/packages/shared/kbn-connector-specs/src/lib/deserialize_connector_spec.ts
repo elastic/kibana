@@ -12,7 +12,7 @@ import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
 interface ConnectorShape {
   config: ZodObject<ZodRawShape>;
-  secrets: ZodDiscriminatedUnion;
+  secrets: ZodObject<ZodRawShape> | ZodDiscriminatedUnion;
 }
 
 export type ConnectorZodSchema = ZodObject<ZodRawShape> & {
@@ -24,15 +24,15 @@ export function fromConnectorSpecSchema(
 ): ConnectorZodSchema | undefined {
   const schema = fromJSONSchema(jsonSchema);
 
-  if (
-    !schema ||
-    !(schema instanceof ZodObject) ||
-    !schema.shape ||
-    !('config' in schema.shape) ||
-    !(schema.shape.config instanceof ZodObject) ||
-    !('secrets' in schema.shape) ||
-    !(schema.shape.secrets instanceof ZodDiscriminatedUnion)
-  ) {
+  if (!schema || !(schema instanceof ZodObject)) {
+    return undefined;
+  }
+
+  const { config, secrets } = schema.shape;
+  const hasValidSecrets =
+    secrets instanceof ZodObject || secrets instanceof ZodDiscriminatedUnion;
+
+  if (!(config instanceof ZodObject) || !hasValidSecrets) {
     return undefined;
   }
   return schema.strict() as ConnectorZodSchema;

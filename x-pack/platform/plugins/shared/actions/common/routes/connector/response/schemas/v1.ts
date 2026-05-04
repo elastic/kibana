@@ -134,10 +134,10 @@ export const connectorTypeResponseSchema = schema.object({
       description: 'The source of the connector type definition.',
     },
   }),
-  select_message: schema.maybe(
+  description: schema.maybe(
     schema.string({
       meta: {
-        description: 'A message shown when selecting this connector type.',
+        description: 'Description of the connector type.',
       },
     })
   ),

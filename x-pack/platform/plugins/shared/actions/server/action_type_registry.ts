@@ -281,7 +281,7 @@ export class ActionTypeRegistry {
           : {}),
         isDeprecated: !!actionType.isDeprecated,
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
-        selectMessage: actionType.selectMessage,
+        description: actionType.description,
         isExperimental: actionType.isExperimental,
       }));
   }
