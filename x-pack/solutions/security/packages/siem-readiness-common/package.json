@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/siem-readiness-common",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "description": "Shared types, constants and pure utility functions for SIEM Readiness, usable by both browser and server code",
+  "sideEffects": false
+}
