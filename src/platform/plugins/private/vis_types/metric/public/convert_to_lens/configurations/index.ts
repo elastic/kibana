@@ -41,16 +41,16 @@ export const getConfiguration = (
         bucketCollapseFn[key as CollapseFunction].includes(breakdownByAccessor)
       ) as CollapseFunction)
     : undefined;
+
   return {
     layerId,
     layerType: 'data',
-    palette: params.metric.metricColorMode !== 'None' ? palette : undefined,
-    applyColorTo:
-      params.metric.metricColorMode !== 'None'
-        ? params.metric.metricColorMode === 'Background'
-          ? 'background'
-          : 'value'
-        : undefined,
+    ...(params.metric.metricColorMode !== 'None'
+      ? {
+          palette,
+          applyColorTo: params.metric.metricColorMode === 'Background' ? 'background' : 'value',
+        }
+      : {}),
     metricAccessor,
     breakdownByAccessor,
     collapseFn,

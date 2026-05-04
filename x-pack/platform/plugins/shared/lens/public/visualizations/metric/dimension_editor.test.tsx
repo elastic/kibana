@@ -1076,23 +1076,12 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
-      const progressDirectionButtonGroup = screen.queryByTestId(
-        'lnsMetric_progress_direction_buttons'
-      );
-      const progressOptions = progressDirectionButtonGroup
-        ? {
-            vertical:
-              within(progressDirectionButtonGroup).queryByTitle(/vertical/i) ||
-              within(progressDirectionButtonGroup).queryByRole('button', { name: /vertical/i }),
-            horizontal:
-              within(progressDirectionButtonGroup).queryByTitle(/horizontal/i) ||
-              within(progressDirectionButtonGroup).queryByRole('button', { name: /horizontal/i }),
-          }
-        : { vertical: null, horizontal: null };
-
       return {
-        progressDirectionShowing: progressDirectionButtonGroup,
-        progressOptions,
+        progressDirectionShowing: screen.queryByTestId('lnsMetric_progress_direction_buttons'),
+        progressOptions: {
+          vertical: screen.queryByTitle(/vertical/i),
+          horizontal: screen.queryByTitle(/horizontal/i),
+        },
         supportingVisOptions,
         clickOnSupportingVis,
         applyColorToBtnGroup,
