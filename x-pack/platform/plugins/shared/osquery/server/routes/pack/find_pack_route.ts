@@ -110,7 +110,9 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_by: attributes.updated_by,
             updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: pack.id,
-            ...(attributes.schedule_type != null ? { schedule_type: attributes.schedule_type } : {}),
+            ...(attributes.schedule_type != null
+              ? { schedule_type: attributes.schedule_type }
+              : {}),
             ...(attributes.interval != null ? { interval: attributes.interval } : {}),
             ...(attributes.rrule_schedule != null
               ? { rrule_schedule: attributes.rrule_schedule }
