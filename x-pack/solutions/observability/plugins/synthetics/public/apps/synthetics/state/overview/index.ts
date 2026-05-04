@@ -8,6 +8,8 @@
 import { createReducer } from '@reduxjs/toolkit';
 import type { MonitorOverviewState } from './models';
 import { overviewViews } from './models';
+import { isPageStateSlotEqual } from '../utils/page_state_equality';
+import { getInitialShowFromAllSpaces } from '../utils/get_initial_show_from_all_spaces';
 
 import {
   setFlyoutConfig,
@@ -25,6 +27,7 @@ const initialState: MonitorOverviewState = {
     perPage: 16,
     sortOrder: 'asc',
     sortField: 'status',
+    showFromAllSpaces: getInitialShowFromAllSpaces(),
   },
   trendStats: {},
   groupBy: { field: 'none', order: 'asc' },
@@ -36,10 +39,16 @@ const initialState: MonitorOverviewState = {
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(setOverviewPageStateAction, (state, action) => {
-      state.pageState = {
-        ...state.pageState,
-        ...action.payload,
-      };
+      // Property-by-property with deep equality so no-op dispatches (e.g.
+      // ShowAllSpaces re-sending the same value, or [] filter arrays from
+      // mount effects) don't create a new pageState reference and re-trigger
+      // the useDebounce fetch in useOverviewStatus.
+      for (const key of Object.keys(action.payload) as Array<keyof typeof action.payload>) {
+        const value = action.payload[key];
+        if (!isPageStateSlotEqual((state.pageState as Record<string, unknown>)[key], value)) {
+          (state.pageState as Record<string, unknown>)[key] = value;
+        }
+      }
     })
     .addCase(setOverviewGroupByAction, (state, action) => {
       state.groupBy = {

@@ -44,7 +44,11 @@ export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: Ove
       onAlertUpdated={onAlertUpdated}
     />
     <EuiHorizontalRule margin="m" />
-    <InsightsSection hit={hit} onAlertUpdated={onAlertUpdated} />
+    <InsightsSection
+      hit={hit}
+      renderCellActions={renderCellActions}
+      onAlertUpdated={onAlertUpdated}
+    />
   </>
 ));
 

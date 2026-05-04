@@ -190,6 +190,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const disabled =
     !isFormModified || hasErrors || isSaving || isLoadingActionTypeModel || !!actionTypeModelError;
 
+  const connectorWithoutSecrets = useMemo(
+    () =>
+      getConnectorWithoutSecrets(
+        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+      ),
+    [connector]
+  );
+
   const onExecutionAction = useCallback(async () => {
     try {
       const res = await executeConnector({
@@ -324,7 +332,11 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 </>
               )}
               {isLoadingActionTypeModel && (
-                <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="center"
+                  style={{ minHeight: 200 }}
+                >
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="xl" />
                   </EuiFlexItem>
@@ -356,7 +368,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 <>
                   <ConnectorForm
                     actionTypeModel={actionTypeModel}
-                    connector={getConnectorWithoutSecrets(connector)}
+                    connector={connectorWithoutSecrets}
                     isEdit={isEdit}
                     onChange={setFormState}
                     onFormModifiedChange={onFormModifiedChange}
@@ -380,6 +392,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    connectorWithoutSecrets,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     actionTypeModelError,
