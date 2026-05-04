@@ -10,7 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { useExternalServices } from '../../../context/external_services';
-import { useStreamsFlyoutRenderer } from './use_streams_flyout_renderer';
+import { useStreamsFieldRenderer } from './use_streams_field_renderer';
 
 jest.mock('../../../context/external_services', () => ({
   useExternalServices: jest.fn(),
@@ -21,20 +21,20 @@ const mockedUseExternalServices = useExternalServices as jest.Mock;
 const buildDiscoverShared = (getById: jest.Mock): DiscoverSharedPublicStart =>
   ({ features: { registry: { getById } } } as unknown as DiscoverSharedPublicStart);
 
-describe('useStreamsFlyoutRenderer', () => {
+describe('useStreamsFieldRenderer', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('returns undefined when there are no external services', () => {
     mockedUseExternalServices.mockReturnValue(undefined);
-    const { result } = renderHook(() => useStreamsFlyoutRenderer());
+    const { result } = renderHook(() => useStreamsFieldRenderer());
     expect(result.current).toBeUndefined();
   });
 
   it('returns undefined when discoverShared is missing', () => {
     mockedUseExternalServices.mockReturnValue({});
-    const { result } = renderHook(() => useStreamsFlyoutRenderer());
+    const { result } = renderHook(() => useStreamsFieldRenderer());
     expect(result.current).toBeUndefined();
   });
 
@@ -42,7 +42,7 @@ describe('useStreamsFlyoutRenderer', () => {
     const getById = jest.fn().mockReturnValue(undefined);
     mockedUseExternalServices.mockReturnValue({ discoverShared: buildDiscoverShared(getById) });
 
-    const { result } = renderHook(() => useStreamsFlyoutRenderer());
+    const { result } = renderHook(() => useStreamsFieldRenderer());
 
     expect(result.current).toBeUndefined();
     expect(getById).toHaveBeenCalledWith('streams');
@@ -56,7 +56,7 @@ describe('useStreamsFlyoutRenderer', () => {
     });
     mockedUseExternalServices.mockReturnValue({ discoverShared: buildDiscoverShared(getById) });
 
-    const { result } = renderHook(() => useStreamsFlyoutRenderer());
+    const { result } = renderHook(() => useStreamsFieldRenderer());
 
     expect(result.current).toBe(renderFlyoutStreamFieldByStreamName);
     expect(getById).toHaveBeenCalledWith('streams');

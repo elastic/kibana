@@ -15,9 +15,10 @@ const STREAMS_FEATURE_ID = 'streams' as const;
 /**
  * Returns the streams plugin's `renderFlyoutStreamFieldByStreamName` if the
  * feature is registered with the discoverShared registry; otherwise
- * `undefined`.
+ * `undefined`. The renderer produces a stream field/section to be embedded
+ * inside the flyout (not the flyout itself).
  */
-export const useStreamsFlyoutRenderer = ():
+export const useStreamsFieldRenderer = ():
   | ObservabilityStreamsFeature['renderFlyoutStreamFieldByStreamName']
   | undefined => {
   const externalServices = useExternalServices();

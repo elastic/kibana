@@ -28,7 +28,7 @@ import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
-import { useStreamsFlyoutRenderer } from '../hooks/use_streams_flyout_renderer';
+import { useStreamsFieldRenderer } from '../hooks/use_streams_field_renderer';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -50,11 +50,11 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     name: localMetricSourceName,
     fallback: METRIC_SOURCE_KIND.DATA_STREAM,
   });
-  const renderStreamFlyout = useStreamsFlyoutRenderer();
+  const renderStreamField = useStreamsFieldRenderer();
 
   const streamSection =
-    localMetricSourceName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamFlyout
-      ? renderStreamFlyout({ streamName: localMetricSourceName })
+    localMetricSourceName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
+      ? renderStreamField({ streamName: localMetricSourceName })
       : null;
 
   const staticSource = useMemo(() => {
