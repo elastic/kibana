@@ -39,7 +39,6 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
   >
     <EuiFlexItem>
       <EuiToolTip
-        delay="long"
         position="right"
       >
         <SelectOption
@@ -67,7 +66,6 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiToolTip
-        delay="long"
         position="right"
       >
         <TruncateLabelsOption
