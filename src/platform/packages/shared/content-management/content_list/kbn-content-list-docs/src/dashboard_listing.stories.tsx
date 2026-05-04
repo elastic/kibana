@@ -124,10 +124,10 @@ const OriginalStory = () => {
             </Filters>
           </ContentListToolbar>
           <ContentListTable title="Dashboards">
-            <Column.Name showDescription showTags showStarred width="56%" />
-            <Column.CreatedBy width="180px" />
-            <Column.UpdatedAt width="160px" />
-            <Column.Actions width="96px">
+            <Column.Name showDescription showTags showStarred />
+            <Column.CreatedBy />
+            <Column.UpdatedAt />
+            <Column.Actions>
               <Action.Edit />
               <Action.Delete />
             </Column.Actions>
@@ -187,10 +187,10 @@ const ProposalStory = () => {
               </Filters>
             </ContentListToolbar>
             <ContentListTable title="Dashboards">
-              <Column.Name showDescription showTags showStarred width="56%" />
-              <Column.CreatedBy width="180px" />
-              <Column.UpdatedAt width="160px" />
-              <Column.Actions width="128px">
+              <Column.Name showDescription showTags showStarred />
+              <Column.CreatedBy />
+              <Column.UpdatedAt />
+              <Column.Actions>
                 <Action.Inspect />
                 <Action.Edit />
                 <Action.Delete />

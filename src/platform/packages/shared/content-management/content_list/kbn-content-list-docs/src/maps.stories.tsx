@@ -115,9 +115,9 @@ const OriginalStory = () => {
               </Filters>
             </ContentListToolbar>
             <ContentListTable title="Maps">
-              <Column.Name showDescription showTags width="72%" />
-              <Column.UpdatedAt width="160px" />
-              <Column.Actions width="96px">
+              <Column.Name showDescription showTags />
+              <Column.UpdatedAt />
+              <Column.Actions>
                 <Action.Delete />
               </Column.Actions>
             </ContentListTable>
@@ -168,10 +168,10 @@ const ProposalStory = () => {
               </Filters>
             </ContentListToolbar>
             <ContentListTable title="Maps">
-              <Column.Name showDescription showTags width="56%" />
-              <Column.CreatedBy width="180px" />
-              <Column.UpdatedAt width="160px" />
-              <Column.Actions width="128px">
+              <Column.Name showDescription showTags />
+              <Column.CreatedBy />
+              <Column.UpdatedAt />
+              <Column.Actions>
                 <Action.Inspect />
                 <Action.Delete />
               </Column.Actions>

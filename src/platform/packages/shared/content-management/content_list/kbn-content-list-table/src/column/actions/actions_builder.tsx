@@ -16,7 +16,7 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
-import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { action, type ActionOutput, type ActionBuilderContext } from '../../action';
 
 /** Default i18n-translated column title for the actions column. */
@@ -147,7 +147,7 @@ export const buildActionsColumn = (
   attributes: ActionsColumnProps,
   context: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> | undefined => {
-  const { children, width, minWidth, maxWidth, columnTitle, sticky = true } = attributes;
+  const { children, columnTitle, sticky = true } = attributes;
 
   // Parse action children from the Column.Actions element.
   const actionParts = children !== undefined ? action.parseChildren(children) : [];
@@ -171,14 +171,23 @@ export const buildActionsColumn = (
   }
 
   const defaultWidth = getActionsColumnDefaultWidth(actions.length, context.euiTheme);
+  const resolvedWidth = pickAttribute(attributes, 'width', defaultWidth);
 
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
     actions,
     ...getColumnLayoutProps({
-      width: width ?? defaultWidth,
-      minWidth: minWidth ?? width ?? defaultWidth,
-      maxWidth,
+      width: resolvedWidth,
+      // `'max-content'` lets the translated header push the column wider
+      // than the icon-row width when needed (e.g. de "Aktionen" ~75px is
+      // wider than the one-icon `36 + 12 = 48px` derived width). `min-width`
+      // wins over `max-width` per the CSS spec, so this floor never fights
+      // the cap below.
+      minWidth: pickAttribute(attributes, 'minWidth', 'max-content'),
+      // Cap at the derived width so the column never absorbs slack on
+      // full-width pages — the trailing whitespace lives in `Column.Name`
+      // (which is the only column intentionally allowed to grow).
+      maxWidth: pickAttribute(attributes, 'maxWidth', resolvedWidth),
     }),
     sticky,
     'data-test-subj': 'content-list-table-column-actions',
