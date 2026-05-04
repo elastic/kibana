@@ -116,7 +116,7 @@ export function TryItButton({
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" direction="row">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="lock" size="s" />
+                    <EuiIcon type="lock" size="s" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="xs">
