@@ -35,7 +35,9 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import {
   DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
   DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import {
   useConnectorOAuthConnect,
   OAuthRedirectMode,
@@ -327,8 +329,9 @@ const ActionsConnectorsList = ({
           {
             name: '',
             render: (item: ActionConnectorTableItem) => {
+              if (!item.isConnectorTypeDeprecated) return null;
               return (
-                item.isConnectorTypeDeprecated && (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
                   <EuiFlexItem grow={false}>
                     <EuiBetaBadge
                       label={DEPRECATED_LABEL}
@@ -337,7 +340,17 @@ const ActionsConnectorsList = ({
                       size="s"
                     />
                   </EuiFlexItem>
-                )
+                  {isLLMConnectorTypeId(item.actionTypeId) && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="info"
+                        color="subdued"
+                        content={DEPRECATED_LLM_CONNECTOR_INFO}
+                        data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               );
             },
           },
