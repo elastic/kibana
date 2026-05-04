@@ -14,6 +14,7 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import {
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
@@ -41,7 +42,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: baseFeatureSchema,
+    body: baseFeatureSchema.and(z.object({ uuid: z.string().optional() })),
   }),
   handler: async ({
     params,
@@ -59,14 +60,29 @@ export const upsertFeatureRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const featureClient = await getFeatureClient();
+    const { uuid: existingUuid, ...baseBody } = params.body;
+
+    if (existingUuid) {
+      const [resolved] = await featureClient.findFeaturesByUuids([existingUuid]);
+      if (!resolved) {
+        throw new StatusError(`Feature ${existingUuid} not found`, 404);
+      }
+      if (resolved.stream_name !== params.path.name) {
+        throw new StatusError(
+          `Feature ${existingUuid} belongs to stream '${resolved.stream_name}', not '${params.path.name}'`,
+          400
+        );
+      }
+    }
+
     await featureClient.bulk(params.path.name, [
       {
         index: {
           feature: {
-            ...params.body,
+            ...baseBody,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            uuid: uuid(),
+            uuid: existingUuid ?? uuid(),
           },
         },
       },

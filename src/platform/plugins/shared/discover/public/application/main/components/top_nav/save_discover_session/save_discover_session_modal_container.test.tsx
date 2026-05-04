@@ -651,6 +651,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
         app: 'dashboards',
         path: '#/view/dashboard-123',
+        newPanel: false,
         state: { savedObjectId: 'the-saved-search-id' },
       });
     });
@@ -670,6 +671,51 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
         app: 'dashboards',
         path: '#/create',
+        newPanel: false,
+        state: { savedObjectId: 'the-saved-search-id' },
+      });
+    });
+
+    it('should navigate to a dashboard when dashboardId is set for Save As', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const { modalProps } = await setup({
+        initialCopyOnSave: true,
+        isEmbedded: true,
+        services,
+      });
+
+      await act(async () => {
+        await modalProps?.onSave(
+          getOnSaveProps({ dashboardId: 'dashboard-123', newCopyOnSave: true })
+        );
+      });
+
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path: '#/view/dashboard-123',
+        newPanel: true,
+        state: { savedObjectId: 'the-saved-search-id' },
+      });
+    });
+
+    it('should navigate to a dashboard when dashboardId is set to "new" for Save As', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const { modalProps } = await setup({
+        initialCopyOnSave: true,
+        isEmbedded: true,
+        services,
+      });
+
+      await act(async () => {
+        await modalProps?.onSave(getOnSaveProps({ dashboardId: 'new', newCopyOnSave: true }));
+      });
+
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path: '#/create',
+        newPanel: true,
         state: { savedObjectId: 'the-saved-search-id' },
       });
     });

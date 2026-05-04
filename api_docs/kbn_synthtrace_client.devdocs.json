@@ -4987,7 +4987,7 @@
                 "label": "name",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/semconv_host.ts",
-                "lineNumber": 138,
+                "lineNumber": 128,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
