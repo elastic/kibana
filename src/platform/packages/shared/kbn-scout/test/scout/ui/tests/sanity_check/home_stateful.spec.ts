@@ -19,11 +19,10 @@ test.describe(
     test(`should successfully load home page`, async ({ browserAuth, page }) => {
       const LOADING_TIMEOUT = 20_000;
       await browserAuth.loginAsAdmin();
-      await page.gotoApp('home');
-      await page.evaluate(() => {
-        localStorage.setItem('home:welcome:show', 'false');
+      await page.addInitScript(() => {
+        window.localStorage.setItem('home:welcome:show', 'false');
       });
-      await page.reload();
+      await page.gotoApp('home');
 
       await expect(
         page.testSubj.locator('headerGlobalNav'),
