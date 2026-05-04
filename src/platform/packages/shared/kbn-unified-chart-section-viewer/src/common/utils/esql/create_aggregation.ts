@@ -115,18 +115,12 @@ export function createMetricAggregation({
 }
 
 /**
- * Creates the time bucketing part of an ES|QL query.
+ * Creates the time bucketing part of an ES|QL query using `TBUCKET`,
+ * which automatically resolves the timestamp field via the Kibana timestamp filter.
  *
  * @param targetBuckets - The desired number of buckets for the time series.
- * @param timestampField - The name of the timestamp field.
- * @returns The ES|QL BUCKET function string.
+ * @returns The ES|QL TBUCKET function string.
  */
-export function createTimeBucketAggregation({
-  targetBuckets = 100,
-  timestampField = '@timestamp',
-}: {
-  targetBuckets?: number;
-  timestampField?: string;
-}) {
-  return `BUCKET(${timestampField}, ${targetBuckets}, ?_tstart, ?_tend)`;
+export function createTimeBucketAggregation({ targetBuckets = 100 }: { targetBuckets?: number }) {
+  return `TBUCKET(${targetBuckets})`;
 }

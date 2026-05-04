@@ -9,7 +9,7 @@ applies_to:
 
 # GitHub connector [github-action-type]
 
-The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It uses Bearer token (personal access token) authentication.
+The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It supports two authentication methods: Bearer token (personal access token) and OAuth Authorization Code.
 
 ## Create connectors in {{kib}} [define-github-ui]
 
@@ -22,8 +22,10 @@ GitHub connectors have the following configuration properties:
 MCP Server URL
 :   The URL of the GitHub MCP server. Defaults to `https://api.githubcopilot.com/mcp/`.
 
-Bearer Token
-:   A GitHub personal access token for authentication. Refer to [Get API credentials](#github-api-credentials) for instructions.
+Authentication
+:   Choose one of the following authentication methods:
+    - **Bearer Token**: A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials) for instructions.
+    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
 
 ## Test connectors [github-action-configuration]
 
@@ -97,7 +99,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [github-api-credentials]
 
-To use the GitHub connector, you need a GitHub personal access token:
+To use the GitHub connector with a personal access token:
 
 1. Log in to [GitHub](https://github.com/).
 2. Go to **Settings** > **Developer settings** > **Personal access tokens** > **Fine-grained tokens** (or [create one directly](https://github.com/settings/personal-access-tokens/new)).
@@ -113,3 +115,15 @@ To use the GitHub connector, you need a GitHub personal access token:
 ::::{note}
 Classic personal access tokens also work. When using a classic token, select the `repo` scope for full repository access, or `public_repo` for public repositories only.
 ::::
+
+## Get OAuth credentials [github-oauth-credentials]
+
+To use the GitHub connector with OAuth:
+
+1. Log in to [GitHub](https://github.com/).
+2. Go to **Settings** > **Developer settings** > **OAuth Apps** > **New OAuth App** (or [create one directly](https://github.com/settings/applications/new)).
+3. Configure the application:
+   - Set a descriptive name (for example, "Kibana GitHub Connector").
+   - Set the **Authorization callback URL** to your Kibana OAuth redirect URI.
+4. After creating the app, copy the **Client ID** and generate a **Client Secret**.
+5. In {{kib}}, select **OAuth Authorization Code** as the authentication method and enter the Client ID and Client Secret.

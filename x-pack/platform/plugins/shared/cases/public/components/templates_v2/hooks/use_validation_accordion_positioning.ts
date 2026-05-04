@@ -77,7 +77,7 @@ export const useValidationAccordionPositioning = (): UseValidationAccordionPosit
     const updateBounds = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        setContainerBounds({ left: rect.left, width: rect.width });
+        setContainerBounds({ left: rect.left, width: rect.width + 24 });
       }
       if (accordionRef.current) {
         const height = accordionRef.current.offsetHeight;

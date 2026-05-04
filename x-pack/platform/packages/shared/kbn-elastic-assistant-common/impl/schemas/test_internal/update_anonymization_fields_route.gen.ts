@@ -14,9 +14,11 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const UpdateAnonymizationFieldsResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean().optional(),
+  })
+);
 export type UpdateAnonymizationFieldsResponse = z.infer<typeof UpdateAnonymizationFieldsResponse>;
-export const UpdateAnonymizationFieldsResponse = z.object({
-  success: z.boolean().optional(),
-});

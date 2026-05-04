@@ -17,6 +17,28 @@ paths:
             application/json:
               schema:
                 $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointList'
+              examples:
+                newList:
+                  summary: Endpoint exception list created
+                  value:
+                    id: "2e23a8c4-ef7e-4c10-adfa-3eae4e4b4b8b"
+                    list_id: "endpoint_list"
+                    type: "endpoint"
+                    name: "Endpoint Security Exception List"
+                    description: "Endpoint Security Exception List"
+                    immutable: false
+                    namespace_type: "agnostic"
+                    os_types: []
+                    tags: []
+                    version: 1
+                    tie_breaker_id: "e3c5a8e0-5b6a-4b4b-8b3a-2e23a8c4ef7e"
+                    created_at: "2025-01-01T00:00:00.000Z"
+                    created_by: "elastic"
+                    updated_at: "2025-01-01T00:00:00.000Z"
+                    updated_by: "elastic"
+                alreadyExists:
+                  summary: Endpoint exception list already exists (empty response)
+                  value: {}
         400:
           description: Invalid input data
           content:

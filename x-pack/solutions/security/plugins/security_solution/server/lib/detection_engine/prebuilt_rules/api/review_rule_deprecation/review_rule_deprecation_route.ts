@@ -59,10 +59,12 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
               ids,
             });
 
-            // Map rule_id -> { id, name } from the installed rules
+            // Map rule_id -> { id, name } from the installed rules.
             const installedRuleMap = new Map<string, { id: string; name: string }>();
             for (const rule of fetchedRules) {
-              installedRuleMap.set(rule.params.ruleId, { id: rule.id, name: rule.name });
+              if (rule.params.immutable) {
+                installedRuleMap.set(rule.params.ruleId, { id: rule.id, name: rule.name });
+              }
             }
 
             const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules([
@@ -92,10 +94,10 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
           const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
           const deprecatedRuleIds = deprecatedAssets.map((asset) => asset.rule_id);
 
-          // Only fetch installed rules that match deprecated rule_ids
-          const installedRules = await ruleObjectsClient.fetchInstalledRulesByIds({
-            ruleIds: deprecatedRuleIds,
-          });
+          // Only fetch installed prebuilt rules that match deprecated rule_ids.
+          const installedRules = (
+            await ruleObjectsClient.fetchInstalledRulesByIds({ ruleIds: deprecatedRuleIds })
+          ).filter((rule) => rule.rule_source.type === 'external');
 
           // Build response from installed rules that have matching deprecated assets
           const deprecatedAssetMap = new Map(

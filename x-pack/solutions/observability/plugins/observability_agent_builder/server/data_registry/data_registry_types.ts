@@ -127,11 +127,13 @@ interface InfraHostsResponse {
 
 export interface ExitSpanSample {
   serviceName: string;
+  agentName?: string;
   spanDestinationServiceResource: string;
   spanType: string;
   spanSubtype: string;
   destinationService?: {
     serviceName: string;
+    agentName?: string;
   };
 }
 

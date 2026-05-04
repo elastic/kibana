@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, EuiHideForProps, IconType } from '@elastic/eui';
+import type { EuiHideForProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 
 /**
@@ -134,7 +134,7 @@ type AppMenuLinkItem = AppMenuItemBase & {
   /**
    * The HTML target attribute for the item. Only used if `items` is not provided.
    */
-  target: string;
+  target?: string;
   /**
    * Function to run when the item is clicked. Only used if `items` is not provided.
    */
@@ -251,13 +251,6 @@ export type AppMenuPopoverItem = Omit<
   labelBadgeText?: string;
 };
 
-type AppMenuActionButton = Omit<AppMenuItemCommon, 'order' | 'overflow' | 'separator'> & {
-  /**
-   * The color of the button.
-   */
-  color?: EuiButtonColor;
-};
-
 /**
  * Primary action button type. Can be either a simple button or a split button.
  */
@@ -265,7 +258,7 @@ export type AppMenuPrimaryActionItem =
   /**
    * The main part of the button should never open a popover.
    */
-  Omit<AppMenuActionButton, 'items'> & {
+  Omit<AppMenuItemCommon, 'order' | 'overflow' | 'separator'> & {
     /**
      * Subset of SplitButtonWithNotificationProps.
      */

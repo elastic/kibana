@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import type {
   ModelProvider,
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
+  ModelSelectionPreferences,
 } from '@kbn/agent-builder-server/runner';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
+import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
@@ -28,6 +34,8 @@ export interface CreateModelProviderOpts {
   trackingService?: TrackingService;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  logger: Logger;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -37,6 +45,11 @@ export type CreateModelProviderFactoryFn = (
 export type ModelProviderFactoryFn = (
   opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
 ) => ModelProvider;
+
+const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
+  let cached: Promise<T> | undefined;
+  return () => (cached ??= fn());
+};
 
 /**
  * Utility function to creates a {@link ModelProviderFactoryFn}
@@ -58,19 +71,65 @@ export const createModelProvider = ({
   trackingService,
   uiSettings,
   savedObjects,
+  searchInferenceEndpoints,
+  logger,
 }: CreateModelProviderOpts): ModelProvider => {
-  const getDefaultConnectorId = async () => {
+  const getDefaultConnectorId = memoizeAsync(async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
       uiSettings,
       savedObjects,
       request,
       connectorId: defaultConnectorId,
       inference,
+      searchInferenceEndpoints,
     });
     if (!resolvedConnectorId) {
       throw new Error('No connector available');
     }
+
+    logger.debug(`[getDefaultConnectorId] Using connectorId: ${resolvedConnectorId}`);
     return resolvedConnectorId;
+  });
+
+  const getFastModelConnectorId = memoizeAsync(async () => {
+    const fastModelEnabled = await uiSettings
+      .asScopedToClient(savedObjects.getScopedClient(request))
+      .get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+
+    let connectorId: string | undefined;
+
+    if (fastModelEnabled) {
+      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+        request
+      );
+
+      const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
+      if (recommendedEndpoint.length > 0) {
+        connectorId = recommendedEndpoint[0].connectorId;
+      }
+    }
+
+    if (!connectorId) {
+      connectorId = await getDefaultConnectorId();
+    }
+
+    logger.debug(
+      `[getFastModelConnectorId] Using connectorId: ${connectorId} (fastModelEnabled: ${fastModelEnabled})`
+    );
+
+    return connectorId;
+  });
+
+  getFastModelConnectorId().catch(() => undefined);
+
+  const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
+    const { effortLevel = EffortLevels.medium } = opts;
+    if (effortLevel === EffortLevels.low) {
+      return await getFastModelConnectorId();
+    } else {
+      return await getDefaultConnectorId();
+    }
   };
 
   const completedCalls: ModelCallInfo[] = [];
@@ -81,7 +140,7 @@ export const createModelProvider = ({
     };
   };
 
-  const getModel = async (connectorId: string): Promise<ScopedModel> => {
+  const getModelById = async (connectorId: string): Promise<ScopedModel> => {
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
@@ -137,8 +196,9 @@ export const createModelProvider = ({
   };
 
   return {
-    getDefaultModel: async () => getModel(await getDefaultConnectorId()),
-    getModel: ({ connectorId }) => getModel(connectorId),
+    selectModel: async (opts) => getModelById(await selectModelId(opts)),
+    getDefaultModel: async () => getModelById(await getDefaultConnectorId()),
+    getModelById: ({ connectorId }) => getModelById(connectorId),
     getUsageStats,
   };
 };

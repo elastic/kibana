@@ -10,10 +10,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceNode } from '../service_node';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -29,9 +31,11 @@ const meta: Meta<typeof ServiceNode> = {
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
-          <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
-            <Story />
-          </div>
+          <ServiceMapSearchProvider>
+            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+              <Story />
+            </div>
+          </ServiceMapSearchProvider>
         </ReactFlowProvider>
       </MockApmPluginStorybook>
     ),
@@ -247,4 +251,50 @@ export const OpenTelemetryAgents: StoryObj = {
       </div>
     );
   },
+};
+
+export const HighlightStates: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'no-highlight',
+            label: 'no-highlight',
+            isService: true,
+            agentName: 'java',
+          })}
+        />
+        <LabelText>No highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'context-highlight',
+            label: 'context-highlight',
+            isService: true,
+            agentName: 'nodejs',
+            contextHighlight: true,
+          })}
+        />
+        <LabelText>Context highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['search-overrides'])}
+          activeMatchNodeId="search-overrides"
+        >
+          <ServiceNode
+            {...createNodeProps({
+              id: 'search-overrides',
+              label: 'search-overrides',
+              isService: true,
+              agentName: 'go',
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Search overrides context</LabelText>
+      </div>
+    </div>
+  ),
 };

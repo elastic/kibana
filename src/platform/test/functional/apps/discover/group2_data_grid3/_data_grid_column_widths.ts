@@ -120,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await testResizeColumn('_source');
     });
 
@@ -129,6 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
       expect(newWidth).to.be(originalWidth - 100);
       await dashboard.saveDashboard('test');

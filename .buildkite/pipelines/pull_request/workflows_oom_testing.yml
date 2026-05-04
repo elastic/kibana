@@ -1,0 +1,17 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout/workflows_oom_testing.sh
+    label: 'Workflow Schema OOM Prevention'
+    key: workflows-oom-testing
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1

@@ -308,6 +308,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await retry.waitFor('two toasts to appear', async () => {
+        return (await toasts.getCount()) >= 2;
+      });
       const [firstToast, secondToast] = await toasts.getAll();
 
       expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(

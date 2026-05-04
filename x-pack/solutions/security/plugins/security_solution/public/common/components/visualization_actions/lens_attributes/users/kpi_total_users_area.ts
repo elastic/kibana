@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
 import {
   ENTITY_STORE_V2_USERS_KPI_LENS_AD_HOC_ID,
-  getEntityStoreV2LatestUsersIndexTitle,
   getEntityStoreV2UserOnlyFilter,
 } from './entity_store_v2_users_kpi_lens_shared';
 
@@ -95,7 +95,7 @@ const getLegacyKpiTotalUsersAreaLensAttributes = (): LensAttributes => {
 };
 
 const getEntityStoreV2KpiTotalUsersAreaLensAttributes = (spaceId?: string): LensAttributes => {
-  const indexTitle = getEntityStoreV2LatestUsersIndexTitle(spaceId);
+  const indexTitle = getLatestEntitiesIndexName(spaceId ?? 'default');
 
   return {
     description: '',

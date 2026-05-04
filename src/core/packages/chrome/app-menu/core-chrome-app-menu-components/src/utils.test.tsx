@@ -17,9 +17,10 @@ import {
   getPopoverActionItems,
   getPopoverPanels,
   getIsSelectedColor,
+  processStaticItems,
 } from './utils';
 import { APP_MENU_ITEM_LIMIT } from './constants';
-import type { AppMenuPopoverItem } from './types';
+import type { AppMenuItemType, AppMenuPopoverItem } from './types';
 
 describe('utils', () => {
   describe('createReturnFocus', () => {
@@ -633,6 +634,77 @@ describe('utils', () => {
       expect(sharePanel?.['data-test-subj']).toBe('sharePopoverPanel');
       expect(mainPanel?.['data-test-subj']).toBeUndefined(); // Main panel has no test ID by default
     });
+
+    it('should append staticItems after regular items in the main panel', () => {
+      const items: AppMenuPopoverItem[] = [
+        { id: '1', label: 'Item 1', run: jest.fn(), order: 2 },
+        { id: '2', label: 'Item 2', run: jest.fn(), order: 1 },
+      ];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      expect(panels).toHaveLength(1);
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      // Regular items sorted by order: Item 2 (order 1), Item 1 (order 2), then static
+      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static1']);
+    });
+
+    it('should not re-sort staticItems together with regular items', () => {
+      const items: AppMenuPopoverItem[] = [
+        { id: 'regular', label: 'Regular', run: jest.fn(), order: 10 },
+      ];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      // Static item with order 1 should still come after regular item with order 10
+      expect(panelItems[0].key).toBe('regular');
+      expect(panelItems[panelItems.length - 1].key).toBe('static1');
+    });
+
+    it('should handle staticItems with nested sub-items', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const staticItems: AppMenuPopoverItem[] = [
+        {
+          id: 'static-parent',
+          label: 'Static Parent',
+          order: 1,
+          items: [{ id: 'static-child', label: 'Static Child', run: jest.fn(), order: 1 }],
+        },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      // Main panel + child panel for static item
+      expect(panels).toHaveLength(2);
+      const childPanel = panels.find((p) => p.title === 'Static Parent');
+      expect(childPanel).toBeDefined();
+    });
+
+    it('should place staticItems before action items', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+      ];
+
+      const panels = getPopoverPanels({
+        items,
+        staticItems,
+        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+      });
+
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      // Order: regular item, separator, static, action-separator, action-items
+      const staticIndex = panelItems.findIndex((i) => i.key === 'static1');
+      const actionIndex = panelItems.findIndex((i) => i.key === 'action-items');
+      expect(staticIndex).toBeLessThan(actionIndex);
+    });
   });
 
   describe('getIsSelectedColor', () => {
@@ -688,6 +760,79 @@ describe('utils', () => {
       });
 
       expect(result).toBe('#fallback');
+    });
+  });
+
+  describe('processStaticItems', () => {
+    const createStaticItem = (overrides: Record<string, unknown> = {}): AppMenuItemType =>
+      ({
+        id: 'item1',
+        order: 1,
+        label: 'Item 1',
+        run: jest.fn(),
+        iconType: 'gear',
+        ...overrides,
+      } as AppMenuItemType);
+
+    it('should return an empty array when no items are provided', () => {
+      expect(processStaticItems()).toEqual([]);
+      expect(processStaticItems([])).toEqual([]);
+    });
+
+    it('should set overflow to true on all items', () => {
+      const items = [
+        createStaticItem({ id: 'a', order: 1 }),
+        createStaticItem({ id: 'b', order: 2 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result.every((item) => item.overflow === true)).toBe(true);
+    });
+
+    it('should add separator "above" only to the first item', () => {
+      const items = [
+        createStaticItem({ id: 'a', order: 1 }),
+        createStaticItem({ id: 'b', order: 2 }),
+        createStaticItem({ id: 'c', order: 3 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result[0].separator).toBe('above');
+      expect(result[1].separator).toBeUndefined();
+      expect(result[2].separator).toBeUndefined();
+    });
+
+    it('should strip existing separator values from non-first items', () => {
+      const items = [
+        createStaticItem({ id: 'a', order: 1, separator: 'below' }),
+        createStaticItem({ id: 'b', order: 2, separator: 'above' }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result[0].separator).toBe('above');
+      expect(result[1].separator).toBeUndefined();
+    });
+
+    it('should sort items by order', () => {
+      const items = [
+        createStaticItem({ id: 'c', order: 3 }),
+        createStaticItem({ id: 'a', order: 1 }),
+        createStaticItem({ id: 'b', order: 2 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result.map((item) => item.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should add separator "above" to the first item after sorting', () => {
+      const items = [
+        createStaticItem({ id: 'c', order: 3 }),
+        createStaticItem({ id: 'a', order: 1 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result[0].id).toBe('a');
+      expect(result[0].separator).toBe('above');
     });
   });
 });

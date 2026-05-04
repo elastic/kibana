@@ -59,6 +59,7 @@ export const RequiredFieldRow = ({
       readDefaultValueOnForm={!item.isNew}
       componentProps={{
         itemId: item.id,
+        autoFocus: item.isNew,
         onRemove: handleRemove,
         typesByFieldName,
         getWarnings,
@@ -71,6 +72,7 @@ export const RequiredFieldRow = ({
 interface RequiredFieldFieldProps {
   field: FieldHook<RequiredFieldInput>;
   onRemove: () => void;
+  autoFocus?: boolean;
   typesByFieldName: Record<string, string[] | undefined>;
   availableFieldNames: string[];
   getWarnings: ({ name, type }: { name: string; type: string }) => {
@@ -84,6 +86,7 @@ const RequiredFieldField = ({
   field,
   typesByFieldName,
   onRemove,
+  autoFocus,
   availableFieldNames,
   getWarnings,
   itemId,
@@ -125,6 +128,7 @@ const RequiredFieldField = ({
           <NameComboBox
             field={field}
             itemId={itemId}
+            autoFocus={autoFocus}
             availableFieldNames={availableFieldNames}
             typesByFieldName={typesByFieldName}
             nameWarning={nameWarning}

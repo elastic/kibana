@@ -139,6 +139,7 @@
             "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FetchAggIntervalsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -190,6 +191,7 @@
             "lineNumber": 207,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "FetchHistogramsForFieldsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -291,6 +293,7 @@
             "lineNumber": 25,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -349,6 +352,7 @@
             "lineNumber": 33,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -533,6 +537,7 @@
             "lineNumber": 56,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "NumberValidatorConditions",
             "trackAdoption": false,
             "isRequired": false
           }

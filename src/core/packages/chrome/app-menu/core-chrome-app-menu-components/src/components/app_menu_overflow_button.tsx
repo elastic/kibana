@@ -17,6 +17,7 @@ import type { AppMenuItemType, AppMenuPrimaryActionItem } from '../types';
 
 interface AppMenuShowMoreButtonProps {
   items: AppMenuItemType[];
+  staticItems?: AppMenuItemType[];
   isPopoverOpen: boolean;
   primaryActionItem?: AppMenuPrimaryActionItem;
   onPopoverToggle: () => void;
@@ -25,6 +26,7 @@ interface AppMenuShowMoreButtonProps {
 
 export const AppMenuOverflowButton = ({
   items,
+  staticItems,
   isPopoverOpen,
   primaryActionItem,
   onPopoverToggle,
@@ -32,7 +34,7 @@ export const AppMenuOverflowButton = ({
 }: AppMenuShowMoreButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (items.length === 0) {
+  if (items.length === 0 && (!staticItems || staticItems.length === 0)) {
     return null;
   }
 
@@ -52,7 +54,7 @@ export const AppMenuOverflowButton = ({
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesVertical" // TODO: Change to "ellipsis" when it's available in EUI.
+      iconType="ellipsis"
       size="xs"
       aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
@@ -69,6 +71,7 @@ export const AppMenuOverflowButton = ({
   return (
     <AppMenuPopover
       items={items}
+      staticItems={staticItems}
       anchorElement={button}
       tooltipContent={i18n.translate('core.chrome.appMenu.showMoreButtonTooltip', {
         defaultMessage: 'More',

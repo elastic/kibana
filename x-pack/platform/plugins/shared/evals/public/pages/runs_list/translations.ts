@@ -81,3 +81,24 @@ export const getLoadErrorBody = (errorMessage: string) =>
 export const RETRY_BUTTON = i18n.translate('xpack.evals.runsList.retryButton', {
   defaultMessage: 'Retry',
 });
+
+export const COMPARE_SELECTED_BUTTON = i18n.translate(
+  'xpack.evals.runsList.compareSelectedButton',
+  {
+    defaultMessage: 'Compare selected',
+  }
+);
+
+export const COMPARE_SELECTION_HINT = i18n.translate('xpack.evals.runsList.compareSelectionHint', {
+  defaultMessage: 'Select exactly 2 runs from the same suite to compare',
+});
+
+export const COMPARE_DIFFERENT_SUITE_HINT = i18n.translate(
+  'xpack.evals.runsList.compareDifferentSuiteHint',
+  { defaultMessage: 'Only runs from the same suite can be compared' }
+);
+
+export const COMPARE_MAX_SELECTED_HINT = i18n.translate(
+  'xpack.evals.runsList.compareMaxSelectedHint',
+  { defaultMessage: '2 runs already selected - deselect one to pick a different run' }
+);

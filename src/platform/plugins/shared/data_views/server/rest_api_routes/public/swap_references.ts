@@ -19,7 +19,9 @@ import type {
 import {
   DATA_VIEW_SWAP_REFERENCES_PATH,
   INITIAL_REST_VERSION,
+  PREVIEW_SWAP_REFERENCES_SUMMARY,
   PREVIEW_SWAP_REFERENCES_DESCRIPTION,
+  SWAP_REFERENCES_SUMMARY,
   SWAP_REFERENCES_DESCRIPTION,
 } from '../../constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -64,6 +66,7 @@ export const swapReferencesRoute =
     const path = previewRoute
       ? `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`
       : DATA_VIEW_SWAP_REFERENCES_PATH;
+    const summary = previewRoute ? PREVIEW_SWAP_REFERENCES_SUMMARY : SWAP_REFERENCES_SUMMARY;
     const description = previewRoute
       ? PREVIEW_SWAP_REFERENCES_DESCRIPTION
       : SWAP_REFERENCES_DESCRIPTION;
@@ -71,6 +74,7 @@ export const swapReferencesRoute =
       .post({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -87,23 +91,84 @@ export const swapReferencesRoute =
           validate: {
             request: {
               body: schema.object({
-                fromId: idSchema,
-                fromType: schema.maybe(schema.string()),
-                toId: idSchema,
-                forId: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema)])),
-                forType: schema.maybe(schema.string()),
-                delete: schema.maybe(schema.boolean()),
+                fromId: schema.string({
+                  meta: {
+                    description: 'The identifier of the saved object to swap references from.',
+                  },
+                }),
+                fromType: schema.maybe(
+                  schema.string({
+                    meta: {
+                      description:
+                        'The saved object type of the source. Defaults to `index-pattern` (data view).',
+                    },
+                  })
+                ),
+                toId: schema.string({
+                  meta: {
+                    description: 'The identifier of the saved object to swap references to.',
+                  },
+                }),
+                forId: schema.maybe(
+                  schema.oneOf([idSchema, schema.arrayOf(idSchema)], {
+                    meta: {
+                      description:
+                        'Limit the swap to specific saved objects. Can be a single ID or an array of IDs.',
+                    },
+                  })
+                ),
+                forType: schema.maybe(
+                  schema.string({
+                    meta: {
+                      description:
+                        'Limit the swap to saved objects of a specific type, such as `dashboard` or `visualization`.',
+                    },
+                  })
+                ),
+                delete: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'When `true`, deletes the source saved object after all references are swapped. ' +
+                        'The delete only occurs if no remaining references point to the source.',
+                    },
+                  })
+                ),
               }),
             },
             response: {
               200: {
                 body: () =>
                   schema.object({
-                    result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
+                    result: schema.arrayOf(
+                      schema.object({
+                        id: schema.string({
+                          meta: { description: 'The identifier of the affected saved object.' },
+                        }),
+                        type: schema.string({
+                          meta: { description: 'The type of the affected saved object.' },
+                        }),
+                      }),
+                      {
+                        meta: {
+                          description:
+                            'The list of saved objects whose references were updated (or would be updated in a preview).',
+                        },
+                      }
+                    ),
                     deleteStatus: schema.maybe(
                       schema.object({
-                        remainingRefs: schema.number(),
-                        deletePerformed: schema.boolean(),
+                        remainingRefs: schema.number({
+                          meta: {
+                            description:
+                              'The number of remaining references pointing to the source saved object.',
+                          },
+                        }),
+                        deletePerformed: schema.boolean({
+                          meta: {
+                            description: 'Whether the source saved object was deleted.',
+                          },
+                        }),
                       })
                     ),
                   }),

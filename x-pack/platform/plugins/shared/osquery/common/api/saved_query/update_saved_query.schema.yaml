@@ -31,64 +31,67 @@ components:
     UpdateSavedQueryResponse:
         description: 'The response for updating a saved query.'
         type: object
+        required:
+          - data
         properties:
           data:
-            description: 'The updated saved query.'
             type: object
+            required:
+              - saved_object_id
+              - id
             properties:
               saved_object_id:
-                description: 'The saved object ID of the saved query.'
                 type: string
               id:
-                description: 'The saved query ID.'
-                type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
               description:
-                description: 'The saved query description.'
-                type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryDescriptionOrUndefined'
               query:
-                description: 'The SQL query.'
-                type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Query'
               interval:
-                description: 'The query interval in seconds.'
-                type: string
+                oneOf:
+                  - type: integer
+                  - type: string
               timeout:
-                description: 'The query timeout in seconds.'
                 type: integer
               snapshot:
-                description: 'Whether the query is a snapshot query.'
-                type: boolean
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
               removed:
-                description: 'Whether to include results for removed processes.'
-                type: boolean
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
               platform:
-                description: 'The target platform(s).'
-                type: string
-              version:
-                description: 'The minimum osquery version.'
-                type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PlatformOrUndefined'
               ecs_mapping:
-                description: 'The ECS mapping configuration.'
-                type: object
-              updated_at:
-                description: 'The last update timestamp.'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+              created_at:
                 type: string
+                format: date-time
+              created_by:
+                type: string
+                nullable: true
+              created_by_profile_uid:
+                type: string
+              updated_at:
+                type: string
+                format: date-time
               updated_by:
-                description: 'The user who last updated the saved query.'
+                type: string
+                nullable: true
+              updated_by_profile_uid:
+                type: string
+              prebuilt:
+                type: boolean
+              version:
+                description: 'The saved query version.'
                 type: string
         example:
           data:
-            saved_object_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+            saved_object_id: "42ba1280-2172-11ee-8523-5765fca79a3c"
             id: "updated_my_saved_query_name"
-            description: "Saved query description"
             query: "select * from uptime;"
-            platform: "linux,darwin"
-            version: "2.8.0"
+            description: "Saved query description"
             interval: "60"
-            timeout: 120
-            snapshot: true
-            removed: false
-            ecs_mapping:
-              host.uptime:
-                field: "total_seconds"
-            updated_at: "2022-07-26T10:15:00.000Z"
+            created_at: "2025-02-26T13:37:30.452Z"
+            created_by: "elastic"
+            updated_at: "2025-02-26T13:40:16.297Z"
             updated_by: "elastic"
+            version: "WzQzMTcsMV0="

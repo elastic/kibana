@@ -50,11 +50,11 @@ node scripts/capture_oas_snapshot \
   --include-path /api/spaces \
   --include-path /api/streams \
   --include-path /api/fleet \
-  --include-path /api/saved_objects/_import \
-  --include-path /api/saved_objects/_export \
+  --include-path /api/saved_objects \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
-  --include-path /api/workflows
+  --include-path /api/workflows \
+  --include-path /api/security/entity_store
 ```
 
 3. Rebuild the final OAS documents:
@@ -104,11 +104,11 @@ node scripts/capture_oas_snapshot \
   --include-path /api/spaces \
   --include-path /api/streams \
   --include-path /api/fleet \
-  --include-path /api/saved_objects/_import \
-  --include-path /api/saved_objects/_export \
+  --include-path /api/saved_objects \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
-  --include-path /api/workflows
+  --include-path /api/workflows \
+  --include-path /api/security/entity_store
 cd oas_docs && make api-docs
 ```
 

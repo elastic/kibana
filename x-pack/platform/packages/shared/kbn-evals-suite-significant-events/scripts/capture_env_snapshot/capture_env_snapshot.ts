@@ -9,18 +9,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
+import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
 import { GCS_BUCKET } from '../lib/constants';
-import {
-  resolvePatterns,
-  parseCommonSnapshotFlags,
-  validateIndexPrivileges,
-} from '../lib/snapshot_utils';
-
-function toSnapshotName(index: string): string {
-  return `snapshot-${index.slice(1)}`;
-}
+import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
+import { withTempSuperuser } from '../lib/user_utils';
 
 async function fetchMapping(
   esClient: Client,
@@ -33,53 +27,57 @@ async function fetchMapping(
 async function captureSystemIndex({
   esClient,
   log,
+  config,
   sourceIndex,
 }: {
   esClient: Client;
+  config: ConnectionConfig;
   log: ToolingLog;
   sourceIndex: string;
 }): Promise<string> {
-  const snapshotIndex = toSnapshotName(sourceIndex);
+  return withTempSuperuser(esClient, log, config, async (sysClient) => {
+    const snapshotIndex = toSnapshotName(sourceIndex);
 
-  const mappings = await fetchMapping(esClient, sourceIndex);
-  if (!mappings) {
-    throw new Error(`Could not fetch mapping for "${sourceIndex}"`);
-  }
+    const mappings = await fetchMapping(sysClient, sourceIndex);
+    if (!mappings) {
+      throw new Error(`Could not fetch mapping for "${sourceIndex}"`);
+    }
 
-  await esClient.indices.delete({ index: snapshotIndex, ignore_unavailable: true });
+    await sysClient.indices.delete({ index: snapshotIndex, ignore_unavailable: true });
 
-  await esClient.indices.create({
-    index: snapshotIndex,
-    mappings,
-  });
+    await sysClient.indices.create({
+      index: snapshotIndex,
+      mappings,
+    });
 
-  const result = await esClient.reindex(
-    {
-      wait_for_completion: true,
-      source: { index: sourceIndex },
-      dest: { index: snapshotIndex },
-    },
-    { requestTimeout: 30 * 60 * 1000 }
-  );
-
-  if (result.timed_out) {
-    throw new Error(`Reindex timed out capturing "${sourceIndex}"`);
-  }
-
-  const failures = result.failures ?? [];
-  if (failures.length > 0) {
-    throw new Error(
-      `Reindex had ${failures.length} failure(s) capturing "${sourceIndex}": ${failures
-        .slice(0, 3)
-        .map((f) => f.cause?.reason ?? 'unknown')
-        .join('; ')}`
+    const result = await sysClient.reindex(
+      {
+        wait_for_completion: true,
+        source: { index: sourceIndex },
+        dest: { index: snapshotIndex },
+      },
+      { requestTimeout: 30 * 60 * 1000 }
     );
-  }
 
-  const created = result.created ?? 0;
-  log.info(`Captured ${sourceIndex} → ${snapshotIndex} (${created} docs)`);
+    if (result.timed_out) {
+      throw new Error(`Reindex timed out capturing "${sourceIndex}"`);
+    }
 
-  return snapshotIndex;
+    const failures = result.failures ?? [];
+    if (failures.length > 0) {
+      throw new Error(
+        `Reindex had ${failures.length} failure(s) capturing "${sourceIndex}": ${failures
+          .slice(0, 3)
+          .map((f) => f.cause?.reason ?? 'unknown')
+          .join('; ')}`
+      );
+    }
+
+    const created = result.created ?? 0;
+    log.info(`Captured ${sourceIndex} → ${snapshotIndex} (${created} docs)`);
+
+    return snapshotIndex;
+  });
 }
 
 export async function captureEnvSnapshot({
@@ -100,34 +98,13 @@ export async function captureEnvSnapshot({
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
-  await validateIndexPrivileges(
-    esClient,
-    log,
-    systemIndices,
-    (missing) =>
-      `Capture requires a user with manage privilege on system indices. ` +
-      `Pass superuser credentials via --es-username/--es-password. ` +
-      `Missing index:manage privilege on: ${missing}`
-  );
-
   const resolvedSystemIndices = await resolvePatterns(esClient, log, systemIndices);
   const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 
   const capturedSystemIndices: string[] = [];
   for (const idx of resolvedSystemIndices) {
-    let snapshotIndex: string;
-    try {
-      snapshotIndex = await captureSystemIndex({ esClient, log, sourceIndex: idx });
-    } catch (err) {
-      if (err?.meta?.body?.error?.type === 'security_exception') {
-        throw new Error(
-          `Capture requires a user with manage privilege on system indices. ` +
-            `Pass superuser credentials via --es-username/--es-password. ` +
-            `Missing index:manage privilege on: ${idx}`
-        );
-      }
-      throw err;
-    }
+    const snapshotIndex = await captureSystemIndex({ esClient, config, log, sourceIndex: idx });
+
     capturedSystemIndices.push(snapshotIndex);
   }
 

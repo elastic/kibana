@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   PageOrUndefined,
@@ -28,88 +28,98 @@ import { CreatePacksRequestBody, CreatePacksResponse } from './create_pack.gen';
 import { UpdatePacksRequestBody, UpdatePacksResponse } from './update_packs.gen';
 import { CopyPacksResponse } from './copy_pack.gen';
 
+export const OsqueryCopyPacksRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the pack to copy.
+     */
+    id: PackId,
+  })
+);
 export type OsqueryCopyPacksRequestParams = z.infer<typeof OsqueryCopyPacksRequestParams>;
-export const OsqueryCopyPacksRequestParams = z.object({
-  /**
-   * The ID of the pack to copy.
-   */
-  id: PackId,
-});
 export type OsqueryCopyPacksRequestParamsInput = z.input<typeof OsqueryCopyPacksRequestParams>;
 
+export const OsqueryCopyPacksResponse = lazySchema(() => CopyPacksResponse);
 export type OsqueryCopyPacksResponse = z.infer<typeof OsqueryCopyPacksResponse>;
-export const OsqueryCopyPacksResponse = CopyPacksResponse;
 
+export const OsqueryCreatePacksRequestBody = lazySchema(() => CreatePacksRequestBody);
 export type OsqueryCreatePacksRequestBody = z.infer<typeof OsqueryCreatePacksRequestBody>;
-export const OsqueryCreatePacksRequestBody = CreatePacksRequestBody;
 export type OsqueryCreatePacksRequestBodyInput = z.input<typeof OsqueryCreatePacksRequestBody>;
 
+export const OsqueryCreatePacksResponse = lazySchema(() => CreatePacksResponse);
 export type OsqueryCreatePacksResponse = z.infer<typeof OsqueryCreatePacksResponse>;
-export const OsqueryCreatePacksResponse = CreatePacksResponse;
 
+export const OsqueryDeletePacksRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The pack ID.
+     */
+    id: PackId,
+  })
+);
 export type OsqueryDeletePacksRequestParams = z.infer<typeof OsqueryDeletePacksRequestParams>;
-export const OsqueryDeletePacksRequestParams = z.object({
-  /**
-   * The pack ID.
-   */
-  id: PackId,
-});
 export type OsqueryDeletePacksRequestParamsInput = z.input<typeof OsqueryDeletePacksRequestParams>;
 
+export const OsqueryDeletePacksResponse = lazySchema(() => z.object({}));
 export type OsqueryDeletePacksResponse = z.infer<typeof OsqueryDeletePacksResponse>;
-export const OsqueryDeletePacksResponse = z.object({});
+export const OsqueryFindPacksRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The page number to return.
+     */
+    page: PageOrUndefined.optional(),
+    /**
+     * The number of results to return per page.
+     */
+    pageSize: PageSizeOrUndefined.optional(),
+    /**
+     * The field to sort results by.
+     */
+    sort: SortOrUndefined.optional(),
+    /**
+     * The sort order.
+     */
+    sortOrder: SortOrderOrUndefined.optional(),
+  })
+);
 export type OsqueryFindPacksRequestQuery = z.infer<typeof OsqueryFindPacksRequestQuery>;
-export const OsqueryFindPacksRequestQuery = z.object({
-  /**
-   * The page number to return.
-   */
-  page: PageOrUndefined.optional(),
-  /**
-   * The number of results to return per page.
-   */
-  pageSize: PageSizeOrUndefined.optional(),
-  /**
-   * The field to sort results by.
-   */
-  sort: SortOrUndefined.optional(),
-  /**
-   * The sort order.
-   */
-  sortOrder: SortOrderOrUndefined.optional(),
-});
 export type OsqueryFindPacksRequestQueryInput = z.input<typeof OsqueryFindPacksRequestQuery>;
 
+export const OsqueryFindPacksResponse = lazySchema(() => FindPacksResponse);
 export type OsqueryFindPacksResponse = z.infer<typeof OsqueryFindPacksResponse>;
-export const OsqueryFindPacksResponse = FindPacksResponse;
 
+export const OsqueryGetPacksDetailsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The pack ID.
+     */
+    id: PackId,
+  })
+);
 export type OsqueryGetPacksDetailsRequestParams = z.infer<
   typeof OsqueryGetPacksDetailsRequestParams
 >;
-export const OsqueryGetPacksDetailsRequestParams = z.object({
-  /**
-   * The pack ID.
-   */
-  id: PackId,
-});
 export type OsqueryGetPacksDetailsRequestParamsInput = z.input<
   typeof OsqueryGetPacksDetailsRequestParams
 >;
 
+export const OsqueryGetPacksDetailsResponse = lazySchema(() => FindPackResponse);
 export type OsqueryGetPacksDetailsResponse = z.infer<typeof OsqueryGetPacksDetailsResponse>;
-export const OsqueryGetPacksDetailsResponse = FindPackResponse;
 
+export const OsqueryUpdatePacksRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The pack ID.
+     */
+    id: PackId,
+  })
+);
 export type OsqueryUpdatePacksRequestParams = z.infer<typeof OsqueryUpdatePacksRequestParams>;
-export const OsqueryUpdatePacksRequestParams = z.object({
-  /**
-   * The pack ID.
-   */
-  id: PackId,
-});
 export type OsqueryUpdatePacksRequestParamsInput = z.input<typeof OsqueryUpdatePacksRequestParams>;
 
+export const OsqueryUpdatePacksRequestBody = lazySchema(() => UpdatePacksRequestBody);
 export type OsqueryUpdatePacksRequestBody = z.infer<typeof OsqueryUpdatePacksRequestBody>;
-export const OsqueryUpdatePacksRequestBody = UpdatePacksRequestBody;
 export type OsqueryUpdatePacksRequestBodyInput = z.input<typeof OsqueryUpdatePacksRequestBody>;
 
+export const OsqueryUpdatePacksResponse = lazySchema(() => UpdatePacksResponse);
 export type OsqueryUpdatePacksResponse = z.infer<typeof OsqueryUpdatePacksResponse>;
-export const OsqueryUpdatePacksResponse = UpdatePacksResponse;

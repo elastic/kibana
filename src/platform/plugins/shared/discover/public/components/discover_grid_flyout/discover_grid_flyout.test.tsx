@@ -8,10 +8,9 @@
  */
 
 import React from 'react';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import type { DiscoverGridFlyoutProps } from './discover_grid_flyout';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../build_services';
@@ -19,8 +18,6 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -35,22 +32,18 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
   return {
     ...actual,
     UnifiedDocViewerFlyout: (props: UnifiedDocViewerFlyoutProps) => (
-      <OriginalFlyout
-        {...props}
-        {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
-      />
+      <>
+        <div data-test-subj="mockFlyoutTitle">
+          {props.flyoutTitle ?? (props.isEsqlQuery ? 'Result' : 'Document')}
+        </div>
+        <OriginalFlyout
+          {...props}
+          {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
+        />
+      </>
     ),
   };
 });
-
-const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
-
-const waitNextUpdate = async (component: ReactWrapper) => {
-  await act(async () => {
-    await waitNextTick();
-  });
-  component.update();
-};
 
 describe('Discover flyout', function () {
   const getServices = () => {
@@ -64,7 +57,7 @@ describe('Discover flyout', function () {
     } as unknown as DiscoverServices;
   };
 
-  const mountComponent = async ({
+  const renderComponent = async ({
     dataView,
     records,
     expandedHit,
@@ -79,6 +72,7 @@ describe('Discover flyout', function () {
   }) => {
     const onClose = jest.fn();
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+    const user = userEvent.setup();
 
     const currentRecords =
       records ||
@@ -99,16 +93,17 @@ describe('Discover flyout', function () {
       setExpandedDoc: jest.fn(),
     };
 
-    const Proxy = (newProps: DiscoverGridFlyoutProps) => (
+    render(
       <DiscoverTestProvider services={services}>
-        <DiscoverGridFlyout {...newProps} />
+        <DiscoverGridFlyout {...props} />
       </DiscoverTestProvider>
     );
 
-    const component = mountWithIntl(<Proxy {...props} />);
-    await waitNextUpdate(component);
+    await waitFor(() => {
+      expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
+    });
 
-    return { component, props, services };
+    return { props, services, user };
   };
 
   beforeEach(() => {
@@ -117,35 +112,39 @@ describe('Discover flyout', function () {
   });
 
   it('should be rendered correctly using an data view without timefield', async () => {
-    const { component, props } = await mountComponent({});
+    const { props, user } = await renderComponent({});
 
-    const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
-    findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
+    expect(screen.getByTestId('docTableRowAction')).toHaveAttribute(
+      'href',
+      'mock-doc-redirect-url'
+    );
+
+    await user.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(props.onClose).toHaveBeenCalled();
   });
 
   it('should be rendered correctly using an data view with timefield', async () => {
-    const { component, props } = await mountComponent({ dataView: dataViewWithTimefieldMock });
+    const { props, user } = await renderComponent({ dataView: dataViewWithTimefieldMock });
 
-    const actions = findTestSubject(component, 'docTableRowAction');
+    const actions = screen.getAllByTestId('docTableRowAction');
     expect(actions.length).toBe(2);
-    expect(actions.first().prop('href')).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
-    expect(actions.last().prop('href')).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
-    findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
+    expect(actions[0]).toHaveAttribute('href', 'mock-doc-redirect-url');
+    expect(actions[1]).toHaveAttribute('href', 'mock-context-redirect-url');
+
+    await user.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(props.onClose).toHaveBeenCalled();
   });
 
   it('displays document navigation when there is more than 1 doc available', async () => {
-    const { component } = await mountComponent({ dataView: dataViewWithTimefieldMock });
-    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
-    expect(docNav.length).toBeTruthy();
+    await renderComponent({ dataView: dataViewWithTimefieldMock });
+
+    expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
   });
 
   it('displays no document navigation when there are 0 docs available', async () => {
-    const { component } = await mountComponent({ records: [], expandedHit: esHitsMock[0] });
-    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
-    expect(docNav.length).toBeFalsy();
+    await renderComponent({ records: [], expandedHit: esHitsMock[0] });
+
+    expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
   });
 
   it('displays no document navigation when the expanded doc is not part of the given docs', async () => {
@@ -166,93 +165,110 @@ describe('Discover flyout', function () {
         _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
       },
     ].map((hit) => buildDataTableRecord(hit, dataViewMock));
-    const { component } = await mountComponent({ records, expandedHit: esHitsMock[0] });
-    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
-    expect(docNav.length).toBeFalsy();
+    await renderComponent({ records, expandedHit: esHitsMock[0] });
+
+    expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
   });
 
   it('allows you to navigate to the next doc, if expanded doc is the first', async () => {
     // scenario: you've expanded a doc, and in the next request different docs where fetched
-    const { component, props } = await mountComponent({});
-    findTestSubject(component, 'pagination-button-next').simulate('click');
+    const { props, user } = await renderComponent({});
+
+    await user.click(screen.getByTestId('pagination-button-next'));
+
     // we selected 1, so we'd expect 2
-    expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('2');
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(props.hits[1]);
   });
 
   it('doesnt allow you to navigate to the previous doc, if expanded doc is the first', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({});
-    findTestSubject(component, 'pagination-button-previous').simulate('click');
+    const { props, user } = await renderComponent({});
+
+    await user.click(screen.getByTestId('pagination-button-previous'));
+
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(0);
   });
 
   it('doesnt allow you to navigate to the next doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({
+    const { props, user } = await renderComponent({
       expandedHit: esHitsMock[esHitsMock.length - 1],
     });
-    findTestSubject(component, 'pagination-button-next').simulate('click');
+
+    await user.click(screen.getByTestId('pagination-button-next'));
+
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(0);
   });
 
   it('allows you to navigate to the previous doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({
+    const { props, user } = await renderComponent({
       expandedHit: esHitsMock[esHitsMock.length - 1],
     });
-    findTestSubject(component, 'pagination-button-previous').simulate('click');
+
+    await user.click(screen.getByTestId('pagination-button-previous'));
+
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
-    expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('4');
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(props.hits[props.hits.length - 2]);
   });
 
-  it('allows navigating with arrow keys through documents', async () => {
-    const { component, props } = await mountComponent({});
-    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowRight' });
+  it('allows navigating to the next document with the right arrow key', async () => {
+    const { props, user } = await renderComponent({});
+
+    screen.getByTestId('euiFlyoutBodyOverflow').focus();
+    await user.keyboard('{ArrowRight}');
+
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
-    component.setProps({ ...props, hit: props.hits[1] });
-    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowLeft' });
+  });
+
+  it('allows navigating to the previous document with the left arrow key', async () => {
+    const { props, user } = await renderComponent({
+      expandedHit: esHitsMock[1],
+    });
+
+    screen.getByTestId('euiFlyoutBodyOverflow').focus();
+    await user.keyboard('{ArrowLeft}');
+
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
-  it('should not navigate with keypresses when already at the border of documents', async () => {
-    const { component, props } = await mountComponent({});
-    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowLeft' });
+  it('does not navigate to the previous document with the left arrow key on the first document', async () => {
+    const { props, user } = await renderComponent({});
+
+    screen.getByTestId('euiFlyoutBodyOverflow').focus();
+    await user.keyboard('{ArrowLeft}');
+
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
-    component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });
-    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowRight' });
+  });
+
+  it('does not navigate to the next document with the right arrow key on the last document', async () => {
+    const { props, user } = await renderComponent({
+      expandedHit: esHitsMock[esHitsMock.length - 1],
+    });
+
+    screen.getByTestId('euiFlyoutBodyOverflow').focus();
+    await user.keyboard('{ArrowRight}');
+
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
   it('should not navigate with arrow keys through documents if an input is in focus', async () => {
     mockRenderCustomHeader = () => <input data-test-subj="flyoutCustomInput" />;
-    const { component, props } = await mountComponent({});
-    findTestSubject(component, 'flyoutCustomInput').simulate('keydown', {
-      key: 'ArrowRight',
-    });
-    findTestSubject(component, 'flyoutCustomInput').simulate('keydown', {
-      key: 'ArrowLeft',
-    });
+    const { props, user } = await renderComponent({});
+
+    screen.getByTestId('flyoutCustomInput').focus();
+    await user.keyboard('{ArrowRight}{ArrowLeft}');
+
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
   it('should not render single/surrounding views for ES|QL', async () => {
-    const { component } = await mountComponent({
+    await renderComponent({
       query: { esql: 'FROM indexpattern' },
     });
-    const singleDocumentView = findTestSubject(component, 'docTableRowAction');
-    expect(singleDocumentView.length).toBeFalsy();
 
-    // After opting in to flyout session management we render title via flyoutMenuProps prop, not as an explicit element anymore
-    // Enzyme has limitations with reading the header, so we check the prop directly
-    // TODO: check title text content directly after migrating the test to RTL https://github.com/elastic/kibana/issues/222939
-    const flyout = component.find('EuiFlyout');
-    const flyoutMenuProps = flyout.prop('flyoutMenuProps');
-    expect(flyoutMenuProps).toEqual(
-      expect.objectContaining({
-        title: 'Result',
-        hideTitle: false,
-      })
-    );
+    expect(screen.queryByTestId('docTableRowAction')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockFlyoutTitle')).toHaveTextContent('Result');
   });
 
   describe('context awareness', () => {
@@ -282,20 +298,10 @@ describe('Discover flyout', function () {
         dataView: dataViewMock,
         processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
       });
-      const { component } = await mountComponent({ records, services });
+      await renderComponent({ records, services });
 
-      const content = findTestSubject(component, 'kbnDocViewer');
-      expect(content.text()).toBe('Mock tab');
-
-      // TODO: check title text content directly after migrating the test to RTL https://github.com/elastic/kibana/issues/222939
-      const flyout = component.find('EuiFlyout');
-      const flyoutMenuProps = flyout.prop('flyoutMenuProps');
-      expect(flyoutMenuProps).toEqual(
-        expect.objectContaining({
-          title: 'Document #new::1::',
-          hideTitle: false,
-        })
-      );
+      expect(screen.getByText('Mock tab')).toBeInTheDocument();
+      expect(screen.getByTestId('mockFlyoutTitle')).toHaveTextContent('Document #new::1::');
     });
 
     it('should render custom header when provided by document profile', async () => {
@@ -308,12 +314,9 @@ describe('Discover flyout', function () {
         dataView: dataViewMock,
         processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
       });
-      const { component } = await mountComponent({ services, records });
+      await renderComponent({ services, records });
 
-      // The custom header should be rendered in the flyout
-      const customHeader = findTestSubject(component, 'customDocViewerHeader');
-      expect(customHeader.length).toBe(1);
-      expect(customHeader.text()).toBe('Custom Header');
+      expect(screen.getByTestId('customDocViewerHeader')).toHaveTextContent('Custom Header');
     });
 
     it('should render custom footer when provided by document profile', async () => {
@@ -326,12 +329,9 @@ describe('Discover flyout', function () {
         dataView: dataViewMock,
         processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
       });
-      const { component } = await mountComponent({ services, records });
+      await renderComponent({ services, records });
 
-      // The custom footer should be rendered in the flyout
-      const customFooter = findTestSubject(component, 'customDocViewerFooter');
-      expect(customFooter.length).toBe(1);
-      expect(customFooter.text()).toBe('Custom Footer');
+      expect(screen.getByTestId('customDocViewerFooter')).toHaveTextContent('Custom Footer');
     });
   });
 });

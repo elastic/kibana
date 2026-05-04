@@ -7,10 +7,10 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { reloadIndices } from '.';
-import { notificationService } from '../../services/notification';
 import { httpService } from '../../services/http';
 import type { AppDispatch } from '../types';
 import { getHttpErrorToastMessage } from '../http_error';
+import type { AppDependencies } from '../../app_context';
 
 export const performExtensionAction =
   ({
@@ -22,7 +22,11 @@ export const performExtensionAction =
     indexNames: string[];
     successMessage: string;
   }) =>
-  async (dispatch: AppDispatch) => {
+  async (
+    dispatch: AppDispatch,
+    _getState: () => unknown,
+    { notificationService }: AppDependencies['services']
+  ) => {
     try {
       await requestMethod(indexNames, httpService.httpClient);
     } catch (error) {

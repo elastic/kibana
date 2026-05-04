@@ -29,6 +29,7 @@ import type {
   WiredStreamsStatus,
 } from './types';
 import type { StreamsRepositoryClient } from './api';
+import { createStreamsSourceEnricher } from './services/esql_source_enricher';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
@@ -45,6 +46,14 @@ export class Plugin implements StreamsPluginClass {
 
   setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
+
+    if (pluginSetup.esql) {
+      const application = core.getStartServices().then(([coreStart]) => coreStart.application);
+      pluginSetup.esql.registerSourceEnricher(
+        createStreamsSourceEnricher(this.repositoryClient, application)
+      );
+    }
+
     return {};
   }
 
