@@ -80,21 +80,21 @@ export class ChangeTrackingService implements IChangeTrackingService {
     }
 
     const user = this.authService.getCurrentUser(request);
-    const userInfo: Pick<LogChangeHistoryOptions, 'username' | 'userProfileId'> = {
-      username: user?.username ?? '',
-      userProfileId: user?.profile_uid,
-    };
+    const username = user?.username ?? '';
+    const userProfileId = user?.profile_uid;
 
     return {
       log: async (change, opts) =>
         this.log(change, {
           ...opts,
-          ...userInfo,
+          username,
+          userProfileId,
         }),
       logBulk: async (changes, opts) =>
         this.logBulk(changes, {
           ...opts,
-          ...userInfo,
+          username,
+          userProfileId,
         }),
       getHistory: this.getHistory.bind(this),
     };
