@@ -83,6 +83,8 @@ export interface Action<Context extends object = object, ActionExtension extends
    */
   isCompatible(context: ActionExecutionContext<Context>): Promise<boolean>;
 
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
   /**
    * Executes the action.
    */
@@ -151,6 +153,8 @@ export type ActionDefinition<
    * the context and should be displayed to user, otherwise resolves to false.
    */
   isCompatible?(context: ActionDefinitionContext<Context>): Promise<boolean>;
+
+  isDisabled?(context: ActionDefinitionContext<Context>): boolean;
 
   /**
    * Executes the action.

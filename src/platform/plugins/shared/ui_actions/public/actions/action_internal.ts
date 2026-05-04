@@ -30,6 +30,7 @@ export class ActionInternal<
   public readonly showNotification?: boolean;
   public readonly disabled?: boolean;
 
+  public readonly isDisabled: Action<Context>['isDisabled'];
   public readonly getCompatibilityChangesSubject?: Action<Context>['getCompatibilityChangesSubject'];
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
@@ -44,6 +45,7 @@ export class ActionInternal<
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
     this.disabled = this.definition.disabled;
+    this.isDisabled = this.definition.isDisabled;
     this.errorLogged = false;
     this.extension = this.definition.extension;
 

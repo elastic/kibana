@@ -7,43 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable } from 'rxjs';
+import { map } from 'rxjs';
 
-import { i18n } from '@kbn/i18n';
-import { apiCanPinPanels } from '@kbn/presentation-publishing';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import {
   ACTION_CREATE_TIME_SLIDER,
   DEFAULT_TIME_SLIDER_STATE,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
+import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext, PresentationContainer } from '@kbn/presentation-publishing';
+import {
+  apiCanPinPanels,
+  apiHasType,
+  apiIsPresentationContainer,
+} from '@kbn/presentation-publishing';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 
-interface SupportsTimeSliderControl {
-  hasTimeSliderControl: () => boolean;
-  layoutChanged$: Observable<undefined>;
-}
-
-const apiSupportsTimeSliderControl = (api: unknown): api is SupportsTimeSliderControl =>
-  typeof (api as SupportsTimeSliderControl).hasTimeSliderControl === 'function' &&
-  Boolean((api as SupportsTimeSliderControl).layoutChanged$);
-
 const compatibilityCheck = (api: unknown | null) =>
-  apiCanPinPanels(api) && apiSupportsTimeSliderControl(api) && !api.hasTimeSliderControl();
+  apiIsPresentationContainer(api) && apiCanPinPanels(api);
+
+const isDisabled = (api: PresentationContainer) =>
+  Object.values(api.children$.getValue()).some(
+    (child) => apiHasType(child) && child.type === TIME_SLIDER_CONTROL
+  );
 
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
   grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controls',
-  couldBecomeCompatible: ({ embeddable }) => apiCanPinPanels(embeddable),
+  getDisplayNameTooltip: ({ embeddable }) => {
+    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+    if (isDisabled(embeddable)) {
+      return i18n.translate('dashboard.addPanelFlyout.timeSliderOnlyOneTooltip', {
+        defaultMessage: 'You can only add one time slider control per dashboard.',
+      });
+    }
+    return i18n.translate('dashboard.addPanelFlyout.timeSliderTooltip', {
+      defaultMessage: 'Add a time slider control to your dashboard.',
+    });
+  },
+  couldBecomeCompatible: ({ embeddable }) => compatibilityCheck(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
-    apiSupportsTimeSliderControl(embeddable) ? embeddable.layoutChanged$ : undefined,
+    apiIsPresentationContainer(embeddable)
+      ? embeddable.children$.pipe(map(() => undefined))
+      : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),
+  isDisabled: ({ embeddable }) => {
+    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+    return isDisabled(embeddable);
+  },
   execute: async ({ embeddable }) => {
-    if (!apiCanPinPanels(embeddable)) throw new IncompatibleActionError();
+    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {

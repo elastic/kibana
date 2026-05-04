@@ -12,7 +12,6 @@ import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 
-import { getTimeSliderActionItem } from '../../../dashboard_actions/get_time_slider_control_action_item';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';
 import type { DashboardApi } from '../../../dashboard_api/types';
@@ -62,17 +61,12 @@ export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGrou
         },
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(addPanelContext),
+        isDisabled: action?.isDisabled?.(addPanelContext),
         order: action.order ?? 0,
         MenuItem: action.MenuItem ? action.MenuItem({ context: addPanelContext }) : undefined,
       });
     });
   });
-
-  /** Handle special time slider case */
-  if (groups.controls) {
-    const timeSliderAction = await getTimeSliderActionItem(api);
-    if (timeSliderAction) pushItem(groups.controls, timeSliderAction);
-  }
 
   return Object.values(groups)
     .map((group) => {
