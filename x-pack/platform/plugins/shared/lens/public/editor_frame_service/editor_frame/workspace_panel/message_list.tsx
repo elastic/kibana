@@ -83,7 +83,7 @@ export const MessageList = ({
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type="error" />
+                <EuiIcon type="error" aria-hidden={true} />
                 {errorCount}
               </>
             )}
@@ -91,6 +91,7 @@ export const MessageList = ({
               <>
                 <EuiIcon
                   type="warning"
+                  aria-hidden={true}
                   css={css`
                     margin-left: 4px;
                   `}
@@ -122,9 +123,9 @@ export const MessageList = ({
                 {!hidePopoverIcon && (
                   <EuiFlexItem grow={false}>
                     {message.severity === 'error' ? (
-                      <EuiIcon type="error" color="danger" />
+                      <EuiIcon type="error" color="danger" aria-hidden={true} />
                     ) : (
-                      <EuiIcon type="warning" color="warning" />
+                      <EuiIcon type="warning" color="warning" aria-hidden={true} />
                     )}
                   </EuiFlexItem>
                 )}

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { ListClient } from '@kbn/lists-plugin/server';
+import { createTestConfig } from '../../../../../config/serverless/config.base.ai4dsoc';
 
-export interface CreateListIndicesInitializationFlowContext {
-  internalListClient: ListClient;
-}
+export default createTestConfig({
+  testFiles: [require.resolve('..')],
+  junit: {
+    reportName: 'AI4DSOC - EASE Rules - Serverless Search AI Lake Tier',
+  },
+});
