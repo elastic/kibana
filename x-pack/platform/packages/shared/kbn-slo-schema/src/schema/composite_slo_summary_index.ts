@@ -25,9 +25,4 @@ const storedCompositeSloSummarySchema = z.object({
   members: z.array(compositeSloMemberSummarySchema).optional(),
 });
 
-type CompositeSloSummaryIndexSummaryFields = z.infer<
-  typeof storedCompositeSloSummarySchema
->;
-
 export { storedCompositeSloSummarySchema };
-export type { CompositeSloSummaryIndexSummaryFields };
