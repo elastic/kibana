@@ -60,6 +60,11 @@ export default function chainRunner(tlConfig) {
         switch (item.type) {
           case 'function': {
             const itemFunctionDef = tlConfig.getFunction(item.function);
+            if (functionDef.datasource && itemFunctionDef.datasource) {
+              throw new Error(
+                `Cannot use datasource function ${item.function}() as an argument to datasource function ${fnName}(). Datasource functions cannot be nested.`
+              );
+            }
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));

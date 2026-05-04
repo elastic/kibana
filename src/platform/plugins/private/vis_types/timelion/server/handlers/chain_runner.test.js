@@ -64,4 +64,25 @@ describe('chain_runner', () => {
       expect(results[0].list[0].color).toBe('#f00');
     });
   });
+
+  describe('datasource nesting prevention', () => {
+    it('rejects a datasource function nested as an argument to another datasource', async () => {
+      await expect(processExpression('.static(.static(42))')).rejects.toThrow(
+        /The value argument for static\(\) must be a number or a colon-separated string of numbers/
+      );
+    });
+
+    it('rejects deeply nested datasource functions', async () => {
+      await expect(processExpression('.static(.static(.static(42)))')).rejects.toThrow(
+        /The value argument for static\(\) must be a number or a colon-separated string of numbers/
+      );
+    });
+
+    it('allows a datasource as an argument to a non-datasource function', async () => {
+      const sheets = await processExpression('.static(5).sum(.static(10))');
+      const results = await Promise.all(sheets);
+
+      expect(results[0].list[0].data[0][1]).toBe(15);
+    });
+  });
 });
