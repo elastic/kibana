@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { savedQuerySchemaV2, packSchemaV2 } from './schemas';
+import { savedQuerySchemaV2, packSchemaV2, packSchemaV3 } from './schemas';
 
 export const savedQueryModelVersion1: SavedObjectsModelVersion = {
   changes: [
@@ -61,6 +61,34 @@ export const packSavedObjectModelVersion2: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: packSchemaV2.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+/**
+ * V3 adds pack-level scheduling fields:
+ * - `schedule_type` (keyword): 'interval' | 'rrule'
+ * - `interval` (integer): pack-level interval in seconds (new — previously per-query only)
+ * - `rrule_schedule` (dynamic: false): the serialized RRULE config object
+ *
+ * CRITICAL: the pack SO root mappings are NOT `dynamic: false` (unlike the
+ * saved query SO). Without this `mappings_addition`, new pack-level fields are
+ * silently dropped on write. Per-query overrides inside `queries` (which is
+ * `dynamic: false`) do not need explicit mapping; `packQuerySchema` uses
+ * `unknowns: 'allow'` so they round-trip cleanly.
+ */
+export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        schedule_type: { type: 'keyword' },
+        interval: { type: 'integer' },
+        rrule_schedule: { dynamic: false, properties: {} },
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
   },
 };
 

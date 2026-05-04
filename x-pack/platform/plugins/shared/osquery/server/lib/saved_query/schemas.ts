@@ -77,3 +77,20 @@ export const packSchemaV2 = packSchemaV1.extends({
   created_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
+
+const rruleScheduleConfigSchema = schema.object(
+  {
+    rrule: schema.string(),
+    start_date: schema.string(),
+    end_date: schema.maybe(schema.string()),
+    splay: schema.maybe(schema.string()),
+    timeout: schema.maybe(schema.number()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const packSchemaV3 = packSchemaV2.extends({
+  schedule_type: schema.maybe(schema.oneOf([schema.literal('interval'), schema.literal('rrule')])),
+  interval: schema.maybe(schema.number()),
+  rrule_schedule: schema.maybe(rruleScheduleConfigSchema),
+});

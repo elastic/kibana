@@ -8,12 +8,29 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 
+const scheduleTypeRt = t.union([t.literal('interval'), t.literal('rrule')]);
+
+const rruleScheduleConfigRt = t.intersection([
+  t.type({
+    rrule: t.string,
+    start_date: t.string,
+  }),
+  t.partial({
+    end_date: t.string,
+    splay: t.string,
+    timeout: t.number,
+  }),
+]);
+
 export const createPackRequestBodySchema = t.type({
   name: t.string,
   description: t.union([t.string, t.undefined]),
   enabled: t.union([t.boolean, t.undefined]),
   policy_ids: t.union([t.array(t.string), t.undefined]),
   shards: t.union([t.record(t.string, toNumberRt), t.undefined]),
+  schedule_type: t.union([scheduleTypeRt, t.undefined]),
+  interval: t.union([toNumberRt, t.undefined]),
+  rrule_schedule: t.union([rruleScheduleConfigRt, t.undefined]),
   queries: t.record(
     t.string,
     t.type({
@@ -23,6 +40,8 @@ export const createPackRequestBodySchema = t.type({
       removed: t.union([t.boolean, t.undefined]),
       platform: t.union([t.string, t.undefined]),
       version: t.union([t.string, t.undefined]),
+      schedule_type: t.union([scheduleTypeRt, t.undefined]),
+      rrule_schedule: t.union([rruleScheduleConfigRt, t.undefined]),
       ecs_mapping: t.union([
         t.record(
           t.string,

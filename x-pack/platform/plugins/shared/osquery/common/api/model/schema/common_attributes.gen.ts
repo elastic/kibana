@@ -182,6 +182,49 @@ export type ECSMappingArray = z.infer<typeof ECSMappingArray>;
 export const ECSMappingArrayOrUndefined = lazySchema(() => ECSMappingArray.nullable());
 export type ECSMappingArrayOrUndefined = z.infer<typeof ECSMappingArrayOrUndefined>;
 
+/**
+ * Discriminator for the active scheduling mode. `interval` uses native osqueryd interval scheduling; `rrule` uses osquerybeat RRULE-based recurrence scheduling.
+ */
+export const ScheduleType = lazySchema(() => z.enum(['interval', 'rrule']));
+export type ScheduleType = z.infer<typeof ScheduleType>;
+export type ScheduleTypeEnum = typeof ScheduleType.enum;
+export const ScheduleTypeEnum = ScheduleType.enum;
+
+export const ScheduleTypeOrUndefined = lazySchema(() => ScheduleType.nullable());
+export type ScheduleTypeOrUndefined = z.infer<typeof ScheduleTypeOrUndefined>;
+
+/**
+ * RRULE schedule configuration consumed by osquerybeat. The `rrule` field is the fully serialized RFC 5545 string. DTSTART is NOT included; osquerybeat uses the separate `start_date` field.
+ */
+export const RRuleScheduleConfig = lazySchema(() =>
+  z.object({
+    /**
+     * RFC 5545 RRULE string, e.g. `FREQ=WEEKLY;BYDAY=MO,WE,FR`.
+     */
+    rrule: z.string(),
+    /**
+     * RFC 3339 datetime string for the schedule start.
+     */
+    start_date: z.string().datetime(),
+    /**
+     * Optional RFC 3339 datetime string for the schedule end.
+     */
+    end_date: z.string().datetime().optional(),
+    /**
+     * Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 1 hour.
+     */
+    splay: z.string().optional(),
+    /**
+     * Optional per-query timeout in seconds.
+     */
+    timeout: z.number().int().optional(),
+  })
+);
+export type RRuleScheduleConfig = z.infer<typeof RRuleScheduleConfig>;
+
+export const RRuleScheduleConfigOrUndefined = lazySchema(() => RRuleScheduleConfig.nullable());
+export type RRuleScheduleConfigOrUndefined = z.infer<typeof RRuleScheduleConfigOrUndefined>;
+
 export const ArrayQueriesItem = lazySchema(() =>
   z.object({
     id: QueryId.optional(),
@@ -191,6 +234,8 @@ export const ArrayQueriesItem = lazySchema(() =>
     platform: PlatformOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    schedule_type: ScheduleTypeOrUndefined.optional(),
+    rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
   })
 );
 export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
@@ -211,6 +256,8 @@ export const ObjectQueriesItem = lazySchema(() =>
     saved_query_id: SavedQueryIdOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    schedule_type: ScheduleTypeOrUndefined.optional(),
+    rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
   })
 );
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
@@ -264,6 +311,15 @@ export const SortOrderOrUndefinedEnum = SortOrderOrUndefined.enum;
  */
 export const Shards = lazySchema(() => z.object({}).catchall(z.number()));
 export type Shards = z.infer<typeof Shards>;
+
+/**
+ * Pack-level interval in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.
+ */
+export const PackInterval = lazySchema(() => z.number().int());
+export type PackInterval = z.infer<typeof PackInterval>;
+
+export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
+export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
 
 export const DefaultSuccessResponse = lazySchema(() => z.object({}));
 export type DefaultSuccessResponse = z.infer<typeof DefaultSuccessResponse>;

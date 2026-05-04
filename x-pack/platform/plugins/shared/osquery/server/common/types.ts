@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RRuleScheduleConfig, ScheduleType } from '../../common';
+
 export interface IQueryPayload {
   name: string;
   id: string;
@@ -27,6 +29,10 @@ export interface PackSavedObject {
     schedule_id?: string;
     start_date?: string;
     ecs_mapping?: Record<string, unknown>;
+    /** Per-query schedule type override. Mutually exclusive with sibling fields per type. */
+    schedule_type?: ScheduleType;
+    /** Per-query RRULE schedule override. Only present when `schedule_type === 'rrule'`. */
+    rrule_schedule?: RRuleScheduleConfig;
   }>;
   version?: number;
   enabled: boolean | undefined;
@@ -40,6 +46,21 @@ export interface PackSavedObject {
   read_only?: boolean;
   shards: SOShard;
   references: Array<{ name: string; type: string; id: string }>;
+  /**
+   * Pack-level schedule type. When absent, legacy behavior applies (each query
+   * uses its own per-query `interval`).
+   */
+  schedule_type?: ScheduleType;
+  /**
+   * Pack-level interval (seconds). New concept — previously `interval` was
+   * per-query only. Only present when `schedule_type === 'interval'`.
+   */
+  interval?: number;
+  /**
+   * Pack-level RRULE schedule. Only present when `schedule_type === 'rrule'`.
+   * The server stamps this onto each query that has no individual override.
+   */
+  rrule_schedule?: RRuleScheduleConfig;
 }
 
 export interface SavedQuerySavedObject {

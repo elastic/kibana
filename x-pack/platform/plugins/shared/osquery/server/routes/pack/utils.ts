@@ -24,6 +24,7 @@ import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
+import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
@@ -39,6 +40,21 @@ export interface PackQueryInput {
   schedule_id?: string;
   start_date?: string;
   ecs_mapping?: Record<string, unknown>;
+  /** Per-query schedule type override. */
+  schedule_type?: ScheduleType;
+  /** Per-query RRULE override (only present when `schedule_type === 'rrule'`). */
+  rrule_schedule?: RRuleScheduleConfig;
+}
+
+/**
+ * Pack-level schedule fields, used to fan out the pack's default schedule onto
+ * queries that don't have their own override.
+ */
+export interface PackSchedule {
+  schedule_type?: ScheduleType;
+  /** Pack-level interval (seconds). Set when `schedule_type === 'interval'`. */
+  interval?: number;
+  rrule_schedule?: RRuleScheduleConfig;
 }
 
 export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
@@ -53,20 +69,32 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
       const ecsMapping = value.ecs_mapping
         ? convertECSMappingToArray(value.ecs_mapping as Record<string, object>)
         : undefined;
+
+      // Mutual exclusivity at the per-query override level: when the query
+      // explicitly opts into one schedule mode, only that mode's fields are
+      // picked. Without `schedule_type` we keep legacy behavior (interval).
+      const baseFields = [
+        'name',
+        'query',
+        'platform',
+        'version',
+        'snapshot',
+        'removed',
+        'timeout',
+        'schedule_id',
+        'start_date',
+      ] as const;
+
+      const scheduleFields: Array<keyof PackQueryInput> =
+        value.schedule_type === 'rrule'
+          ? ['schedule_type', 'rrule_schedule']
+          : value.schedule_type === 'interval'
+          ? ['schedule_type', 'interval']
+          : ['interval'];
+
       acc.push({
         id: key,
-        ...pick(value, [
-          'name',
-          'query',
-          'interval',
-          'platform',
-          'version',
-          'snapshot',
-          'removed',
-          'timeout',
-          'schedule_id',
-          'start_date',
-        ]),
+        ...pick(value, [...baseFields, ...scheduleFields]),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       } as SOPackQuery);
 
