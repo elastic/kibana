@@ -8,10 +8,16 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { INTERNAL_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2, getEntitiesAlias, ENTITY_LATEST } from '../../../../common';
+import {
+  FF_ENABLE_ENTITY_STORE_V2,
+  getEntitiesAlias,
+  ENTITY_LATEST,
+  getLatestEntityIndexPattern,
+} from '../../../../common';
 
 apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }, () => {
-  const ENTITIES_INDEX = getEntitiesAlias(ENTITY_LATEST, 'default');
+  const ENTITIES_ALIAS_INDEX = getEntitiesAlias(ENTITY_LATEST, 'default');
+  const LATEST_ENTITY_INDEX = getLatestEntityIndexPattern('default');
 
   apiTest.beforeAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update({
@@ -81,12 +87,46 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
+    'Should return has_read_permissions: false when user has read access to only one of the two required indices',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: [ENTITIES_ALIAS_INDEX], privileges: ['read'] }],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: { siemV5: ['all'] },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+      const response = await apiClient.get(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
+        headers: { ...cookieHeader, ...INTERNAL_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toMatchObject({
+        has_all_required: false,
+        has_read_permissions: false,
+        has_write_permissions: false,
+      });
+    }
+  );
+
+  apiTest(
     'Should return limited privileges for user with read-only access to entities index',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser({
         elasticsearch: {
           cluster: [],
-          indices: [{ names: [ENTITIES_INDEX], privileges: ['read'] }],
+          indices: [
+            { names: [ENTITIES_ALIAS_INDEX], privileges: ['read'] },
+            { names: [LATEST_ENTITY_INDEX], privileges: ['read'] },
+          ],
         },
         kibana: [
           {
