@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useLayoutEffect } from 'react';
 import type { ChromeBreadcrumb, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import type { AppHeaderBack } from '@kbn/app-header';
-import { APPLICATION_TOP_BAR_MIN_HEIGHT_PX } from '@kbn/app-header';
+
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeaderView } from '@kbn/app-header';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
@@ -96,40 +96,25 @@ export function useHasChromeAppHeaderContent(): boolean {
   return hasExplicitAppHeaderContent(config) || fallback.hasContent;
 }
 
-function useMeasuredAppHeaderHeight(hasContent: boolean): React.RefCallback<HTMLDivElement> {
+function useMeasuredAppHeaderHeight(): React.RefCallback<HTMLDivElement> {
   const updateLayout = useLayoutUpdate();
-  const observerRef = useRef<ResizeObserver | null>(null);
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-        observerRef.current = null;
-      }
-    };
-  }, []);
+  useLayoutEffect(() => {
+    if (!el) return;
 
-  return useCallback(
-    (el: HTMLDivElement | null) => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-        observerRef.current = null;
-      }
+    updateLayout({ applicationTopBarHeight: el.offsetHeight });
 
-      if (!hasContent || !el) {
-        updateLayout({ applicationTopBarHeight: APPLICATION_TOP_BAR_MIN_HEIGHT_PX });
-        return;
-      }
+    const ro = new ResizeObserver(([entry]) => {
+      const h = entry.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
+      updateLayout({ applicationTopBarHeight: h });
+    });
+    ro.observe(el);
 
-      observerRef.current = new ResizeObserver(([entry]) => {
-        const height = entry.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
-        updateLayout({ applicationTopBarHeight: height });
-      });
+    return () => ro.disconnect();
+  }, [el, updateLayout]);
 
-      observerRef.current.observe(el);
-    },
-    [hasContent, updateLayout]
-  );
+  return setEl;
 }
 
 export const ChromeAppHeaderRenderer = React.memo(() => {
@@ -138,7 +123,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
 
   const back = normalizeAppHeaderBack(config?.back);
   const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
-  const measureRef = useMeasuredAppHeaderHeight(hasContent);
+  const measureRef = useMeasuredAppHeaderHeight();
 
   if (!hasContent) return null;
 

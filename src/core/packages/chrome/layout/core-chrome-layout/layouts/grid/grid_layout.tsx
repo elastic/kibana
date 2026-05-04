@@ -34,7 +34,7 @@ import {
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
-import { APPLICATION_TOP_BAR_MIN_HEIGHT_PX } from '@kbn/app-header';
+
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
@@ -111,7 +111,6 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
 
   const layoutConfig: ChromeLayoutConfig = {
     ...layoutConfigs[layoutConfigKey],
-    ...(needsChromeAppHeader && { applicationTopBarHeight: APPLICATION_TOP_BAR_MIN_HEIGHT_PX }),
     sidebarWidth,
     navigationWidth,
   };
