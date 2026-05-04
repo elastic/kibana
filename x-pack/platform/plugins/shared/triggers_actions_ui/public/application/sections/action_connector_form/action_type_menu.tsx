@@ -143,14 +143,14 @@ export const ActionTypeMenu = ({
       const card = (
         <EuiCard
           betaBadgeProps={
-            item.isExperimental
-              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
-              : item.isDeprecated
+            item.isDeprecated
               ? {
                   label: DEPRECATED_LABEL,
                   tooltipContent: DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
                   color: 'warning',
                 }
+              : item.isExperimental
+              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
           role="listitem"
