@@ -28,7 +28,7 @@ jest.mock('../../../../common', () => ({
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
-const mockUsePackageNames = jest.fn(() => undefined);
+const mockUsePackageNames = jest.fn((): Set<string> | undefined => undefined);
 jest.mock('../../forms/integration_form', () => ({
   useIntegrationForm: jest.fn(),
   usePackageNames: () => mockUsePackageNames(),

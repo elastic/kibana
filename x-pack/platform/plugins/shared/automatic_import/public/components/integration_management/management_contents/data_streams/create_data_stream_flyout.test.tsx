@@ -46,15 +46,13 @@ jest.mock('../../../../common', () => ({
     },
   })),
 }));
-const mockGetInstalledPackages = jest.fn(() =>
-  Promise.resolve({
-    items: [],
-  })
+const mockGetInstalledPackages = jest.fn(
+  (): Promise<{ items: Array<{ id: string; type: string }> }> => Promise.resolve({ items: [] })
 );
-const mockGetAllIntegrations = jest.fn(() => Promise.resolve([]));
+const mockGetAllIntegrations = jest.fn((): Promise<unknown[]> => Promise.resolve([]));
 jest.mock('../../../../common/lib/api', () => ({
-  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
-  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...args),
+  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
+  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
 }));
 
 const mockReportAnalyzeLogsTriggered = jest.fn();
@@ -556,7 +554,7 @@ describe('CreateDataStreamFlyout', () => {
   describe('duplicate integration name validation', () => {
     it('should disable analyze button when integration name already exists', async () => {
       mockGetInstalledPackages.mockResolvedValue({
-        items: [{ id: 'existing_integration' }],
+        items: [{ id: 'existing_integration', type: 'integration' }],
       });
 
       const Wrapper = createWrapper({
