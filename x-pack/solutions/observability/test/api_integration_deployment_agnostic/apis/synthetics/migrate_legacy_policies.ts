@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PrivateLocation, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -143,9 +144,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       _httpMonitorJson = getFixtureJson('http_monitor');
 
-      const apiResponse = await testPrivateLocations.addFleetPolicy('Legacy Migration Test Policy');
+      const apiResponse = await testPrivateLocations.addFleetPolicy(
+        'Legacy Migration Test Policy',
+        [ALL_SPACES_ID]
+      );
       testFleetPolicyID = apiResponse.body.item.id;
-      const locations = await testPrivateLocations.setTestLocations([testFleetPolicyID]);
+      const locations = await testPrivateLocations.setTestLocations(
+        [testFleetPolicyID],
+        [ALL_SPACES_ID]
+      );
       privateLocation = locations[0];
 
       const pkgResponse = await supertestAdmin.get('/api/fleet/epm/packages/synthetics');

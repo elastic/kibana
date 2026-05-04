@@ -10,7 +10,11 @@ if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
 
     cd "$WORKSPACE"
 
-    download_artifact kibana-default.tar.zst . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+    # [rspack-transition] The build step records which build ID to use.
+    # Falls back to KIBANA_BUILD_ID or BUILDKITE_BUILD_ID for non-PR pipelines.
+    EFFECTIVE_BUILD_ID=$(buildkite-agent meta-data get "kibana-effective-build-id" 2>/dev/null || echo "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}")
+
+    download_artifact kibana-default.tar.zst . --build "$EFFECTIVE_BUILD_ID"
 
     mkdir -p "$KIBANA_BUILD_LOCATION"
     tar -xf kibana-default.tar.zst -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
