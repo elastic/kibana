@@ -42,12 +42,7 @@ export async function ensureWorkflow(
 
   if (existing) {
     if (existing.yaml !== yaml || !existing.enabled || !existing.valid) {
-      await managementApi.updateWorkflow(
-        workflowId,
-        { yaml, enabled: true },
-        spaceId,
-        request
-      );
+      await managementApi.updateWorkflow(workflowId, { yaml, enabled: true }, spaceId, request);
       logger.info(`Updated workflow ${workflowId}`);
     }
   } else {
