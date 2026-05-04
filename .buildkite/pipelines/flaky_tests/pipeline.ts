@@ -40,17 +40,13 @@ const MAX_JOBS = 500;
 // they request too many repetitions for a single config.
 const MAX_SCOUT_COUNT_PER_CONFIG = 50;
 
-// Scout discovery target for the flaky-setup step. The regular Scout pipeline keys this off
-// `BUILDKITE_PULL_REQUEST_BASE_BRANCH == 'main'`, but flaky builds are typically triggered
-// from the BK UI without PR context — so a feature branch destined for main would otherwise
-// be misclassified as a release branch and silently lose serverless coverage. Instead, we
-// detect Kibana's release-branch naming (e.g. `8.19`, `9.0`, `8.x`) directly. Anything else
-// (main, feature branches) is treated as main-equivalent.
-const RELEASE_BRANCH_REGEX = /^[0-9]+\.([0-9]+|x)$/;
-const isReleaseBranchBuild =
-  RELEASE_BRANCH_REGEX.test(process.env.BUILDKITE_BRANCH ?? '') ||
-  RELEASE_BRANCH_REGEX.test(process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH ?? '');
-const scoutDiscoveryTarget = isReleaseBranchBuild ? 'local-stateful-only' : 'local';
+// Scout discovery target for the flaky-setup step. Flaky builds pin BUILDKITE_BRANCH to
+// `refs/pull/<N>/head` and run with build_pull_requests=false, so the regular pipeline's
+// `BUILDKITE_PULL_REQUEST_BASE_BRANCH` check doesn't apply. We use GITHUB_PR_TARGET_BRANCH
+// (set by the trigger) to decide: main-targeting PRs get `local` (stateful + serverless),
+// anything else (release branches) gets `local-stateful-only`.
+const scoutDiscoveryTarget =
+  process.env.GITHUB_PR_TARGET_BRANCH === 'main' ? 'local' : 'local-stateful-only';
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
