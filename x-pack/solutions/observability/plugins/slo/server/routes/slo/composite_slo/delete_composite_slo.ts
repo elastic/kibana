@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { deleteCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
+import { retryTransientEsErrors } from '../../../utils/retry';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -19,7 +20,10 @@ export const deleteCompositeSummaryDoc = async (
   logger: Logger
 ): Promise<void> => {
   try {
-    await esClient.delete({ index: COMPOSITE_SUMMARY_INDEX_NAME, id });
+    await retryTransientEsErrors(
+      () => esClient.delete({ index: COMPOSITE_SUMMARY_INDEX_NAME, id }),
+      { logger }
+    );
   } catch (err) {
     // 404 means the summary doc was never written (e.g. task hasn't run yet) — not an error
     if (err?.statusCode !== 404) {
