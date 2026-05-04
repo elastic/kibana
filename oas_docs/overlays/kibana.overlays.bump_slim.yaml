@@ -4,7 +4,7 @@ info:
   version: 0.0.1
   # ⚠️  TEMPORARY — retire this file when Dashboards & Visualizations APIs reach GA.
   # See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
-  # Current external hosting: https://elastic.github.io/as-code-docs/
+  # Current external hosting: https://elastic.github.io/dashboards-api-spec/
 
 actions:
   # ──────────────────────────────────────────────
@@ -40,7 +40,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Dashboards)**
       post:
         tags:
           - Dashboards
@@ -49,7 +49,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Dashboards)**
 
   - target: "$.paths['/api/dashboards/{id}'].get"
     description: "Strip GET /api/dashboards/{id} down to redirect notice"
@@ -71,7 +71,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Dashboards)**
       put:
         tags:
           - Dashboards
@@ -80,7 +80,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Dashboards)**
       delete:
         tags:
           - Dashboards
@@ -89,7 +89,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Dashboards)**
 
   # ──────────────────────────────────────────────
   # VISUALIZATIONS — same strategy.
@@ -113,7 +113,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Visualizations)**
       post:
         tags:
           - Visualizations
@@ -122,7 +122,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Visualizations)**
 
   - target: "$.paths['/api/visualizations/{id}'].get"
     description: "Strip GET /api/visualizations/{id} down to redirect notice"
@@ -144,7 +144,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Visualizations)**
       put:
         tags:
           - Visualizations
@@ -153,7 +153,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Visualizations)**
       delete:
         tags:
           - Visualizations
@@ -162,7 +162,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Visualizations)**
 
   # ──────────────────────────────────────────────
   # Tag-level descriptions (section intro above the operations list).
@@ -174,7 +174,7 @@ actions:
       description: |
         > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
         >
-        > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
+        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Dashboards)**
 
   - target: '$.tags[?(@.name=="Visualizations")]'
     description: "Replace Visualizations tag description with tech-preview notice"
@@ -182,4 +182,4 @@ actions:
       description: |
         > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
         >
-        > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
+        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/#tag/Visualizations)**
