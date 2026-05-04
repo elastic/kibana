@@ -6,10 +6,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { GenAiSettingsPlugin } from './plugin';
 import { config } from '../common/config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { GenAiSettingsPlugin } = await import('./plugin');
   return new GenAiSettingsPlugin(initializerContext);
 }
 

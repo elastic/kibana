@@ -244,8 +244,37 @@ export const MetricItem = ({
                   subtitle: metricSubtitle,
                   body: (
                     <div
+                      role="button"
+                      tabIndex={0}
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        const closestInteractive = target.closest(
+                          'a, button, [role="button"], .euiBadge'
+                        );
+                        if (!closestInteractive || closestInteractive === e.currentTarget) {
+                          onClick({
+                            locationId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locationName ?? '',
+                            spaces: monitor.spaces,
+                          });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onClick({
+                            locationId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locationName ?? '',
+                            spaces: monitor.spaces,
+                          });
+                        }
+                      }}
                     >
                       <MetricItemBody
                         monitor={monitor}
