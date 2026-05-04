@@ -9,21 +9,18 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { CasesEventBus } from './event_bus';
 
 describe('CasesEventBus', () => {
-  const metadata = {
-    request: httpServerMock.createKibanaRequest(),
-    spaceId: 'default',
-  };
+  const request = httpServerMock.createKibanaRequest();
 
   it('emits case created events', () => {
     const eventBus = new CasesEventBus();
     const listener = jest.fn();
 
     eventBus.onCaseCreated(listener);
-    eventBus.emitCaseCreated(metadata, { caseId: 'case-1', owner: 'securitySolution' });
+    eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
 
     expect(listener).toHaveBeenCalledWith({
       type: 'caseCreated',
-      metadata,
+      request,
       payload: { caseId: 'case-1', owner: 'securitySolution' },
     });
   });
@@ -33,7 +30,7 @@ describe('CasesEventBus', () => {
     const listener = jest.fn();
 
     eventBus.onCaseUpdated(listener);
-    eventBus.emitCaseUpdated(metadata, {
+    eventBus.emitCaseUpdated(request, {
       caseId: 'case-1',
       owner: 'securitySolution',
       updatedFields: ['status'],
@@ -41,7 +38,7 @@ describe('CasesEventBus', () => {
 
     expect(listener).toHaveBeenCalledWith({
       type: 'caseUpdated',
-      metadata,
+      request,
       payload: { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['status'] },
     });
   });
@@ -52,7 +49,7 @@ describe('CasesEventBus', () => {
 
     eventBus.onCommentAdded(listener);
     eventBus.removeCommentAddedListener(listener);
-    eventBus.emitCommentAdded(metadata, {
+    eventBus.emitCommentAdded(request, {
       caseId: 'case-1',
       caseCommentIds: [],
       owner: 'securitySolution',
