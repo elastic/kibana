@@ -1,0 +1,422 @@
+{
+  "id": "@kbn/content-list-page",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-page",
+        "id": "def-public.KibanaContentListPage",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaContentListPage",
+        "description": [
+          "\nKibana-specific page shell for content listing pages.\n\nA thin wrapper over ",
+          {
+            "pluginId": "@kbn/content-list-page",
+            "scope": "public",
+            "docId": "kibKbnContentListPagePluginApi",
+            "section": "def-public.KibanaPageTemplate",
+            "text": "KibanaPageTemplate"
+          },
+          " that wires up a shared heading\n`id` and `data-test-subj` for child components. Use the compound components\nto build the page:\n\n- ",
+          {
+            "pluginId": "@kbn/content-list-page",
+            "scope": "public",
+            "docId": "kibKbnContentListPagePluginApi",
+            "section": "def-public.KibanaContentListPage.Header",
+            "text": "KibanaContentListPage.Header"
+          },
+          " — page title, description, and actions.\n- ",
+          {
+            "pluginId": "@kbn/content-list-page",
+            "scope": "public",
+            "docId": "kibKbnContentListPagePluginApi",
+            "section": "def-public.KibanaContentListPage.Section",
+            "text": "KibanaContentListPage.Section"
+          },
+          " — a labelled `KibanaPageTemplate.Section`.\n"
+        ],
+        "signature": [
+          "(({ children, headingId: headingIdProp, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-page",
+            "scope": "public",
+            "docId": "kibKbnContentListPagePluginApi",
+            "section": "def-public.KibanaContentListPageProps",
+            "text": "KibanaContentListPageProps"
+          },
+          ") => React.JSX.Element) & { Header: ({ title, description, actions, tabs, \"data-test-subj\": dataTestSubjProp, }: ",
+          {
+            "pluginId": "@kbn/content-list-page",
+            "scope": "public",
+            "docId": "kibKbnContentListPagePluginApi",
+            "section": "def-public.KibanaContentListPageHeaderProps",
+            "text": "KibanaContentListPageHeaderProps"
+          },
+          ") => React.JSX.Element; Section: ({ children, \"aria-labelledby\": ariaLabelledBy, \"data-test-subj\": dataTestSubjProp, }: ",
+          {
+            "pluginId": "@kbn/content-list-page",
+            "scope": "public",
+            "docId": "kibKbnContentListPagePluginApi",
+            "section": "def-public.KibanaContentListPageSectionProps",
+            "text": "KibanaContentListPageSectionProps"
+          },
+          ") => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+        "lineNumber": 213,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  headingId: headingIdProp,\n  'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaContentListPageProps",
+                "text": "KibanaContentListPageProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 165,
+            "columnNumber": 36,
+            "deprecated": false,
+            "docsReferencedTypeName": "KibanaContentListPageProps",
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-page",
+        "id": "def-public.KibanaContentListPageHeaderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaContentListPageHeaderProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageHeaderProps.title",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "Page title rendered as the page-level heading."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageHeaderProps.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Optional supporting copy rendered next to the title."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageHeaderProps.actions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "\nOne or more action nodes rendered to the right of the page title.\n\nPass an array when multiple independent action slots are needed, or a\nsingle element/fragment when the actions should render as one slot in\n",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaPageTemplate.Header",
+                "text": "KibanaPageTemplate.Header"
+              },
+              "'s `rightSideItems`."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageHeaderProps.tabs",
+            "type": "Array",
+            "tags": [],
+            "label": "tabs",
+            "description": [
+              "\nTab items rendered below the page title, forwarded to\n",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaPageTemplate.Header",
+                "text": "KibanaPageTemplate.Header"
+              },
+              "'s `tabs` prop."
+            ],
+            "signature": [
+              "Tab[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageHeaderProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Override the `data-test-subj`. Defaults to `<page data-test-subj>-header`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-page",
+        "id": "def-public.KibanaContentListPageProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaContentListPageProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+        "lineNumber": 148,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nPage content. Compose with ",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaContentListPage.Header",
+                "text": "KibanaContentListPage.Header"
+              },
+              " and\n",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaContentListPage.Section",
+                "text": "KibanaContentListPage.Section"
+              },
+              " for consistent page chrome and\n`aria-labelledby` wiring."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageProps.headingId",
+            "type": "string",
+            "tags": [],
+            "label": "headingId",
+            "description": [
+              "\nOverride the heading element `id` shared between ",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaContentListPage.Header",
+                "text": "KibanaContentListPage.Header"
+              },
+              "\nand ",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaContentListPage.Section",
+                "text": "KibanaContentListPage.Section"
+              },
+              ". Both components read from the same\ncontext value, so `Header` and `Section` are always synchronized."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Override the root `data-test-subj`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-page",
+        "id": "def-public.KibanaContentListPageSectionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaContentListPageSectionProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+        "lineNumber": 106,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageSectionProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageSectionProps.arialabelledby",
+            "type": "string",
+            "tags": [],
+            "label": "'aria-labelledby'",
+            "description": [
+              "\nOverride the default `aria-labelledby` (which points at the page heading\nrendered by ",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaContentListPage.Header",
+                "text": "KibanaContentListPage.Header"
+              },
+              ").\n\nAlways provide an explicit value when using `Section` without a `Header`\nsibling — omitting it will cause `aria-labelledby` to reference a missing\nelement, which is invalid for accessibility."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageSectionProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Override the default `data-test-subj`. Defaults to `<page data-test-subj>-section`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
