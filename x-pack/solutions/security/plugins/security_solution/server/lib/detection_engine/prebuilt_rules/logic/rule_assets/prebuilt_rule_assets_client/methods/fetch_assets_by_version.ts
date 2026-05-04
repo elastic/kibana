@@ -12,6 +12,7 @@ import type {
   QueryDslQueryContainer,
   Sort,
 } from '@elastic/elasticsearch/lib/api/types';
+import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
@@ -23,13 +24,6 @@ import {
   getPrebuiltRuleAssetsSearchNamespace,
 } from '../utils';
 import { buildPrebuiltRuleAssetSourceIncludes } from '../build_source_includes';
-
-/**
- * Default upper bound applied to `size` when callers don't provide an explicit
- * `perPage`
- */
-export const PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP = 100;
-
 export interface FetchAssetsByVersionSearchParams {
   filter?: string;
   aggs?: Record<string, AggregationsAggregationContainer>;
@@ -37,12 +31,6 @@ export interface FetchAssetsByVersionSearchParams {
   page?: number;
   perPage?: number;
   fields?: string[];
-  /**
-   * When provided, narrows the returned hits to these rule versions via
-   * `post_filter`, while leaving aggregations scoped to the full set defined
-   * by `versions`.
-   */
-  hitsFilterVersions?: RuleVersionSpecifier[];
 }
 
 export interface FetchAssetsByVersionResult {
@@ -76,13 +64,6 @@ export async function fetchAssetsByVersion(
     getPrebuiltRuleAssetSoId(version.rule_id, version.version)
   );
 
-  // `query` defines the scope aggregations run over (the full installable set
-  // when `hitsFilterVersions` is provided). `post_filter` narrows returned
-  // hits to the caller's page without affecting aggregation buckets.
-  const postFilterSoIds = params?.hitsFilterVersions?.map((version) =>
-    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
-  );
-
   const sourceIncludes = buildPrebuiltRuleAssetSourceIncludes(params?.fields);
 
   const searchResult = await savedObjectsClient.search<
@@ -93,10 +74,9 @@ export async function fetchAssetsByVersion(
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     query: buildQuery(soIds, params?.filter),
-    ...(postFilterSoIds ? { post_filter: { terms: { _id: postFilterSoIds } } } : {}),
     ...(sourceIncludes ? { _source: { includes: sourceIncludes } } : {}),
     runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
-    size: params?.perPage ?? Math.min(versions.length, PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP),
+    size: params?.perPage ?? MAX_PREBUILT_RULES_COUNT,
     from:
       params?.page != null && params?.perPage != null
         ? (params.page - 1) * params.perPage

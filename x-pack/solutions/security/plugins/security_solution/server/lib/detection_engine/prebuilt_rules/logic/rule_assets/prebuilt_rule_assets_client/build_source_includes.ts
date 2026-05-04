@@ -9,9 +9,8 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
 
 /**
  * Top-level `security-rule` attribute keys that must be fetched from ES no
- * matter what `fields` the caller asks for, otherwise the rule will fail zod
- * validation in `validatePrebuiltRuleAssets` or the conversion pipeline in
- * `convertPrebuiltRuleAssetToRuleResponse`.
+ * matter what `fields` the caller asks for, otherwise the rule will fail
+ * `validatePrebuiltRuleAssets` or `convertPrebuiltRuleAssetToRuleResponse`.
  *
  */
 export const PREBUILT_RULE_ASSET_BASELINE_FIELDS: ReadonlySet<string> = new Set([
@@ -24,7 +23,7 @@ export const PREBUILT_RULE_ASSET_BASELINE_FIELDS: ReadonlySet<string> = new Set(
   'risk_score',
   'severity',
 
-  // Type-discriminant union across all rule types
+  // Per rule type variant required fields.
   'query',
   'language',
   'saved_id',
@@ -38,16 +37,6 @@ export const PREBUILT_RULE_ASSET_BASELINE_FIELDS: ReadonlySet<string> = new Set(
   'history_window_start',
 ]);
 
-/**
- * Builds the `_source.includes` list for a prebuilt-rule-asset ES search when
- * the caller requested a narrowed `fields` set.
- *
- *
- * When narrowing, the list is `requested ∪ baseline` prefixed with the SO
- * type (e.g. `security-rule.name`) plus the SO document root fields so the
- * SO layer can still read the hit's `type`, `references`, migration metadata,
- * etc.
- */
 export const buildPrebuiltRuleAssetSourceIncludes = (
   requestedFields?: string[]
 ): string[] | undefined => {

@@ -76,12 +76,7 @@ const buildTagsClause = (tags: string[]): string => {
 };
 
 /**
- * Converts the UI filter options into a structured KQL filter using the field paths that
- * exist on the prebuilt-rule asset saved-object documents (`security-rule.*`).
- * Preserves the UI semantics:
- *   - `name`: substring match for single terms, exact phrase match for
- *     multi-term values
- *   - `tags`: AND across all provided tags
+ * Converts filter options from a simplified UI format to a format expected by the API.
  */
 export const buildInstallReviewKqlFilter = (
   filterOptions: AddPrebuiltRulesTableFilterOptions | undefined

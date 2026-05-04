@@ -58,6 +58,7 @@ export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 export interface UsePrebuiltRulesUpgradeFilterOptions {
   tags?: string[];
   customizationStatus?: RuleCustomizationStatus;
+  ruleIds?: string[];
 }
 
 export interface UsePrebuiltRulesUpgradeParams {
@@ -68,7 +69,6 @@ export interface UsePrebuiltRulesUpgradeParams {
   sort?: { order: UpgradePrebuiltRulesSortingOptions['order']; field: FindRulesSortField };
   filterOptions?: UsePrebuiltRulesUpgradeFilterOptions;
   searchTerm?: string;
-  ruleIds?: string[];
   onUpgrade?: () => void;
 }
 
@@ -77,7 +77,6 @@ export function usePrebuiltRulesUpgrade({
   sort,
   filterOptions,
   searchTerm,
-  ruleIds,
   onUpgrade,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
@@ -86,8 +85,6 @@ export function usePrebuiltRulesUpgrade({
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
-  // `perform_rule_upgrade` ALL_RULES still takes the legacy `PrebuiltRulesFilter` shape
-  // (free-text term goes in `name`), so rebuild it from the split hook params.
   const performUpgradeFilter: PrebuiltRulesFilter | undefined = useMemo(() => {
     const nameTerm = searchTerm?.trim();
     const entries: PrebuiltRulesFilter = {};
@@ -119,7 +116,7 @@ export function usePrebuiltRulesUpgrade({
       filterOptions: {
         tags: filterOptions?.tags,
         customizationStatus: filterOptions?.customizationStatus,
-        ruleIds,
+        ruleIds: filterOptions?.ruleIds,
       },
       searchTerm,
     },
@@ -149,15 +146,15 @@ export function usePrebuiltRulesUpgrade({
   const upgradeRulesWithDryRun = useRulesUpgradeWithDryRun(confirmConflictsUpgrade);
 
   const upgradeRulesToResolved = useCallback(
-    async (specifierIds: RuleSignatureId[]) => {
-      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = specifierIds.map((ruleId) => ({
+    async (ruleIds: RuleSignatureId[]) => {
+      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds.map((ruleId) => ({
         rule_id: ruleId,
         version: rulesUpgradeState[ruleId].target_rule.version,
         revision: rulesUpgradeState[ruleId].revision,
         fields: constructRuleFieldsToUpgrade(rulesUpgradeState[ruleId]),
       }));
 
-      setLoadingRules((prev) => [...prev, ...specifierIds]);
+      setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
         // Handle MLJobs modal
@@ -173,7 +170,7 @@ export function usePrebuiltRulesUpgrade({
       } catch {
         // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
-        const upgradedRuleIdsSet = new Set(specifierIds);
+        const upgradedRuleIdsSet = new Set(ruleIds);
 
         if (onUpgrade) {
           onUpgrade();
@@ -186,14 +183,14 @@ export function usePrebuiltRulesUpgrade({
   );
 
   const upgradeRulesToTarget = useCallback(
-    async (specifierIds: RuleSignatureId[]) => {
-      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = specifierIds.map((ruleId) => ({
+    async (ruleIds: RuleSignatureId[]) => {
+      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds.map((ruleId) => ({
         rule_id: ruleId,
         version: rulesUpgradeState[ruleId].target_rule.version,
         revision: rulesUpgradeState[ruleId].revision,
       }));
 
-      setLoadingRules((prev) => [...prev, ...specifierIds]);
+      setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
         // Handle MLJobs modal
@@ -209,7 +206,7 @@ export function usePrebuiltRulesUpgrade({
       } catch {
         // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
-        const upgradedRuleIdsSet = new Set(specifierIds);
+        const upgradedRuleIdsSet = new Set(ruleIds);
 
         if (onUpgrade) {
           onUpgrade();
@@ -222,17 +219,22 @@ export function usePrebuiltRulesUpgrade({
   );
 
   const upgradeRules = useCallback(
-    async (specifierIds: RuleSignatureId[]) => {
+    async (ruleIds: RuleSignatureId[]) => {
       if (isRulesCustomizationEnabled) {
-        await upgradeRulesToResolved(specifierIds);
+        await upgradeRulesToResolved(ruleIds);
       } else {
-        await upgradeRulesToTarget(specifierIds);
+        await upgradeRulesToTarget(ruleIds);
       }
     },
     [isRulesCustomizationEnabled, upgradeRulesToResolved, upgradeRulesToTarget]
   );
 
   const upgradeAllRules = useCallback(async () => {
+    if (filterOptions?.ruleIds?.length) {
+      await upgradeRules(upgradeableRules.map((rule) => rule.rule_id));
+      return;
+    }
+
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
@@ -262,6 +264,8 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules([]);
     }
   }, [
+    filterOptions?.ruleIds,
+    upgradeRules,
     upgradeableRules,
     upgradeRulesWithDryRun,
     upgradeRulesRequest,

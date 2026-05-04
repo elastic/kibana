@@ -31,7 +31,7 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
-import { PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP } from '../../logic/rule_assets/prebuilt_rule_assets_client/methods/fetch_assets_by_version';
+import { PREBUILT_RULE_BATCH_SIZE } from '../constants';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
@@ -114,10 +114,7 @@ export const performRuleUpgradeHandler = async (
     }
 
     while (ruleUpgradeQueue.length > 0) {
-      const targetRulesForUpgrade = ruleUpgradeQueue.splice(
-        0,
-        PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP
-      );
+      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
 
       const [currentRules, latestRulesResult] = await Promise.all([
         ruleObjectsClient.fetchInstalledRulesByIds({

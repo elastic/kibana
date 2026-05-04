@@ -21,7 +21,7 @@ import {
   PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY,
 } from '../../constants';
 import { reviewRuleUpgradeHandler } from './review_rule_upgrade_handler';
-import { validateReviewRuleUpgradeRequestBody } from './request_schema_validation';
+import { validateGranularReviewRequestBody } from '../validate_granular_review_request';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
@@ -54,7 +54,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter, log
         },
       },
       (context, request, response) => {
-        const validationErrors = validateReviewRuleUpgradeRequestBody(request.body);
+        const validationErrors = validateGranularReviewRequestBody(request.body);
         if (validationErrors.length) {
           const siemResponse = buildSiemResponse(response);
           return siemResponse.error({ statusCode: 400, body: validationErrors });

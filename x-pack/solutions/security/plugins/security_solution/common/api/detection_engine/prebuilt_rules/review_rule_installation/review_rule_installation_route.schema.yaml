@@ -49,9 +49,7 @@ paths:
                 fields:
                   type: array
                   description: |
-                    Subset of top-level `RuleResponse` keys used to narrow Elasticsearch `_source` for each
-                    prebuilt-rule saved object (snake_case, as in the REST payload). The server merges a small
-                    baseline attribute set so rule payloads remain convertible. Omit to fetch full assets.
+                    Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
                   items:
                     $ref: '#/components/schemas/ReviewRuleInstallationField'
       responses:
@@ -66,8 +64,7 @@ components:
     ReviewRuleInstallationField:
       type: string
       description: |
-        Top-level key from detection rule API responses (`RuleResponse`). Covers common and type-specific
-        rule fields that may appear when reviewing installable prebuilt rules.
+        Top-level key from detection rule API responses (`RuleResponse`).
       enum:
         - actions
         - alias_purpose
@@ -222,12 +219,12 @@ components:
           description: Rules per page.
         total:
           type: integer
-          description: The total number of rules available for installation that match the filter criteria.
+          description: The total number of rules available for installation.
         stats:
           $ref: '#/components/schemas/RuleInstallationStatsForReview'
         rules:
           type: array
-          description: Info about individual rules; one object per each rule available for installation.
+          description: Individual rules available for installation.
           items:
             $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
         counts:

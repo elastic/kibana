@@ -29,7 +29,7 @@ const RuleUpdateCalloutComponent = ({
       page: 1, // we only want to fetch one result
       perPage: 1,
     },
-    ruleIds: [rule.rule_id],
+    filterOptions: { ruleIds: [rule.rule_id] },
     onUpgrade,
   });
 

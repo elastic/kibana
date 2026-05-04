@@ -21,7 +21,7 @@ import {
 } from '../../constants';
 import { buildSiemResponse } from '../../../routes/utils';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
-import { validateReviewRuleInstallationRequestBody } from './request_schema_validation';
+import { validateGranularReviewRequestBody } from '../validate_granular_review_request';
 
 export const reviewRuleInstallationRoute = (
   router: SecuritySolutionPluginRouter,
@@ -57,7 +57,7 @@ export const reviewRuleInstallationRoute = (
         },
       },
       (context, request, response) => {
-        const validationErrors = validateReviewRuleInstallationRequestBody(request.body);
+        const validationErrors = validateGranularReviewRequestBody(request.body);
         if (validationErrors.length) {
           const siemResponse = buildSiemResponse(response);
           return siemResponse.error({ statusCode: 400, body: validationErrors });

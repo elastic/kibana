@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import type { ReviewRuleUpgradeRequestBodyInput } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
+import type { GranularRulesFilter } from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import {
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
   validateAggregationsCountsUnique,
   validateSearchRulesFilter,
-} from '../../../rule_management/api/rules/search_rules/request_schema_validation';
+} from '../../rule_management/api/rules/search_rules/request_schema_validation';
 
-export const validateReviewRuleUpgradeRequestBody = (
-  body: ReviewRuleUpgradeRequestBodyInput
+interface GranularReviewRequestBody {
+  filter?: GranularRulesFilter;
+  search?: { term: string; mode?: string };
+  aggregations?: { counts?: readonly string[] };
+}
+
+export const validateGranularReviewRequestBody = (
+  body: GranularReviewRequestBody
 ): string[] => {
   const errors: string[] = [];
 

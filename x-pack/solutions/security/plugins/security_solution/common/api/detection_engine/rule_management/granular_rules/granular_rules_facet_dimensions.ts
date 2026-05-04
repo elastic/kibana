@@ -14,4 +14,5 @@ export const RULES_FACET_CATEGORY_TO_ATTRIBUTE: Record<GranularRulesFacetCategor
   createdBy: 'alert.attributes.createdBy',
   lastRunOutcome: 'alert.attributes.lastRun.outcome',
   isCustomized: 'alert.attributes.params.ruleSource.isCustomized',
+  type: 'alert.attributes.params.type',
 };

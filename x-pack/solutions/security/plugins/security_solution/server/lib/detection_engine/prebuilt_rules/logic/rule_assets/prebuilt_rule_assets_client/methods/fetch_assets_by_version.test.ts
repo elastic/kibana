@@ -7,10 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-import {
-  PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP,
-  fetchAssetsByVersion,
-} from './fetch_assets_by_version';
+import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
+import { fetchAssetsByVersion } from './fetch_assets_by_version';
 
 jest.mock('../../prebuilt_rule_assets_validation', () => ({
   validatePrebuiltRuleAssets: (assets: unknown[]) => assets,
@@ -44,7 +42,7 @@ describe('fetchAssetsByVersion', () => {
     expect(searchMock).not.toHaveBeenCalled();
   });
 
-  it('scopes query to the full versions list and omits post_filter when hitsFilterVersions is not provided', async () => {
+  it('scopes query to the versions list', async () => {
     const versions = [
       { rule_id: 'rule-1', version: 1 },
       { rule_id: 'rule-2', version: 1 },
@@ -60,64 +58,6 @@ describe('fetchAssetsByVersion', () => {
         { terms: { _id: [soId('rule-1', 1), soId('rule-2', 1), soId('rule-3', 1)] } },
       ])
     );
-    expect(call.post_filter).toBeUndefined();
-  });
-
-  it('passes full-scope soIds in query and page soIds in post_filter when hitsFilterVersions is provided', async () => {
-    const versions = [
-      { rule_id: 'rule-1', version: 1 },
-      { rule_id: 'rule-2', version: 1 },
-      { rule_id: 'rule-3', version: 1 },
-    ];
-    const hitsFilterVersions = [{ rule_id: 'rule-2', version: 1 }];
-
-    await fetchAssetsByVersion(savedObjectsClient, versions, { hitsFilterVersions });
-
-    const call = searchMock.mock.calls[0][0];
-    expect(call.query.bool.must).toEqual(
-      expect.arrayContaining([
-        { terms: { _id: [soId('rule-1', 1), soId('rule-2', 1), soId('rule-3', 1)] } },
-      ])
-    );
-    expect(call.post_filter).toEqual({
-      terms: { _id: [soId('rule-2', 1)] },
-    });
-  });
-
-  it('keeps aggs at the top level (full-scope) while post_filter narrows only the hits', async () => {
-    const versions = [
-      { rule_id: 'rule-1', version: 1 },
-      { rule_id: 'rule-2', version: 1 },
-    ];
-    const hitsFilterVersions = [{ rule_id: 'rule-1', version: 1 }];
-    const aggs = {
-      tags: {
-        terms: { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags` },
-      },
-    };
-
-    await fetchAssetsByVersion(savedObjectsClient, versions, { aggs, hitsFilterVersions });
-
-    const call = searchMock.mock.calls[0][0];
-    // Aggs are siblings to query/post_filter, so ES runs them over `query`
-    // (full set) regardless of `post_filter` (hits page).
-    expect(call.aggs).toBe(aggs);
-    expect(call.post_filter).toEqual({
-      terms: { _id: [soId('rule-1', 1)] },
-    });
-  });
-
-  it('applies an empty-terms post_filter when hitsFilterVersions is an empty array (matches the "page past the end" handler case)', async () => {
-    const versions = [{ rule_id: 'rule-1', version: 1 }];
-
-    await fetchAssetsByVersion(savedObjectsClient, versions, { hitsFilterVersions: [] });
-
-    const call = searchMock.mock.calls[0][0];
-    // Empty `hitsFilterVersions` is produced by the handler when `page` is
-    // past the end of `installableVersions`. We still emit `post_filter` so
-    // the hits page is correctly empty while aggregations keep running over
-    // the full set defined by `query`.
-    expect(call.post_filter).toEqual({ terms: { _id: [] } });
   });
 
   it('omits _source when no fields are provided so ES returns the full document', async () => {
@@ -182,22 +122,23 @@ describe('fetchAssetsByVersion', () => {
     const buildVersions = (count: number) =>
       Array.from({ length: count }, (_, i) => ({ rule_id: `rule-${i}`, version: 1 }));
 
-    it('defaults size to versions.length when versions.length < cap and no perPage is provided', async () => {
+    it('defaults size to MAX_PREBUILT_RULES_COUNT when no perPage is provided', async () => {
       const versions = buildVersions(7);
 
       await fetchAssetsByVersion(savedObjectsClient, versions);
 
       const call = searchMock.mock.calls[0][0];
-      expect(call.size).toBe(7);
+      expect(call.size).toBe(MAX_PREBUILT_RULES_COUNT);
     });
 
-    it('caps the default size at PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP when versions.length >= cap', async () => {
-      const versions = buildVersions(PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP + 25);
+    it('does not silently truncate large versions arrays when no perPage is provided', async () => {
+      const versions = buildVersions(5000);
 
       await fetchAssetsByVersion(savedObjectsClient, versions);
 
       const call = searchMock.mock.calls[0][0];
-      expect(call.size).toBe(PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP);
+      expect(call.size).toBe(MAX_PREBUILT_RULES_COUNT);
+      expect(call.size).toBeGreaterThanOrEqual(versions.length);
     });
 
     it('supports perPage when it is provided', async () => {

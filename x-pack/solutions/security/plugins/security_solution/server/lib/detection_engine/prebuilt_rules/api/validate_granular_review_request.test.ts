@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import { validateReviewRuleUpgradeRequestBody } from './request_schema_validation';
+import type { GranularRulesFilterMode } from '../../../../../common/api/detection_engine';
 import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
-} from '../../../rule_management/api/rules/search_rules/request_schema_validation';
+} from '../../rule_management/api/rules/search_rules/request_schema_validation';
+import { validateGranularReviewRequestBody } from './validate_granular_review_request';
 
-describe('validateReviewRuleUpgradeRequestBody', () => {
-  const defaultInput = {
-    page: 1,
-    per_page: 20,
-  };
+describe('validateGranularReviewRequestBody', () => {
+  const defaultInput = {};
 
   it('accepts default body with no optional fields', () => {
-    expect(validateReviewRuleUpgradeRequestBody(defaultInput)).toEqual([]);
+    expect(validateGranularReviewRequestBody(defaultInput)).toEqual([]);
   });
 
-  it('accepts a valid KQL filter using alerting flattened paths', () => {
+  it.each([
+    ['security-rule.* paths', 'security-rule.tags: "tag-a"'],
+    ['security-rule.attributes.* paths', 'security-rule.attributes.tags: "tag-a"'],
+    ['alerting flattened paths', 'alert.attributes.tags: "tag-a"'],
+  ])('accepts a valid KQL filter using %s', (_label, term) => {
     expect(
-      validateReviewRuleUpgradeRequestBody({
+      validateGranularReviewRequestBody({
         ...defaultInput,
-        filter: { term: 'alert.attributes.tags: "tag-a"', mode: 'KQL' },
+        filter: { term, mode: 'KQL' },
       })
     ).toEqual([]);
   });
 
   it('rejects a syntactically invalid KQL filter', () => {
-    const errors = validateReviewRuleUpgradeRequestBody({
+    const errors = validateGranularReviewRequestBody({
       ...defaultInput,
-      filter: { term: 'alert.attributes.name: (' },
+      filter: { term: 'security-rule.name: (', mode: 'KQL' },
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
   });
@@ -41,68 +43,53 @@ describe('validateReviewRuleUpgradeRequestBody', () => {
   it('rejects a KQL filter that exceeds the maximum length', () => {
     const filler = 'a'.repeat(MAX_SEARCH_RULES_FILTER_KQL_LENGTH);
     expect(
-      validateReviewRuleUpgradeRequestBody({
+      validateGranularReviewRequestBody({
         ...defaultInput,
-        filter: { term: `${filler}x` },
+        filter: { term: `${filler}x`, mode: 'KQL' },
       })
     ).toEqual([`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`]);
   });
 
   it('rejects unsupported filter.mode', () => {
-    const errors = validateReviewRuleUpgradeRequestBody({
+    const errors = validateGranularReviewRequestBody({
       ...defaultInput,
-      filter: JSON.parse('{"term":"x","mode":"esql"}'),
+      filter: { term: 'x', mode: 'esql' as unknown as GranularRulesFilterMode },
     });
     expect(errors).toContain('unsupported filter.mode "esql"');
   });
 
-  it('accepts sort as a non-empty array of criteria', () => {
-    expect(
-      validateReviewRuleUpgradeRequestBody({
-        ...defaultInput,
-        sort: [{ field: 'name', order: 'asc' }],
-      })
-    ).toEqual([]);
-  });
-
-  it('accepts fields parameter', () => {
-    expect(
-      validateReviewRuleUpgradeRequestBody({
-        ...defaultInput,
-        fields: ['name', 'tags'],
-      })
-    ).toEqual([]);
-  });
-
   it('rejects duplicate entries in aggregations.counts', () => {
     expect(
-      validateReviewRuleUpgradeRequestBody({
+      validateGranularReviewRequestBody({
         ...defaultInput,
         aggregations: { counts: ['tags', 'tags'] },
       })
     ).toContain('aggregations.counts must not contain duplicate facet categories');
   });
 
-  it('accepts aggregations.counts with distinct categories', () => {
+  it.each([
+    ['install categories', ['tags', 'severity']],
+    ['upgrade categories', ['tags', 'enabled']],
+  ])('accepts aggregations.counts with distinct %s', (_label, counts) => {
     expect(
-      validateReviewRuleUpgradeRequestBody({
+      validateGranularReviewRequestBody({
         ...defaultInput,
-        aggregations: { counts: ['tags', 'enabled'] },
+        aggregations: { counts },
       })
     ).toEqual([]);
   });
 
   it('rejects unsupported search.mode', () => {
-    const errors = validateReviewRuleUpgradeRequestBody({
+    const errors = validateGranularReviewRequestBody({
       ...defaultInput,
-      search: JSON.parse('{"term":"x","mode":"vector"}'),
+      search: { term: 'x', mode: 'vector' },
     });
     expect(errors).toContain('unsupported search.mode "vector"');
   });
 
   it('rejects search.term over max length', () => {
     expect(
-      validateReviewRuleUpgradeRequestBody({
+      validateGranularReviewRequestBody({
         ...defaultInput,
         search: {
           term: 'x'.repeat(MAX_SEARCH_RULES_SEARCH_TERM_LENGTH + 1),
@@ -113,7 +100,7 @@ describe('validateReviewRuleUpgradeRequestBody', () => {
 
   it('accepts search.term at max length', () => {
     expect(
-      validateReviewRuleUpgradeRequestBody({
+      validateGranularReviewRequestBody({
         ...defaultInput,
         search: { term: 'x'.repeat(MAX_SEARCH_RULES_SEARCH_TERM_LENGTH), mode: 'legacy' },
       })

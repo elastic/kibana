@@ -35,7 +35,7 @@ import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
 /**
- * One sort criterion applied to the installed rules in the upgradeable set.
+ * Sort field and order pair.
  */
 export const ReviewRuleUpgradeSortItem = lazySchema(() =>
   z
@@ -54,8 +54,7 @@ export const ReviewRuleUpgradeSortItem = lazySchema(() =>
 export type ReviewRuleUpgradeSortItem = z.infer<typeof ReviewRuleUpgradeSortItem>;
 
 /**
-  * Ordered sort criteria for the upgradeable rule set. The first item is used by the server to
-query the installed rules.
+  * Ordered sort criteria for the upgradeable rule set.
 
   */
 export const ReviewRuleUpgradeSort = lazySchema(() => z.array(ReviewRuleUpgradeSortItem).min(1));
@@ -191,7 +190,7 @@ export const ReviewRuleUpgradeRequestBody = lazySchema(() =>
        */
       per_page: z.number().int().min(0).max(500).optional().default(20),
       /**
-       * Structured filter applied to the installed rules (alert saved objects) in the upgradeable set.
+       * String filter expression interpreted according to `mode`.
        */
       filter: GranularRulesFilter.optional(),
       /**
@@ -205,16 +204,12 @@ upgradeable rules.
       */
       aggregations: SearchRulesAggregations.optional(),
       /**
-      * Ordered sort criteria applied to the upgradeable rule set. The server applies the first
-item as the sort field/order when querying installed rules.
+      * Ordered sort criteria applied to the upgradeable rule set.
 
       */
       sort: ReviewRuleUpgradeSort.optional(),
       /**
-      * Subset of top-level `RuleResponse` keys used to narrow `current_rule` and
-`target_rule` in the response (snake_case, as in the REST payload). The server
-merges a small baseline attribute set so rule payloads remain recognizable.
-Omit to return the full rule objects.
+      * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
       fields: z.array(ReviewRuleInstallationField).optional(),

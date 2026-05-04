@@ -18,7 +18,6 @@ import type {
   ReviewRuleInstallationRequestBody,
   ReviewRuleInstallationResponseBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
@@ -32,35 +31,9 @@ import { buildPrebuiltRuleInstallationKql } from '../../logic/build_prebuilt_rul
 import { expandRawAggregationResult } from '../../../rule_management/logic/search/granular_facet_aggregations';
 import { prepareQueryDslSort } from '../../logic/rule_assets/prebuilt_rule_assets_client/utils';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../logic/rule_assets/prebuilt_rule_assets_type';
+import { narrowRuleResponseFields } from '../narrow_rule_response_fields';
 
 const PREBUILT_RULE_INSTALLATION_FACET_AGG_SIZE = 200;
-
-// Minimum required identity fields.
-const REVIEW_INSTALLATION_BASELINE_FIELDS: ReadonlySet<ReviewRuleInstallationField> = new Set([
-  'rule_id',
-  'id',
-  'version',
-  'type',
-  'name',
-  'immutable',
-  'rule_source',
-]);
-
-const applyFieldSelection = (
-  rules: RuleResponse[],
-  fields: ReviewRuleInstallationField[] | undefined
-): RuleResponse[] => {
-  if (!fields?.length) {
-    return rules;
-  }
-  const allowed = new Set([...fields, ...REVIEW_INSTALLATION_BASELINE_FIELDS]);
-  return rules.map(
-    (rule) =>
-      Object.fromEntries(
-        Object.entries(rule).filter(([key]) => allowed.has(key as ReviewRuleInstallationField))
-      ) as RuleResponse
-  );
-};
 
 const buildPrebuiltRuleInstallationAggregations = (
   categories: PrebuiltRuleAssetsFacetCategory[]
@@ -203,10 +176,6 @@ async function fetchRules({
     filter
   );
 
-  // Pass the full installable set as `versions` so aggregations run over the
-  // whole filtered result. Elasticsearch `from`/`size` (via `page`/`perPage`)
-  // only affects returned hits — aggregations always run on all matched
-  // documents — so this gives correct pagination AND correct full-set counts.
   const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
     installableVersions,
     {
@@ -223,7 +192,7 @@ async function fetchRules({
   );
 
   return {
-    rules: applyFieldSelection(convertedRules, fields),
+    rules: convertedRules.map((rule) => narrowRuleResponseFields(rule, fields)),
     total: installableVersions.length,
     aggregations: installableRuleAssetsPage.aggregations,
   };

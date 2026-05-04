@@ -219,6 +219,22 @@ export default ({ getService }: FtrProviderContext): void => {
         )) as unknown as { status_code: number };
         expect(response.status_code).toBe(400);
       });
+
+      it('counts reflect the full upgradeable set, not just the current page', async () => {
+        await setUpThreeUpgradeableRules();
+
+        const response = await reviewPrebuiltRulesToUpgrade(supertest, {
+          per_page: 1,
+          aggregations: { counts: ['tags'] },
+        });
+
+        expect(response.rules).toHaveLength(1);
+        expect(response.total).toBe(3);
+        const tagsCounts = response.counts?.tags as Record<string, number> | undefined;
+        expect(tagsCounts?.['tag-a']).toBe(2);
+        expect(tagsCounts?.['tag-b']).toBe(1);
+        expect(tagsCounts?.['tag-c']).toBe(1);
+      });
     });
 
     describe('Field selection', () => {
@@ -332,6 +348,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(ascOrder).toEqual([...ascOrder].sort());
         expect(descOrder).toEqual([...ascOrder].sort().reverse());
+      });
+
+      it('defaults to name asc when sort is omitted', async () => {
+        await setUpThreeUpgradeableRules();
+
+        const response = await reviewPrebuiltRulesToUpgrade(supertest, {});
+
+        const order = response.rules.map((r) => r.current_rule.name);
+        expect(order).toEqual([...order].sort());
       });
     });
   });

@@ -27,8 +27,7 @@ import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
 /**
-  * Top-level key from detection rule API responses (`RuleResponse`). Covers common and type-specific
-rule fields that may appear when reviewing installable prebuilt rules.
+  * Top-level key from detection rule API responses (`RuleResponse`).
 
   */
 export const ReviewRuleInstallationField = lazySchema(() =>
@@ -204,12 +203,12 @@ export const ReviewRuleInstallationResponseBody = lazySchema(() =>
        */
       per_page: z.number().int(),
       /**
-       * The total number of rules available for installation that match the filter criteria.
+       * The total number of rules available for installation.
        */
       total: z.number().int(),
       stats: RuleInstallationStatsForReview,
       /**
-       * Info about individual rules; one object per each rule available for installation.
+       * Individual rules available for installation.
        */
       rules: z.array(RuleResponse),
       /**
@@ -256,9 +255,7 @@ installable rules.
       */
       sort: PrebuiltRuleAssetsSort.optional(),
       /**
-      * Subset of top-level `RuleResponse` keys used to narrow Elasticsearch `_source` for each
-prebuilt-rule saved object (snake_case, as in the REST payload). The server merges a small
-baseline attribute set so rule payloads remain convertible. Omit to fetch full assets.
+      * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
       fields: z.array(ReviewRuleInstallationField).optional(),

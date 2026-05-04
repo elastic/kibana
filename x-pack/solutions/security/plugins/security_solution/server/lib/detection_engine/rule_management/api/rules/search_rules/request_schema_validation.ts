@@ -54,7 +54,7 @@ export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInpu
 };
 
 export const validateAggregationsCountsUnique = (
-  aggregations: { counts?: readonly string[] } | undefined
+  aggregations: { counts?: string[] } | undefined
 ): string[] => {
   const counts = aggregations?.counts;
   if (counts == null || counts.length === 0) {

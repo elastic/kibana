@@ -8,10 +8,10 @@
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
+import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../api/detection_engine/rule_management/granular_rules/granular_rules_facet_dimensions';
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
-  IS_CUSTOMIZED_FIELD,
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
   PARAMS_TYPE_FIELD,
@@ -19,6 +19,8 @@ import {
   RULE_PARAMS_FIELDS,
   TAGS_FIELD,
 } from './rule_fields';
+
+const IS_CUSTOMIZED_FIELD = RULES_FACET_CATEGORY_TO_ATTRIBUTE.isCustomized;
 
 export const KQL_FILTER_IMMUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: true`;
 export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;

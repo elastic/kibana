@@ -11,16 +11,15 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
-  RuleUpgradeInfoForReview,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { ReviewRuleInstallationField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type {
   FindRulesSortField,
   GranularRulesFilter,
   GranularRulesSearch,
   SearchRulesAggregations,
 } from '../../../../../../common/api/detection_engine/rule_management';
-import type { RuleResponse, SortOrder } from '../../../../../../common/api/detection_engine';
+import type { FacetCounts } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
+import type { SortOrder } from '../../../../../../common/api/detection_engine';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
@@ -39,44 +38,8 @@ import { getPossibleUpgrades } from '../../logic/utils';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 import { buildGranularRulesKql } from '../../../rule_management/logic/search/build_granular_rules_kql';
-import {
-  buildAggregations,
-  expandRawAggregationResult,
-} from '../../../rule_management/logic/search/granular_facet_aggregations';
-
-// Identity fields always returned regardless of `fields` subselection.
-const REVIEW_UPGRADE_BASELINE_FIELDS: ReadonlySet<ReviewRuleInstallationField> = new Set([
-  'rule_id',
-  'id',
-  'version',
-  'type',
-  'name',
-  'immutable',
-  'rule_source',
-]);
-
-const applyFieldSelectionToRules = (
-  rules: RuleUpgradeInfoForReview[],
-  fields: ReviewRuleInstallationField[] | undefined
-): RuleUpgradeInfoForReview[] => {
-  if (!fields?.length) {
-    return rules;
-  }
-  const allowed = new Set<ReviewRuleInstallationField>([
-    ...fields,
-    ...REVIEW_UPGRADE_BASELINE_FIELDS,
-  ]);
-  const narrow = (rule: RuleResponse): RuleResponse =>
-    Object.fromEntries(
-      Object.entries(rule).filter(([key]) => allowed.has(key as ReviewRuleInstallationField))
-    ) as RuleResponse;
-
-  return rules.map((entry) => ({
-    ...entry,
-    current_rule: narrow(entry.current_rule),
-    target_rule: narrow(entry.target_rule),
-  }));
-};
+import { fetchGranularFacetCountsChunked } from '../../../rule_management/logic/search/granular_facet_aggregations';
+import { narrowRuleResponseFields } from '../narrow_rule_response_fields';
 
 export const reviewRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -135,7 +98,11 @@ export const reviewRuleUpgradeHandler = async (
         num_rules_with_non_solvable_conflicts: 0,
         tags: [],
       },
-      rules: applyFieldSelectionToRules(upgradeInfo, fields),
+      rules: upgradeInfo.map((entry) => ({
+        ...entry,
+        current_rule: narrowRuleResponseFields(entry.current_rule, fields),
+        target_rule: narrowRuleResponseFields(entry.target_rule, fields),
+      })),
       page,
       per_page: perPage,
       total,
@@ -167,15 +134,15 @@ interface CalculateUpgradeableRulesDiffArgs {
   aggregations: SearchRulesAggregations | undefined;
 }
 
-async function calculateUpgradeableRulesDiff({
+export async function calculateUpgradeableRulesDiff({
   rulesClient,
   ruleAssetsClient,
   ruleObjectsClient,
   mlAuthz,
   page,
   perPage,
-  sortField,
-  sortOrder,
+  sortField = 'name',
+  sortOrder = 'asc',
   filter,
   search,
   aggregations,
@@ -184,11 +151,10 @@ async function calculateUpgradeableRulesDiff({
   const latestVersionsMap = new Map(allLatestVersions.map((version) => [version.rule_id, version]));
 
   const combinedKql = buildGranularRulesKql({ filter, search });
-
-  // Push the user-supplied KQL down into the installed-rules SO fetch so single-rule lookups
-  // (e.g. filtering by `rule_id`) don't pull every prebuilt rule and then narrow afterwards.
   const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions({
     kqlFilter: combinedKql,
+    sortField,
+    sortOrder,
   });
 
   const installedVersionsByRuleId = new Map<string, RuleSummary>(
@@ -201,31 +167,47 @@ async function calculateUpgradeableRulesDiff({
     mlAuthz
   );
 
-  const upgradeableSoIds = upgradeableRules
-    .map((upgrade) => installedVersionsByRuleId.get(upgrade.rule_id)?.id)
-    .filter((id): id is string => id != null);
+  const upgradeableSoIds = upgradeableRules.flatMap((upgrade) => {
+    const summary = installedVersionsByRuleId.get(upgrade.rule_id);
+    return summary ? [summary.id] : [];
+  });
 
   if (upgradeableSoIds.length === 0) {
     return { rules: [], total: 0, counts: undefined };
   }
 
+  const pagedSoIds = upgradeableSoIds.slice((page - 1) * perPage, page * perPage);
+
+  // fetch pre-paged id list (<= perPage) so the OR-expanded
+  // KQL clause stays well-bounded. `combinedKql` is intentionally not re-passed
+  // here as it was already applied to the installed rule versions fetch.
+  const pageResult =
+    pagedSoIds.length === 0
+      ? { data: [] }
+      : await findRules({
+          rulesClient,
+          filter: undefined,
+          ruleIds: pagedSoIds,
+          sortField,
+          sortOrder,
+          page: 1,
+          perPage: pagedSoIds.length,
+          fields: undefined,
+          aggregations: undefined,
+        });
+
+  const pagedCurrentRules = pageResult.data.map((rule) => internalRuleToAPIResponse(rule));
+
   const categoryCounts = aggregations?.counts ?? [];
-  const aggs =
-    categoryCounts.length > 0 ? buildAggregations({ categories: categoryCounts }) : undefined;
+  let counts: FacetCounts | undefined;
 
-  const findResult = await findRules({
-    rulesClient,
-    filter: combinedKql,
-    ruleIds: upgradeableSoIds,
-    sortField,
-    sortOrder,
-    page,
-    perPage,
-    fields: undefined,
-    aggregations: aggs,
-  });
-
-  const pagedCurrentRules = findResult.data.map((rule) => internalRuleToAPIResponse(rule));
+  if (categoryCounts.length > 0) {
+    counts = await fetchGranularFacetCountsChunked({
+      rulesClient,
+      ruleIds: upgradeableSoIds,
+      categories: categoryCounts,
+    });
+  }
 
   const baseVersions: RuleVersionSpecifier[] = pagedCurrentRules.map((rule) => ({
     rule_id: rule.rule_id,
@@ -255,13 +237,9 @@ async function calculateUpgradeableRulesDiff({
 
   const upgradeInfo = calculateRuleUpgradeInfo(diffResults);
 
-  const counts = findResult.aggregations
-    ? expandRawAggregationResult(findResult.aggregations as Record<string, unknown>, categoryCounts)
-    : undefined;
-
   return {
     rules: upgradeInfo,
-    total: findResult.total,
+    total: upgradeableSoIds.length,
     counts,
   };
 }

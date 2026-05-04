@@ -57,6 +57,7 @@ components:
         - createdBy
         - lastRunOutcome
         - isCustomized
+        - type
 
     SearchRulesField:
       type: string
