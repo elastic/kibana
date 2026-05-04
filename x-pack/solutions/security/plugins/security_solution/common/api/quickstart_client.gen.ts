@@ -537,6 +537,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
+   */
   async applyEntityEngineDataviewIndices() {
     this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
     return this.kbnClient
@@ -1447,6 +1450,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
+   */
   async entityStoreGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API EntityStoreGetPrivileges`);
     return this.kbnClient
@@ -1771,6 +1777,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the engine descriptor for a specific entity type, including its configuration and current status.
+   */
   async getEntityEngine(props: GetEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
     return this.kbnClient
@@ -1795,6 +1804,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
+   */
   async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
@@ -2181,6 +2193,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initialize a single entity engine for the specified entity type.
+   */
   async initEntityEngine(props: InitEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
     return this.kbnClient
@@ -2194,6 +2209,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initialize the entire Entity Store, creating engines for all or specified entity types.
+   */
   async initEntityStore(props: InitEntityStoreProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
     return this.kbnClient
@@ -2355,6 +2373,9 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all installed entity engines and their current status.
+   */
   async listEntityEngines() {
     this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
     return this.kbnClient
@@ -2914,6 +2935,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Start a previously stopped entity engine, resuming transform processing for the given entity type.
+   */
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2960,6 +2984,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Stop a running entity engine, pausing transform processing for the given entity type.
+   */
   async stopEntityEngine(props: StopEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
     return this.kbnClient

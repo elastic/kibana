@@ -24,4 +24,19 @@
  * fail if the versions are out of sync.
  */
 process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION = 'true';
+
+/**
+ * Propagate Kibana's babel-register hook to Playwright worker processes via
+ * NODE_OPTIONS. @kbn/setup-node-env installs the require hook in this process,
+ * but Playwright forks fresh Node processes for its workers which only inherit
+ * env vars, not in-memory require hooks. Appending --require to NODE_OPTIONS
+ * ensures the workers transpile through Kibana's Babel config too.
+ */
+var babelRegisterRequire = '--require=@kbn/babel-register/install';
+if ((process.env.NODE_OPTIONS || '').indexOf(babelRegisterRequire) === -1) {
+  process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, babelRegisterRequire]
+    .filter(Boolean)
+    .join(' ');
+}
+
 require('@kbn/setup-node-env');

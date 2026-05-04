@@ -100,6 +100,7 @@ export function ErrorSampleAiInsight({
 
   return (
     <AiInsight
+      insightType="error"
       title={i18n.translate('xpack.observabilityAgentBuilder.errorAiInsight.titleLabel', {
         defaultMessage: "What's this error?",
       })}

@@ -38,6 +38,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
 
+// There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
+const EXTENDED_TIMEOUT = 60_000;
+jest.setTimeout(EXTENDED_TIMEOUT);
+
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
 const mockSearchBarCustomization: SearchBarCustomization = {
