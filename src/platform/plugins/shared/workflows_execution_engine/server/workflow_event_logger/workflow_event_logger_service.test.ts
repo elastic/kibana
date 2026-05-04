@@ -22,7 +22,7 @@ describe('WorkflowEventLoggerService', () => {
     const repository = { searchLogs: jest.fn().mockResolvedValue({ total: 0, logs: [] }) };
     (service as any).logsRepository = repository;
 
-    await service.searchLogs({
+    await service.getExecutionLogs({
       executionId: 'exec-1',
       page: 2,
       size: 50,

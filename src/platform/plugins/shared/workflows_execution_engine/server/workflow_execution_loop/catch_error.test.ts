@@ -104,7 +104,7 @@ describe('catchError', () => {
           nestedScopes: [{ nodeId: 'scope-node', nodeType: 'atomic' }],
         },
       ],
-    }));
+    })) as unknown as (typeof params.workflowExecutionState)['getWorkflowExecution'];
 
     await catchError(params as any, stepRuntime as any);
 

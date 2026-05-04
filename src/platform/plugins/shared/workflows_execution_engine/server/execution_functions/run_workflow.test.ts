@@ -28,6 +28,7 @@ import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
@@ -118,7 +119,7 @@ describe('runWorkflow', () => {
         workflowExecutionState: {
           getWorkflowExecution: mockGetWorkflowExecutionFromState,
           getLastFailedStepContext: jest.fn(),
-        },
+        } as unknown as WorkflowExecutionState,
       });
 
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
