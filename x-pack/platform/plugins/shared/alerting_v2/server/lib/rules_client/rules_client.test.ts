@@ -104,7 +104,10 @@ describe('RulesClient', () => {
   });
 
   function createClient() {
-    return new RulesClient(request, 'space-1', rulesSavedObjectService, taskManager, userService);
+    return new RulesClient({
+      services: { request, rulesSavedObjectService, taskManager, userService },
+      options: { spaceId: 'space-1' },
+    });
   }
 
   describe('createRule', () => {

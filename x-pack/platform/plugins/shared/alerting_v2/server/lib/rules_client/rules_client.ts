@@ -11,24 +11,18 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
-import { PluginStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import { inject, injectable } from 'inversify';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
-import { UserService } from '../services/user_service/user_service';
-import { RulesClientSpaceIdToken } from './tokens';
 import type {
   BulkOperationError,
   BulkOperationResponse,
@@ -76,16 +70,32 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
-@injectable()
+export interface RulesClientConstructorParams {
+  services: {
+    request: KibanaRequest;
+    rulesSavedObjectService: RulesSavedObjectServiceContract;
+    taskManager: TaskManagerStartContract;
+    userService: UserServiceContract;
+  };
+  options: {
+    spaceId: string;
+  };
+}
+
 export class RulesClient {
-  constructor(
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(RulesClientSpaceIdToken) private readonly spaceId: string,
-    @inject(RulesSavedObjectServiceScopedToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
-    @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(UserService) private readonly userService: UserServiceContract
-  ) {}
+  private readonly request: KibanaRequest;
+  private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
+  private readonly taskManager: TaskManagerStartContract;
+  private readonly userService: UserServiceContract;
+  private readonly spaceId: string;
+
+  constructor({ services, options }: RulesClientConstructorParams) {
+    this.request = services.request;
+    this.rulesSavedObjectService = services.rulesSavedObjectService;
+    this.taskManager = services.taskManager;
+    this.userService = services.userService;
+    this.spaceId = options.spaceId;
+  }
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };

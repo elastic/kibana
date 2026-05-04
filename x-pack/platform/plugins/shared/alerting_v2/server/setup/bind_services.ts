@@ -7,6 +7,7 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -80,7 +81,21 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(RulesClient).toSelf().inRequestScope();
+  bind(RulesClient)
+    .toDynamicValue(({ get }) => {
+      return new RulesClient({
+        services: {
+          request: get(Request),
+          rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
+          taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
+          userService: get(UserService),
+        },
+        options: {
+          spaceId: get(RulesClientSpaceIdToken),
+        },
+      });
+    })
+    .inRequestScope();
   bind(RulesClientSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
