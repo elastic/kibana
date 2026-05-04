@@ -24,7 +24,9 @@ export interface MarkdownVisRendererDependencies {
 // @ts-ignore
 const MarkdownVisComponent = lazy(() => import('./markdown_vis_controller'));
 
-export const getMarkdownVisRenderer: (getStartDeps: StartServicesAccessor) => ExpressionRenderDefinition<MarkdownVisRenderValue> = (getStartDeps) => ({
+export const getMarkdownVisRenderer: (
+  getStartDeps: StartServicesAccessor
+) => ExpressionRenderDefinition<MarkdownVisRenderValue> = (getStartDeps) => ({
   name: 'markdown_vis',
   displayName: 'markdown visualization',
   reuseDomNode: true,

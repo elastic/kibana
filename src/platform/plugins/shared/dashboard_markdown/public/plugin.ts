@@ -13,6 +13,8 @@ import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
+import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
 import {
   APP_ICON,
@@ -23,8 +25,6 @@ import {
 import { setKibanaServices } from './services/kibana_services';
 import type { MarkdownEmbeddableState } from '../server';
 import { setupLegacyVis } from './legacy_vis/setup';
-import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 export interface MarkdownSetupDeps {
   contentManagement: ContentManagementPublicSetup;
