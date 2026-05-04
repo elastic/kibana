@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createEsqlExecutionEvaluator } from '@kbn/evals';
-import type { KIQueryGenerationEvaluator } from '../types';
+import type {
+  KIQueryGenerationEvaluationExample,
+  KIQueryGenerationEvaluator,
+  KIQueryGenerationOutput,
+} from '../types';
 import { getQueriesFromOutput } from '../types';
 
 /**
@@ -20,7 +24,7 @@ import { getQueriesFromOutput } from '../types';
  * The evaluator name is preserved as `syntax_validation` for backwards
  * compatibility with existing eval reports and dashboards.
  *
- * Reports sub-scores (in `result.details`):
+ * Reports sub-scores (in `result.metadata`):
  * - `astSyntaxValidityRate` — fraction of queries that parse successfully
  * - `executionSuccessRate` — fraction of queries that execute without error
  * - `executionHitRate` — fraction of queries returning ≥1 row (only included
@@ -30,10 +34,10 @@ export const createSyntaxValidationEvaluator = (
   esClient: ElasticsearchClient,
   logger?: Logger
 ): KIQueryGenerationEvaluator =>
-  createEsqlExecutionEvaluator({
+  createEsqlExecutionEvaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>({
     esClient,
     logger,
     name: 'syntax_validation',
     queryExtractor: (output) => getQueriesFromOutput(output).map((q) => q.esql),
     includeHitDetection: ({ metadata }) => Boolean(metadata?.failure_mode),
-  }) as KIQueryGenerationEvaluator;
+  });

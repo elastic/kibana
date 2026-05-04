@@ -213,15 +213,15 @@ describe('createEsqlValidityEvaluator', () => {
       const result = await evaluator.evaluate(params(['this is garbage']));
       expect(result.score).toBe(0);
       expect(result.explanation).toContain('failed validation');
-      expect(result.metadata?.details).toBeDefined();
+      expect(result.metadata?.queries).toBeDefined();
 
-      const details = result.metadata?.details as Array<{
+      const queries = result.metadata?.queries as Array<{
         query: string;
         valid: boolean;
         errors: string[];
       }>;
-      expect(details[0].valid).toBe(false);
-      expect(details[0].errors.length).toBeGreaterThan(0);
+      expect(queries[0].valid).toBe(false);
+      expect(queries[0].errors.length).toBeGreaterThan(0);
     });
   });
 
@@ -250,12 +250,22 @@ describe('createEsqlValidityEvaluator', () => {
   });
 
   describe('edge cases', () => {
-    it('scores 1.0 when extractor returns empty array', async () => {
+    it('scores 1.0 when extractor returns empty array (default)', async () => {
       const evaluator = createEsqlValidityEvaluator({ queryExtractor: () => [] });
       const result = await evaluator.evaluate(params({}));
       expect(result.score).toBe(1);
-      expect(result.label).toBe('valid');
+      expect(result.label).toBe('no-queries');
       expect(result.explanation).toContain('No ES|QL queries');
+    });
+
+    it('honours a custom scoreOnEmptyQueries override', async () => {
+      const evaluator = createEsqlValidityEvaluator({
+        queryExtractor: () => [],
+        scoreOnEmptyQueries: 0,
+      });
+      const result = await evaluator.evaluate(params({}));
+      expect(result.score).toBe(0);
+      expect(result.label).toBe('no-queries');
     });
 
     it('scores 0 when extractor throws an error', async () => {
@@ -277,7 +287,7 @@ describe('createEsqlValidityEvaluator', () => {
       });
       const result = await evaluator.evaluate(params(null));
       expect(result.score).toBe(1);
-      expect(result.label).toBe('valid');
+      expect(result.label).toBe('no-queries');
     });
 
     it('handles non-string values in the extracted array', async () => {

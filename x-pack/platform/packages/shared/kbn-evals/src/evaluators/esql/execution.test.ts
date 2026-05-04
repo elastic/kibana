@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Example } from '../../types';
 import { createEsqlExecutionEvaluator, ESQL_EXECUTION_EVALUATOR_NAME } from './execution';
 
-const params = (output: unknown) => ({
+const params = <T>(output: T) => ({
   input: {},
   output,
   expected: null,
@@ -65,10 +66,11 @@ describe('createEsqlExecutionEvaluator', () => {
 
       expect(result.score).toBe(1);
       expect(result.label).toBe('valid');
-      const details = result.details as Record<string, unknown>;
-      expect(details.astSyntaxValidityRate).toBe(1);
-      expect(details.executionSuccessRate).toBe(1);
-      expect(details.includesHitRate).toBe(false);
+      const metadata = result.metadata as Record<string, unknown>;
+      expect(metadata.astSyntaxValidityRate).toBe(1);
+      expect(metadata.executionSuccessRate).toBe(1);
+      expect(metadata.includesHitRate).toBe(false);
+      expect(metadata.totalQueries).toBe(1);
     });
 
     it('scores 0.5 when AST is valid but execution fails', async () => {
@@ -82,9 +84,9 @@ describe('createEsqlExecutionEvaluator', () => {
 
       expect(result.score).toBe(0.5);
       expect(result.label).toBe('execution-error');
-      const details = result.details as Record<string, unknown>;
-      expect(details.astSyntaxValidityRate).toBe(1);
-      expect(details.executionSuccessRate).toBe(0);
+      const metadata = result.metadata as Record<string, unknown>;
+      expect(metadata.astSyntaxValidityRate).toBe(1);
+      expect(metadata.executionSuccessRate).toBe(0);
       expect(result.explanation).toContain('failed ES execution');
       expect(result.explanation).not.toContain('AST parse errors');
     });
@@ -102,9 +104,9 @@ describe('createEsqlExecutionEvaluator', () => {
 
       expect(result.score).toBe(0);
       expect(result.label).toBe('syntax-error');
-      const details = result.details as Record<string, unknown>;
-      expect(details.astSyntaxValidityRate).toBe(0);
-      expect(details.executionSuccessRate).toBe(0);
+      const metadata = result.metadata as Record<string, unknown>;
+      expect(metadata.astSyntaxValidityRate).toBe(0);
+      expect(metadata.executionSuccessRate).toBe(0);
       expect(result.explanation).toContain('AST parse errors');
     });
 
@@ -141,9 +143,9 @@ describe('createEsqlExecutionEvaluator', () => {
 
       const result = await evaluator.evaluate(params([hit, miss]));
 
-      const details = result.details as Record<string, unknown>;
-      expect(details.includesHitRate).toBe(true);
-      expect(details.executionHitRate).toBe(0.5);
+      const metadata = result.metadata as Record<string, unknown>;
+      expect(metadata.includesHitRate).toBe(true);
+      expect(metadata.executionHitRate).toBe(0.5);
       expect(result.score).toBeCloseTo((1 + 1 + 0.5) / 3, 5);
       expect(result.explanation).toContain('returned no hits');
     });
@@ -160,11 +162,11 @@ describe('createEsqlExecutionEvaluator', () => {
         ...params([query]),
         metadata: { failure_mode: 'authentication_failure' },
       });
-      expect((withFailureMode.details as Record<string, unknown>).includesHitRate).toBe(true);
+      expect((withFailureMode.metadata as Record<string, unknown>).includesHitRate).toBe(true);
       expect(withFailureMode.score).toBeCloseTo((1 + 1 + 0) / 3, 5);
 
       const withoutFailureMode = await evaluator.evaluate(params([query]));
-      expect((withoutFailureMode.details as Record<string, unknown>).includesHitRate).toBe(false);
+      expect((withoutFailureMode.metadata as Record<string, unknown>).includesHitRate).toBe(false);
       expect(withoutFailureMode.score).toBe(1);
     });
 
@@ -182,8 +184,68 @@ describe('createEsqlExecutionEvaluator', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('returns score 0 with no-queries label when extractor returns empty', async () => {
+  describe('parallelization', () => {
+    it('issues all ES queries concurrently', async () => {
+      const queries = ['FROM logs-1', 'FROM logs-2', 'FROM logs-3'];
+      const inFlight = new Set<string>();
+      let maxConcurrent = 0;
+
+      const esClient = {
+        esql: {
+          query: jest.fn(async ({ query }: { query: string }) => {
+            inFlight.add(query);
+            maxConcurrent = Math.max(maxConcurrent, inFlight.size);
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            inFlight.delete(query);
+            return { values: [[1]] };
+          }),
+        },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient,
+        queryExtractor: identityExtractor,
+      });
+
+      await evaluator.evaluate(params(queries));
+
+      expect(maxConcurrent).toBe(queries.length);
+    });
+  });
+
+  describe('logger config', () => {
+    it('logs warnings when execution fails', async () => {
+      const query = 'FROM logs-* | WHERE missing.field == "x"';
+      const warn = jest.fn();
+      const logger = { warn } as unknown as Logger;
+
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient: createEsClient({ [query]: { error: new Error('field not found') } }),
+        queryExtractor: identityExtractor,
+        logger,
+      });
+
+      await evaluator.evaluate(params([query]));
+
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('field not found'));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining(query));
+    });
+
+    it('does not throw when no logger is provided and execution fails', async () => {
+      const query = 'FROM logs-* | WHERE missing.field == "x"';
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient: createEsClient({ [query]: { error: new Error('field not found') } }),
+        queryExtractor: identityExtractor,
+      });
+
+      const result = await evaluator.evaluate(params([query]));
+
+      expect(result.score).toBe(0.5);
+    });
+  });
+
+  describe('empty-output behavior', () => {
+    it('defaults to score 0 with no-queries label', async () => {
       const evaluator = createEsqlExecutionEvaluator({
         esClient: createEsClient({}),
         queryExtractor: () => [],
@@ -195,6 +257,21 @@ describe('createEsqlExecutionEvaluator', () => {
       expect(result.label).toBe('no-queries');
     });
 
+    it('honours a custom scoreOnEmptyQueries override', async () => {
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient: createEsClient({}),
+        queryExtractor: () => [],
+        scoreOnEmptyQueries: 1,
+      });
+
+      const result = await evaluator.evaluate(params([]));
+
+      expect(result.score).toBe(1);
+      expect(result.label).toBe('no-queries');
+    });
+  });
+
+  describe('edge cases', () => {
     it('returns error label when extractor throws', async () => {
       const evaluator = createEsqlExecutionEvaluator({
         esClient: createEsClient({}),
@@ -281,12 +358,10 @@ describe('createEsqlExecutionEvaluator', () => {
         ],
       };
 
-      const evaluator = createEsqlExecutionEvaluator({
+      const evaluator = createEsqlExecutionEvaluator<Example, typeof toolOutput>({
         esClient: createEsClient({ [validQuery]: { values: [['jdoe', 1]] } }),
-        queryExtractor: (output: unknown) => {
-          const out = output as typeof toolOutput;
-          return out.toolResults.filter((r) => r.type === 'esqlResults').map((r) => r.data.query);
-        },
+        queryExtractor: (output) =>
+          output.toolResults.filter((r) => r.type === 'esqlResults').map((r) => r.data.query),
       });
 
       const result = await evaluator.evaluate(params(toolOutput));
@@ -301,12 +376,9 @@ describe('createEsqlExecutionEvaluator', () => {
         toolResults: [{ type: 'esqlResults', data: { query: garbage } }],
       };
 
-      const evaluator = createEsqlExecutionEvaluator({
+      const evaluator = createEsqlExecutionEvaluator<Example, typeof toolOutput>({
         esClient: createEsClient({ [garbage]: { error: new Error('parse failed') } }),
-        queryExtractor: (output: unknown) => {
-          const out = output as typeof toolOutput;
-          return out.toolResults.map((r) => r.data.query);
-        },
+        queryExtractor: (output) => output.toolResults.map((r) => r.data.query),
       });
 
       const result = await evaluator.evaluate(params(toolOutput));

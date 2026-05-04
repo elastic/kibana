@@ -15,6 +15,12 @@ import type {
   TaskOutput,
 } from '../../types';
 
+/**
+ * Default evaluator name. Title case is the convention for evaluators registered
+ * in `@kbn/evals` and surfaced in eval reports. Suite-specific consumers that
+ * need a stable existing identity (e.g. `syntax_validation`) can override via
+ * the `name` config.
+ */
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 
 interface QueryExecutionDetail {
@@ -45,6 +51,55 @@ function extractErrorMessages(errors: ReadonlyArray<unknown>): string[] {
   });
 }
 
+async function evaluateSingleQuery(
+  query: string,
+  esClient: ElasticsearchClient,
+  logger?: Logger
+): Promise<QueryExecutionDetail> {
+  const detail: QueryExecutionDetail = {
+    query: typeof query === 'string' ? query : '',
+    astValid: false,
+    executionValid: false,
+    hasHits: false,
+  };
+
+  if (!query || typeof query !== 'string' || query.trim().length === 0) {
+    detail.astError = 'Empty or non-string query';
+    return detail;
+  }
+
+  const [astResult, execResult] = await Promise.allSettled([
+    validateQuery(query),
+    esClient.esql.query({ query }),
+  ]);
+
+  if (astResult.status === 'fulfilled') {
+    const { errors } = astResult.value;
+    if (errors.length === 0) {
+      detail.astValid = true;
+    } else {
+      detail.astError = extractErrorMessages(errors).join('; ');
+    }
+  } else {
+    detail.astError =
+      astResult.reason instanceof Error ? astResult.reason.message : String(astResult.reason);
+  }
+
+  if (execResult.status === 'fulfilled') {
+    detail.executionValid = true;
+    if (execResult.value.values && execResult.value.values.length > 0) {
+      detail.hasHits = true;
+    }
+  } else {
+    const errorMessage =
+      execResult.reason instanceof Error ? execResult.reason.message : String(execResult.reason);
+    detail.executionError = errorMessage;
+    logger?.warn(`ES|QL execution failed for "${query}": ${errorMessage}`);
+  }
+
+  return detail;
+}
+
 /**
  * Two- or three-tier ES|QL execution evaluator (CODE-kind, deterministic).
  *
@@ -59,11 +114,23 @@ function extractErrorMessages(errors: ReadonlyArray<unknown>): string[] {
  *
  * The final score is the unweighted mean of the included tiers.
  *
+ * Per-query work runs concurrently via `Promise.allSettled`, so total latency
+ * scales with the slowest query rather than the sum of all queries.
+ *
  * Unlike {@link createEsqlValidityEvaluator} (syntax-only, no infra needed),
  * this evaluator requires an `ElasticsearchClient` because it actually runs
  * each query. Use the validity evaluator when you only want a fast, offline
  * structural check, and use this one when you also want to verify the queries
  * are runnable against your dataset.
+ *
+ * ### Empty-output behavior
+ *
+ * The default `scoreOnEmptyQueries` is `0`: if the extractor returns an empty
+ * array, the evaluator scores 0 with label `no-queries`. This matches the
+ * original significant-events semantics ("the task should have generated
+ * queries — none is a failure"). Set `scoreOnEmptyQueries: 1` (or any other
+ * value) when an empty extractor result is legitimately a pass — e.g. when
+ * the same dataset mixes ES|QL-producing and non-ES|QL examples.
  *
  * @param config.esClient - Elasticsearch client used to execute each query.
  * @param config.queryExtractor - Extracts ES|QL strings from the task output.
@@ -73,7 +140,9 @@ function extractErrorMessages(errors: ReadonlyArray<unknown>): string[] {
  * @param config.logger - Optional logger for execution failures.
  * @param config.name - Override the evaluator name (defaults to
  *   `ES|QL Execution Validity`). Useful for preserving stable evaluator
- *   identity in existing eval reports.
+ *   identity in existing eval reports (e.g. legacy snake_case names).
+ * @param config.scoreOnEmptyQueries - Score returned when the extractor yields
+ *   no queries. Defaults to `0`.
  */
 export function createEsqlExecutionEvaluator<
   TExample extends Example = Example,
@@ -84,6 +153,7 @@ export function createEsqlExecutionEvaluator<
   includeHitDetection?: IncludeHitDetection<TExample, TTaskOutput>;
   logger?: Logger;
   name?: string;
+  scoreOnEmptyQueries?: number;
 }): Evaluator<TExample, TTaskOutput> {
   const {
     esClient,
@@ -91,6 +161,7 @@ export function createEsqlExecutionEvaluator<
     includeHitDetection = false,
     logger,
     name = ESQL_EXECUTION_EVALUATOR_NAME,
+    scoreOnEmptyQueries = 0,
   } = config;
 
   return {
@@ -111,7 +182,7 @@ export function createEsqlExecutionEvaluator<
 
       if (queries.length === 0) {
         return {
-          score: 0,
+          score: scoreOnEmptyQueries,
           label: 'no-queries',
           explanation: 'No ES|QL queries found in output.',
         };
@@ -122,49 +193,13 @@ export function createEsqlExecutionEvaluator<
           ? includeHitDetection(params)
           : includeHitDetection;
 
-      const details: QueryExecutionDetail[] = [];
-      let astValidCount = 0;
-      let executionValidCount = 0;
-      let hitCount = 0;
+      const details = await Promise.all(
+        queries.map((query) => evaluateSingleQuery(query, esClient, logger))
+      );
 
-      for (const query of queries) {
-        const detail: QueryExecutionDetail = {
-          query: typeof query === 'string' ? query : '',
-          astValid: false,
-          executionValid: false,
-          hasHits: false,
-        };
-
-        if (!query || typeof query !== 'string' || query.trim().length === 0) {
-          detail.astError = 'Empty or non-string query';
-          details.push(detail);
-          continue;
-        }
-
-        const { errors } = await validateQuery(query);
-        if (errors.length === 0) {
-          detail.astValid = true;
-          astValidCount++;
-        } else {
-          detail.astError = extractErrorMessages(errors).join('; ');
-        }
-
-        try {
-          const result = await esClient.esql.query({ query });
-          detail.executionValid = true;
-          executionValidCount++;
-          if (result.values && result.values.length > 0) {
-            detail.hasHits = true;
-            hitCount++;
-          }
-        } catch (e) {
-          const errorMessage = e instanceof Error ? e.message : String(e);
-          detail.executionError = errorMessage;
-          logger?.warn(`ES|QL execution failed for "${query}": ${errorMessage}`);
-        }
-
-        details.push(detail);
-      }
+      const astValidCount = details.filter((d) => d.astValid).length;
+      const executionValidCount = details.filter((d) => d.executionValid).length;
+      const hitCount = details.filter((d) => d.hasHits).length;
 
       const astSyntaxValidityRate = astValidCount / queries.length;
       const executionSuccessRate = executionValidCount / queries.length;
@@ -210,7 +245,8 @@ export function createEsqlExecutionEvaluator<
             ? 'execution-error'
             : 'partial',
         explanation,
-        details: {
+        metadata: {
+          totalQueries: queries.length,
           astSyntaxValidityRate,
           executionSuccessRate,
           executionHitRate,

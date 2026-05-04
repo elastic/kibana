@@ -6,8 +6,12 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
-import type { Evaluator, EvaluationResult } from '../../types';
+import type { Evaluator, EvaluationResult, Example, TaskOutput } from '../../types';
 
+/**
+ * Default evaluator name. Title case is the convention for evaluators registered
+ * in `@kbn/evals` and surfaced in eval reports.
+ */
 export const ESQL_VALIDITY_EVALUATOR_NAME = 'ES|QL Validity';
 
 interface QueryValidationDetail {
@@ -25,16 +29,37 @@ interface QueryValidationDetail {
  * Returns score 1.0 when every extracted query is syntactically valid,
  * 0.0 when at least one query contains a parse error.
  *
+ * Per-query parsing runs concurrently via `Promise.all`, so total latency
+ * scales with the slowest query rather than the sum of all queries.
+ *
+ * ### Empty-output behavior
+ *
+ * The default `scoreOnEmptyQueries` is `1`: if the extractor returns an empty
+ * array, the evaluator scores 1.0 with label `valid` ("nothing to validate
+ * means nothing is invalid"). This is intentionally different from
+ * {@link createEsqlExecutionEvaluator}, which scores 0 by default for empty
+ * output (because in execution contexts, missing queries usually mean the
+ * task failed). Set this option explicitly when neither default fits.
+ *
  * @param config.queryExtractor - extracts ES|QL strings from the task output.
- *   Must return an array; empty arrays score 1.0 (nothing to validate).
+ *   Must return an array.
+ * @param config.scoreOnEmptyQueries - Score returned when the extractor yields
+ *   no queries. Defaults to `1`.
+ * @param config.name - Override the evaluator name (defaults to
+ *   `ES|QL Validity`).
  */
-export function createEsqlValidityEvaluator(config: {
-  queryExtractor: (output: unknown) => string[];
-}): Evaluator {
-  const { queryExtractor } = config;
+export function createEsqlValidityEvaluator<
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+>(config: {
+  queryExtractor: (output: TTaskOutput) => string[];
+  scoreOnEmptyQueries?: number;
+  name?: string;
+}): Evaluator<TExample, TTaskOutput> {
+  const { queryExtractor, scoreOnEmptyQueries = 1, name = ESQL_VALIDITY_EVALUATOR_NAME } = config;
 
   return {
-    name: ESQL_VALIDITY_EVALUATOR_NAME,
+    name,
     kind: 'CODE',
     evaluate: async ({ output }): Promise<EvaluationResult> => {
       let queries: string[];
@@ -51,26 +76,25 @@ export function createEsqlValidityEvaluator(config: {
 
       if (queries.length === 0) {
         return {
-          score: 1,
-          label: 'valid',
+          score: scoreOnEmptyQueries,
+          label: 'no-queries',
           explanation: 'No ES|QL queries found in output — nothing to validate.',
         };
       }
 
-      const details: QueryValidationDetail[] = [];
+      const details = await Promise.all(
+        queries.map(async (query): Promise<QueryValidationDetail> => {
+          if (!query || typeof query !== 'string' || query.trim().length === 0) {
+            return { query: query ?? '', valid: false, errors: ['Empty or non-string query'] };
+          }
 
-      for (const query of queries) {
-        if (!query || typeof query !== 'string' || query.trim().length === 0) {
-          details.push({ query: query ?? '', valid: false, errors: ['Empty or non-string query'] });
-          continue;
-        }
-
-        const { errors } = await validateQuery(query);
-        const errorMessages = errors.map((e) =>
-          'text' in e ? e.text : 'message' in e ? (e as { message: string }).message : String(e)
-        );
-        details.push({ query, valid: errorMessages.length === 0, errors: errorMessages });
-      }
+          const { errors } = await validateQuery(query);
+          const errorMessages = errors.map((e) =>
+            'text' in e ? e.text : 'message' in e ? (e as { message: string }).message : String(e)
+          );
+          return { query, valid: errorMessages.length === 0, errors: errorMessages };
+        })
+      );
 
       const invalidQueries = details.filter((d) => !d.valid);
       const allValid = invalidQueries.length === 0;
@@ -101,7 +125,7 @@ export function createEsqlValidityEvaluator(config: {
           totalQueries: details.length,
           validCount: details.length - invalidQueries.length,
           invalidCount: invalidQueries.length,
-          details,
+          queries: details,
         },
       };
     },
