@@ -19,6 +19,9 @@ const specsByIdMap = new Map(
   Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])
 );
 
+// `authz.enabled: false` matches other connector metadata routes (e.g. `list_types.ts`); the
+// handler still runs through `verifyAccessAndContext` for license and request context checks.
+
 /**
  * GET /internal/actions/connector_types/{id}/spec
  *
@@ -38,7 +41,8 @@ export const getConnectorSpecRoute = (
       security: {
         authz: {
           enabled: false,
-          reason: 'This API returns connector type metadata and does not require Kibana feature privileges.',
+          reason:
+            'This API returns connector type metadata and does not require Kibana feature privileges.',
         },
       },
       options: {
@@ -70,7 +74,12 @@ export const getConnectorSpecRoute = (
                   docsUrl: schema.maybe(schema.string()),
                   isTechnicalPreview: schema.maybe(schema.boolean()),
                 }),
-                schema: schema.recordOf(schema.string(), schema.any()),
+                schema: schema.recordOf(schema.string(), schema.any(), {
+                  meta: {
+                    description:
+                      'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes), not a Kibana config-schema object.',
+                  },
+                }),
               }),
           },
           404: {

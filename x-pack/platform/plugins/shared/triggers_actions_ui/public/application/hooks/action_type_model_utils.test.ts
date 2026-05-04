@@ -316,6 +316,32 @@ describe('action_type_model_utils', () => {
       expect(result?.config).toEqual({ someField: 'value', authType: 'api_key' });
     });
 
+    it('merges authType into existing secrets without removing other secret keys', () => {
+      const spec: ConnectorSpecResponse = {
+        metadata: {
+          id: 'test-connector',
+          displayName: 'Test',
+          description: 'Test',
+          minimumLicense: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        schema: { type: 'object', properties: {} },
+      };
+
+      const model = transformSpecToActionTypeModel(spec);
+      const deserializer = model.connectorForm?.deserializer;
+
+      const apiData = {
+        name: 'My Connector',
+        config: { authType: 'api_key' },
+        secrets: { apiKey: 'stored-secret' },
+      };
+
+      const result = deserializer?.(apiData);
+
+      expect(result?.secrets).toEqual({ apiKey: 'stored-secret', authType: 'api_key' });
+    });
+
     it('does not overwrite authType in secrets if already present', () => {
       const spec: ConnectorSpecResponse = {
         metadata: {

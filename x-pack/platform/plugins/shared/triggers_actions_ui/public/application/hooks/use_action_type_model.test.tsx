@@ -86,6 +86,7 @@ describe('useActionTypeModel', () => {
       isLoading: false,
       error: null,
       isFromSpec: false,
+      refetch: expect.any(Function),
     });
   });
 

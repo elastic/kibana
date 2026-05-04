@@ -34,6 +34,8 @@ export interface UseActionTypeModelResult {
   error: Error | null;
   /** Whether the model was derived from a spec (vs from registry) */
   isFromSpec: boolean;
+  /** Re-runs the connector spec query (no-op when the model is from the registry) */
+  refetch: () => void;
 }
 
 /**
@@ -67,6 +69,7 @@ export function useActionTypeModel(
     data: specData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
     queryFn: async ({ signal }) => {
@@ -97,7 +100,10 @@ export function useActionTypeModel(
       isLoading: shouldFetchSpec && isLoading,
       error: normalizeError(error),
       isFromSpec: registeredModel == null && specBasedModel != null,
+      refetch: () => {
+        void refetch();
+      },
     }),
-    [registeredModel, specBasedModel, shouldFetchSpec, isLoading, error]
+    [registeredModel, specBasedModel, shouldFetchSpec, isLoading, error, refetch]
   );
 }

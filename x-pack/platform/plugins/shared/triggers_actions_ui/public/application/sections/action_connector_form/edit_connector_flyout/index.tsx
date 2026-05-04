@@ -467,7 +467,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       if (!resolvedActionType && !actionTypeModel) {
         return false;
       }
-      const source = actionTypeModel?.source ?? resolvedActionType?.source;
+      const source =
+        actionTypeModel?.source ??
+        resolvedActionType?.source ??
+        // Older API payloads / saved objects may omit `source`; treat as stack so the test tab
+        // stays available for legacy in-process connector types.
+        ACTION_TYPE_SOURCES.stack;
       return source === ACTION_TYPE_SOURCES.stack;
     })();
 

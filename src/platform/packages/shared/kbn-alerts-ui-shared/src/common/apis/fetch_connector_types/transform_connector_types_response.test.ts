@@ -24,6 +24,7 @@ describe('transformConnectorTypesResponse', () => {
         sub_feature: 'endpointSecurity',
         is_deprecated: false,
         allow_multiple_system_actions: true,
+        description: 'Card subtitle from list API',
       },
       {
         id: 'actionType2Id',
@@ -51,6 +52,7 @@ describe('transformConnectorTypesResponse', () => {
         subFeature: 'endpointSecurity',
         isDeprecated: false,
         allowMultipleSystemActions: true,
+        description: 'Card subtitle from list API',
       },
       {
         id: 'actionType2Id',

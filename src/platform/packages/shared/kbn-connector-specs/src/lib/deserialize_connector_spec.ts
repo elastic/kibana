@@ -22,15 +22,14 @@ export type ConnectorZodSchema = ZodObject<ZodRawShape> & {
 export function fromConnectorSpecSchema(
   jsonSchema: Record<string, unknown>
 ): ConnectorZodSchema | undefined {
-  const schema = fromJSONSchema(jsonSchema);
+  const schema = fromJSONSchema(jsonSchema, { preserveMeta: true });
 
   if (!schema || !(schema instanceof ZodObject)) {
     return undefined;
   }
 
   const { config, secrets } = schema.shape;
-  const hasValidSecrets =
-    secrets instanceof ZodObject || secrets instanceof ZodDiscriminatedUnion;
+  const hasValidSecrets = secrets instanceof ZodObject || secrets instanceof ZodDiscriminatedUnion;
 
   if (!(config instanceof ZodObject) || !hasValidSecrets) {
     return undefined;

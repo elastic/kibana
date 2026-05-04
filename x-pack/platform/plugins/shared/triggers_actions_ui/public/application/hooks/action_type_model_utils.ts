@@ -150,6 +150,6 @@ function createConnectorFormDeserializer() {
       return apiData;
     }
 
-    return { ...apiData, secrets: { authType: config.authType } };
+    return { ...apiData, secrets: { ...(secrets ?? {}), authType: config.authType } };
   };
 }

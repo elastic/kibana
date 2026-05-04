@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonGroup,
   EuiCallOut,
   EuiFlyout,
@@ -113,6 +114,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeModel,
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
   } = useActionTypeModel(actionTypeRegistry, actionType);
 
   const hasErrors = isFormValid === false;
@@ -364,6 +366,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                       }
                     )}
                   </p>
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    color="danger"
+                    data-test-subj="connector-spec-load-retry"
+                    onClick={() => refetchConnectorSpec()}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorRetry',
+                      { defaultMessage: 'Retry' }
+                    )}
+                  </EuiButton>
                 </EuiCallOut>
                 <EuiSpacer size="m" />
               </>
