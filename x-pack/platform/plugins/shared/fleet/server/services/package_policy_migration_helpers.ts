@@ -11,6 +11,8 @@ import type {
   NewPackagePolicyInputStream,
   PackageInfo,
   InputsOverride,
+  RegistryVarsEntry,
+  RegistryStreamWithDataStream,
 } from '../../common/types';
 import type { NewPackagePolicy } from '../types';
 import { varsReducer, getInputEffectiveName } from '../../common/services';
@@ -52,7 +54,8 @@ export function findInputForMigration(
 export function applyInputLevelMigration(
   update: InputsOverride,
   allBaseInputs: NewPackagePolicyInput[],
-  inputs: NewPackagePolicyInput[]
+  inputs: NewPackagePolicyInput[],
+  varDefs?: RegistryVarsEntry[]
 ): NewPackagePolicyInput | undefined {
   if (update.migrate_from === undefined || update.deprecated) {
     return undefined;
@@ -73,20 +76,46 @@ export function applyInputLevelMigration(
   const staleIdx = foundStale ? inputs.indexOf(foundStale) : -1;
   if (staleIdx !== -1) inputs.splice(staleIdx, 1);
 
+  // Copy old vars so we can alias renamed entries without mutating the stored input.
+  const oldVars = { ...(originalInputToMigrate.vars ?? {}) };
+
+  // When the new input declares var-level migrate_from (e.g. azure_tenant_id.migrate_from =
+  // 'tenant_id'), alias the old value under the new name so deepMergeVars can find it.
+  // Only alias when the new name is not already present — direct mapping wins over a rename.
+  if (varDefs && varDefs.length > 0) {
+    const renameMap = buildVarRenameMap(varDefs);
+    for (const [newName, oldName] of Object.entries(renameMap)) {
+      if (oldVars[oldName] != null && !(newName in oldVars)) {
+        oldVars[newName] = oldVars[oldName];
+      }
+    }
+  }
+
   // Merge old input vars into the new input: seed with old values, keep new schema as the
   // authoritative list of vars, then strip any keys not present in the new schema.
   // deepMergeVars iterates over `update` (new schema) and restores non-null old values, so
   // null old values fall through to the new package defaults (see keepOriginalValue logic).
-  const mergedInput = deepMergeVars(
-    { ...update, vars: originalInputToMigrate.vars },
-    update,
-    true
-  ) as InputsOverride;
+  const mergedInput = deepMergeVars({ ...update, vars: oldVars }, update, true) as InputsOverride;
   update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
   // Preserve the enabled state of the old input rather than unconditionally enabling.
   update.enabled = originalInputToMigrate.enabled;
 
   return originalInputToMigrate;
+}
+
+/**
+ * Builds a rename map `{ newVarName: oldVarName }` from `RegistryVarsEntry` definitions that
+ * declare `migrate_from`. Used by `migrateStreamVars` to alias old var values under new names
+ * before the name-based `deepMergeVars` lookup runs.
+ */
+export function buildVarRenameMap(varDefs: RegistryVarsEntry[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const varDef of varDefs) {
+    if (varDef.migrate_from) {
+      map[varDef.name] = varDef.migrate_from;
+    }
+  }
+  return map;
 }
 
 /**
@@ -98,13 +127,18 @@ export function applyInputLevelMigration(
  * Stream-level vars take priority over input-level vars on collision.
  * `removeStaleVars` then discards any key not defined in the new stream schema.
  *
+ * When `varDefs` is provided, vars that declare `migrate_from` on the new stream definition are
+ * aliased in `combinedOldVars` under the new name before the name-based merge runs, so renamed
+ * vars carry over their old values correctly.
+ *
  * `oldStream` may be `undefined` when only input-level vars are available (e.g. the new input
  * has more streams than the old one). In that case `enabled` is left at the new stream's default.
  */
 export function migrateStreamVars(
   newStream: InputsOverride,
   oldStream: NewPackagePolicyInputStream | undefined,
-  oldInputVars: PackagePolicyConfigRecord | undefined
+  oldInputVars: PackagePolicyConfigRecord | undefined,
+  varDefs?: RegistryVarsEntry[]
 ): NewPackagePolicyInputStream {
   // Combine old input-level vars with old stream-level vars. Stream-level vars take
   // priority over input-level vars for the same key (more specific value wins).
@@ -113,6 +147,18 @@ export function migrateStreamVars(
     ...(oldInputVars ?? {}),
     ...(oldStream?.vars ?? {}),
   };
+
+  // When the new stream declares var-level migrate_from (e.g. url.migrate_from = 'request_url'),
+  // alias the old value under the new name so deepMergeVars (which matches by name) can find it.
+  // Only alias when the new name is not already present — direct mapping wins over a rename.
+  if (varDefs && varDefs.length > 0) {
+    const renameMap = buildVarRenameMap(varDefs);
+    for (const [newName, oldName] of Object.entries(renameMap)) {
+      if (combinedOldVars[oldName] != null && !(newName in combinedOldVars)) {
+        combinedOldVars[newName] = combinedOldVars[oldName];
+      }
+    }
+  }
 
   const merged = deepMergeVars(
     { ...newStream, vars: combinedOldVars },
@@ -144,7 +190,8 @@ export function migrateStreamVars(
 export function applyStreamLevelMigration(
   update: InputsOverride,
   originalInputToMigrate: NewPackagePolicyInput | undefined,
-  allBaseInputs: NewPackagePolicyInput[]
+  allBaseInputs: NewPackagePolicyInput[],
+  registryStreams?: RegistryStreamWithDataStream[]
 ): void {
   if (!update.streams || update.deprecated) {
     return;
@@ -192,7 +239,16 @@ export function applyStreamLevelMigration(
 
     if (!oldStream && !oldInputVars) return newStream;
 
-    return migrateStreamVars(newStream as InputsOverride, oldStream, oldInputVars);
+    const registryStream = registryStreams?.find(
+      (rs) =>
+        rs.data_stream.dataset === (newStream as NewPackagePolicyInputStream).data_stream?.dataset
+    );
+    return migrateStreamVars(
+      newStream as InputsOverride,
+      oldStream,
+      oldInputVars,
+      registryStream?.vars
+    );
   });
 
   // If stream-level migration succeeded without an input-level migrate_from, carry the

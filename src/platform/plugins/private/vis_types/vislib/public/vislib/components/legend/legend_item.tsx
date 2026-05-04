@@ -125,6 +125,7 @@ const VisLegendItemComponent = ({
         type="dot"
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
+        aria-hidden={true}
       />
       <span className="visLegend__valueTitle">{item.label}</span>
     </EuiButtonEmpty>
@@ -132,6 +133,10 @@ const VisLegendItemComponent = ({
 
   const renderDetails = () => (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleOptionsPopoverAriaLabel', {
+        defaultMessage: '{legendDataLabel}, legend options',
+        values: { legendDataLabel: item.label },
+      })}
       display="block"
       button={button}
       isOpen={selected}

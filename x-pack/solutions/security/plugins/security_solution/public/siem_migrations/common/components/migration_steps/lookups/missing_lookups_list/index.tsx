@@ -74,9 +74,13 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     >
                       <EuiFlexItem grow={false}>
                         {uploadedLookups[lookupName] != null ? (
-                          <EuiIcon type="checkCircleFill" color={euiTheme.colors.success} />
+                          <EuiIcon
+                            type="checkCircleFill"
+                            color={euiTheme.colors.success}
+                            aria-hidden={true}
+                          />
                         ) : (
-                          <EuiIcon type="dot" />
+                          <EuiIcon type="dot" aria-hidden={true} />
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -140,6 +144,10 @@ const CONFIGS: Record<MigrationSource, ConfigSetting> = {
   [MigrationSource.QRADAR]: {
     tooltip: i18n.COPY_REFERENCE_SET_NAME_TOOLTIP,
     label: i18n.CLEAR_EMPTY_REFERENCE_SET_TOOLTIP,
+  },
+  [MigrationSource.SENTINEL]: {
+    tooltip: i18n.COPY_WATCHLIST_NAME_TOOLTIP,
+    label: i18n.CLEAR_EMPTY_WATCHLIST_TOOLTIP,
   },
 };
 const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(

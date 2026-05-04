@@ -10,11 +10,13 @@ import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { Header } from '../../flyout_v2/network_details/header';
+import { Content } from '../../flyout_v2/network_details/content';
 import { PreviewPanelFooter } from './footer';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { PanelHeader } from './header';
-import { PanelContent } from './content';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
+import { FlyoutHeader } from '../shared/components/flyout_header';
+import { FlyoutBody } from '../shared/components/flyout_body';
 
 export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'network-details' | 'network-preview';
@@ -63,8 +65,12 @@ export const NetworkPanel: FC<NetworkPanelProps> = memo(
           isPreviewMode={isPreviewMode}
           isRulePreview={scopeId === TableId.rulePreview}
         />
-        <PanelHeader ip={ip} flowTarget={flowTarget} />
-        <PanelContent ip={ip} flowTarget={flowTarget} />
+        <FlyoutHeader>
+          <Header ip={ip} flowTarget={flowTarget} />
+        </FlyoutHeader>
+        <FlyoutBody>
+          <Content ip={ip} flowTarget={flowTarget} />
+        </FlyoutBody>
         {isPreviewMode && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
       </>
     );

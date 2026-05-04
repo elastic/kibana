@@ -18,43 +18,29 @@ import {
   createQueryKnowledgeIndicatorTool,
   STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
 } from './create_query_knowledge_indicator/tool';
-import { createGetDataQualityTool } from './read/get_data_quality';
-import { createGetFailedDocumentsTool } from './read/get_failed_documents';
-import { createGetLifecycleStatsTool } from './read/get_lifecycle_stats';
-import { createGetSchemaTool } from './read/get_schema';
-import { createGetStreamTool } from './read/get_stream';
-import { createListStreamsTool } from './read/list_streams';
+import { createInspectStreamsTool } from './read/inspect_streams';
+import { createDiagnoseStreamTool } from './read/diagnose_stream';
 import { createQueryDocumentsTool } from './read/query_documents';
+import { createDesignPipelineTool } from './read/design_pipeline';
 import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './search_knowledge_indicators/tool';
+import { createUpdateStreamTool } from './write/update_stream';
+import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
-import { createForkStreamTool } from './write/fork_stream';
-import { createMapFieldsTool } from './write/map_fields';
-import { createSetFailureStoreTool } from './write/set_failure_store';
-import { createSetRetentionTool } from './write/set_retention';
-import { createUpdateProcessorsTool } from './write/update_processors';
-import { createUpdateStreamDescriptionTool } from './write/update_stream_description';
-import { StreamsWriteQueue } from './write_queue';
+import { StreamsWriteQueue } from '../utils/write_queue';
 
 export {
-  STREAMS_DELETE_STREAM_TOOL_ID,
-  STREAMS_FORK_STREAM_TOOL_ID,
-  STREAMS_GET_DATA_QUALITY_TOOL_ID,
-  STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID,
-  STREAMS_GET_LIFECYCLE_STATS_TOOL_ID,
-  STREAMS_GET_SCHEMA_TOOL_ID,
-  STREAMS_GET_STREAM_TOOL_ID,
-  STREAMS_LIST_STREAMS_TOOL_ID,
-  STREAMS_MAP_FIELDS_TOOL_ID,
-  STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_READ_TOOL_IDS,
-  STREAMS_SET_FAILURE_STORE_TOOL_ID,
-  STREAMS_SET_RETENTION_TOOL_ID,
-  STREAMS_UPDATE_DESCRIPTION_TOOL_ID,
-  STREAMS_UPDATE_PROCESSORS_TOOL_ID,
   STREAMS_WRITE_TOOL_IDS,
+  STREAMS_INSPECT_STREAMS_TOOL_ID,
+  STREAMS_DIAGNOSE_STREAM_TOOL_ID,
+  STREAMS_QUERY_DOCUMENTS_TOOL_ID,
+  STREAMS_DESIGN_PIPELINE_TOOL_ID,
+  STREAMS_UPDATE_STREAM_TOOL_ID,
+  STREAMS_CREATE_PARTITION_TOOL_ID,
+  STREAMS_DELETE_STREAM_TOOL_ID,
 } from './tool_ids';
 
 export {
@@ -84,22 +70,19 @@ export function registerAgentBuilderTools({
 
   const streamsTools = [
     // Read tools
-    createGetDataQualityTool({ getScopedClients, isServerless: server.isServerless }),
-    createGetFailedDocumentsTool({ getScopedClients }),
-    createGetLifecycleStatsTool({ getScopedClients }),
-    createGetSchemaTool({ getScopedClients }),
-    createGetStreamTool({ getScopedClients }),
-    createListStreamsTool({ getScopedClients }),
+    createInspectStreamsTool({ getScopedClients, isServerless: server.isServerless }),
+    createDiagnoseStreamTool({
+      getScopedClients,
+      isServerless: server.isServerless,
+      logger: logger.get('diagnose_stream'),
+    }),
     createQueryDocumentsTool({ getScopedClients }),
+    createDesignPipelineTool({ getScopedClients }),
 
     // Write tools
+    createUpdateStreamTool({ getScopedClients, writeQueue }),
+    createCreatePartitionTool({ getScopedClients, writeQueue }),
     createDeleteStreamTool({ getScopedClients, writeQueue }),
-    createForkStreamTool({ getScopedClients, writeQueue }),
-    createMapFieldsTool({ getScopedClients, writeQueue }),
-    createSetFailureStoreTool({ getScopedClients, writeQueue }),
-    createSetRetentionTool({ getScopedClients, writeQueue }),
-    createUpdateProcessorsTool({ getScopedClients, writeQueue }),
-    createUpdateStreamDescriptionTool({ getScopedClients, writeQueue }),
 
     // Significant events tools
     createSearchKnowledgeIndicatorsTool({
@@ -122,6 +105,6 @@ export function registerAgentBuilderTools({
   ];
 
   for (const tool of streamsTools) {
-    agentBuilder.tools.register(tool);
+    agentBuilder.tools.register(tool as Parameters<typeof agentBuilder.tools.register>[0]);
   }
 }

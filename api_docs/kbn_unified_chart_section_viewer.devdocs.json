@@ -43,6 +43,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AnalyticsServiceStart",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -82,6 +83,7 @@
             "lineNumber": 24,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "EventBasedTelemetryProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -120,6 +122,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -174,6 +177,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -857,6 +861,7 @@
                 "lineNumber": 15,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetricsTelemetry",
                 "trackAdoption": false,
                 "isRequired": true
               }

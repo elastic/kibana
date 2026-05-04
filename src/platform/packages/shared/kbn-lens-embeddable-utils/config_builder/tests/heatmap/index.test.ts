@@ -13,9 +13,15 @@ import { heatmapConfigSchema } from '../../schema/charts/heatmap';
 import type { HeatmapConfig } from '../../schema/charts/heatmap';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
-import { validateConverter } from '../validate';
+import { validateConverter, validateAPIConverter } from '../validate';
 import * as dslMocks from './dsl.mocks';
 import * as esqlMocks from './esql.mocks';
+import * as esqlApiMocks from './lens_api_config.mock';
+
+function toAPI(attributes: Parameters<LensConfigBuilder['toAPIFormat']>[0]): HeatmapConfig {
+  const builder = new LensConfigBuilder();
+  return builder.toAPIFormat(attributes) as HeatmapConfig;
+}
 
 describe('Heatmap', () => {
   describe('DSL', () => {
@@ -58,6 +64,28 @@ describe('Heatmap', () => {
     });
   });
 
+  describe('axis.y omission when no yAccessor', () => {
+    it('should omit axis.y for a DSL heatmap without yAccessor', () => {
+      const apiOutput = toAPI(dslMocks.simple);
+      expect(apiOutput.axis).not.toHaveProperty('y');
+    });
+
+    it('should omit axis.y for an ESQL heatmap without yAccessor', () => {
+      const apiOutput = toAPI(esqlMocks.simple);
+      expect(apiOutput.axis).not.toHaveProperty('y');
+    });
+
+    it('should include axis.y for a DSL heatmap with yAccessor', () => {
+      const apiOutput = toAPI(dslMocks.withXAndYAxes);
+      expect(apiOutput.axis).toHaveProperty('y');
+    });
+
+    it('should include axis.y for an ESQL heatmap with yAccessor', () => {
+      const apiOutput = toAPI(esqlMocks.withXAndYAxes);
+      expect(apiOutput.axis).toHaveProperty('y');
+    });
+  });
+
   describe('color default application', () => {
     const baseHeatmap = {
       type: 'heatmap',
@@ -89,6 +117,40 @@ describe('Heatmap', () => {
       const apiOutput = builder.toAPIFormat(lensState) as HeatmapConfig;
 
       expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
+    });
+  });
+
+  describe('validateAPIConverter', () => {
+    describe('axis scale support', () => {
+      it('should convert temporal scale correctly', () => {
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(esqlApiMocks.withTemporalXAxisScale);
+        const outputConfig = builder.toAPIFormat(lensState) as HeatmapConfig;
+
+        expect(outputConfig.axis?.x?.scale).toBe('temporal');
+
+        validateAPIConverter(esqlApiMocks.withTemporalXAxisScale, heatmapConfigSchema, ['axis.y']);
+      });
+
+      it('should convert ordinal scale correctly', () => {
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(esqlApiMocks.withOrdinalXAxisScale);
+        const outputConfig = builder.toAPIFormat(lensState) as HeatmapConfig;
+
+        expect(outputConfig.axis?.x?.scale).toBe('ordinal');
+
+        validateAPIConverter(esqlApiMocks.withOrdinalXAxisScale, heatmapConfigSchema, ['axis.y']);
+      });
+
+      it('should convert linear scale correctly', () => {
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(esqlApiMocks.withLinearXAxisScale);
+        const outputConfig = builder.toAPIFormat(lensState) as HeatmapConfig;
+
+        expect(outputConfig.axis?.x?.scale).toBe('linear');
+
+        validateAPIConverter(esqlApiMocks.withLinearXAxisScale, heatmapConfigSchema, ['axis.y']);
+      });
     });
   });
 });

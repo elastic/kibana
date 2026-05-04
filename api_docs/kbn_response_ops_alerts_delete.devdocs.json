@@ -33,6 +33,7 @@
             "lineNumber": 24,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertDeleteDescriptiveFormGroupProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -72,6 +73,7 @@
             "lineNumber": 138,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertDeleteProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -123,6 +125,7 @@
             "lineNumber": 16,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateAlertDeleteScheduleParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -182,6 +185,7 @@
             "lineNumber": 18,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "GetAlertDeleteLastRunParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -241,6 +245,7 @@
             "lineNumber": 19,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "GetAlertDeletePreviewParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -302,6 +307,7 @@
             "lineNumber": 18,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "UseAlertDeleteLastRunParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -363,6 +369,7 @@
             "lineNumber": 21,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "UseAlertDeletePreviewParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -428,6 +435,7 @@
             "lineNumber": 19,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "UseAlertDeleteScheduleParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -832,6 +840,7 @@
                 "lineNumber": 17,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "IHttpFetchError",
                 "trackAdoption": false,
                 "isRequired": true
               }

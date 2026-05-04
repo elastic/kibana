@@ -217,7 +217,7 @@ describe('convertPathParameters', () => {
         {
           in: 'path',
           name: 'a',
-          required: false,
+          required: true,
           schema: {
             type: 'string',
           },

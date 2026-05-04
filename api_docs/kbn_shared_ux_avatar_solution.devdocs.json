@@ -49,6 +49,7 @@
             "lineNumber": 47,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaSolutionAvatarProps",
             "trackAdoption": false,
             "isRequired": true
           }

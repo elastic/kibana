@@ -7,7 +7,26 @@ steps:
       zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
     key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    # [rspack-transition] Original condition (restore when legacy optimizer is removed):
+    # if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  # [rspack-transition] Verify the Rspack optimizer can build all bundles
+  # successfully. Skipped when ci:build-with-rspack-optimizer is set because
+  # the main Build Kibana Distribution step already uses Rspack.
+  - command: .buildkite/scripts/steps/verify_rspack_build.sh
+    label: 'Verify Rspack Optimizer Build'
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:build-with-rspack-optimizer/"
+    agents:
+      machineType: n2d-standard-8
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 200
+    key: verify_rspack_build
     timeout_in_minutes: 60
     plugins:
       - custom-checkout#v1.8.0:

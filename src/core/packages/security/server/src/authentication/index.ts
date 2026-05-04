@@ -19,6 +19,8 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   NativeAPIKeysType,
   NativeAPIKeysWithContextType,
   UpdateAPIKeyParams,
@@ -35,6 +37,18 @@ export type {
   ConvertUiamAPIKeyResultFailed,
   ConvertUiamAPIKeysResponse,
 } from './api_keys';
+
+export type {
+  UiamOAuthType,
+  UiamOAuthClientResponse,
+  UiamOAuthClientLogo,
+  UiamOAuthClientType,
+  UiamOAuthConnectionsSummary,
+  UiamOAuthConnectionResponse,
+  CreateUiamOAuthClientParams,
+  UpdateUiamOAuthClientParams,
+  UpdateUiamOAuthConnectionParams,
+} from './oauth';
 
 export { HTTPAuthorizationHeader } from './http_authentication';
 export {

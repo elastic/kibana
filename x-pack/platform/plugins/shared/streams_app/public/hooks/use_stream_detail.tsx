@@ -87,7 +87,11 @@ export function StreamDetailContextProvider({
           throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },
-    [streamsRepositoryClient, name, canManageInUi]
+    [streamsRepositoryClient, name, canManageInUi],
+    {
+      shouldSuppressFetchErrorToast: (err: Error) =>
+        isHttpFetchError(err) && err.body?.statusCode === 404,
+    }
   );
 
   const {

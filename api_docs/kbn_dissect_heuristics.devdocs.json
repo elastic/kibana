@@ -73,6 +73,7 @@
             "lineNumber": 43,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "AssembleDissectProcessorParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -185,6 +186,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DissectPattern",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -274,6 +276,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DissectPattern",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -297,6 +300,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NormalizedReviewResult",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -374,6 +378,7 @@
             "lineNumber": 23,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DissectPattern",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -546,6 +551,7 @@
             "lineNumber": 16,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "DissectAST",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -646,6 +652,7 @@
                 "lineNumber": 16,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReviewFields",
                 "trackAdoption": false
               },
               {
@@ -1351,6 +1358,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReviewFields",
             "trackAdoption": false
           },
           {

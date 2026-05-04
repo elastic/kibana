@@ -313,21 +313,7 @@
       }
     }
   },
-  "alerting_api_key_pending_invalidation": {
-    "dynamic": false,
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "uiamApiKey": {
-        "type": "binary"
-      }
-    }
-  },
-  "alerting_notification_policy": {
+  "alerting_action_policy": {
     "dynamic": false,
     "properties": {
       "auth": {
@@ -413,6 +399,20 @@
       },
       "updatedByUsername": {
         "type": "keyword"
+      }
+    }
+  },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -1476,6 +1476,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1738,6 +1742,10 @@
         "properties": {}
       },
       "pending_upgrade_review": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "previous_dependency_versions": {
         "dynamic": false,
         "properties": {}
       },

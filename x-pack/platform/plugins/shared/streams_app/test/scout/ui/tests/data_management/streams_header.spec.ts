@@ -6,6 +6,7 @@
  */
 
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
@@ -38,6 +39,7 @@ test.describe(
 
     test('shows correct badges', async ({ pageObjects, config }) => {
       await pageObjects.streams.gotoDataRetentionTab(TEST_STREAM_NAME);
+
       await test.step('verify Discover badge link', async () => {
         await pageObjects.streams.verifyDiscoverButtonLink(TEST_STREAM_NAME);
       });
@@ -79,14 +81,18 @@ test.describe(
         isMalformed: true,
       });
 
-      // Wait to ensure the doc is indexed
-      await page.waitForTimeout(20000);
-
-      // Refresh the page to reflect the processor changes
-      await page.reload();
-
-      // We should have 51 documents in total now, 1 degraded -> ~1.96% degraded docs -> < 3% so Degraded quality
-      await pageObjects.streams.verifyDataQuality(TEST_STREAM_NAME, 'Degraded');
+      // First transition: Degraded
+      await expect
+        .poll(
+          async () => {
+            await page.reload();
+            return page
+              .locator(`[data-test-subj="dataQualityIndicator-${TEST_STREAM_NAME}"]`)
+              .textContent();
+          },
+          { timeout: 90_000, intervals: [5000] }
+        )
+        .toContain('Degraded');
 
       currentTime = Date.now();
       // Ingest 4 more malformed docs to have 5 degraded documents
@@ -98,14 +104,18 @@ test.describe(
         isMalformed: true,
       });
 
-      // Wait to ensure the docs are indexed
-      await page.waitForTimeout(20000);
-
-      // Refresh the page to reflect the processor changes
-      await page.reload();
-
-      // We should have 55 documents in total now, 5 degraded -> ~9.09% degraded docs -> > 3% so Poor quality
-      await pageObjects.streams.verifyDataQuality(TEST_STREAM_NAME, 'Poor');
+      // Second transition: Poor
+      await expect
+        .poll(
+          async () => {
+            await page.reload();
+            return page
+              .locator(`[data-test-subj="dataQualityIndicator-${TEST_STREAM_NAME}"]`)
+              .textContent();
+          },
+          { timeout: 90_000, intervals: [5000] }
+        )
+        .toContain('Poor');
     });
   }
 );

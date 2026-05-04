@@ -38,12 +38,14 @@ interface ScoreBaseEntitiesParams {
   now: string;
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
+  abortSignal?: AbortSignal;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
   lookupIndex: string;
+  abortSignal?: AbortSignal;
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
@@ -82,11 +84,16 @@ export const calculateBaseEntityScores = async function* ({
   now,
   watchlistConfigs,
   calculationRunId,
+  abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
 
   do {
+    if (abortSignal?.aborted) {
+      logger.info('Base scoring aborted between pages');
+      return;
+    }
     // Per page: find this page's start/end IDs for scoring, then apply entity modifiers.
     const pageResult = await fetchNextEuidPage({
       esClient,

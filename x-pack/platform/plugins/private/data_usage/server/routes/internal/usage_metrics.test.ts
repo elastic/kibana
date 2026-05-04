@@ -33,7 +33,6 @@ const utcTimeRange = transformToUTCtime({
 describe('registerUsageMetricsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
   let router: DataUsageRouter;
-  let dataUsageService: DataUsageService;
   let context: DataUsageRequestHandlerContext;
   let mockedDataUsageContext: ReturnType<typeof createMockedDataUsageContext>;
 
@@ -47,7 +46,6 @@ describe('registerUsageMetricsRoute', () => {
     mockedDataUsageContext = createMockedDataUsageContext(
       coreMock.createPluginInitializerContext()
     );
-    dataUsageService = new DataUsageService(mockedDataUsageContext.logFactory.get());
   });
 
   it('should request correct API', () => {
@@ -89,49 +87,57 @@ describe('registerUsageMetricsRoute', () => {
     });
   });
 
-  // TODO: fix this test
-  it.skip('should correctly transform response', async () => {
+  it('should correctly transform response', async () => {
     (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = jest
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: '.ds-1' }, { name: '.ds-2' }],
       });
 
-    dataUsageService.getMetrics = jest.fn().mockResolvedValue({
-      metrics: {
-        ingest_rate: [
-          {
-            name: '.ds-1',
-            data: [
-              [1726858530000, 13756849],
-              [1726862130000, 14657904],
-            ],
-          },
-          {
-            name: '.ds-2',
-            data: [
-              [1726858530000, 12894623],
-              [1726862130000, 14436905],
-            ],
-          },
-        ],
-        storage_retained: [
-          {
-            name: '.ds-1',
-            data: [
-              [1726858530000, 12576413],
-              [1726862130000, 13956423],
-            ],
-          },
-          {
-            name: '.ds-2',
-            data: [
-              [1726858530000, 12894623],
-              [1726862130000, 14436905],
-            ],
-          },
-        ],
-      },
+    jest.spyOn(DataUsageService.prototype, 'getMetrics').mockResolvedValue({
+      ingest_rate: [
+        {
+          name: '.ds-1',
+          error: null,
+          data: [
+            [1726858530000, 13756849],
+            [1726862130000, 14657904],
+          ],
+        },
+        {
+          name: '.ds-2',
+          error: null,
+          data: [
+            [1726858530000, 12894623],
+            [1726862130000, 14436905],
+          ],
+        },
+      ],
+      storage_retained: [
+        {
+          name: '.ds-1',
+          error: null,
+          data: [
+            [1726858530000, 12576413],
+            [1726862130000, 13956423],
+          ],
+        },
+        {
+          name: '.ds-2',
+          error: null,
+          data: [
+            [1726858530000, 12894623],
+            [1726862130000, 14436905],
+          ],
+        },
+      ],
+      search_vcu: [],
+      ingest_vcu: [],
+      ml_vcu: [],
+      index_latency: [],
+      index_rate: [],
+      search_latency: [],
+      search_rate: [],
     });
 
     registerUsageMetricsRoute(router, mockedDataUsageContext);
@@ -152,40 +158,45 @@ describe('registerUsageMetricsRoute', () => {
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: {
-        metrics: {
-          ingest_rate: [
-            {
-              name: '.ds-1',
-              data: [
-                { x: 1726858530000, y: 13756849 },
-                { x: 1726862130000, y: 14657904 },
-              ],
-            },
-            {
-              name: '.ds-2',
-              data: [
-                { x: 1726858530000, y: 12894623 },
-                { x: 1726862130000, y: 14436905 },
-              ],
-            },
-          ],
-          storage_retained: [
-            {
-              name: '.ds-1',
-              data: [
-                { x: 1726858530000, y: 12576413 },
-                { x: 1726862130000, y: 13956423 },
-              ],
-            },
-            {
-              name: '.ds-2',
-              data: [
-                { x: 1726858530000, y: 12894623 },
-                { x: 1726862130000, y: 14436905 },
-              ],
-            },
-          ],
-        },
+        ingest_rate: [
+          {
+            name: '.ds-1',
+            data: [
+              { x: 1726858530000, y: 13756849 },
+              { x: 1726862130000, y: 14657904 },
+            ],
+          },
+          {
+            name: '.ds-2',
+            data: [
+              { x: 1726858530000, y: 12894623 },
+              { x: 1726862130000, y: 14436905 },
+            ],
+          },
+        ],
+        storage_retained: [
+          {
+            name: '.ds-1',
+            data: [
+              { x: 1726858530000, y: 12576413 },
+              { x: 1726862130000, y: 13956423 },
+            ],
+          },
+          {
+            name: '.ds-2',
+            data: [
+              { x: 1726858530000, y: 12894623 },
+              { x: 1726862130000, y: 14436905 },
+            ],
+          },
+        ],
+        search_vcu: [],
+        ingest_vcu: [],
+        ml_vcu: [],
+        index_latency: [],
+        index_rate: [],
+        search_latency: [],
+        search_rate: [],
       },
     });
   });
@@ -294,16 +305,15 @@ describe('registerUsageMetricsRoute', () => {
     });
   });
 
-  // TODO: fix this test
-  it.skip('should throw error if error on requesting auto ops service', async () => {
+  it('should throw error if error on requesting auto ops service', async () => {
     (await context.core).elasticsearch.client.asCurrentUser.indices.getDataStream = jest
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: '.ds-1' }, { name: '.ds-2' }],
       });
 
-    dataUsageService.getMetrics = jest
-      .fn()
+    jest
+      .spyOn(DataUsageService.prototype, 'getMetrics')
       .mockRejectedValue(new AutoOpsError('Uh oh, something went wrong!'));
 
     registerUsageMetricsRoute(router, mockedDataUsageContext);

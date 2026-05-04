@@ -14,6 +14,7 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   agentBuilderDefaultAgentId,
@@ -67,7 +68,7 @@ export type RunChatAgentFn = (
 /*
  * Max number of agent cycles allowed before forcing an answer.
  */
-const CYCLE_LIMIT = 15;
+const CYCLE_LIMIT = 30;
 
 /**
  * Create the handler function for the default agentBuilder agent.
@@ -188,7 +189,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
-      tools: browserApiTools ?? [],
+      tools: (browserApiTools ?? []).map((tool) => ({ ...tool, origin: ToolOrigin.internal })),
     }),
   ]);
 
@@ -207,8 +208,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     await toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: [
-        builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
-        builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+        {
+          ...builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
+        {
+          ...builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
       ],
       logger,
     });
@@ -423,6 +430,6 @@ const createInitializerCommand = ({
 
 const getRecursionLimit = (cycleLimit: number): number => {
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
-  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
-  return cycleLimit * 2 + 8;
+  // in practice we have three steps per cycle (agent node + tool call node + background work), and then a few other steps (prepare + answering), and some extra buffer
+  return Math.ceil(cycleLimit * 3.5 + 20);
 };

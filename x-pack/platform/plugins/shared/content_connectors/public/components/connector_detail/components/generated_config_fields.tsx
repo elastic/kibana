@@ -137,7 +137,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiIcon type="check" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
@@ -153,6 +153,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorNameLink"
               external
               target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -171,6 +172,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorIdLink"
                   external
                   target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -201,7 +203,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiIcon type="check" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
@@ -222,7 +224,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup responsive={false} gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="check" />
+                    <EuiIcon type="check" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {i18n.translate(

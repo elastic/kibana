@@ -460,6 +460,7 @@
             "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }

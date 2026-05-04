@@ -57,6 +57,8 @@ import {
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
+import type { ResolvedExtendedFieldFilter } from './extended_field_search_utils';
+import { buildExtendedFieldRuntimeMappings } from './extended_field_search_utils';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
@@ -271,9 +273,11 @@ export class CasesService {
   public async searchCasesGroupedByID({
     caseOptions,
     namespaces,
+    extendedFieldFilters,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -284,15 +288,22 @@ export class CasesService {
       search: caseOptions.search,
       searchFields: caseOptions.searchFields,
       caseIds: caseIdsByAttachmentSearch,
+      extendedFieldFilters,
     });
 
     const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
     const query = mergeSearchQuery(searchQuery, filterQuery);
 
+    const runtimeMappings =
+      extendedFieldFilters && extendedFieldFilters.length > 0
+        ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
+        : undefined;
+
     const cases = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
       namespaces,
       query,
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       ...convertFindQueryParams(caseOptions),
     });
 

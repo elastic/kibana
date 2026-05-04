@@ -38,7 +38,7 @@ describe('fetchAndAssignAgentMetrics', () => {
         .mockResolvedValueOnce({
           aggregations: {
             agents: {
-              buckets: [{ key: 'a2', avg_memory_size: { value: 200 }, avg_cpu: { value: 2.34 } }],
+              buckets: [{ key: 'a2', max_memory_size: { value: 200 }, avg_cpu: { value: 2.34 } }],
             },
           },
         }),
@@ -55,5 +55,88 @@ describe('fetchAndAssignAgentMetrics', () => {
       { id: 'a3', type: 'FLEET', metrics: { cpu_avg: 3.23, memory_size_byte_avg: 300 } },
     ]);
     expect(esClient.search).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses elastic.display.name as service.instance.id for OPAMP agents when present', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
+        .mockResolvedValueOnce({
+          aggregations: {
+            agents: {
+              buckets: [
+                {
+                  key: 'my-collector-host',
+                  max_memory_size: { value: 512 },
+                  avg_cpu: { value: 0.5 },
+                },
+              ],
+            },
+          },
+        }),
+    };
+    const agents = [
+      {
+        id: 'opamp-fleet-id',
+        type: 'OPAMP',
+        non_identifying_attributes: { 'elastic.display.name': 'my-collector-host' },
+      },
+    ];
+    const result = await fetchAndAssignAgentMetrics(esClient as any, agents as any);
+    expect(result).toEqual([
+      {
+        id: 'opamp-fleet-id',
+        type: 'OPAMP',
+        non_identifying_attributes: { 'elastic.display.name': 'my-collector-host' },
+        metrics: { cpu_avg: 0.5, memory_size_byte_avg: 512 },
+      },
+    ]);
+    // Verify the query used the display name, not the agent ID
+    const otelSearchCall = esClient.search.mock.calls[1][0];
+    expect(otelSearchCall.query.bool.must).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ terms: { 'service.instance.id': ['my-collector-host'] } }),
+      ])
+    );
+  });
+
+  it('assigns the same metrics bucket to all agents sharing the same elastic.display.name', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
+        .mockResolvedValueOnce({
+          aggregations: {
+            agents: {
+              buckets: [
+                { key: 'shared-host', max_memory_size: { value: 768 }, avg_cpu: { value: 0.3 } },
+              ],
+            },
+          },
+        }),
+    };
+    const agents = [
+      {
+        id: 'opamp-id-1',
+        type: 'OPAMP',
+        non_identifying_attributes: { 'elastic.display.name': 'shared-host' },
+      },
+      {
+        id: 'opamp-id-2',
+        type: 'OPAMP',
+        non_identifying_attributes: { 'elastic.display.name': 'shared-host' },
+      },
+    ];
+    const result = await fetchAndAssignAgentMetrics(esClient as any, agents as any);
+    expect(result[0].metrics).toEqual({ cpu_avg: 0.3, memory_size_byte_avg: 768 });
+    expect(result[1].metrics).toEqual({ cpu_avg: 0.3, memory_size_byte_avg: 768 });
+    // Only one unique instanceId should be queried
+    const otelSearchCall = esClient.search.mock.calls[1][0];
+    expect(otelSearchCall.query.bool.must).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ terms: { 'service.instance.id': ['shared-host'] } }),
+      ])
+    );
   });
 });

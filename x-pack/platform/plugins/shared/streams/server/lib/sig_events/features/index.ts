@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { MS_PER_DAY, EMPTY_TOKENS } from './iteration_state';
+export { MS_PER_DAY } from './iteration_state';
 export { deriveSuccessCount, deriveTotalTokensUsed } from './iteration_state';
 
 export { identifyInferredFeatures, buildTelemetry } from './identify_inferred_features';
