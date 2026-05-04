@@ -14,6 +14,12 @@ import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 export class ThreatMatchRuleCreatePage {
   constructor(private readonly page: ScoutPage) {}
 
+  private async dismissProjectPickerTour(): Promise<void> {
+    await this.page.addInitScript(() => {
+      window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
+    });
+  }
+
   /**
    * Opens rule creation in the given space, selects Indicator match, enters the
    * threat index, and waits for the threat-field autocomplete combobox.
@@ -25,9 +31,7 @@ export class ThreatMatchRuleCreatePage {
   }): Promise<void> {
     const { kbnUrl, spaceId, testIndex } = params;
 
-    await this.page.addInitScript(() => {
-      window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
-    });
+    await this.dismissProjectPickerTour();
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
 
     // Rule type cards may take a while to render in CI
