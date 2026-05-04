@@ -55,9 +55,7 @@ describe('resolveCpsData', () => {
     const result = await resolveCpsData(esClient, 'default', logger);
 
     expect(result).toEqual({ linkedProjects: [] });
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to resolve CPS data')
-    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to resolve CPS data'));
   });
 
   it('resolves the correct NPRE for a custom space', async () => {
