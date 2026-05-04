@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EmptyViewerState,
@@ -72,15 +72,9 @@ export const ListsDetailViewComponent: FC = () => {
   } = useListDetailsView(exceptionListId);
 
   const location = useLocation<{ justCreated?: string }>();
-  const [screenReaderMessage, setScreenReaderMessage] = useState('');
-
-  useEffect(() => {
-    if (location.state?.justCreated) {
-      setScreenReaderMessage(
-        i18n.SHARED_EXCEPTION_LIST_CREATED_SUCCESSFULLY(location.state.justCreated)
-      );
-    }
-  }, [location.state]);
+  const screenReaderMessage = location.state?.justCreated
+    ? i18n.SHARED_EXCEPTION_LIST_CREATED_SUCCESSFULLY(location.state.justCreated)
+    : '';
 
   const [showIncludeExpiredExceptionItemsModal, setShowIncludeExpiredExceptionItemsModal] =
     useState<CheckExceptionTtlActionTypes | null>(null);
