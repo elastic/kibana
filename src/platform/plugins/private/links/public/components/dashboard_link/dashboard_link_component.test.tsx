@@ -51,6 +51,7 @@ describe('Dashboard link component', () => {
     destination: '456',
     title: 'Dashboard 1',
     description: 'Dashboard 1 description',
+    options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   };
 
   const renderComponent = (overrides?: Partial<DashboardLinkProps>) => {
