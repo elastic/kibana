@@ -58,4 +58,8 @@ export type {
   ChromeNextAiButton,
   ChromeNextGlobalSearchConfig,
   ChromeNextSpaceSelectorConfig,
+  AppHeaderConfig,
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderTab,
 } from './src';

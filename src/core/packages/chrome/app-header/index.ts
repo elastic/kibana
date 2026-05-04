@@ -12,8 +12,8 @@ export {
   APP_HEADER_HEIGHT_CSS_VAR_NAME,
   APPLICATION_TOP_BAR_MIN_HEIGHT_PX,
 } from './src';
-export { AppHeaderView } from './src';
-export type { AppHeaderViewProps } from './src';
+export { AppHeaderView, ChromeAppHeader } from './src';
+export type { AppHeaderViewProps, ChromeAppHeaderProps, AppHeaderConfig } from './src';
 export type {
   AppHeaderWithFallbackProps as AppHeaderProps,
   AppHeaderBack,

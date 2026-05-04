@@ -9,12 +9,15 @@
 
 export { AppHeader, AppHeaderView } from './app_header';
 export type { AppHeaderProps, AppHeaderViewProps } from './app_header';
+export { ChromeAppHeader } from './app_header';
+export type { ChromeAppHeaderProps } from './app_header';
 export type {
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderTab,
   AppHeaderMenu,
   AppHeaderPadding,
+  AppHeaderConfig,
 } from './types';
 export {
   APP_HEADER_HEIGHT_CSS_VAR_NAME,
