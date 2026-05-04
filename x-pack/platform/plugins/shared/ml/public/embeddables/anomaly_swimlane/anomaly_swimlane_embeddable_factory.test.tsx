@@ -35,7 +35,7 @@ const mockResponse = of([
 
 jest.mock('../ensure_license', () => {
   return {
-    ensureLicense: jest.fn()
+    ensureLicense: jest.fn(),
   };
 });
 
