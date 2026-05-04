@@ -175,7 +175,10 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const streamName = samplesSnapshot.context.definition.stream.name;
-  const hasPrivileges = samplesSnapshot.context.definition.privileges.manage;
+  const hasPrivileges =
+    'privileges' in samplesSnapshot.context.definition
+      ? samplesSnapshot.context.definition.privileges.manage
+      : true;
 
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
