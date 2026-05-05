@@ -72,12 +72,26 @@ export function SourceDocument({
       ).slice(0, maxEntries)
     : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
 
-  const hasVisiblePairs =
-    !isPlainRecord ||
-    pairs.some(([, , fieldName]) => !(fieldName && (row.flattened[fieldName] ?? null) === null));
+  const renderedPairs: ReactNode[] = [];
 
-  if (!hasVisiblePairs) {
-    return <span className={CELL_CLASS}>—</span>;
+  for (const [fieldDisplayName, value, fieldName] of pairs) {
+    // temporary solution for text based mode. As there are a lot of unsupported fields we want to
+    // hide the empty one from the Document view
+    if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) continue;
+    renderedPairs.push(
+      <Fragment key={fieldDisplayName}>
+        <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+          {fieldDisplayName}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription className="unifiedDataTable__descriptionListDescription">
+          {value}
+        </EuiDescriptionListDescription>
+      </Fragment>
+    );
+  }
+
+  if (renderedPairs.length === 0) {
+    return <span className={classnames(CELL_CLASS, className)}>—</span>;
   }
 
   return (
@@ -88,21 +102,7 @@ export function SourceDocument({
       css={styles.descriptionList}
       data-test-subj={dataTestSubj}
     >
-      {pairs.map(([fieldDisplayName, value, fieldName]) => {
-        // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-        // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
-        return (
-          <Fragment key={fieldDisplayName}>
-            <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-              {fieldDisplayName}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription className="unifiedDataTable__descriptionListDescription">
-              {value}
-            </EuiDescriptionListDescription>
-          </Fragment>
-        );
-      })}
+      {renderedPairs}
     </EuiDescriptionList>
   );
 }
