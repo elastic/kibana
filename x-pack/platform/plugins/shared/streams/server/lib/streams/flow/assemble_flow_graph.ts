@@ -219,6 +219,7 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
   // ── Stream nodes ──────────────────────────────────────────────────────────
   const streamNodeIdByName = new Map<string, string>();
   const streamDocsPerSecByName = new Map<string, number>();
+  const streamNameSet = new Set(streams.map(({ stream }) => stream.name));
 
   for (const { stream } of streams) {
     const streamNodeId = `stream-${stream.name}`;
@@ -235,8 +236,10 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
       const parentName = getParentStreamName(stream.name);
       const parentId = parentName ? `stream-${parentName}` : undefined;
 
-      // Track root wired streams for cloud pipeline fallback targeting
-      if (!parentName) {
+      // "Root" = parent doesn't exist in the actual stream set (e.g. logs.ecs
+      // has parentName 'logs' but 'logs' itself is not a real stream).
+      const isRootInSet = !parentName || !streamNameSet.has(parentName);
+      if (isRootInSet) {
         rootWiredStreamNames.push(stream.name);
       }
 
