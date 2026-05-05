@@ -23,7 +23,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
     query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
     language: schema.string(),
   }),
-  filters: schema.maybe(schema.arrayOf(schema.any())),
+  filters: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
   timefilter: schema.maybe(schema.any()),
 });
 
@@ -31,6 +31,7 @@ const savedQueryResponseSchema = () =>
   schema.object({
     id: schema.string(),
     attributes: SAVED_QUERY_ATTRS_CONFIG,
+    // codeql[js/kibana/unbounded-array-in-schema] THis is a response schema
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 
@@ -253,6 +254,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
               body: () =>
                 schema.object({
                   total: schema.number(),
+                  // codeql[js/kibana/unbounded-array-in-schema] THis is a response schema
                   savedQueries: schema.arrayOf(savedQueryResponseSchema()),
                 }),
             },

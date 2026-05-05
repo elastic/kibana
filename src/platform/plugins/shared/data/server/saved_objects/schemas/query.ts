@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const FILTERS_SCHEMA = schema.arrayOf(schema.object({}, { unknowns: 'allow' }));
+const FILTERS_SCHEMA = schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 });
 
 const TIME_FILTER_SCHEMA = schema.object({
   from: schema.string(),

@@ -46,7 +46,7 @@ export function getUiSettings(
         defaultMessage:
           'Fields that exist outside of _source to merge into our document when displaying it',
       }),
-      schema: schema.arrayOf(schema.string()),
+      schema: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     },
     [UI_SETTINGS.DOC_HIGHLIGHT]: {
       name: i18n.translate('data.advancedSettings.docTableHighlightTitle', {
@@ -94,7 +94,7 @@ export function getUiSettings(
         boost: schema.nullable(schema.number()),
         default_operator: schema.nullable(schema.string()),
         enable_position_increments: schema.nullable(schema.boolean()),
-        fields: schema.nullable(schema.arrayOf<string>(schema.string())),
+        fields: schema.nullable(schema.arrayOf<string>(schema.string(), { maxSize: 1000 })),
         fuzziness: schema.nullable(schema.string()),
         fuzzy_max_expansions: schema.nullable(schema.number()),
         fuzzy_prefix_length: schema.nullable(schema.number()),
@@ -489,7 +489,8 @@ export function getUiSettings(
               from: schema.string(),
               to: schema.string(),
               display: schema.string(),
-            })
+            }),
+            { maxSize: 100 }
           ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
