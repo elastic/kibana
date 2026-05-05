@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -199,7 +200,7 @@ download_tmp_artifact() {
   done
 
   if [[ "$use_gcs" == "true" ]]; then
-    "$(dirname "${BASH_SOURCE[0]}")/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
+    "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
     gcloud storage cp \
       "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
       "${dest_dir}/${artifact_name}"
@@ -215,7 +216,7 @@ download_tmp_artifact() {
 upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
 
-  "$(dirname "${BASH_SOURCE[0]}")/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
 
   printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
     gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"

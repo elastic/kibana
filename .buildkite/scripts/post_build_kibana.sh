@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source "$(dirname "$0")/common/util.sh"
 
 
 # [rspack-transition] avoid shipping bundle sizes while RSPack is not the default
