@@ -16,6 +16,7 @@ import type {
   ToolCallStep,
   Conversation,
   CompactionStep,
+  BackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
@@ -29,6 +30,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
+import { useActiveSpaceId } from '../active_space_context';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
 import {
   createNewConversation,
@@ -77,6 +79,7 @@ export interface ConversationActions {
     conversationId: string;
     title: string;
   }) => void;
+  addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -232,6 +235,11 @@ const createConversationActions = ({
         }
       });
     },
+    addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
       setCurrentRound((round) => {
         const step: CompactionStep = {
@@ -359,7 +367,8 @@ export const useConversationActions = ({
   onConversationCreated,
   onDeleteConversation,
 }: UseConversationActionsParams): ConversationActions => {
-  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const spaceId = useActiveSpaceId();
+  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
 
   const conversationActions = useMemo(
     () =>

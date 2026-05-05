@@ -25,6 +25,7 @@ import type {
   ESQLTelemetryCallbacks,
   ESQLSourceResult,
 } from '@kbn/esql-types';
+import type { ESQLDependencies } from '@kbn/monaco/src/languages/esql/language';
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -125,4 +126,8 @@ export enum HistoryTabId {
   standardQueries = 'starred-queries-tab',
 }
 
-export type EsqlLanguageDeps = ESQLCallbacks & Partial<{ telemetry: ESQLTelemetryCallbacks }>;
+export type EsqlLanguageDeps = ESQLCallbacks &
+  Partial<{
+    telemetry: ESQLTelemetryCallbacks;
+    getEditorMessages: ESQLDependencies['getEditorMessages'];
+  }>;

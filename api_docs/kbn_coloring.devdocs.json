@@ -128,6 +128,7 @@
                 "lineNumber": 89,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ColorMappingProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -198,6 +199,7 @@
                 "lineNumber": 109,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Readonly",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -360,6 +362,7 @@
                 "lineNumber": 48,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -398,6 +401,7 @@
                 "lineNumber": 56,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -436,6 +440,7 @@
                 "lineNumber": 64,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -474,6 +479,7 @@
                 "lineNumber": 72,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -512,6 +518,7 @@
                 "lineNumber": 79,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawValue",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -575,6 +582,7 @@
             "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PaletteRegistry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -592,6 +600,7 @@
             "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -615,6 +624,7 @@
             "lineNumber": 213,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataBounds",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -669,6 +679,7 @@
             "lineNumber": 15,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableColumnMeta",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -823,6 +834,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -863,6 +875,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -1074,6 +1087,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1220,6 +1234,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1342,6 +1357,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1382,6 +1398,7 @@
             "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ColorMappingInputData",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1435,6 +1452,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1532,6 +1550,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1555,6 +1574,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPaletteId",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1623,6 +1643,7 @@
             "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataBounds",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1714,6 +1735,7 @@
             "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GradientColorMode",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1737,6 +1759,7 @@
             "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1815,6 +1838,7 @@
             "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PaletteRegistry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1832,6 +1856,7 @@
             "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1885,6 +1910,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnPalettes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1972,6 +1998,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PaletteRegistry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1995,6 +2022,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CustomPaletteParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2432,6 +2460,7 @@
             "lineNumber": 16,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "RawValue",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2500,6 +2529,7 @@
             "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PaletteOutput",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3908,6 +3938,7 @@
                 "lineNumber": 103,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3995,6 +4026,7 @@
                 "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChartColorConfiguration",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -4014,6 +4046,7 @@
                 "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4069,6 +4102,7 @@
                 "lineNumber": 118,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4142,6 +4176,7 @@
                 "lineNumber": 129,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4448,6 +4483,7 @@
             "lineNumber": 72,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "RawValue",
             "trackAdoption": false
           }
         ],
@@ -4771,7 +4807,9 @@
             "type": "Array",
             "tags": [],
             "label": "assignments",
-            "description": [],
+            "description": [
+              "\nThe default color mapping used in Kibana, starts with the EUI color palette"
+            ],
             "signature": [
               "never[]"
             ],
@@ -4787,7 +4825,9 @@
             "type": "Array",
             "tags": [],
             "label": "specialAssignments",
-            "description": [],
+            "description": [
+              "\nThe default color mapping used in Kibana, starts with the EUI color palette"
+            ],
             "signature": [
               "AssignmentBase",
               "<",
@@ -4808,7 +4848,9 @@
             "type": "string",
             "tags": [],
             "label": "paletteId",
-            "description": [],
+            "description": [
+              "\nThe default color mapping used in Kibana, starts with the EUI color palette"
+            ],
             "signature": [
               "\"default\""
             ],
@@ -4824,7 +4866,9 @@
             "type": "Object",
             "tags": [],
             "label": "colorMode",
-            "description": [],
+            "description": [
+              "\nThe default color mapping used in Kibana, starts with the EUI color palette"
+            ],
             "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "lineNumber": 34,
             "columnNumber": 3,

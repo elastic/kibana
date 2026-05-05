@@ -43,11 +43,12 @@ apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentA
     apiTest.setTimeout(IMPORT_TIMEOUT);
     adminCredentials = await requestAuth.getApiKey('admin');
 
-    for (const [start, end] of [
-      [1, 6000],
-      [6001, 12000],
-    ]) {
-      const ndjson = generateVisualizationNdjson(start, end);
+    const BATCH_SIZE = 1_000;
+    const TOTAL_OBJECTS = 12_000;
+
+    for (let batchStart = 1; batchStart <= TOTAL_OBJECTS; batchStart += BATCH_SIZE) {
+      const batchEnd = batchStart + BATCH_SIZE - 1;
+      const ndjson = generateVisualizationNdjson(batchStart, batchEnd);
       const formData = new FormData();
       formData.append('file', ndjson, 'export.ndjson');
 

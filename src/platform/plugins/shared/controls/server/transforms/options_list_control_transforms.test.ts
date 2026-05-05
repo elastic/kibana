@@ -25,7 +25,7 @@ const getTransforms = () => {
   const embeddable = createEmbeddableSetupMock();
   registerOptionsListControlTransforms(embeddable);
 
-  const [, transformsSetup] = embeddable.registerTransforms.mock.calls[0];
+  const [, transformsSetup] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
   const { transformOut, transformIn } = transformsSetup.getTransforms!({} as DrilldownTransforms);
   return { transformOut: transformOut!, transformIn: transformIn! };
 };

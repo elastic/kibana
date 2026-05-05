@@ -83,7 +83,7 @@ export const EnablementConfirmationModal: React.FC<EnablementConfirmationModalPr
             <EuiText>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.enablement.modal.description"
-                defaultMessage="Enabling Entity Analytics will start the Risk Score engine and Entity Store. This provides real-time visibility into entity activity and stores data for entities observed in events."
+                defaultMessage="Enabling Entity Analytics will start the risk score maintainer and Entity Store. This provides real-time visibility into entity activity and stores data for entities observed in events."
               />
             </EuiText>
           </EuiFlexItem>

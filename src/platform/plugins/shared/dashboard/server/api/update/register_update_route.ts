@@ -12,11 +12,11 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { telemetryHandler } from '../telemetry_handler';
 import { writeErrorHandler } from '../write_error_handler';
 
 export function registerUpdateRoute(
@@ -76,6 +76,7 @@ export function registerUpdateRoute(
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
+            req.serverTiming,
             isDashboardAppRequest
           );
           return result.meta.updated_at === result.meta.created_at

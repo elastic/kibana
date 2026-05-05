@@ -8,9 +8,19 @@
 import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 
-const DATA_VIEW_ID = 'inference-token-usage';
-const DASHBOARD_ID = 'inference-token-usage';
+const DATA_VIEW_ID = 'kibana-inference-token-usage';
+const DASHBOARD_ID = 'kibana-inference-token-usage';
 const INDEX_PATTERN = '.kibana-inference-token-usage';
+
+// Pin the dashboard SO to versions past the legacy embeddable migrations.
+// Without these, the SO migrator runs Lens migrations from 7.13.1 onward,
+// which expect the pre-8.6 `indexpattern` datasource shape and crash on the
+// modern `formBased` shape we build below.
+const CORE_MIGRATION_VERSION = '8.8.0';
+const DASHBOARD_TYPE_MIGRATION_VERSION = '10.3.0';
+// Index-pattern's latest legacy migration is 7.11.0 — going higher than that
+// trips the "more recent version of Kibana" check on import.
+const INDEX_PATTERN_TYPE_MIGRATION_VERSION = '7.11.0';
 
 export const installTokenUsageDashboard = async (
   savedObjectsImporter: ISavedObjectsImporter,
@@ -54,6 +64,8 @@ function buildDataView() {
     type: 'index-pattern',
     id: DATA_VIEW_ID,
     managed: true,
+    coreMigrationVersion: CORE_MIGRATION_VERSION,
+    typeMigrationVersion: INDEX_PATTERN_TYPE_MIGRATION_VERSION,
     attributes: {
       name: 'Inference Token Usage',
       title: INDEX_PATTERN,
@@ -105,7 +117,7 @@ function buildMetricPanel({ panelId, title, field, x, y }: MetricPanelConfig) {
         hidePanelTitles: false,
         attributes: {
           title,
-          visualizationType: 'lnsMetricNew',
+          visualizationType: 'lnsMetric',
           type: 'lens',
           references: [
             {
@@ -119,6 +131,7 @@ function buildMetricPanel({ panelId, title, field, x, y }: MetricPanelConfig) {
               layerId,
               layerType: 'data',
               metricAccessor: colMetric,
+              secondaryTrend: { type: 'none' },
             },
             datasourceStates: {
               formBased: {
@@ -144,6 +157,8 @@ function buildMetricPanel({ panelId, title, field, x, y }: MetricPanelConfig) {
             },
             query: { query: '', language: 'kuery' },
             filters: [],
+            internalReferences: [],
+            adHocDataViews: {},
           },
         },
         enhancements: {},
@@ -175,7 +190,7 @@ function buildCountMetricPanel() {
         hidePanelTitles: false,
         attributes: {
           title,
-          visualizationType: 'lnsMetricNew',
+          visualizationType: 'lnsMetric',
           type: 'lens',
           references: [
             {
@@ -189,6 +204,7 @@ function buildCountMetricPanel() {
               layerId,
               layerType: 'data',
               metricAccessor: colMetric,
+              secondaryTrend: { type: 'none' },
             },
             datasourceStates: {
               formBased: {
@@ -214,6 +230,8 @@ function buildCountMetricPanel() {
             },
             query: { query: '', language: 'kuery' },
             filters: [],
+            internalReferences: [],
+            adHocDataViews: {},
           },
         },
         enhancements: {},
@@ -329,6 +347,8 @@ function buildXYPanel({ panelId, title, valueField, splitField, x, y, w, h }: XY
             },
             query: { query: '', language: 'kuery' },
             filters: [],
+            internalReferences: [],
+            adHocDataViews: {},
           },
         },
         enhancements: {},
@@ -443,6 +463,8 @@ function buildTablePanel({ panelId, title, bucketField, bucketLabel, x, y }: Tab
             },
             query: { query: '', language: 'kuery' },
             filters: [],
+            internalReferences: [],
+            adHocDataViews: {},
           },
         },
         enhancements: {},
@@ -517,6 +539,8 @@ function buildDashboard() {
     type: 'dashboard',
     id: DASHBOARD_ID,
     managed: true,
+    coreMigrationVersion: CORE_MIGRATION_VERSION,
+    typeMigrationVersion: DASHBOARD_TYPE_MIGRATION_VERSION,
     attributes: {
       title: '[Elastic] Inference Token Usage',
       description:

@@ -59,6 +59,10 @@ export type {
   BaseConnectorContract,
   StepStabilityLevel,
   HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
   StepPropertyHandler,
   PropertySelectionHandler,
   SelectionOption,
@@ -67,6 +71,7 @@ export type {
   StepSelectionValues,
   RequestOptions,
   GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
@@ -84,7 +89,4 @@ export {
   UpdateWorkflowCommandSchema,
   // shared constants
   MAX_WORKFLOW_YAML_LENGTH,
-  WORKFLOW_ID_PATTERN,
-  WORKFLOW_ID_MIN_LENGTH,
-  WORKFLOW_ID_MAX_LENGTH,
 } from './v1';

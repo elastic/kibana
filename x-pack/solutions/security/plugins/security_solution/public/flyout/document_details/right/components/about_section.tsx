@@ -13,7 +13,7 @@ import {
   type EsHitRecord,
   getFieldValue,
 } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
@@ -71,7 +71,7 @@ export const AboutSection = memo(() => {
     [searchHit]
   );
 
-  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);

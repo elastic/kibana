@@ -19,6 +19,7 @@ import {
   KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
   KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   DEFAULT_LOGS_INDEX,
+  QUERIES_INDEX,
 } from './constants';
 import {
   getSigeventsSnapshotKIFeaturesIndex,
@@ -277,4 +278,29 @@ export async function enableLogsNativeStream(
     }
     throw err;
   }
+}
+
+export async function promoteQueries(config: ConnectionConfig): Promise<void> {
+  const { status, data } = await kibanaRequest(
+    config,
+    'POST',
+    '/internal/streams/queries/_promote'
+  );
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to promote queries: ${status} ${JSON.stringify(data)}`);
+  }
+}
+
+export async function resetQueriesPromotion({ esClient }: { esClient: Client }): Promise<void> {
+  await esClient.updateByQuery({
+    index: QUERIES_INDEX,
+    conflicts: 'proceed',
+    refresh: true,
+    query: { match_all: {} },
+    script: {
+      lang: 'painless',
+      source: `ctx._source['rule_backed'] = params.rb`,
+      params: { rb: false },
+    },
+  });
 }

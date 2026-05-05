@@ -34,7 +34,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: [],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -43,7 +43,14 @@ describe('useFetchEpisodeActions', () => {
 
   it('fetches and builds episodeActionsMap keyed by episode id', async () => {
     const rows: AlertEpisodeAction[] = [
-      { episode_id: 'ep-1', rule_id: 'rule-1', group_hash: 'gh-1', last_ack_action: 'ack' },
+      {
+        episode_id: 'ep-1',
+        rule_id: 'rule-1',
+        group_hash: 'gh-1',
+        last_ack_action: 'ack',
+        last_assignee_uid: 'u-1',
+        last_ack_actor: 'actor-1',
+      },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);
 
@@ -51,7 +58,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: ['ep-1'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -65,13 +72,29 @@ describe('useFetchEpisodeActions', () => {
       ruleId: 'rule-1',
       groupHash: 'gh-1',
       lastAckAction: 'ack',
+      lastAssigneeUid: 'u-1',
+      lastAckActor: 'actor-1',
     });
   });
 
   it('keeps the last row when duplicate episode ids are returned', async () => {
     const rows: AlertEpisodeAction[] = [
-      { episode_id: 'dup', rule_id: 'r1', group_hash: null, last_ack_action: 'ack' },
-      { episode_id: 'dup', rule_id: 'r2', group_hash: null, last_ack_action: 'unack' },
+      {
+        episode_id: 'dup',
+        rule_id: 'r1',
+        group_hash: null,
+        last_ack_action: 'ack',
+        last_assignee_uid: null,
+        last_ack_actor: null,
+      },
+      {
+        episode_id: 'dup',
+        rule_id: 'r2',
+        group_hash: null,
+        last_ack_action: 'unack',
+        last_assignee_uid: 'u-2',
+        last_ack_actor: null,
+      },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);
 
@@ -79,7 +102,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: ['dup'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );

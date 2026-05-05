@@ -9,7 +9,7 @@
 @types/estree@0.0.50
 @types/estree@1.0.8
 @types/json-schema@7.0.11
-@types/node@22.19.1
+@types/node@24.10.13
 @webassemblyjs/ast@1.12.1
 @webassemblyjs/floating-point-hex-parser@1.11.6
 @webassemblyjs/helper-api-error@1.11.6
@@ -94,7 +94,7 @@ tapable@2.3.0
 terser-webpack-plugin@5.3.17
 terser@5.40.0
 tslib@1.14.1
-undici-types@6.21.0
+undici-types@7.16.0
 update-browserslist-db@1.2.3
 uri-js@4.2.2
 vscode-jsonrpc@8.2.0

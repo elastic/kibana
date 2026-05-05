@@ -11,7 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiText,
   EuiToolTip,
@@ -158,9 +158,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                   {nameContent}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={TARGET_ENTITY_TOOLTIP}>
-                    <EuiIcon type="aggregate" size="s" aria-hidden={true} />
-                  </EuiToolTip>
+                  <EuiIconTip content={TARGET_ENTITY_TOOLTIP} type="aggregate" size="s" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );

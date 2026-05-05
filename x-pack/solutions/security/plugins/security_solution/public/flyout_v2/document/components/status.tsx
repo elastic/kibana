@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
@@ -50,7 +50,7 @@ export const Status = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: StatusProps) => {
     const eventId = hit.raw._id as string;
     const isRemoteDocument = useMemo(
-      () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
     );
     const statusFieldInfo = useMemo<StatusPopoverButtonFieldInfo | null>(() => {

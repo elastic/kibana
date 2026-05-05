@@ -162,6 +162,7 @@
                 "lineNumber": 148,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -205,6 +206,7 @@
                 "lineNumber": 153,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -285,6 +287,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -302,6 +305,7 @@
                 "lineNumber": 26,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -434,6 +438,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -451,6 +456,7 @@
                 "lineNumber": 26,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -588,6 +594,7 @@
                 "lineNumber": 31,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -605,6 +612,7 @@
                 "lineNumber": 31,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -982,6 +990,7 @@
                 "lineNumber": 34,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -999,6 +1008,7 @@
                 "lineNumber": 34,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1382,6 +1392,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1399,6 +1410,7 @@
                 "lineNumber": 25,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1513,6 +1525,7 @@
                 "lineNumber": 30,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1530,6 +1543,7 @@
                 "lineNumber": 30,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1732,6 +1746,7 @@
                 "lineNumber": 28,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1749,6 +1764,7 @@
                 "lineNumber": 28,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1907,6 +1923,7 @@
                 "lineNumber": 28,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1924,6 +1941,7 @@
                 "lineNumber": 28,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2211,6 +2229,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2265,6 +2284,7 @@
                 "lineNumber": 80,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReqOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2369,6 +2389,7 @@
                 "lineNumber": 27,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "URL",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2431,6 +2452,7 @@
                 "lineNumber": 36,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "PathOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2651,6 +2673,7 @@
                 "lineNumber": 29,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevel",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2824,6 +2847,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -2841,6 +2865,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -2857,6 +2882,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -2915,6 +2941,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -2932,6 +2959,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -2948,6 +2976,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3022,6 +3051,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3039,6 +3069,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3055,6 +3086,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3145,6 +3177,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3164,6 +3197,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3219,6 +3253,7 @@
             "lineNumber": 22,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPlaywrightOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3293,6 +3328,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3310,6 +3346,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3326,6 +3363,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3414,15 +3452,7 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { debuggingPort: number; } & { debuggingPort: number; }>"
+          "; } & { config: any; } & { debuggingPort: number; } & { debuggingPort: number; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
         "lineNumber": 16,
@@ -3460,6 +3490,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3477,6 +3508,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3493,6 +3525,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3546,6 +3579,7 @@
             "lineNumber": 37,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3633,6 +3667,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3706,6 +3741,7 @@
             "lineNumber": 8559,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "List",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3800,15 +3836,7 @@
           "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { roleDescriptors: ",
+          "; config: any; } & { roleDescriptors: ",
           "RoleDescriptorsFixture",
           "; log: ",
           {
@@ -3864,6 +3892,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3881,6 +3910,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3897,6 +3927,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3991,15 +4022,7 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { roleDescriptors: ",
+          "; } & { config: any; } & { roleDescriptors: ",
           "RoleDescriptorsFixture",
           "; log: ",
           {
@@ -4055,6 +4078,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -4072,6 +4096,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -4088,6 +4113,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -4152,6 +4178,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -4169,6 +4196,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -4185,6 +4213,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -4555,6 +4584,7 @@
                 "lineNumber": 43,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRole",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4622,6 +4652,7 @@
                 "lineNumber": 15873,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4687,6 +4718,7 @@
                 "lineNumber": 15874,
                 "columnNumber": 57,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4752,6 +4784,7 @@
                 "lineNumber": 15875,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4817,6 +4850,7 @@
                 "lineNumber": 15876,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4882,6 +4916,7 @@
                 "lineNumber": 15877,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4947,6 +4982,7 @@
                 "lineNumber": 15883,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5937,6 +5973,7 @@
                 "lineNumber": 12525,
                 "columnNumber": 83,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5956,6 +5993,7 @@
                 "lineNumber": 12525,
                 "columnNumber": 124,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arg",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6032,6 +6070,7 @@
                 "lineNumber": 12561,
                 "columnNumber": 78,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6112,6 +6151,7 @@
                 "lineNumber": 12596,
                 "columnNumber": 89,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6131,6 +6171,7 @@
                 "lineNumber": 12596,
                 "columnNumber": 130,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arg",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6180,6 +6221,7 @@
                 "lineNumber": 12629,
                 "columnNumber": 84,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6225,6 +6267,7 @@
                 "lineNumber": 12657,
                 "columnNumber": 86,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6244,6 +6287,7 @@
                 "lineNumber": 12657,
                 "columnNumber": 129,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arg",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6289,6 +6333,7 @@
                 "lineNumber": 12685,
                 "columnNumber": 81,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6468,6 +6513,7 @@
                 "lineNumber": 12774,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "Locator",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7472,6 +7518,7 @@
                 "lineNumber": 13335,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "EvaluationArgument",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -7547,6 +7594,7 @@
                 "lineNumber": 13370,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Locator",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9714,6 +9762,7 @@
                 "lineNumber": 14305,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "Locator",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10000,6 +10049,7 @@
                 "lineNumber": 14451,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorScreenshotOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11632,18 +11682,12 @@
           {
             "parentPluginId": "@kbn/scout-security",
             "id": "def-common.ScoutParallelWorkerFixtures.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
             "lineNumber": 56,
@@ -11745,6 +11789,19 @@
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
             "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutParallelWorkerFixtures.isSnapshotBuild",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSnapshotBuild",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11956,212 +12013,6 @@
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
             "lineNumber": 35,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-security",
-        "id": "def-common.ScoutTestConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "ScoutTestConfig",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-        "lineNumber": 12,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.serverless",
-            "type": "boolean",
-            "tags": [],
-            "label": "serverless",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 13,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.http2",
-            "type": "boolean",
-            "tags": [],
-            "label": "http2",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.uiam",
-            "type": "boolean",
-            "tags": [],
-            "label": "uiam",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 15,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.projectType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "projectType",
-            "description": [],
-            "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.organizationId",
-            "type": "string",
-            "tags": [],
-            "label": "organizationId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 17,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.isCloud",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCloud",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.cloudHostName",
-            "type": "string",
-            "tags": [],
-            "label": "cloudHostName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.cloudUsersFilePath",
-            "type": "string",
-            "tags": [],
-            "label": "cloudUsersFilePath",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.license",
-            "type": "string",
-            "tags": [],
-            "label": "license",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.hosts",
-            "type": "Object",
-            "tags": [],
-            "label": "hosts",
-            "description": [],
-            "signature": [
-              "{ kibana: string; elasticsearch: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.auth",
-            "type": "Object",
-            "tags": [],
-            "label": "auth",
-            "description": [],
-            "signature": [
-              "{ username: string; password: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 26,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.linkedProject",
-            "type": "Object",
-            "tags": [],
-            "label": "linkedProject",
-            "description": [],
-            "signature": [
-              "{ hosts: { elasticsearch: string; }; auth: { username: string; password: string; }; } | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.metadata",
-            "type": "Any",
-            "tags": [],
-            "label": "metadata",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12416,18 +12267,12 @@
           {
             "parentPluginId": "@kbn/scout-security",
             "id": "def-common.ScoutWorkerFixtures.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "lineNumber": 75,
@@ -12561,6 +12406,19 @@
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutWorkerFixtures.isSnapshotBuild",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSnapshotBuild",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13207,6 +13065,25 @@
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/test/scout_page/index.ts",
         "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-security",
+        "id": "def-common.ScoutTestConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfig",
+        "description": [
+          "\nShape of the JSON files Scout reads to point tests at a deployment\n(`local.json`, `cloud_ech.json`, `cloud_mki.json`). The canonical schema\nwith required/optional/conditional rules lives in `./test_config.schema.ts`."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.ts",
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
