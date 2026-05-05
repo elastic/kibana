@@ -182,9 +182,71 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
+        id: 'sets',
+        name: i18n.translate('dataSets.tabs.setsWithCount', {
+          defaultMessage: 'Sets ({count})',
+          values: { count: dataSetItems.length },
+        }),
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <EuiInMemoryTable<DataSetWithName>
+              items={dataSetItems}
+              itemId="name"
+              columns={dataSetColumns}
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: i18n.translate('dataSets.setsSearch.placeholder', {
+                    defaultMessage: 'Search data sets…',
+                  }),
+                  'data-test-subj': 'dataSetsSetsSearch',
+                  schema: {
+                    fields: {
+                      name: { type: 'string' },
+                      dataSourceId: { type: 'string' },
+                      resource: { type: 'string' },
+                      description: { type: 'string' },
+                    },
+                  },
+                },
+                toolsRight: (
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="dataSetsSetsCreateButton"
+                    iconType="plusInCircle"
+                    onClick={() => setCreateDatasetFlyoutOpen(true)}
+                  >
+                    {i18n.translate('dataSets.setsAddButtonLabel', {
+                      defaultMessage: 'Add',
+                    })}
+                  </EuiButton>
+                ),
+              }}
+              rowHeader="name"
+              sorting
+              pagination={{
+                pageSizeOptions: [5, 10, 20],
+                initialPageSize: 10,
+              }}
+              data-test-subj="dataSetsSetsTable"
+              tableCaption={i18n.translate('dataSets.setsTable.caption', {
+                defaultMessage: 'Data sets',
+              })}
+              noItemsMessage={i18n.translate('dataSets.setsTable.noItems', {
+                defaultMessage: 'No data sets found',
+              })}
+              tableLayout="auto"
+              responsiveBreakpoint={false}
+            />
+          </>
+        ),
+      },
+      {
         id: 'sources',
-        name: i18n.translate('dataSets.tabs.sources', {
-          defaultMessage: 'Sources',
+        name: i18n.translate('dataSets.tabs.sourcesWithCount', {
+          defaultMessage: 'Sources ({count})',
+          values: { count: items.length },
         }),
         content: (
           <>
@@ -258,66 +320,6 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
               })}
               noItemsMessage={i18n.translate('dataSets.table.noItems', {
                 defaultMessage: 'No data sources found',
-              })}
-              tableLayout="auto"
-              responsiveBreakpoint={false}
-            />
-          </>
-        ),
-      },
-      {
-        id: 'sets',
-        name: i18n.translate('dataSets.tabs.sets', {
-          defaultMessage: 'Sets',
-        }),
-        content: (
-          <>
-            <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSetWithName>
-              items={dataSetItems}
-              itemId="name"
-              columns={dataSetColumns}
-              search={{
-                box: {
-                  incremental: true,
-                  placeholder: i18n.translate('dataSets.setsSearch.placeholder', {
-                    defaultMessage: 'Search data sets…',
-                  }),
-                  'data-test-subj': 'dataSetsSetsSearch',
-                  schema: {
-                    fields: {
-                      name: { type: 'string' },
-                      dataSourceId: { type: 'string' },
-                      resource: { type: 'string' },
-                      description: { type: 'string' },
-                    },
-                  },
-                },
-                toolsRight: (
-                  <EuiButton
-                    color="primary"
-                    data-test-subj="dataSetsSetsCreateButton"
-                    iconType="plusInCircle"
-                    onClick={() => setCreateDatasetFlyoutOpen(true)}
-                  >
-                    {i18n.translate('dataSets.setsAddButtonLabel', {
-                      defaultMessage: 'Add',
-                    })}
-                  </EuiButton>
-                ),
-              }}
-              rowHeader="name"
-              sorting
-              pagination={{
-                pageSizeOptions: [5, 10, 20],
-                initialPageSize: 10,
-              }}
-              data-test-subj="dataSetsSetsTable"
-              tableCaption={i18n.translate('dataSets.setsTable.caption', {
-                defaultMessage: 'Data sets',
-              })}
-              noItemsMessage={i18n.translate('dataSets.setsTable.noItems', {
-                defaultMessage: 'No data sets found',
               })}
               tableLayout="auto"
               responsiveBreakpoint={false}
