@@ -30,6 +30,15 @@ describe('samplingFilterDslToKql', () => {
     );
   });
 
+  it('escapes backslashes before quotes so KQL parses the result correctly', () => {
+    expect(samplingFilterDslToKql({ term: { message: 'foo\\"bar' } })).toBe(
+      'message: "foo\\\\\\"bar"'
+    );
+    expect(samplingFilterDslToKql({ term: { path: 'C:\\\\logs\\\\app.log' } })).toBe(
+      'path: "C:\\\\\\\\logs\\\\\\\\app.log"'
+    );
+  });
+
   it('translates bool clauses with array fields', () => {
     expect(
       samplingFilterDslToKql({

@@ -92,7 +92,11 @@ function extractQueryValue(value: unknown): unknown {
 
 function quoteKqlValue(value: unknown): string {
   if (typeof value === 'string') {
-    return `"${value.replace(/"/g, '\\"')}"`;
+    // Escape backslashes before quotes — the KQL grammar (grammar.peggy:230)
+    // treats `\\` as an escaped backslash and `\"` as an escaped quote inside a
+    // quoted string. Escaping quotes first would emit `\"` and the second pass
+    // would then double the just-added backslash, breaking the quote escape.
+    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }
 
   return String(value);
