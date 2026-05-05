@@ -35,12 +35,33 @@ describe('edit action builder', () => {
 
       expect(result).toMatchObject({
         name: 'Edit',
-        description: expect.any(String),
+        description: expect.any(Function),
         icon: 'pencil',
         type: 'icon',
         isPrimary: true,
         'data-test-subj': 'content-list-table-action-edit',
       });
+    });
+
+    it('uses the default description when no disabled reason is provided', () => {
+      const result = buildEditAction({}, defaultContext);
+      const description = result?.description as (item: { id: string }) => string;
+
+      expect(description({ id: '1' })).toBe('Edit this item');
+    });
+
+    it('uses the per-item disabled reason when provided', () => {
+      const result = buildEditAction(
+        {
+          disabledReason: (item) =>
+            item.id === 'managed' ? 'Managed dashboards cannot edit' : undefined,
+        },
+        defaultContext
+      );
+      const description = result?.description as (item: { id: string }) => string;
+
+      expect(description({ id: 'managed' })).toBe('Managed dashboards cannot edit');
+      expect(description({ id: 'open' })).toBe('Edit this item');
     });
 
     it('returns `undefined` when in read-only mode', () => {

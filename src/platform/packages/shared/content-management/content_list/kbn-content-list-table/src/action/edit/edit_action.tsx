@@ -56,7 +56,7 @@ export const buildEditAction = (
 
   return {
     name: label,
-    description: DEFAULT_EDIT_DESCRIPTION,
+    description: (item) => attributes.disabledReason?.(item) ?? DEFAULT_EDIT_DESCRIPTION,
     icon: 'pencil',
     type: 'icon',
     isPrimary: true,

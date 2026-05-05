@@ -92,7 +92,7 @@ export const buildDeleteAction = (
 
   return {
     name: <DangerActionName>{label}</DangerActionName>,
-    description: DEFAULT_DELETE_DESCRIPTION,
+    description: (item) => attributes.disabledReason?.(item) ?? DEFAULT_DELETE_DESCRIPTION,
     icon: 'trash',
     type: 'icon',
     color: 'danger',

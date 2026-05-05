@@ -53,6 +53,20 @@ const labels = {
   entityPlural: 'dashboards',
 } as const;
 
+/** Per-item gate: disable Edit for managed dashboards. */
+const isItemEditable = (item: ContentListItem) => !item.managed;
+
+/** Per-item disabled-reason for Edit; falls through to default description otherwise. */
+const editDisabledReason = (item: ContentListItem) =>
+  item.managed ? `'${item.title}' is managed by Elastic and cannot be edited.` : undefined;
+
+/** Per-item gate: disable Delete for managed dashboards. */
+const isItemDeletable = (item: ContentListItem) => !item.managed;
+
+/** Per-item disabled-reason for Delete; falls through to default description otherwise. */
+const deleteDisabledReason = (item: ContentListItem) =>
+  item.managed ? `'${item.title}' is managed by Elastic and cannot be deleted.` : undefined;
+
 const useDashboardProviderProps = ({
   onInspect,
   includeInspect = false,
@@ -128,8 +142,8 @@ const OriginalStory = () => {
             <Column.CreatedBy />
             <Column.UpdatedAt />
             <Column.Actions>
-              <Action.Edit />
-              <Action.Delete />
+              <Action.Edit enabled={isItemEditable} disabledReason={editDisabledReason} />
+              <Action.Delete enabled={isItemDeletable} disabledReason={deleteDisabledReason} />
             </Column.Actions>
           </ContentListTable>
           <ContentListFooter />
@@ -192,8 +206,8 @@ const ProposalStory = () => {
               <Column.UpdatedAt />
               <Column.Actions>
                 <Action.Inspect />
-                <Action.Edit />
-                <Action.Delete />
+                <Action.Edit enabled={isItemEditable} disabledReason={editDisabledReason} />
+                <Action.Delete enabled={isItemDeletable} disabledReason={deleteDisabledReason} />
               </Column.Actions>
             </ContentListTable>
             <ContentListFooter />
