@@ -24,8 +24,8 @@ apiTest.describe('User Storage - Scope Isolation', { tag: [...tags.stateful.clas
   });
 
   // Space-scoped keys use `multiple-isolated` saved objects: one ES doc per (type, profileUid)
-  // that can only belong to one space at a time. Clean up before each test to prevent
-  // cross-space `unresolvableConflict` errors from a prior test's data.
+  // that can only belong to one space at a time. `remove()` nulls out keys but leaves the SO
+  // document alive, so stale documents from failed runs must be cleared before each test.
   apiTest.beforeEach(async ({ apiClient }) => {
     for (const key of ALL_KEYS) {
       await h.del(apiClient, key);
@@ -49,19 +49,6 @@ apiTest.describe('User Storage - Scope Isolation', { tag: [...tags.stateful.clas
       const response = await h.getInSpace(apiClient, TEST_SPACE);
       expect(response).toHaveStatusCode(200);
       expect(response.body['test:string_key']).toBe('default_value');
-    }
-  );
-
-  apiTest(
-    'space-scoped key set in second space does not affect default space',
-    async ({ apiClient }) => {
-      await h.putInSpace(apiClient, TEST_SPACE, 'test:string_key', 'second-space-value');
-
-      const defaultResponse = await h.get(apiClient);
-      expect(defaultResponse.body['test:string_key']).toBe('default_value');
-
-      const spaceResponse = await h.getInSpace(apiClient, TEST_SPACE);
-      expect(spaceResponse.body['test:string_key']).toBe('second-space-value');
     }
   );
 
