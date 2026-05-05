@@ -132,7 +132,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 48,
+        "line": 41,
         "column": 10
       }
     },
@@ -147,7 +147,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 64,
+        "line": 57,
         "column": 10
       }
     },
@@ -162,7 +162,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 83,
+        "line": 76,
         "column": 10
       }
     },
