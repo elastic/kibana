@@ -835,6 +835,10 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
@@ -881,6 +885,8 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
@@ -911,9 +917,13 @@ components:
                   version:
                     type: string
               type: array
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -1207,12 +1217,18 @@ components:
           $ref: '#/components/schemas/PackDescriptionOrUndefined'
         enabled:
           $ref: '#/components/schemas/EnabledOrUndefined'
+        interval:
+          $ref: '#/components/schemas/PackIntervalOrUndefined'
         name:
           $ref: '#/components/schemas/PackName'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/ObjectQueries'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         shards:
           $ref: '#/components/schemas/Shards'
     CreatePacksResponse:
@@ -1263,15 +1279,21 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/ObjectQueries'
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -2289,8 +2311,12 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         saved_query_id:
           $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
@@ -2308,6 +2334,15 @@ components:
       type: string
     PackIdOrUndefined:
       $ref: '#/components/schemas/PackId'
+      nullable: true
+    PackInterval:
+      description: >-
+        Pack-level interval in seconds. Used when `schedule_type` is `interval`.
+        Mutually exclusive with `rrule_schedule`.
+      example: 3600
+      type: integer
+    PackIntervalOrUndefined:
+      $ref: '#/components/schemas/PackInterval'
       nullable: true
     PackName:
       description: The pack name.
@@ -2361,6 +2396,42 @@ components:
       type: boolean
     RemovedOrUndefined:
       $ref: '#/components/schemas/Removed'
+      nullable: true
+    RRuleScheduleConfig:
+      description: >-
+        RRULE schedule configuration consumed by osquerybeat. The `rrule` field
+        is the fully serialized RFC 5545 string. DTSTART is NOT included;
+        osquerybeat uses the separate `start_date` field.
+      type: object
+      properties:
+        end_date:
+          description: Optional RFC 3339 datetime string for the schedule end.
+          example: '2026-12-31T23:59:59.000Z'
+          format: date-time
+          type: string
+        rrule:
+          description: RFC 5545 RRULE string, e.g. `FREQ=WEEKLY;BYDAY=MO,WE,FR`.
+          example: FREQ=DAILY
+          type: string
+        splay:
+          description: >-
+            Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 1
+            hour.
+          example: 5m
+          type: string
+        start_date:
+          description: RFC 3339 datetime string for the schedule start.
+          example: '2026-01-01T00:00:00.000Z'
+          format: date-time
+          type: string
+        timeout:
+          description: Optional per-query timeout in seconds.
+          type: integer
+      required:
+        - rrule
+        - start_date
+    RRuleScheduleConfigOrUndefined:
+      $ref: '#/components/schemas/RRuleScheduleConfig'
       nullable: true
     SavedQueryDescription:
       description: The saved query description.
@@ -2446,6 +2517,19 @@ components:
           required:
             - sourceType
             - source
+    ScheduleType:
+      description: >-
+        Discriminator for the active scheduling mode. `interval` uses native
+        osqueryd interval scheduling; `rrule` uses osquerybeat RRULE-based
+        recurrence scheduling.
+      enum:
+        - interval
+        - rrule
+      example: rrule
+      type: string
+    ScheduleTypeOrUndefined:
+      $ref: '#/components/schemas/ScheduleType'
+      nullable: true
     Shards:
       additionalProperties:
         type: number
@@ -2538,12 +2622,18 @@ components:
           $ref: '#/components/schemas/PackDescriptionOrUndefined'
         enabled:
           $ref: '#/components/schemas/EnabledOrUndefined'
+        interval:
+          $ref: '#/components/schemas/PackIntervalOrUndefined'
         name:
           $ref: '#/components/schemas/PackName'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/ObjectQueries'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         shards:
           $ref: '#/components/schemas/Shards'
     UpdatePacksResponse:
@@ -2591,15 +2681,21 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/ObjectQueries'
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Shards'
             updated_at:
