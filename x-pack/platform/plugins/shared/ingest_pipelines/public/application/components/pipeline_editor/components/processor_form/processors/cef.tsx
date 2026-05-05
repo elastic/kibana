@@ -23,12 +23,12 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.cefForm.timezoneFieldLabel', {
-      defaultMessage: 'Timezone (optional)',
+      defaultMessage: 'Time zone (optional)',
     }),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.cefForm.timezoneHelpText"
-        defaultMessage="Timezone for date fields in the CEF message. Defaults to {timezone}."
+        defaultMessage="Time zone for date fields in the CEF message. Defaults to {timezone}."
         values={{ timezone: <EuiCode>{'UTC'}</EuiCode> }}
       />
     ),
@@ -47,7 +47,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.cefForm.ignoreEmptyValuesHelpText"
-        defaultMessage="If true, keys with empty values are quietly ignored. Defaults to {defaultValue}."
+        defaultMessage="If true, keys with empty values are ignored. Defaults to {defaultValue}."
         values={{ defaultValue: <EuiCode>{'true'}</EuiCode> }}
       />
     ),
@@ -59,7 +59,7 @@ export const Cef: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.cefForm.fieldNameHelpText', {
-          defaultMessage: 'Field containing the CEF-formatted message to parse.',
+          defaultMessage: 'Field containing the CEF message to parse.',
         })}
       />
 
@@ -68,7 +68,7 @@ export const Cef: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.cefForm.targetFieldHelpText',
           {
             defaultMessage:
-              'Field that the parsed structured object will be written into. Any existing content in this field will be overwritten.',
+              'Output field for the parsed CEF object. Any existing content will be overwritten.',
           }
         )}
       />
@@ -91,7 +91,7 @@ export const Cef: FunctionComponent = () => {
         helpText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.cefForm.ignoreMissingHelpText"
-            defaultMessage="If true and {field} does not exist or is null, the processor quietly exits without modifying the document. Defaults to {defaultValue}."
+            defaultMessage="If true and {field} does not exist or is null, the processor exits without modifying the document. Defaults to {defaultValue}."
             values={{
               field: <EuiCode>{'field'}</EuiCode>,
               defaultValue: <EuiCode>{'false'}</EuiCode>,
