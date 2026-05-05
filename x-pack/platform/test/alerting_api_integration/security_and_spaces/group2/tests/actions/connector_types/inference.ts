@@ -93,7 +93,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             ...config,
             defaultModel: 'gpt-4o',
           },
-          is_connector_type_deprecated: false,
+          is_connector_type_deprecated: true,
         });
       });
 
@@ -124,7 +124,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             ...config,
             defaultModel: 'gpt-3.5-turbo',
           },
-          is_connector_type_deprecated: false,
+          is_connector_type_deprecated: true,
         });
       });
 
