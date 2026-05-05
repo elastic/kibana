@@ -312,13 +312,16 @@ export const getHeatmapVisualization = ({
     return <HeatmapDimensionEditor {...props} paletteService={paletteService} />;
   },
 
+  FlyoutLegendComponent(props) {
+    return <HeatmapLegendSettings {...props} />;
+  },
+
   FlyoutToolbarComponent(props) {
     return (
       <FlyoutToolbar
         {...props}
         contentMap={{
           style: HeatmapStyleSettings,
-          legend: HeatmapLegendSettings,
         }}
       />
     );

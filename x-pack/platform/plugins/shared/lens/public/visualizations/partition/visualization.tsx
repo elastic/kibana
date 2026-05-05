@@ -547,6 +547,10 @@ export const getPieVisualization = ({
   toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
     toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
+  FlyoutLegendComponent(props) {
+    return <PartitionLegendSettings {...props} />;
+  },
+
   FlyoutToolbarComponent(props) {
     const { isDisabled: hasDisabledStyleSettings } = PartitionChartsMeta[props.state.shape].toolbar;
     return (
@@ -554,7 +558,6 @@ export const getPieVisualization = ({
         {...props}
         contentMap={{
           style: hasDisabledStyleSettings ? undefined : PartitionStyleSettings,
-          legend: PartitionLegendSettings,
         }}
       />
     );

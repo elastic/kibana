@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,7 @@ import {
   selectFramePublicAPI,
   useLensDispatch,
   selectHideTextBasedEditor,
+  updateVisualizationState,
 } from '../../../state_management';
 import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import {
@@ -44,14 +45,12 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
-import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
-import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import { useEsqlConversionCheck } from './use_esql_conversion_check';
 import {
@@ -59,6 +58,8 @@ import {
   type GeneralPanelSettingsApi,
   type GeneralSettingsAccordionHandle,
 } from './general_settings_accordion';
+import { LegendAccordion } from './legend_accordion';
+import { StyleAccordion } from './style_accordion';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -105,24 +106,12 @@ export function LensEditConfigurationFlyout({
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
-  const [isGeneralSettingsAccordionOpen, setIsGeneralSettingsAccordionOpen] = useState(true);
+  const [isGeneralSettingsAccordionOpen, setIsGeneralSettingsAccordionOpen] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isLegendAccordionOpen, setIsLegendAccordionOpen] = useState(false);
+  const [isStyleAccordionOpen, setIsStyleAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [esqlQueryState, setESQLQueryState] = useState<TextBasedQueryState | null>(null);
-
-  const hasAdjustedAccordionStackRef = useRef(false);
-
-  useEffect(() => {
-    hasAdjustedAccordionStackRef.current = false;
-  }, [panelId]);
-
-  useEffect(() => {
-    if (!panelApi || hasAdjustedAccordionStackRef.current) {
-      return;
-    }
-    hasAdjustedAccordionStackRef.current = true;
-    setIsLayerAccordionOpen(false);
-  }, [panelApi]);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -138,6 +127,22 @@ export function LensEditConfigurationFlyout({
   );
 
   const dispatch = useLensDispatch();
+
+  const setVisualizationState = useCallback(
+    (newState: unknown) => {
+      const vizId = visualization.activeId;
+      if (!vizId) {
+        return;
+      }
+      dispatch(
+        updateVisualizationState({
+          visualizationId: vizId,
+          newState,
+        })
+      );
+    },
+    [dispatch, visualization.activeId]
+  );
 
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
@@ -388,14 +393,6 @@ export function LensEditConfigurationFlyout({
     return undefined;
   }, [textBasedMode, esqlQueryState?.isQueryPendingSubmit]);
 
-  const addLayerButton = useAddLayerButton(
-    framePublicAPI,
-    coreStart,
-    startDependencies.dataViews,
-    startDependencies.uiActions,
-    setIsInlineFlyoutVisible
-  );
-
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
@@ -449,33 +446,25 @@ export function LensEditConfigurationFlyout({
 
   if (isLoading) return null;
 
-  const toolbar = (
-    <>
-      <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-        <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
-      {showConvertToEsqlButton ? (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={convertToEsqlButtonTooltip}>
-            <EuiButtonIcon
-              color="success"
-              display="base"
-              size="s"
-              iconType="code"
-              aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
-                defaultMessage: 'Convert to ES|QL',
-              })}
-              isDisabled={isConvertToEsqlButtonDisabled}
-              onClick={() => {
-                showModal();
-              }}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      ) : null}
-    </>
-  );
+  const toolbar = showConvertToEsqlButton ? (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip position="top" content={convertToEsqlButtonTooltip}>
+        <EuiButtonIcon
+          color="success"
+          display="base"
+          size="s"
+          iconType="code"
+          aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
+            defaultMessage: 'Convert to ES|QL',
+          })}
+          isDisabled={isConvertToEsqlButtonDisabled}
+          onClick={() => {
+            showModal();
+          }}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  ) : null;
 
   const layerTabs = (
     <LayerTabsWrapper
@@ -502,11 +491,73 @@ export function LensEditConfigurationFlyout({
         if (status && isESQLResultsAccordionOpen) {
           setIsESQLResultsAccordionOpen(!status);
         }
+        if (status && isLegendAccordionOpen) {
+          setIsLegendAccordionOpen(false);
+        }
+        if (status && isStyleAccordionOpen) {
+          setIsStyleAccordionOpen(false);
+        }
         setIsGeneralSettingsAccordionOpen(!isGeneralSettingsAccordionOpen);
       }}
       onHasChangesChange={setGeneralSettingsChanged}
     />
   ) : undefined;
+
+  const legendAccordion = activeVisualization?.FlyoutLegendComponent ? (
+    <LegendAccordion
+      activeVisualization={activeVisualization}
+      visualizationState={visualization.state}
+      setVisualizationState={setVisualizationState}
+      framePublicAPI={framePublicAPI}
+      isAccordionOpen={isLegendAccordionOpen}
+      onAccordionToggle={(status) => {
+        if (status && isGeneralSettingsAccordionOpen) {
+          setIsGeneralSettingsAccordionOpen(false);
+        }
+        if (status && isLayerAccordionOpen) {
+          setIsLayerAccordionOpen(false);
+        }
+        if (status && isSuggestionsAccordionOpen) {
+          setIsSuggestionsAccordionOpen(false);
+        }
+        if (status && isESQLResultsAccordionOpen) {
+          setIsESQLResultsAccordionOpen(false);
+        }
+        if (status && isStyleAccordionOpen) {
+          setIsStyleAccordionOpen(false);
+        }
+        setIsLegendAccordionOpen(!isLegendAccordionOpen);
+      }}
+    />
+  ) : null;
+
+  const styleAccordion = activeVisualization?.FlyoutToolbarComponent ? (
+    <StyleAccordion
+      activeVisualization={activeVisualization}
+      visualizationState={visualization.state}
+      setVisualizationState={setVisualizationState}
+      framePublicAPI={framePublicAPI}
+      isAccordionOpen={isStyleAccordionOpen}
+      onAccordionToggle={(status) => {
+        if (status && isGeneralSettingsAccordionOpen) {
+          setIsGeneralSettingsAccordionOpen(false);
+        }
+        if (status && isLayerAccordionOpen) {
+          setIsLayerAccordionOpen(false);
+        }
+        if (status && isSuggestionsAccordionOpen) {
+          setIsSuggestionsAccordionOpen(false);
+        }
+        if (status && isESQLResultsAccordionOpen) {
+          setIsESQLResultsAccordionOpen(false);
+        }
+        if (status && isLegendAccordionOpen) {
+          setIsLegendAccordionOpen(false);
+        }
+        setIsStyleAccordionOpen(!isStyleAccordionOpen);
+      }}
+    />
+  ) : null;
 
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (hideTextBasedEditor && hidesSuggestions) {
@@ -571,15 +622,17 @@ export function LensEditConfigurationFlyout({
       >
         <>
           {/* General settings accordion — outside the drag-drop flex group to avoid its overrides */}
-          <div
-            css={css`
-              pointer-events: auto;
-              padding: 0 ${euiTheme.euiTheme.size.base};
-              border-block-end: ${euiTheme.euiTheme.border.thin};
-            `}
-          >
-            {generalSettings}
-          </div>
+          {generalSettings && (
+            <div
+              css={css`
+                pointer-events: auto;
+                padding: 0 ${euiTheme.euiTheme.size.base};
+                border-block-end: ${euiTheme.euiTheme.border.thin};
+              `}
+            >
+              {generalSettings}
+            </div>
+          )}
           {/* Flex container for the flyout content layout.
               Enables proper scroll behavior where accordion headers stay fixed
               and only the accordion content areas scroll independently. */}
@@ -687,18 +740,21 @@ export function LensEditConfigurationFlyout({
                   if (status && isESQLResultsAccordionOpen) {
                     setIsESQLResultsAccordionOpen(!status);
                   }
+                  if (status && isLegendAccordionOpen) {
+                    setIsLegendAccordionOpen(false);
+                  }
+                  if (status && isStyleAccordionOpen) {
+                    setIsStyleAccordionOpen(false);
+                  }
                   setIsLayerAccordionOpen(!isLayerAccordionOpen);
                 }}
               >
                 <>
                   <div
                     css={css`
-                      margin-inline: -${euiTheme.euiTheme.size.base};
-
                       &:has([role='tablist']) {
                         border: ${euiTheme.euiTheme.border.thin};
                         border-radius: ${euiTheme.euiTheme.border.radius.medium};
-                        margin-inline: 0;
                         margin-block-start: ${euiTheme.euiTheme.size.s};
                         margin-block-end: ${euiTheme.euiTheme.size.m};
 
@@ -733,6 +789,42 @@ export function LensEditConfigurationFlyout({
               </EuiAccordion>
             </EuiFlexItem>
 
+            {legendAccordion ? (
+              <EuiFlexItem
+                grow={isLegendAccordionOpen ? 1 : false}
+                css={css`
+                  border-top: ${euiTheme.euiTheme.border.thin};
+                  padding-left: ${euiTheme.euiTheme.size.base};
+                  padding-right: ${euiTheme.euiTheme.size.base};
+                  .euiAccordion__childWrapper {
+                    flex: ${isLegendAccordionOpen ? 1 : 'none'};
+                    padding-left: 0 !important;
+                    margin-left: 0 !important;
+                  }
+                `}
+              >
+                {legendAccordion}
+              </EuiFlexItem>
+            ) : null}
+
+            {styleAccordion ? (
+              <EuiFlexItem
+                grow={isStyleAccordionOpen ? 1 : false}
+                css={css`
+                  border-top: ${euiTheme.euiTheme.border.thin};
+                  padding-left: ${euiTheme.euiTheme.size.base};
+                  padding-right: ${euiTheme.euiTheme.size.base};
+                  .euiAccordion__childWrapper {
+                    flex: ${isStyleAccordionOpen ? 1 : 'none'};
+                    padding-left: 0 !important;
+                    margin-left: 0 !important;
+                  }
+                `}
+              >
+                {styleAccordion}
+              </EuiFlexItem>
+            ) : null}
+
             <EuiFlexItem
               grow={isSuggestionsAccordionOpen ? 1 : false}
               data-test-subj="InlineEditingSuggestions"
@@ -763,6 +855,12 @@ export function LensEditConfigurationFlyout({
                   }
                   if (status && isESQLResultsAccordionOpen) {
                     setIsESQLResultsAccordionOpen(!status);
+                  }
+                  if (status && isLegendAccordionOpen) {
+                    setIsLegendAccordionOpen(false);
+                  }
+                  if (status && isStyleAccordionOpen) {
+                    setIsStyleAccordionOpen(false);
                   }
                   setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
                 }}

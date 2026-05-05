@@ -68,7 +68,7 @@ export const FlyoutWrapper = ({
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       {i18n.translate('xpack.lens.config.showVisualizationLabel', {
-                        defaultMessage: 'Configuration',
+                        defaultMessage: 'Edit visualization',
                       })}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

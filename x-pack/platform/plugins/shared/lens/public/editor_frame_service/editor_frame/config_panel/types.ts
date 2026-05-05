@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
@@ -103,6 +104,11 @@ export interface LayerPanelProps extends LensConfigPanelBaseProps {
     visualizationId?: string;
   }) => void;
   displayLayerSettings: boolean;
+  /**
+   * Optional pre-rendered "Add layer" button. Rendered inline in the layer header
+   * (alongside the layer settings, clone and "more" icons) when inline editing.
+   */
+  addLayerButton?: ReactElement | null;
 }
 
 export interface LayerDatasourceDropProps {

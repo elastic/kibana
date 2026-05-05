@@ -12,6 +12,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import type { DropResult, EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -19,6 +20,7 @@ import {
   euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -27,7 +29,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  EuiTextArea,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
@@ -41,6 +45,13 @@ import { LinksStrings } from '../links_strings';
 import { TooltipWrapper } from '../tooltip_wrapper';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
 import { LinksEditorSingleLink } from './links_editor_single_link';
+
+export type GeneralSettings = {
+  title?: string;
+  description?: string;
+  hideTitle?: boolean;
+  hideBorder?: boolean;
+};
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -56,11 +67,25 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export interface LinksEditorProps {
-  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
-  onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
+  onSaveToLibrary: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    generalSettings: GeneralSettings
+  ) => Promise<void>;
+  onAddToDashboard: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    generalSettings: GeneralSettings
+  ) => void;
   onClose: () => void;
   initialLinks?: ResolvedLink[];
   initialLayout?: LinksLayoutType;
+  initialTitle?: string;
+  initialDescription?: string;
+  initialHideTitle?: boolean;
+  initialHideBorder?: boolean;
+  defaultTitleForReset?: string;
+  defaultDescriptionForReset?: string;
   parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
@@ -72,10 +97,17 @@ export const LinksEditor = ({
   onClose,
   initialLinks,
   initialLayout,
+  initialTitle = '',
+  initialDescription = '',
+  initialHideTitle = false,
+  initialHideBorder = false,
+  defaultTitleForReset,
+  defaultDescriptionForReset,
   parentDashboardId,
   isByReference,
   flyoutId,
 }: LinksEditorProps) => {
+  const { euiTheme } = useEuiTheme();
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
   const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
@@ -87,6 +119,34 @@ export const LinksEditor = ({
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(isByReference);
 
+  const [isGeneralSettingsOpen, setIsGeneralSettingsOpen] = useState(false);
+  const [isLinksSettingsOpen, setIsLinksSettingsOpen] = useState(true);
+
+  const [panelTitle, setPanelTitle] = useState(initialTitle);
+  const [hideTitle, setHideTitle] = useState(initialHideTitle);
+  const [panelDescription, setPanelDescription] = useState(initialDescription);
+  const [hideBorder, setHideBorder] = useState(initialHideBorder);
+
+  /**
+   * Accordion shell: header button has 16px left/right padding so text is inset from the flyout edges.
+   * Expanded body (`__childWrapper`) also gets 16px inline padding for form content.
+   */
+  const accordionShellCss = css`
+    inline-size: 100%;
+    .euiAccordion__triggerWrapper {
+      padding-inline: ${euiTheme.size.base};
+    }
+    .euiAccordion__childWrapper {
+      inline-size: 100%;
+      max-inline-size: 100%;
+      padding-inline: ${euiTheme.size.base};
+    }
+  `;
+
+  const accordionFormPaddingCss = css({
+    paddingBlockEnd: euiTheme.size.base,
+  });
+
   const isEditingExisting = initialLinks || isByReference;
 
   useEffect(() => {
@@ -96,6 +156,15 @@ export const LinksEditor = ({
     }
     setOrderedLinks(initialLinks);
   }, [initialLinks]);
+
+  const buildGeneralSettings = useCallback((): GeneralSettings => {
+    return {
+      title: panelTitle.trim() !== '' ? panelTitle : undefined,
+      description: panelDescription.trim() !== '' ? panelDescription : undefined,
+      hideTitle,
+      hideBorder,
+    };
+  }, [hideBorder, hideTitle, panelDescription, panelTitle]);
 
   const onDragEnd = useCallback(
     ({ source, destination }: DropResult) => {
@@ -170,68 +239,201 @@ export const LinksEditor = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={styles.bodyStyles}>
-        <EuiForm fullWidth>
-          <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
-            <EuiButtonGroup
-              options={layoutOptions}
-              buttonSize="compressed"
-              idSelected={currentLayout}
-              onChange={(id) => {
-                setCurrentLayout(id as LinksLayoutType);
-              }}
-              legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
-            />
-          </EuiFormRow>
-          <EuiFormRow label={LinksStrings.editor.panelEditor.getLinksTitle()}>
-            {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
-                to the focus of the inner elements */}
-            <div>
-              {hasZeroLinks ? (
-                <LinksEditorEmptyPrompt addLink={() => addOrEditLink()} />
-              ) : (
-                <>
-                  <EuiDragDropContext onDragEnd={onDragEnd}>
-                    <EuiDroppable
-                      css={styles.droppableStyles}
-                      droppableId="linksDroppableLinksArea"
-                      data-test-subj="links--panelEditor--linksAreaDroppable"
+        <>
+          <EuiAccordion
+            id="links-panel-general-settings"
+            css={[
+              accordionShellCss,
+              css({
+                borderBlockEnd: euiTheme.border.thin,
+              }),
+            ]}
+            data-test-subj="links--panelEditor--generalSettingsAccordion"
+            buttonContent={
+              <EuiTitle
+                size="xxs"
+                css={css`
+                  padding: 2px;
+                `}
+              >
+                <h5>{LinksStrings.editor.panelEditor.getGeneralSettingsAccordionTitle()}</h5>
+              </EuiTitle>
+            }
+            buttonProps={{ paddingSize: 'm' }}
+            initialIsOpen={isGeneralSettingsOpen}
+            forceState={isGeneralSettingsOpen ? 'open' : 'closed'}
+            onToggle={(isOpenNext: boolean) => {
+              setIsGeneralSettingsOpen(isOpenNext);
+              if (isOpenNext) setIsLinksSettingsOpen(false);
+            }}
+          >
+            <EuiForm fullWidth css={accordionFormPaddingCss}>
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  checked={!hideTitle}
+                  data-test-subj="links--panelEditor--generalSettingsShowTitle"
+                  id="linksPanelInlineGeneralSettingsHideTitle"
+                  label={LinksStrings.editor.panelEditor.getShowTitleLabel()}
+                  onChange={(e) => setHideTitle(!e.target.checked)}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={LinksStrings.editor.panelEditor.getTitleInputLabel()}
+                labelAppend={
+                  defaultTitleForReset ? (
+                    <EuiButtonEmpty
+                      size="xs"
+                      data-test-subj="links--panelEditor--generalSettingsResetTitle"
+                      onClick={() => setPanelTitle(defaultTitleForReset)}
+                      disabled={hideTitle || panelTitle === defaultTitleForReset}
+                      aria-label={LinksStrings.editor.panelEditor.getResetTitleAriaLabel()}
                     >
-                      {orderedLinks.map((link, idx) => (
-                        <EuiDraggable
-                          spacing="m"
-                          index={idx}
-                          key={link.id}
-                          draggableId={link.id}
-                          customDragHandle={true}
-                          hasInteractiveChildren={true}
-                          data-test-subj={`links--panelEditor--draggableLink`}
+                      {LinksStrings.editor.panelEditor.getResetTitleButtonLabel()}
+                    </EuiButtonEmpty>
+                  ) : undefined
+                }
+              >
+                <EuiFieldText
+                  compressed
+                  id="linksPanelInlineGeneralSettingsPanelTitle"
+                  data-test-subj="links--panelEditor--generalSettingsTitle"
+                  value={panelTitle}
+                  disabled={hideTitle}
+                  onChange={(e) => setPanelTitle(e.target.value)}
+                  aria-label={LinksStrings.editor.panelEditor.getTitleInputAriaLabel()}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={LinksStrings.editor.panelEditor.getPanelDescriptionLabel()}
+                labelAppend={
+                  defaultDescriptionForReset ? (
+                    <EuiButtonEmpty
+                      size="xs"
+                      data-test-subj="links--panelEditor--generalSettingsResetDescription"
+                      onClick={() => setPanelDescription(defaultDescriptionForReset)}
+                      disabled={panelDescription === defaultDescriptionForReset}
+                      aria-label={LinksStrings.editor.panelEditor.getResetDescriptionAriaLabel()}
+                    >
+                      {LinksStrings.editor.panelEditor.getResetDescriptionButtonLabel()}
+                    </EuiButtonEmpty>
+                  ) : undefined
+                }
+              >
+                <EuiTextArea
+                  compressed
+                  id="linksPanelInlineGeneralSettingsPanelDescription"
+                  data-test-subj="links--panelEditor--generalSettingsDescription"
+                  value={panelDescription}
+                  onChange={(e) => setPanelDescription(e.target.value)}
+                  placeholder={LinksStrings.editor.panelEditor.getDescriptionPlaceholder()}
+                  aria-label={LinksStrings.editor.panelEditor.getDescriptionInputAriaLabel()}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  checked={!hideBorder}
+                  data-test-subj="links--panelEditor--generalSettingsShowBorder"
+                  id="linksPanelInlineGeneralSettingsBorder"
+                  label={LinksStrings.editor.panelEditor.getShowBorderLabel()}
+                  onChange={(e) => setHideBorder(!e.target.checked)}
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiAccordion>
+
+          <EuiAccordion
+            id="links-panel-links-settings"
+            css={[
+              accordionShellCss,
+              css({
+                borderBlockEnd: euiTheme.border.thin,
+              }),
+            ]}
+            data-test-subj="links--panelEditor--linksSettingsAccordion"
+            buttonContent={
+              <EuiTitle
+                size="xxs"
+                css={css`
+                  padding: 2px;
+                `}
+              >
+                <h5>{LinksStrings.editor.panelEditor.getLinksSettingsAccordionTitle()}</h5>
+              </EuiTitle>
+            }
+            buttonProps={{ paddingSize: 'm' }}
+            initialIsOpen={isLinksSettingsOpen}
+            forceState={isLinksSettingsOpen ? 'open' : 'closed'}
+            onToggle={(isOpenNext: boolean) => {
+              setIsLinksSettingsOpen(isOpenNext);
+              if (isOpenNext) setIsGeneralSettingsOpen(false);
+            }}
+          >
+            <EuiForm fullWidth css={accordionFormPaddingCss}>
+              <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
+                <EuiButtonGroup
+                  options={layoutOptions}
+                  buttonSize="compressed"
+                  idSelected={currentLayout}
+                  onChange={(id) => {
+                    setCurrentLayout(id as LinksLayoutType);
+                  }}
+                  legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
+                />
+              </EuiFormRow>
+              <EuiFormRow label={LinksStrings.editor.panelEditor.getLinksTitle()}>
+                {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
+                to the focus of the inner elements */}
+                <div>
+                  {hasZeroLinks ? (
+                    <LinksEditorEmptyPrompt addLink={() => addOrEditLink()} />
+                  ) : (
+                    <>
+                      <EuiDragDropContext onDragEnd={onDragEnd}>
+                        <EuiDroppable
+                          css={styles.droppableStyles}
+                          droppableId="linksDroppableLinksArea"
+                          data-test-subj="links--panelEditor--linksAreaDroppable"
                         >
-                          {(provided) => (
-                            <LinksEditorSingleLink
-                              link={link}
-                              editLink={() => addOrEditLink(link)}
-                              deleteLink={() => deleteLink(link.id)}
-                              dragHandleProps={provided.dragHandleProps ?? undefined} // casting `null` to `undefined`
-                            />
-                          )}
-                        </EuiDraggable>
-                      ))}
-                    </EuiDroppable>
-                  </EuiDragDropContext>
-                  <EuiButtonEmpty
-                    flush="left"
-                    size="s"
-                    iconType="plusCircle"
-                    onClick={() => addOrEditLink()}
-                    data-test-subj="links--panelEditor--addLinkBtn"
-                  >
-                    {LinksStrings.editor.getAddButtonLabel()}
-                  </EuiButtonEmpty>
-                </>
-              )}
-            </div>
-          </EuiFormRow>
-        </EuiForm>
+                          {orderedLinks.map((link, idx) => (
+                            <EuiDraggable
+                              spacing="m"
+                              index={idx}
+                              key={link.id}
+                              draggableId={link.id}
+                              customDragHandle={true}
+                              hasInteractiveChildren={true}
+                              data-test-subj={`links--panelEditor--draggableLink`}
+                            >
+                              {(provided) => (
+                                <LinksEditorSingleLink
+                                  link={link}
+                                  editLink={() => addOrEditLink(link)}
+                                  deleteLink={() => deleteLink(link.id)}
+                                  dragHandleProps={provided.dragHandleProps ?? undefined} // casting `null` to `undefined`
+                                />
+                              )}
+                            </EuiDraggable>
+                          ))}
+                        </EuiDroppable>
+                      </EuiDragDropContext>
+                      <EuiButtonEmpty
+                        flush="left"
+                        size="s"
+                        iconType="plusCircle"
+                        onClick={() => addOrEditLink()}
+                        data-test-subj="links--panelEditor--addLinkBtn"
+                      >
+                        {LinksStrings.editor.getAddButtonLabel()}
+                      </EuiButtonEmpty>
+                    </>
+                  )}
+                </div>
+              </EuiFormRow>
+            </EuiForm>
+          </EuiAccordion>
+        </>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
@@ -276,9 +478,10 @@ export const LinksEditor = ({
                     disabled={hasZeroLinks}
                     data-test-subj={'links--panelEditor--saveBtn'}
                     onClick={async () => {
+                      const generalSettings = buildGeneralSettings();
                       if (saveByReference) {
                         setIsSaving(true);
-                        onSaveToLibrary(orderedLinks, currentLayout)
+                        onSaveToLibrary(orderedLinks, currentLayout, generalSettings)
                           .catch((e) => {
                             toasts.addError(e, {
                               title: LinksStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
@@ -290,7 +493,7 @@ export const LinksEditor = ({
                             }
                           });
                       } else {
-                        onAddToDashboard(orderedLinks, currentLayout);
+                        onAddToDashboard(orderedLinks, currentLayout, generalSettings);
                       }
                     }}
                   >
@@ -313,6 +516,10 @@ export default LinksEditor;
 const styles = {
   droppableStyles: ({ euiTheme }: UseEuiTheme) => css({ margin: `0 -${euiTheme.size.xs}` }),
   bodyStyles: css({
+    // Zero out all EuiFlyoutBody default padding so accordions span edge-to-edge.
+    '& .euiFlyoutBody__overflowContent': {
+      padding: 0,
+    },
     // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
     // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
     // https://github.com/elastic/eui/pull/7855.

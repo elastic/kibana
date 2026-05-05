@@ -8,29 +8,18 @@
 import React, { useState, useMemo } from 'react';
 
 import { EuiButtonGroup } from '@elastic/eui';
-import type { EuiButtonGroupOptionProps, UseEuiTheme, IconType } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiIconLegend } from '@kbn/chart-icons';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { FlyoutContainer } from './flyout_container';
 
-type Options = 'legend' | 'style' | 'filters';
+type Options = 'style' | 'filters';
 
 type ToolbarOption = EuiButtonGroupOptionProps & { id: Options; label: string };
 const baseToolbarOptions: ToolbarOption[] = [
-  {
-    id: 'legend',
-    label: i18n.translate('xpack.lens.flyoutToolbar.legend.title', {
-      defaultMessage: 'Legend',
-    }),
-    iconType: EuiIconLegend as IconType,
-    toolTipContent: i18n.translate('xpack.lens.flyoutToolbar.legend.tooltip', {
-      defaultMessage: 'Legend',
-    }),
-  },
   {
     id: 'style',
     label: i18n.translate('xpack.lens.flyoutToolbar.style.title', {
@@ -55,7 +44,6 @@ const baseToolbarOptions: ToolbarOption[] = [
 
 export interface ToolbarContentMap<S> {
   style?: React.ComponentType<VisualizationToolbarProps<S>>;
-  legend?: React.ComponentType<VisualizationToolbarProps<S>>;
   filters?: React.ComponentType<VisualizationToolbarProps<S>>;
 }
 
@@ -77,6 +65,17 @@ export function FlyoutToolbar<S>({
   );
 
   const flyoutToolbarStyles = useMemoCss(styles);
+
+  if (toolbarOptions.length === 0) {
+    return null;
+  }
+
+  // In inline editing mode, render style content directly without the button group / popover
+  if (isInlineEditing) {
+    const StyleContent = contentMap.style;
+    if (!StyleContent) return null;
+    return <StyleContent {...flyoutContentProps} />;
+  }
 
   const flyoutTitle = idSelected
     ? toolbarOptions.find((toolbarOption) => toolbarOption.id === idSelected)?.label || ''

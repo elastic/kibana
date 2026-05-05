@@ -31,6 +31,8 @@ export async function onVisualizationsEdit(refId: string) {
           refId,
           ...linksState,
           links: await resolveLinks(linksState.links ?? []),
+          panelDefaultTitle: linksState.title,
+          panelDefaultDescription: linksState.description,
         },
         closeFlyout,
       });

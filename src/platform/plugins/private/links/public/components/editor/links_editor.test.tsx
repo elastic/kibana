@@ -17,6 +17,13 @@ import { LinksStrings } from '../links_strings';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import type { ResolvedLink } from '../../types';
 
+const defaultGeneralSettings = {
+  title: undefined,
+  description: undefined,
+  hideTitle: false,
+  hideBorder: false,
+};
+
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [
     {
@@ -100,7 +107,9 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(onSaveToLibrary).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onSaveToLibrary).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT, {
+      ...defaultGeneralSettings,
+    });
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
@@ -110,6 +119,8 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT, {
+      ...defaultGeneralSettings,
+    });
   });
 });

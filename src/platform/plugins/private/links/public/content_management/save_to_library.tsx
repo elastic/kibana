@@ -47,9 +47,22 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
         return {};
       }
 
+      const {
+        error: _error,
+        refId: _refId,
+        hideTitle,
+        hideBorder,
+        links,
+        layout,
+        panelDefaultTitle: _panelDefaultTitle,
+        panelDefaultDescription: _panelDefaultDescription,
+      } = newState;
+
       const newAttributes = {
-        ...newState,
-        links: serializeResolvedLinks(newState.links ?? []),
+        layout,
+        hide_title: hideTitle,
+        hide_border: hideBorder,
+        links: serializeResolvedLinks(links ?? []),
         title: newTitle,
         description: newDescription,
       };

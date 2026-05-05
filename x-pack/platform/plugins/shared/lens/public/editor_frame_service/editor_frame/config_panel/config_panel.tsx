@@ -41,6 +41,7 @@ import {
 } from '../../../state_management';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
+import { useAddLayerButton } from '../../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();
@@ -293,6 +294,19 @@ export function ConfigPanel(
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
+  // In inline editing the "Add layer" button is rendered next to the chart switch in
+  // the layer header rather than in the flyout toolbar. In the regular Lens app the
+  // toolbar still owns it, so we skip injecting it here.
+  const noopSetIsInlineFlyoutVisible = useCallback(() => {}, []);
+  const inlineAddLayerButton = useAddLayerButton(
+    props.framePublicAPI,
+    props.core,
+    props.dataViews,
+    props.uiActions,
+    props.setIsInlineFlyoutVisible ?? noopSetIsInlineFlyoutVisible
+  );
+  const addLayerButton = props.setIsInlineFlyoutVisible ? inlineAddLayerButton : null;
+
   const layerConfig = useMemo(() => {
     if (!selectedLayerId) return;
 
@@ -361,6 +375,7 @@ export function ConfigPanel(
         }}
         updateAll={updateAll}
         addLayer={addLayer}
+        addLayerButton={addLayerButton}
         isOnlyLayer={isOnlyLayer}
         onEmptyDimensionAdd={(columnId, { groupId }) => {
           // avoid state update if the datasource does not support initializeDimension

@@ -16,6 +16,9 @@ import {
   EuiText,
   EuiIconTip,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -85,8 +88,11 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    addLayerButton,
     ...editorProps
   } = props;
+
+  const [isLayerActionsMenuOpen, setLayerActionsMenuOpen] = useState(false);
 
   const { parentApi } = editorProps;
   const esqlVariables = useStateFromPublishingSubject(
@@ -419,6 +425,7 @@ export function LayerPanel(props: LayerPanelProps) {
                   <EuiToolTip content={layerSettingsAction.displayName} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType={layerSettingsAction.icon}
+                      color="text"
                       aria-label={layerSettingsAction.displayName}
                       onClick={() => layerSettingsAction.execute(null)}
                       data-test-subj={layerSettingsAction['data-test-subj']}
@@ -426,39 +433,71 @@ export function LayerPanel(props: LayerPanelProps) {
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
+              {layerActions && supportsMultipleLayers && !isTextBasedLanguage ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={layerActions.cloneLayerAction.displayName}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType={layerActions.cloneLayerAction.icon}
+                      color="text"
+                      aria-label={layerActions.cloneLayerAction.displayName}
+                      onClick={() => layerActions.cloneLayerAction.execute(null)}
+                      data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              {addLayerButton ? (
+                <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+              ) : null}
               {layerActions && (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={layerActions.removeLayerAction.displayName}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType={layerActions.removeLayerAction.icon}
-                        color={layerActions.removeLayerAction.color}
-                        aria-label={layerActions.removeLayerAction.displayName}
-                        onClick={() => layerActions.removeLayerAction.execute(null)}
-                        data-test-subj={layerActions.removeLayerAction['data-test-subj']}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  {supportsMultipleLayers && !isTextBasedLanguage ? (
-                    <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    panelPaddingSize="none"
+                    isOpen={isLayerActionsMenuOpen}
+                    closePopover={() => setLayerActionsMenuOpen(false)}
+                    button={
                       <EuiToolTip
-                        content={layerActions.cloneLayerAction.displayName}
+                        content={i18n.translate('xpack.lens.layerPanel.moreActions', {
+                          defaultMessage: 'More',
+                        })}
                         disableScreenReaderOutput
                       >
                         <EuiButtonIcon
-                          iconType={layerActions.cloneLayerAction.icon}
-                          color={layerActions.cloneLayerAction.color}
-                          aria-label={layerActions.cloneLayerAction.displayName}
-                          onClick={() => layerActions.cloneLayerAction.execute(null)}
-                          data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
+                          iconType="boxesVertical"
+                          color="text"
+                          aria-label={i18n.translate('xpack.lens.layerPanel.moreActions', {
+                            defaultMessage: 'More',
+                          })}
+                          onClick={() => setLayerActionsMenuOpen((open) => !open)}
+                          data-test-subj="lnsLayerHeaderMoreActions"
                         />
                       </EuiToolTip>
-                    </EuiFlexItem>
-                  ) : null}
-                </>
+                    }
+                  >
+                    <EuiContextMenuPanel
+                      size="s"
+                      items={[
+                        <EuiContextMenuItem
+                          key="clearLayer"
+                          icon={layerActions.removeLayerAction.icon}
+                          data-test-subj={layerActions.removeLayerAction['data-test-subj']}
+                          css={css`
+                            color: ${euiTheme.colors.textDanger};
+                          `}
+                          onClick={() => {
+                            setLayerActionsMenuOpen(false);
+                            layerActions.removeLayerAction.execute(null);
+                          }}
+                        >
+                          {layerActions.removeLayerAction.displayName}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
               )}
             </EuiFlexGroup>
             {props.indexPatternService &&
