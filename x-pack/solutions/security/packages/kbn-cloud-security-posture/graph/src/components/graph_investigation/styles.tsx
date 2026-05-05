@@ -36,7 +36,6 @@ export const AnimatedSearchBarContainer = styled.div`
   }
 
   & > div {
-    overflow: hidden;
     padding: 0;
 
     ${euiCanAnimate} {
@@ -47,7 +46,24 @@ export const AnimatedSearchBarContainer = styled.div`
     }
   }
 
+  /* Clip during the collapse animation only; expanded state must let
+     content stay visible so a tall input never hides surrounding controls. */
   &.toggled-off > div {
+    overflow: hidden;
     padding: 0;
+  }
+
+  /* In the narrow graph flyout, the KQL textarea can grow multi-line.
+     Anchor the row's controls to the top so they keep their position
+     instead of drifting with the row's vertical center, and cap the
+     textarea at ~3 lines (euiTheme.size.xl = 32px) so longer queries
+     scroll inside the input. The !important defeats the upstream rule
+     '.kbnQueryBar__textarea.kbnQueryBar__textarea--autoHeight' (0,3,0). */
+  .kbnQueryBar {
+    align-items: flex-start;
+  }
+
+  .kbnQueryBar__textarea.kbnQueryBar__textarea--autoHeight {
+    max-height: 96px !important;
   }
 `;
