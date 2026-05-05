@@ -22,7 +22,7 @@ export const AgentCollectorConfig: React.FunctionComponent<{ agent: Agent }> = (
 
   return (
     <>
-      <CollectorConfigView config={agentData?.effective_config ?? {}} />
+      <CollectorConfigView config={agentData?.effective_config ?? {}} health={agent.health} />
       <EuiSpacer size="l" />
     </>
   );
