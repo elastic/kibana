@@ -53,6 +53,10 @@ export interface SmlGetHttpResponse {
 
 /**
  * Default and maximum `per_page` values for the list endpoint.
+ *
+ * Deeper pagination is bounded at runtime by the index's
+ * `index.max_result_window` setting (default 10000); requests that exceed it
+ * are rejected with HTTP 400.
  */
 export const SML_HTTP_LIST_PER_PAGE_DEFAULT = 20;
 export const SML_HTTP_LIST_PER_PAGE_MAX = 1000;
@@ -70,13 +74,15 @@ export interface SmlListHttpResponse {
 
 /**
  * Body for `PUT /internal/agent_context_layer/sml/{id}`.
+ *
+ * `spaces` is intentionally omitted: documents are created in the caller's
+ * current space, and the server preserves `spaces` on update.
  */
 export interface SmlUpsertHttpRequestBody {
   type: string;
   title: string;
   origin_id: string;
   content: string;
-  spaces: string[];
   permissions?: string[];
 }
 

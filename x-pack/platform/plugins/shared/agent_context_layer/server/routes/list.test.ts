@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlDocument } from '../services/sml/types';
 import { registerListRoute } from './list';
+import { SmlResultWindowExceededError } from '../services/sml/sml_errors';
 
 const createMockSmlService = () => ({
   search: jest.fn(),
@@ -157,5 +158,17 @@ describe('registerListRoute', () => {
     mockSmlService.listDocuments.mockRejectedValue(new Error('boom'));
     await expect(callHandler({ page: 1, per_page: 20 })).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
+  });
+
+  it('returns 400 when sml.listDocuments throws SmlResultWindowExceededError', async () => {
+    mockSmlService.listDocuments.mockRejectedValue(
+      new SmlResultWindowExceededError(
+        'Result window is too large, from + size must be less than or equal to: [10000] but was [11000]'
+      )
+    );
+    const response = await callHandler({ page: 11, per_page: 1000 });
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: expect.stringContaining('Result window is too large') },
+    });
   });
 });

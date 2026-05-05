@@ -50,7 +50,6 @@ const validBody = {
   title: 'Test Viz',
   origin_id: 'viz-1',
   content: 'some content',
-  spaces: ['test-space'],
 };
 
 describe('registerUpsertRoute', () => {
@@ -109,6 +108,7 @@ describe('registerUpsertRoute', () => {
     const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
     expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
       id: 'chunk-1',
+      spaceId: 'test-space',
       document: validBody,
       esClient: expect.any(Object),
     });
@@ -126,6 +126,46 @@ describe('registerUpsertRoute', () => {
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     expect(body.created).toBe(false);
     expect(body.item).toEqual(sampleDocument);
+  });
+
+  it('returns 404 when the document exists in another space', async () => {
+    mockSmlService.upsertDocument.mockResolvedValue(null);
+    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: { message: "SML document 'chunk-1' not found" },
+    });
+  });
+
+  it('falls back to default space when spaces plugin is unavailable', async () => {
+    const coreSetup = coreMock.createSetup();
+    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([{}, {}, {}]);
+
+    const localRouter = httpServiceMock.createRouter();
+    registerUpsertRoute({
+      router: localRouter as any,
+      coreSetup: coreSetup as any,
+      logger,
+      getSmlService: () => mockSmlService as any,
+    });
+
+    const [, localHandler] = localRouter.put.mock.calls[0];
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'chunk-1' },
+      body: validBody,
+    });
+    const response = httpServerMock.createResponseFactory();
+    const ctx = {
+      core: Promise.resolve({
+        uiSettings: { client: createMockUiSettingsClient(true) },
+        elasticsearch: { client: {} },
+      }),
+    };
+
+    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
+    await localHandler(ctx, request, response);
+    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'default' })
+    );
   });
 
   it('propagates errors from sml.upsertDocument', async () => {

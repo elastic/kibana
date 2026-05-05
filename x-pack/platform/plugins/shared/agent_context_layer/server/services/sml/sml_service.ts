@@ -23,6 +23,7 @@ import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
 import { smlIndexName, createSmlStorage } from './sml_storage';
+import { SmlResultWindowExceededError } from './sml_errors';
 
 export interface SmlServiceSetup {
   /**
@@ -128,8 +129,8 @@ class SmlServiceImpl implements SmlServiceInstance {
           originId,
         });
       },
-      upsertDocument: async ({ id, document, esClient }) => {
-        return upsertDocument({ id, document, esClient, logger });
+      upsertDocument: async ({ id, spaceId, document, esClient }) => {
+        return upsertDocument({ id, spaceId, document, esClient, logger });
       },
       deleteDocument: async ({ id, spaceId, esClient }) => {
         return deleteDocument({ id, spaceId, esClient, logger });
@@ -153,6 +154,27 @@ class SmlServiceImpl implements SmlServiceInstance {
 
 export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
+};
+
+const isResultWindowExceededError = (error: unknown): boolean => {
+  if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
+  const body = error.body as
+    | {
+        error?: {
+          reason?: string;
+          caused_by?: { reason?: string };
+          root_cause?: Array<{ reason?: string }>;
+        };
+      }
+    | undefined;
+  const reasons = [
+    body?.error?.reason,
+    body?.error?.caused_by?.reason,
+    ...(body?.error?.root_cause?.map((rc) => rc.reason) ?? []),
+  ];
+  return reasons.some(
+    (reason) => typeof reason === 'string' && reason.includes('Result window is too large')
+  );
 };
 
 /**
@@ -649,29 +671,43 @@ const listDocuments = async ({
     if (isNotFoundError(error)) {
       return { total: 0, results: [] };
     }
+    if (isResultWindowExceededError(error)) {
+      const responseError = error as errors.ResponseError;
+      const body = responseError.body as
+        | { error?: { root_cause?: Array<{ reason?: string }>; reason?: string } }
+        | undefined;
+      const reason =
+        body?.error?.root_cause?.[0]?.reason ?? body?.error?.reason ?? responseError.message;
+      throw new SmlResultWindowExceededError(reason);
+    }
     logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
     throw error;
   }
 };
 
 /**
- * Upsert an SML document by id.
+ * Upsert an SML document by id, scoped to a space.
  *
- * If an existing document is found, its `created_at` is preserved and
- * `updated_at` is refreshed; otherwise a new document is created with both
- * timestamps set to now.
+ * On create, `spaces` is set to `[spaceId]`. On update, `created_at` and the
+ * existing `spaces` are preserved (callers cannot widen or narrow space
+ * membership through this endpoint), and `updated_at` is refreshed.
+ *
+ * Returns `null` when a document with this id exists but is not visible from
+ * `spaceId` — callers cannot clobber documents in other spaces.
  */
 const upsertDocument = async ({
   id,
+  spaceId,
   document,
   esClient,
   logger,
 }: {
   id: string;
+  spaceId: string;
   document: SmlDocumentInput;
   esClient: IScopedClusterClient;
   logger: Logger;
-}): Promise<SmlUpsertResult> => {
+}): Promise<SmlUpsertResult | null> => {
   const internalEsClient = esClient.asInternalUser;
   const storage = createSmlStorage({ logger, esClient: internalEsClient });
   const smlClient = storage.getClient();
@@ -689,6 +725,10 @@ const upsertDocument = async ({
     }
   }
 
+  if (existing && !isVisibleInSpace(existing.spaces, spaceId)) {
+    return null;
+  }
+
   const now = new Date().toISOString();
   const created = !existing;
   const fullDocument: SmlDocument = {
@@ -699,13 +739,18 @@ const upsertDocument = async ({
     content: document.content,
     created_at: existing?.created_at ?? now,
     updated_at: now,
-    spaces: document.spaces,
+    spaces: existing?.spaces ?? [spaceId],
     permissions: document.permissions ?? [],
   };
 
   await smlClient.index({ id, document: fullDocument });
 
   return { document: fullDocument, created };
+};
+
+const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
+  if (!spaces || spaces.length === 0) return false;
+  return spaces.includes(spaceId) || spaces.includes('*');
 };
 
 /**

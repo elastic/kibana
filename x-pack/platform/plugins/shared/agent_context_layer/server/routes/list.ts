@@ -20,6 +20,7 @@ import { smlBasePath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { toSmlHttpItem } from './common';
+import { SmlResultWindowExceededError } from '../services/sml/sml_errors';
 
 const AGENT_CONTEXT_LAYER_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readAgentContextLayer] },
@@ -91,6 +92,9 @@ export const registerListRoute = ({
 
         return response.ok({ body });
       } catch (error) {
+        if (error instanceof SmlResultWindowExceededError) {
+          return response.badRequest({ body: { message: error.message } });
+        }
         logger.error(`SML list route error: ${(error as Error).message}`);
         throw error;
       }

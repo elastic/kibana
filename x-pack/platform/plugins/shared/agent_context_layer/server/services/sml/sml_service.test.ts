@@ -11,6 +11,7 @@ import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasti
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import { createSmlService, isNotFoundError } from './sml_service';
+import { SmlResultWindowExceededError } from './sml_errors';
 import { smlIndexName, createSmlStorage } from './sml_storage';
 import type { SmlTypeDefinition } from './types';
 
@@ -1204,6 +1205,70 @@ describe('SmlService', () => {
       ).rejects.toThrow('Connection refused');
       expect(logger.warn).toHaveBeenCalledWith('SML listDocuments failed: Connection refused');
     });
+
+    it('throws SmlResultWindowExceededError when ES rejects with result-window error', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      const reason =
+        'Result window is too large, from + size must be less than or equal to: [10000] but was [11000]';
+      esClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'search_phase_execution_exception',
+              reason: 'all shards failed',
+              root_cause: [{ type: 'illegal_argument_exception', reason }],
+              caused_by: { type: 'illegal_argument_exception', reason },
+            },
+          },
+          warnings: [],
+          headers: {},
+          meta: {} as any,
+        })
+      );
+
+      await expect(
+        smlService.listDocuments({
+          spaceId: 'default',
+          esClient: scopedClient,
+          page: 11,
+          perPage: 1000,
+        })
+      ).rejects.toBeInstanceOf(SmlResultWindowExceededError);
+      // logger.warn is the bucket for unexpected ES failures; the typed error
+      // is an expected outcome and should not log there.
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('SML listDocuments failed')
+      );
+    });
+
+    it('does not translate unrelated 400 ES errors', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: { type: 'parse_exception', reason: 'unparseable query' },
+          },
+          warnings: [],
+          headers: {},
+          meta: {} as any,
+        })
+      );
+
+      await expect(
+        smlService.listDocuments({
+          spaceId: 'default',
+          esClient: scopedClient,
+        })
+      ).rejects.not.toBeInstanceOf(SmlResultWindowExceededError);
+    });
   });
 
   describe('upsertDocument', () => {
@@ -1220,7 +1285,7 @@ describe('SmlService', () => {
       });
     });
 
-    it('creates a new document with both timestamps when none exists (404)', async () => {
+    it('creates a new document with spaces=[spaceId] and equal timestamps when none exists (404)', async () => {
       smlClient.get.mockRejectedValue(createNotFoundError());
 
       const service = createSmlService();
@@ -1229,28 +1294,30 @@ describe('SmlService', () => {
 
       const result = await smlService.upsertDocument({
         id: 'doc-1',
+        spaceId: 'default',
         document: {
           type: 'lens',
           title: 'New Doc',
           origin_id: 'ref-1',
           content: 'c',
-          spaces: ['default'],
         },
         esClient: scopedClient,
       });
 
-      expect(result.created).toBe(true);
-      expect(result.document.id).toBe('doc-1');
-      expect(result.document.created_at).toBeDefined();
-      expect(result.document.created_at).toBe(result.document.updated_at);
-      expect(result.document.permissions).toEqual([]);
+      expect(result).not.toBeNull();
+      expect(result!.created).toBe(true);
+      expect(result!.document.id).toBe('doc-1');
+      expect(result!.document.spaces).toEqual(['default']);
+      expect(result!.document.created_at).toBeDefined();
+      expect(result!.document.created_at).toBe(result!.document.updated_at);
+      expect(result!.document.permissions).toEqual([]);
       expect(smlClient.index).toHaveBeenCalledWith({
         id: 'doc-1',
-        document: result.document,
+        document: result!.document,
       });
     });
 
-    it('updates an existing document and preserves created_at', async () => {
+    it('updates an existing document, preserving created_at and spaces', async () => {
       smlClient.get.mockResolvedValue({
         found: true,
         _source: {
@@ -1261,7 +1328,7 @@ describe('SmlService', () => {
           content: 'old',
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-06-01T00:00:00.000Z',
-          spaces: ['default'],
+          spaces: ['default', 'engineering'],
           permissions: [],
         },
       });
@@ -1272,22 +1339,98 @@ describe('SmlService', () => {
 
       const result = await smlService.upsertDocument({
         id: 'doc-1',
+        spaceId: 'default',
         document: {
           type: 'lens',
           title: 'New',
           origin_id: 'ref-1',
           content: 'new',
-          spaces: ['default'],
           permissions: ['saved_object:lens/get'],
         },
         esClient: scopedClient,
       });
 
-      expect(result.created).toBe(false);
-      expect(result.document.created_at).toBe('2023-01-01T00:00:00.000Z');
-      expect(result.document.updated_at).not.toBe('2023-06-01T00:00:00.000Z');
-      expect(result.document.title).toBe('New');
-      expect(result.document.permissions).toEqual(['saved_object:lens/get']);
+      expect(result).not.toBeNull();
+      expect(result!.created).toBe(false);
+      expect(result!.document.created_at).toBe('2023-01-01T00:00:00.000Z');
+      expect(result!.document.updated_at).not.toBe('2023-06-01T00:00:00.000Z');
+      expect(result!.document.title).toBe('New');
+      expect(result!.document.permissions).toEqual(['saved_object:lens/get']);
+      // existing spaces are preserved — caller cannot widen or narrow membership
+      expect(result!.document.spaces).toEqual(['default', 'engineering']);
+    });
+
+    it('returns null when an existing document is not visible in the caller space', async () => {
+      smlClient.get.mockResolvedValue({
+        found: true,
+        _source: {
+          id: 'doc-1',
+          type: 'lens',
+          title: 'Old',
+          origin_id: 'ref-1',
+          content: 'old',
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-06-01T00:00:00.000Z',
+          spaces: ['other-space'],
+          permissions: [],
+        },
+      });
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      const result = await smlService.upsertDocument({
+        id: 'doc-1',
+        spaceId: 'default',
+        document: {
+          type: 'lens',
+          title: 'New',
+          origin_id: 'ref-1',
+          content: 'new',
+        },
+        esClient: scopedClient,
+      });
+
+      expect(result).toBeNull();
+      expect(smlClient.index).not.toHaveBeenCalled();
+    });
+
+    it('treats spaces=["*"] as visible in any caller space', async () => {
+      smlClient.get.mockResolvedValue({
+        found: true,
+        _source: {
+          id: 'doc-1',
+          type: 'lens',
+          title: 'Old',
+          origin_id: 'ref-1',
+          content: 'old',
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-06-01T00:00:00.000Z',
+          spaces: ['*'],
+          permissions: [],
+        },
+      });
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      const result = await smlService.upsertDocument({
+        id: 'doc-1',
+        spaceId: 'default',
+        document: {
+          type: 'lens',
+          title: 'New',
+          origin_id: 'ref-1',
+          content: 'new',
+        },
+        esClient: scopedClient,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result!.created).toBe(false);
+      expect(result!.document.spaces).toEqual(['*']);
     });
 
     it('throws when storage lookup fails with non-404', async () => {
@@ -1300,12 +1443,12 @@ describe('SmlService', () => {
       await expect(
         smlService.upsertDocument({
           id: 'doc-1',
+          spaceId: 'default',
           document: {
             type: 'lens',
             title: 'x',
             origin_id: 'ref-1',
             content: 'c',
-            spaces: ['default'],
           },
           esClient: scopedClient,
         })

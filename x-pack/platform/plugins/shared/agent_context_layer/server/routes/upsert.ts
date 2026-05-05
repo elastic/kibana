@@ -43,7 +43,6 @@ export const registerUpsertRoute = ({
           title: schema.string({ minLength: 1 }),
           origin_id: schema.string({ minLength: 1 }),
           content: schema.string(),
-          spaces: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
           permissions: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
         }),
       },
@@ -66,15 +65,22 @@ export const registerUpsertRoute = ({
         const { id } = request.params;
         const esClient = coreContext.elasticsearch.client;
 
-        const { document, created } = await sml.upsertDocument({
+        const [, startDeps] = await coreSetup.getStartServices();
+        const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+
+        const result = await sml.upsertDocument({
           id,
+          spaceId,
           document: request.body,
           esClient,
         });
+        if (!result) {
+          return response.notFound({ body: { message: `SML document '${id}' not found` } });
+        }
 
         const body: SmlUpsertHttpResponse = {
-          item: toSmlHttpItem(document),
-          created,
+          item: toSmlHttpItem(result.document),
+          created: result.created,
         };
 
         return response.ok({ body });
