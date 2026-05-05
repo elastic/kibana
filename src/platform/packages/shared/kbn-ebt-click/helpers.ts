@@ -10,7 +10,11 @@
 import type { EbtClickAttrs } from './types';
 
 /** Maps an EbtClickAttrs object to the corresponding `data-ebt-*` HTML attributes. */
-export function getEbtProps(ebt: EbtClickAttrs): Record<string, string> {
+export function getEbtProps(ebt: EbtClickAttrs): {
+  'data-ebt-action': string;
+  'data-ebt-element': string;
+  'data-ebt-detail'?: string;
+} {
   return {
     'data-ebt-action': ebt.action,
     'data-ebt-element': ebt.element,
