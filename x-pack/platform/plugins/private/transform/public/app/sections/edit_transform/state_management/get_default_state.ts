@@ -8,8 +8,10 @@
 import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
 } from '../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
+import { isLatestTransform } from '../../../../../common/types/transform';
 
 import { initializeFormField } from './form_field';
 import { initializeFormSection } from './form_section';
@@ -56,7 +58,11 @@ export const getDefaultState = (config?: TransformConfigUnion): State => ({
       'settings.max_page_search_size',
       config,
       {
-        defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
+        defaultValue: `${
+          config && isLatestTransform(config)
+            ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+            : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
+        }`,
         isNullable: true,
         isOptional: true,
         validator: 'transformSettingsPageSearchSizeValidator',

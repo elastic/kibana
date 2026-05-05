@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
@@ -38,6 +38,7 @@ const defaultProps = {
   },
   timeRange: { from: 'now-15m', to: 'now' },
   ruleTypeId: 'apm.transaction_duration',
+  element: RED_METRICS_CHART_ELEMENT.LATENCY,
 };
 
 const setupMocks = ({
@@ -118,20 +119,45 @@ describe('RedMetricsChartActions', () => {
     expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toBeInTheDocument();
   });
 
-  it('includes ruleTypeId in data-source attributes', () => {
+  it('sets the expected data-ebt-* attributes on each action', () => {
     setupMocks();
     const { getByTestId } = render(<RedMetricsChartActions {...defaultProps} />);
 
     fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-    expect(getByTestId('apmAlertDetailsOpenInApmAction')).toHaveAttribute(
-      'data-source',
-      'alertDetails-apm.transaction_duration'
+    const inApmAction = getByTestId('apmAlertDetailsOpenInApmAction');
+    expect(inApmAction).toHaveAttribute('data-ebt-action', 'openInApm');
+    expect(inApmAction).toHaveAttribute('data-ebt-element', 'latencyChart');
+    expect(inApmAction).toHaveAttribute('data-ebt-detail', 'apm.transaction_duration');
+
+    const tracesInDiscoverAction = getByTestId('apmAlertDetailsTracesOpenInDiscoverAction');
+    expect(tracesInDiscoverAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(tracesInDiscoverAction).toHaveAttribute('data-ebt-element', 'latencyChart');
+    expect(tracesInDiscoverAction).toHaveAttribute('data-ebt-detail', 'apm.transaction_duration');
+  });
+
+  it('sets the expected data-ebt-* attributes on the errors-in-Discover action', () => {
+    setupMocks();
+    const { getByTestId } = render(
+      <RedMetricsChartActions
+        {...defaultProps}
+        indexType="error"
+        ruleTypeId="apm.error_rate"
+        element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
+        queryParams={{
+          serviceName: 'testService',
+          environment: 'testEnvironment',
+          errorGroupId: 'testGroupId',
+        }}
+      />
     );
-    expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toHaveAttribute(
-      'data-source',
-      'alertDetails-apm.transaction_duration'
-    );
+
+    fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
+
+    const errorsInDiscoverAction = getByTestId('apmAlertDetailsErrorsOpenInDiscoverAction');
+    expect(errorsInDiscoverAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(errorsInDiscoverAction).toHaveAttribute('data-ebt-element', 'errorCountChart');
+    expect(errorsInDiscoverAction).toHaveAttribute('data-ebt-detail', 'apm.error_rate');
   });
 
   describe('In APM action', () => {
@@ -176,6 +202,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.transaction_duration"
+          element={RED_METRICS_CHART_ELEMENT.LATENCY}
         />
       );
 
@@ -199,6 +226,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.error_rate"
+          element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
         />
       );
 
@@ -222,6 +250,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.error_rate"
+          element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
         />
       );
 
