@@ -20,6 +20,7 @@ import type {
   XYChartElementEvent,
   XYChartSeriesIdentifier,
   SettingsProps,
+  Truncate,
 } from '@elastic/charts';
 import {
   Chart,
@@ -484,10 +485,14 @@ export function XYChart({
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
 
+  const getTickLabelTruncationStyle = (
+    width: Truncate['width'] | undefined,
+    position: Truncate['position'] = 'end'
+  ): Truncate | undefined => (width !== undefined ? { width, position } : undefined);
+
   const getYAxesStyle = (axis: AxisConfiguration) => {
     const tickVisible = axis.showLabels;
     const position = getOriginalAxisPosition(axis.position, shouldRotate);
-
     const style = {
       tickLabel: {
         fill: axis.labelColor,
@@ -499,6 +504,7 @@ export function XYChart({
                 inner: linesPaddings[position],
               }
             : undefined,
+        truncation: getTickLabelTruncationStyle(axis.truncate),
       },
       axisTitle: {
         visible: axis.showTitle,
@@ -721,6 +727,7 @@ export function XYChart({
           rotation: xAxisConfig?.labelsOrientation,
           padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
           fill: xAxisConfig?.labelColor,
+          truncation: getTickLabelTruncationStyle(xAxisConfig?.truncate, 'middle'),
         },
         axisTitle: {
           visible: xAxisConfig?.showTitle,
@@ -947,13 +954,7 @@ export function XYChart({
               title={xTitle}
               gridLine={gridLineStyle}
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
-              tickFormat={(d) => {
-                let value = safeXAccessorLabelRenderer(d) || '';
-                if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
-                  value = `${value.slice(0, xAxisConfig.truncate)}...`;
-                }
-                return value;
-              }}
+              tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
               maximumFractionDigits={xTickDecimals}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
@@ -983,13 +984,7 @@ export function XYChart({
                     visible: axis.showGridLines,
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
-                  tickFormat={(d) => {
-                    let value = axis.formatter?.convert(d) || '';
-                    if (axis.truncate && value.length > axis.truncate) {
-                      value = `${value.slice(0, axis.truncate)}...`;
-                    }
-                    return value;
-                  }}
+                  tickFormat={(d) => axis.formatter?.convert(d) || ''}
                   maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
