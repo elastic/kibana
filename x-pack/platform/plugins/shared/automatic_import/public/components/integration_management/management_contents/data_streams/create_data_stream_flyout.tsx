@@ -39,7 +39,7 @@ import {
 } from '../../../../../common';
 import { PLUGIN_ID } from '../../../../../common/constants';
 import type { LogsSourceOption } from '../../forms/types';
-import { useIntegrationForm } from '../../forms/integration_form';
+import { useIntegrationForm, usePackageNames } from '../../forms/integration_form';
 import * as formI18n from '../../forms/translations';
 import * as i18n from './translations';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
@@ -142,6 +142,7 @@ interface AnalyzeLogsValidationParams {
   connectorId?: string;
   dataStreamDescription?: string;
   dataCollectionMethod?: string[];
+  hasDuplicateIntegrationName: boolean;
   hasDuplicateDataStreamName: boolean;
   logsSourceOption: string;
   logSample?: string;
@@ -156,6 +157,9 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
   } else {
     if (!meetsMinLength(params.integrationTitle)) {
       reasons.push(formI18n.NAME_TOO_SHORT);
+    }
+    if (params.hasDuplicateIntegrationName) {
+      reasons.push(formI18n.TITLE_ALREADY_EXISTS);
     }
     if (!isValidNameFormat(params.integrationTitle)) {
       reasons.push(formI18n.NAME_INVALID_FORMAT);
@@ -212,6 +216,7 @@ interface AnalyzeFormValidityParams {
   dataStreamTitle: string;
   dataStreamDescription?: string;
   dataCollectionMethod?: string[];
+  hasDuplicateIntegrationName: boolean;
   hasDuplicateDataStreamName: boolean;
   logsSourceOption: string;
   logSample?: string;
@@ -228,6 +233,7 @@ const isValidTitle = (title: string): boolean =>
 
 const checkIntegrationFieldsValid = (params: AnalyzeFormValidityParams): boolean =>
   isValidTitle(params.integrationTitle) &&
+  !params.hasDuplicateIntegrationName &&
   !!params.description?.trim() &&
   !!params.connectorId?.trim();
 
@@ -362,6 +368,14 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const hasDuplicateDataStreamName =
     !!dataStreamTitle && existingDataStreamNames.has(dataStreamTitle.toLowerCase());
 
+  const packageNames = usePackageNames();
+  const hasDuplicateIntegrationName = useMemo(() => {
+    if (!integrationTitle || !packageNames) return false;
+    const normalized = normalizeTitleName(integrationTitle);
+    if (currentIntegrationId && normalized === currentIntegrationId) return false;
+    return packageNames.has(normalized);
+  }, [integrationTitle, packageNames, currentIntegrationId]);
+
   const { isAnalyzeDisabled } = useAnalyzeFormValidity({
     integrationTitle,
     description: formData?.description,
@@ -369,6 +383,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     dataStreamTitle,
     dataStreamDescription: formData?.dataStreamDescription,
     dataCollectionMethod: formData?.dataCollectionMethod,
+    hasDuplicateIntegrationName,
     hasDuplicateDataStreamName,
     logsSourceOption,
     logSample,
@@ -389,6 +404,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         connectorId: formData?.connectorId,
         dataStreamDescription: formData?.dataStreamDescription,
         dataCollectionMethod: formData?.dataCollectionMethod,
+        hasDuplicateIntegrationName,
         hasDuplicateDataStreamName,
         logsSourceOption,
         logSample,
@@ -402,6 +418,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       formData?.connectorId,
       formData?.dataStreamDescription,
       formData?.dataCollectionMethod,
+      hasDuplicateIntegrationName,
       hasDuplicateDataStreamName,
       logsSourceOption,
       logSample,
