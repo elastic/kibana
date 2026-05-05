@@ -26,6 +26,28 @@ export interface SmlChunk {
   title: string;
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
+  /**
+   * Optional ISO timestamp to use as the chunk's `created_at`.
+   *
+   * When provided, the indexer stores this value on the chunk's `created_at`
+   * instead of the indexer's "now". This is useful for SML types whose chunks
+   * represent historical events (e.g. a turn in a past conversation) where each
+   * chunk has an authoritative point-in-time timestamp distinct from when the
+   * crawler indexed it. The chunk's `updated_at` always reflects the time the
+   * indexer wrote the chunk.
+   */
+  createdAt?: string;
+  /**
+   * Optional owner of the underlying data, used for per-user access filtering
+   * at search time. When set, the chunk is only returned to search/access
+   * checks issued by the same user (matched on `username`). Chunks without a
+   * `userId` are visible to any user whose space and Kibana privileges match
+   * (existing behavior).
+   *
+   * Used for SML types that wrap user-private data such as agent_builder
+   * conversations.
+   */
+  userId?: string;
 }
 
 /**
@@ -126,6 +148,8 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /** Owner of the underlying data, when the chunk represents user-private data. */
+  user_id?: string;
 }
 
 /**
@@ -213,11 +237,17 @@ export interface SmlService {
     logger: Logger;
   }) => Promise<void>;
 
-  /** Fetch SML documents by their chunk IDs, scoped to a space */
+  /**
+   * Fetch SML documents by their chunk IDs, scoped to a space.
+   * When `request` is provided, user-scoped chunks (those with `user_id`) are
+   * filtered to the requesting user; without a request, only non-user-scoped
+   * chunks are returned.
+   */
   getDocuments: (params: {
     ids: string[];
     spaceId: string;
     esClient: IScopedClusterClient;
+    request?: KibanaRequest;
   }) => Promise<Map<string, SmlDocument>>;
 
   /** Get a type definition by ID */

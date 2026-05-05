@@ -65,6 +65,7 @@ export const resolveSmlAttachItems = async ({
     ids: uniqueChunkIds,
     spaceId,
     esClient,
+    request,
   });
 
   return Promise.all(

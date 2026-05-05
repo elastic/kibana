@@ -133,10 +133,11 @@ class SmlIndexerImpl implements SmlIndexer {
             title: chunk.title,
             origin_id: originId,
             content: chunk.content,
-            created_at: now,
+            created_at: chunk.createdAt ?? now,
             updated_at: now,
             spaces,
             permissions: chunk.permissions ?? [],
+            ...(chunk.userId ? { user_id: chunk.userId } : {}),
           },
         },
       };

@@ -405,5 +405,81 @@ describe('createSmlIndexer', () => {
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.operations[0].index.document.permissions).toEqual([]);
     });
+
+    it('chunk.createdAt overrides created_at; updated_at always reflects index time', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [
+          {
+            type: 'conversation',
+            title: 'Past turn',
+            content: 'c',
+            createdAt: '2020-01-02T03:04:05.000Z',
+          },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'conversation', getSmlData })
+      );
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'conv-1',
+          attachmentType: 'conversation',
+          action: 'create',
+          esClient,
+        })
+      );
+
+      const doc = bulkMock.mock.calls[0][0].operations[0].index.document;
+      expect(doc.created_at).toBe('2020-01-02T03:04:05.000Z');
+      expect(typeof doc.updated_at).toBe('string');
+      expect(doc.updated_at).not.toBe('2020-01-02T03:04:05.000Z');
+    });
+
+    it('chunk.userId is persisted on the document; omitted when not set', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [
+          {
+            type: 'conversation',
+            title: 'Owned',
+            content: 'c',
+            userId: 'alice',
+          },
+          { type: 'conversation', title: 'Anonymous', content: 'd' },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'conversation', getSmlData })
+      );
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'conv-2',
+          attachmentType: 'conversation',
+          action: 'create',
+          esClient,
+        })
+      );
+
+      const ops = bulkMock.mock.calls[0][0].operations;
+      expect(ops[0].index.document.user_id).toBe('alice');
+      expect(ops[1].index.document.user_id).toBeUndefined();
+    });
   });
 });

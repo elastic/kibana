@@ -19,6 +19,7 @@ import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
 import { visualizationSmlType } from './sml_types/visualization';
 import { createConnectorSmlType } from './sml_types/connector';
+import { conversationSmlType } from './sml_types/conversation';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 
 export class AgentBuilderPlatformPlugin
@@ -50,6 +51,7 @@ export class AgentBuilderPlatformPlugin
     });
     registerSkills(setupDeps.agentBuilder);
     setupDeps.agentContextLayer.registerType(visualizationSmlType);
+    setupDeps.agentContextLayer.registerType(conversationSmlType);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {

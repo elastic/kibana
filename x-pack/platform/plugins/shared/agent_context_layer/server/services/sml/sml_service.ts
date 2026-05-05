@@ -10,6 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SmlService, SmlSearchResult, SmlDocument, SmlTypeDefinition } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
@@ -28,6 +29,12 @@ export interface SmlServiceSetup {
 export interface SmlServiceStartDeps {
   logger: Logger;
   securityAuthz?: AuthorizationServiceSetup;
+  /**
+   * Security service used to derive the current user's username from the
+   * incoming request, which is then used as a per-document user filter
+   * for chunks that opt in via `SmlChunk.userId`.
+   */
+  security?: SecurityServiceStart;
 }
 
 export interface SmlServiceInstance {
@@ -44,6 +51,7 @@ class SmlServiceImpl implements SmlServiceInstance {
   private indexer?: SmlIndexer;
   private crawler?: SmlCrawler;
   private securityAuthz?: AuthorizationServiceSetup;
+  private security?: SecurityServiceStart;
 
   constructor() {
     this.registry = createSmlTypeRegistry();
@@ -58,8 +66,9 @@ class SmlServiceImpl implements SmlServiceInstance {
     };
   }
 
-  start({ logger, securityAuthz }: SmlServiceStartDeps): SmlService {
+  start({ logger, securityAuthz, security }: SmlServiceStartDeps): SmlService {
     this.securityAuthz = securityAuthz;
+    this.security = security;
     if (!securityAuthz) {
       logger.warn(
         'SML service started without security authorization — permission checks are disabled (open access)'
@@ -76,10 +85,12 @@ class SmlServiceImpl implements SmlServiceInstance {
     return {
       getCrawler: () => crawler,
       search: async ({ query, size = 10, spaceId, esClient, request, skipContent }) => {
+        const userId = this.getUserIdForRequest(request);
         const rawResults = await searchSml({
           query,
           size,
           spaceId,
+          userId,
           esClient,
           logger,
           skipContent,
@@ -92,9 +103,11 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
       },
       checkItemsAccess: async ({ ids, spaceId, esClient, request }) => {
+        const userId = this.getUserIdForRequest(request);
         return checkItemsAccess({
           ids,
           spaceId,
+          userId,
           esClient,
           request,
           securityAuthz: this.securityAuthz,
@@ -104,8 +117,9 @@ class SmlServiceImpl implements SmlServiceInstance {
       indexAttachment: async (params) => {
         return this.getIndexer().indexAttachment(params);
       },
-      getDocuments: async ({ ids, spaceId, esClient }) => {
-        return getDocumentsByIds({ ids, spaceId, esClient, logger });
+      getDocuments: async ({ ids, spaceId, esClient, request }) => {
+        const userId = request ? this.getUserIdForRequest(request) : undefined;
+        return getDocumentsByIds({ ids, spaceId, userId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -121,6 +135,18 @@ class SmlServiceImpl implements SmlServiceInstance {
       throw new Error('SML indexer not initialized — call start() first');
     }
     return this.indexer;
+  }
+
+  /**
+   * Derive the username for the request, used to filter chunks that have an
+   * indexed `user_id`. Returns `undefined` for fake requests (e.g. background
+   * tasks) and when the security plugin is absent — in those cases all
+   * user-scoped chunks are excluded from the response (closed by default).
+   */
+  private getUserIdForRequest(request: KibanaRequest): string | undefined {
+    if (!this.security) return undefined;
+    if (request.isFakeRequest) return undefined;
+    return this.security.authc.getCurrentUser(request)?.username;
   }
 }
 
@@ -205,12 +231,42 @@ const filterResultsByPermissions = async ({
 };
 
 /**
+ * Build the bool clause that filters out user-scoped chunks the requester
+ * shouldn't see:
+ *
+ *  - chunks without `user_id` are visible to anyone (existing behavior)
+ *  - chunks with `user_id` are only visible when it matches the requester
+ *
+ * When the requester's username can't be resolved (fake request / no security),
+ * user-scoped chunks are excluded entirely.
+ */
+const buildUserScopeFilter = (userId: string | undefined): Record<string, unknown> => {
+  if (userId) {
+    return {
+      bool: {
+        should: [
+          { bool: { must_not: [{ exists: { field: 'user_id' } }] } },
+          { term: { user_id: userId } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+  }
+  return {
+    bool: {
+      must_not: [{ exists: { field: 'user_id' } }],
+    },
+  };
+};
+
+/**
  * Check whether the current user has access to specific SML items.
  * Looks up each item's permissions from the index and batch-checks them.
  */
 const checkItemsAccess = async ({
   ids,
   spaceId,
+  userId,
   esClient,
   request,
   securityAuthz,
@@ -218,6 +274,7 @@ const checkItemsAccess = async ({
 }: {
   ids: string[];
   spaceId: string;
+  userId: string | undefined;
   esClient: IScopedClusterClient;
   request: KibanaRequest;
   securityAuthz?: AuthorizationServiceSetup;
@@ -250,6 +307,7 @@ const checkItemsAccess = async ({
                 minimum_should_match: 1,
               },
             },
+            buildUserScopeFilter(userId),
           ],
         },
       },
@@ -341,6 +399,7 @@ const searchSml = async ({
   query,
   size,
   spaceId,
+  userId,
   esClient,
   logger,
   skipContent,
@@ -348,6 +407,7 @@ const searchSml = async ({
   query: string;
   size: number;
   spaceId: string;
+  userId: string | undefined;
   esClient: IScopedClusterClient;
   logger: Logger;
   skipContent?: boolean;
@@ -376,6 +436,7 @@ const searchSml = async ({
                 minimum_should_match: 1,
               },
             },
+            buildUserScopeFilter(userId),
           ],
         },
       },
@@ -401,6 +462,7 @@ const searchSml = async ({
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
+          ...(source.user_id ? { user_id: source.user_id } : {}),
           score: hit._score ?? 0,
         };
       });
@@ -424,11 +486,13 @@ const searchSml = async ({
 const getDocumentsByIds = async ({
   ids,
   spaceId,
+  userId,
   esClient,
   logger,
 }: {
   ids: string[];
   spaceId: string;
+  userId: string | undefined;
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<Map<string, SmlDocument>> => {
@@ -451,6 +515,7 @@ const getDocumentsByIds = async ({
                 minimum_should_match: 1,
               },
             },
+            buildUserScopeFilter(userId),
           ],
         },
       },
@@ -469,6 +534,7 @@ const getDocumentsByIds = async ({
         updated_at: source.updated_at ?? '',
         spaces: source.spaces ?? [],
         permissions: source.permissions ?? [],
+        ...(source.user_id ? { user_id: source.user_id } : {}),
       };
       docMap.set(doc.id, doc);
     }

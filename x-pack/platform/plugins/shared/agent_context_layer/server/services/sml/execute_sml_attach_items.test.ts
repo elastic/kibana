@@ -88,6 +88,7 @@ describe('resolveSmlAttachItems', () => {
       ids: ['a', 'b'],
       spaceId: 'default',
       esClient: baseParams.esClient,
+      request: baseParams.request,
     });
   });
 
@@ -108,6 +109,7 @@ describe('resolveSmlAttachItems', () => {
       ids: ['chunk-1'],
       spaceId: 'default',
       esClient: baseParams.esClient,
+      request: baseParams.request,
     });
   });
 

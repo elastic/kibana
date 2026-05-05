@@ -60,6 +60,7 @@ export interface AgentContextLayerPluginStart {
     ids: string[];
     spaceId: string;
     esClient: IScopedClusterClient;
+    request?: KibanaRequest;
   }) => Promise<Map<string, SmlDocument>>;
 
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;

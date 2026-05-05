@@ -97,6 +97,7 @@ export class AgentContextLayerPlugin
     this.smlService = this.smlServiceInstance.start({
       logger: this.logger.get('sml'),
       securityAuthz: security?.authz,
+      security: coreStart.security,
     });
 
     const smlService = this.smlService;

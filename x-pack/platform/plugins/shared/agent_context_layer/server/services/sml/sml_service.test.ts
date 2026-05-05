@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { createSmlService, isNotFoundError } from './sml_service';
 import { smlIndexName } from './sml_storage';
 import type { SmlTypeDefinition } from './types';
@@ -65,6 +66,29 @@ const createMockSecurityAuthzPartial = (
     checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
   } as unknown as AuthorizationServiceSetup;
 };
+
+const createMockSecurityService = (username: string | undefined): SecurityServiceStart => {
+  return {
+    authc: {
+      getCurrentUser: jest.fn().mockReturnValue(username ? { username } : null),
+    },
+  } as unknown as SecurityServiceStart;
+};
+
+/** Filter clause produced for a request whose user resolves to `undefined`. */
+const NO_USER_SCOPE_FILTER = {
+  bool: { must_not: [{ exists: { field: 'user_id' } }] },
+};
+/** Filter clause produced for a request whose user resolves to `userId`. */
+const userScopeFilter = (userId: string) => ({
+  bool: {
+    should: [
+      { bool: { must_not: [{ exists: { field: 'user_id' } }] } },
+      { term: { user_id: userId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
 
 const createMockSmlTypeDefinition = (
   overrides: Partial<SmlTypeDefinition> = {}
@@ -222,6 +246,7 @@ describe('SmlService', () => {
                 minimum_should_match: 1,
               },
             },
+            NO_USER_SCOPE_FILTER,
           ],
         },
       });
@@ -761,6 +786,7 @@ describe('SmlService', () => {
                     minimum_should_match: 1,
                   },
                 },
+                NO_USER_SCOPE_FILTER,
               ],
             },
           },
@@ -923,6 +949,7 @@ describe('SmlService', () => {
                     minimum_should_match: 1,
                   },
                 },
+                NO_USER_SCOPE_FILTER,
               ],
             },
           },
@@ -931,6 +958,189 @@ describe('SmlService', () => {
       expect(
         (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('per-user filter (SmlChunk.userId)', () => {
+    it('search uses user-scope clause when security resolves a username', async () => {
+      const security = createMockSecurityService('alice');
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, security });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.search({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual(userScopeFilter('alice'));
+    });
+
+    it('search excludes user-scoped chunks when no username is resolved', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.search({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual(NO_USER_SCOPE_FILTER);
+    });
+
+    it('search excludes user-scoped chunks for fake requests even with security present', async () => {
+      const security = createMockSecurityService('alice');
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, security });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.search({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request: { isFakeRequest: true } as unknown as KibanaRequest,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual(NO_USER_SCOPE_FILTER);
+      expect(call.query!.bool!.filter).not.toContainEqual(userScopeFilter('alice'));
+    });
+
+    it('checkItemsAccess applies the user-scope filter', async () => {
+      const security = createMockSecurityService('bob');
+      const securityAuthz = createMockSecurityAuthz([]);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, security, securityAuthz });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.checkItemsAccess({
+        ids: ['x'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual(userScopeFilter('bob'));
+    });
+
+    it('getDocuments applies the user-scope filter when called with a request', async () => {
+      const security = createMockSecurityService('carol');
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, security });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.getDocuments({
+        ids: ['x'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual(userScopeFilter('carol'));
+    });
+
+    it('getDocuments without request excludes user-scoped chunks', async () => {
+      const security = createMockSecurityService('carol');
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, security });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.getDocuments({
+        ids: ['x'],
+        spaceId: 'default',
+        esClient: scopedClient,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual(NO_USER_SCOPE_FILTER);
+    });
+
+    it('search returns user_id field in results when present on the source doc', async () => {
+      const security = createMockSecurityService('alice');
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, security });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'chunk-1',
+                type: 'conversation',
+                title: 'A turn',
+                origin_id: 'conv-1',
+                content: 'hi',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
+                spaces: ['default'],
+                permissions: [],
+                user_id: 'alice',
+              },
+              _score: 1,
+            },
+          ],
+        },
+      } as any);
+
+      const res = await smlService.search({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(res.results[0].user_id).toBe('alice');
     });
   });
 });
