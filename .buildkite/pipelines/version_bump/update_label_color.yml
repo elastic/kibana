@@ -2,6 +2,7 @@ steps:
   - name: 'Update Label Color'
     key: update-label-color
     command: .buildkite/scripts/steps/version_bump/update_label_color.sh
+    depends_on: fetch-dra-artifacts
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
