@@ -7,10 +7,12 @@
 
 import Fs from 'fs';
 import * as Url from 'url';
-import { EsArchiver } from '@kbn/es-archiver';
-import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { EsArchiver } from '@kbn/es-archiver';
+import { KbnClient } from '@kbn/kbn-client';
+import { createEsClientForTesting } from '@kbn/test-es-server';
+import { ToolingLog } from '@kbn/tooling-log';
+import { systemIndicesTestUser } from './system_indices_test_user';
 
 interface ClientOptions {
   url: string;
@@ -37,9 +39,9 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
-  let authOverride = systemIndicesSuperuser;
+  let authOverride = systemIndicesTestUser;
   if (isServerless) {
-    authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
+    authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesTestUser;
   }
 
   const client = createEsClientForTesting({

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { systemIndicesSuperuser } from '@kbn/test';
-import { createEsClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import * as Url from 'url';
+import { createEsClientForTesting } from '@kbn/test-es-server';
+import { systemIndicesTestUser } from './system_indices_test_user';
 
 export const esClient = (
   on: Cypress.PluginEvents,
@@ -24,12 +25,11 @@ export const esClient = (
   system_indices_superuser is a user created for testing purposes (an operator one) that does not have restrictions,
   that user is the one used on ESS and stateless environments to access internal indexes directly and does not exist on MKI environments.
   */
-  const authOverride = isServerless ? (isCloudServerless ? user : systemIndicesSuperuser) : user;
+  const authOverride = isServerless ? (isCloudServerless ? user : systemIndicesTestUser) : user;
 
-  const client = createEsClient({
-    url: config.env.ELASTICSEARCH_URL,
-    username: authOverride?.username,
-    password: authOverride?.password,
+  const client = createEsClientForTesting({
+    esUrl: Url.format(config.env.ELASTICSEARCH_URL as string),
+    authOverride,
   });
 
   on('task', {

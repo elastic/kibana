@@ -139,6 +139,7 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+/tsconfig.runtime.json
 *.type_check.json
 
 # Yarn local mirror content

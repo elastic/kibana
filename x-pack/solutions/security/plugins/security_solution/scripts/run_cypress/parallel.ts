@@ -6,6 +6,8 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import { execFileSync } from 'child_process';
+import fs from 'fs';
 import yargs from 'yargs';
 import _ from 'lodash';
 import globby from 'globby';
@@ -15,6 +17,7 @@ import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
 import path from 'path';
 import { plugin as grep } from '@cypress/grep/plugin';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
@@ -44,6 +47,24 @@ import type { LoadBalancerConfig, SpecGroup } from './utils';
 import { getFTRConfig } from './get_ftr_config';
 import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
+
+/**
+ * Cypress spawns a separate process that uses `tsx` to load `cypress.config` (TS/JS).
+ * That process must not apply `tsconfig.base.json`'s `paths.axios` → `index.d.ts` emit hack,
+ * or `tsx` will execute the `.d.ts` and throw `ReferenceError: axios is not defined`.
+ * The embedded `tsx` reads `process.env.TSX_TSCONFIG_PATH` (not all shells forward env
+ * into the Cypress/Electron process reliably, so we set it here in the parent runner).
+ */
+const ensureCypressTsxRuntimeTsconfig = () => {
+  const tsconfigPath = path.join(REPO_ROOT, 'tsconfig.runtime.json');
+  const genScript = path.join(REPO_ROOT, 'scripts', 'generate_tsconfig_runtime.js');
+  if (!fs.existsSync(tsconfigPath) && fs.existsSync(genScript)) {
+    execFileSync(process.execPath, [genScript], { cwd: REPO_ROOT, stdio: 'inherit' });
+  }
+  if (fs.existsSync(tsconfigPath)) {
+    process.env.TSX_TSCONFIG_PATH = tsconfigPath;
+  }
+};
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -77,6 +98,8 @@ const filterCompletedSpecs = async (
 export const cli = () => {
   run(
     async ({ log: _cliLogger }) => {
+      ensureCypressTsxRuntimeTsconfig();
+
       const { argv } = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))

@@ -27,7 +27,16 @@ export {
 } from './src/certs';
 export * from './src/dev_service_account';
 export * from './src/axios';
-export * from './src/plugin_list';
+
+/**
+ * Lazy-loaded to keep the plugin-list CLI's transitive deps (e.g. `@kbn/dev-cli-runner`
+ * → `@kbn/ci-stats-reporter` → `axios`) out of consumer import graphs such as
+ * Cypress configs loaded by the Cypress-embedded `tsx`. Only `scripts/build_plugin_list_docs.js`
+ * calls this.
+ */
+export function runPluginListCli() {
+  return import('./src/plugin_list').then((m) => m.runPluginListCli());
+}
 export * from './src/streams';
 export * from './src/extract';
 export * from './src/diff_strings';

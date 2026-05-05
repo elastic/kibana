@@ -9,4 +9,12 @@
 
 export type { LoadActionPerfOptions } from './src/lib/docs';
 export { EsArchiver } from './src/es_archiver';
-export * from './src/cli';
+
+/**
+ * Lazy-loaded to keep the CLI's transitive deps (e.g. `@kbn/dev-cli-runner`
+ * → `@kbn/ci-stats-reporter` → `axios`) out of consumer import graphs such
+ * as Cypress configs loaded by the Cypress-embedded `tsx`.
+ */
+export function runCli() {
+  return import('./src/cli').then((m) => m.runCli());
+}
