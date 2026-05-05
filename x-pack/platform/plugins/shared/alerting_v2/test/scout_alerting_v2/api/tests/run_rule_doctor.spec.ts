@@ -6,14 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { apiTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { RULE_DOCTOR_DEDUP_WORKFLOW_ID } from '../../../../server/workflows/load_workflows';
+import { apiTest, testData } from '../fixtures';
 import {
-  API_HEADERS,
   RULE_DOCTOR_RUN_API_PATH,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '../fixtures';
+} from '../../common/constants';
 
 apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
@@ -30,7 +30,7 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
 
   apiTest.afterAll(async ({ apiClient, kbnClient }) => {
     await apiClient.delete(`/api/workflows/workflow/${RULE_DOCTOR_DEDUP_WORKFLOW_ID}?force=true`, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
     });
 
     await kbnClient.uiSettings.update({
@@ -40,7 +40,7 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
 
   apiTest('should accept a deduplication run and return 202', async ({ apiClient }) => {
     const response = await apiClient.post(RULE_DOCTOR_RUN_API_PATH, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       body: { type: 'deduplication' },
       responseType: 'json',
     });
@@ -52,7 +52,7 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
 
   apiTest('should reject an invalid analysis type with 400', async ({ apiClient }) => {
     const response = await apiClient.post(RULE_DOCTOR_RUN_API_PATH, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       body: { type: 'invalid_type' },
       responseType: 'json',
     });
@@ -64,7 +64,7 @@ apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
 
   apiTest('should return 403 for a viewer without write privileges', async ({ apiClient }) => {
     const response = await apiClient.post(RULE_DOCTOR_RUN_API_PATH, {
-      headers: { ...API_HEADERS, ...viewerCredentials.apiKeyHeader },
+      headers: { ...testData.COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
       body: { type: 'deduplication' },
       responseType: 'json',
     });
