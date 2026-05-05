@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import type { Streams, IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { PhaseName } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
@@ -129,6 +129,28 @@ const IlmLifecycleSummary = ({
 
   return (
     <>
+      {ilmSummary.policyMissing && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.streams.lifecycleSummary.policyMissingTitle', {
+              defaultMessage: 'ILM policy not found',
+            })}
+            color="warning"
+            iconType="warning"
+            data-test-subj="lifecycleSummary-policyMissingCallout"
+          >
+            {i18n.translate('xpack.streams.lifecycleSummary.policyMissingDescription', {
+              defaultMessage:
+                'The ILM policy "{policyName}" referenced by this data stream does not exist. Assign a valid ILM policy to restore lifecycle management.',
+              values: {
+                policyName: (definition.effective_lifecycle as IngestStreamLifecycleILM).ilm
+                  .policy,
+              },
+            })}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <DataLifecycleSummary
         model={{
           phases: ilmSummary.phases,

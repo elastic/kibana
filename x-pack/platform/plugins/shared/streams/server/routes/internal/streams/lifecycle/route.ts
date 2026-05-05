@@ -90,30 +90,28 @@ const lifecycleStatsRoute = createServerRoute({
     }
 
     const policyName = lifecycle.ilm.policy;
-    let policyEntry: Awaited<
+    let policyDetails: Awaited<
       ReturnType<typeof scopedClusterClient.asCurrentUser.ilm.getLifecycle>
-    >[string];
+    >;
     try {
-      policyEntry = await scopedClusterClient.asCurrentUser.ilm
-        .getLifecycle({ name: policyName })
-        .then((policies) => policies[policyName]);
+      policyDetails = await scopedClusterClient.asCurrentUser.ilm.getLifecycle({
+        name: policyName,
+      });
     } catch (error) {
       if (isNotFoundError(error)) {
-        throw new StatusError(
-          `ILM policy '${policyName}' not found: the data stream references an ILM policy that does not exist`,
-          404
-        );
+        return { phases: undefined, policy_missing: true };
       }
       throw error;
     }
-    const { policy } = policyEntry;
+
+    const { policy } = policyDetails[policyName];
 
     const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] = await Promise.all([
       scopedClusterClient.asCurrentUser.ilm.explainLifecycle({ index: name }),
       scopedClusterClient.asCurrentUser.indices.stats({ index: dataStream.name }),
     ]);
 
-    return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }) };
+    return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }), policy_missing: false };
   },
 });
 
