@@ -742,7 +742,7 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
-    it('uses a stable promptId across re-invocations for an attachment-driven workflow', async () => {
+    it('uses a stable promptId for identical re-invocations (so accept/execute round-trip works)', async () => {
       const contextA = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
       });
@@ -750,12 +750,88 @@ describe('registerWorkflowExecuteStepTool', () => {
         executionMode: AgentExecutionMode.conversation,
       });
 
-      await invokePromptHandler(registeredTool, { stepName: 'send_slack' }, contextA);
-      await invokePromptHandler(registeredTool, { stepName: 'send_slack' }, contextB);
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextA
+      );
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextB
+      );
 
       const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
       const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
       expect(idA).toBe(idB);
+    });
+
+    it('produces a different promptId when confirmation_body changes (per-call freshness)', async () => {
+      const contextA = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const contextB = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextA
+      );
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send goodbye to #alerts' },
+        contextB
+      );
+
+      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      expect(idA).not.toBe(idB);
+    });
+
+    it('produces a different promptId when contextOverride changes', async () => {
+      const contextA = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const contextB = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', contextOverride: { steps: { prev: { output: { id: 1 } } } } },
+        contextA
+      );
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', contextOverride: { steps: { prev: { output: { id: 2 } } } } },
+        contextB
+      );
+
+      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      expect(idA).not.toBe(idB);
+    });
+
+    it('prompts for confirmation when a foreach contains an unsafe descendant (conversation mode)', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'outer_foreach',
+          confirmation_body: 'Will iterate `items` and POST each to https://example.com',
+        },
+        context
+      );
+
+      expect(result.prompt).toBeDefined();
+      expect(result.prompt.type).toBe(AgentPromptType.confirmation);
+      expect((result.prompt as any).color).toBe('warning');
+      expect((result.prompt as any).message).toContain('https://example.com');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
     it('keeps if/while-with-unsafe-children on the stub path (no prompt)', async () => {

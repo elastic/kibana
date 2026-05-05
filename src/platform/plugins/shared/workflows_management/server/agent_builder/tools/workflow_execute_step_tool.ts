@@ -12,6 +12,7 @@ import YAML, { LineCounter, parseDocument } from 'yaml';
 import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import {
@@ -410,17 +411,45 @@ const executeConditionStepWithStubs = async ({
   }
 };
 
+/**
+ * Builds a prompt id that is stable for a single tool invocation (so the
+ * accept -> re-enter -> execute round-trip works) but varies across separate
+ * invocations of the same step in the same conversation.
+ *
+ * `context.prompts` does not expose `toolCallId`, so we approximate per-call
+ * uniqueness by hashing the user-meaningful inputs the LLM provides:
+ * `confirmationBody`, `contextOverride`, and the YAML version. When the
+ * framework re-enters the handler after the user accepts the prompt, the
+ * args are replayed verbatim, so the hash matches and the prior `accepted`
+ * response is reused. A subsequent agent call with any different input
+ * produces a different id and re-prompts the user.
+ *
+ * Identical-input re-calls still reuse a prior accept; that is an accepted
+ * residual of not having toolCallId access. See PR #267673 discussion.
+ */
 const buildPromptId = ({
   workflowId,
   yaml,
   stepName,
+  contextOverride,
+  confirmationBody,
 }: {
   workflowId?: string;
   yaml: string;
   stepName: string;
+  contextOverride?: Record<string, unknown>;
+  confirmationBody?: string;
 }): string => {
   const scope = workflowId ?? createHash('sha256').update(yaml).digest('hex').slice(0, 16);
-  return `workflow_execute_step.${scope}.${stepName}`;
+  const callFingerprint = createHash('sha256')
+    .update(confirmationBody ?? '')
+    .update(' ')
+    .update(contextOverride ? JSON.stringify(contextOverride) : '')
+    .update(' ')
+    .update(yaml)
+    .digest('hex')
+    .slice(0, 12);
+  return `workflow_execute_step.${scope}.${stepName}.${callFingerprint}`;
 };
 
 const buildFallbackPreview = (
@@ -428,16 +457,30 @@ const buildFallbackPreview = (
   contextOverride?: Record<string, unknown>
 ): string => {
   const lines: string[] = [
-    `**Step:** \`${stepInfo.stepId}\``,
-    `**Type:** \`${stepInfo.stepType}\``,
+    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.step', {
+      defaultMessage: '**Step:** `{stepId}`',
+      values: { stepId: stepInfo.stepId },
+    }),
+    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.type', {
+      defaultMessage: '**Type:** `{stepType}`',
+      values: { stepType: stepInfo.stepType },
+    }),
   ];
   if (contextOverride && Object.keys(contextOverride).length > 0) {
     const keys = Object.keys(contextOverride).join(', ');
-    lines.push(`**Context override keys:** ${keys}`);
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.contextOverrideKeys', {
+        defaultMessage: '**Context override keys:** {keys}',
+        values: { keys },
+      })
+    );
   }
   lines.push(
     '',
-    'This step has external side effects. Review the workflow YAML before confirming — the LLM did not provide a custom preview.'
+    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.body', {
+      defaultMessage:
+        'This step has external side effects. Review the workflow YAML before confirming.',
+    })
   );
   return lines.join('\n');
 };
@@ -608,13 +651,31 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
       if (!stepInfo) {
         return createToolResult({
           success: false,
-          error: `Step "${stepName}" not found in the workflow YAML`,
+          error: i18n.translate('workflows.agentBuilder.executeStep.error.stepNotFound', {
+            defaultMessage: 'Step "{stepName}" not found in the workflow YAML',
+            values: { stepName },
+          }),
         });
       }
 
       const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType);
+      const unsafeStep = isStepUnsafe ? stepInfo : findUnsafeStep(stepName, lookup.steps);
+      const isCondition = CONDITION_STEP_TYPES.has(stepInfo.stepType);
 
-      if (isStepUnsafe) {
+      // Conditions with unsafe descendants: stub the children and run the
+      // condition, no prompt — execution stays side-effect-free.
+      if (unsafeStep && isCondition && !isStepUnsafe && unsafeStep.stepId !== stepName) {
+        return executeConditionStepWithStubs({
+          api,
+          yaml,
+          stepName,
+          workflowId,
+          contextOverride,
+          context,
+        });
+      }
+
+      if (unsafeStep) {
         // Standalone (non-interactive) runs cannot prompt — fall back to the
         // existing preview-only result. This keeps background runs / evals /
         // A2A invocations friction-free.
@@ -624,63 +685,51 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
             yaml,
             stepName,
             stepInfo,
-            unsafeStep: stepInfo,
+            unsafeStep,
             context,
           });
         }
 
-        const promptId = buildPromptId({ workflowId, yaml, stepName });
+        const promptId = buildPromptId({
+          workflowId,
+          yaml,
+          stepName,
+          contextOverride,
+          confirmationBody,
+        });
         const status = context.prompts.checkConfirmationStatus(promptId);
 
         if (status.status === ConfirmationStatus.rejected) {
           return createToolResult({
             success: false,
-            error: 'User declined to execute this step.',
+            error: i18n.translate('workflows.agentBuilder.executeStep.error.userDeclined', {
+              defaultMessage: 'User declined to execute this step.',
+            }),
           });
         }
 
         if (status.status === ConfirmationStatus.unprompted) {
-          const isDestructive = DESTRUCTIVE_STEP_TYPES.has(stepInfo.stepType);
+          const isDestructive = DESTRUCTIVE_STEP_TYPES.has(unsafeStep.stepType);
           return context.prompts.askForConfirmation({
             id: promptId,
-            title: `Execute step "${stepName}" (${stepInfo.stepType})`,
+            title: i18n.translate('workflows.agentBuilder.executeStep.confirmation.title', {
+              defaultMessage: 'Execute step "{stepName}" ({stepType})',
+              values: { stepName, stepType: stepInfo.stepType },
+            }),
             message: confirmationBody ?? buildFallbackPreview(stepInfo, contextOverride),
-            confirm_text: 'Run step',
-            cancel_text: 'Cancel',
+            confirm_text: i18n.translate(
+              'workflows.agentBuilder.executeStep.confirmation.confirmText',
+              { defaultMessage: 'Run step' }
+            ),
+            cancel_text: i18n.translate(
+              'workflows.agentBuilder.executeStep.confirmation.cancelText',
+              { defaultMessage: 'Cancel' }
+            ),
             color: isDestructive ? 'danger' : 'warning',
           });
         }
 
         // accepted → fall through to execute below
-      } else {
-        // Step itself is safe; check whether descendants are unsafe.
-        const unsafeStep = findUnsafeStep(stepName, lookup.steps);
-
-        if (
-          unsafeStep &&
-          CONDITION_STEP_TYPES.has(stepInfo.stepType) &&
-          unsafeStep.stepId !== stepName
-        ) {
-          return executeConditionStepWithStubs({
-            api,
-            yaml,
-            stepName,
-            workflowId,
-            contextOverride,
-            context,
-          });
-        }
-
-        if (unsafeStep) {
-          return createUnsafeStepResult({
-            api,
-            yaml,
-            stepName,
-            stepInfo,
-            unsafeStep,
-            context,
-          });
-        }
       }
 
       try {
