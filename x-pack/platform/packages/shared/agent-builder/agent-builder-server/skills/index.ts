@@ -15,3 +15,4 @@ export type {
   WorkflowSkillBoundedTool,
   StaticEsqlSkillBoundedTool,
 } from './tools';
+export type { SkillRegistry } from './registry';

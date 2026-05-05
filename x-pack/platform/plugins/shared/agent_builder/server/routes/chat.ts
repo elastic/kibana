@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -73,6 +74,7 @@ export function registerChatRoutes({
     ),
     conversation_id: schema.maybe(
       schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
         meta: {
           description: 'Optional existing conversation ID to continue a previous conversation.',
         },
@@ -301,6 +303,7 @@ export function registerChatRoutes({
         agentId,
         connectorId,
         conversationId,
+        autoCreateConversationWithId: true,
         capabilities,
         browserApiTools,
         configurationOverrides,

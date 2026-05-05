@@ -1926,10 +1926,6 @@
                 "path": "x-pack/platform/plugins/shared/security/public/components/use_badge.ts"
               },
               {
-                "plugin": "@kbn/management-settings-application",
-                "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/components/app/use_readonly_header.ts"
               },
@@ -1940,6 +1936,10 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/public/render_app.tsx"
+              },
+              {
+                "plugin": "@kbn/management-settings-application",
+                "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx"
               },
               {
                 "plugin": "dashboard",
