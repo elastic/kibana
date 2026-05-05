@@ -196,24 +196,37 @@ export const createRiskScoreMaintainer = ({
         phase0LookupStage.error({ errorKind: 'unexpected' });
         throw error;
       }
-      for (const entityType of runConfig.entityTypes) {
-        if (abortController.signal.aborted) {
-          logger.info('Risk score maintainer run aborted before processing entity type');
-          break;
-        }
-        await executeEntityTypeRun({
-          entityType,
-          crudClient,
-          logger,
-          abortSignal: abortController.signal,
-          telemetryReporter,
-          metricsTracker,
-          runContext,
-          runConfig,
-          calculationRunId,
-          runNow,
-        });
-      }
+      // Entity types are scored in parallel: each run reads alerts independently
+      // and writes to the same risk-score data stream and entity store, with no
+      // shared per-run state in this maintainer. A failure in one entity type
+      // is logged and isolated so the remaining types still complete.
+      await Promise.all(
+        runConfig.entityTypes.map(async (entityType) => {
+          if (abortController.signal.aborted) {
+            logger.info(
+              `Risk score maintainer run aborted before processing entity type "${entityType}"`
+            );
+            return;
+          }
+          try {
+            await executeEntityTypeRun({
+              entityType,
+              crudClient,
+              logger,
+              abortSignal: abortController.signal,
+              telemetryReporter,
+              metricsTracker,
+              runContext,
+              runConfig,
+              calculationRunId,
+              runNow,
+            });
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.error(`Entity type "${entityType}" run failed: ${errorMessage}`);
+          }
+        })
+      );
 
       const maintainerRunDurationMs = Date.now() - maintainerRunStartedAtMs;
       logger.info(
