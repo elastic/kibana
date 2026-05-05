@@ -141,6 +141,7 @@ export class MonitoringPlugin
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       coreSetup.savedObjects.registerType({
         name: SAVED_OBJECT_TELEMETRY,
         hidden: true,

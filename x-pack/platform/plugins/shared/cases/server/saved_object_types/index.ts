@@ -58,9 +58,11 @@ export const registerSavedObjects = ({
   core.savedObjects.registerType(casesRulesSavedObjectType);
 
   if (config.templates?.enabled) {
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
     core.savedObjects.registerType(caseTemplateSavedObjectType);
   }
   if (config.attachments?.enabled) {
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
     core.savedObjects.registerType(createCaseAttachmentSavedObjectType());
   }
 };
