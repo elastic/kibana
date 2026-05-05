@@ -21,6 +21,19 @@ describe('interpreter/functions#markdown', () => {
 
   it('returns an object with the correct structure', async () => {
     const actual = await fn(null, args, undefined);
-    expect(actual).toMatchSnapshot();
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "as": "markdown_vis",
+        "type": "render",
+        "value": Object {
+          "visParams": Object {
+            "fontSize": 12,
+            "markdown": "## hello _markdown_",
+            "openLinksInNewTab": true,
+          },
+          "visType": "markdown",
+        },
+      }
+    `);
   });
 });

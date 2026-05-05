@@ -34,13 +34,75 @@ describe('markdown vis toExpressionAst function', () => {
     vis.params = {};
     // @ts-expect-error
     const actual = toExpressionAst(vis);
-    expect(actual).toMatchSnapshot();
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "font": Array [
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "size": Array [
+                          "undefined",
+                        ],
+                      },
+                      "function": "font",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
+              ],
+            },
+            "function": "markdownVis",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 
   it('with params', () => {
     vis.params = { markdown: '### my markdown', fontSize: 15, openLinksInNewTab: true };
     // @ts-expect-error
     const actual = toExpressionAst(vis);
-    expect(actual).toMatchSnapshot();
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "font": Array [
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "size": Array [
+                          15,
+                        ],
+                      },
+                      "function": "font",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
+              ],
+              "markdown": Array [
+                "### my markdown",
+              ],
+              "openLinksInNewTab": Array [
+                true,
+              ],
+            },
+            "function": "markdownVis",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 });
