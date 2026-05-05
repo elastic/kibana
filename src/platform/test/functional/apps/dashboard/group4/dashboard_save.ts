@@ -102,10 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.switchToEditMode();
         await dashboard.expectExistsQuickSaveOption();
-        await dashboardAddPanel.clickTopNavAddMenu();
-        await testSubjects.existOrFail('dashboardAddCollapsibleSectionButton');
-        await testSubjects.scrollIntoView('dashboardAddCollapsibleSectionButton');
-        await testSubjects.click('dashboardAddCollapsibleSectionButton');
+        await dashboardAddPanel.clickAddCollapsibleSection();
         await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
 
@@ -132,8 +129,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Does not warn when only the prefix matches', async function () {
-        await dashboard.saveDashboard(dashboardName.split(' ')[0]);
-
+        await dashboard.switchToEditMode();
+        await dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(`${dashboardName} copy`, {
+          waitDialogIsClosed: false,
+        });
         await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
       });
     });

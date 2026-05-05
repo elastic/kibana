@@ -757,4 +757,122 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
   });
+
+  const makeEsqlCols = (names: string[]) =>
+    names.map((name) => ({ id: name, name, meta: { type: 'string' as const } }));
+
+  test('should clear stale columns from a STATS query to a zero-result query', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        { id: '1', raw: { count: 1, bucket: 'a' }, flattened: {} } as unknown as DataTableRecord,
+      ],
+      esqlQueryColumns: makeEsqlCols(['count', 'bucket']),
+      query: { esql: 'from the-data-view-title | stats count=count(*) by bucket' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['count', 'bucket'] },
+    });
+    replaceUrlState.mockClear();
+
+    const manyFields = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: manyFields,
+      query: { esql: 'from the-data-view-title | where field1 > 9999999' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({ tabId, appState: { columns: [] } });
+  });
+
+  test('should not change columns for the same non-transformational query returning 0 rows', async () => {
+    const { replaceUrlState, dataState } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    const manyEsqlCols = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    const manyRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6 };
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [{ id: '1', raw: manyRaw, flattened: manyRaw } as unknown as DataTableRecord],
+      esqlQueryColumns: manyEsqlCols,
+      query: { esql: 'from the-data-view-title' },
+    });
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: manyEsqlCols,
+      query: { esql: 'from the-data-view-title' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
+
+  test('should strip removed selected columns when default columns do not change', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({
+      appState: { columns: ['field1', 'field2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      query: { esql: 'from the-data-view-title' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
+    });
+  });
+
+  test('should not strip selected columns when the current response has no column metadata', async () => {
+    const { toolkit, replaceUrlState, dataState } = await setupTest({
+      appState: { columns: [] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['field1', 'field2'] },
+      })
+    );
+
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
 });

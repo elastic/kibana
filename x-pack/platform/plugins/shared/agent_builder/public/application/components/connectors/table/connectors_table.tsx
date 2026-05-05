@@ -6,10 +6,12 @@
  */
 
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiInMemoryTable, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { memo, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { labels } from '../../../utils/i18n';
 import { useConnectorsTableColumns } from './connectors_table_columns';
 import { ConnectorsTableHeader } from './connectors_table_header';
@@ -28,13 +30,21 @@ export const AgentBuilderConnectorsTable = memo(() => {
     setTablePageIndex(0);
   }, [tableConnectors]);
 
+  const { euiTheme } = useEuiTheme();
+  const { isEarsEnabled } = useAgentBuilderServices();
+
+  const isDisabledEarsConnector = (connector: ConnectorItem): boolean =>
+    !isEarsEnabled && connector.config?.authType === 'ears';
+
+  const disabledRowCss = css({ backgroundColor: euiTheme.colors.lightestShade });
+
   return (
     <EuiInMemoryTable
       tableCaption={labels.connectors.tableCaption(connectors.length)}
       data-test-subj="agentBuilderConnectorsTable"
       css={[
-        ({ euiTheme }) => ({
-          borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        ({ euiTheme: theme }) => ({
+          borderTop: `1px solid ${theme.colors.borderBaseSubdued}`,
           '& table': {
             backgroundColor: 'transparent',
           },
@@ -75,6 +85,7 @@ export const AgentBuilderConnectorsTable = memo(() => {
       }}
       rowProps={(connector) => ({
         'data-test-subj': `agentBuilderConnectorsTableRow-${connector.id}`,
+        ...(isDisabledEarsConnector(connector) ? { css: disabledRowCss } : {}),
       })}
       selection={{
         selectable: (connector) => !connector.isPreconfigured,

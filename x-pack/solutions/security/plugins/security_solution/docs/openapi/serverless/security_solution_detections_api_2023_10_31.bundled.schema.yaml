@@ -3459,7 +3459,6 @@ paths:
         '200':
           content:
             application/json:
-              description: Elasticsearch update by query or update by IDs response
               examples:
                 add:
                   value:
@@ -3478,7 +3477,15 @@ paths:
                     total: 1
                     updated: 1
                     version_conflicts: 0
-          description: Indicates a successful call.
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: >
+            Indicates a successful call. The body matches an Elasticsearch
+            update-by-query response
+
+            (for example `took`, `updated`, `failures`).
         '400':
           content:
             application/json:
@@ -8714,17 +8721,17 @@ components:
       type: object
       properties:
         scriptId:
+          description: The ID of the script to run (from the Kibana Script library)
           type: string
         scriptInput:
+          description: The arguments to pass to the script (if any)
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
           example: 60
           type: integer
     RunscriptParams:
-      description: |
-        > warn
-        > This functionality is currently not available
+      description: Run a script on the Elastic Defend host that triggered the alert.
       type: object
       properties:
         command:

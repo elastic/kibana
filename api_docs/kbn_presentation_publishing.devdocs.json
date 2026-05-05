@@ -1314,6 +1314,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2697,6 +2698,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StateComparators",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2714,6 +2716,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StateType",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -2731,6 +2734,7 @@
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StateType",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -2748,6 +2752,7 @@
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -2948,6 +2953,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PublishingSubject",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3038,6 +3044,7 @@
             "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PublishingSubjectType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3098,6 +3105,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StateType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3154,6 +3162,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StateComparators",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3171,6 +3180,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -3188,6 +3198,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -3205,6 +3216,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3350,6 +3362,7 @@
             "lineNumber": 17,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3450,6 +3463,7 @@
             "lineNumber": 18,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3691,6 +3705,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3717,6 +3732,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WithAllKeys",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3743,6 +3759,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StateComparators",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3805,6 +3822,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedTimeRange",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3858,6 +3876,7 @@
             "lineNumber": 55,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedTitles",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4072,6 +4091,7 @@
                     "lineNumber": 37,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "StateType",
                     "trackAdoption": false,
                     "isRequired": false
                   }
@@ -4350,6 +4370,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -4367,6 +4388,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -4512,6 +4534,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StoredStateType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4559,6 +4582,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StoredStateType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4703,6 +4727,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4938,6 +4963,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SubjectType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5737,6 +5763,7 @@
                 "lineNumber": 17,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PanelPackage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6728,6 +6755,7 @@
                 "lineNumber": 40,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PanelPackage",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7816,7 +7844,14 @@
             "tags": [],
             "label": "serializeState",
             "description": [
-              "\nSerializes all state into a format that can be saved into\nsome external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}"
+              "\nSerializes all state into a format that can be saved into\nsome external store. The opposite of `deserialize` in the ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.ReactEmbeddableFactory",
+                "text": "ReactEmbeddableFactory"
+              }
             ],
             "signature": [
               "() => SerializedState"
@@ -7869,6 +7904,7 @@
                 "lineNumber": 22,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedState",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -8701,6 +8737,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PanelPackage",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -14162,6 +14199,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false
           },
           {
@@ -14178,6 +14216,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false
           }
         ],

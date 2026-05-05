@@ -66,6 +66,7 @@
                 "lineNumber": 20,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataStreamsStatsServiceStartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -309,6 +310,7 @@
                 "lineNumber": 41,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDataStreamsTypesPrivilegesQuery",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -345,6 +347,7 @@
                 "lineNumber": 43,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDataStreamsStatsQuery",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -381,6 +384,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDataStreamsDegradedDocsStatsQuery",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -417,6 +421,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDataStreamsFailedDocsStatsQuery",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -453,6 +458,7 @@
                 "lineNumber": 50,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDataStreamsTotalDocsQuery",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -509,6 +515,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetNonAggregatableDataStreamsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -547,6 +554,7 @@
                 "lineNumber": 55,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateFailureStoreParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -653,7 +661,7 @@
               "id": "def-public.DatasetQualityPluginStart.createDatasetQualityController.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n    initialState = DEFAULT_CONTEXT,\n  }",
               "description": [],
               "signature": [
                 "{ initialState?: Partial<",
@@ -716,7 +724,7 @@
               "id": "def-public.DatasetQualityPluginStart.createDatasetQualityDetailsController.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n    initialState,\n    streamsRepositoryClient,\n    refreshDefinition,\n  }",
               "description": [],
               "signature": [
                 "{ initialState: ",

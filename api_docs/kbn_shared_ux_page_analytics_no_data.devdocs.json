@@ -49,6 +49,7 @@
             "lineNumber": 21,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "AnalyticsNoDataPageProps",
             "trackAdoption": false,
             "isRequired": true
           }
