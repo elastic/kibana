@@ -260,4 +260,4 @@ export {
   type OAuthClientLogo,
   type OAuthClientConnectionsSummary,
   type OAuthClientType,
-} from './oauth-clients';
+} from './oauth_clients';

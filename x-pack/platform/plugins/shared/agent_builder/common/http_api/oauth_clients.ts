@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OAuthClient } from '@kbn/agent-builder-common/oauth-clients';
+import type { OAuthClient } from '@kbn/agent-builder-common';
 
 export interface ListOAuthClientsResponse {
   clients: OAuthClient[];
