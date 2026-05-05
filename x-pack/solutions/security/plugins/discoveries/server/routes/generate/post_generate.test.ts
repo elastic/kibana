@@ -139,7 +139,7 @@ describe('registerGenerateRoute', () => {
       path: '/internal/attack_discovery/_generate',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution-attackDiscoveryAll'],
+          requiredPrivileges: ['securitySolution-attackDiscoveryAll', 'alerts-read'],
         },
       },
       options: {
@@ -148,6 +148,26 @@ describe('registerGenerateRoute', () => {
         },
       },
     });
+  });
+
+  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
+    registerGenerateRoute(mockRouter, mockLogger, {
+      analytics: mockAnalytics,
+      getEventLogIndex: mockGetEventLogIndex,
+      getEventLogger: mockGetEventLogger,
+      getStartServices: mockGetStartServices,
+      workflowInitService: mockWorkflowInitService,
+    });
+
+    expect(mockRouter.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
+          }),
+        }),
+      })
+    );
   });
 
   it('returns 404 when workflows feature flag is disabled', async () => {

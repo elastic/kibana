@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 import type {
   DiagnosticsContext,
@@ -134,7 +135,7 @@ export const registerGetPipelineDataRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
@@ -344,11 +345,14 @@ export const registerGetPipelineDataRoute = (
           }
 
           // Step 4: Extract validation data
+          // includeInput: true is required so getScheduledInputDiscoveries can
+          // read the persist step's input.attack_discoveries in scheduled mode.
           const validationTracking = tracking.validation;
           const validationData: AttackDiscoveryApiAlert[] | null =
             validationTracking != null
               ? await workflowsManagementApi
                   .getWorkflowExecution(validationTracking.workflowRunId, spaceId, {
+                    includeInput: true,
                     includeOutput: true,
                   })
                   .then((validationExecution) =>

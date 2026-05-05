@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
@@ -51,7 +52,7 @@ export const registerGetExecutionTrackingRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })

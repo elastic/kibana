@@ -209,6 +209,50 @@ describe('registerValidateRoute', () => {
     expect(logger.error).toHaveBeenCalledWith('Error validating discoveries: boom');
   });
 
+  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerValidateRoute(router, logger, {
+      adhocAttackDiscoveryDataClient,
+      getStartServices: jest.fn(),
+      workflowInitService: mockWorkflowInitService,
+    });
+
+    expect(router.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('registers the route with ALERTS_API_READ in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerValidateRoute(router, logger, {
+      adhocAttackDiscoveryDataClient,
+      getStartServices: jest.fn(),
+      workflowInitService: mockWorkflowInitService,
+    });
+
+    expect(router.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['alerts-read']),
+          }),
+        }),
+      })
+    );
+  });
+
   it('returns 200 when validation succeeds', async () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();

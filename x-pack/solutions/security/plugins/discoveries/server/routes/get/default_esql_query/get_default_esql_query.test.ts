@@ -161,6 +161,50 @@ describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default',
 });
 
 describe('registerGetDefaultEsqlQueryRoute feature flag', () => {
+  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', async () => {
+    const { registerGetDefaultEsqlQueryRoute } = await import('./get_default_esql_query');
+
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerGetDefaultEsqlQueryRoute(router, mockLogger, {
+      getStartServices: mockGetStartServices,
+    });
+
+    expect(router.versioned.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('registers the route with ALERTS_API_READ in requiredPrivileges', async () => {
+    const { registerGetDefaultEsqlQueryRoute } = await import('./get_default_esql_query');
+
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerGetDefaultEsqlQueryRoute(router, mockLogger, {
+      getStartServices: mockGetStartServices,
+    });
+
+    expect(router.versioned.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['alerts-read']),
+          }),
+        }),
+      })
+    );
+  });
+
   it('returns 404 when the feature flag is disabled', async () => {
     const { assertWorkflowsEnabled } = await import('../../../lib/assert_workflows_enabled');
     (assertWorkflowsEnabled as jest.Mock).mockImplementationOnce(

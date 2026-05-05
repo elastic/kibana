@@ -10,6 +10,7 @@ import {
   ATTACK_DISCOVERY_API_ACTION_ALL,
   ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
 } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   UpdateAttackDiscoveryScheduleRequestBody,
@@ -46,8 +47,9 @@ export const registerUpdateScheduleRoute = (
       security: {
         authz: {
           requiredPrivileges: [
-            ATTACK_DISCOVERY_API_ACTION_ALL,
             ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
+            ATTACK_DISCOVERY_API_ACTION_ALL,
+            ALERTS_API_READ,
           ],
         },
       },

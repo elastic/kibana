@@ -7,6 +7,7 @@
 
 import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { FindAttackDiscoverySchedulesRequestQuery } from '@kbn/discoveries-schemas';
 import { transformScheduleToApi } from '@kbn/discoveries/impl/lib/schedules/transforms';
@@ -36,7 +37,7 @@ export const registerFindSchedulesRoute = (
       path: SCHEDULES_FIND_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
