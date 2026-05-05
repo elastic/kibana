@@ -627,7 +627,7 @@ export function LensEditConfigurationFlyout({
               css={css`
                 pointer-events: auto;
                 padding: 0 ${euiTheme.euiTheme.size.base};
-                border-block-end: ${euiTheme.euiTheme.border.thin};
+                ${!textBasedMode ? `border-block-end: ${euiTheme.euiTheme.border.thin};` : ''}
               `}
             >
               {generalSettings}
