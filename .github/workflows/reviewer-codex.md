@@ -17,6 +17,7 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
+timeout-minutes: 20
 engine:  
   id: codex
   model: openai/gpt-5.5
