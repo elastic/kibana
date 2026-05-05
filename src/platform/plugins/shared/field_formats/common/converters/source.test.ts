@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { SourceFormat } from './source';
 import { TEXT_CONTEXT_TYPE } from '../content_types';
 import { expectReactElementWithNull } from '../test_utils';
@@ -40,8 +41,8 @@ describe('Source Format', () => {
   test('handles missing values', () => {
     const source = new SourceFormat({}, jest.fn());
 
-    expect(source.convert(null, TEXT_CONTEXT_TYPE)).toBe('null');
-    expect(source.convert(undefined, TEXT_CONTEXT_TYPE)).toBe(undefined);
+    expect(source.convert(null, TEXT_CONTEXT_TYPE)).toBe(NULL_LABEL);
+    expect(source.convert(undefined, TEXT_CONTEXT_TYPE)).toBe(NULL_LABEL);
     expectReactElementWithNull(source.reactConvert(null));
     expectReactElementWithNull(source.reactConvert(undefined));
   });

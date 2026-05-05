@@ -44,7 +44,7 @@ describe('Relative Date Format', () => {
     expect(reactConvert(val)).toBe(moment(val).fromNow());
   });
 
-  test('reactConvert passes through script-like string content', () => {
+  test('reactConvert returns raw string for unhighlighted content (React escapes at render)', () => {
     expect(reactConvert('<script>alert("test")</script>')).toBe('<script>alert("test")</script>');
   });
 

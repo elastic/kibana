@@ -30,7 +30,7 @@ describe('IP Address Format', () => {
     expectReactElementWithNull(ip.reactConvert(undefined));
   });
 
-  test('reactConvert passes through script-like string content', () => {
+  test('reactConvert returns raw string for unhighlighted content (React escapes at render)', () => {
     expect(ip.reactConvert('<script>alert("test")</script>')).toBe(
       '<script>alert("test")</script>'
     );

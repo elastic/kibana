@@ -138,7 +138,7 @@ describe('String Format', () => {
     `);
   });
 
-  test('reactConvert passes through script-like string content without highlights', () => {
+  test('reactConvert returns raw string for unhighlighted content (React escapes at render)', () => {
     expect(new StringFormat().reactConvert('<script>alert("test")</script>')).toBe(
       '<script>alert("test")</script>'
     );
