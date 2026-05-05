@@ -27,6 +27,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
+import { HighlightWrapper } from '../../shared/service_map/highlight_wrapper';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -123,7 +124,8 @@ export const ServiceNode = memo(
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs}
+        ${euiTheme.colors.backgroundBaseSubdued};
       cursor: pointer;
       pointer-events: all;
 
@@ -170,29 +172,8 @@ export const ServiceNode = memo(
       values: { count: data.alertsCount ?? 0 },
     });
 
-    const contextFrameStyles = useMemo(
-      () => css`
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 100%;
-        ${contextHighlight
-          ? `
-          padding: ${euiTheme.size.s};
-          border: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
-          border-radius: ${euiTheme.border.radius.medium};
-          background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
-        `
-          : ''}
-      `,
-      [euiTheme, contextHighlight]
-    );
-
     return (
-      <div
-        data-test-subj={contextHighlight ? 'serviceMapNodeContextHighlightFrame' : undefined}
-        css={contextFrameStyles}
-      >
+      <HighlightWrapper nodeId={data.id} contextHighlight={contextHighlight}>
         <EuiFlexGroup
           direction="column"
           alignItems="center"
@@ -274,7 +255,7 @@ export const ServiceNode = memo(
           )}
           <NodeLabel label={data.label} selected={selected} />
         </EuiFlexGroup>
-      </div>
+      </HighlightWrapper>
     );
   }
 );
