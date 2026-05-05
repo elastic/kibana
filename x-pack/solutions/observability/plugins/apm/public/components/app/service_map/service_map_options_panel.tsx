@@ -56,7 +56,7 @@ const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = 
   {
     value: 'depth1',
     label: i18n.translate('xpack.apm.serviceMap.controls.connectionDepth1', {
-      defaultMessage: '1 connection',
+      defaultMessage: 'Single connection',
     }),
   },
 ];
