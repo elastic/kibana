@@ -142,6 +142,10 @@ export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.gr
   defaultMessage: 'Grouping fields',
 });
 
+export const TAGS_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.tagsLabel', {
+  defaultMessage: 'Tags',
+});
+
 export const TRIGGERED_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
   defaultMessage: 'Triggered',
 });

@@ -302,22 +302,6 @@ export function EpisodeDetailsPage() {
       </EuiText>
     ) : null;
 
-  const showTagsInHeader = !isLoading && tags.length > 0;
-  const tagsInHeader = showTagsInHeader ? (
-    <div data-test-subj="alertingV2EpisodeDetailsHeaderTags">
-      <AlertEpisodeTags tags={tags} />
-    </div>
-  ) : null;
-
-  const headerDescription =
-    tagsInHeader || ruleDescriptionText ? (
-      <>
-        {ruleDescriptionText}
-        {tagsInHeader && ruleDescriptionText ? <EuiSpacer size="s" /> : null}
-        {tagsInHeader}
-      </>
-    ) : undefined;
-
   const sidebarHeaderTitle =
     sidebarPanel === 'episode_details'
       ? i18n.SIDEBAR_TITLE_EPISODE_DETAILS
@@ -412,6 +396,17 @@ export function EpisodeDetailsPage() {
                   title: i18n.DURATION_LABEL,
                   description:
                     durationMs != null ? i18n.FORMAT_EPISODE_DURATION_MS(durationMs) : '—',
+                },
+                {
+                  title: i18n.TAGS_LABEL,
+                  description:
+                    tags.length > 0 ? (
+                      <div data-test-subj="alertingV2EpisodeDetailsSidebarTags">
+                        <AlertEpisodeTags tags={tags} />
+                      </div>
+                    ) : (
+                      '—'
+                    ),
                 },
                 {
                   title: i18n.ASSIGNEE_LABEL,
@@ -639,7 +634,7 @@ export function EpisodeDetailsPage() {
       `}
       pageHeader={{
         pageTitle,
-        description: headerDescription,
+        description: ruleDescriptionText,
         bottomBorder: true,
         restrictWidth: false,
         paddingSize: 'none',
