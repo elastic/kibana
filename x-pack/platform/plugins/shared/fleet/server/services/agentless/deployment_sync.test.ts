@@ -516,7 +516,8 @@ describe('Agentless Deployment Sync', () => {
         expect.anything(),
         expect.anything(),
         'policy1',
-        { agentless: { cluster_id: 'cluster-abc' } }
+        { agentless: { cluster_id: 'cluster-abc' } },
+        { bumpRevision: false }
       );
       expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalledTimes(0);
       expect(agentlessAgentService.deleteAgentlessAgent).toHaveBeenCalledTimes(0);
@@ -558,7 +559,8 @@ describe('Agentless Deployment Sync', () => {
             cloud_connectors: { enabled: true, target_csp: 'aws' },
             cluster_id: 'cluster-abc',
           },
-        }
+        },
+        { bumpRevision: false }
       );
     });
 

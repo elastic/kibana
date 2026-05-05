@@ -140,9 +140,18 @@ export async function syncAgentlessDeployments(
             );
             if (!opts?.dryRun) {
               await agentPolicyService
-                .update(spacedScoppedSoClient, esClient, agentPolicy.id, {
-                  agentless: { ...agentPolicy.agentless, cluster_id: deployment.cluster_id },
-                })
+                .update(
+                  spacedScoppedSoClient,
+                  esClient,
+                  agentPolicy.id,
+                  {
+                    agentless: {
+                      ...agentPolicy.agentless,
+                      cluster_id: deployment.cluster_id,
+                    },
+                  },
+                  { bumpRevision: false }
+                )
                 .catch((error) => {
                   logger.error(
                     `[Agentless Deployment Sync] Failed to update cluster_id for policy ${agentPolicy.id}`,
