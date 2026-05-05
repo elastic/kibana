@@ -59,17 +59,6 @@ const mockWorkflowsWithAllPredefined: WorkflowItem[] = [
     tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
   },
   {
-    description: 'ES|QL example',
-    id: 'esql-example-id',
-    name: 'Attack discovery - ES|QL example',
-    tags: [
-      'Attack discovery',
-      'Security',
-      'Example',
-      'attackDiscovery:esql_example_alert_retrieval',
-    ],
-  },
-  {
     description: 'Custom validation workflow',
     id: 'validation-custom',
     name: 'My Custom Validation',

@@ -141,7 +141,6 @@ describe('WORKFLOW_ID_ALIASES_TO_TAGS', () => {
   it('contains expected alias keys', () => {
     expect(Object.keys(WORKFLOW_ID_ALIASES_TO_TAGS).sort()).toEqual([
       'attack-discovery-custom-validation-example',
-      'attack-discovery-esql-example',
       'attack-discovery-generation',
       'attack-discovery-run-example',
       'attack-discovery-validate',

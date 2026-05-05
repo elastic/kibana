@@ -12,18 +12,15 @@ import React from 'react';
 import { WorkflowConfigurationPanel } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
 import { useListWorkflows } from '../hooks/use_list_workflows';
 import type { WorkflowConfiguration, WorkflowItem } from '../types';
 import * as i18n from '../translations';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../use_workflow_editor_link');
 jest.mock('../hooks/use_list_workflows');
 
 const MOCK_WORKFLOWS_URL = '/app/workflows';
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
 
 const mockWorkflows: WorkflowItem[] = [
   {
@@ -66,17 +63,6 @@ const mockWorkflowsWithPredefined: WorkflowItem[] = [
     id: 'default-validation-id',
     name: 'Attack discovery - Default validation',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
-  },
-  {
-    description: 'ES|QL example',
-    id: 'esql-example-id',
-    name: 'Attack discovery - ES|QL example',
-    tags: [
-      'Attack discovery',
-      'Security',
-      'Example',
-      'attackDiscovery:esql_example_alert_retrieval',
-    ],
   },
 ];
 
@@ -169,12 +155,6 @@ describe('WorkflowConfigurationPanel', () => {
         telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
-
-    mockUseWorkflowEditorLink.mockReturnValue({
-      editorUrl: null,
-      navigateToEditor: jest.fn(),
-      resolvedWorkflowId: null,
-    });
 
     mockUseListWorkflows.mockReturnValue(mockSuccessResult);
   });
@@ -385,10 +365,10 @@ describe('WorkflowConfigurationPanel', () => {
 
       const input = screen.getByRole('combobox');
       input.focus();
-      await userEvent.type(input, 'Attack');
+      await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Attack discovery - ES|QL example')).toBeInTheDocument();
+        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
       });
 
       expect(
@@ -407,10 +387,10 @@ describe('WorkflowConfigurationPanel', () => {
 
       const input = screen.getByRole('combobox');
       input.focus();
-      await userEvent.type(input, 'Attack');
+      await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Attack discovery - ES|QL example')).toBeInTheDocument();
+        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
       });
 
       expect(screen.queryByTitle('Attack discovery - Generation')).not.toBeInTheDocument();
@@ -427,31 +407,13 @@ describe('WorkflowConfigurationPanel', () => {
 
       const input = screen.getByRole('combobox');
       input.focus();
-      await userEvent.type(input, 'Attack');
+      await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Attack discovery - ES|QL example')).toBeInTheDocument();
+        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
       });
 
       expect(screen.queryByTitle('Attack discovery - Default validation')).not.toBeInTheDocument();
-    });
-
-    it('includes the ES|QL example alert retrieval workflow', async () => {
-      mockUseListWorkflows.mockReturnValue(mockSuccessWithPredefined);
-
-      render(
-        <TestProviders>
-          <WorkflowConfigurationPanel {...defaultProps} />
-        </TestProviders>
-      );
-
-      const input = screen.getByRole('combobox');
-      input.focus();
-      await userEvent.type(input, 'Attack');
-
-      await waitFor(() => {
-        expect(screen.getByTitle('Attack discovery - ES|QL example')).toBeInTheDocument();
-      });
     });
 
     it('includes custom (user-created) workflows without AD tags', async () => {
@@ -470,31 +432,6 @@ describe('WorkflowConfigurationPanel', () => {
       await waitFor(() => {
         expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('example workflow links', () => {
-    it('renders the esql example link when esqlExampleUrl is available', () => {
-      const MOCK_ESQL_EXAMPLE_URL = '/app/workflows/esql-example-id';
-
-      mockUseWorkflowEditorLink.mockImplementation(
-        ({ workflowId }: { workflowId: string | null | undefined }) => ({
-          editorUrl: workflowId === 'attack-discovery-esql-example' ? MOCK_ESQL_EXAMPLE_URL : null,
-          navigateToEditor: jest.fn(),
-          resolvedWorkflowId: null,
-        })
-      );
-
-      render(
-        <TestProviders>
-          <WorkflowConfigurationPanel {...defaultProps} />
-        </TestProviders>
-      );
-
-      const link = screen.getByTestId('esqlExampleWorkflowLink');
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', MOCK_ESQL_EXAMPLE_URL);
-      expect(screen.getByText(i18n.ESQL_EXAMPLE_LINK)).toBeInTheDocument();
     });
   });
 

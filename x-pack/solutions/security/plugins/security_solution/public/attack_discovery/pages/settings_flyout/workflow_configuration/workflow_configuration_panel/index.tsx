@@ -10,7 +10,6 @@ import { EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../../common/lib/telemetry';
-import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
 import { filterWorkflowsForAlertRetrieval } from '../helpers/filter_workflows_for_step';
 import { useListWorkflows } from '../hooks/use_list_workflows';
 import { NoWorkflowsAvailable } from '../no_workflows_available';
@@ -25,10 +24,6 @@ const WorkflowConfigurationPanelComponent: React.FC<WorkflowConfigurationPanelPr
 }) => {
   const { application, telemetry } = useKibana().services;
   const { data: workflows = [], isLoading } = useListWorkflows();
-  const { editorUrl: esqlExampleUrl } = useWorkflowEditorLink({
-    workflowId: 'attack-discovery-esql-example',
-    workflowRunId: null,
-  });
 
   const agentBuilderUrl = useMemo(() => {
     try {
@@ -75,27 +70,7 @@ const WorkflowConfigurationPanelComponent: React.FC<WorkflowConfigurationPanelPr
     value.alertRetrievalWorkflowIds.length
   );
 
-  const helpText = useMemo(
-    () => (
-      <>
-        {i18n.ALERT_RETRIEVAL_WORKFLOWS_HELP}
-        {esqlExampleUrl != null && (
-          <>
-            {' '}
-            <EuiLink
-              data-test-subj="esqlExampleWorkflowLink"
-              external
-              href={esqlExampleUrl}
-              target="_blank"
-            >
-              {i18n.ESQL_EXAMPLE_LINK}
-            </EuiLink>
-          </>
-        )}
-      </>
-    ),
-    [esqlExampleUrl]
-  );
+  const helpText = i18n.ALERT_RETRIEVAL_WORKFLOWS_HELP;
 
   const labelAppend = createWorkflowUrl !== '' && (
     <EuiText size="xs">

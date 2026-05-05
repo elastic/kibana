@@ -7,6 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useWorkflowEditorLink } from '.';
+import { clearResolvedWorkflowIdCache } from './helpers/resolve_workflow_id_from_alias';
 import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');
@@ -21,6 +22,7 @@ describe('useWorkflowEditorLink', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearResolvedWorkflowIdCache();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -189,6 +191,49 @@ describe('useWorkflowEditorLink', () => {
 
       await waitFor(() => {
         expect(result.current.editorUrl).toBe('/app/workflows/workflow-abc');
+      });
+    });
+  });
+
+  describe('when workflowId is a custom slug not in the alias map', () => {
+    const workflowId = 'validation-with-transform';
+    const workflowRunId = 'run-val-123';
+
+    beforeEach(() => {
+      mockGetUrlForApp.mockReturnValue(
+        '/app/workflows/validation-with-transform?tab=executions&executionId=run-val-123'
+      );
+    });
+
+    it('returns an editor URL using workflowId directly as the slug', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).toBe(
+          '/app/workflows/validation-with-transform?tab=executions&executionId=run-val-123'
+        );
+      });
+    });
+
+    it('does not call the workflows search API for custom slugs', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).not.toBeNull();
+      });
+
+      expect(mockHttpFetch).not.toHaveBeenCalled();
+    });
+
+    it('calls getUrlForApp with the custom slug directly in the path', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).not.toBeNull();
+      });
+
+      expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows', {
+        path: '/validation-with-transform?tab=executions&executionId=run-val-123',
       });
     });
   });

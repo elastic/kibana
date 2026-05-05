@@ -231,13 +231,6 @@ export const VALIDATION_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ESQL_EXAMPLE_LINK = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.workflowConfiguration.esqlExampleLink',
-  {
-    defaultMessage: 'ES|QL Example Alert Retrieval workflow',
-  }
-);
-
 export const GENERATION_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.generationSectionTitle',
   {
