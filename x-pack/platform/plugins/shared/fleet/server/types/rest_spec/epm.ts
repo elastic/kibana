@@ -758,6 +758,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object({
       success: schema.boolean(),
       namespace_customization_enabled_for: schema.maybe(
         schema.arrayOf(schema.string(), {
+          maxSize: 100,
           meta: {
             description:
               'The opt-in list on the package. Returned whenever the package is installed: the new list on success, or the unchanged list when the request is rejected (for example, because of a namespace-prefix restriction).',
