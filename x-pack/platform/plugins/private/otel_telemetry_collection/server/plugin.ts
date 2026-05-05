@@ -65,7 +65,7 @@ export class OtelTelemetryCollectionPlugin
     this.otelTelemetryService.setup(plugins.taskManager);
   }
 
-  public async start(core: CoreStart, plugins: OtelTelemetryCollectionPluginStartDeps) {
+  public start(core: CoreStart, plugins: OtelTelemetryCollectionPluginStartDeps) {
     this.logger.debug('Starting OTel telemetry collection plugin');
 
     if (plugins.telemetry) {
@@ -77,21 +77,31 @@ export class OtelTelemetryCollectionPlugin
     }
 
     const cdnConfig = this.effectiveCdnConfig(this.pluginConfig);
-    const info = await core.elasticsearch.client.asInternalUser.info();
-    const artifactService = new ArtifactService(this.logger, info, cdnConfig);
 
-    this.configurationService.start(
-      artifactService,
-      DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
-      this.telemetryConfigProvider
-    );
+    // Bootstrap asynchronously so we don't block Kibana's start lifecycle on
+    // Elasticsearch availability (e.g. OAS snapshot capture starts Kibana
+    // without a backing ES cluster).
+    void (async () => {
+      try {
+        const info = await core.elasticsearch.client.asInternalUser.info();
+        const artifactService = new ArtifactService(this.logger, info, cdnConfig);
 
-    this.otelTelemetryService.start(
-      plugins.taskManager,
-      core.analytics,
-      core.elasticsearch.client.asInternalUser,
-      this.telemetryConfigProvider
-    );
+        this.configurationService.start(
+          artifactService,
+          DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
+          this.telemetryConfigProvider
+        );
+
+        this.otelTelemetryService.start(
+          plugins.taskManager,
+          core.analytics,
+          core.elasticsearch.client.asInternalUser,
+          this.telemetryConfigProvider
+        );
+      } catch (error) {
+        this.logger.error('Failed to bootstrap OTel telemetry collection', { error });
+      }
+    })();
   }
 
   public stop() {
