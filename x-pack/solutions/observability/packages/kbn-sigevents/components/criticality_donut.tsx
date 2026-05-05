@@ -53,9 +53,11 @@ export const CriticalityDonut = ({
     strokeWidth,
   ]);
 
+  const clamped = Math.min(100, Math.max(0, score));
+
   const label = i18n.translate('xpack.observability.sigeventsOverview.criticalityDonut.ariaLabel', {
     defaultMessage: 'Criticality score {score} out of 100',
-    values: { score },
+    values: { score: clamped },
   });
 
   return (
@@ -110,7 +112,7 @@ export const CriticalityDonut = ({
             line-height: 1;
           `}
         >
-          {score}
+          {clamped}
         </span>
       </div>
     </div>

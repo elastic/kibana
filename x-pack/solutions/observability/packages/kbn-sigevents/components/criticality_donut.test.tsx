@@ -31,7 +31,7 @@ describe('CriticalityDonut', () => {
 
   it('clamps score to 0-100 range', () => {
     render(<CriticalityDonut score={150} isCritical={true} />);
-    expect(screen.getByText('150')).toBeInTheDocument();
+    expect(screen.getByText('100')).toBeInTheDocument();
   });
 
   it('displays score of 0', () => {

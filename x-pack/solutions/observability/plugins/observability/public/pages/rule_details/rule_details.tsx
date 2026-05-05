@@ -109,8 +109,11 @@ export function RuleDetailsPage() {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(RULE_DETAILS_TAB_URL_STORAGE_KEY);
 
-    return urlTabId && [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB].includes(urlTabId)
-      ? (urlTabId as TabId)
+    return urlTabId &&
+      [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB, 'execution'].includes(urlTabId)
+      ? urlTabId === 'execution'
+        ? (RULE_DETAILS_EXECUTION_TAB as TabId)
+        : (urlTabId as TabId)
       : RULE_DETAILS_ALERTS_TAB;
   });
 

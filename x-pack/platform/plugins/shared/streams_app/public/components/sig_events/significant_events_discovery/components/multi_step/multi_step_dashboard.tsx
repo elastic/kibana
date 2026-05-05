@@ -59,9 +59,9 @@ function toRows<TRow extends BaseRecord>(
   return records.map(
     (r) =>
       ({
+        ...((r._source as object | null) ?? {}),
         _id: r._id,
         _index: r._index,
-        ...((r._source as object | null) ?? {}),
       } as TRow)
   );
 }

@@ -104,7 +104,7 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
 
   const criticalityColor: EuiBadgeProps['color'] = useMemo(() => {
     if (event.criticality >= 80) return 'danger';
-    if (event.criticality >= 50) return 'warning';
+    if (event.criticality >= 60) return 'warning';
     return 'hollow';
   }, [event.criticality]);
 

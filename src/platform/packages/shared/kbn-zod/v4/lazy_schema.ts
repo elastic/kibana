@@ -34,7 +34,7 @@ export const setLazySchemaDisabled = (value: boolean): void => {
  * lets the GC reclaim the materialized schema once no consumer is holding a
  * reference (see `lazyImmutableGCableObject`).
  *
- * When disabled via `setLazySchemaEnabled(false)`: calls the factory eagerly
+ * When disabled via `setLazySchemaDisabled(true)`: calls the factory eagerly
  * at wrap time and returns the real schema object, bypassing the Proxy and
  * GC-eligibility machinery entirely.
  *

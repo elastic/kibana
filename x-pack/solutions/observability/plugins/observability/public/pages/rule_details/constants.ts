@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RULE_DETAILS_EXECUTION_TAB = 'execution';
+export const RULE_DETAILS_EXECUTION_TAB = 'history';
 export const RULE_DETAILS_ALERTS_TAB = 'alerts';
 export const RULE_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 export const RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY = 'searchBarParams';
