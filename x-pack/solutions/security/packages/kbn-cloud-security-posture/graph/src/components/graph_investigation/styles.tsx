@@ -46,24 +46,27 @@ export const AnimatedSearchBarContainer = styled.div`
     }
   }
 
-  /* Clip during the collapse animation only; expanded state must let
-     content stay visible so a tall input never hides surrounding controls. */
+  /* Clip on the inner div only while toggled-off, so the wrapper stays free
+     to grow with the input in the expanded state. The trade-off is that the
+     expand transition no longer clips intermediate frames, but the textarea
+     cap below keeps the content small enough that there's nothing to clip. */
   &.toggled-off > div {
     overflow: hidden;
     padding: 0;
   }
 
-  /* In the narrow graph flyout, the KQL textarea can grow multi-line.
-     Anchor the row's controls to the top so they keep their position
-     instead of drifting with the row's vertical center, and cap the
-     textarea at ~3 lines (euiTheme.size.xl = 32px) so longer queries
-     scroll inside the input. The !important defeats the upstream rule
-     '.kbnQueryBar__textarea.kbnQueryBar__textarea--autoHeight' (0,3,0). */
+  /* In the narrow graph flyout, the KQL textarea can grow multi-line and
+     push the row's controls out of view. Anchor controls to the top, and
+     cap the auto-height textarea at 3 lines so longer queries scroll inside
+     the input. The selector matches the upstream specificity (0,3,0) of
+     '.kbnQueryBar__textarea.kbnQueryBar__textarea--autoHeight' from the kql
+     plugin's QueryStringInput; !important removes any reliance on injection
+     order between the two unrelated styled components. */
   .kbnQueryBar {
     align-items: flex-start;
   }
 
   .kbnQueryBar__textarea.kbnQueryBar__textarea--autoHeight {
-    max-height: 96px !important;
+    max-height: calc(${() => useEuiTheme().euiTheme.size.xl} * 3) !important;
   }
 `;
