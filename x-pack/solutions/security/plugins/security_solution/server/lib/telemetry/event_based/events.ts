@@ -335,7 +335,7 @@ export type RiskScoreMaintainerStage =
   | 'phase2_resolution_scoring'
   | 'reset_to_zero';
 
-interface RiskScoreMaintainerStageSummaryEventBase {
+interface StageSummaryBase {
   namespace: string;
   entityType: string;
   status: RiskScoreMaintainerStatus;
@@ -345,8 +345,7 @@ interface RiskScoreMaintainerStageSummaryEventBase {
   idBasedRiskScoringEnabled: boolean;
 }
 
-export interface RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent
-  extends RiskScoreMaintainerStageSummaryEventBase {
+interface Phase0LookupBuildSummary extends StageSummaryBase {
   stage: 'phase0_lookup_build';
   pagesProcessed?: number;
   entitiesIterated?: number;
@@ -355,32 +354,29 @@ export interface RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent
   lookupRowsFailed?: number;
 }
 
-export interface RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent
-  extends RiskScoreMaintainerStageSummaryEventBase {
+interface Phase1BaseScoringSummary extends StageSummaryBase {
   stage: 'phase1_base_scoring';
   pagesProcessed?: number;
   scoresWritten?: number;
 }
 
-export interface RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent
-  extends RiskScoreMaintainerStageSummaryEventBase {
+interface Phase2ResolutionScoringSummary extends StageSummaryBase {
   stage: 'phase2_resolution_scoring';
   pagesProcessed?: number;
   scoresWritten?: number;
 }
 
-export interface RiskScoreMaintainerResetToZeroStageSummaryEvent
-  extends RiskScoreMaintainerStageSummaryEventBase {
+interface ResetToZeroSummary extends StageSummaryBase {
   stage: 'reset_to_zero';
   scoresWritten?: number;
   resetBatchLimitHit?: boolean;
 }
 
 export type RiskScoreMaintainerStageSummaryEvent =
-  | RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent
-  | RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent
-  | RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent
-  | RiskScoreMaintainerResetToZeroStageSummaryEvent;
+  | Phase0LookupBuildSummary
+  | Phase1BaseScoringSummary
+  | Phase2ResolutionScoringSummary
+  | ResetToZeroSummary;
 
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
@@ -441,55 +437,64 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
 
 export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<RiskScoreMaintainerStageSummaryEvent> =
   {
-  eventType: 'risk_score_maintainer_stage_summary',
-  schema: {
-    namespace: { type: 'keyword', _meta: { description: 'Kibana space where scoring ran' } },
-    entityType: { type: 'keyword', _meta: { description: 'Entity type scored (e.g. host, user)' } },
-    stage: { type: 'keyword', _meta: { description: 'Maintainer stage identifier' } },
-    status: { type: 'keyword', _meta: { description: 'Stage outcome status' } },
-    skipReason: {
-      type: 'keyword',
-      _meta: { optional: true, description: 'Bounded reason when status is skipped' },
+    eventType: 'risk_score_maintainer_stage_summary',
+    schema: {
+      namespace: { type: 'keyword', _meta: { description: 'Kibana space where scoring ran' } },
+      entityType: {
+        type: 'keyword',
+        _meta: { description: 'Entity type scored (e.g. host, user)' },
+      },
+      stage: { type: 'keyword', _meta: { description: 'Maintainer stage identifier' } },
+      status: { type: 'keyword', _meta: { description: 'Stage outcome status' } },
+      skipReason: {
+        type: 'keyword',
+        _meta: { optional: true, description: 'Bounded reason when status is skipped' },
+      },
+      errorKind: {
+        type: 'keyword',
+        _meta: { optional: true, description: 'Bounded error category when status is error' },
+      },
+      durationMs: { type: 'long', _meta: { description: 'Stage duration in milliseconds' } },
+      pagesProcessed: {
+        type: 'long',
+        _meta: { optional: true, description: 'Number of pages processed in this stage' },
+      },
+      scoresWritten: {
+        type: 'long',
+        _meta: { optional: true, description: 'Risk score docs written in this stage' },
+      },
+      entitiesIterated: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: 'Entity-store entities iterated during lookup build',
+        },
+      },
+      lookupRowsWritten: {
+        type: 'long',
+        _meta: { optional: true, description: 'Lookup rows written during lookup build' },
+      },
+      bulkBatches: {
+        type: 'long',
+        _meta: { optional: true, description: 'Bulk batches issued during Phase 0 lookup build' },
+      },
+      lookupRowsFailed: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: 'Bulk items that failed during Phase 0 lookup build',
+        },
+      },
+      resetBatchLimitHit: {
+        type: 'boolean',
+        _meta: { optional: true, description: 'Whether reset-to-zero hit per-run batch limit' },
+      },
+      idBasedRiskScoringEnabled: {
+        type: 'boolean',
+        _meta: { description: 'Whether Entity Store dual-write was enabled' },
+      },
     },
-    errorKind: {
-      type: 'keyword',
-      _meta: { optional: true, description: 'Bounded error category when status is error' },
-    },
-    durationMs: { type: 'long', _meta: { description: 'Stage duration in milliseconds' } },
-    pagesProcessed: {
-      type: 'long',
-      _meta: { optional: true, description: 'Number of pages processed in this stage' },
-    },
-    scoresWritten: {
-      type: 'long',
-      _meta: { optional: true, description: 'Risk score docs written in this stage' },
-    },
-    entitiesIterated: {
-      type: 'long',
-      _meta: { optional: true, description: 'Entity-store entities iterated during lookup build' },
-    },
-    lookupRowsWritten: {
-      type: 'long',
-      _meta: { optional: true, description: 'Lookup rows written during lookup build' },
-    },
-    bulkBatches: {
-      type: 'long',
-      _meta: { optional: true, description: 'Bulk batches issued during Phase 0 lookup build' },
-    },
-    lookupRowsFailed: {
-      type: 'long',
-      _meta: { optional: true, description: 'Bulk items that failed during Phase 0 lookup build' },
-    },
-    resetBatchLimitHit: {
-      type: 'boolean',
-      _meta: { optional: true, description: 'Whether reset-to-zero hit per-run batch limit' },
-    },
-    idBasedRiskScoringEnabled: {
-      type: 'boolean',
-      _meta: { description: 'Whether Entity Store dual-write was enabled' },
-    },
-  },
-};
+  };
 
 interface AssetCriticalitySystemProcessedAssignmentFileEvent {
   processing: {

@@ -9,10 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import {
   RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
-  type RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent,
-  type RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent,
-  type RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent,
-  type RiskScoreMaintainerResetToZeroStageSummaryEvent,
+  type RiskScoreMaintainerStageSummaryEvent,
 } from '../../../telemetry/event_based/events';
 
 const ERROR_MESSAGE_MAX_LENGTH = 500;
@@ -39,24 +36,16 @@ interface GlobalSkipInput {
   idBasedRiskScoringEnabled: boolean;
 }
 
-type RunStageSummaryEvent =
-  | Omit<
-      RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent,
-      'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
-    >
-  | Omit<
-      RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent,
-      'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
-    >
-  | Omit<
-      RiskScoreMaintainerResetToZeroStageSummaryEvent,
-      'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
-    >;
-
-type Phase0StageSummaryEvent = Omit<
-  RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent,
+type LocalStageSummaryEvent<TStage extends RiskScoreMaintainerStageSummaryEvent['stage']> = Omit<
+  Extract<RiskScoreMaintainerStageSummaryEvent, { stage: TStage }>,
   'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
 >;
+
+type RunStageSummaryEvent = LocalStageSummaryEvent<
+  'phase1_base_scoring' | 'phase2_resolution_scoring' | 'reset_to_zero'
+>;
+
+type Phase0StageSummaryEvent = LocalStageSummaryEvent<'phase0_lookup_build'>;
 
 export const createRiskScoreMaintainerTelemetryReporter = ({
   telemetry,
