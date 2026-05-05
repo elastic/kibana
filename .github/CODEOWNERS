@@ -2316,10 +2316,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts @elastic/kibana-telemetry @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
-# Kibana Localization
-/src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
-#CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
-
 # Inference Plugins (Search Solution)
 x-pack/platform/plugins/shared/inference @elastic/search-kibana
 x-pack/platform/test/functional_gen_ai/inference @elastic/search-kibana
@@ -3383,6 +3379,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/ @elastic/kibana-operations
 /moon.yml @elastic/kibana-operations
 /.coderabbit.yml @elastic/kibana-operations
+
+# Kibana Localization
+/src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
+#CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Buildkite overrides, and ownership shares
 /.buildkite/scripts/steps/checks/api_contracts.sh @elastic/kibana-core
