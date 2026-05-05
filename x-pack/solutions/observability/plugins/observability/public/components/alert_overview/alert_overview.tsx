@@ -24,6 +24,7 @@ import {
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -62,11 +63,15 @@ export const AlertOverview = memo(
     } = useKibana().services;
     const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
     const dateFormat = useUiSetting<string>('dateFormat');
+
     const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
     const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
+
+    const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
     const alertStart = alert.fields[ALERT_START];
     const alertEnd = alert.fields[ALERT_END];
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
+
     const linkToRule =
       pageId !== RULE_DETAILS_PAGE_ID && ruleId
         ? prepend(paths.observability.ruleDetails(ruleId))
@@ -110,6 +115,7 @@ export const AlertOverview = memo(
           meta: {
             alertEnd,
             timeRange,
+            alertRuleTypeId,
             groups: getSources(alert) || [],
           },
         },
@@ -186,6 +192,7 @@ export const AlertOverview = memo(
       alertStatus,
       alert,
       alertEnd,
+      alertRuleTypeId,
       timeRange,
       dateFormat,
       ruleCriteria,
