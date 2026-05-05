@@ -15,6 +15,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 
 interface ServiceHeaderBadgesProps {
   serviceName: string;
@@ -23,6 +24,11 @@ interface ServiceHeaderBadgesProps {
   end: string;
   onSloClick: () => void;
   alertsTabHref: string;
+}
+
+interface HeaderFetchResult {
+  alertsCount: number;
+  anomalyScore?: number;
 }
 
 export function ServiceHeaderBadges({
@@ -38,6 +44,7 @@ export function ServiceHeaderBadges({
   const { capabilities, navigateToUrl } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
+  const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 
   const { mostCriticalSloStatus, sloFetchStatus } = useServiceSloContext();
 
@@ -45,28 +52,65 @@ export function ServiceHeaderBadges({
     services: { telemetry },
   } = useKibana<ApmPluginStartDeps & ApmServices>();
 
-  const { data: alertsData, status: alertsStatus } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!(isAlertingAvailable && canReadAlerts)) {
+      const tasks: Array<Promise<Partial<HeaderFetchResult>>> = [];
+
+      if (isAlertingAvailable && canReadAlerts) {
+        tasks.push(
+          callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
+            params: {
+              path: { serviceName },
+              query: { start, end, environment },
+            },
+          })
+            .then((res) => ({ alertsCount: res.alertsCount }))
+            .catch(() => ({ alertsCount: 0 }))
+        );
+      }
+
+      if (canReadMlJobs) {
+        tasks.push(
+          callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
+            params: {
+              path: { serviceName },
+              query: { start, end, environment },
+            },
+          })
+            .then((res) => ({ anomalyScore: res.anomalyScore }))
+            .catch((): Partial<HeaderFetchResult> => ({}))
+        );
+      }
+
+      if (tasks.length === 0) {
         return;
       }
-      return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
-        params: {
-          path: { serviceName },
-          query: { start, end, environment },
-        },
+
+      return Promise.all(tasks).then((parts) => {
+        const merged: HeaderFetchResult = { alertsCount: 0 };
+        for (const part of parts) {
+          if (part.alertsCount !== undefined) {
+            merged.alertsCount = part.alertsCount;
+          }
+          if (part.anomalyScore !== undefined) {
+            merged.anomalyScore = part.anomalyScore;
+          }
+        }
+        return merged;
       });
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts]
+    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts, canReadMlJobs],
+    { showToastOnError: false }
   );
 
-  const alertsCount = alertsData?.alertsCount ?? 0;
+  const alertsCount = data?.alertsCount ?? 0;
 
   const showAlertsBadge =
-    isAlertingAvailable &&
-    canReadAlerts &&
-    alertsStatus === FETCH_STATUS.SUCCESS &&
-    alertsCount > 0;
+    isAlertingAvailable && canReadAlerts && status === FETCH_STATUS.SUCCESS && alertsCount > 0;
+
+  const showAnomaliesBadge =
+    canReadMlJobs && status === FETCH_STATUS.SUCCESS && data?.anomalyScore !== undefined;
+
   const showSloBadge = canReadSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
@@ -75,7 +119,7 @@ export function ServiceHeaderBadges({
     }
   }, [showSloBadge, telemetry]);
 
-  if (!showAlertsBadge && !showSloBadge) {
+  if (!showAlertsBadge && !showSloBadge && !showAnomaliesBadge) {
     return null;
   }
 
@@ -121,6 +165,11 @@ export function ServiceHeaderBadges({
             serviceName={serviceName}
             onClick={onSloClick}
           />
+        </EuiFlexItem>
+      )}
+      {showAnomaliesBadge && (
+        <EuiFlexItem grow={false} data-test-subj="serviceHeaderAnomaliesBadge">
+          <AnomaliesBadge score={data?.anomalyScore} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
