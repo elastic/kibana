@@ -376,6 +376,7 @@ module.exports = {
     '@kbn/imports/no_group_crossing_imports': 'error',
     '@kbn/imports/no_direct_handlebars_import': 'error',
     '@kbn/imports/no_direct_monaco_import': 'warn',
+    '@kbn/imports/no_undeclared_plugin_target': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
