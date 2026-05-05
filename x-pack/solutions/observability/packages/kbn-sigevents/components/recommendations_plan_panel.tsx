@@ -60,19 +60,17 @@ const DEFAULT_STEPS: RecommendationStep[] = [
 
 const generateAccordionId = htmlIdGenerator('recommendationsPlanStep');
 
-export function RecommendationsPlanPanel(props: RecommendationsPlanPanelProps) {
-  const {
-    steps = DEFAULT_STEPS,
-    escalateBadgeLabel,
-    escalateBadgeColor = 'warning',
-    escalateBadgeIconType = 'warning',
-    initialOpenStepIds,
-    initialDetailsOpen = false,
-    onRemediate,
-    onOpenDetails,
-  } = props;
-
-  const hasPlaceholderData = props.steps === undefined;
+export function RecommendationsPlanPanel({
+  steps = DEFAULT_STEPS,
+  escalateBadgeLabel,
+  escalateBadgeColor = 'warning',
+  escalateBadgeIconType = 'warning',
+  initialOpenStepIds,
+  initialDetailsOpen = false,
+  onRemediate,
+  onOpenDetails,
+}: RecommendationsPlanPanelProps) {
+  const hasPlaceholderData = steps === undefined;
 
   const { euiTheme } = useEuiTheme();
 

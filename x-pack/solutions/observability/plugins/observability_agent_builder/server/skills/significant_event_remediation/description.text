@@ -1,0 +1,1 @@
+Expands a loaded Observability significant event into live validation (streams, ES|QL, KIs) and service-level follow-up, then synthesizes root cause updates and remediation. Use when the user has a significant-event attachment or asks to remediate, investigate further, or validate a promoted significant event — not for cold-start RCA without that context.

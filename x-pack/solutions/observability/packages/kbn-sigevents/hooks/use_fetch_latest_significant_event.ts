@@ -10,6 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SignificantEventDocument } from '@kbn/observability-agent-builder-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ImpactedService } from '../components/main_significant_event';
 import type { ImpactedCardItem } from '../components/sigevents_overview';
@@ -19,62 +20,7 @@ interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
 }
 
-const SIGEVENTS_INDEX = 'sigevents-events-ms';
-
-interface BlastRadiusItem {
-  ki_id: string;
-  name: string;
-  stream_name: string;
-  confirmed: boolean;
-}
-
-interface CauseKiItem {
-  ki_id?: string;
-  name: string;
-  stream_name: string;
-  confirmed?: boolean;
-}
-
-interface DependencyEdge {
-  source: string;
-  target: string;
-  protocol: string;
-  exposure: 'exposed' | 'not_exposed';
-}
-
-interface EvidenceDocument {
-  description: string;
-  esql_query: string;
-  result: string;
-  row_count: number;
-  collected_at: string;
-  rule_name: string;
-  stream_name: string;
-  confirmed?: boolean;
-}
-
-interface SignificantEventDocument {
-  '@timestamp': string;
-  event_id: string;
-  discovery_id: string;
-  discovery_slug: string;
-  verdict: 'promoted' | 'acknowledged' | 'demoted';
-  title: string;
-  summary: string;
-  root_cause: string;
-  rule_names: string[];
-  stream_names: string[];
-  blast_radius?: BlastRadiusItem[];
-  cause_kis: CauseKiItem[];
-  dependency_edges?: DependencyEdge[];
-  evidences?: EvidenceDocument[];
-  criticality: number;
-  recommended_action: 'escalate' | 'monitor' | 'resolve' | 'investigate';
-  impact: 'critical' | 'high' | 'medium' | 'low';
-  recommendations: string[];
-  verdict_id: string;
-  last_reviewed_at: string;
-}
+export const SIGEVENTS_INDEX = 'sigevents-events-ms';
 
 export interface LatestSignificantEventData {
   raw: SignificantEventDocument;

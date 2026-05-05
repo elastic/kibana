@@ -51,6 +51,7 @@
     "@kbn/observability-utils-server",
     "@kbn/calculate-auto",
     "@kbn/search-inference-endpoints",
+    "@kbn/workflows-management-plugin",
     "@kbn/inference-connectors",
     "@kbn/react-query",
   ],

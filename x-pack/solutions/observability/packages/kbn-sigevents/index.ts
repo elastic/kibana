@@ -7,7 +7,10 @@
 
 export * from './components';
 
-export { useFetchLatestSignificantEvent } from './hooks/use_fetch_latest_significant_event';
+export {
+  useFetchLatestSignificantEvent,
+  SIGEVENTS_INDEX,
+} from './hooks/use_fetch_latest_significant_event';
 export type { LatestSignificantEventData } from './hooks/use_fetch_latest_significant_event';
 
 export { useFetchSystemOverview } from './hooks/use_fetch_system_overview';

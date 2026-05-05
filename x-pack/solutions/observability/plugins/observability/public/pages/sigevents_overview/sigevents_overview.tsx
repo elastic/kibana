@@ -28,8 +28,11 @@ import {
   SigeventsOverview,
   SignificantEventDetailBody,
   SignificantEventDetailHeader,
+  SIGEVENTS_INDEX,
 } from '@kbn/sigevents';
+import type { EmbeddableConversationProps } from '@kbn/agent-builder-plugin/public';
 import type { HealthyMetricCardItem } from '@kbn/sigevents';
+import { OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -96,6 +99,7 @@ export function SigeventsOverviewPage() {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const [conversationKey, setConversationKey] = useState(0);
+  const [attachments, setAttachments] = useState<EmbeddableConversationProps['attachments']>([]);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
 
   const closeDetailFlyout = useCallback(() => {
@@ -113,32 +117,45 @@ export function SigeventsOverviewPage() {
     setIsDetailFlyoutOpen(true);
   }, [openFlyoutFocus]);
 
+  useEffect(() => {
+    if (eventData?.raw.event_id) {
+      setAttachments([
+        {
+          type: OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
+          data: {
+            index: SIGEVENTS_INDEX,
+            eventId: eventData?.raw.event_id,
+          },
+        },
+      ]);
+    }
+  }, [eventData?.raw.event_id]);
+
+  const buildRemediationPrompt = useCallback((eventTitle: string) => {
+    return i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
+      defaultMessage:
+        'Help me remediate: {eventTitle}. Anchor on the significant event attachment, validate and extend it with live telemetry, then give an updated root cause narrative and prioritized remediation steps.',
+      values: { eventTitle },
+    });
+  }, []);
+
   const handleRemediate = useCallback(() => {
     const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
-    setRemediationPrompt(
-      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
-        defaultMessage:
-          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
-        values: { eventTitle },
-      })
-    );
+    setRemediationPrompt(buildRemediationPrompt(eventTitle));
     setConversationKey((prev) => prev + 1);
-  }, [eventData?.mainEventTitle]);
+  }, [eventData?.mainEventTitle, buildRemediationPrompt]);
 
   const handleFlyoutRemediate = useCallback(() => {
     handleRemediate();
   }, [handleRemediate]);
 
-  const handleRemediateEvent = useCallback((eventTitle: string) => {
-    setRemediationPrompt(
-      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
-        defaultMessage:
-          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
-        values: { eventTitle },
-      })
-    );
-    setConversationKey((prev) => prev + 1);
-  }, []);
+  const handleRemediateEvent = useCallback(
+    (eventTitle: string) => {
+      setRemediationPrompt(buildRemediationPrompt(eventTitle));
+      setConversationKey((prev) => prev + 1);
+    },
+    [buildRemediationPrompt]
+  );
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
@@ -394,6 +411,7 @@ export function SigeventsOverviewPage() {
                   autoSendInitialMessage={!!remediationPrompt}
                   autoFocus={false}
                   newConversation={conversationKey > 0}
+                  attachments={attachments}
                 />
               </EuiFlexItem>
             )}
