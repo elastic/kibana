@@ -95,6 +95,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
           errorMessage={errorMessage}
           isLoading={isLoading}
           isMultiple={isMultiple}
+          isRequired={isRequired ?? false}
           selectedUsers={selectedUsers}
           suggestedProfiles={suggestedProfiles}
           missingUids={missingUids}
@@ -103,7 +104,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
         />
       );
     },
-    [label, name, isLoading, isMultiple, suggestedProfiles, onSearchChange]
+    [label, name, isLoading, isMultiple, isRequired, suggestedProfiles, onSearchChange]
   );
 
   return (
@@ -126,6 +127,7 @@ interface UserPickerComboboxWithProfilesProps {
   errorMessage: string | null;
   isLoading: boolean;
   isMultiple: boolean;
+  isRequired: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];
   missingUids: string[];

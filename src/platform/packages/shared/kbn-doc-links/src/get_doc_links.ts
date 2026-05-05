@@ -1089,6 +1089,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
+      featureSettings: `${ELASTIC_DOCS}explore-analyze/ai-features/manage-access-to-ai-assistant`,
+      externalInference: `${ELASTIC_DOCS}explore-analyze/elastic-inference/external`,
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless
@@ -1110,6 +1112,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
       casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
+      configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
     },
   });
 };
