@@ -16,52 +16,72 @@ paths:
       description: Get a list of all response actions.
       operationId: EndpointGetActionsList
       parameters:
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/Page'
-        - in: query
+        - description: The number of response actions to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSize'
-        - in: query
+        - description: A list of response action command names to filter by.
+          in: query
           name: commands
           required: false
           schema:
             $ref: '#/components/schemas/Commands'
-        - in: query
+        - description: A list of Elastic Agent IDs to filter the response actions by.
+          in: query
           name: agentIds
           required: false
           schema:
             $ref: '#/components/schemas/AgentIds'
-        - in: query
+        - description: A list of user IDs that submitted the response actions.
+          in: query
           name: userIds
           required: false
           schema:
             $ref: '#/components/schemas/UserIds'
-        - in: query
+        - description: >-
+            A start date in ISO 8601 format or Date Math format (for example,
+            `now-24h`).
+          in: query
           name: startDate
           required: false
           schema:
             $ref: '#/components/schemas/StartDate'
-        - in: query
+        - description: >-
+            An end date in ISO 8601 format or Date Math format (for example,
+            `now`).
+          in: query
           name: endDate
           required: false
           schema:
             $ref: '#/components/schemas/EndDate'
-        - in: query
+        - description: >-
+            The agent type to filter response actions by. Defaults to
+            `endpoint`.
+          in: query
           name: agentTypes
           required: false
           schema:
             $ref: '#/components/schemas/AgentTypes'
-        - in: query
+        - description: >-
+            A list of response action IDs whose outputs should be included in
+            the response.
+          in: query
           name: withOutputs
           required: false
           schema:
             $ref: '#/components/schemas/WithOutputs'
-        - in: query
+        - description: >-
+            A list of response action types to filter by (`automated`,
+            `manual`).
+          in: query
           name: types
           required: false
           schema:
@@ -70,6 +90,40 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                actionsList:
+                  summary: A list of response actions
+                  value:
+                    data:
+                      - agents:
+                          - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                        agentType: endpoint
+                        command: running-processes
+                        completedAt: '2022-08-08T09:50:47.672Z'
+                        createdBy: elastic
+                        id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
+                        isCompleted: true
+                        isExpired: false
+                        startedAt: '2022-08-08T15:24:57.402Z'
+                        wasSuccessful: true
+                      - agents:
+                          - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                        agentType: endpoint
+                        command: isolate
+                        completedAt: '2022-08-08T10:41:57.352Z'
+                        createdBy: elastic
+                        id: 43b4098b-8752-4fbb-a7a7-6df7c74d0ee3
+                        isCompleted: true
+                        isExpired: false
+                        startedAt: '2022-08-08T15:23:37.359Z'
+                        wasSuccessful: true
+                    elasticAgentIds:
+                      - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                    endDate: now
+                    page: 1
+                    pageSize: 10
+                    startDate: now-24h/h
+                    total: 2
               schema:
                 $ref: '#/components/schemas/GetEndpointActionListResponse'
           description: Indicates a successful call.
@@ -91,6 +145,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                actionStatus:
+                  summary: Pending response actions per agent
+                  value:
+                    data:
+                      - agent_id: afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
+                        pending_actions:
+                          execute: 0
+                          get-file: 0
+                          isolate: 0
+                          kill-process: 1
+                          running-processes: 0
+                          scan: 0
+                          unisolate: 0
+                          upload: 0
               schema:
                 $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: Indicates a successful call.
@@ -102,17 +171,33 @@ paths:
       description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
       parameters:
-        - in: path
+        - description: The ID of the response action to retrieve.
+          in: path
           name: action_id
           required: true
           schema:
-            description: The ID of the action to retrieve.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
             type: string
       responses:
         '200':
           content:
             application/json:
+              examples:
+                actionDetails:
+                  summary: Details of an isolate response action
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentType: endpoint
+                      command: isolate
+                      completedAt: '2022-08-08T10:41:57.352Z'
+                      createdBy: elastic
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: true
+                      isExpired: false
+                      startedAt: '2022-08-08T15:23:37.359Z'
+                      wasSuccessful: true
               schema:
                 $ref: '#/components/schemas/ActionDetailsResponse'
           description: OK
@@ -150,6 +235,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                fileInfo:
+                  summary: File information for a response action upload
+                  value:
+                    data:
+                      actionId: 233db9ea-6733-4849-9226-5a7039c7161d
+                      agentId: ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentType: endpoint
+                      created: '2025-02-26T13:37:30.452Z'
+                      id: >-
+                        233db9ea-6733-4849-9226-5a7039c7161d.ed518850-681a-4d60-bb98-e22640cae2a8
+                      mimeType: application/zip
+                      name: memory_dump.zip
+                      size: 1048576
+                      status: READY
               schema:
                 properties:
                   data:
@@ -233,6 +333,12 @@ paths:
         '200':
           content:
             application/octet-stream:
+              examples:
+                fileDownload:
+                  summary: >-
+                    Password-protected ZIP archive containing the response
+                    action file
+                  value: binary file content (password-protected .zip)
               schema:
                 format: binary
                 type: string
@@ -836,6 +942,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                actionsState:
+                  summary: Response actions state with encryption enabled
+                  value:
+                    data:
+                      canEncrypt: true
               schema:
                 $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
@@ -1019,6 +1131,16 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              uploadFile:
+                summary: Upload a script file to a specific endpoint
+                value:
+                  comment: Pushing remediation script to host
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  file: RWxhc3RpYw==
+                  parameters:
+                    overwrite: false
             schema:
               $ref: '#/components/schemas/UploadRouteRequestBody'
         required: true
@@ -1067,32 +1189,40 @@ paths:
       description: Get a list of all endpoint host metadata.
       operationId: GetEndpointMetadataList
       parameters:
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/Page'
-        - in: query
+        - description: The number of endpoints to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSize'
-        - in: query
+        - description: A KQL string to filter the endpoint metadata results.
+          in: query
           name: kuery
           required: false
           schema:
             $ref: '#/components/schemas/Kuery'
-        - in: query
+        - description: >-
+            A set of host statuses to filter the results by (for example,
+            `healthy`, `updating`).
+          in: query
           name: hostStatuses
           required: true
           schema:
             $ref: '#/components/schemas/HostStatuses'
-        - in: query
+        - description: The field used to sort the results.
+          in: query
           name: sortField
           required: false
           schema:
             $ref: '#/components/schemas/SortField'
-        - in: query
+        - description: The sort order, either `asc` or `desc`.
+          in: query
           name: sortDirection
           required: false
           schema:
@@ -1101,6 +1231,36 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                metadataList:
+                  summary: A list of endpoint host metadata
+                  value:
+                    data:
+                      - host_status: healthy
+                        last_checkin: '2023-07-04T15:47:57.432Z'
+                        metadata:
+                          agent:
+                            id: 285297c6-3bff-4b83-9a07-f3e749801123
+                            type: endpoint
+                            version: 8.10.0
+                          Endpoint:
+                            policy:
+                              applied:
+                                id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                                name: test
+                                status: success
+                            status: enrolled
+                          host:
+                            hostname: WinDev2104Eval
+                            os:
+                              name: Windows
+                              platform: windows
+                              version: 20H2
+                    page: 0
+                    pageSize: 10
+                    sortDirection: desc
+                    sortField: enrolled_at
+                    total: 1
               schema:
                 $ref: '#/components/schemas/MetadataListResponse'
           description: Indicates a successful call.
@@ -1123,6 +1283,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                endpointMetadata:
+                  summary: Host metadata for a specific endpoint
+                  value:
+                    host_status: healthy
+                    last_checkin: '2023-07-04T15:48:57.360Z'
+                    metadata:
+                      agent:
+                        id: abb8a826-6812-448c-a571-6d8269b51449
+                        type: endpoint
+                        version: 8.10.0
+                      Endpoint:
+                        policy:
+                          applied:
+                            id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                            name: test
+                            status: success
+                        status: enrolled
+                      host:
+                        hostname: WinDev2104Eval
+                        os:
+                          name: Windows
+                          platform: windows
+                          version: 20H2
               schema:
                 $ref: '#/components/schemas/EndpointMetadataResponse'
           description: Indicates a successful call.
@@ -1144,6 +1328,23 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                policyResponse:
+                  summary: The most recent policy response for an endpoint
+                  value:
+                    policy_response:
+                      '@timestamp': '2023-07-04T15:48:57.360Z'
+                      agent:
+                        id: ed518850-681a-4d60-bb98-e22640cae2a8
+                        version: 7.16.0
+                      Endpoint:
+                        policy:
+                          applied:
+                            endpoint_policy_version: '2'
+                            id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
+                            name: My endpoint policy
+                            status: success
+                            version: '3'
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: Indicates a successful call.
@@ -1165,6 +1366,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                protectionUpdatesNote:
+                  summary: The protection updates note for a package policy
+                  value:
+                    note: >-
+                      Pinned protection updates to 2025-01-01 while validating
+                      new signatures.
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
@@ -1186,6 +1394,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              setNote:
+                summary: Set a new protection updates note
+                value:
+                  note: >-
+                    Pinned protection updates to 2025-01-01 while validating new
+                    signatures.
             schema:
               type: object
               properties:
@@ -1197,6 +1412,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                noteSaved:
+                  summary: Protection updates note saved
+                  value:
+                    note: >-
+                      Pinned protection updates to 2025-01-01 while validating
+                      new signatures.
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
@@ -1527,41 +1749,34 @@ components:
     ActionStateSuccessResponse:
       type: object
       properties:
-        body:
+        data:
           type: object
           properties:
-            data:
-              type: object
-              properties:
-                canEncrypt:
-                  description: >-
-                    Whether the Kibana instance has encryption enabled for
-                    response actions.
-                  type: boolean
-          required:
-            - data
+            canEncrypt:
+              description: >-
+                Whether the Kibana instance has encryption enabled for response
+                actions.
+              type: boolean
       required:
-        - body
+        - data
     ActionStatusSuccessResponse:
       type: object
       properties:
-        body:
-          type: object
-          properties:
-            data:
-              type: object
-              properties:
-                agent_id:
-                  $ref: '#/components/schemas/AgentId'
-                pending_actions:
-                  $ref: '#/components/schemas/PendingActionsSchema'
-              required:
-                - agent_id
-                - pending_actions
-          required:
-            - data
+        data:
+          description: One pending-actions summary entry per requested agent.
+          items:
+            type: object
+            properties:
+              agent_id:
+                $ref: '#/components/schemas/AgentId'
+              pending_actions:
+                $ref: '#/components/schemas/PendingActionsSchema'
+            required:
+              - agent_id
+              - pending_actions
+          type: array
       required:
-        - body
+        - data
     AgentId:
       description: Agent ID
       type: string
