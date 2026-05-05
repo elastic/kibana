@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -34,12 +36,21 @@ interface EsqlQueryResult {
   values: unknown[][];
 }
 
+/**
+ * Detects the index-not-found case the engine recovers from gracefully (Step 1
+ * runs against `logs-{integration}-{namespace}` data streams that don't exist
+ * until the integration ships at least one document).
+ *
+ * Uses the typed `ResponseError` from `@elastic/elasticsearch` rather than
+ * duck-typing two error shapes — the contract is anchored to the client we
+ * actually depend on, so a future client upgrade that changes internal
+ * representation surfaces as a compile-time signal rather than silent
+ * failure.
+ */
 function isIndexNotFound(err: unknown): boolean {
-  const e = err as {
-    meta?: { body?: { error?: { type?: string } } };
-    body?: { error?: { type?: string } };
-  };
-  return (e?.meta?.body?.error?.type ?? e?.body?.error?.type) === 'index_not_found_exception';
+  return (
+    err instanceof esErrors.ResponseError && err.body?.error?.type === 'index_not_found_exception'
+  );
 }
 
 function errMsg(err: unknown): string {
@@ -217,6 +228,16 @@ export const runGenericMaintainer = async ({
   totalBuckets: number;
   totalRecords: number;
   totalWritten: number;
+  /**
+   * Count of actor EUIDs the engine produced records for, but whose entity
+   * store record returned a 404 from `bulkUpdateEntity`. A 404 means the
+   * actor isn't in the store yet — extraction lag, namespace mismatch, or
+   * suppression. Surfaced here (rather than silently logged) so the caller
+   * (task scheduler / alerting) can react when the count is sustained.
+   */
+  totalNotFound: number;
+  /** Count of non-404 errors returned by `bulkUpdateEntity` (5xx, etc.). */
+  totalWriteErrors: number;
   lastRunTimestamp: string;
 }> => {
   // Defense-in-depth: namespace flows raw into eight `indexPattern(namespace)`
@@ -227,6 +248,8 @@ export const runGenericMaintainer = async ({
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
+  let totalNotFound = 0;
+  let totalWriteErrors = 0;
   const allRecords: ProcessedEngineRecord[] = [];
 
   for (const config of integrations) {
@@ -248,10 +271,20 @@ export const runGenericMaintainer = async ({
   }
 
   if (!abortController?.signal.aborted) {
-    totalWritten = await writeEntityIds(crudClient, logger, allRecords);
+    const writeResult = await writeEntityIds(crudClient, logger, allRecords);
+    totalWritten = writeResult.updated;
+    totalNotFound = writeResult.notFound;
+    totalWriteErrors = writeResult.errors;
   } else {
     logger.info('Generic maintainer aborted, skipping entity id write');
   }
 
-  return { totalBuckets, totalRecords, totalWritten, lastRunTimestamp: new Date().toISOString() };
+  return {
+    totalBuckets,
+    totalRecords,
+    totalWritten,
+    totalNotFound,
+    totalWriteErrors,
+    lastRunTimestamp: new Date().toISOString(),
+  };
 };

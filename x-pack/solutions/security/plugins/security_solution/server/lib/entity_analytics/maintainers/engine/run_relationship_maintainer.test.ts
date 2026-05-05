@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -82,10 +84,23 @@ const successResponse = (
   aggregations: { users: { buckets, after_key: afterKey } },
 });
 
-const indexNotFoundError = (shape: 'meta' | 'body') => {
-  const body = { error: { type: 'index_not_found_exception' } };
-  return shape === 'meta' ? { meta: { body } } : { body };
-};
+const indexNotFoundError = () =>
+  new esErrors.ResponseError({
+    statusCode: 404,
+    body: { error: { type: 'index_not_found_exception' } },
+    warnings: null,
+    headers: {},
+    meta: {} as never,
+  });
+
+const responseErrorWithType = (type: string) =>
+  new esErrors.ResponseError({
+    statusCode: 400,
+    body: { error: { type } },
+    warnings: null,
+    headers: {},
+    meta: {} as never,
+  });
 
 const realEsError = () => new Error('cluster_block_exception: index read-only');
 
@@ -128,6 +143,71 @@ describe('runGenericMaintainer', () => {
           integrations: [baseConfig],
         })
       ).resolves.toBeDefined();
+    });
+  });
+
+  describe('run summary surfaces 404 / write-error counts (F.1)', () => {
+    it('returns totalNotFound and totalWriteErrors in the summary when bulkUpdate reports them', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      // Step 1: 1 actor bucket, no after_key (single page).
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice', 'user.email': null }, doc_count: 1 }])
+      );
+      // Step 2: 1 row produced.
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', 'host:1', null]],
+      });
+      // bulkUpdate returns one 404 and one 500.
+      const { crudClient } = makeCrudClient([{ status: 404 }, { status: 500 }]);
+      const result = await runGenericMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      expect(result.totalNotFound).toBe(1);
+      expect(result.totalWriteErrors).toBe(1);
+    });
+
+    it('returns zero totalNotFound and zero totalWriteErrors when no records are written (early return path)', async () => {
+      const { esClient, search } = makeEsClient();
+      search.mockResolvedValue(successResponse([]));
+      const { crudClient } = makeCrudClient();
+      const result = await runGenericMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      expect(result.totalNotFound).toBe(0);
+      expect(result.totalWriteErrors).toBe(0);
+    });
+
+    it('returns zero totalNotFound and zero totalWriteErrors when the abort signal is set before the write', async () => {
+      const ac = new AbortController();
+      const { esClient, search } = makeEsClient();
+      search.mockImplementationOnce(async () => {
+        ac.abort();
+        return successResponse([]);
+      });
+      const { crudClient } = makeCrudClient();
+      const result = await runGenericMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+        abortController: ac,
+      });
+      expect(result.totalNotFound).toBe(0);
+      expect(result.totalWriteErrors).toBe(0);
     });
   });
 
@@ -270,28 +350,62 @@ describe('runGenericMaintainer', () => {
   });
 
   describe('error handling — composite agg (Step 1)', () => {
-    it.each(['meta', 'body'] as const)(
-      'detects index_not_found_exception via %s.body.error.type and skips integration without throwing',
-      async (shape) => {
-        const { esClient, search, esql } = makeEsClient();
-        const { crudClient, bulkUpdate } = makeCrudClient();
-        search.mockRejectedValueOnce(indexNotFoundError(shape));
-        const logger = loggerMock.create();
-        const result = await runGenericMaintainer({
+    it('detects index_not_found_exception via instanceof errors.ResponseError + body.error.type and skips integration without throwing', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkUpdate } = makeCrudClient();
+      search.mockRejectedValueOnce(indexNotFoundError());
+      const logger = loggerMock.create();
+      const result = await runGenericMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      expect(result.totalBuckets).toBe(0);
+      expect(esql).not.toHaveBeenCalled();
+      expect(bulkUpdate).not.toHaveBeenCalled();
+      const infos = logger.info.mock.calls.map((c) => c[0] as string);
+      expect(infos.some((m) => m.includes('not found, skipping'))).toBe(true);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('does NOT swallow a ResponseError with a different error.type — re-throws (e.g. cluster_block_exception)', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient } = makeCrudClient();
+      search.mockRejectedValueOnce(responseErrorWithType('cluster_block_exception'));
+      const logger = loggerMock.create();
+      await expect(
+        runGenericMaintainer({
           esClient,
           logger,
           namespace: 'default',
           crudClient,
           integrations: [baseConfig],
-        });
-        expect(result.totalBuckets).toBe(0);
-        expect(esql).not.toHaveBeenCalled();
-        expect(bulkUpdate).not.toHaveBeenCalled();
-        const infos = logger.info.mock.calls.map((c) => c[0] as string);
-        expect(infos.some((m) => m.includes('not found, skipping'))).toBe(true);
-        expect(logger.error).not.toHaveBeenCalled();
-      }
-    );
+        })
+      ).rejects.toBeInstanceOf(esErrors.ResponseError);
+    });
+
+    it('does NOT swallow a duck-typed plain object with shape { body: { error: { type: "index_not_found_exception" } } } — re-throws (typed ResponseError is required)', async () => {
+      // Locks the contract: only real `errors.ResponseError` instances are
+      // recoverable. A duck-typed object that happens to have the same shape
+      // (e.g. from a custom test fake or future client wrapper) is treated as
+      // a real failure so we surface it instead of silently dropping data.
+      const { esClient, search } = makeEsClient();
+      const { crudClient } = makeCrudClient();
+      const duckTyped = { body: { error: { type: 'index_not_found_exception' } } };
+      search.mockRejectedValueOnce(duckTyped);
+      const logger = loggerMock.create();
+      await expect(
+        runGenericMaintainer({
+          esClient,
+          logger,
+          namespace: 'default',
+          crudClient,
+          integrations: [baseConfig],
+        })
+      ).rejects.toBe(duckTyped);
+    });
 
     it('returns null (does not throw) when the abort signal fires during composite agg', async () => {
       const { esClient, search, esql } = makeEsClient();

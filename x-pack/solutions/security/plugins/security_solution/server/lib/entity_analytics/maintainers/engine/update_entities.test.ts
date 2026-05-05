@@ -16,10 +16,10 @@ const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateCli
   } as unknown as EntityUpdateClient);
 
 describe('writeEntityIds', () => {
-  it('returns 0 immediately when records is empty', async () => {
+  it('returns zero counts immediately when records is empty', async () => {
     const crudClient = makeCrudClient();
     const result = await writeEntityIds(crudClient, loggerMock.create(), []);
-    expect(result).toBe(0);
+    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
@@ -33,7 +33,7 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toBe(0);
+    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
@@ -50,7 +50,7 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toBe(0);
+    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
@@ -99,7 +99,7 @@ describe('writeEntityIds', () => {
     ]);
   });
 
-  it('counts only successfully updated entities', async () => {
+  it('returns updated/notFound/errors counts and counts only successfully updated entities in `updated`', async () => {
     const crudClient = makeCrudClient([{ status: 404 }]);
     const records: ProcessedEngineRecord[] = [
       {
@@ -114,10 +114,38 @@ describe('writeEntityIds', () => {
       },
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
-    expect(result).toBe(1);
+    expect(result).toEqual({ updated: 1, notFound: 1, errors: 0 });
   });
 
-  it('logs 404 errors at debug level, not error', async () => {
+  it('separates 404 (notFound) from non-404 (errors) in the response counts', async () => {
+    const crudClient = makeCrudClient([{ status: 404 }, { status: 500 }, { status: 503 }]);
+    const records: ProcessedEngineRecord[] = [
+      {
+        entityId: 'user:alice@corp',
+        entityType: 'user',
+        relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
+      },
+      {
+        entityId: 'user:bob@corp',
+        entityType: 'user',
+        relationships: { communicates_with: ['host:D3F5C9B9-bar'] },
+      },
+      {
+        entityId: 'user:charlie@corp',
+        entityType: 'user',
+        relationships: { communicates_with: ['host:D3F5C9B9-baz'] },
+      },
+      {
+        entityId: 'user:dave@corp',
+        entityType: 'user',
+        relationships: { communicates_with: ['host:D3F5C9B9-qux'] },
+      },
+    ];
+    const result = await writeEntityIds(crudClient, loggerMock.create(), records);
+    expect(result).toEqual({ updated: 1, notFound: 1, errors: 2 });
+  });
+
+  it('logs 404 (notFound) at info level — non-zero 404s are surfaced for the caller (was debug)', async () => {
     const logger = loggerMock.create();
     const crudClient = makeCrudClient([{ status: 404 }]);
     const records: ProcessedEngineRecord[] = [
@@ -128,7 +156,8 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, logger, records);
-    expect(logger.debug).toHaveBeenCalled();
+    const infos = logger.info.mock.calls.map((c) => c[0] as string);
+    expect(infos.some((m) => m.includes('not yet in store'))).toBe(true);
     expect(logger.error).not.toHaveBeenCalled();
   });
 

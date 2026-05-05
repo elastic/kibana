@@ -45,15 +45,34 @@ function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> 
   return merged;
 }
 
+/**
+ * Result of a `writeEntityIds` call. Surfaces the three buckets that the
+ * `bulkUpdateEntity` response distinguishes so the engine can include them
+ * in its run summary instead of swallowing them in a debug log.
+ *
+ * - `updated`: entities whose relationships were merged + persisted.
+ * - `notFound`: 404 responses — actor EUID isn't in the entity store yet
+ *   (extraction lag, namespace mismatch, suppression). Not a write failure
+ *   by itself, but persistent 404s burn work every run with no user signal,
+ *   so we surface the count.
+ * - `errors`: non-404 failures (5xx, 4xx other than 404) — these always
+ *   warrant an investigation.
+ */
+export interface WriteEntityIdsResult {
+  updated: number;
+  notFound: number;
+  errors: number;
+}
+
 export const writeEntityIds = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
   records: ProcessedEngineRecord[]
-): Promise<number> => {
-  if (records.length === 0) return 0;
+): Promise<WriteEntityIdsResult> => {
+  if (records.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
   const valid = filterValid(records);
-  if (valid.length === 0) return 0;
+  if (valid.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
   const merged = mergeRecords(valid);
 
@@ -79,22 +98,29 @@ export const writeEntityIds = async (
     }
   }
 
-  if (objects.length === 0) return 0;
+  if (objects.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);
-  const errors = await crudClient.bulkUpdateEntity({ objects, force: true });
+  const responseErrors = await crudClient.bulkUpdateEntity({ objects, force: true });
 
-  const missingErrors = errors.filter((e) => e.status === 404);
-  const realErrors = errors.filter((e) => e.status !== 404);
-  const updated = objects.length - errors.length;
+  const missingErrors = responseErrors.filter((e) => e.status === 404);
+  const realErrors = responseErrors.filter((e) => e.status !== 404);
+  const updated = objects.length - responseErrors.length;
 
+  // Promote 404s from `debug` to `info` when non-trivial: a single 404 is
+  // expected during entity extraction lag, but a sustained run with many
+  // 404s indicates a config/namespace problem worth surfacing in the run
+  // summary so the caller (task scheduler, alerting) can react.
   if (missingErrors.length > 0) {
-    logger.debug(`Skipped ${missingErrors.length} records: entities not yet in store`);
+    logger.info(
+      `Skipped ${missingErrors.length} records: actor entities not yet in store ` +
+        `(extraction lag, namespace mismatch, or suppression)`
+    );
   }
   if (realErrors.length > 0) {
     logger.error(`Failed to write ${realErrors.length} records: ${JSON.stringify(realErrors)}`);
   }
 
   logger.info(`Wrote relationship ids for ${updated} entities`);
-  return updated;
+  return { updated, notFound: missingErrors.length, errors: realErrors.length };
 };
