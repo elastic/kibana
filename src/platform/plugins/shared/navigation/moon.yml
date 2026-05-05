@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/navigation
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-feature-flags-server'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
   - '@kbn/i18n-react'
