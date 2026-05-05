@@ -19,10 +19,8 @@ imports:
   - .github/agents/code-reviewer.md
 engine:  
   id: codex
-  model: gpt-5.5
+  model: openai/gpt-5.5
   args:
-    - -c
-    - model=llm-gateway/gpt-5.5
     - -c
     - model_context_window=1050000
     # Disable plugins and apps to remove context bloat
@@ -30,7 +28,7 @@ engine:
     - features.plugins=false
     - -c
     - features.apps=false
-    # Codex disables settings for unrecognized model names like the llm-gateway/ prefix.
+    # Codex disables settings for unrecognized model names like provider-prefixed slugs.
     # Force reasoning on
     - -c
     - model_supports_reasoning_summaries=true
@@ -41,9 +39,9 @@ engine:
     - -c
     - model_reasoning_summary=auto
   env:
-    CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
+    CODEX_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    OPENAI_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    OPENAI_BASE_URL: https://openrouter.ai/api/v1
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
@@ -119,7 +117,7 @@ network:
     - defaults
     - github
     - chatgpt.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 jobs:
   prefetch_pr_context:
     permissions:
