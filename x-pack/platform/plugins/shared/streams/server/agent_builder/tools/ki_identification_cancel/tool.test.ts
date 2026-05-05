@@ -16,9 +16,13 @@ describe('createKiIdentificationCancelTool', () => {
           {
             id: 'exec-1',
             status: 'running',
-            context: { inputs: { streamName: 'logs.nginx' } },
           },
         ],
+      }),
+      getWorkflowExecution: jest.fn().mockResolvedValue({
+        id: 'exec-1',
+        status: 'running',
+        context: { inputs: { streamName: 'logs.nginx' } },
       }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };

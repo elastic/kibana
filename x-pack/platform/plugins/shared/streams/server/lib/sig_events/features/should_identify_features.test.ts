@@ -65,7 +65,7 @@ describe('shouldIdentifyFeatures', () => {
       thresholdHours,
     });
 
-    expect(result).toEqual({ shouldIdentify: false });
+    expect(result).toEqual({ shouldIdentify: false, newestLastSeen: recentDate });
   });
 
   it('returns shouldIdentify: true when newest inferred feature exceeds threshold', async () => {
@@ -81,7 +81,7 @@ describe('shouldIdentifyFeatures', () => {
       thresholdHours,
     });
 
-    expect(result).toEqual({ shouldIdentify: true });
+    expect(result).toEqual({ shouldIdentify: true, newestLastSeen: oldDate });
   });
 
   it('returns shouldIdentify: true for invalid timestamps', async () => {
@@ -114,6 +114,6 @@ describe('shouldIdentifyFeatures', () => {
       thresholdHours,
     });
 
-    expect(result).toEqual({ shouldIdentify: false });
+    expect(result).toEqual({ shouldIdentify: false, newestLastSeen: justWithinThreshold });
   });
 });
