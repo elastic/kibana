@@ -1,7 +1,6 @@
 steps:
   - name: 'Bump versions.json'
     key: bump-versions-json
-    depends_on: bump-version
     command: .buildkite/scripts/steps/version_bump/bump_versions_json.sh
     agents:
       image: family/kibana-ubuntu-2404
