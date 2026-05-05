@@ -13,6 +13,7 @@ import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type { FormBasedPersistedState, TextBasedPersistedState } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -263,6 +264,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     });
 
     attributes.state.needsRefresh = attributes.state.needsRefresh ?? false;
+    attributes.version = LENS_ITEM_LATEST_VERSION; // transforms should return latest version
 
     return attributes;
   },
