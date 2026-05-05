@@ -41,7 +41,6 @@
     "@kbn/field-utils",
     "@kbn/esql-types",
     "@kbn/background-search",
-    "@kbn/split-button",
     "@kbn/cps",
     "@kbn/css-utils",
     "@kbn/kql",
