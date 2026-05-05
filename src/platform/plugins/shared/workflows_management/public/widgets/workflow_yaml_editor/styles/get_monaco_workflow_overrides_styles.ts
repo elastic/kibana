@@ -136,5 +136,9 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
     .monaco-editor .suggest-widget .monaco-list .monaco-list-row .suggest-icon {
       color: ${euiTheme.colors.textParagraph} !important;
     }
+
+    [data-test-subj='workflowYamlEditor'] .monaco-editor .wordHighlightText {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
   `;
 };
