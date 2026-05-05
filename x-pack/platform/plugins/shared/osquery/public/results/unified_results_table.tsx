@@ -49,6 +49,7 @@ import {
   PaginationLimitToastContent,
   euiProgressCss,
 } from './results_table_shared';
+import { useExportFiltersContext } from './export_filters_context';
 
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
@@ -236,6 +237,29 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     scheduleId,
     executionCount,
   });
+
+  // Publish active filters to context so the page-header export button and
+  // the row kebab menu can read them. We extract `setFilters` (which is stable)
+  // rather than depending on the whole context value, since the context value
+  // changes whenever the underlying filters map updates and would otherwise
+  // re-trigger this effect.
+  const setExportFilters = useExportFiltersContext()?.setFilters;
+  const unfilteredTotal = actionResultsData?.aggregations?.totalRowCount;
+  useEffect(() => {
+    setExportFilters?.(actionId, {
+      kuery: userKuery,
+      activeFilters,
+      filteredTotal: allResultsData?.total,
+      total: unfilteredTotal,
+    });
+  }, [
+    setExportFilters,
+    actionId,
+    userKuery,
+    activeFilters,
+    allResultsData?.total,
+    unfilteredTotal,
+  ]);
 
   // Register missing columns as runtime fields on the data view so that
   // UnifiedDataTable can resolve their field type tokens (icons in column headers).
