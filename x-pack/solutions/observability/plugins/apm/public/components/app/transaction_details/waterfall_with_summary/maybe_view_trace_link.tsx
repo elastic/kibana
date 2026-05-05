@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
 import { getTraceParentChildrenMap } from '../../../shared/trace_waterfall/use_trace_waterfall';
 import {
@@ -54,31 +53,15 @@ function FullTraceButton({
 export function MaybeViewTraceLink({
   isLoading,
   transaction,
-  waterfall,
-  useUnified = false,
   traceItems = [],
   onViewFullTrace,
 }: {
   isLoading: boolean;
   transaction?: ITransaction;
-  waterfall: IWaterfall;
-  useUnified?: boolean;
   traceItems?: TraceItem[];
   onViewFullTrace: () => void;
 }) {
   const rootTransactionInfo = useMemo(() => {
-    if (!useUnified) {
-      const root = waterfall.rootWaterfallTransaction;
-      if (!root) return undefined;
-      return {
-        id: root.id,
-        name: root.doc.transaction.name,
-        serviceName: root.doc.service.name,
-        traceId: root.doc.trace.id,
-        transactionType: root.doc.transaction.type,
-        serviceEnvironment: root.doc.service.environment,
-      };
-    }
     const traceMap = getTraceParentChildrenMap(traceItems, false);
     const root = traceMap.root?.[0];
     if (!root || root.docType !== 'transaction') return undefined;
@@ -90,7 +73,7 @@ export function MaybeViewTraceLink({
       transactionType: root.type,
       serviceEnvironment: root.serviceEnvironment,
     };
-  }, [useUnified, waterfall.rootWaterfallTransaction, traceItems]);
+  }, [traceItems]);
 
   if (isLoading || !transaction) {
     return <FullTraceButton isLoading={isLoading} />;

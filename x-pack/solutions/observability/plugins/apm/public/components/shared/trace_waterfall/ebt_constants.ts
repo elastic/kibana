@@ -20,3 +20,6 @@ export const TRACE_WATERFALL_EBT_ELEMENTS = {
   FLYOUT_OPEN_IN_DISCOVER: 'flyoutWaterfallOpenInDiscover',
   FLYOUT_OPEN_IN_APM: 'flyoutWaterfallOpenInApm',
 } as const;
+
+export const EBT_SCROLL_TO_ORIGIN_ACTION = 'scrollToOrigin';
+export const EBT_FLYOUT_WATERFALL_SCROLL_TO_ORIGIN_BUTTON = 'flyoutWaterfallScrollToOriginButton';

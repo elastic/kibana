@@ -90,14 +90,19 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     (
       completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
     ) => {
-      const queriesTaskResult = completedTaskState.queriesTaskResult;
-      const featuresTaskResult = completedTaskState.featuresTaskResult;
+      const { queriesTaskResult, featuresTaskResult } = completedTaskState;
+      const featuresSkipped = !featuresTaskResult;
       const generatedFeaturesCount =
         featuresTaskResult?.status === TaskStatus.Completed
-          ? featuresTaskResult.features.length
+          ? (featuresTaskResult.iterations ?? []).reduce(
+              (sum, iteration) => sum + iteration.newFeatures.length,
+              0
+            )
           : 0;
       const generatedQueriesCount =
         queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
+
+      const count = generatedFeaturesCount + generatedQueriesCount;
 
       toasts.addSuccess({
         title: i18n.translate(
@@ -105,11 +110,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           {
             defaultMessage:
               '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
-            values: {
-              count: generatedFeaturesCount + generatedQueriesCount,
-            },
+            values: { count },
           }
         ),
+        text: featuresSkipped
+          ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
+              defaultMessage: 'Feature identification was skipped.',
+            })
+          : undefined,
       });
 
       void Promise.all([
