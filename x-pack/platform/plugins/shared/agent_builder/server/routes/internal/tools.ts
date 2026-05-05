@@ -275,7 +275,6 @@ export function registerInternalToolsRoutes({
       } = await listSearchSources({
         pattern,
         includeHidden: false,
-        includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: true,
         excludeIndicesRepresentedAsDatastream: true,
         esClient,

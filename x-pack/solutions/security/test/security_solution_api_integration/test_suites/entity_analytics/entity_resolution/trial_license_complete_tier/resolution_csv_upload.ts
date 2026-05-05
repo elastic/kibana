@@ -118,7 +118,8 @@ export default ({ getService }: FtrProviderContext) => {
     }
   };
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/260599
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
       // Use enableEntityStoreV2 and explicitly stop
       // the automated-resolution maintainer so it cannot race with CSV upload tests.

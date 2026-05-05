@@ -28,12 +28,15 @@ import type { RunTestsOptions } from './flags';
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   if (!process.env.CI) {
+    // [rspack-transition] When the legacy optimizer is removed, keep only the rspack script.
+    const buildScript =
+      process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1'
+        ? 'node scripts/build_rspack_bundles'
+        : 'node scripts/build_kibana_platform_plugins';
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
-    log.warning(
-      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
-    );
+    log.warning(`   Don't forget to use \`${buildScript}\` to build plugins you plan on testing`);
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
