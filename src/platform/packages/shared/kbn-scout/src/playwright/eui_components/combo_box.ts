@@ -162,7 +162,7 @@ export class EuiComboBoxWrapper {
       optionRoleName?: string;
       /** Use for combos backed by slow suggestion APIs so other suites keep default waits. */
       optionVisibilityTimeoutMs?: number;
-    } = {}
+    } & ComboBoxInputOptions = {}
   ) {
     await this.clear();
     await this.comboBoxMainInput.click();
