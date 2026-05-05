@@ -65,7 +65,7 @@ Use operations[] to:
 
         if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
           logger.error(newDashboardMetadataErrorMessage);
-          return noTitleOrDescriptionErrorResult;
+          return missingNewDashboardMetadataErrorResult;
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
@@ -182,7 +182,7 @@ Use operations[] to:
   };
 };
 
-const noTitleOrDescriptionErrorResult = {
+const missingNewDashboardMetadataErrorResult = {
   results: [
     {
       type: ToolResultType.error,
