@@ -9,7 +9,7 @@
 
 import { firstValueFrom } from 'rxjs';
 import { createHash } from 'crypto';
-import { i18n, i18nLoader, getLocaleLabel, type AvailableLocale } from '@kbn/i18n';
+import { i18n, getLocaleLabel, type AvailableLocale } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';

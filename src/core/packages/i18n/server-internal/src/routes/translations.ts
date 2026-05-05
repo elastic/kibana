@@ -62,9 +62,7 @@ export const registerTranslationsRoute = ({
         async (_ctx, req, res) => {
           const requestedLocale = req.params.locale.toLowerCase();
           // Find the canonical-cased locale key (e.g. 'fr-FR' not 'fr-fr')
-          const canonicalLocale = supportedLocales.find(
-            (s) => s.toLowerCase() === requestedLocale
-          );
+          const canonicalLocale = supportedLocales.find((s) => s.toLowerCase() === requestedLocale);
           if (!canonicalLocale) {
             return res.notFound({
               body: `Unknown locale: ${req.params.locale}`,
