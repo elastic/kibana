@@ -14,52 +14,77 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
 import type { ParsedMetricItem } from '../../../types';
-import { BadgeGroup, MetricTypeBadge } from '../components';
+import { BadgeGroup, MetricTypeBadge, StrongTitle } from '../components';
+import { METRIC_SOURCE_KIND, type MetricSourceKind } from '../hooks/use_metric_source_kind';
+
+const SOURCE_LABEL: Record<MetricSourceKind, string> = {
+  [METRIC_SOURCE_KIND.INDEX]: i18n.translate('metricsExperience.overviewTab.strong.indexLabel', {
+    defaultMessage: 'Index',
+  }),
+  [METRIC_SOURCE_KIND.DATA_STREAM]: i18n.translate(
+    'metricsExperience.overviewTab.strong.dataStreamLabel',
+    { defaultMessage: 'Data stream' }
+  ),
+};
+
+const SOURCE_TEST_SUBJ: Record<MetricSourceKind, string> = {
+  [METRIC_SOURCE_KIND.INDEX]: 'metricsExperienceFlyoutOverviewTabIndexLabel',
+  [METRIC_SOURCE_KIND.DATA_STREAM]: 'metricsExperienceFlyoutOverviewTabDataStreamLabel',
+};
+
+interface StaticIndexName {
+  indexName: string;
+  kind: MetricSourceKind;
+}
+
+const LABEL_WIDTH_MULTIPLIER = 11.25;
 
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
+  /**
+   * When set, prepends a static `<Label>: <indexName>` row above the standard
+   * metadata. The label is derived from `kind` (Index or Data stream). Used
+   * when the index name is not rendered through the streams flyout.
+   */
+  staticIndexName?: StaticIndexName;
 }
 
-export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem, staticIndexName }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
-    const labelMinWidthPxInner = euiTheme.base * 11.25;
+    const labelMinWidthPxInner = euiTheme.base * LABEL_WIDTH_MULTIPLIER;
 
-    const title = (text: string) => (
-      <EuiText size="xs">
-        <strong>{text}</strong>
-      </EuiText>
-    );
+    const indexNameRow = staticIndexName
+      ? [
+          {
+            title: <StrongTitle text={SOURCE_LABEL[staticIndexName.kind]} />,
+            description: (
+              <EuiText
+                color="primary"
+                size="s"
+                css={css`
+                  word-break: break-word;
+                  overflow-wrap: anywhere;
+                `}
+                data-test-subj={SOURCE_TEST_SUBJ[staticIndexName.kind]}
+              >
+                {staticIndexName.indexName}
+              </EuiText>
+            ),
+          },
+        ]
+      : [];
 
-    const rowsInner: Array<{
-      title: NonNullable<React.ReactNode>;
-      description: NonNullable<React.ReactNode>;
-    }> = [
+    const rowsInner = [
+      ...indexNameRow,
       {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-            defaultMessage: 'Data stream',
-          })
-        ),
-        description: (
-          <EuiText
-            color="primary"
-            size="s"
-            css={css`
-              word-break: break-word;
-              overflow-wrap: anywhere;
-            `}
-          >
-            {metricItem.dataStream ?? ''}
-          </EuiText>
-        ),
-      },
-      {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-            defaultMessage: 'Field type',
-          })
+        title: (
+          <StrongTitle
+            text={i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+              defaultMessage: 'Field type',
+            })}
+          />
         ),
         description: (
           <BadgeGroup
@@ -72,10 +97,12 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
         ),
       },
       {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-            defaultMessage: 'Metric unit',
-          })
+        title: (
+          <StrongTitle
+            text={i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+              defaultMessage: 'Metric unit',
+            })}
+          />
         ),
         description: (
           <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
@@ -89,10 +116,12 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
         ),
       },
       {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-            defaultMessage: 'Metric type',
-          })
+        title: (
+          <StrongTitle
+            text={i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+              defaultMessage: 'Metric type',
+            })}
+          />
         ),
         description: (
           <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
@@ -110,7 +139,7 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
   }, [
     euiTheme.base,
-    metricItem.dataStream,
+    staticIndexName,
     metricItem.fieldTypes,
     metricItem.metricTypes,
     metricItem.units,

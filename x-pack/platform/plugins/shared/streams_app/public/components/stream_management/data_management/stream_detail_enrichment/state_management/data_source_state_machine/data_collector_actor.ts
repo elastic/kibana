@@ -10,8 +10,9 @@ import type { SampleDocument } from '@kbn/streams-schema';
 import type { ErrorActorEvent } from 'xstate';
 import { fromObservable } from 'xstate';
 import type { errors as esErrors } from '@elastic/elasticsearch';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { Observable, filter, from, map, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
@@ -42,6 +43,7 @@ interface CollectKqlDataParams extends SearchParamsOptions {
   telemetryClient: StreamsTelemetryClient;
   dataSourceType: EnrichmentDataSource['type'];
   streamType: 'wired' | 'classic' | 'unknown';
+  uiSettings: DataSourceMachineDeps['uiSettings'];
 }
 
 type CollectorParams = Pick<
@@ -66,7 +68,11 @@ export function createDataCollectorActor({
   data,
   telemetryClient,
   streamsRepositoryClient,
-}: Pick<DataSourceMachineDeps, 'data' | 'telemetryClient' | 'streamsRepositoryClient'>) {
+  uiSettings,
+}: Pick<
+  DataSourceMachineDeps,
+  'data' | 'telemetryClient' | 'streamsRepositoryClient' | 'uiSettings'
+>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const { dataSource, streamName, streamType } = input;
     return getDataCollectorForDataSource(dataSource)({
@@ -75,22 +81,20 @@ export function createDataCollectorActor({
       telemetryClient,
       streamType,
       streamsRepositoryClient,
+      uiSettings,
     });
   });
 }
 
 type AllCollectorParams = CollectorParams & {
   streamsRepositoryClient: StreamsRepositoryClient;
+  uiSettings: DataSourceMachineDeps['uiSettings'];
 };
 
 /**
  * Returns the appropriate data collector function based on the data source type
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
-  if (dataSource.type === 'latest-samples') {
-    return (args: AllCollectorParams) =>
-      collectKqlData({ ...args, dataSourceType: dataSource.type });
-  }
   if (dataSource.type === 'failure-store') {
     return (args: AllCollectorParams) =>
       collectFailureStoreData({
@@ -108,6 +112,10 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
         ...pick(dataSource, ['filters', 'query', 'timeRange']),
         dataSourceType: dataSource.type,
       });
+  }
+  if (dataSource.type === 'latest-samples') {
+    return (args: AllCollectorParams) =>
+      collectKqlData({ ...args, dataSourceType: dataSource.type });
   }
   if (dataSource.type === 'custom-samples') {
     return () => of(dataSource.documents);
@@ -178,10 +186,12 @@ function collectKqlData({
   telemetryClient,
   dataSourceType,
   streamType,
+  uiSettings,
   ...searchParams
 }: CollectKqlDataParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
-  const params = buildSamplesSearchParams(searchParams, dataSourceType);
+  const esQueryConfig = getEsQueryConfig(uiSettings);
+  const params = buildSamplesSearchParams(searchParams, dataSourceType, esQueryConfig);
 
   return new Observable((observer) => {
     let registerFetchLatency: () => void = () => {};
@@ -232,10 +242,16 @@ function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[]
  */
 function buildSamplesSearchParams(
   searchParams: SearchParamsOptions,
-  dataSourceType: EnrichmentDataSource['type']
+  dataSourceType: EnrichmentDataSource['type'],
+  esQueryConfig: EsQueryConfig
 ) {
   const { filters, index, query, size = 100, timeRange } = searchParams;
-  const queryDefinition = buildEsQuery({ title: index, fields: [] }, query ?? [], filters ?? []);
+  const queryDefinition = buildEsQuery(
+    { title: index, fields: [] },
+    query ?? [],
+    filters ?? [],
+    esQueryConfig
+  );
   addTimeRangeToQuery(queryDefinition, timeRange);
 
   return {

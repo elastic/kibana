@@ -50,15 +50,13 @@ import {
 } from '../../../../state';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ErrorCallout } from '../../../common/components/error_callout';
+import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
 import type { FlyoutParamProps } from './types';
-import {
-  quietFetchOverviewStatusAction,
-  selectOverviewStatus,
-} from '../../../../state/overview_status';
+import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import { MonitorStatusPanel } from '../../../monitor_details/monitor_status/monitor_status_panel';
 import { FlyoutLastTestRun, FlyoutSummaryKPIs } from './flyout_panels';
 
@@ -229,7 +227,7 @@ function DetailFlyoutStatusHistory({ configId, location }: { configId: string; l
 export function MonitorDetailFlyout(props: Props) {
   const { id, configId, onLocationChange, locationId, spaces } = props;
 
-  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+  const { status: overviewStatus } = useOverviewStatusState();
 
   const monitor: OverviewStatusMetaData | undefined = useMemo(() => {
     if (!overviewStatus) return undefined;
@@ -334,7 +332,7 @@ export function MonitorDetailFlyout(props: Props) {
               <EuiToolTip
                 content={isPush ? UNDOCK_LABEL : DOCK_LABEL}
                 display="block"
-                disableScreenReaderOutput={true}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   data-test-subj="syntheticsFlyoutToggleMode"
