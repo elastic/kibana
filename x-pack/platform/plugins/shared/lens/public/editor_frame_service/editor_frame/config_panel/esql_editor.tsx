@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Simplify } from '@kbn/chart-expressions-common';
+import { useObservable } from '@kbn/use-observable';
+import { EMPTY } from 'rxjs';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { useESQLEditorContext } from './esql_editor_context';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
@@ -28,6 +30,7 @@ import {
   useLensDispatch,
   useLensSelector,
   selectCanEditTextBasedQuery,
+  selectSearchSessionId,
 } from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
@@ -95,6 +98,7 @@ export function ESQLEditor({
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
   const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [errors, setErrors] = useState<Error[]>([]);
   const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
@@ -126,12 +130,10 @@ export function ESQLEditor({
   }, [attributes, framePublicAPI.dataViews.indexPatterns]);
 
   const lensAdaptersRef = useRef(lensAdapters);
-  useEffect(() => {
-    lensAdaptersRef.current = lensAdapters;
-  }, [lensAdapters]);
+  lensAdaptersRef.current = lensAdapters;
 
-  /** Skips duplicate `getSuggestions` when chart reload follows a query submit (see `runQuery`) */
-  const suppressNextChartLoadGridRefreshRef = useRef(false);
+  const isInitialRenderRef = useRef(true);
+
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
@@ -140,69 +142,28 @@ export function ESQLEditor({
 
   const dispatch = useLensDispatch();
 
+  // Update activeData and column limit indicator when chart data finishes loading
+  const isDataLoading = useObservable(dataLoading$ ?? EMPTY);
+
   useEffect(() => {
-    // React whenever the workspace reports chart data loading state
-    const s = dataLoading$?.subscribe((isDataLoading) => {
-      // Only act when a load has fully finished (not undefined / not still loading)
-      if (isDataLoading !== false) {
-        return;
-      }
-      // After submit, runQuery already refreshed the grid; skip the duplicate refresh from the chart reload
-      if (suppressNextChartLoadGridRefreshRef.current) {
-        suppressNextChartLoadGridRefreshRef.current = false;
-        return;
-      }
+    if (isDataLoading !== false) {
+      return;
+    }
 
-      const lastSubmittedQuery = submittedQueryRef.current;
-      // Refresh the ES|QL results table for the last submitted query (time/filters may have changed)
-      if (isOfAggregateQueryType(lastSubmittedQuery)) {
-        void getSuggestions(
-          lastSubmittedQuery,
-          data,
-          http,
-          uiSettings,
-          datasourceMap,
-          visualizationMap,
-          adHocDataViews,
-          undefined,
-          undefined,
-          setDataGridAttrs,
-          esqlVariables,
-          false,
-          currentAttributesRef.current
-        );
-      }
+    const activeData = getActiveDataFromDatatable(layerId, lensAdaptersRef.current?.tables?.tables);
 
-      const activeData = getActiveDataFromDatatable(
-        layerId,
-        lensAdaptersRef.current?.tables?.tables
-      );
+    const table = activeData?.[layerId];
 
-      const table = activeData?.[layerId];
+    if (table) {
+      // there are cases where a query can return a big amount of columns
+      // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
+      setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
+    }
 
-      if (table) {
-        // there are cases where a query can return a big amount of columns
-        // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
-        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
-      }
-
-      if (Object.keys(activeData).length > 0) {
-        dispatch(onActiveDataChange({ activeData }));
-      }
-    });
-    return () => s?.unsubscribe();
-  }, [
-    adHocDataViews,
-    data,
-    dataLoading$,
-    datasourceMap,
-    dispatch,
-    esqlVariables,
-    http,
-    layerId,
-    uiSettings,
-    visualizationMap,
-  ]);
+    if (Object.keys(activeData).length > 0) {
+      dispatch(onActiveDataChange({ activeData }));
+    }
+  }, [isDataLoading, dispatch, layerId]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
@@ -225,7 +186,6 @@ export function ESQLEditor({
         setCurrentAttributes?.(attrs);
         setErrors([]);
         updateSuggestion?.(attrs);
-        suppressNextChartLoadGridRefreshRef.current = true;
       }
       prevQuery.current = q;
       setSubmittedQuery(q);
@@ -263,6 +223,44 @@ export function ESQLEditor({
       isQueryPendingSubmit: !isEqual(query, submittedQuery),
     });
   }, [query, submittedQuery, errors.length, onTextBasedQueryStateChange]);
+
+  useEffect(() => {
+    // Skip the initial render, the grid is populated by useInitializeChart → runQuery
+    if (isInitialRenderRef.current) {
+      isInitialRenderRef.current = false;
+      return;
+    }
+
+    const lastSubmittedQuery = submittedQueryRef.current;
+    if (isOfAggregateQueryType(lastSubmittedQuery)) {
+      getSuggestions(
+        lastSubmittedQuery,
+        data,
+        http,
+        uiSettings,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        undefined,
+        undefined,
+        setDataGridAttrs,
+        esqlVariables,
+        false,
+        currentAttributesRef.current
+      ).catch(() => {
+        // The chart itself will surface query errors via its own error handling path
+      });
+    }
+  }, [
+    searchSessionId,
+    esqlVariables,
+    data,
+    http,
+    uiSettings,
+    datasourceMap,
+    visualizationMap,
+    adHocDataViews,
+  ]);
 
   // Early exit if it's not in TextBased mode or the editor should be hidden
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
