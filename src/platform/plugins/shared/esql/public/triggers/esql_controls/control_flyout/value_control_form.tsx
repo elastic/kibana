@@ -46,6 +46,12 @@ import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
 import { ControlLabel, ControlSelectionType } from './shared_form_components';
 
+export type ValuesPreviewStatus = 'valid' | 'stale' | 'invalid';
+
+export interface ValueControlFormStatus {
+  valuesPreviewStatus: ValuesPreviewStatus;
+}
+
 interface ValueControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
@@ -53,7 +59,7 @@ interface ValueControlFormProps {
   controlFlyoutType: EsqlControlType;
   queryString: string;
   setControlState: (state: OptionsListESQLControlState) => void;
-  setValuesPreviewIsStale: (isStale: boolean) => void;
+  onFormStatusChange: (status: ValueControlFormStatus) => void;
   initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
@@ -62,8 +68,8 @@ interface ValueControlFormProps {
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
-To get the agent field values use: 
-FROM logs-* 
+To get the agent field values use:
+FROM logs-*
 |  WHERE @timestamp <=?_tend and @timestamp >?_tstart
 | STATS BY agent
 */`;
@@ -76,7 +82,7 @@ export function ValueControlForm({
   controlFlyoutType,
   search,
   setControlState,
-  setValuesPreviewIsStale,
+  onFormStatusChange,
   valuesRetrieval,
   timeRange,
   esqlVariables,
@@ -214,9 +220,9 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setEsqlQueryErrors([]);
-          setValuesPreviewIsStale(false);
+          onFormStatusChange({ valuesPreviewStatus: 'valid' });
         } else {
-          setValuesPreviewIsStale(true);
+          onFormStatusChange({ valuesPreviewStatus: 'invalid' });
         }
 
         setValuesQuery(query);
@@ -224,11 +230,11 @@ export function ValueControlForm({
         if (e instanceof DOMException && e.name === 'AbortError') {
           return;
         }
-        setValuesPreviewIsStale(true);
+        onFormStatusChange({ valuesPreviewStatus: 'invalid' });
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables, core.uiSettings, setValuesPreviewIsStale]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings, onFormStatusChange]
   );
 
   const setSuggestedQuery = useCallback(async () => {
@@ -327,7 +333,7 @@ export function ValueControlForm({
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
-              setValuesPreviewIsStale(true);
+              onFormStatusChange({ valuesPreviewStatus: 'stale' });
               setValuesQuery(q.esql);
             }}
             disableAutoFocus={true}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
@@ -24,7 +24,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
-import { ValueControlForm } from './value_control_form';
+import { ValueControlForm, type ValueControlFormStatus } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
 import {
@@ -121,8 +121,9 @@ export function ESQLControlsFlyout({
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [variableType, setVariableType] = useState<ESQLVariableType>(initialVariableType);
 
-  const [formIsInvalid, setFormIsInvalid] = useState(false);
-  const [valuesPreviewIsStale, setValuesPreviewIsStale] = useState(false);
+  const [valueControlFormStatus, setValueControlFormStatus] = useState<ValueControlFormStatus>({
+    valuesPreviewStatus: 'valid',
+  });
   const [controlState, setControlState] = useState<OptionsListESQLControlState | undefined>(
     initialState
   );
@@ -152,20 +153,30 @@ export function ESQLControlsFlyout({
     [controlFlyoutType, variableNamePrefix, variableType]
   );
 
-  useEffect(() => {
+  const onValueControlFormStatusChange = useCallback((status: ValueControlFormStatus) => {
+    setValueControlFormStatus((currentStatus) => {
+      if (currentStatus.valuesPreviewStatus === status.valuesPreviewStatus) {
+        return currentStatus;
+      }
+      return status;
+    });
+  }, []);
+
+  const formIsInvalid = useMemo(() => {
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const variableExists =
       checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
     const { available_options } = { available_options: [], ...controlState };
-    const staleValuesPreview =
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && valuesPreviewIsStale;
+    const valuesPreviewIsInvalid =
+      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
+      valueControlFormStatus.valuesPreviewStatus !== 'valid';
 
-    setFormIsInvalid(
+    return (
       !variableNameWithoutQuestionmark ||
-        variableExists ||
-        !areValuesValid ||
-        staleValuesPreview ||
-        !available_options.length
+      variableExists ||
+      !areValuesValid ||
+      valuesPreviewIsInvalid ||
+      !available_options.length
     );
   }, [
     isControlInEditMode,
@@ -174,8 +185,7 @@ export function ESQLControlsFlyout({
     controlFlyoutType,
     esqlVariables,
     variableName,
-    variableType,
-    valuesPreviewIsStale,
+    valueControlFormStatus.valuesPreviewStatus,
   ]);
 
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
@@ -236,11 +246,11 @@ export function ESQLControlsFlyout({
         variableType={variableType}
         initialState={initialState}
         setControlState={setControlState}
-        setValuesPreviewIsStale={setValuesPreviewIsStale}
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}
         esqlVariables={esqlVariables}
+        onFormStatusChange={onValueControlFormStatusChange}
       />
     ) : (
       <IdentifierControlForm
