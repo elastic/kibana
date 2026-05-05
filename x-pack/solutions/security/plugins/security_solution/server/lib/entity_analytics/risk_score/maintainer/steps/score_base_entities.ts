@@ -11,8 +11,11 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
-import { getBaseScoreESQLByIds } from '../../calculate_esql_risk_scores';
-import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
+import {
+  getEuidCompositeQuery,
+  getBaseScoreESQL,
+  type EuidCompositeAggregation,
+} from '../../calculate_esql_risk_scores';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
@@ -28,7 +31,6 @@ interface ScoreBaseEntitiesParams {
   entityType: EntityType;
   alertFilters: QueryDslQueryContainer[];
   alertsIndex: string;
-  lookupIndex: string;
   pageSize: number;
   sampleSize: number;
   now: string;
@@ -47,13 +49,26 @@ export interface Phase1BaseScoringSummary extends StepResult {
   scoresWritten: number;
 }
 
+interface EuidPageBounds {
+  lower: string | undefined;
+  upper: string;
+}
+
+interface EuidPageResult {
+  upperBound: string;
+  afterKey: Record<string, string> | undefined;
+}
+
 /**
  * Streams base risk scores for one entity type, one page per yield.
  *
- * Each page: `search_after` over the Phase-0 lookup index (filtered by EUID
- * type prefix) for up to `pageSize` IDs, then one ES|QL query with those IDs
- * as a `WHERE entity_id IN (...)` predicate. Modifier entities are fetched
- * only for IDs that produced scores.
+ * Each page: a composite aggregation over the alerts index (paginating by EUID
+ * via a Painless runtime mapping) discovers the next page's upper-bound EUID,
+ * then a single ES|QL query scores every alert in the half-open EUID range
+ * `(previousUpper, currentUpper]`. The Phase-0 lookup index is unused here —
+ * Phase 2 (resolution scoring) is its only reader.
+ *
+ * Modifier entities are fetched only for IDs that produced scores.
  */
 export const calculateBaseEntityScores = async function* ({
   esClient,
@@ -62,7 +77,6 @@ export const calculateBaseEntityScores = async function* ({
   entityType,
   alertFilters,
   alertsIndex,
-  lookupIndex,
   pageSize,
   sampleSize,
   now,
@@ -70,36 +84,38 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
-  const lookupPageSize = Math.min(pageSize, MAX_ENTITY_SEARCH_PAGE_SIZE);
-  let cursor: string | undefined;
+  let afterKey: Record<string, string> | undefined;
+  let previousPageUpperBound: string | undefined;
 
-  while (true) {
+  do {
     if (abortSignal?.aborted) {
       logger.info('Base scoring aborted between pages');
       return;
     }
 
-    const { entityIds, nextCursor } = await fetchNextLookupPage({
+    const pageResult = await fetchNextEuidPage({
       esClient,
-      lookupIndex,
       entityType,
-      pageSize: lookupPageSize,
-      cursor,
+      alertFilters,
+      alertsIndex,
+      pageSize,
+      afterKey,
     });
-
-    if (entityIds.length === 0) {
+    if (!pageResult) {
       return;
     }
 
-    const scores = await scorePageByIds({
+    afterKey = pageResult.afterKey;
+    const scores = await scorePageFromAlerts({
       esClient,
       entityType,
-      entityIds,
+      bounds: { lower: previousPageUpperBound, upper: pageResult.upperBound },
       sampleSize,
       pageSize,
       alertsIndex,
       alertFilters,
     });
+    previousPageUpperBound = pageResult.upperBound;
 
     if (scores.length > 0) {
       const entities = await fetchEntitiesByIds({
@@ -119,12 +135,7 @@ export const calculateBaseEntityScores = async function* ({
         watchlistConfigs,
       });
     }
-
-    if (nextCursor === undefined) {
-      return;
-    }
-    cursor = nextCursor;
-  }
+  } while (afterKey !== undefined);
 };
 
 export const scoreBaseEntities = async ({
@@ -158,51 +169,47 @@ export const scoreBaseEntities = async ({
   };
 };
 
-const fetchNextLookupPage = async ({
+const fetchNextEuidPage = async ({
   esClient,
-  lookupIndex,
   entityType,
+  alertFilters,
+  alertsIndex,
   pageSize,
-  cursor,
+  afterKey,
 }: {
   esClient: ElasticsearchClient;
-  lookupIndex: string;
   entityType: EntityType;
+  alertFilters: QueryDslQueryContainer[];
+  alertsIndex: string;
   pageSize: number;
-  cursor: string | undefined;
-}): Promise<{ entityIds: string[]; nextCursor: string | undefined }> => {
-  const response = await esClient.search<{ entity_id?: string }>({
-    index: lookupIndex,
-    size: pageSize,
-    _source: ['entity_id'],
-    track_total_hits: false,
-    sort: [{ entity_id: { order: 'asc' } }],
-    // Strict undefined: a truthy check would fold an empty-string cursor
-    // into "no cursor" and re-page from the start.
-    search_after: cursor !== undefined ? [cursor] : undefined,
-    // EUIDs are `${entityType}:...` (see appendTypeIdIfNeeded in
-    // entity_store/common/domain/euid/esql.ts), so a prefix scopes the page.
-    query: { prefix: { entity_id: `${entityType}:` } },
-  });
+  afterKey: Record<string, string> | undefined;
+}): Promise<EuidPageResult | null> => {
+  const compositeResponse = await esClient.search(
+    getEuidCompositeQuery(entityType, alertFilters, {
+      index: alertsIndex,
+      pageSize,
+      afterKey,
+    })
+  );
 
-  const hits = response.hits.hits ?? [];
-  const entityIds: string[] = [];
-  for (const hit of hits) {
-    const entityId = hit._source?.entity_id;
-    if (typeof entityId === 'string') {
-      entityIds.push(entityId);
-    }
+  const compositeAgg = (
+    compositeResponse.aggregations as { by_entity_id?: EuidCompositeAggregation } | undefined
+  )?.by_entity_id;
+  const buckets = compositeAgg?.buckets ?? [];
+  if (buckets.length === 0) {
+    return null;
   }
 
-  // Short page = slice exhausted.
-  const nextCursor = hits.length < pageSize ? undefined : entityIds[entityIds.length - 1];
-  return { entityIds, nextCursor };
+  return {
+    upperBound: buckets[buckets.length - 1].key.entity_id,
+    afterKey: compositeAgg?.after_key,
+  };
 };
 
-const scorePageByIds = async ({
+const scorePageFromAlerts = async ({
   esClient,
   entityType,
-  entityIds,
+  bounds,
   sampleSize,
   pageSize,
   alertsIndex,
@@ -210,13 +217,13 @@ const scorePageByIds = async ({
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
-  entityIds: string[];
+  bounds: EuidPageBounds;
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
   alertFilters: QueryDslQueryContainer[];
 }): Promise<ParsedRiskScore[]> => {
-  const query = getBaseScoreESQLByIds(entityType, entityIds, sampleSize, pageSize, alertsIndex);
+  const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
   const esqlResponse = await esClient.esql.query({
     query,
     filter: { bool: { filter: alertFilters } },

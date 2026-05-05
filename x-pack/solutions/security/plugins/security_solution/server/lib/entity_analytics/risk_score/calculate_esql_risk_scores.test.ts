@@ -9,7 +9,6 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
-  getBaseScoreESQLByIds,
   getESQL,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
@@ -71,38 +70,6 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
     });
 
-    it('builds a base score query with an entity_id IN clause from the supplied ids', () => {
-      const query = getBaseScoreESQLByIds(
-        EntityType.user,
-        ['user:a@okta', 'user:b@okta'],
-        5000,
-        1000,
-        '.alerts-security.alerts-default'
-      );
-
-      expect(query).toContain('WHERE entity_id IN ("user:a@okta", "user:b@okta")');
-      expect(query).toContain('BY entity_id');
-      expect(query).not.toContain('LOOKUP JOIN');
-    });
-
-    it('throws when getBaseScoreESQLByIds is called with an empty id list', () => {
-      expect(() =>
-        getBaseScoreESQLByIds(EntityType.user, [], 5000, 1000, '.alerts-security.alerts-default')
-      ).toThrow('At least one entity ID must be provided');
-    });
-
-    it('escapes quote and backslash characters in the base score id list', () => {
-      const query = getBaseScoreESQLByIds(
-        EntityType.user,
-        ['user:with"quote\\slash@okta'],
-        5000,
-        1000,
-        '.alerts-security.alerts-default'
-      );
-
-      expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
-    });
-
     it('escapes quote and backslash characters in resolution target ID list', () => {
       const query = getResolutionScoreESQLByIds(
         EntityType.user,
@@ -123,14 +90,15 @@ describe('Calculate risk scores with ESQL', () => {
       ['CR', '\u000D'],
       ['LS', '\u2028'],
       ['PS', '\u2029'],
-    ])('throws when base score id list contains %s control character', (_label, char) => {
+    ])('throws when resolution target id list contains %s control character', (_label, char) => {
       expect(() =>
-        getBaseScoreESQLByIds(
+        getResolutionScoreESQLByIds(
           EntityType.user,
-          ['user:good@okta', `user:bad${char}@okta`],
+          ['user:target-a', `user:bad${char}@okta`],
           5000,
           1000,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
     });

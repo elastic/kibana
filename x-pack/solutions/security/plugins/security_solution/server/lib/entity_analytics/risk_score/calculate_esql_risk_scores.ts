@@ -580,68 +580,6 @@ export const getBaseScoreESQL = (
   return query;
 };
 
-/**
- * Base scoring filtered by an explicit `entity_id IN (...)` list. The IN-clause
- * pushes down to Lucene so non-matching alerts are dropped at scan time; a
- * LOOKUP JOIN against a large lookup index instead trips the request circuit
- * breaker on alert-heavy workloads (~150K alerts, default heap).
- *
- * Caller sizes `entityIds` to stay within `index.max_terms_count` (65,536) and
- * the 10,000 ES|QL row cap.
- */
-export const getBaseScoreESQLByIds = (
-  entityType: EntityType,
-  entityIds: string[],
-  sampleSize: number,
-  pageSize: number,
-  alertsIndex: string
-): string => {
-  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
-  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
-  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
-
-  if (entityIds.length === 0) {
-    throw new Error('At least one entity ID must be provided for ID-based base scoring');
-  }
-
-  assertEsqlInterpolatableIds(entityIds);
-
-  const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
-
-  // Filter on entity_id BEFORE the CONCAT/base64 builders run, so the
-  // per-row string-allocation work only happens for alerts that survive
-  // the IN-clause. RENAME/EVAL ordering is otherwise unchanged.
-  const query = /* esql */ `
-  SET unmapped_fields="nullify";
-  FROM ${alertsIndex} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
-    ${fieldEvalsClause}
-    | EVAL entity_id = ${euidEval}
-    | WHERE entity_id IN (${idsClause})
-    | RENAME kibana.alert.risk_score as risk_score,
-             kibana.alert.rule.name as rule_name,
-             kibana.alert.rule.uuid as rule_id,
-             kibana.alert.uuid as alert_id,
-             event.kind as category,
-             @timestamp as time
-    | EVAL rule_name_b64 = TO_BASE64(rule_name),
-           category_b64 = TO_BASE64(category)
-    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | STATS
-        alert_count = count(risk_score),
-        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
-        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc")
-        BY entity_id
-    | SORT scores DESC
-    | LIMIT ${pageSize}
-  `;
-
-  return query;
-};
-
 export const getResolutionCompositeQuery = (
   index: string,
   pageSize: number,

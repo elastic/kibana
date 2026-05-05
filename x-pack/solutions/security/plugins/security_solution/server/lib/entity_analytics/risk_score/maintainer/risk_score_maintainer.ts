@@ -458,7 +458,6 @@ const executeEntityTypeRun = async ({
     const baseSummary = await scoreBaseEntities({
       alertFilters,
       alertsIndex: runConfig.alertsIndex,
-      lookupIndex: runContext.lookupIndex,
       crudClient,
       entityType,
       esClient: runContext.esClient,
