@@ -3,18 +3,23 @@
 set -euo pipefail
 
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
-  cmd=(
-    "node" "scripts/ship_ci_stats"
-      "--metrics" "target/optimizer_bundle_metrics.json"
-      "--metrics" "build/kibana/node_modules/@kbn/ui-shared-deps-src/shared_built_assets/metrics.json"
-  )
+  # [rspack-transition] avoid shipping bundle sizes while RSPack is not the default
+  if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
+    echo "--- Skip Ship Kibana Distribution Metrics to CI Stats (rspack build)"
+  else
+    cmd=(
+      "node" "scripts/ship_ci_stats"
+        "--metrics" "target/optimizer_bundle_metrics.json"
+        "--metrics" "build/kibana/node_modules/@kbn/ui-shared-deps-src/shared_built_assets/metrics.json"
+    )
 
-  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]] || [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-pull-request" ]]; then
-    cmd+=("--validate")
+    if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]] || [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-pull-request" ]]; then
+      cmd+=("--validate")
+    fi
+
+    echo "--- Ship Kibana Distribution Metrics to CI Stats"
+    "${cmd[@]}"
   fi
-
-  echo "--- Ship Kibana Distribution Metrics to CI Stats"
-  "${cmd[@]}"
 fi
 
 echo "--- Upload Build Artifacts"
