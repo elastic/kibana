@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -88,9 +89,24 @@ const lifecycleStatsRoute = createServerRoute({
       throw new StatusError('Lifecycle stats are only available for ILM policy', 400);
     }
 
-    const { policy } = await scopedClusterClient.asCurrentUser.ilm
-      .getLifecycle({ name: lifecycle.ilm.policy })
-      .then((policies) => policies[lifecycle.ilm.policy]);
+    const policyName = lifecycle.ilm.policy;
+    let policyEntry: Awaited<
+      ReturnType<typeof scopedClusterClient.asCurrentUser.ilm.getLifecycle>
+    >[string];
+    try {
+      policyEntry = await scopedClusterClient.asCurrentUser.ilm
+        .getLifecycle({ name: policyName })
+        .then((policies) => policies[policyName]);
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        throw new StatusError(
+          `ILM policy '${policyName}' not found: the data stream references an ILM policy that does not exist`,
+          404
+        );
+      }
+      throw error;
+    }
+    const { policy } = policyEntry;
 
     const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] = await Promise.all([
       scopedClusterClient.asCurrentUser.ilm.explainLifecycle({ index: name }),
