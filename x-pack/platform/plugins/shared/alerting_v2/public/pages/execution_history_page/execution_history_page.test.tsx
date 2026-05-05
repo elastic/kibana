@@ -312,4 +312,16 @@ describe('ExecutionHistoryPage', () => {
 
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
+
+  it('keeps the banner visible with a loading button while the fetch is in flight', async () => {
+    mockFetchResult({ isFetching: true });
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 2 } });
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('executionHistoryLoadNewEventsButton'));
+
+    // Banner still visible while fetching
+    expect(screen.getByTestId('executionHistoryNewEventsBanner')).toBeInTheDocument();
+    expect(screen.getByTestId('executionHistoryLoadNewEventsButton')).toBeDisabled();
+  });
 });

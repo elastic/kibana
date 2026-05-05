@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -178,6 +178,7 @@ export const ExecutionHistoryPage = () => {
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
   const [lastSeenAt, setLastSeenAt] = useState(() => new Date().toISOString());
+  const [isLoadingNewEvents, setIsLoadingNewEvents] = useState(false);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
@@ -201,10 +202,18 @@ export const ExecutionHistoryPage = () => {
   const newEventsCount = newCountData?.count ?? 0;
 
   const onLoadNewEvents = () => {
-    setLastSeenAt(new Date().toISOString());
+    setIsLoadingNewEvents(true);
     setPage(0);
     refetch();
   };
+
+  // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
+  useEffect(() => {
+    if (isLoadingNewEvents && !isFetching) {
+      setLastSeenAt(new Date().toISOString());
+      setIsLoadingNewEvents(false);
+    }
+  }, [isLoadingNewEvents, isFetching]);
 
   const onTableChange = ({
     page: tablePage,
@@ -295,6 +304,8 @@ export const ExecutionHistoryPage = () => {
               size="s"
               color="primary"
               onClick={onLoadNewEvents}
+              isLoading={isLoadingNewEvents}
+              isDisabled={isLoadingNewEvents}
               data-test-subj="executionHistoryLoadNewEventsButton"
             >
               <FormattedMessage
