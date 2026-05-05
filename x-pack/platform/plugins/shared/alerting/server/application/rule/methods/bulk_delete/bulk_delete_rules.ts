@@ -44,6 +44,7 @@ import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -280,35 +281,11 @@ const bulkDeleteWithOCC = async (
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
-  if (context.changeTrackingService) {
-    const changes = rules.reduce<RuleChange[]>((acc, rule) => {
-      const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
-      if (!ruleType.trackChanges) {
-        return acc;
-      }
-      acc.push({
-        objectId: rule.id,
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: ruleType.solution,
-        snapshot: {
-          attributes: rule.attributes,
-          references: rule.references ?? [],
-        },
-      });
-      return acc;
-    }, []);
-    if (changes.length) {
-      const username = await context.getUserName();
-      await context.changeTrackingService.logBulk(changes, {
-        action: RuleChangeTrackingAction.ruleDelete,
-        // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
-        username: username ?? 'unknown',
-        userProfileId: undefined,
-        spaceId: context.spaceId,
-        data: { metadata: { bulkCount: rules.length } },
-      });
-    }
-  }
+  await logBulkRuleChanges({
+    context,
+    ruleSOs: rules,
+    action: RuleChangeTrackingAction.ruleDelete,
+  });
 
   return {
     errors,

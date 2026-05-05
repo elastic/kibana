@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -18,6 +18,7 @@ import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { logRuleChange } from '../common_utils/log_rule_change';
 import type { UpdateApiKeyParams } from './types';
 import { updateApiKeyParamsSchema } from './schemas';
 
@@ -127,8 +128,19 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   try {
-    await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, updateAttributes, {
-      version,
+    const updatedRuleSavedObject = await context.unsecuredSavedObjectsClient.update(
+      RULE_SAVED_OBJECT_TYPE,
+      id,
+      updateAttributes,
+      {
+        version,
+      }
+    );
+
+    await logRuleChange({
+      context,
+      ruleSO: updatedRuleSavedObject as SavedObject<RawRule>,
+      action: RuleChangeTrackingAction.ruleUpdateApiKey,
     });
 
     if (context.changeTrackingService && ruleType.trackChanges) {

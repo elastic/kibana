@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -26,6 +27,7 @@ import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
+import { logRuleChange } from '../common_utils/log_rule_change';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 
@@ -117,26 +119,11 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     }),
   });
 
-  if (context.changeTrackingService && ruleType.trackChanges) {
-    await context.changeTrackingService.log(
-      {
-        objectId: id,
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: ruleType.solution,
-        snapshot: {
-          attributes: { ...attributes, ...updatedRuleRaw.attributes } as RawRule,
-          references: updatedRuleRaw.references ?? references,
-        },
-      },
-      {
-        action: RuleChangeTrackingAction.ruleSnooze,
-        // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
-        username: username ?? 'unknown',
-        userProfileId: undefined,
-        spaceId: context.spaceId,
-      }
-    );
-  }
+  await logRuleChange({
+    context,
+    ruleSO: updatedRuleRaw as SavedObject<RawRule>,
+    action: RuleChangeTrackingAction.ruleSnooze,
+  });
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
     updatedRuleRaw.attributes as RawRule,

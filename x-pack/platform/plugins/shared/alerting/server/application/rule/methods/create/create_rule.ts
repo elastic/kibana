@@ -46,6 +46,7 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { logRuleChange } from '../common_utils/log_rule_change';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -252,26 +253,11 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  if (context.changeTrackingService && ruleType.trackChanges) {
-    await context.changeTrackingService.log(
-      {
-        objectId: id,
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: ruleType.solution,
-        snapshot: {
-          attributes: ruleAttributes,
-          references,
-        },
-      },
-      {
-        action: RuleChangeTrackingAction.ruleCreate,
-        // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
-        username: username ?? 'unknown',
-        userProfileId: undefined,
-        spaceId: context.spaceId,
-      }
-    );
-  }
+  await logRuleChange({
+    context,
+    ruleSO: createdRuleSavedObject,
+    action: RuleChangeTrackingAction.ruleCreate,
+  });
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

@@ -42,6 +42,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -243,38 +244,11 @@ const bulkDisableRulesWithOCC = async (
       })
   );
 
-  if (context.changeTrackingService) {
-    const changes = rulesToDisable.reduce<RuleChange[]>((acc, rule) => {
-      const updated = result.saved_objects.find((r) => r.id === rule.id);
-      if (!updated || updated.error) {
-        return acc;
-      }
-      const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
-      if (!ruleType.trackChanges) {
-        return acc;
-      }
-      acc.push({
-        objectId: rule.id,
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: ruleType.solution,
-        snapshot: {
-          attributes: rule.attributes as RawRule,
-          references: rule.references ?? [],
-        },
-      });
-      return acc;
-    }, []);
-    if (changes.length) {
-      await context.changeTrackingService.logBulk(changes, {
-        action: RuleChangeTrackingAction.ruleDisable,
-        // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
-        username: username ?? 'unknown',
-        userProfileId: undefined,
-        spaceId: context.spaceId,
-        data: { metadata: { bulkCount: rulesToDisable.length } },
-      });
-    }
-  }
+  await logBulkRuleChanges({
+    context,
+    ruleSOs: result.saved_objects,
+    action: RuleChangeTrackingAction.ruleDisable,
+  });
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];

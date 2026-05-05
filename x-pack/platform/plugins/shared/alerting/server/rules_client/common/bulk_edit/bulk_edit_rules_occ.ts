@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { ChangeTrackingAction } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import type { RuleChange } from '../../lib/change_tracking';
+import { logBulkRuleChanges } from '../../../application/rule/methods/common_utils/log_bulk_rule_changes';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -203,38 +203,11 @@ async function saveBulkUpdatedRules({
       savedObjectsBulkCreateOptions: { overwrite: true },
     });
 
-    if (context.changeTrackingService) {
-      const changes = rules.reduce<RuleChange[]>((acc, rule) => {
-        const updated = result.saved_objects.find((r) => r.id === rule.id);
-        if (!updated || updated.error) {
-          return acc;
-        }
-        const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
-        if (!ruleType.trackChanges) {
-          return acc;
-        }
-        acc.push({
-          objectId: rule.id,
-          objectType: RULE_SAVED_OBJECT_TYPE,
-          module: ruleType.solution,
-          snapshot: {
-            attributes: rule.attributes as RawRule,
-            references: rule.references ?? [],
-          },
-        });
-        return acc;
-      }, []);
-      if (changes.length) {
-        await context.changeTrackingService.logBulk(changes, {
-          action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
-          // TODO: remove username/userProfileId once asScoped() is wired in (#266096)
-          username: username ?? 'unknown',
-          userProfileId: undefined,
-          spaceId: context.spaceId,
-          data: { metadata: { bulkCount: rules.length } },
-        });
-      }
-    }
+    await logBulkRuleChanges({
+      context,
+      ruleSOs: result.saved_objects,
+      action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
+    });
   } catch (e) {
     // avoid unused newly generated API keys
 
