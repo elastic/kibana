@@ -190,9 +190,6 @@ export class CloudHandler extends ProjectHandler {
       );
     }
 
-    let lastPhase: string | undefined;
-    let attempts = 0;
-
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
       const response = await fetch(
