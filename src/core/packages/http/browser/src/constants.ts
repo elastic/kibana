@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DEFAULT_SPACE_ID = 'default';
+export { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';

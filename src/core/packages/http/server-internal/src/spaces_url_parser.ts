@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
@@ -27,7 +28,7 @@ const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 export function getSpaceIdFromPath(
   requestBasePath: string = '/',
   serverBasePath: string = '/'
-): { spaceId: string; pathHasExplicitSpaceIdentifier: boolean } {
+): { spaceId: SpaceId; pathHasExplicitSpaceIdentifier: boolean } {
   const pathToCheck = stripServerBasePath(requestBasePath, serverBasePath);
   const match = pathToCheck.match(spaceContextRegex);
 
@@ -35,7 +36,7 @@ export function getSpaceIdFromPath(
     return { spaceId: DEFAULT_SPACE_ID, pathHasExplicitSpaceIdentifier: false };
   }
 
-  return { spaceId: match[1], pathHasExplicitSpaceIdentifier: true };
+  return { spaceId: asSpaceId(match[1]), pathHasExplicitSpaceIdentifier: true };
 }
 
 function stripServerBasePath(requestBasePath: string, serverBasePath: string): string {

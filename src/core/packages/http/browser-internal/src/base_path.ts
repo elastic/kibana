@@ -8,7 +8,8 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
-import { DEFAULT_SPACE_ID } from '@kbn/core-http-browser';
+import type { SpaceId } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { modifyUrl } from '@kbn/std';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
@@ -18,7 +19,7 @@ export class BasePath implements IBasePath {
   public readonly serverBasePath: string;
   public readonly assetsHrefBase: string;
   public readonly publicBaseUrl?: string;
-  public readonly spaceId: string;
+  public readonly spaceId: SpaceId;
 
   constructor({
     basePath,
@@ -41,7 +42,7 @@ export class BasePath implements IBasePath {
         ? basePath.slice(serverBasePath.length)
         : basePath;
     const match = namespacedPath.match(spaceContextRegex);
-    this.spaceId = match?.[1] ?? DEFAULT_SPACE_ID;
+    this.spaceId = match?.[1] ? asSpaceId(match[1]) : DEFAULT_SPACE_ID;
   }
 
   public get = () => {

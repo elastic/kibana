@@ -22,6 +22,7 @@ import {
   type KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -91,7 +92,9 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
-  const appState = spaceId ? { ...kibanaRequestState, spaceId } : kibanaRequestState;
+  const appState = spaceId
+    ? { ...kibanaRequestState, spaceId: asSpaceId(spaceId) }
+    : kibanaRequestState;
 
   return kibanaRequestFactory<P, Q, B>(
     hapiMocks.createRequest({

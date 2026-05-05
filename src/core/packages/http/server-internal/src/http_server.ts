@@ -161,7 +161,7 @@ function stripConfiguredBasePath(
  * prefix the URL is rewritten to drop it and the per-request basePath is
  * recorded so downstream code can prepend it.
  */
-function extractSpaceFromUrl(request: Request, basePathService: BasePath): string {
+function extractSpaceFromUrl(request: Request, basePathService: BasePath) {
   const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(request.url.pathname);
   if (!pathHasExplicitSpaceIdentifier) {
     return spaceId;

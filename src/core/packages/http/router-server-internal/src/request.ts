@@ -36,6 +36,7 @@ import type {
   RouteSecurity,
   RequestTiming,
 } from '@kbn/core-http-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -154,7 +155,7 @@ export class CoreKibanaRequest<
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
   /** {@inheritDoc KibanaRequest.spaceId} */
-  public readonly spaceId: string;
+  public readonly spaceId: SpaceId;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
 

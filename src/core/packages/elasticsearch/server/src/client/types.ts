@@ -8,6 +8,7 @@
  */
 
 import type { Headers, KibanaRequest } from '@kbn/core-http-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 /**
  * Fake request object created manually by Kibana plugins.
@@ -22,7 +23,7 @@ export interface FakeRequest {
    * in non-HTTP contexts (background tasks, scheduled jobs) instead of
    * constructing a fake URL with `/s/{spaceId}`.
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
 }
 
 /**

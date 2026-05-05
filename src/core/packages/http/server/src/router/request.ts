@@ -13,6 +13,7 @@ import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { Span } from 'elastic-apm-node';
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
@@ -53,7 +54,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   rewrittenUrl?: URL;
   traceId?: string;
   /** The resolved space ID for this request. Defaults to 'default'. */
-  spaceId?: string;
+  spaceId?: SpaceId;
   /** The top HTTP Otel Span for this request. */
   httpSpan?: OTelSpan;
   /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
@@ -219,7 +220,7 @@ export interface KibanaRequest<
    * The resolved Kibana space ID for this request.
    * Always populated; defaults to {@link DEFAULT_SPACE_ID} ('default') when no explicit space is present in the URL.
    */
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
 
   /**
    * URL rewritten in onPreRouting request interceptor.

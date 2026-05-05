@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ApiVersion } from '@kbn/core-http-common';
@@ -114,7 +115,7 @@ export interface IBasePath {
    * Always populated — defaults to `'default'` when no `/s/{spaceId}` prefix is present.
    * This is a static string; space changes trigger a full page navigation.
    */
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
 
   /**
    * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
