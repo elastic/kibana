@@ -40,7 +40,6 @@ export const AttackRelatedAlertsDetails: React.FC = memo(() => {
         scopeId,
         dataTestSubj: ATTACK_DETAILS_LEFT_INSIGHTS_CORRELATION_TABLE,
         onShowAlert,
-        hidePreviewLink: false,
       }),
     [scopeId, onShowAlert]
   );
