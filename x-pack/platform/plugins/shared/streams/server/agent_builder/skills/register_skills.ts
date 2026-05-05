@@ -21,14 +21,16 @@ export const registerAgentBuilderSkills = ({
   telemetry: EbtTelemetryClient;
   workflowsManagementApi?: WorkflowsManagementApi;
 }): void => {
-  if (!agentBuilder || !workflowsManagementApi) {
+  if (!agentBuilder) {
     return;
   }
 
   const streamsSkills = [
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
-    createKiIdentificationManagementSkill({ telemetry, workflowsManagementApi }),
+    ...(workflowsManagementApi
+      ? [createKiIdentificationManagementSkill({ telemetry, workflowsManagementApi })]
+      : []),
   ];
 
   for (const skill of streamsSkills) {

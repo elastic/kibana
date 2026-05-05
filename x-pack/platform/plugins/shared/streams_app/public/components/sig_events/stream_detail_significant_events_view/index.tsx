@@ -186,7 +186,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const isKnowledgeIndicatorsGenerationCanceling =
     knowledgeIndicatorsTaskState?.status === 'cancelled';
   const isGenerateButtonDisabled =
-    knowledgeIndicatorsTaskState === null || isKnowledgeIndicatorsGenerationPending;
+    knowledgeIndicatorsTaskState === null ||
+    isKnowledgeIndicatorsGenerationPending ||
+    isKnowledgeIndicatorsGenerationCanceling;
 
   if (isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
