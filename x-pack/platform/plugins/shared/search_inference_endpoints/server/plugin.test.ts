@@ -94,25 +94,44 @@ describe('SearchInferenceEndpointsPlugin', () => {
   });
 
   describe('start()', () => {
-    it('endpoints.getForFeature reads inference settings with getScopedClient', async () => {
-      const coreStart = coreMock.createStart();
+    let coreStart: ReturnType<typeof coreMock.createStart>;
+    let startContract: ReturnType<SearchInferenceEndpointsPlugin['start']>;
+
+    beforeEach(() => {
+      coreStart = coreMock.createStart();
       plugin.setup(coreSetup, { features });
 
       const inference = inferenceMock.createStartContract();
       inference.getConnectorList.mockResolvedValue([]);
       inference.getConnectorById.mockRejectedValue(new Error('not found'));
 
-      const startContract = plugin.start(coreStart, {
+      startContract = plugin.start(coreStart, {
         actions: actionsMock.createStart(),
         inference,
       });
+    });
 
+    it('endpoints.getForFeature reads inference settings with getScopedClient', async () => {
       const request = httpServerMock.createKibanaRequest();
       await startContract.endpoints.getForFeature('any_feature', request);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
         includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
       });
+    });
+
+    it('creates a separate scoped SO client per request, ensuring space isolation', async () => {
+      const requestA = httpServerMock.createKibanaRequest();
+      const requestB = httpServerMock.createKibanaRequest();
+
+      await startContract.endpoints.getForFeature('any_feature', requestA);
+      await startContract.endpoints.getForFeature('any_feature', requestB);
+
+      const calls = coreStart.savedObjects.getScopedClient.mock.calls;
+      const requestsUsed = calls.map(([req]) => req);
+
+      expect(requestsUsed).toContain(requestA);
+      expect(requestsUsed).toContain(requestB);
     });
   });
 });

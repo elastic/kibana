@@ -225,20 +225,6 @@
         "line": 66,
         "column": 10
       }
-    },
-    {
-      "id": "93cc12119b7ac80-6494b431b9108ab",
-      "title": "Inference settings space isolation \u2014 connectors API connectors API uses per-space inference settings for the same feature",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-stateful-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces_connectors.spec.ts",
-        "line": 58,
-        "column": 5
-      }
     }
   ]
 }
