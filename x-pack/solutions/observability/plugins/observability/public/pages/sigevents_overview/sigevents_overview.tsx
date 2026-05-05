@@ -54,11 +54,9 @@ const embeddableConversationWrapperStyles = css`
     background: transparent;
   }
 
-  /* Hide the lazy-load spinner so it doesn't cause layout shift */
-  > .euiFlexGroup {
-    .euiLoadingSpinner {
-      display: none;
-    }
+  /* Hide all spinners so they don't cause layout shift */
+  .euiLoadingSpinner {
+    display: none;
   }
 `;
 
@@ -155,8 +153,7 @@ export function SigeventsOverviewPage() {
 
   const handleFlyoutRemediate = useCallback(() => {
     handleRemediate();
-    closeDetailFlyout();
-  }, [handleRemediate, closeDetailFlyout]);
+  }, [handleRemediate]);
 
   const handleRemediateEvent = useCallback((eventTitle: string) => {
     setRemediationPrompt(
@@ -407,7 +404,7 @@ export function SigeventsOverviewPage() {
               )}
             </EuiFlexItem>
 
-            {EmbeddableConversation && (
+            {EmbeddableConversation && !loading && !overviewLoading && (
               <EuiFlexItem
                 grow={true}
                 css={embeddableConversationWrapperStyles}
