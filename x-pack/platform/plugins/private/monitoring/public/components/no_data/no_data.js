@@ -139,16 +139,16 @@ export function NoData(props) {
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           {shouldShowAutoOpsPromotion && (
-              <>
-                <AutoOpsPromotionCallout
-                  cloudConnectUrl={cloudConnectUrl}
-                  onConnectClick={handleConnectClick}
-                  hasCloudConnectPermission={hasCloudConnectPermission}
-                  overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
+            <>
+              <AutoOpsPromotionCallout
+                cloudConnectUrl={cloudConnectUrl}
+                onConnectClick={handleConnectClick}
+                hasCloudConnectPermission={hasCloudConnectPermission}
+                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}
             body={
@@ -193,16 +193,16 @@ export function NoData(props) {
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
         {shouldShowAutoOpsPromotion && (
-            <>
-              <AutoOpsPromotionCallout
-                cloudConnectUrl={cloudConnectUrl}
-                onConnectClick={handleConnectClick}
-                hasCloudConnectPermission={hasCloudConnectPermission}
-                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
+          <>
+            <AutoOpsPromotionCallout
+              cloudConnectUrl={cloudConnectUrl}
+              onConnectClick={handleConnectClick}
+              hasCloudConnectPermission={hasCloudConnectPermission}
+              overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiIcon type="monitoringApp" size="xxl" />}
           title={
