@@ -155,7 +155,7 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-registered-domain-conditional', query);
 
         // NOTE: Ingest Pipeline returns both docs but applies the processing only to the matching one
-        // while ES|QL only returns the processed matching document
+        // while ES|QL only processes and returns the matching document
         expect(ingestResult).toHaveLength(2);
         expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
         expect(ingestResult[1]['rd.domain']).toBeUndefined();

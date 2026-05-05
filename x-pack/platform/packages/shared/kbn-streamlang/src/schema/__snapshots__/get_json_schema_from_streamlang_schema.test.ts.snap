@@ -2139,7 +2139,7 @@ Object {
             },
             Object {
               "additionalProperties": false,
-              "description": "Extract the domain components from a FQDN string",
+              "description": "Extract the domain parts from a FQDN string",
               "properties": Object {
                 "action": Object {
                   "const": "registered_domain",
@@ -2155,6 +2155,7 @@ Object {
                   "type": "string",
                 },
                 "expression": Object {
+                  "description": "The string expression containing the FQDN to parse",
                   "minLength": 1,
                   "type": "string",
                 },
@@ -2163,10 +2164,11 @@ Object {
                   "type": "boolean",
                 },
                 "ignore_missing": Object {
+                  "description": "Skip processing when expression field is missing",
                   "type": "boolean",
                 },
                 "prefix": Object {
-                  "description": "A non-empty string.",
+                  "description": "The prefix for the output columns. The extracted parts are available as prefix.part_name",
                   "minLength": 1,
                   "type": "string",
                 },
@@ -3651,7 +3653,7 @@ Object {
               },
               Object {
                 "additionalProperties": false,
-                "description": "Extract the domain components from a FQDN string",
+                "description": "Extract the domain parts from a FQDN string",
                 "properties": Object {
                   "action": Object {
                     "const": "registered_domain",
@@ -3667,6 +3669,7 @@ Object {
                     "type": "string",
                   },
                   "expression": Object {
+                    "description": "The string expression containing the FQDN to parse",
                     "minLength": 1,
                     "type": "string",
                   },
@@ -3675,10 +3678,11 @@ Object {
                     "type": "boolean",
                   },
                   "ignore_missing": Object {
+                    "description": "Skip processing when expression field is missing",
                     "type": "boolean",
                   },
                   "prefix": Object {
-                    "description": "A non-empty string.",
+                    "description": "The prefix for the output columns. The extracted parts are available as prefix.part_name",
                     "minLength": 1,
                     "type": "string",
                   },

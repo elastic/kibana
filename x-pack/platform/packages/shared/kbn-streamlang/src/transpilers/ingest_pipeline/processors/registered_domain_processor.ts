@@ -16,14 +16,14 @@ import type { RegisteredDomainProcessor } from '../../../../types/processors';
  * {
  *   action: 'registered_domain',
  *   expression: 'fqdn',
- *   prefix: 'url',
+ *   prefix: 'rd',
  * }
  *
  * Output:
  * {
  *   registered_domain: {
  *     field: 'fqdn',
- *     target_field: 'url',
+ *     target_field: 'rd',
  *     ignore_missing: true,
  *   },
  * }

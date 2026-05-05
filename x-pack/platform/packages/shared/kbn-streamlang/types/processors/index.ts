@@ -756,12 +756,22 @@ export interface RegisteredDomainProcessor extends ProcessorBaseWithWhere {
   ignore_missing?: boolean;
 }
 
-export const registeredDomainSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('registered_domain'),
-  expression: StreamlangSourceField,
-  prefix: NonEmptyString,
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<RegisteredDomainProcessor>;
+export const registeredDomainSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('registered_domain'),
+    expression: StreamlangSourceField.describe(
+      'The string expression containing the FQDN to parse'
+    ),
+    prefix: NonEmptyString.describe(
+      'The prefix for the output columns. The extracted parts are available as prefix.part_name'
+    ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when expression field is missing'),
+  })
+  .describe(
+    'Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN'
+  ) satisfies z.Schema<RegisteredDomainProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor

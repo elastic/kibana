@@ -22,7 +22,7 @@ import { buildIgnoreMissingFilter } from './common';
  *        {
  *          action: 'registered_domain',
  *          expression: 'fqdn',
- *          prefix: 'url',
+ *          prefix: 'rd',
  *        } as RegisteredDomainProcessor,
  *      ],
  *    };
@@ -30,7 +30,7 @@ import { buildIgnoreMissingFilter } from './common';
  *
  *    Generates:
  *    ```txt
- *    | REGISTERED_DOMAIN url = fqdn
+ *    | REGISTERED_DOMAIN rd = fqdn
  *    ```
  *
  * @example Conditional:
@@ -40,7 +40,7 @@ import { buildIgnoreMissingFilter } from './common';
  *        {
  *          action: 'registered_domain',
  *          expression: 'fqdn',
- *          prefix: 'url',
+ *          prefix: 'rd',
  *          where: { field: 'fqdn', exists: true },
  *        } as RegisteredDomainProcessor,
  *      ],
@@ -50,7 +50,7 @@ import { buildIgnoreMissingFilter } from './common';
  *    Generates:
  *    ```txt
  *    | WHERE fqdn IS NOT NULL
- *    | REGISTERED_DOMAIN url = fqdn
+ *    | REGISTERED_DOMAIN rd = fqdn
  *    ```
  */
 export function convertRegisteredDomainProcessorToESQL(
