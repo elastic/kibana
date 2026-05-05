@@ -32,20 +32,19 @@ const COMMON_STATE_IGNORE_PATHS = [
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
   'state.datasourceStates.formBased.currentIndexPatternId',
+  // Label and customLabel diffs
+  'state.datasourceStates.*.layers.*.columns.*.label', // is kept at state -> API only if it is a custom label
+  'state.datasourceStates.*.layers.*.columns.*.customLabel', // dropped at state -> API and only applied from API -> State if label is explicitly set
   // TODO: check DSL differing properties changed in transforms
-  'state.datasourceStates.formBased.layers.*.columns.*.label',
-  'state.datasourceStates.formBased.layers.*.columns.*.customLabel',
   'state.datasourceStates.formBased.layers.*.columns.*.params',
   'state.datasourceStates.formBased.layers.*.columns.*.scale', // conditionally set for data columns
   // TODO: check missing ES|QL column properties stripped out in transforms
-  'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension',
-  'state.datasourceStates.textBased.layers.*.columns.*.label',
-  'state.datasourceStates.textBased.layers.*.columns.*.customLabel',
+  'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
   'state.datasourceStates.textBased.layers.*.columns.*.meta.esType',
   // TODO: check missing/different properties on adHocDataViews
   'state.adHocDataViews.*.fieldAttrs',
   'state.adHocDataViews.*.managed',
-  'state.adHocDataViews.*.timeFieldName',
+  'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -83,7 +82,7 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
         index: adHocDataView.name ?? '',
         dataSourceType: 'esql',
         esqlQuery: layer.query?.esql,
-        timeFieldName: undefined, // TODO: check this is expected
+        timeFieldName: undefined, // not saved in API re-derived at runtime
       });
 
       layer.index = newId;
@@ -195,7 +194,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
           });
 
           if (layer.timeField) {
-            layer.timeField = undefined; // TODO: check this is correct
+            layer.timeField = undefined; // not saved in API re-derived at runtime
           }
         }
 
