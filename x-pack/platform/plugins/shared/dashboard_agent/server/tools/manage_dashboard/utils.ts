@@ -35,28 +35,22 @@ export const getErrorMessage = (error: unknown): string => {
 const hasNonEmptyValue = (value: string | undefined): value is string =>
   value !== undefined && value.trim().length > 0;
 
-const hasRequiredCreateMetadataOperation = (operations: DashboardOperation[]): boolean =>
+const hasRequiredCreateTitleOperation = (operations: DashboardOperation[]): boolean =>
   operations.some(
-    (operation) =>
-      operation.operation === 'set_metadata' &&
-      hasNonEmptyValue(operation.title) &&
-      hasNonEmptyValue(operation.description)
+    (operation) => operation.operation === 'set_metadata' && hasNonEmptyValue(operation.title)
   );
 
-const hasBlankMetadataUpdate = (operations: DashboardOperation[]): boolean =>
+const hasBlankTitleUpdate = (operations: DashboardOperation[]): boolean =>
   operations.some((operation) => {
     if (operation.operation !== 'set_metadata') {
       return false;
     }
 
-    return (
-      (operation.title !== undefined && !hasNonEmptyValue(operation.title)) ||
-      (operation.description !== undefined && !hasNonEmptyValue(operation.description))
-    );
+    return operation.title !== undefined && !hasNonEmptyValue(operation.title);
   });
 
 export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
-  hasRequiredCreateMetadataOperation(operations) && !hasBlankMetadataUpdate(operations);
+  hasRequiredCreateTitleOperation(operations) && !hasBlankTitleUpdate(operations);
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),

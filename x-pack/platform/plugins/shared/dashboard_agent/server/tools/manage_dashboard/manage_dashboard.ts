@@ -25,7 +25,7 @@ import { createVisualizationResolver } from './inline_visualization';
 import { dashboardOperationSchema, executeDashboardOperations } from './operations';
 
 const newDashboardMetadataErrorMessage =
-  'New dashboards require a set_metadata operation with non-empty title and description.';
+  'New dashboards require a set_metadata operation with a non-empty title.';
 
 const manageDashboardSchema = z.object({
   dashboardAttachmentId: z
