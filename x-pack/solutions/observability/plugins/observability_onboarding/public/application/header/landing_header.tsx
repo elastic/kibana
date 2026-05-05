@@ -6,34 +6,23 @@
  */
 
 import {
-  EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHideFor,
+  EuiImage,
+  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import React from 'react';
 import backgroundImageUrl from './background.svg';
 
 export function LandingHeader() {
   return (
-    <EuiPageTemplate.Section
-      paddingSize="xl"
-      css={css`
-        & > div {
-          background-image: url(${backgroundImageUrl});
-          background-position: right center;
-          background-repeat: no-repeat;
-        }
-      `}
-      grow={false}
-      restrictWidth
-    >
-      <EuiSpacer size="xl" />
-      <EuiFlexGroup>
+    <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
             <h1>
@@ -51,7 +40,11 @@ export function LandingHeader() {
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiHideFor sizes={['xs', 's']}>
+          <EuiFlexItem grow={false}>
+            <EuiImage src={backgroundImageUrl} alt="" size="l" />
+          </EuiFlexItem>
+        </EuiHideFor>
       </EuiFlexGroup>
     </EuiPageTemplate.Section>
   );
