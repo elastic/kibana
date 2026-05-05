@@ -486,6 +486,11 @@ const DEPRECATED_IMPORTS = [
     message:
       'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
   },
+  {
+    name: '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib',
+    message:
+      '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
+  },
 ];
 
 module.exports = {
@@ -1018,7 +1023,19 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': [
+          'warn',
+          {
+            paths: DEPRECATED_IMPORTS,
+            patterns: [
+              {
+                group: ['@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/**'],
+                message:
+                  '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
+              },
+            ],
+          },
+        ],
         'no-restricted-modules': [
           'error',
           {
