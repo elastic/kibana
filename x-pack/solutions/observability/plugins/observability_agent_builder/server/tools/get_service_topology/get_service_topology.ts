@@ -211,11 +211,104 @@ async function getUpstreamTopology({
 }
 
 /**
+ * Find messaging dependencies (Kafka topics, RabbitMQ queues, etc.) from a set of connections.
+ * These are external nodes with span.type === 'messaging'.
+ */
+export function findMessagingDependencies(connections: ConnectionWithKey[]): string[] {
+  const messagingDeps = new Set<string>();
+  for (const conn of connections) {
+    const target = conn.target;
+    if ('span.type' in target && target['span.type'] === 'messaging') {
+      messagingDeps.add(conn._dependencyName);
+    }
+  }
+  return Array.from(messagingDeps);
+}
+
+/**
+ * For each messaging dependency, find other services that also connect to it.
+ * This reveals the other side of the pipeline (e.g., the producer when we started
+ * from a consumer, or vice versa). Only returns connections not already present
+ * in existingConnections.
+ */
+async function expandMessagingConnections({
+  resources,
+  messagingDeps,
+  existingConnections,
+  startMs,
+  endMs,
+}: {
+  resources: TopologyResources;
+  messagingDeps: string[];
+  existingConnections: ConnectionWithKey[];
+  startMs: number;
+  endMs: number;
+}): Promise<ConnectionWithKey[]> {
+  if (messagingDeps.length === 0) {
+    return [];
+  }
+
+  const { apmEventClient } = await buildApmResources({
+    core: resources.core,
+    plugins: resources.plugins,
+    request: resources.request,
+    logger: resources.logger,
+  });
+
+  const existingKeys = new Set(existingConnections.map((c) => c._key));
+  const allNewConnections: ConnectionWithKey[] = [];
+
+  for (const depName of messagingDeps) {
+    resources.logger.debug(
+      `Expanding messaging dependency "${depName}" to find other connected services`
+    );
+
+    const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
+      apmEventClient,
+      dependencyName: depName,
+      start: startMs,
+      end: endMs,
+    });
+
+    if (depTraceIds.length === 0) {
+      continue;
+    }
+
+    const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
+      request: resources.request,
+      traceIds: depTraceIds,
+      start: startMs,
+      end: endMs,
+    });
+
+    if (!spans) {
+      continue;
+    }
+
+    const newConnections = buildConnectionsFromSpans(spans).filter(
+      (c) => c._dependencyName === depName && !existingKeys.has(c._key)
+    );
+
+    resources.logger.debug(
+      `Found ${newConnections.length} additional connections to messaging dependency "${depName}"`
+    );
+
+    allNewConnections.push(...newConnections);
+  }
+
+  return allNewConnections;
+}
+
+/**
  * Optimized path for direction === 'both': fetches trace samples and exit spans once,
  * then filters in both directions from the shared connection graph.
  *
  * This avoids duplicate ES queries — getTraceSampleIds and fetchExitSpanSamplesFromTraceIds
  * would otherwise execute identical queries for both downstream and upstream.
+ *
+ * When messaging dependencies (Kafka, RabbitMQ, etc.) are found, automatically expands
+ * through them to discover services on the other side of the pipeline (e.g., producers
+ * when querying a consumer).
  */
 async function getBothTopology({
   resources,
@@ -293,10 +386,22 @@ async function getBothTopology({
   const downFiltered = filterDownstreamConnections(allConnections, serviceName, maxDepth);
   const upFiltered = filterUpstreamConnections(allConnections, serviceName, maxDepth);
 
-  // Single metrics query with union of service names from both directions
+  const combinedConnections = [...downFiltered, ...upFiltered];
+
+  // Auto-expand through messaging dependencies to reveal the other side of the pipeline
+  const messagingDeps = findMessagingDependencies(combinedConnections);
+  const messagingConnections = await expandMessagingConnections({
+    resources,
+    messagingDeps,
+    existingConnections: combinedConnections,
+    startMs,
+    endMs,
+  });
+
+  // Single metrics query with union of service names from all connections
   const serviceNames = uniq([
-    ...downFiltered.map((c) => c._sourceName),
-    ...upFiltered.map((c) => c._sourceName),
+    ...combinedConnections.map((c) => c._sourceName),
+    ...messagingConnections.map((c) => c._sourceName),
   ]);
 
   const metricsMap = await getConnectionMetrics({
@@ -309,8 +414,8 @@ async function getBothTopology({
 
   return {
     connections: [
-      ...finalizeConnections(downFiltered, metricsMap),
-      ...finalizeConnections(upFiltered, metricsMap),
+      ...finalizeConnections(combinedConnections, metricsMap),
+      ...finalizeConnections(messagingConnections, metricsMap),
     ],
   };
 }
