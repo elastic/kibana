@@ -1,0 +1,49 @@
+{
+  "id": "@kbn/measure-component",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/measure-component",
+        "id": "def-public.MeasureButton",
+        "type": "Function",
+        "tags": [],
+        "label": "MeasureButton",
+        "description": [
+          "\nThe entry point for the measure component.\nToggles measure mode from the developer toolbar."
+        ],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-measure-component/src/components/measure_button.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

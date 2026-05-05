@@ -8,9 +8,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IlmPolicyPhases } from '@kbn/streams-schema';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +18,7 @@ import {
   useGeneratedHtmlId,
   EuiLink,
 } from '@elastic/eui';
+import { useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
 import { DOWNSAMPLE_PHASES } from '../form';
 import { DownsampleIntervalField } from '../form';
@@ -33,40 +31,37 @@ import { TIME_UNIT_OPTIONS } from '../constants';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 
 export interface DownsampleFieldSectionProps {
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   phaseName: DownsamplePhase;
   dataTestSubj: string;
   isMetricsStream: boolean;
 }
 
 export const DownsampleFieldSection = ({
-  form,
   phaseName,
   dataTestSubj,
   isMetricsStream,
 }: DownsampleFieldSectionProps) => {
-  const enabledPath = `_meta.${phaseName}.downsampleEnabled`;
-  const intervalValuePath = `_meta.${phaseName}.downsample.fixedIntervalValue`;
-  const intervalUnitPath = `_meta.${phaseName}.downsample.fixedIntervalUnit`;
-  const readonlyPath = `_meta.${phaseName}.readonlyEnabled`;
+  const { control, getFieldState, getValues, resetField, setValue, trigger, formState } =
+    useFormContext<IlmPhasesFlyoutFormInternal>();
+
+  const enabledPath =
+    `_meta.${phaseName}.downsampleEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+  const intervalValuePath =
+    `_meta.${phaseName}.downsample.fixedIntervalValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+  const intervalUnitPath =
+    `_meta.${phaseName}.downsample.fixedIntervalUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+  const readonlyPath =
+    `_meta.${phaseName}.readonlyEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
 
-  useFormData({ form, watch: enabledPath });
-
-  const enabledField = form.getFields()[enabledPath];
-  const isEnabled = Boolean(enabledField?.value);
-  const readonlyDefaultValue = form.getFieldDefaultValue<boolean>(readonlyPath);
-  const readonlyField = form.getFields()[readonlyPath];
-  const isReadonlyEnabled = Boolean(readonlyField?.value ?? readonlyDefaultValue);
+  const isEnabled = Boolean(useWatch({ control, name: enabledPath }));
+  const isReadonlyEnabled = Boolean(useWatch({ control, name: readonlyPath }));
 
   const resetReadonly = useCallback(() => {
-    // Ensure the "default value on the form" is reset too so that when the readonly field is re-mounted
-    // (after toggling downsampling off), it comes back unchecked.
-    const payload: Record<string, unknown> = { _meta: { [phaseName]: { readonlyEnabled: false } } };
-    form.updateFieldValues(payload, { runDeserializer: false });
-    form.setFieldValue(readonlyPath, false);
-  }, [form, phaseName, readonlyPath]);
+    resetField(readonlyPath, { defaultValue: false });
+    setValue(readonlyPath, false);
+  }, [resetField, readonlyPath, setValue]);
 
   useEffect(() => {
     if (isEnabled && isReadonlyEnabled) {
@@ -77,8 +72,6 @@ export const DownsampleFieldSection = ({
   const {
     core: { docLinks },
   } = useKibana();
-
-  if (!enabledField) return null;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -110,7 +103,7 @@ export const DownsampleFieldSection = ({
             data-test-subj={`${dataTestSubj}DownsamplingSwitch`}
             onChange={(e) => {
               const nextEnabled = e.target.checked;
-              enabledField.setValue(nextEnabled);
+              setValue(enabledPath, nextEnabled);
 
               if (nextEnabled) {
                 // Downsampling is incompatible with the ILM "readonly" action in this flyout.
@@ -121,56 +114,55 @@ export const DownsampleFieldSection = ({
               // When enabling downsampling, default the fixed_interval to 2x the previous enabled downsample interval.
               // Only do this when the current interval is still the schema default (pristine 1d) to avoid clobbering
               // existing values when toggling.
-              if (!nextEnabled) return;
-
-              const fields = form.getFields();
-              const valueField = fields[intervalValuePath];
-              const unitField = fields[intervalUnitPath];
-              if (!valueField || !unitField) return;
-
-              const currentValue = String(valueField.value ?? '').trim();
-              const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
+              const currentValue = String(getValues(intervalValuePath) ?? '').trim();
+              const currentUnit = String(getValues(intervalUnitPath) ?? 'd') as PreservedTimeUnit;
 
               const isStillDefault =
                 currentValue === '1' &&
                 currentUnit === 'd' &&
-                valueField.isModified === false &&
-                unitField.isModified === false;
-              if (!isStillDefault) return;
+                getFieldState(intervalValuePath, formState).isDirty === false &&
+                getFieldState(intervalUnitPath, formState).isDirty === false;
 
-              const phaseIndex = DOWNSAMPLE_PHASES.indexOf(phaseName);
-              const previousPhases =
-                phaseIndex > 0 ? DOWNSAMPLE_PHASES.slice(0, phaseIndex).reverse() : [];
+              if (nextEnabled && isStillDefault) {
+                const phaseIndex = DOWNSAMPLE_PHASES.indexOf(phaseName);
+                const previousPhases =
+                  phaseIndex > 0 ? DOWNSAMPLE_PHASES.slice(0, phaseIndex).reverse() : [];
 
-              for (const previousPhase of previousPhases) {
-                const isPrevEnabled = Boolean(fields[`_meta.${previousPhase}.enabled`]?.value);
-                const isPrevDownsampleEnabled = Boolean(
-                  fields[`_meta.${previousPhase}.downsampleEnabled`]?.value
-                );
-                if (!isPrevEnabled || !isPrevDownsampleEnabled) continue;
+                for (const previousPhase of previousPhases) {
+                  const isPrevEnabled = Boolean(getValues(`_meta.${previousPhase}.enabled`));
+                  const isPrevDownsampleEnabled = Boolean(
+                    getValues(`_meta.${previousPhase}.downsampleEnabled`)
+                  );
+                  if (!isPrevEnabled || !isPrevDownsampleEnabled) continue;
 
-                const previousValue = String(
-                  fields[`_meta.${previousPhase}.downsample.fixedIntervalValue`]?.value ?? ''
-                ).trim();
-                if (previousValue === '') continue;
+                  const previousValue = String(
+                    getValues(`_meta.${previousPhase}.downsample.fixedIntervalValue`) ?? ''
+                  ).trim();
+                  if (previousValue === '') continue;
 
-                const previousUnit = String(
-                  fields[`_meta.${previousPhase}.downsample.fixedIntervalUnit`]?.value ?? 'd'
-                ) as PreservedTimeUnit;
+                  const previousUnit = String(
+                    getValues(`_meta.${previousPhase}.downsample.fixedIntervalUnit`) ?? 'd'
+                  ) as PreservedTimeUnit;
 
-                const previousNum = Number(previousValue);
-                if (!Number.isFinite(previousNum) || previousNum <= 0) continue;
+                  const previousNum = Number(previousValue);
+                  if (!Number.isFinite(previousNum) || previousNum <= 0) continue;
 
-                const { value, unit } = getDoubledDurationFromPrevious({
-                  previousValue,
-                  previousUnit,
-                  previousValueFallback: previousNum,
-                  previousValueMinExclusive: 0,
-                });
-                valueField.setValue(value);
-                unitField.setValue(unit);
-                break;
+                  const { value, unit } = getDoubledDurationFromPrevious({
+                    previousValue,
+                    previousUnit,
+                    previousValueFallback: previousNum,
+                    previousValueMinExclusive: 0,
+                  });
+                  setValue(intervalValuePath, value);
+                  setValue(intervalUnitPath, unit);
+                  break;
+                }
               }
+
+              // Validate (or clear) dependent intervals when toggling.
+              setTimeout(() => {
+                void trigger();
+              }, 0);
             }}
           />
         </EuiFlexItem>

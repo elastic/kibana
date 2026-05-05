@@ -21,6 +21,7 @@ import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
+import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -177,16 +178,30 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: (featureId: string, request: KibanaRequest) => {
+        getForFeature: async (featureId: string, request: KibanaRequest) => {
           const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
-          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
-          return getForFeatureFn(
-            featureRegistry,
-            soClient,
-            getConnectorById,
-            featureId,
-            this.logger
+          const uiSettingsClient = core.uiSettings.asScopedToClient(
+            core.savedObjects.getScopedClient(request)
           );
+          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+          const resolveFeatureEndpoints = (fId: string) =>
+            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
+          const getConnectorList = () => plugins.inference.getConnectorList(request);
+
+          const result = await resolveModelsForFeature({
+            getForFeature: resolveFeatureEndpoints,
+            getConnectorList,
+            getConnectorById,
+            uiSettingsClient,
+            featureId,
+            logger: this.logger,
+          });
+
+          return {
+            endpoints: result.connectors,
+            warnings: result.warnings,
+            soEntryFound: result.soEntryFound,
+          };
         },
       },
     };

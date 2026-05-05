@@ -17,7 +17,7 @@ import type {
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
+import type { LensApiConfig } from '../../schema';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 
@@ -1073,7 +1073,7 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
   version: LENS_ITEM_LATEST_VERSION,
 };
 
-export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
+export const apiXYWithNoYTitleAndInsideLegend: LensApiConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1093,7 +1093,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },
@@ -1152,7 +1151,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   },
 };
 
-export const apiXYWithTopListWithTruncationLegend: LensApiState = {
+export const apiXYWithTopListWithTruncationLegend: LensApiConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1174,7 +1173,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },
@@ -1233,7 +1231,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   },
 };
 
-export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
+export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1253,7 +1251,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },

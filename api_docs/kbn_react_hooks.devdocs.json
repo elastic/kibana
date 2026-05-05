@@ -76,6 +76,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -94,6 +95,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseAbortableAsyncOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -206,6 +208,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -251,6 +254,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDebouncedValueOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -317,6 +321,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DebounceOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -366,6 +371,45 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useStableCallback",
+        "type": "Function",
+        "tags": [],
+        "label": "useStableCallback",
+        "description": [
+          "\nAccepts a callback and returns a function with a stable identity\nthat will always call the latest version of the callback when invoked"
+        ],
+        "signature": [
+          "<T extends (...args: never[]) => unknown>(fn: T | undefined) => (...args: Parameters<T>) => unknown"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_stable_callback/use_stable_callback.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useStableCallback.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_stable_callback/use_stable_callback.ts",
+            "lineNumber": 16,
+            "columnNumber": 76,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -426,6 +470,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ThrottleOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -650,6 +695,7 @@
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -667,6 +713,7 @@
                 "lineNumber": 21,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -745,7 +792,7 @@
                 "id": "def-common.UseAbortableAsync.$1.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "__0",
+                "label": "{}",
                 "description": [],
                 "signature": [
                   "{ signal: AbortSignal; } & TAdditionalParameters"
@@ -772,6 +819,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false
           },
           {

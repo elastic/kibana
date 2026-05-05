@@ -138,7 +138,7 @@ export function createSearchKnowledgeIndicatorsTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running search_kis: ${message}`);
+        logger.error(`Error running ki_search: ${message}`);
         if (error instanceof Error) {
           logger.debug(error.stack ?? error.message);
         } else {

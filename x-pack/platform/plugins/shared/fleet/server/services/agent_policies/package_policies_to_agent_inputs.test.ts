@@ -1234,6 +1234,180 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       },
     ]);
   });
+  it('merges package policy global_data_tags into the add_fields processor', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            supports_agentless: true,
+            global_data_tags: [
+              { name: 'client_id', value: 'acme' },
+              { name: 'env', value: 'prod' },
+            ],
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        undefined
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                client_id: 'acme',
+                env: 'prod',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+            release: 'beta',
+          },
+        },
+        inputVar: 'input-value',
+      },
+    ]);
+  });
+
+  it('merges agent policy global_data_tags and package policy global_data_tags together', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            supports_agentless: true,
+            global_data_tags: [{ name: 'client_id', value: 'acme' }],
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        [{ name: 'organization', value: 'elastic' }]
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                organization: 'elastic',
+                client_id: 'acme',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+            release: 'beta',
+          },
+        },
+        inputVar: 'input-value',
+      },
+    ]);
+  });
+
+  it('does not add processor when package policy global_data_tags is empty', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            supports_agentless: true,
+            global_data_tags: [],
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        undefined
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+            release: 'beta',
+          },
+        },
+        inputVar: 'input-value',
+      },
+    ]);
+  });
 });
 
 describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () => {

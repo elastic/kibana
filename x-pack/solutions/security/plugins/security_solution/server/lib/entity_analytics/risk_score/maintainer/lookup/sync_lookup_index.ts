@@ -28,12 +28,16 @@ export const buildLookupSyncOperationsForPage = ({
   page,
   now,
   notInStoreEntityIds,
+  resolutionTargetIds = [],
 }: {
   page: ScoredEntityPage;
   now: string;
   notInStoreEntityIds: string[];
+  resolutionTargetIds?: string[];
 }): { upserts: LookupDocument[]; deletes: string[] } => {
   const upsertMap = new Map<string, LookupDocument>();
+  const resolutionTargetIdSet = new Set(resolutionTargetIds);
+  const deleteSet = new Set(notInStoreEntityIds);
 
   for (const [entityId, entity] of page.entities.entries()) {
     const targetId = entity.entity?.relationships?.resolution?.resolved_to;
@@ -55,11 +59,35 @@ export const buildLookupSyncOperationsForPage = ({
           '@timestamp': now,
         });
       }
+    } else {
+      // Lookup rows are derived state owned by risk scoring. Remove stale rows
+      // when an entity is no longer resolved and is not a confirmed target.
+      if (!resolutionTargetIdSet.has(entityId) && !upsertMap.has(entityId)) {
+        deleteSet.add(entityId);
+      }
+    }
+  }
+
+  for (const targetId of resolutionTargetIds) {
+    // Some pages only confirm that a target exists; they may not contain an
+    // alias row that would otherwise create the target's self mapping.
+    if (!upsertMap.has(targetId)) {
+      upsertMap.set(targetId, {
+        entity_id: targetId,
+        resolution_target_id: targetId,
+        propagation_target_id: null,
+        relationship_type: SELF_RELATIONSHIP_TYPE,
+        '@timestamp': now,
+      });
     }
   }
 
   const upserts = [...upsertMap.values()];
-  return { upserts, deletes: notInStoreEntityIds };
+  for (const entityId of upsertMap.keys()) {
+    // If an entity is upserted in this page, never delete it in the same batch.
+    deleteSet.delete(entityId);
+  }
+  return { upserts, deletes: [...deleteSet] };
 };
 
 export const syncLookupIndex = async ({
@@ -106,12 +134,14 @@ export const syncLookupIndexForCategorizedPage = async ({
   page,
   categorized,
   now,
+  resolutionTargetIds = [],
 }: {
   esClient: ElasticsearchClient;
   index: string;
   page: ScoredEntityPage;
   categorized: CategorizedEntities;
   now: string;
+  resolutionTargetIds?: string[];
 }): Promise<LookupSyncSummary> =>
   syncLookupIndex({
     esClient,
@@ -120,5 +150,6 @@ export const syncLookupIndexForCategorizedPage = async ({
       page,
       now,
       notInStoreEntityIds: categorized.not_in_store.map((score) => score.id_value),
+      resolutionTargetIds,
     }),
   });

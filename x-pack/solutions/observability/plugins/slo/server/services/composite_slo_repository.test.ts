@@ -10,7 +10,6 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { escapeKuery } from '@kbn/es-query';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-import { storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
 import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
 import { DefaultCompositeSLORepository } from './composite_slo_repository';
@@ -40,18 +39,14 @@ describe('DefaultCompositeSLORepository', () => {
       const result = await repository.create(compositeSlo);
 
       expect(result).toEqual(compositeSlo);
-      expect(soClient.create).toHaveBeenCalledWith(
-        SO_SLO_COMPOSITE_TYPE,
-        storedCompositeSloDefinitionSchema.encode(compositeSlo)
-      );
+      expect(soClient.create).toHaveBeenCalledWith(SO_SLO_COMPOSITE_TYPE, compositeSlo);
     });
 
     it('throws SLOIdConflict when a composite SLO with the same id exists', async () => {
       const compositeSlo = createCompositeSlo();
-      const stored = storedCompositeSloDefinitionSchema.encode(compositeSlo);
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: stored }],
+        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
         page: 1,
         per_page: 1,
       } as any);
@@ -63,10 +58,9 @@ describe('DefaultCompositeSLORepository', () => {
   describe('update', () => {
     it('updates an existing composite SLO saved object', async () => {
       const compositeSlo = createCompositeSlo();
-      const stored = storedCompositeSloDefinitionSchema.encode(compositeSlo);
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: stored }],
+        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
         page: 1,
         per_page: 1,
       } as any);
@@ -74,11 +68,10 @@ describe('DefaultCompositeSLORepository', () => {
       const result = await repository.update(compositeSlo);
 
       expect(result).toEqual(compositeSlo);
-      expect(soClient.create).toHaveBeenCalledWith(
-        SO_SLO_COMPOSITE_TYPE,
-        storedCompositeSloDefinitionSchema.encode(compositeSlo),
-        { id: 'so-id-1', overwrite: true }
-      );
+      expect(soClient.create).toHaveBeenCalledWith(SO_SLO_COMPOSITE_TYPE, compositeSlo, {
+        id: 'so-id-1',
+        overwrite: true,
+      });
     });
 
     it('throws SLONotFound when the composite SLO does not exist', async () => {
@@ -97,10 +90,9 @@ describe('DefaultCompositeSLORepository', () => {
   describe('findById', () => {
     it('returns the composite SLO matching the id', async () => {
       const compositeSlo = createCompositeSlo();
-      const stored = storedCompositeSloDefinitionSchema.encode(compositeSlo);
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: stored }],
+        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
         page: 1,
         per_page: 1,
       } as any);
@@ -132,10 +124,9 @@ describe('DefaultCompositeSLORepository', () => {
   describe('deleteById', () => {
     it('deletes the composite SLO matching the id', async () => {
       const compositeSlo = createCompositeSlo();
-      const stored = storedCompositeSloDefinitionSchema.encode(compositeSlo);
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: stored }],
+        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
         page: 1,
         per_page: 1,
       } as any);
@@ -160,10 +151,9 @@ describe('DefaultCompositeSLORepository', () => {
   describe('search', () => {
     it('returns paginated results with default sort', async () => {
       const compositeSlo = createCompositeSlo();
-      const stored = storedCompositeSloDefinitionSchema.encode(compositeSlo);
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: stored }],
+        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
         page: 1,
         per_page: 25,
       } as any);
@@ -274,11 +264,10 @@ describe('DefaultCompositeSLORepository', () => {
 
     it('filters out invalid stored composite SLOs', async () => {
       const compositeSlo = createCompositeSlo();
-      const stored = storedCompositeSloDefinitionSchema.encode(compositeSlo);
       soClient.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: [
-          { id: 'so-id-1', attributes: stored },
+          { id: 'so-id-1', attributes: compositeSlo },
           { id: 'so-id-2', attributes: { invalid: 'data' } },
         ],
         page: 1,

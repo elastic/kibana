@@ -8,6 +8,8 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestTiming } from '@kbn/core-http-server';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
@@ -20,14 +22,35 @@ export async function update(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardUpdateRequestBody,
+  serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     updateBody,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
+
+  let isCreateRequest = false;
+  try {
+    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+  } catch (resolveError) {
+    if (resolveError.isBoom && resolveError.output.statusCode === 404) {
+      isCreateRequest = true;
+    } else {
+      throw resolveError;
+    }
+  }
+
+  // Validate id at handler level for create requests
+  if (isCreateRequest) {
+    asCodeIdSchema.validate(id);
+  }
 
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
@@ -41,10 +64,13 @@ export async function update(
     }
   );
 
-  return getDashboardCRUResponseBody(
+  const response = getDashboardCRUResponseBody(
     savedObject,
     'update',
     dashboardStateSchema,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
+
+  return response;
 }

@@ -43,6 +43,7 @@ export class ColumnValidator {
 
   private get exists(): boolean {
     if (
+      this.column.text.length > 0 &&
       !isParametrized(this.column) &&
       !getColumnExists(this.column, this.context, this.commandName === 'row')
     ) {

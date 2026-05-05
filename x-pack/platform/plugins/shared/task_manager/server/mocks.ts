@@ -43,6 +43,7 @@ const createStartMock = () => {
     bulkUpdateState: jest.fn(),
     registerEncryptedSavedObjectsClient: jest.fn(),
     registerApiKeyInvalidateFn: jest.fn(),
+    registerUiamApiKeyInvalidateFn: jest.fn(),
   });
 
   return mock;

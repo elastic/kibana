@@ -81,6 +81,7 @@
             "lineNumber": 55,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }

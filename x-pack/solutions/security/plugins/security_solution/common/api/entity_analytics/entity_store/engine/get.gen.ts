@@ -14,18 +14,20 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EntityType, EngineDescriptor } from '../common.gen';
 
+export const GetEntityEngineRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the engine.
+     */
+    entityType: EntityType,
+  })
+);
 export type GetEntityEngineRequestParams = z.infer<typeof GetEntityEngineRequestParams>;
-export const GetEntityEngineRequestParams = z.object({
-  /**
-   * The entity type of the engine (either 'user' or 'host').
-   */
-  entityType: EntityType,
-});
 export type GetEntityEngineRequestParamsInput = z.input<typeof GetEntityEngineRequestParams>;
 
+export const GetEntityEngineResponse = lazySchema(() => EngineDescriptor);
 export type GetEntityEngineResponse = z.infer<typeof GetEntityEngineResponse>;
-export const GetEntityEngineResponse = EngineDescriptor;

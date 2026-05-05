@@ -100,7 +100,7 @@ components:
 
 
     PackId:
-      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
+      description: 'The ID of the pack.'
       example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 

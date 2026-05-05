@@ -66,7 +66,6 @@ export interface LogPageProbeSourceClauseParams {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
   /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
   logsPageCursorStart?: PaginationParams;
 }
@@ -77,11 +76,16 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
+  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
+
+  // Always use >= for the time-window start. When logsPageCursorStart is set its compound filter
+  // (@timestamp > T OR (@timestamp = T AND _id > id)) owns the exclusive lower bound. Using >
+  // here would drop documents with @timestamp = fromDateISO when the cursor timestamp equals
+  // fromDateISO (e.g. second recovery slice where all remaining logs share the same timestamp).
   const baseWhere = `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE 
-      ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+  | WHERE
+      ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
       AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
 

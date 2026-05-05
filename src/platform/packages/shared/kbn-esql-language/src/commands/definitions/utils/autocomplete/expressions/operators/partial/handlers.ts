@@ -14,9 +14,7 @@ import { getFunctionDefinition } from '../../../../functions';
 import { createSyntheticListOperatorNode, createSyntheticLikeOperatorNode } from './utils';
 import { dispatchOperators } from '../dispatcher';
 import { inOperators, patternMatchOperators } from '../../../../../all_operators';
-
-const WHITESPACE_NORMALIZE_REGEX = /\s+/g;
-const TRAILING_WHITESPACE_REGEX = /\s+$/;
+import { normalizeWhitespace } from '../../../../regex';
 
 const NULL_CHECK_CANDIDATES = ['is null', 'is not null'] as const;
 
@@ -30,10 +28,7 @@ export async function handleNullCheckOperator(
   { innerText }: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
   const text = textBeforeCursor || innerText;
-  const queryNormalized = text
-    .toLowerCase()
-    .replace(WHITESPACE_NORMALIZE_REGEX, ' ')
-    .replace(TRAILING_WHITESPACE_REGEX, ' ');
+  const queryNormalized = normalizeWhitespace(text.toLowerCase());
 
   const suggestions: ISuggestionItem[] = [];
 

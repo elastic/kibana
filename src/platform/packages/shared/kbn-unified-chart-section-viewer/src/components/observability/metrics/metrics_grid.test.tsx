@@ -21,6 +21,7 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
 import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
 
 jest.mock('@kbn/discover-utils', () => ({
   DiscoverFlyouts: { metricInsights: 'metricInsights' },
@@ -94,7 +95,11 @@ describe('MetricsGrid', () => {
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
-    return render(<MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />);
+    return render(
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />
+      </MetricsExperienceStateProvider>
+    );
   };
 
   beforeEach(() => {
@@ -115,23 +120,27 @@ describe('MetricsGrid', () => {
 
   it('passes the correct size prop', () => {
     const { rerender } = render(
-      <MetricsGrid
-        {...defaultProps}
-        columns={3}
-        dimensions={[{ name: 'host.name' }]}
-        discoverFetch$={discoverFetch$}
-      />
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid
+          {...defaultProps}
+          columns={3}
+          dimensions={[{ name: 'host.name' }]}
+          discoverFetch$={discoverFetch$}
+        />
+      </MetricsExperienceStateProvider>
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
 
     rerender(
-      <MetricsGrid
-        {...defaultProps}
-        columns={4}
-        dimensions={[{ name: 'host.name' }]}
-        discoverFetch$={discoverFetch$}
-      />
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid
+          {...defaultProps}
+          columns={4}
+          dimensions={[{ name: 'host.name' }]}
+          discoverFetch$={discoverFetch$}
+        />
+      </MetricsExperienceStateProvider>
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());

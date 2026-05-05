@@ -14,19 +14,21 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AttackDiscoveryAlert } from './attack_discovery_alert.gen';
 
+export const AttackDiscoveryFindInternalResponse = lazySchema(() =>
+  z.object({
+    connector_names: z.array(z.string()),
+    data: z.array(AttackDiscoveryAlert),
+    page: z.number().int(),
+    per_page: z.number().int().optional(),
+    total: z.number().int(),
+    unique_alert_ids_count: z.number().int(),
+    unique_alert_ids: z.array(z.string()).optional(),
+  })
+);
 export type AttackDiscoveryFindInternalResponse = z.infer<
   typeof AttackDiscoveryFindInternalResponse
 >;
-export const AttackDiscoveryFindInternalResponse = z.object({
-  connector_names: z.array(z.string()),
-  data: z.array(AttackDiscoveryAlert),
-  page: z.number().int(),
-  per_page: z.number().int().optional(),
-  total: z.number().int(),
-  unique_alert_ids_count: z.number().int(),
-  unique_alert_ids: z.array(z.string()).optional(),
-});

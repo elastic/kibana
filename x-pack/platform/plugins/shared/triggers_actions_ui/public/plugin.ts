@@ -44,8 +44,10 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -168,6 +170,7 @@ interface PluginsSetup {
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
   actions: ActionsPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 interface PluginsStart {
@@ -228,6 +231,9 @@ export class Plugin
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+
+    plugins.share.url.locators.create(new RulesLocatorDefinition());
+    plugins.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
       defaultMessage: 'Rules',

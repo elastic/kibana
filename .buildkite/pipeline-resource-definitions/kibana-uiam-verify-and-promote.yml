@@ -21,7 +21,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         UIAM_IMAGE: docker.elastic.co/cloud-ci/uiam:latest-dev
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: true
       branch_configuration: main
