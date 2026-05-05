@@ -7,16 +7,13 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { createEsClientForTesting } from '@kbn/test-es-server';
-import {
-  computePairedTTestResults,
-  pairScores,
-  type EvaluationScoreDocument as CommonEvaluationScoreDocument,
-} from '@kbn/evals-common';
-import { EvaluationScoreRepository } from '../../utils/score_repository';
+import { KbnClient } from '@kbn/kbn-client';
+import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
+import { EvalsClient } from '../../utils/evals_client';
+import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 
-const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
+const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -24,6 +21,8 @@ export const compareCmd: Command<void> = {
   Compare two evaluation runs using paired t-tests.
 
   NOTE: The two runs must use the same experiment orchestrator (e.g. Kibana or Phoenix), due to the different handling of the dataset/example IDs.
+  Scores are read from the evals plugin on the target Kibana.
+  Configure target/auth with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.
 
   Example:
     node scripts/evals compare <run-id-1> <run-id-2>
@@ -33,7 +32,7 @@ export const compareCmd: Command<void> = {
 
     if (!firstRunId || !secondRunId) {
       throw createFlagError(
-        'Two run IDs are required. Example: node scripts/evals compare <run-id-1> <run-id-2>'
+        'Two run IDs are required. Example: node scripts/evals compare <run-id-1> <run-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
       );
     }
 
@@ -41,17 +40,35 @@ export const compareCmd: Command<void> = {
       throw createFlagError('Unexpected extra arguments. Provide exactly two run IDs.');
     }
 
-    const evaluationsEsUrl = process.env.EVALUATIONS_ES_URL ?? DEFAULT_EVALUATIONS_ES_URL;
-    if (!process.env.EVALUATIONS_ES_URL) {
-      log.warning(`EVALUATIONS_ES_URL not set; defaulting to ${DEFAULT_EVALUATIONS_ES_URL}.`);
+    const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL;
+    if (!evaluationsKbnUrl) {
+      log.warning(`EVALUATIONS_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
     }
 
-    const esClient = createEsClientForTesting({ esUrl: evaluationsEsUrl });
-    const scoreRepository = new EvaluationScoreRepository(esClient, log);
+    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVALUATIONS_KBN_URL });
+    const kbnClient = getEvaluationsKbnClient({
+      kbnClient: defaultKbnClient,
+      log,
+      evaluationsKbnUrl,
+      evaluationsKbnApiKey: process.env.EVALUATIONS_KBN_API_KEY,
+    });
+    const evalsKbnClient = new EvalsClient(kbnClient, log);
+
+    try {
+      await evalsKbnClient.assertPluginEnabled();
+    } catch (error) {
+      throw createFlagError(
+        [
+          error instanceof Error ? error.message : String(error),
+          'Set EVALUATIONS_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVALUATIONS_KBN_API_KEY when authenticating to a non-local target.',
+        ].join('\n')
+      );
+    }
 
     const [firstRunScores, secondRunScores] = await Promise.all([
-      scoreRepository.getScoresByRunId(firstRunId),
-      scoreRepository.getScoresByRunId(secondRunId),
+      evalsKbnClient.getRunScores(firstRunId),
+      evalsKbnClient.getRunScores(secondRunId),
     ]);
 
     if (firstRunScores.length === 0) {
@@ -86,10 +103,10 @@ export const compareCmd: Command<void> = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    const scoresA = filteredFirstRunScores as unknown as CommonEvaluationScoreDocument[];
-    const scoresB = filteredSecondRunScores as unknown as CommonEvaluationScoreDocument[];
-
-    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(scoresA, scoresB);
+    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
+      filteredFirstRunScores,
+      filteredSecondRunScores
+    );
 
     if (pairs.length === 0) {
       throw new Error('No paired scores found between the two runs.');

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { hostname as osHostname } from 'os';
 import type { InferenceConnector, InferenceConnectorType, Model } from '@kbn/inference-common';
 import { getConnectorFamily, getConnectorModel, getConnectorProvider } from '@kbn/inference-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import type { EsClient } from '@kbn/scout';
+import type { KbnClient } from '@kbn/scout';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationReporter, EvalsExecutorClient } from '@kbn/evals';
 import {
-  EvaluationScoreRepository,
-  mapToEvaluationScoreDocuments,
-  exportEvaluations,
+  buildIngestRequest,
+  EvalsClient,
+  getGitMetadata,
+  getBuildkiteCiMetadataFromEnv,
 } from '@kbn/evals';
 import { KibanaPhoenixClient } from './client';
 import { getPhoenixConfig } from './get_phoenix_config';
@@ -42,8 +44,8 @@ function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Mod
  * fixture with a Phoenix-backed executor when `KBN_EVALS_EXECUTOR=phoenix` is set.
  *
  * When active, the override replaces the base `executorClient` entirely, so it
- * replicates the teardown that the base fixture normally performs: exporting
- * evaluation results to Elasticsearch and printing the terminal report.
+ * replicates the teardown that the base fixture normally performs: ingesting
+ * evaluation results through the evals plugin and printing the terminal report.
  *
  * When `KBN_EVALS_EXECUTOR` is not `phoenix`, the base is returned unchanged.
  *
@@ -69,14 +71,14 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
           connector,
           evaluationConnector,
           repetitions,
-          evaluationsEsClient,
+          evaluationsKbnClient,
           reportModelScore,
         }: {
           log: SomeDevLog;
           connector: AvailableConnectorWithId;
           evaluationConnector: AvailableConnectorWithId;
           repetitions: number;
-          evaluationsEsClient: EsClient;
+          evaluationsKbnClient: KbnClient;
           reportModelScore: EvaluationReporter;
         },
         use: (client: EvalsExecutorClient) => Promise<void>
@@ -88,6 +90,11 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
 
         const model = buildModelFromConnector(connector);
         const evaluatorModel = buildModelFromConnector(evaluationConnector);
+        const evalsKbnClient = new EvalsClient(evaluationsKbnClient, log);
+        const suiteId = process.env.EVAL_SUITE_ID;
+        const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
+        const gitMetadata = getGitMetadata();
+        const hostName = osHostname();
 
         const phoenixClient = new KibanaPhoenixClient({
           config: getPhoenixConfig(),
@@ -99,28 +106,32 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
 
         await use(phoenixClient);
 
-        const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
         const experiments = await phoenixClient.getRanExperiments();
-        const documents = await mapToEvaluationScoreDocuments({
-          experiments,
+        const ingestRequests = buildIngestRequest({
+          source: { kind: 'experiments', experiments },
+          runId,
           taskModel: model,
           evaluatorModel,
-          runId,
-          totalRepetitions: repetitions,
+          repetitions,
+          hostName,
+          gitMetadata,
+          suiteId,
+          buildkiteMetadata,
+          log,
         });
 
         try {
-          await exportEvaluations(documents, scoreRepository, log);
-        } catch (error) {
-          log.error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${runId}. ${error}`
+          await Promise.all(
+            ingestRequests.map((ingestRequest) => evalsKbnClient.ingestScores(ingestRequest))
           );
+        } catch (error) {
+          log.error(`Failed to ingest evaluation results for run ID: ${runId}. ${String(error)}`);
           throw error;
         }
 
-        await reportModelScore(scoreRepository, runId, log, {
+        await reportModelScore(evalsKbnClient, runId, log, {
           taskModelId: model.id,
-          suiteId: process.env.EVAL_SUITE_ID,
+          suiteId,
         });
       },
       { scope: 'worker' },

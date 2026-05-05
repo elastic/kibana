@@ -1,0 +1,161 @@
+openapi: 3.0.0
+info:
+  title: Ingest Evaluation Scores API endpoint
+  version: '1'
+paths:
+  /internal/evals/scores:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: IngestScores
+      description: Ingest a batch of evaluation scores
+      summary: Ingest evaluation scores
+      tags:
+        - Evals API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                run_id:
+                  type: string
+                experiment_id:
+                  type: string
+                suite_id:
+                  type: string
+                task_model:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                evaluator_model:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                run_metadata:
+                  type: object
+                  properties:
+                    git_branch:
+                      type: string
+                    git_commit_sha:
+                      type: string
+                    total_repetitions:
+                      type: integer
+                  required:
+                    - total_repetitions
+                environment:
+                  type: object
+                  properties:
+                    hostname:
+                      type: string
+                  required:
+                    - hostname
+                ci:
+                  type: object
+                  properties:
+                    buildkite:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
+                scores:
+                  type: array
+                  maxItems: 1000
+                  items:
+                    type: object
+                    properties:
+                      example:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          index:
+                            type: integer
+                          input:
+                            type: object
+                            additionalProperties: true
+                          dataset:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - id
+                          - index
+                          - dataset
+                      task:
+                        type: object
+                        properties:
+                          trace_id:
+                            type: string
+                          repetition_index:
+                            type: integer
+                          output:
+                            type: object
+                            additionalProperties: true
+                        required:
+                          - repetition_index
+                      evaluator:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          score:
+                            type: number
+                            nullable: true
+                          label:
+                            type: string
+                            nullable: true
+                          explanation:
+                            type: string
+                            nullable: true
+                          metadata:
+                            type: object
+                            additionalProperties: true
+                          trace_id:
+                            type: string
+                            nullable: true
+                        required:
+                          - name
+                    required:
+                      - example
+                      - task
+                      - evaluator
+              required:
+                - run_id
+                - experiment_id
+                - task_model
+                - evaluator_model
+                - run_metadata
+                - environment
+                - scores
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingested:
+                    type: integer
+                  conflicted:
+                    type: integer
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        status:
+                          type: integer
+                        reason:
+                          type: string
+                      required:
+                        - index
+                        - status
+                        - reason
+                required:
+                  - ingested
+                  - conflicted
+                  - failed

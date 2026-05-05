@@ -7,13 +7,13 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
-import type { Model } from '@kbn/inference-common';
-import type { EvaluationScoreRepository } from '../score_repository';
+import type { Model } from '@kbn/evals-common';
+import type { EvalsClient } from '../evals_client';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions } from '../../types';
 
 export type EvaluationReporter = (
-  scoreRepository: EvaluationScoreRepository,
+  evalsClient: EvalsClient,
   runId: string,
   log: SomeDevLog,
   options?: { taskModelId?: string; suiteId?: string }
@@ -30,13 +30,8 @@ function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
 export function createDefaultTerminalReporter(
   options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  return async (
-    scoreRepository: EvaluationScoreRepository,
-    runId: string,
-    log: SomeDevLog,
-    filter
-  ) => {
-    const runStats = await scoreRepository.getStatsByRunId(runId, filter);
+  return async (evalsClient: EvalsClient, runId: string, log: SomeDevLog, filter) => {
+    const runStats = await evalsClient.getRunStats(runId, filter);
 
     if (!runStats || runStats.stats.length === 0) {
       const filterSuffix = [

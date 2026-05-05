@@ -95,15 +95,13 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 
 ### Available fixtures
 
-| Fixture                     | Description                                                                                                                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
-| `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
-| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
-| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                              |
-| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
-| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
-| `evaluationsEsClient`       | Dedicated ES client for storing evaluation results. Defaults to `esClient` Scout fixture. See [Using a Separate Cluster for Evaluation Results](#using-a-separate-cluster-for-evaluation-results)        |
+| Fixture            | Description                                                                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`  | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
+| `executorClient`   | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
+| `phoenixClient`    | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
+| `reportModelScore` | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
+| `traceEsClient`    | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
 
 ## Running the suite
 
@@ -122,6 +120,7 @@ node scripts/evals start --suite agent-builder
 `evals init` walks you through EIS (Cloud Connected Mode) connector discovery or validates existing connectors in `kibana.dev.yml`. It outputs an `export KIBANA_TESTING_AI_CONNECTORS="..."` command to paste into your shell.
 
 `evals start` orchestrates the full stack in one terminal:
+
 1. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
 2. Starts Scout (ES + Kibana with `evals_tracing` config)
 3. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
@@ -161,8 +160,9 @@ node scripts/evals start --suite attack-discovery --export-profile local
 ```
 
 Notes:
+
 - `--datasets-profile <name>` loads `EVALUATIONS_KBN_URL` / `EVALUATIONS_KBN_API_KEY` from `config.<name>.json`
-- `--export-profile <name>` loads `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS` from `config.<name>.json`
+- `--export-profile <name>` loads `TRACING_ES_URL` and `TRACING_EXPORTERS` from `config.<name>.json`
 
 #### Filtering tests with `--grep`
 
@@ -240,6 +240,7 @@ The `models:*` and `models:judge:*` labels are automatically synced from LiteLLM
 - **On demand**: Add the `ci:sync-model-labels` label to any PR to trigger label sync in PR CI.
 
 The sync step:
+
 1. Discovers available models from both **LiteLLM** (`GET /v1/models`) and **EIS** (via `discover_eis_models.js`)
 2. Creates/updates labels for all discovered models
 3. Marks stale labels as deprecated (renamed from `models:*` to `deprecated:models:*`)
@@ -384,7 +385,7 @@ node scripts/evals dataplex sync --dry-run
 node scripts/evals dataplex sync --print-commands
 ```
 
-Note: The **Dataplex "Aspect types"** console page lists *schemas*. Snapshot datasets themselves show up under Dataplex **Entries**.
+Note: The **Dataplex "Aspect types"** console page lists _schemas_. Snapshot datasets themselves show up under Dataplex **Entries**.
 
 <details>
 <summary>Manual flow (if you prefer full control)</summary>
@@ -655,24 +656,23 @@ The environment variable takes priority over the value passed to `createRagEvalu
 
 #### Using a Separate Cluster for Evaluation Results
 
-If you want to store evaluation results (exported to `kibana-evaluations` datastream) in a different Elasticsearch cluster than your test environment, specify the cluster URL with the `EVALUATIONS_ES_URL` environment variable:
+If you want to store evaluation results in a different Kibana environment than your test target, specify it with `EVALUATIONS_KBN_URL`:
 
 ```bash
-EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
 ```
 
-This creates a dedicated `evaluationsEsClient` that connects to your evaluations cluster while `esClient` continues to use your test environment cluster.
+Score ingestion and score reads are routed through the evals plugin on that target Kibana (`POST /internal/evals/scores` and run read routes), while `esClient` continues to use your test environment cluster.
 
 #### Using Separate Clusters and Kibana
 
 Use these settings when traces, evaluation results, or managed datasets live outside the default Scout Kibana/Elasticsearch pair.
 
-| Variable | CLI flag | Purpose |
-| --- | --- | --- |
-| `TRACING_ES_URL` | `--trace-es-url` | Sends trace-based evaluator queries to a separate monitoring Elasticsearch cluster. |
-| `EVALUATIONS_ES_URL` | `--evaluations-es-url` | Exports evaluation scores to a separate Elasticsearch cluster. |
-| `EVALUATIONS_KBN_URL` | `--evaluations-kbn-url` | Routes dataset upsert and dataset lookup operations to a separate Kibana instance. |
-| `EVALUATIONS_KBN_API_KEY` | `--evaluations-kbn-api-key` | Optional API key used for dataset Kibana operations when `EVALUATIONS_KBN_URL` is set. |
+| Variable                  | CLI flag                    | Purpose                                                                                                              |
+| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `TRACING_ES_URL`          | `--trace-es-url`            | Sends trace-based evaluator queries to a separate monitoring Elasticsearch cluster.                                  |
+| `EVALUATIONS_KBN_URL`     | `--evaluations-kbn-url`     | Routes score ingestion, score reads, and dataset operations to a separate Kibana instance with evals plugin enabled. |
+| `EVALUATIONS_KBN_API_KEY` | `--evaluations-kbn-api-key` | Optional API key used for Kibana evals routes when `EVALUATIONS_KBN_URL` is set.                                     |
 
 #### Using a Separate Kibana for Dataset Operations
 
@@ -694,18 +694,14 @@ By default, evaluation results are displayed in the terminal as a formatted tabl
 
 ```ts
 // my_eval.test.ts
-import {
-  evaluate as base,
-  type EvaluationScoreRepository,
-  type EvaluationScoreDocument,
-} from '@kbn/evals';
+import { evaluate as base, type EvalsClient, type EvaluationScoreDocument } from '@kbn/evals';
 
 export const evaluate = base.extend({
   reportModelScore: async ({}, use) => {
     // Custom reporter implementation
-    await use(async (scoreRepository, runId, log) => {
-      // Query Elasticsearch for evaluation results
-      const docs = await scoreRepository.getScoresByRunId(runId);
+    await use(async (evalsClient: EvalsClient, runId, log) => {
+      // Fetch persisted scores through the evals plugin APIs
+      const docs = await evalsClient.getRunScores(runId);
 
       if (docs.length === 0) {
         log.error(`No results found for run: ${runId}`);
@@ -730,17 +726,19 @@ evaluate('my test', async ({ executorClient }) => {
 });
 ```
 
-**Note:** Elasticsearch export always happens first and is not affected by custom reporters. This ensures all results are persisted regardless of custom reporting logic.
+**Note:** Score ingestion through the evals plugin happens before custom reporting and is not affected by custom reporters. This ensures all results are persisted regardless of custom reporting logic.
 
-## Elasticsearch Export
+## Score Ingestion via Kibana
 
-The evaluation results are automatically exported to Elasticsearch in datastream called `kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+Evaluation results are ingested through the evals plugin route `POST /internal/evals/scores` on the target Kibana. The plugin persists docs into the `kibana-evaluations` data stream, which provides durable storage and supports run analysis over time.
+
+For non-local targets, set both `EVALUATIONS_KBN_URL` and `EVALUATIONS_KBN_API_KEY`.
 
 ### Golden cluster API key privileges (required)
 
 A single API key can cover **all** golden cluster operations: evaluation result export, trace storage, and dataset management. The key is created via the Kibana API (not the ES API) so it can bundle both Elasticsearch index privileges and Kibana feature privileges using `kibana_role_descriptors`.
 
-When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs an export **preflight check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
+When targeting a “golden” environment via `EVALUATIONS_KBN_URL` + `EVALUATIONS_KBN_API_KEY`, score ingestion and reads go through the evals plugin APIs (`/internal/evals/*`) instead of direct Elasticsearch writes.
 
 **Automatic setup (recommended):**
 
@@ -748,7 +746,7 @@ When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATI
 node scripts/evals init config
 ```
 
-This interactive wizard opens your browser to the golden cluster Dev Tools, copies the API key creation payload to your clipboard, and walks you through pasting the result back. The single `encoded` key is applied to all four config fields (`evaluationsEs.apiKey`, `tracingEs.apiKey`, `evaluationsKbn.apiKey`, and the tracing exporter `Authorization` header).
+This interactive wizard opens your browser to the golden cluster Dev Tools, copies the API key creation payload to your clipboard, and walks you through pasting the result back. The single `encoded` key is applied to the config fields (`tracingEs.apiKey`, `evaluationsKbn.apiKey`, and the tracing exporter `Authorization` header).
 
 **Manual setup:**
 
@@ -765,20 +763,19 @@ This grants:
 
 Copy the returned `encoded` value and use it for all four secret fields in your vault config:
 
-| Config field | Env variable | Value |
-| --- | --- | --- |
-| `evaluationsEs.apiKey` | `EVALUATIONS_ES_API_KEY` | `<encoded>` |
-| `tracingEs.apiKey` | `TRACING_ES_API_KEY` | `<encoded>` |
-| `evaluationsKbn.apiKey` | `EVALUATIONS_KBN_API_KEY` | `<encoded>` |
-| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS` | `ApiKey <encoded>` |
+| Config field                                     | Env variable              | Value              |
+| ------------------------------------------------ | ------------------------- | ------------------ |
+| `tracingEs.apiKey`                               | `TRACING_ES_API_KEY`      | `<encoded>`        |
+| `evaluationsKbn.apiKey`                          | `EVALUATIONS_KBN_API_KEY` | `<encoded>`        |
+| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS`   | `ApiKey <encoded>` |
 
-### Exporting to a separate Elasticsearch cluster
+### Using a Separate Kibana for Score Ingestion
 
-By default, exports go to the same Elasticsearch cluster used by the Scout test environment (`esClient` fixture).
-If you want to keep using an isolated Scout cluster for the eval run, but export results to a different Elasticsearch cluster (e.g. your local `localhost:9200`), set:
+By default, score ingestion targets the same Kibana used by the eval run.
+If you want to keep using an isolated Scout cluster for execution, but ingest scores to a different Kibana environment, set:
 
 ```bash
-EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config ...
+EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601 node scripts/playwright test --config ...
 ```
 
 ### Datastream Structure

@@ -9,13 +9,14 @@ import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
+import type { KbnClient } from '@kbn/kbn-client';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
-import type { EvaluatorStats } from './utils/score_repository';
+import type { EvalsClient, EvaluatorStats } from './utils/evals_client';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -229,7 +230,8 @@ export interface WorkerRunIdRef {
 
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
-  evaluationsKbnClient: ScoutWorkerFixtures['kbnClient'];
+  evalsClient: EvalsClient;
+  evaluationsKbnClient: KbnClient;
   /**
    * Whether the target Kibana has the evals plugin enabled (xpack.evals.enabled: true).
    * Determined once per worker by probing the plugin's enabled endpoint.
@@ -248,7 +250,6 @@ export interface EvaluationSpecificWorkerFixtures {
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
-  evaluationsEsClient: EsClient;
 }
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {

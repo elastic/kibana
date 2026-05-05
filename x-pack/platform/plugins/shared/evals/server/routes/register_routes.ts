@@ -28,6 +28,7 @@ import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
+import { registerIngestScoresRoute } from './scores/ingest_scores';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -47,6 +48,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetTraceRoute(dependencies);
   registerGetTracingProjectsRoute(dependencies);
   registerGetProjectTracesRoute(dependencies);
+  registerIngestScoresRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
   registerGetDatasetRoute(dependencies);

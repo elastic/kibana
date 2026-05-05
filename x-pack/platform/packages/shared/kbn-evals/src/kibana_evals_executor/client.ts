@@ -205,7 +205,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     });
                   } catch (err) {
                     this.options.log.warning(
-                      `Incremental score export failed (will retry in batch): ${err}`
+                      `Incremental score export failed for run "${this.options.runId}" (example=${exampleIndex}, repetition=${rep}): ${err}`
                     );
                   }
                 }

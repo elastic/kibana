@@ -62,20 +62,20 @@ kbn-evals-suite-security-ai-rules/
 Run the suite with `node scripts/evals run`. Results are persisted to an Elasticsearch cluster and a summary table is printed at the end.
 
 ```bash
-EVALUATIONS_ES_URL=<ES_URL> \
-EVALUATIONS_ES_API_KEY=<API_KEY> \
+EVALUATIONS_KBN_URL=<KBN_URL> \
+EVALUATIONS_KBN_API_KEY=<API_KEY> \
 EVALUATION_CONNECTOR_ID=gpt-4o \
   node scripts/evals run --suite security-ai-rules
 ```
 
-Replace `<ES_URL>` and `<API_KEY>` with the Elasticsearch endpoint and API key for the cluster where evaluation scores should be stored (this can be a remote/cloud cluster, not necessarily the local one Kibana is connected to).
+Replace `<KBN_URL>` and `<API_KEY>` with the Kibana endpoint and API key for the target environment where the evals plugin is enabled.
 
 ### Environment variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `EVALUATIONS_ES_URL` | Elasticsearch URL for storing results | `http://elastic:changeme@localhost:9220` |
-| `EVALUATIONS_ES_API_KEY` | API key for the results Elasticsearch cluster (used instead of basic auth) | (none) |
+| `EVALUATIONS_KBN_URL` | Kibana URL used for score ingestion and reads | `http://elastic:changeme@localhost:5620` |
+| `EVALUATIONS_KBN_API_KEY` | API key for the target Kibana (used instead of basic auth) | (none) |
 | `EVALUATION_CONNECTOR_ID` | Connector ID for the task model | required |
 | `EVALUATION_REPETITIONS` | Number of times to run each example | `1` |
 | `SELECTED_EVALUATORS` | Comma-separated evaluator names to run | (all) |
@@ -85,7 +85,7 @@ Replace `<ES_URL>` and `<API_KEY>` with the Elasticsearch endpoint and API key f
 When storing results in a local dev cluster with basic auth, set the URL with embedded credentials:
 
 ```bash
-EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 \
+EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5620 \
 EVALUATION_CONNECTOR_ID=gpt-4o \
   node scripts/evals run --suite security-ai-rules
 ```
@@ -93,8 +93,8 @@ EVALUATION_CONNECTOR_ID=gpt-4o \
 ### Example: Run specific evaluators only
 
 ```bash
-EVALUATIONS_ES_URL=<ES_URL> \
-EVALUATIONS_ES_API_KEY=<API_KEY> \
+EVALUATIONS_KBN_URL=<KBN_URL> \
+EVALUATIONS_KBN_API_KEY=<API_KEY> \
 EVALUATION_CONNECTOR_ID=gpt-4o \
 SELECTED_EVALUATORS="Query Syntax Validity,Field Coverage,MITRE Accuracy" \
   node scripts/evals run --suite security-ai-rules
@@ -314,7 +314,7 @@ This means the required index (e.g., `logs-azure.auditlogs*`) does not exist in 
 **Problem**: No results in `.kibana-evaluations` datastream.
 
 **Solution**:
-1. Verify `EVALUATIONS_ES_URL` is set correctly
+1. Verify `EVALUATIONS_KBN_URL` is set correctly
 2. Check Elasticsearch is running and accessible
 3. Review eval logs for export errors
 4. Ensure the Elasticsearch cluster has sufficient permissions

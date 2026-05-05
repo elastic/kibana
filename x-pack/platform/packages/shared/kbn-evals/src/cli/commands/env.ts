@@ -62,20 +62,15 @@ const ENV_DOCS = [
     example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
   },
   {
-    name: 'EVALUATIONS_ES_URL',
-    description: 'Elasticsearch URL where evaluation results are exported.',
-    example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
-  },
-  {
-    name: 'EVALUATIONS_ES_API_KEY',
-    description: 'API key for authenticating with the evaluations Elasticsearch cluster.',
-    example: 'EVALUATIONS_ES_API_KEY=...',
-  },
-  {
-    name: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT',
+    name: 'EVALUATIONS_KBN_URL',
     description:
-      'Skip the Elasticsearch export preflight check (not recommended for CI). Preflight runs a small sentinel write against the configured evaluations cluster.',
-    example: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true',
+      'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
+    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+  },
+  {
+    name: 'EVALUATIONS_KBN_API_KEY',
+    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
+    example: 'EVALUATIONS_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',

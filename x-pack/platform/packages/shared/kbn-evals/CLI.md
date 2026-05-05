@@ -50,7 +50,7 @@ node scripts/evals start --suite agent-builder --skip-server
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators |
 | `--profile <name>` | | Load both dataset + export settings from `config.<name>.json` in the vault config dir |
 | `--datasets-profile <name>` | | Load dataset settings from `config.<name>.json` (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`) |
-| `--export-profile <name>` | | Load export settings from `config.<name>.json` (sets `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS`) |
+| `--export-profile <name>` | | Load export settings from `config.<name>.json` (sets `TRACING_ES_URL` and `TRACING_EXPORTERS`) |
 | `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
 | `--repetitions <n>` | | Number of times to repeat each example |
 | `--skip-server` | | Skip EDOT/Scout/EIS startup (use existing services) |
@@ -140,8 +140,8 @@ node scripts/evals run --suite streams --dry-run
 | `--export-profile <name>` | | Load export settings from `config.<name>.json` |
 | `--trace-es-url <url>` | | Elasticsearch URL for trace queries |
 | `--trace-es-api-key <key>` | | API key for trace ES |
-| `--evaluations-es-url <url>` | | Elasticsearch URL for storing eval results |
-| `--evaluations-es-api-key <key>` | | API key for evaluations ES |
+| `--evaluations-kbn-url <url>` | | Kibana URL for score ingestion and dataset operations |
+| `--evaluations-kbn-api-key <key>` | | API key for the target Kibana |
 | `--phoenix-base-url <url>` | | Phoenix API URL (when using `--executor phoenix`) |
 | `--phoenix-api-key <key>` | | Phoenix API key |
 | `--dry-run` | | Print the Playwright command and exit |

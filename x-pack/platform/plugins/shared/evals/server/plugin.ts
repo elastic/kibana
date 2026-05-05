@@ -28,6 +28,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
+import { EvaluationScoreService } from './storage/evaluation_score_service';
 
 export class EvalsPlugin
   implements
@@ -37,6 +38,7 @@ export class EvalsPlugin
   private readonly config: EvalsConfig;
   private readonly isServerless: boolean;
   private datasetService?: DatasetService;
+  private evaluationScoreService?: EvaluationScoreService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -55,6 +57,7 @@ export class EvalsPlugin
 
     this.logger.info('Setting up Evals plugin');
     this.datasetService = new DatasetService(this.logger, this.isServerless);
+    this.evaluationScoreService = new EvaluationScoreService(this.logger, this.isServerless);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -66,12 +69,13 @@ export class EvalsPlugin
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
       async () => {
-        if (!this.datasetService) {
-          throw new Error('DatasetService has not been initialized');
+        if (!this.datasetService || !this.evaluationScoreService) {
+          throw new Error('Evals storage services have not been initialized');
         }
 
         return {
           datasetService: this.datasetService,
+          evaluationScoreService: this.evaluationScoreService,
         };
       }
     );
@@ -126,9 +130,14 @@ export class EvalsPlugin
     return {};
   }
 
-  start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
+  start(coreStart: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
+    this.evaluationScoreService
+      ?.installAssets(coreStart.elasticsearch.client.asInternalUser)
+      .catch((error) => this.logger.error(error));
+
     return {
       datasetService: this.datasetService,
+      evaluationScoreService: this.evaluationScoreService,
     };
   }
 

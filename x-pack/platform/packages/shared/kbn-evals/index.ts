@@ -71,19 +71,9 @@ export type {
   EvaluatorDisplayGroup,
 } from './src/utils/reporting/report_table';
 export { createTable } from './src/utils/reporting/report_table';
-export {
-  EvaluationScoreRepository,
-  computeScoreDocumentId,
-  type EvaluationScoreDocument,
-  type EvaluatorStats,
-  type RunStats,
-} from './src/utils/score_repository';
-export {
-  mapToEvaluationScoreDocuments,
-  exportEvaluations,
-  buildSingleScoreDocument,
-  type BuildSingleScoreDocumentParams,
-} from './src/utils/report_model_score';
+export { EvalsClient, type EvaluatorStats, type RunStats } from './src/utils/evals_client';
+export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
+export { buildIngestRequest } from './src/utils/build_ingest_request';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 /**

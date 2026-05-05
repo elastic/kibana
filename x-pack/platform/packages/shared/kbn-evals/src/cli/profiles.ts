@@ -35,7 +35,6 @@ export const isExportProfileImplicitLocal = (
 
 interface VaultConfig {
   evaluationsKbn?: { url?: string; apiKey?: string };
-  evaluationsEs?: { url?: string; apiKey?: string };
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
   gcsDatasetAccessCredentials?: unknown;
@@ -111,13 +110,6 @@ export const envFromExportProfile = (
   if (!cfg) return {};
 
   const next: Record<string, string> = {};
-
-  if (isNonEmptyString(cfg.evaluationsEs?.url) && !isPlaceholder(cfg.evaluationsEs.url)) {
-    next.EVALUATIONS_ES_URL = cfg.evaluationsEs.url;
-  }
-  if (isNonEmptyString(cfg.evaluationsEs?.apiKey) && !isPlaceholder(cfg.evaluationsEs.apiKey)) {
-    next.EVALUATIONS_ES_API_KEY = cfg.evaluationsEs.apiKey;
-  }
 
   if (isNonEmptyString(cfg.tracingEs?.url) && !isPlaceholder(cfg.tracingEs.url)) {
     next.TRACING_ES_URL = cfg.tracingEs.url;

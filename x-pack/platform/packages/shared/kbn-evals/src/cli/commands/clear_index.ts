@@ -10,7 +10,6 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { isNotFoundError } from '@kbn/es-errors';
 import { createEsClientForTesting } from '@kbn/test';
-import { envFromExportProfile, defaultExportProfile } from '../profiles';
 import { isTTY } from '../prompts';
 
 const DEFAULT_PATTERN = 'kibana-evaluations*';
@@ -50,49 +49,26 @@ export const clearIndexCmd: Command<void> = {
 
   Examples:
     node scripts/evals clear-index
-    node scripts/evals clear-index --export-profile local
     node scripts/evals clear-index --pattern kibana-evaluations* --force
     node scripts/evals clear-index --es-url http://elastic:changeme@localhost:9201 --force
   `,
   flags: {
-    string: [
-      'profile',
-      'export-profile',
-      'pattern',
-      'data-stream',
-      'template',
-      'es-url',
-      'es-api-key',
-    ],
+    string: ['pattern', 'data-stream', 'template', 'es-url', 'es-api-key'],
     boolean: ['force', 'dry-run', 'delete-template', 'allow-remote'],
     default: { force: false, 'delete-template': false, 'dry-run': false },
   },
   run: async ({ log, flagsReader }) => {
-    const repoRoot = process.cwd();
-
-    const baseProfile = flagsReader.string('profile') ?? undefined;
-    const exportProfile =
-      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
-
-    const exportEnv = envFromExportProfile(repoRoot, exportProfile);
-
-    const esUrl =
-      flagsReader.string('es-url') ??
-      exportEnv.EVALUATIONS_ES_URL ??
-      process.env.EVALUATIONS_ES_URL;
+    const esUrl = flagsReader.string('es-url');
     if (!esUrl) {
       throw createFlagError(
         [
           'No Elasticsearch URL configured for clearing indices.',
-          'Provide --es-url, set EVALUATIONS_ES_URL, or use --export-profile <name> with a config.<name>.json file.',
+          'Provide --es-url to target the Elasticsearch cluster backing kibana-evaluations.',
         ].join('\n')
       );
     }
 
-    const esApiKey =
-      flagsReader.string('es-api-key') ??
-      exportEnv.EVALUATIONS_ES_API_KEY ??
-      process.env.EVALUATIONS_ES_API_KEY;
+    const esApiKey = flagsReader.string('es-api-key');
 
     const pattern = flagsReader.string('pattern') ?? DEFAULT_PATTERN;
     const dataStream = flagsReader.string('data-stream') ?? DEFAULT_DATA_STREAM;
