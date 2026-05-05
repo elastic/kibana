@@ -20,7 +20,7 @@ imports:
 timeout-minutes: 20
 engine:  
   id: codex
-  model: openai/gpt-5.5
+  model: gpt-5.5
   args:
     - -c
     - model_context_window=1050000
