@@ -267,18 +267,6 @@ export function KnowledgeIndicatorFeatureDetailsContent({
           ))}
         </InfoPanel>
       </EuiFlexItem>
-      {relatedQueryKIs.length > 0 && (
-        <EuiFlexItem>
-          <InfoPanel title={EVENTS_LABEL}>
-            <EuiBasicTable
-              items={relatedQueryKIs}
-              columns={eventsColumns}
-              rowHeader="query"
-              tableCaption={EVENTS_LABEL}
-            />
-          </InfoPanel>
-        </EuiFlexItem>
-      )}
       {showDependenciesPanel && (hasDependencies || allKnowledgeIndicators) && (
         <EuiFlexItem>
           <InfoPanel title={DEPENDENCIES_LABEL}>
@@ -292,6 +280,18 @@ export function KnowledgeIndicatorFeatureDetailsContent({
             ) : (
               <EuiText size="s">{NO_DEPENDENCIES_AVAILABLE}</EuiText>
             )}
+          </InfoPanel>
+        </EuiFlexItem>
+      )}
+      {relatedQueryKIs.length > 0 && (
+        <EuiFlexItem>
+          <InfoPanel title={EVENTS_LABEL}>
+            <EuiBasicTable
+              items={relatedQueryKIs}
+              columns={eventsColumns}
+              rowHeader="query"
+              tableCaption={EVENTS_LABEL}
+            />
           </InfoPanel>
         </EuiFlexItem>
       )}
