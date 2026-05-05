@@ -11,6 +11,7 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
   ToolOrigin,
@@ -126,6 +127,10 @@ export {
   SubagentExecutionMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
   type RoundInput,
@@ -207,6 +212,7 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,

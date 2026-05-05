@@ -6,12 +6,12 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/streams-schema';
-import { getDiverseSampleDocuments, getSampleDocuments } from '@kbn/ai-tools';
-import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
-import type { Condition } from '@kbn/streamlang';
+import { getDiverseSampleDocuments, getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { conditionToESQLAst } from '@kbn/streamlang';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../../streams/errors/parse_error';
 
@@ -74,7 +74,7 @@ export async function fetchSampleDocuments({
             return EMPTY_SAMPLE;
           })
         : Promise.resolve(EMPTY_SAMPLE),
-      getSampleDocuments({ esClient, index, start, end, size }),
+      getSampleDocumentsEsql({ esClient, index, start, end, sampleSize: size }),
     ]);
 
     const { documents, bucketCounts } = mergeDocuments(
@@ -99,20 +99,22 @@ export async function fetchSampleDocuments({
     };
   }
 
-  const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
   const entityFilteredSize = Math.round(size * entityFilteredRatio);
   const diverseSize = Math.round(size * diverseRatio);
+  const whereCondition = entityFilters
+    .map((filter) => conditionToESQLAst({ not: filter }))
+    .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([
-      getSampleDocuments({
+      getSampleDocumentsEsql({
         esClient,
         index,
         start,
         end,
-        size: entityFilteredSize,
-        filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
-        runtime_mappings: runtimeMappings,
+        sampleSize: entityFilteredSize,
+        whereCondition,
+        loadUnmappedFields: true,
       }).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
         return EMPTY_SAMPLE;
@@ -130,12 +132,12 @@ export async function fetchSampleDocuments({
             return EMPTY_SAMPLE;
           })
         : Promise.resolve(EMPTY_SAMPLE),
-      getSampleDocuments({
+      getSampleDocumentsEsql({
         esClient,
         index,
         start,
         end,
-        size,
+        sampleSize: size,
       }),
     ]);
 
@@ -195,24 +197,4 @@ function mergeDocuments(
   }
 
   return { documents: result, bucketCounts };
-}
-
-async function getRuntimeMappings(
-  esClient: ElasticsearchClient,
-  index: string,
-  filters: Condition[]
-): Promise<Record<string, { type: 'keyword' }>> {
-  const usedFields = [
-    ...new Set(filters.flatMap((filter) => getConditionFields(filter).map(({ name }) => name))),
-  ];
-  if (usedFields.length === 0) {
-    return {};
-  }
-
-  const fieldCaps = await esClient.fieldCaps({ index, fields: usedFields });
-  return Object.fromEntries(
-    usedFields
-      .filter((field) => !fieldCaps.fields[field])
-      .map((field) => [field, { type: 'keyword' as const }])
-  );
 }

@@ -11,7 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { flyoutProviders } from './flyout_provider';
-import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHILD_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
@@ -53,6 +53,7 @@ export const ChildLink: FC<ChildLinkProps> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value), [field, value]);
 
@@ -66,13 +67,12 @@ export const ChildLink: FC<ChildLinkProps> = ({
           children: flyoutContent,
         }),
         {
-          ...defaultToolsFlyoutProperties,
-          size: 's',
+          ...defaultDocumentFlyoutProperties,
           session: 'inherit',
         }
       );
     }
-  }, [overlays, services, store, history, flyoutContent]);
+  }, [defaultDocumentFlyoutProperties, overlays, services, store, history, flyoutContent]);
 
   if (!flyoutContent) {
     return <>{children}</>;
