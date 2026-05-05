@@ -26,7 +26,6 @@ describe('AlertProcessingKeyInsight', () => {
   };
 
   const defaultProps: React.ComponentProps<typeof AlertProcessingKeyInsight> = {
-    isLoading: false,
     valueMetrics: defaultValueMetrics,
   };
 

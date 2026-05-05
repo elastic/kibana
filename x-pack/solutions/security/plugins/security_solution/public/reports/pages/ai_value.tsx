@@ -13,7 +13,7 @@ import { ValueReportExporter } from '../components/ai_value/value_report_exporte
 import { EXPORT_REPORT } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
-import { AIValueMetrics } from '../components/ai_value';
+import { AIValueReport } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -151,7 +151,7 @@ const BaseComponent = () => {
                 exportPDFRef.current = exportPDF;
 
                 return (
-                  <AIValueMetrics
+                  <AIValueReport
                     from={from}
                     to={to}
                     setHasAttackDiscoveries={setHasAttackDiscoveries}

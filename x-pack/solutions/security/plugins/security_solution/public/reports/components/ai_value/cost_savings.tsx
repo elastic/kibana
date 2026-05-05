@@ -14,6 +14,7 @@ import { CostSavingsMetric } from './cost_savings_metric';
 import * as i18n from './translations';
 
 interface Props {
+  renderSample: boolean;
   minutesPerAlert: number;
   analystHourlyRate: number;
   from: string;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export const CostSavings: React.FC<Props> = ({
+  renderSample,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -46,6 +48,7 @@ export const CostSavings: React.FC<Props> = ({
       paddingSize="none"
     >
       <CostSavingsMetric
+        renderSample={renderSample}
         from={from}
         to={to}
         analystHourlyRate={analystHourlyRate}

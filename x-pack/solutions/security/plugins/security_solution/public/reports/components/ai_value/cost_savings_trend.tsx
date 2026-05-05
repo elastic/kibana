@@ -15,6 +15,8 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { Chart, Settings, Position, Tooltip, Axis, ScaleType, LineSeries } from '@elastic/charts';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import * as i18n from './translations';
@@ -27,29 +29,29 @@ import { VisualizationContextMenuActions } from '../../../common/components/visu
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
+import { formatDollars } from './metrics';
+import { SAMPLE_TREND_DATA } from './sample_data';
+import { useThemes } from '../../../common/components/charts/common';
+import { COST_SAVINGS_TITLE } from './translations';
 
-interface Props {
+type Props =
+  | { renderSample: true }
+  | {
+      renderSample: false;
+      from: string;
+      to: string;
+      minutesPerAlert: number;
+      analystHourlyRate: number;
+    };
+const ID = 'CostSavingsTrendQuery';
+
+const LiveTrendVisualization: React.FC<{
   from: string;
-  isLoading: boolean;
   to: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
-}
-const ID = 'CostSavingsTrendQuery';
-
-/**
- * Renders a Lens embeddable area chart visualization showing the estimated cost savings trend
- * over time, based on the number of AI filtered alerts, minutes saved per alert, and analyst hourly rate
- * for a given time range.
- */
-
-const CostSavingsTrendComponent: React.FC<Props> = ({
-  minutesPerAlert,
-  analystHourlyRate,
-  isLoading,
-  from,
-  to,
-}) => {
+  onLoad: (data: EmbeddableData) => void;
+}> = ({ from, to, minutesPerAlert, analystHourlyRate, onLoad }) => {
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const signalIndexName = useSignalIndexWithDefault();
   const getLensAttributes = useCallback<GetLensAttributes>(
@@ -62,6 +64,81 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       }),
     [analystHourlyRate, minutesPerAlert, signalIndexName]
   );
+
+  return (
+    <VisualizationEmbeddable
+      data-test-subj="embeddable-area-chart"
+      getLensAttributes={getLensAttributes}
+      timerange={timerange}
+      onLoad={onLoad}
+      id={`${ID}-area-embeddable`}
+      height={300}
+      inspectTitle={i18n.COST_SAVINGS_TREND}
+      scopeId={PageScope.alerts}
+      withActions={[
+        VisualizationContextMenuActions.addToExistingCase,
+        VisualizationContextMenuActions.addToNewCase,
+        VisualizationContextMenuActions.inspect,
+      ]}
+    />
+  );
+};
+
+const SampleTrendVisualization: React.FC = () => {
+  const { baseTheme, theme } = useThemes();
+
+  return (
+    <Chart size={{ height: 300 }}>
+      <Settings
+        theme={[
+          {
+            background: { color: 'transparent' },
+            legend: { spacingBuffer: 100 },
+          },
+          theme,
+        ]}
+        baseTheme={baseTheme}
+        locale={i18nLib.getLocale()}
+        showLegend={false}
+        legendPosition={Position.Right}
+      />
+      <Tooltip
+        headerFormatter={({ value }) => {
+          const d = new Date(value);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const hour = String(d.getHours()).padStart(2, '0');
+          const min = String(d.getMinutes()).padStart(2, '0');
+          return `${year}-${month}-${day} ${hour}:${min}`;
+        }}
+        type="follow"
+      />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        /* no title — matches axisTitlesVisibilitySettings.x: false */
+      />
+      <Axis
+        id="left"
+        position={Position.Left}
+        tickFormat={(v) => formatDollars(v)}
+        /* no title — matches axisTitlesVisibilitySettings.yLeft: false */
+      />
+      <LineSeries
+        id="cost-savings"
+        name={COST_SAVINGS_TITLE}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="timestamp"
+        yAccessors={['costSavings']}
+        data={SAMPLE_TREND_DATA}
+      />
+    </Chart>
+  );
+};
+
+const CostSavingsTrendComponent: React.FC<Props> = (props) => {
   const isSmall = useIsWithinMaxBreakpoint('s');
   const {
     euiTheme: { size },
@@ -74,10 +151,12 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       setLensResponse(data.tables);
     }
   }, []);
+  const liveFrom = !props.renderSample ? props.from : null;
+  const liveTo = !props.renderSample ? props.to : null;
   useEffect(() => {
     // when timerange changes, reset lens response
     setLensResponse(null);
-  }, [timerange]);
+  }, [liveFrom, liveTo]);
 
   return (
     <div
@@ -104,28 +183,28 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
         `}
       >
         <EuiFlexItem>
-          <VisualizationEmbeddable
-            data-test-subj="embeddable-area-chart"
-            getLensAttributes={getLensAttributes}
-            timerange={timerange}
-            onLoad={handleEmbeddableLoad}
-            id={`${ID}-area-embeddable`}
-            height={300}
-            inspectTitle={i18n.COST_SAVINGS_TREND}
-            scopeId={PageScope.alerts}
-            withActions={[
-              VisualizationContextMenuActions.addToExistingCase,
-              VisualizationContextMenuActions.addToNewCase,
-              VisualizationContextMenuActions.inspect,
-            ]}
-          />
+          {props.renderSample ? (
+            <SampleTrendVisualization />
+          ) : (
+            <LiveTrendVisualization
+              from={props.from}
+              to={props.to}
+              minutesPerAlert={props.minutesPerAlert}
+              analystHourlyRate={props.analystHourlyRate}
+              onLoad={handleEmbeddableLoad}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
             max-width: ${isSmall ? 'auto' : '600px'};
           `}
         >
-          <CostSavingsKeyInsight isLoading={isLoading} lensResponse={lensResponse} />
+          {props.renderSample ? (
+            <CostSavingsKeyInsight renderSample={true} />
+          ) : (
+            <CostSavingsKeyInsight renderSample={false} lensResponse={lensResponse} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

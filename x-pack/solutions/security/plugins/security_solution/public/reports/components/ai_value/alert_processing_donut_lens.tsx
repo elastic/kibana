@@ -5,29 +5,145 @@
  * 2.0.
  */
 
-import React, { useId } from 'react';
+import React, { useId, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import {
+  Chart,
+  Partition,
+  PartitionLayout,
+  Settings,
+  type Datum,
+  type PartialTheme,
+} from '@elastic/charts';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { TOTAL_ALERTS_PROCESSED } from './translations';
 import { PageScope } from '../../../data_view_manager/constants';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { DonutChartWrapper } from '../../../common/components/charts/donutchart';
+import { useThemes } from '../../../common/components/charts/common';
+import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
+import { SAMPLE_VALUE_METRICS } from './sample_data';
 
 const ChartSize = 250;
 const visualizationIdPrefix = 'aiValueAlertProcessingDonut';
-interface Props {
+
+const donutTheme: PartialTheme = {
+  chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
+  partition: {
+    idealFontSizeJump: 1.1,
+    outerSizeRatio: 1,
+    emptySizeRatio: 0.8,
+    circlePadding: 4,
+  },
+};
+
+type Props =
+  | { renderSample: true }
+  | {
+      renderSample: false;
+      attackAlertIds: string[];
+      from: string;
+      to: string;
+    };
+
+const LiveAlertProcessingDonut: React.FC<{
   attackAlertIds: string[];
   from: string;
   to: string;
-}
-export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to }) => {
+}> = ({ attackAlertIds, from, to }) => {
   const spaceId = useSpaceId();
-  // Lens embeddables (and our query store) key state by `id`; make it instance-unique to avoid stale/cross-instance rendering.
   const instanceId = useId();
   const visualizationId = `${visualizationIdPrefix}-${instanceId}`;
+
+  return (
+    <VisualizationEmbeddable
+      applyGlobalQueriesAndFilters={false}
+      getLensAttributes={(args) =>
+        getAlertProcessingDonutAttributes({
+          ...args,
+          attackAlertIds,
+          spaceId: spaceId ?? 'default',
+        })
+      }
+      height={ChartSize}
+      width={'100%'}
+      id={visualizationId}
+      isDonut={true}
+      donutTitleLabel={TOTAL_ALERTS_PROCESSED}
+      donutTextWrapperClassName={'donutText'}
+      scopeId={PageScope.alerts}
+      timerange={{ from, to }}
+      withActions={[
+        VisualizationContextMenuActions.addToExistingCase,
+        VisualizationContextMenuActions.addToNewCase,
+        VisualizationContextMenuActions.inspect,
+      ]}
+    />
+  );
+};
+
+const SampleAlertProcessingDonut: React.FC = () => {
+  const { baseTheme, theme } = useThemes();
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
+
+  const totalAlerts = SAMPLE_VALUE_METRICS.totalAlerts;
+  const data = useMemo(
+    () => [
+      { key: 'AI Filtered', value: SAMPLE_VALUE_METRICS.filteredAlerts },
+      {
+        key: 'Escalated',
+        value: SAMPLE_VALUE_METRICS.totalAlerts - SAMPLE_VALUE_METRICS.filteredAlerts,
+      },
+    ],
+    []
+  );
+  const fillColor = (dataName: string) =>
+    dataName === 'Escalated' ? colors.vis.euiColorVis9 : colors.vis.euiColorVis0;
+
+  return (
+    <DonutChartWrapper
+      isChartEmbeddablesEnabled={true}
+      dataExists={true}
+      title={
+        <>
+          <span className="donutTitleLabel">{TOTAL_ALERTS_PROCESSED}</span>
+          <ChartLabel count={totalAlerts} />
+        </>
+      }
+      donutTextWrapperClassName="donutText"
+    >
+      <Chart size={ChartSize}>
+        <Settings
+          theme={[donutTheme, { background: { color: 'transparent' } }, theme]}
+          baseTheme={baseTheme}
+          locale={i18nLib.getLocale()}
+        />
+        <Partition
+          id="sample-donut-chart"
+          data={data}
+          layout={PartitionLayout.sunburst}
+          valueAccessor={(d) => d.value}
+          layers={[
+            {
+              groupByRollup: (d: Datum) => d.key,
+              nodeLabel: (d) => `${d}`,
+              shape: { fillColor },
+            },
+          ]}
+        />
+      </Chart>
+    </DonutChartWrapper>
+  );
+};
+
+export const AlertProcessingDonut: React.FC<Props> = (props) => {
   const {
     euiTheme: { font },
   } = useEuiTheme();
@@ -63,29 +179,15 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         }
       `}
     >
-      <VisualizationEmbeddable
-        applyGlobalQueriesAndFilters={false}
-        getLensAttributes={(args) =>
-          getAlertProcessingDonutAttributes({
-            ...args,
-            attackAlertIds,
-            spaceId: spaceId ?? 'default',
-          })
-        }
-        height={ChartSize}
-        width={'100%'}
-        id={visualizationId}
-        isDonut={true}
-        donutTitleLabel={TOTAL_ALERTS_PROCESSED}
-        donutTextWrapperClassName={'donutText'}
-        scopeId={PageScope.alerts}
-        timerange={{ from, to }}
-        withActions={[
-          VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
-          VisualizationContextMenuActions.inspect,
-        ]}
-      />
+      {props.renderSample ? (
+        <SampleAlertProcessingDonut />
+      ) : (
+        <LiveAlertProcessingDonut
+          attackAlertIds={props.attackAlertIds}
+          from={props.from}
+          to={props.to}
+        />
+      )}
     </div>
   );
 };

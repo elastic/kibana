@@ -11,7 +11,7 @@ import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
 } from '@kbn/management-settings-ids';
-import { AIValueMetrics } from '.';
+import { AIValueReport } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { useValueMetrics } from '../../hooks/use_value_metrics';
 import { ExecutiveSummary } from './executive_summary';
@@ -80,7 +80,7 @@ const mockValueMetricsCompare = {
   costSavings: 12000,
 };
 
-describe('AIValueMetrics', () => {
+describe('AIValueReport', () => {
   const createMockKibanaServices = (overrides: Partial<StartServices> = {}) =>
     ({
       services: {
@@ -116,13 +116,13 @@ describe('AIValueMetrics', () => {
       valueMetricsCompare: mockValueMetricsCompare,
     });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(ExecutiveSummary).toHaveBeenCalledWith(
       expect.objectContaining({
         attackAlertIds: ['alert-1', 'alert-2'],
         analystHourlyRate: 50,
-        hasAttackDiscoveries: true,
+        renderSample: false,
         minutesPerAlert: 10,
         from: defaultProps.from,
         to: defaultProps.to,
@@ -162,7 +162,7 @@ describe('AIValueMetrics', () => {
   });
 
   it('handles hook calls and parameter passing correctly', () => {
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith({
       from: defaultProps.from,
@@ -185,7 +185,7 @@ describe('AIValueMetrics', () => {
       valueMetricsCompare: mockValueMetricsCompare,
     });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(false);
     expect(AlertProcessing).not.toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('AIValueMetrics', () => {
   });
 
   it('passes correct parameters to useValueMetrics hook', () => {
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith({
       from: defaultProps.from,
@@ -214,7 +214,7 @@ describe('AIValueMetrics', () => {
       },
     });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -246,7 +246,7 @@ describe('AIValueMetrics', () => {
     });
 
     it('returns an absolute time range for useValueMetrics', () => {
-      render(<AIValueMetrics {...defaultProps} />);
+      render(<AIValueReport {...defaultProps} />);
 
       expect(mockUseValueMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -263,7 +263,7 @@ describe('AIValueMetrics', () => {
       setReportInput: setReportInputMock,
     });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(setReportInputMock).toHaveBeenCalledWith({
       attackAlertIds: ['alert-1', 'alert-2'],
@@ -288,7 +288,7 @@ describe('AIValueMetrics', () => {
       })
     );
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith({
       from: defaultProps.from,

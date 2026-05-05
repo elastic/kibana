@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ThreatsDetectedMetric } from './threats_detected_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getThreatsDetectedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_metric';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
+import * as i18n from './translations';
 
 // Mock dependencies
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
@@ -29,6 +30,12 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn(),
 }));
 
+jest.mock('./sample_metric', () => ({
+  SampleMetric: jest.fn(({ title }: { title: string }) => (
+    <div data-test-subj="mock-sample-metric">{title}</div>
+  )),
+}));
+
 const mockGetThreatsDetectedMetricLensAttributes =
   getThreatsDetectedMetricLensAttributes as jest.MockedFunction<
     typeof getThreatsDetectedMetricLensAttributes
@@ -36,6 +43,7 @@ const mockGetThreatsDetectedMetricLensAttributes =
 const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
 
 const defaultProps = {
+  renderSample: false as const,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
 };
@@ -158,7 +166,13 @@ describe('ThreatsDetectedMetric', () => {
       to: '2023-01-02T00:00:00.000Z',
     };
 
-    render(<ThreatsDetectedMetric from={customTimeRange.from} to={customTimeRange.to} />);
+    render(
+      <ThreatsDetectedMetric
+        renderSample={false}
+        from={customTimeRange.from}
+        to={customTimeRange.to}
+      />
+    );
 
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -176,10 +190,22 @@ describe('ThreatsDetectedMetric', () => {
       initialCallCount
     );
     rerender(
-      <ThreatsDetectedMetric from="2023-02-01T00:00:00.000Z" to="2023-02-28T23:59:59.999Z" />
+      <ThreatsDetectedMetric
+        renderSample={false}
+        from="2023-02-01T00:00:00.000Z"
+        to="2023-02-28T23:59:59.999Z"
+      />
     );
     expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length).toBe(
       initialCallCount + 1
     );
+  });
+
+  describe('sample variant', () => {
+    it('renders the sample metric and skips the live Lens visualization', () => {
+      render(<ThreatsDetectedMetric renderSample={true} />);
+      expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+      expect(screen.getByText(i18n.THREATS_DETECTED)).toBeInTheDocument();
+    });
   });
 });

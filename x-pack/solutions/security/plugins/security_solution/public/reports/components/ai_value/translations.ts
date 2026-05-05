@@ -22,6 +22,13 @@ export const COST_SAVINGS_TREND = i18n.translate(
   }
 );
 
+export const COST_SAVINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costSavingsTitle',
+  {
+    defaultMessage: 'Cost Savings',
+  }
+);
+
 export const INSIGHTS_ERROR = i18n.translate(
   'xpack.securitySolution.reports.aiValue.insightsError',
   {
@@ -335,5 +342,41 @@ export const TOTAL_ALERTS_PROCESSED = i18n.translate(
   'xpack.securitySolution.reports.aiValue.totalAlertsProcessed',
   {
     defaultMessage: 'Total alerts processed',
+  }
+);
+
+export const SAMPLE_DATA_BADGE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.sampleDataBadge',
+  {
+    defaultMessage: 'Sample data',
+  }
+);
+
+export const WHAT_REPORT_WILL_LOOK_LIKE_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.whatReportWillLookLike',
+  {
+    defaultMessage: 'What your report will look like',
+  }
+);
+
+export const RUN_ATTACK_DISCOVERY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.runAttackDiscoveryText',
+  {
+    defaultMessage: 'Run Attack Discovery to unlock your report',
+  }
+);
+
+export const GET_STARTED_ATTACK_DISCOVERY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.getStartedAttackDiscoveryText',
+  {
+    defaultMessage:
+      "Value Reports shows how much time and money Elastic's AI SOC saved your team. It is powered by Attack discovery results, once you run first discovery, we'll populate your savings, time reclaimed and threat findings here.",
+  }
+);
+
+export const ATTACK_DISCOVERY_LINK = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.attackDiscoveryLink',
+  {
+    defaultMessage: 'Go to Attack discovery',
   }
 );

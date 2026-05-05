@@ -30,6 +30,7 @@ const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof 
 const mockFormatDollars = formatDollars as jest.MockedFunction<typeof formatDollars>;
 
 const defaultProps = {
+  renderSample: false as const,
   minutesPerAlert: 10,
   analystHourlyRate: 50,
   from: '2023-01-01T00:00:00.000Z',

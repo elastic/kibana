@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { CostSavingsMetric } from './cost_savings_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 import { useMetricAnimation } from '../../hooks/use_metric_animation';
+import * as i18n from './translations';
 
 // Mock VisualizationEmbeddable
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
@@ -30,10 +31,17 @@ jest.mock('../../hooks/use_metric_animation', () => ({
   useMetricAnimation: jest.fn(),
 }));
 
+jest.mock('./sample_metric', () => ({
+  SampleMetric: jest.fn(({ title }: { title: string }) => (
+    <div data-test-subj="mock-sample-metric">{title}</div>
+  )),
+}));
+
 const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 const useMetricAnimationMock = useMetricAnimation as jest.Mock;
 
 const defaultProps = {
+  renderSample: false as const,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
   minutesPerAlert: 10,
@@ -90,6 +98,19 @@ describe('CostSavingsMetric', () => {
 
     it('should not attempt to animate the component', () => {
       render(<CostSavingsMetric {...defaultProps} />);
+      expect(useMetricAnimationMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sample variant', () => {
+    it('renders the sample metric and skips the live Lens visualization', () => {
+      render(<CostSavingsMetric renderSample={true} />);
+      expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+      expect(screen.getByText(i18n.COST_SAVINGS_TITLE)).toBeInTheDocument();
+    });
+
+    it('does not call useMetricAnimation in sample variant', () => {
+      render(<CostSavingsMetric renderSample={true} />);
       expect(useMetricAnimationMock).not.toHaveBeenCalled();
     });
   });

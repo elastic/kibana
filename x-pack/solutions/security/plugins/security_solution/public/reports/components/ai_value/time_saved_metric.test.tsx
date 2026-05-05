@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TimeSavedMetric } from './time_saved_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import { PageScope } from '../../../data_view_manager/constants';
+import * as i18n from './translations';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
@@ -29,6 +30,12 @@ jest.mock('../../hooks/use_signal_index_with_default', () => ({
   useSignalIndexWithDefault: jest.fn(),
 }));
 
+jest.mock('./sample_metric', () => ({
+  SampleMetric: jest.fn(({ title }: { title: string }) => (
+    <div data-test-subj="mock-sample-metric">{title}</div>
+  )),
+}));
+
 const mockGetTimeSavedMetricLensAttributes =
   getTimeSavedMetricLensAttributes as jest.MockedFunction<typeof getTimeSavedMetricLensAttributes>;
 const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
@@ -36,6 +43,7 @@ const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFu
 >;
 
 const defaultProps = {
+  renderSample: false as const,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
   minutesPerAlert: 10,
@@ -273,5 +281,13 @@ describe('TimeSavedMetric', () => {
       }),
       {}
     );
+  });
+
+  describe('sample variant', () => {
+    it('renders the sample metric and skips the live Lens visualization', () => {
+      render(<TimeSavedMetric renderSample={true} />);
+      expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+      expect(screen.getByText(i18n.TIME_SAVED)).toBeInTheDocument();
+    });
   });
 });

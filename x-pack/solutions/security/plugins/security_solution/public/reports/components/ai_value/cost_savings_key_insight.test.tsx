@@ -76,7 +76,7 @@ const mockLensResponse = {
 } as unknown as VisualizationTablesWithMeta;
 
 const defaultProps = {
-  isLoading: false,
+  renderSample: false as const,
   lensResponse: mockLensResponse,
 };
 
@@ -260,7 +260,7 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('shows loading state when lensResponse is null', () => {
-    render(<CostSavingsKeyInsight isLoading={false} lensResponse={null} />, { wrapper });
+    render(<CostSavingsKeyInsight renderSample={false} lensResponse={null} />, { wrapper });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -299,7 +299,7 @@ describe('CostSavingsKeyInsight', () => {
       },
     };
 
-    rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={newLensResponse} />);
+    rerender(<CostSavingsKeyInsight renderSample={false} lensResponse={newLensResponse} />);
 
     await waitFor(() => {
       expect(mockChatComplete).toHaveBeenCalledTimes(2);
@@ -395,13 +395,13 @@ describe('CostSavingsKeyInsight', () => {
 
       mockUseAIValueExportContext.mockReturnValue({
         forwardedState: { insight: 'Test insight content' },
-        isInsightVerified: true,
+        isInsightVerified: false,
         shouldRegenerateInsight: false,
         setInsight: mockSetInsightInExportContext,
       });
 
       const { rerender } = render(
-        <CostSavingsKeyInsight isLoading={true} lensResponse={mockLensResponse} />,
+        <CostSavingsKeyInsight renderSample={false} lensResponse={mockLensResponse} />,
         { wrapper }
       );
 
@@ -412,8 +412,14 @@ describe('CostSavingsKeyInsight', () => {
       expect(container).toHaveAttribute('data-render-complete', 'false');
       expect(renderCompleteHandler).not.toHaveBeenCalled();
 
-      // Change props to isLoading = false to render the insight
-      rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={mockLensResponse} />);
+      // Verify the insight to render the markdown
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: { insight: 'Test insight content' },
+        isInsightVerified: true,
+        shouldRegenerateInsight: false,
+        setInsight: mockSetInsightInExportContext,
+      });
+      rerender(<CostSavingsKeyInsight renderSample={false} lensResponse={mockLensResponse} />);
 
       await waitFor(() => {
         expect(container).toHaveAttribute('data-render-complete', 'true');

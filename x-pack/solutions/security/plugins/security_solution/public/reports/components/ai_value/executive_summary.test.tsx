@@ -43,8 +43,7 @@ const defaultProps = {
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
   from: '2023-01-01T00:00:00Z',
   to: '2023-01-31T23:59:59Z',
-  hasAttackDiscoveries: true,
-  isLoading: false,
+  renderSample: false,
   valueMetrics: {
     costSavings: 1000,
     costSavingsCompare: 800,
@@ -83,8 +82,8 @@ describe('ExecutiveSummary', () => {
     expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
   });
 
-  it('renders no attacks message when hasAttackDiscoveries is false', () => {
-    render(<ExecutiveSummary {...defaultProps} hasAttackDiscoveries={false} />);
+  it('renders no attacks message when renderSample is true', () => {
+    render(<ExecutiveSummary {...defaultProps} renderSample={true} />);
     expect(screen.getByTestId('executiveSummaryNoAttacks').textContent).toMatch(
       /no attack discoveries/i
     );
