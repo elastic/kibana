@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup, CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import type { SourceMetadata } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 import { PostGenerateRequestBody } from '@kbn/discoveries-schemas';
 import type { PostGenerateResponse } from '@kbn/discoveries-schemas';
@@ -56,7 +57,7 @@ export const registerGenerateRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
       options: {

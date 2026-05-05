@@ -10,6 +10,7 @@ import {
   ATTACK_DISCOVERY_API_ACTION_ALL,
   ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
 } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EnableAttackDiscoveryScheduleRequestParams } from '@kbn/discoveries-schemas';
 import { reportScheduleAction } from '@kbn/discoveries/impl/lib/telemetry/report_schedule_action';
@@ -41,6 +42,7 @@ export const registerEnableScheduleRoute = (
           requiredPrivileges: [
             ATTACK_DISCOVERY_API_ACTION_ALL,
             ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
+            ALERTS_API_READ,
           ],
         },
       },

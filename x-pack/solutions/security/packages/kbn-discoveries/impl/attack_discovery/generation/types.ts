@@ -20,7 +20,6 @@ import type { AttackDiscoverySource, SourceMetadata } from '../persistence/event
 export type DefaultWorkflowKey =
   | 'custom_validation_example'
   | 'default_alert_retrieval'
-  | 'esql_example_alert_retrieval'
   | 'generation'
   | 'run_example'
   | 'validate';

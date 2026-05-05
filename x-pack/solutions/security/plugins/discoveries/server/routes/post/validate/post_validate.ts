@@ -10,6 +10,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PostValidateRequestBody } from '@kbn/discoveries-schemas';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import type { WorkflowInitializationService } from '../../../lib/workflow_initialization';
@@ -38,7 +39,7 @@ export const registerValidateRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })

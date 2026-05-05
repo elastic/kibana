@@ -18,7 +18,6 @@ import { registerFindSchedulesRoute } from './get/schedules/find_schedules';
 import { registerGetScheduleRoute } from './get/schedules/get_schedule';
 import { registerGetPipelineDataRoute } from './get/pipeline_data/get_pipeline_data';
 import type { WorkflowInitializationService } from '../lib/workflow_initialization';
-import { registerGenerateWorkflowRoute } from './post/generate_workflow/post_generate_workflow';
 import { registerCreateScheduleRoute } from './post/schedules/create_schedule';
 import { registerDisableScheduleRoute } from './post/schedules/disable_schedule';
 import { registerEnableScheduleRoute } from './post/schedules/enable_schedule';
@@ -66,11 +65,6 @@ export const registerRoutes = (
   });
   registerGetPipelineDataRoute(router, logger, {
     getEventLogIndex,
-    getStartServices,
-    workflowInitService,
-    workflowsManagementApi,
-  });
-  registerGenerateWorkflowRoute(router, logger, {
     getStartServices,
     workflowInitService,
     workflowsManagementApi,
