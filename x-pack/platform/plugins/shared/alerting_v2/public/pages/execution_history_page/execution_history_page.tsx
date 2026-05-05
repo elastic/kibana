@@ -7,10 +7,14 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
+  EuiBadge,
   EuiBasicTable,
+  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiPageHeader,
   EuiSpacer,
   EuiTab,
@@ -20,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchExecutionHistory } from '../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
@@ -29,7 +34,9 @@ const RULES_TAB_ID = 'rules';
 
 type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 
-const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
+const buildColumns = (
+  onPolicyClick: (policyId: string) => void
+): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
   {
     field: '@timestamp',
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.timestamp', {
@@ -40,7 +47,11 @@ const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
       defaultMessage: 'Policy',
     }),
-    render: (item: PolicyExecutionHistoryItem) => item.policy.name ?? item.policy.id,
+    render: (item: PolicyExecutionHistoryItem) => (
+      <EuiLink onClick={() => onPolicyClick(item.policy.id)}>
+        {item.policy.name ?? item.policy.id}
+      </EuiLink>
+    ),
   },
   {
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.rule', {
@@ -71,8 +82,18 @@ const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.workflows', {
       defaultMessage: 'Workflows',
     }),
-    render: (workflows: PolicyExecutionHistoryItem['workflows']) =>
-      workflows.map((w) => w.name ?? w.id).join(', '),
+    render: (workflows: PolicyExecutionHistoryItem['workflows']) => {
+      if (workflows.length === 0) return null;
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {workflows.map((w) => (
+            <EuiFlexItem key={w.id} grow={false}>
+              <EuiBadge color="hollow">{w.name ?? w.id}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
+    },
   },
 ];
 
@@ -120,6 +141,7 @@ export const ExecutionHistoryPage = () => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(POLICIES_TAB_ID);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
@@ -127,6 +149,7 @@ export const ExecutionHistoryPage = () => {
   });
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
+  const columns = buildColumns(setPolicyToViewId);
 
   const onTableChange = ({
     page: tablePage,
@@ -218,6 +241,12 @@ export const ExecutionHistoryPage = () => {
         )
       ) : (
         rulesPlaceholder
+      )}
+      {policyToViewId && (
+        <ActionPolicyDetailsFlyoutContainer
+          policyId={policyToViewId}
+          onClose={() => setPolicyToViewId(null)}
+        />
       )}
     </>
   );
