@@ -97,14 +97,29 @@ function computeDelayMs({
   return base + Math.floor(Math.random() * extra);
 }
 
+// 413 Payload Too Large is a client-side error: retrying with the same body
+// will deterministically fail. Keep it terminal so it surfaces immediately
+// rather than burning attempts and obscuring the real cluster regression.
+const TERMINAL_CLIENT_STATUSES = new Set<number>([413]);
+const RETRYABLE_SERVER_STATUSES = new Set<number>([500, 502, 503, 504]);
+
 function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   const status = getStatusCode(error);
   const message = toErrorMessage(error);
   const retryAfterMs = parseRetryAfterMsFromMessage(message);
 
+  if (status !== undefined && TERMINAL_CLIENT_STATUSES.has(status)) {
+    return { retry: false };
+  }
+
   // Primary target: rate limiting
   if (status === 429) return { retry: true, retryAfterMs };
   if (/status code 429|too many requests|ratelimit|rate limit/i.test(message)) {
+    return { retry: true, retryAfterMs };
+  }
+
+  // Transient server-side failures (idempotent endpoints can safely retry).
+  if (status !== undefined && RETRYABLE_SERVER_STATUSES.has(status)) {
     return { retry: true, retryAfterMs };
   }
 

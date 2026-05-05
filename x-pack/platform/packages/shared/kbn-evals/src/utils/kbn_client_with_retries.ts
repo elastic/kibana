@@ -44,6 +44,16 @@ function parseRetryAfterMsFromMessage(message: string): number | undefined {
   return seconds * 1000;
 }
 
+function getStatusCode(error: any): number | undefined {
+  return (
+    error?.statusCode ??
+    error?.status ??
+    error?.response?.status ??
+    error?.meta?.status ??
+    undefined
+  );
+}
+
 function isSseRateLimitPayload(payload: unknown): boolean {
   if (typeof payload !== 'string') return false;
   // Only treat as retryable if it's clearly an SSE error plus rate limit signals.
@@ -67,26 +77,40 @@ export function wrapKbnClientWithRetries({
   const maxDelayMs = Number(process.env.KBN_EVALS_KBNCLIENT_MAX_DELAY_MS ?? '60000') || 60000;
 
   const wrappedRequest: KbnClient['request'] = async (params: any) => {
+    const label = `kbnClient.request ${params?.method ?? 'GET'} ${params?.path ?? ''}`.trim();
+
     return withRetry(
       async () => {
-        const response = await (kbnClient.request as any)(params);
+        try {
+          const response = await (kbnClient.request as any)(params);
 
-        // Some endpoints return SSE text with an embedded error instead of a non-2xx status.
-        // When that error is clearly a rate-limit signal, treat it as retryable.
-        if (isSseRateLimitPayload(response?.data)) {
-          throw new Error(
-            `Rate limited (SSE error payload): ${String(response.data).slice(0, 2000)}`
-          );
+          // Some endpoints return SSE text with an embedded error instead of a non-2xx status.
+          // When that error is clearly a rate-limit signal, treat it as retryable.
+          if (isSseRateLimitPayload(response?.data)) {
+            throw new Error(
+              `Rate limited (SSE error payload): ${String(response.data).slice(0, 2000)}`
+            );
+          }
+
+          return response;
+        } catch (error) {
+          // 413 is terminal — surface it loudly so cluster regressions don't get
+          // buried in a generic retry warning. Re-throw so withRetry sees it.
+          if (getStatusCode(error) === 413) {
+            log.error(
+              `${label} failed with HTTP 413 Payload Too Large — request body exceeds the cluster limit. ` +
+                `This is treated as terminal (no retry). Error: ${toErrorMessage(error)}`
+            );
+          }
+          throw error;
         }
-
-        return response;
       },
       {
-        label: `kbnClient.request ${params?.method ?? 'GET'} ${params?.path ?? ''}`.trim(),
+        label,
         maxAttempts,
         minDelayMs,
         maxDelayMs,
-        onRetry: ({ attempt, maxAttempts: total, delayMs, error, label }) => {
+        onRetry: ({ attempt, maxAttempts: total, delayMs, error }) => {
           const message = toErrorMessage(error);
           const headers = (error as any)?.response?.headers ?? (error as any)?.headers;
           const retryAfterMs =
