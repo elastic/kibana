@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/i18n-react'
   - '@kbn/charts-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/data-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/core-doc-links-browser'

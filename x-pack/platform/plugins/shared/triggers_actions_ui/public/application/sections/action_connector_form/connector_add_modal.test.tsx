@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
@@ -176,6 +176,153 @@ describe('connector_add_modal', () => {
       );
 
       expect(await screen.findByTestId('betaBadge')).toBeInTheDocument();
+    });
+  });
+
+  describe('async spec loading', () => {
+    const specActionType: ActionType = createMockConnectorType({
+      id: 'spec-modal-connector',
+      name: 'Spec modal connector',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['workflows'],
+      source: 'spec',
+      description: 'Spec modal description',
+    });
+
+    const mockSpecResponse = {
+      metadata: {
+        id: 'spec-modal-connector',
+        displayName: 'Spec modal connector',
+        description: 'Connect to Test API',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['workflows'],
+      },
+      schema: {
+        type: 'object',
+        properties: {
+          config: {
+            type: 'object',
+            properties: {},
+          },
+          secrets: {
+            anyOf: [
+              {
+                type: 'object',
+                properties: {
+                  authType: { const: 'api_key_header', type: 'string' },
+                  apiKey: {
+                    type: 'string',
+                    minLength: 1,
+                    label: 'API key',
+                    sensitive: true,
+                  },
+                },
+                required: ['authType', 'apiKey'],
+                label: 'API key header authentication',
+              },
+            ],
+            label: 'Authentication',
+          },
+        },
+        required: ['config', 'secrets'],
+      },
+    };
+
+    beforeEach(() => {
+      appMockRenderer.queryClient.clear();
+      loadActionTypes.mockResolvedValue([specActionType]);
+      actionTypeRegistry.has.mockReturnValue(false);
+      actionTypeRegistry.get.mockImplementation(() => {
+        throw new Error('Unexpected registry get');
+      });
+      const { http } = useKibanaMock().services;
+      http.get = jest.fn().mockResolvedValue(mockSpecResponse);
+      useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+        if (key === 'workflows:ui:enabled') {
+          return true;
+        }
+        return undefined;
+      });
+    });
+
+    it('fetches spec from the API for a spec-based connector', async () => {
+      appMockRenderer.render(
+        <ConnectorAddModal
+          onClose={() => {}}
+          actionType={specActionType}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await waitFor(() => {
+        expect(useKibanaMock().services.http.get).toHaveBeenCalledWith(
+          '/internal/actions/connector_types/spec-modal-connector/spec',
+          expect.objectContaining({ signal: expect.any(AbortSignal) })
+        );
+      });
+
+      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+    });
+
+    it('shows loading state while the spec is loading', async () => {
+      let resolveSpec: (value: typeof mockSpecResponse) => void;
+      const specPromise = new Promise<typeof mockSpecResponse>((resolve) => {
+        resolveSpec = resolve;
+      });
+      const { http } = useKibanaMock().services;
+      http.get = jest.fn().mockReturnValue(specPromise);
+
+      appMockRenderer.render(
+        <ConnectorAddModal
+          onClose={() => {}}
+          actionType={specActionType}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await waitFor(() => {
+        expect(http.get).toHaveBeenCalled();
+      });
+
+      expect(await screen.findByText('Loading connector types…')).toBeInTheDocument();
+
+      resolveSpec!(mockSpecResponse);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+      });
+    });
+
+    it('disables the save button when spec loading fails', async () => {
+      const { http } = useKibanaMock().services;
+      http.get = jest.fn().mockRejectedValue(new Error('spec failed'));
+
+      appMockRenderer.render(
+        <ConnectorAddModal
+          onClose={() => {}}
+          actionType={specActionType}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('connector-spec-load-error')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('saveActionButtonModal')).toBeDisabled();
+    });
+
+    it('uses default modal width when the action type is not in the registry', async () => {
+      appMockRenderer.render(
+        <ConnectorAddModal
+          onClose={() => {}}
+          actionType={specActionType}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      const modal = await screen.findByTestId('connectorAddModal');
+      expect(modal).toHaveStyle({ width: '600px' });
     });
   });
 });

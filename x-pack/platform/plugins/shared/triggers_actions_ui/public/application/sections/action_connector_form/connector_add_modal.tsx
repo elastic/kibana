@@ -12,6 +12,7 @@ import {
   EuiModal,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
@@ -27,6 +28,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import type {
@@ -59,6 +61,7 @@ const ConnectorAddModal = ({
   const {
     application: { capabilities },
     http,
+    uiSettings,
     notifications: { toasts },
   } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType>(tempActionType);
@@ -77,15 +80,27 @@ const ConnectorAddModal = ({
   });
 
   const canSave = hasSaveActionsCapability(capabilities);
-  const actionTypeModel = actionTypeRegistry.get(actionType.id);
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
+  } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
     ? (actionTypeModel?.subtype ?? [])
         .filter((item) => allActionTypes?.[item.id]?.enabledInConfig)
-        .map((subtypeAction) => ({
-          ...actionTypeRegistry.get(subtypeAction.id),
-          name: subtypeAction.name,
-        }))
+        .flatMap((subtypeAction) => {
+          if (!actionTypeRegistry.has(subtypeAction.id)) {
+            return [];
+          }
+          return [
+            {
+              ...actionTypeRegistry.get(subtypeAction.id),
+              name: subtypeAction.name,
+            },
+          ];
+        })
     : [];
 
   const groupActionButtons =
@@ -142,6 +157,9 @@ const ConnectorAddModal = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
+  const registeredActionTypeModel = actionTypeRegistry.has(actionType.id)
+    ? actionTypeRegistry.get(actionType.id)
+    : undefined;
 
   const validateAndCreateConnector = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
@@ -217,7 +235,6 @@ const ConnectorAddModal = ({
       try {
         setLoadingActionTypes(true);
         const availableActionTypes = await loadActionTypes({ http });
-        setLoadingActionTypes(false);
 
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
@@ -233,6 +250,8 @@ const ConnectorAddModal = ({
             ),
           });
         }
+      } finally {
+        setLoadingActionTypes(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -245,7 +264,7 @@ const ConnectorAddModal = ({
       className="actConnectorModal"
       css={css`
         z-index: 9000;
-        width: ${actionTypeRegistry.get(actionType.id).modalWidth};
+        width: ${registeredActionTypeModel?.modalWidth ?? 600}px;
         overflow-y: auto;
       `}
       data-test-subj="connectorAddModal"
@@ -288,38 +307,83 @@ const ConnectorAddModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {loadingActionTypes ? (
+          {loadingActionTypes || isLoadingActionTypeModel ? (
             <SectionLoading>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.connectorAddModal.loadingConnectorTypesDescription"
-                defaultMessage="Loading connector types…"
+                defaultMessage="Loading connector…"
               />
             </SectionLoading>
           ) : (
             <>
-              {groupActionTypeModel && (
+              {actionTypeModelError && (
                 <>
-                  <EuiButtonGroup
-                    isFullWidth
-                    buttonSize="m"
-                    color="primary"
-                    legend=""
-                    options={groupActionButtons}
-                    idSelected={actionType.id}
-                    onChange={onChangeGroupAction}
-                    data-test-subj="slackTypeChangeButton"
-                  />
-                  <EuiSpacer size="xs" />
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="connector-spec-load-error"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                      {
+                        defaultMessage: 'Failed to load connector configuration',
+                      }
+                    )}
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
+                        {
+                          defaultMessage:
+                            'There was an error loading the connector configuration. Check your connection and try again.',
+                        }
+                      )}
+                    </p>
+                    <EuiSpacer size="s" />
+                    <EuiButton
+                      data-test-subj="connector-spec-load-retry"
+                      onClick={() => refetchConnectorSpec()}
+                    >
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorRetry',
+                        { defaultMessage: 'Retry' }
+                      )}
+                    </EuiButton>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
                 </>
               )}
-              <ConnectorForm
-                actionTypeModel={actionTypeModel}
-                connector={initialConnector}
-                isEdit={false}
-                onChange={setFormState}
-                setResetForm={setResetForm}
-              />
-              {preSubmitValidationErrorMessage}
+              {!actionTypeModelError && (
+                <>
+                  {groupActionTypeModel && (
+                    <>
+                      <EuiButtonGroup
+                        isFullWidth
+                        buttonSize="m"
+                        color="primary"
+                        legend={i18n.translate(
+                          'xpack.triggersActionsUI.sections.connectorAddModal.subtypeGroupLegend',
+                          { defaultMessage: 'Connector subtype' }
+                        )}
+                        options={groupActionButtons}
+                        idSelected={actionType.id}
+                        onChange={onChangeGroupAction}
+                        data-test-subj="slackTypeChangeButton"
+                      />
+                      <EuiSpacer size="xs" />
+                    </>
+                  )}
+                  <ConnectorForm
+                    actionTypeModel={actionTypeModel}
+                    connector={initialConnector}
+                    isEdit={false}
+                    onChange={setFormState}
+                    setResetForm={setResetForm}
+                  />
+                  {preSubmitValidationErrorMessage}
+                </>
+              )}
             </>
           )}
         </EuiModalBody>
@@ -340,7 +404,7 @@ const ConnectorAddModal = ({
               type="submit"
               iconType="check"
               isLoading={isSaving}
-              disabled={hasErrors}
+              disabled={hasErrors || isLoadingActionTypeModel || !!actionTypeModelError}
               onClick={onSubmit}
             >
               <FormattedMessage

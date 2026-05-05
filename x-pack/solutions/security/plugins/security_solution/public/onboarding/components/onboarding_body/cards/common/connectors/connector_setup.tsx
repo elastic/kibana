@@ -57,7 +57,11 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
                         <EuiIcon
                           size="xxl"
                           color="text"
-                          type={actionTypeRegistry.get(actionType.id).iconClass}
+                          type={
+                            actionTypeRegistry.has(actionType.id)
+                              ? actionTypeRegistry.get(actionType.id).iconClass
+                              : 'plugs'
+                          }
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

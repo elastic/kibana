@@ -30,6 +30,7 @@ import { isEmpty, partition, some } from 'lodash';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type {
   IErrorObject,
@@ -85,7 +86,7 @@ export const SystemActionTypeForm = ({
   ruleTypeId,
   disableErrorMessages,
 }: SystemActionTypeFormProps) => {
-  const { http } = useKibana().services;
+  const { http, uiSettings } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
@@ -120,6 +121,9 @@ export const SystemActionTypeForm = ({
   const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, true);
 
   const getDefaultParams = useCallback(() => {
+    if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
+      return undefined;
+    }
     const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
 
     return connectorType.defaultActionParams;
@@ -177,19 +181,28 @@ export const SystemActionTypeForm = ({
         setActionParamsErrors({ errors: {} });
         return;
       }
-      const res: { errors: IErrorObject } = await actionTypeRegistry
-        .get(actionItem.actionTypeId)
-        ?.validateParams(
-          actionItem.params,
-          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
-        );
+      const res: { errors: IErrorObject } = actionTypeRegistry.has(actionItem.actionTypeId)
+        ? await actionTypeRegistry
+            .get(actionItem.actionTypeId)
+            .validateParams(
+              actionItem.params,
+              actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+            )
+        : { errors: {} };
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem, disableErrorMessages, actionConnector]);
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
-  if (!actionTypeRegistered) return null;
+  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
+    useActionTypeModel({
+      actionTypeRegistry,
+      actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+      http,
+      uiSettings,
+    });
+
+  if (isLoadingActionTypeModel || !actionTypeRegistered) return null;
 
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
