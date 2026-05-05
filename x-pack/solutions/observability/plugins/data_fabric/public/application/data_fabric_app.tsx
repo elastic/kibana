@@ -14,7 +14,6 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FabricNode, DestinationNodeData, SourceNodeData } from './mock_data';
@@ -60,7 +59,9 @@ const bodyStyles = css`
 
 const headerStyles = css`
   flex-shrink: 0;
-  padding: 16px 24px 0;
+  padding: 16px 24px 12px;
+  border-bottom: 1px solid;
+  border-bottom-color: var(--euiColorBorderBaseSubdued, #d3dae6);
 `;
 
 const contentStyles = css`
@@ -143,7 +144,6 @@ export const DataFabricApp = () => {
           </EuiText>
           <EuiSpacer size="s" />
           <SummaryBar stats={SUMMARY_STATS} />
-          <EuiHorizontalRule margin="s" />
         </div>
 
         <EuiFlexGroup gutterSize="none" css={contentStyles} responsive={false}>
