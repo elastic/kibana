@@ -19,6 +19,8 @@ export interface DownloadSourceBase {
   host: string;
   is_default: boolean;
   proxy_id?: string | null;
+  security_artifacts_proxy_id?: string | null;
+  security_artifacts_url?: string | null;
   ssl?: {
     certificate_authorities?: string[];
     certificate?: string;

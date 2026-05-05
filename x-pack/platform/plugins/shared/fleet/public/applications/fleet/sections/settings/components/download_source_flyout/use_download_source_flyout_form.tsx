@@ -49,6 +49,8 @@ export interface DownloadSourceFormInputsType {
   apiKeyInput: ReturnType<typeof useInput>;
   apiKeySecretInput: ReturnType<typeof useSecretInput>;
   headersInput: ReturnType<typeof useKeyValueInput>;
+  securityArtifactsProxyIdInput: ReturnType<typeof useInput>;
+  securityArtifactsUrlInput: ReturnType<typeof useInput>;
 }
 
 function getInitialAuthType(downloadSource?: DownloadSource): AuthType {
@@ -140,6 +142,17 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     isEditDisabled
   );
 
+  const securityArtifactsProxyIdInput = useInput(
+    downloadSource?.security_artifacts_proxy_id ?? '',
+    () => undefined,
+    isEditDisabled
+  );
+  const securityArtifactsUrlInput = useInput(
+    downloadSource?.security_artifacts_url ?? '',
+    validateOptionalUrl,
+    isEditDisabled
+  );
+
   const inputs = {
     nameInput,
     hostInput,
@@ -156,6 +169,8 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     apiKeyInput,
     apiKeySecretInput,
     headersInput,
+    securityArtifactsProxyIdInput,
+    securityArtifactsUrlInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -196,6 +211,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const apiKeyValid = apiKeyInput.validate();
     const apiKeySecretValid = apiKeySecretInput.validate();
     const headersValid = headersInput.validate();
+    const securityArtifactsUrlValid = securityArtifactsUrlInput.validate();
 
     // Validate auth credentials based on selected auth type
     const authType = authTypeInput.value as AuthType;
@@ -250,7 +266,8 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       apiKeyValid &&
       apiKeySecretValid &&
       headersValid &&
-      authValid
+      authValid &&
+      securityArtifactsUrlValid
     );
   }, [
     nameInput,
@@ -266,6 +283,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     apiKeySecretInput,
     headersInput,
     authTypeInput.value,
+    securityArtifactsUrlInput,
   ]);
 
   const submit = useCallback(async () => {
@@ -328,6 +346,8 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
         proxy_id: proxyIdInput.value || null,
+        security_artifacts_proxy_id: securityArtifactsProxyIdInput.value || null,
+        security_artifacts_url: securityArtifactsUrlInput.value.trim() || null,
         ssl: {
           certificate: sslCertificateInput.value,
           key: sslKeyInput.value || undefined,
@@ -384,6 +404,8 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     apiKeyInput.value,
     apiKeySecretInput.value,
     headersInput.value,
+    securityArtifactsProxyIdInput.value,
+    securityArtifactsUrlInput.value,
     validate,
   ]);
 
@@ -415,6 +437,24 @@ function validateName(value: string) {
     return [
       i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.nameIsRequiredErrorMessage', {
         defaultMessage: 'Name is required',
+      }),
+    ];
+  }
+}
+
+function validateOptionalUrl(value: string) {
+  if (!value) {
+    return;
+  }
+  try {
+    const urlParsed = new URL(value);
+    if (!['http:', 'https:'].includes(urlParsed.protocol)) {
+      throw new Error('Invalid protocol');
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.invalidUrlError', {
+        defaultMessage: 'Invalid URL',
       }),
     ];
   }

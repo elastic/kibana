@@ -86,6 +86,12 @@ const EnrollmentSettingsDownloadSourceSchema = schema.maybe(
     host: schema.uri({ scheme: ['http', 'https'] }),
     is_default: schema.boolean(),
     proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    security_artifacts_proxy_id: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string()])
+    ),
+    security_artifacts_url: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.uri({ scheme: ['http', 'https'] })])
+    ),
     ssl: schema.maybe(
       schema.object({
         certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),

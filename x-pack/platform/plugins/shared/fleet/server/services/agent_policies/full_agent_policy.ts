@@ -113,6 +113,7 @@ export async function getFullAgentPolicy(
     monitoringOutput,
     downloadSource,
     downloadSourceProxy,
+    securityArtifactsProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
@@ -194,6 +195,36 @@ export async function getFullAgentPolicy(
               ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
               : {}),
           };
+        }
+      }
+      if (input.type === 'endpoint') {
+        const artifactOverrides: Record<string, string> = {};
+        if (securityArtifactsProxy) {
+          artifactOverrides.proxy_url = securityArtifactsProxy.url;
+        }
+        if (downloadSource.security_artifacts_url) {
+          artifactOverrides.base_url = downloadSource.security_artifacts_url;
+        }
+        if (Object.keys(artifactOverrides).length > 0) {
+          const policy =
+            ((input as Record<string, unknown>).policy as Record<string, unknown>) ?? {};
+          for (const os of ['windows', 'mac', 'linux']) {
+            const osPolicy = (policy[os] as Record<string, unknown>) ?? {};
+            const advanced = (osPolicy.advanced as Record<string, unknown>) ?? {};
+            const artifacts = (advanced.artifacts as Record<string, unknown>) ?? {};
+            const global = (artifacts.global as Record<string, unknown>) ?? {};
+            policy[os] = {
+              ...osPolicy,
+              advanced: {
+                ...advanced,
+                artifacts: {
+                  ...artifacts,
+                  global: { ...global, ...artifactOverrides },
+                },
+              },
+            };
+          }
+          input = { ...input, policy };
         }
       }
       return input;

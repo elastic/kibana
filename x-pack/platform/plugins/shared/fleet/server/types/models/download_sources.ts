@@ -30,6 +30,27 @@ const DownloadSourceBaseSchema = {
       }),
     ])
   ),
+  security_artifacts_proxy_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.string({
+        meta: {
+          description: 'The ID of the proxy to use for Elastic Defend security artifact downloads.',
+        },
+      }),
+    ])
+  ),
+  security_artifacts_url: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.uri({
+        scheme: ['http', 'https'],
+        meta: {
+          description: 'The base URL for Elastic Defend security artifact downloads.',
+        },
+      }),
+    ])
+  ),
   ssl: schema.maybe(
     schema.object({
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),

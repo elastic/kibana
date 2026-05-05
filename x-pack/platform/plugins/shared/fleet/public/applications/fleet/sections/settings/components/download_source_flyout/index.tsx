@@ -8,6 +8,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiAccordion,
   EuiComboBox,
   EuiFlyout,
   EuiFlyoutBody,
@@ -24,6 +25,7 @@ import {
   EuiLink,
   EuiSwitch,
   EuiSpacer,
+  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -285,6 +287,102 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
           <EuiSpacer size="xs" />
           <ProxyWarning />
           <EuiSpacer size="m" />
+          <SSLFormSection
+            inputs={inputs}
+            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret.sslKey}
+            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            type="download_source"
+          />
+          <EuiAccordion
+            id="elasticDefendSettings"
+            buttonContent={
+              <>
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editDownloadSourcesFlyout.elasticDefendSectionTitle"
+                      defaultMessage="Elastic Defend"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editDownloadSourcesFlyout.elasticDefendSectionDescription"
+                    defaultMessage="Configure security artifact downloads URL and proxy"
+                  />
+                </EuiText>
+              </>
+            }
+            data-test-subj="editDownloadSourcesFlyout.elasticDefendAccordion"
+          >
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editDownloadSourcesFlyout.securityArtifactsUrlLabel"
+                  defaultMessage="Security artifacts URL"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editDownloadSourcesFlyout.securityArtifactsUrlDescription"
+                  defaultMessage="Configure the URL used for Elastic Defend security artifact downloads."
+                />
+              }
+              {...inputs.securityArtifactsUrlInput.formRowProps}
+            >
+              <EuiFieldText
+                data-test-subj="editDownloadSourcesFlyout.securityArtifactsUrlInput"
+                fullWidth
+                {...inputs.securityArtifactsUrlInput.props}
+                placeholder="https://artifacts.security.elastic.co"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editDownloadSourcesFlyout.securityArtifactsProxyIdLabel"
+                  defaultMessage="Security artifacts proxy"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editDownloadSourcesFlyout.securityArtifactsProxyIdDescription"
+                  defaultMessage="Configure the proxy used for Elastic Defend security artifact downloads. Proxy headers and proxy TLS options are not supported."
+                />
+              }
+            >
+              <EuiComboBox
+                fullWidth
+                data-test-subj="editDownloadSourcesFlyout.securityArtifactsProxyIdInput"
+                {...inputs.securityArtifactsProxyIdInput.props}
+                onChange={(options) =>
+                  inputs.securityArtifactsProxyIdInput.setValue(options?.[0]?.value ?? '')
+                }
+                selectedOptions={
+                  inputs.securityArtifactsProxyIdInput.value !== ''
+                    ? proxiesOptions.filter(
+                        (option) => option.value === inputs.securityArtifactsProxyIdInput.value
+                      )
+                    : []
+                }
+                options={proxiesOptions}
+                singleSelection={{ asPlainText: true }}
+                isDisabled={inputs.securityArtifactsProxyIdInput.props.disabled}
+                isClearable={true}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editDownloadSourcesFlyout.securityArtifactsProxyIdPlaceholder',
+                  {
+                    defaultMessage: 'Select proxy',
+                  }
+                )}
+              />
+            </EuiFormRow>
+          </EuiAccordion>
+          <EuiSpacer size="m" />
           <EuiFormRow fullWidth {...inputs.defaultDownloadSourceInput.formRowProps}>
             <EuiSwitch
               data-test-subj="editDownloadSourcesFlyout.isDefaultSwitch"
@@ -297,14 +395,6 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               }
             />
           </EuiFormRow>
-          <EuiSpacer size="m" />
-          <SSLFormSection
-            inputs={inputs}
-            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
-            isConvertedToSecret={isConvertedToSecret.sslKey}
-            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-            type="download_source"
-          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -512,7 +512,7 @@ class DownloadSourceService {
   public async listAllForProxyId(proxyId: string) {
     const downloadSources = await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-      searchFields: ['proxy_id'],
+      searchFields: ['proxy_id', 'security_artifacts_proxy_id'],
       search: proxyId,
       perPage: SO_SEARCH_LIMIT,
     });

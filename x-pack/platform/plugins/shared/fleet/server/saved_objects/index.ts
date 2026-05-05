@@ -1583,6 +1583,7 @@ export const getSavedObjectTypes = (
           is_default: { type: 'boolean' },
           host: { type: 'keyword' },
           proxy_id: { type: 'keyword' },
+          security_artifacts_proxy_id: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1591,6 +1592,16 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {},
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                security_artifacts_proxy_id: { type: 'keyword' },
+              },
             },
           ],
         },

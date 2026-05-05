@@ -1768,6 +1768,173 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  describe('Elastic Defend security artifacts injection', () => {
+    it('should inject artifacts.global.proxy_url and base_url into endpoint inputs when configured', async () => {
+      const endpointPackageInfo: PackageInfo = {
+        name: 'endpoint',
+        version: '1.0.0',
+        type: 'integration',
+        policy_templates: [],
+      } as any;
+
+      mockedGetPackageInfo.mockResolvedValue(endpointPackageInfo);
+
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'ds-with-artifacts',
+          is_default: true,
+          name: 'DS with artifacts',
+          host: 'http://default-registry.co',
+          security_artifacts_url: 'https://artifacts.security.elastic.co',
+        },
+        downloadSourceProxy: undefined,
+        securityArtifactsProxy: {
+          id: 'proxy-1',
+          name: 'Security Proxy',
+          url: 'https://security-proxy.example.com:8080',
+          is_preconfigured: false,
+        },
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'endpoint-policy-1',
+            name: 'Elastic Defend',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'endpoint', version: '1.0.0', title: 'Elastic Defend' },
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: {
+                  policy: {
+                    value: {
+                      windows: {},
+                      mac: {},
+                      linux: {},
+                    },
+                  },
+                },
+              },
+            ],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: 'agent-policy',
+            policy_ids: ['agent-policy'],
+          },
+        ] as any,
+      });
+
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      const endpointInput = agentPolicy?.inputs.find((i) => i.type === 'endpoint');
+      expect(endpointInput).toBeDefined();
+
+      const policy = (endpointInput as any)?.policy;
+      for (const os of ['windows', 'mac', 'linux']) {
+        expect(policy[os].advanced.artifacts.global).toEqual({
+          proxy_url: 'https://security-proxy.example.com:8080',
+          base_url: 'https://artifacts.security.elastic.co',
+        });
+      }
+    });
+
+    it('should not modify endpoint inputs when no security artifacts settings are configured', async () => {
+      const endpointPackageInfo: PackageInfo = {
+        name: 'endpoint',
+        version: '1.0.0',
+        type: 'integration',
+        policy_templates: [],
+      } as any;
+
+      mockedGetPackageInfo.mockResolvedValue(endpointPackageInfo);
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'endpoint-policy-1',
+            name: 'Elastic Defend',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'endpoint', version: '1.0.0', title: 'Elastic Defend' },
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: {
+                  policy: {
+                    value: {
+                      windows: { advanced: { existing: 'setting' } },
+                      mac: {},
+                      linux: {},
+                    },
+                  },
+                },
+              },
+            ],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: 'agent-policy',
+            policy_ids: ['agent-policy'],
+          },
+        ] as any,
+      });
+
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      const endpointInput = agentPolicy?.inputs.find((i) => i.type === 'endpoint');
+      expect(endpointInput).toBeDefined();
+
+      const policy = (endpointInput as any)?.policy;
+      expect(policy.windows.advanced).toEqual({ existing: 'setting' });
+      expect(policy.mac.advanced).toBeUndefined();
+    });
+  });
+
   describe('OTel config generation', () => {
     it('should call generateOtelcolConfig with packageInfoCache when enableOtelIntegrations is true', async () => {
       const packageInfo: PackageInfo = {

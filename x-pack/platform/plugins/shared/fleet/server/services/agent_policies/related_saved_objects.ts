@@ -68,7 +68,8 @@ export async function fetchRelatedSavedObjects(
       return undefined;
     }),
   ]);
-  const { proxy_id: downloadSourceProxyId } = downloadSource;
+  const { proxy_id: downloadSourceProxyId, security_artifacts_proxy_id: securityArtifactsProxyId } =
+    downloadSource;
 
   const dataOutput = outputs.find((output) => output.id === dataOutputId);
   if (!dataOutput) {
@@ -85,6 +86,7 @@ export async function fetchRelatedSavedObjects(
       .filter((proxyId): proxyId is string => typeof proxyId !== 'undefined' && proxyId !== null)
       .concat(fleetServerHosts?.proxy_id ? [fleetServerHosts.proxy_id] : [])
       .concat(downloadSourceProxyId ? [downloadSourceProxyId] : [])
+      .concat(securityArtifactsProxyId ? [securityArtifactsProxyId] : [])
   );
 
   logger.debug(`fetching list of fleet-server proxies`);
@@ -93,6 +95,11 @@ export async function fetchRelatedSavedObjects(
   let downloadSourceProxy: FleetProxy | undefined;
   if (downloadSourceProxyId) {
     downloadSourceProxy = proxies.find((proxy) => proxy.id === downloadSourceProxyId);
+  }
+
+  let securityArtifactsProxy: FleetProxy | undefined;
+  if (securityArtifactsProxyId) {
+    securityArtifactsProxy = proxies.find((proxy) => proxy.id === securityArtifactsProxyId);
   }
 
   logger.debug(`Returning related saved objects for policy [${agentPolicy.id}]`);
@@ -104,6 +111,7 @@ export async function fetchRelatedSavedObjects(
     monitoringOutput,
     downloadSource,
     downloadSourceProxy,
+    securityArtifactsProxy,
     fleetServerHost: fleetServerHosts,
   };
 }
