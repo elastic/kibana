@@ -96,6 +96,19 @@ export const getCriticalityHealthColor = (
 };
 
 /**
+ * Coerces a recommendations value (which may arrive from ES as a string
+ * instead of an array) into a guaranteed `string[]`.
+ */
+export const normalizeRecommendations = (value: unknown): string[] => {
+  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === 'string');
+  if (typeof value === 'string' && value.length > 0) {
+    const cleaned = value.startsWith('$') ? value.slice(1) : value;
+    return cleaned.length > 0 ? [cleaned] : [];
+  }
+  return [];
+};
+
+/**
  * Adapts an `EventDocument` (from the lower-priority / acknowledged events
  * index) into the `SignificantEventDetailFields` shape used by the shared
  * `SignificantEventDetailBody` component.
@@ -110,7 +123,7 @@ export const adaptEventDocumentToDetailFields = (
   severityColor: getImpactBadgeColor(event.impact),
   summary: event.summary,
   rootCause: event.root_cause,
-  recommendations: event.recommendations ?? [],
+  recommendations: normalizeRecommendations(event.recommendations),
   recommendedAction: event.recommended_action,
   criticality: event.criticality,
   impact: capitalize(event.impact),

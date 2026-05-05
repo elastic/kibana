@@ -11,6 +11,7 @@ import { useQuery } from '@kbn/react-query';
 import type { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DEMO_DENIED_EVENT_TITLES } from './use_fetch_latest_significant_event';
 
 interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
@@ -98,7 +99,12 @@ export function useFetchSystemOverview(): {
         index: EVENTS_INDEX,
         size: 5,
         query: {
-          term: { verdict: 'acknowledged' },
+          bool: {
+            must_not: [
+              { term: { verdict: 'demoted' } },
+              ...DEMO_DENIED_EVENT_TITLES.map((t) => ({ match_phrase: { title: t } })),
+            ],
+          },
         },
         sort: [{ criticality: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       };
@@ -106,6 +112,11 @@ export function useFetchSystemOverview(): {
       const priorityParams: estypes.SearchRequest = {
         index: EVENTS_INDEX,
         size: 0,
+        query: {
+          bool: {
+            must_not: DEMO_DENIED_EVENT_TITLES.map((t) => ({ match_phrase: { title: t } })),
+          },
+        },
         aggs: {
           by_impact: {
             terms: { field: 'impact', size: 10 },

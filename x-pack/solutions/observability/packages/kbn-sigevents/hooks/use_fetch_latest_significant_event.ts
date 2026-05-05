@@ -15,6 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ImpactedService } from '../components/main_significant_event';
 import type { ImpactedCardItem } from '../components/sigevents_overview';
 import type { SignificantEventDetailFields } from '../components/significant_event_detail_body';
+import { normalizeRecommendations } from '../components/event_utils';
 
 interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
@@ -128,7 +129,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     severityColor: severity.color,
     summary: doc.summary ?? '',
     rootCause: doc.root_cause ?? '',
-    recommendations: doc.recommendations ?? [],
+    recommendations: normalizeRecommendations(doc.recommendations),
     recommendedAction: doc.recommended_action ?? 'monitor',
     criticality: doc.criticality ?? 0,
     impact: doc.impact ?? 'low',
@@ -162,7 +163,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     state: severity.state,
     blastRadiusScore: doc.criticality ?? 0,
     mainEventTitle: doc.title ?? '',
-    description: doc.summary || (doc.recommendations ?? [])[0] || '',
+    description: doc.summary || normalizeRecommendations(doc.recommendations)[0] || '',
     impactedServices,
     impactedCards,
     severityLabel: severity.label,
@@ -171,6 +172,9 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     timestamp: doc['@timestamp'],
   };
 }
+
+// --- DEMO DENY LIST: remove to restore full event visibility ---
+export const DEMO_DENIED_EVENT_TITLES = ['payment \u2014 credit card data exposure'];
 
 export function useFetchLatestSignificantEvent(): {
   loading: boolean;
@@ -224,7 +228,8 @@ export function useFetchLatestSignificantEvent(): {
 
     const docs = result.hits.hits
       .map((hit) => hit._source)
-      .filter((doc): doc is SignificantEventDocument => doc !== undefined);
+      .filter((doc): doc is SignificantEventDocument => doc !== undefined)
+      .filter((doc) => !DEMO_DENIED_EVENT_TITLES.includes(doc.title?.toLowerCase()));
 
     // Primary event: highest-impact promoted event (critical > high > medium > low)
     const impactPriority: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };

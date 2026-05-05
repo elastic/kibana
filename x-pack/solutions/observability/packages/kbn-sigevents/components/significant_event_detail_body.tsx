@@ -87,11 +87,11 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
     () => ({
       ...rawEvent,
       dependencyEdges: rawEvent.dependencyEdges ?? [],
-      recommendations: rawEvent.recommendations ?? [],
+      recommendations: Array.isArray(rawEvent.recommendations) ? rawEvent.recommendations : [],
       evidences: rawEvent.evidences ?? [],
       causeKis: rawEvent.causeKis ?? [],
-      ruleNames: rawEvent.ruleNames ?? [],
-      streamNames: rawEvent.streamNames ?? [],
+      ruleNames: Array.isArray(rawEvent.ruleNames) ? rawEvent.ruleNames : [],
+      streamNames: Array.isArray(rawEvent.streamNames) ? rawEvent.streamNames : [],
     }),
     [rawEvent]
   );
