@@ -7,12 +7,13 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps } from 'react-router-dom';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
+import { ROLLUP_DEPRECATION_BADGE_LABEL, RollupDeprecationTooltip } from '@kbn/rollup';
 
 import type { AppHeaderTab, AppHeaderBadge } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
@@ -26,6 +27,7 @@ import { INDEX_OPEN, IndexDetailsSection, Section } from '../../../../../../comm
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
+import { renderBadges } from '../../../../lib/render_badges';
 import { ManageIndexButton } from './manage_index_button';
 import { useManageIndexMenu } from './use_manage_index_menu';
 import { DetailsPageMappings } from './details_page_mappings';
@@ -177,14 +179,34 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     const result: AppHeaderBadge[] = [];
     extensionsService.badges.forEach((indexBadge) => {
       if (indexBadge.matchIndex(index)) {
-        result.push({
+        const badge: AppHeaderBadge = {
           label: indexBadge.label,
           color: indexBadge.color as AppHeaderBadge['color'],
-        });
+        };
+
+        if (indexBadge.label === ROLLUP_DEPRECATION_BADGE_LABEL) {
+          badge.renderCustomBadge = ({ badgeText }) => (
+            <RollupDeprecationTooltip>
+              <EuiBadge color={indexBadge.color}>{badgeText}</EuiBadge>
+            </RollupDeprecationTooltip>
+          );
+        }
+
+        result.push(badge);
       }
     });
     return result;
   }, [extensionsService.badges, index]);
+
+  const fallbackPageTitle = useMemo(
+    () => (
+      <>
+        {index.name}
+        {renderBadges(index, extensionsService)}
+      </>
+    ),
+    [extensionsService, index]
+  );
 
   const appMenu = useMemo<AppMenuConfig>(
     () => ({
@@ -246,6 +268,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         padding={{ bleed: 'l' }}
         fallback={{
           'data-test-subj': 'indexDetailsHeader',
+          pageTitle: fallbackPageTitle,
           rightSideItems: [
             <ManageIndexButton
               index={index}

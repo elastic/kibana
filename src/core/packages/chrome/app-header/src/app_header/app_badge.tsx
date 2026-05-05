@@ -69,9 +69,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
 
-  // @ts-expect-error supported for backward compatibility. TODO: Remove it
   if (badge?.renderCustomBadge) {
-    // @ts-expect-error supported for backward compatibility. TODO: Remove it
     return badge.renderCustomBadge({ badgeText: badge.label });
   }
 

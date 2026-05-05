@@ -9,8 +9,7 @@
 
 export { AppHeader, AppHeaderView } from './app_header';
 export type { AppHeaderProps, AppHeaderViewProps } from './app_header';
-export { ChromeAppHeader } from './app_header';
-export type { ChromeAppHeaderProps } from './app_header';
+export { ChromeAppHeaderRegistration, useChromeAppHeaderRegistration } from './app_header';
 export type {
   AppHeaderBack,
   AppHeaderBadge,
@@ -19,8 +18,5 @@ export type {
   AppHeaderPadding,
   AppHeaderConfig,
 } from './types';
-export {
-  APPLICATION_TOP_BAR_MIN_HEIGHT_PX,
-} from './app_header/app_header_shell';
 export type { AppHeaderWithFallbackProps } from './app_header_with_fallback';
 export { AppHeaderWithFallback } from './app_header_with_fallback';

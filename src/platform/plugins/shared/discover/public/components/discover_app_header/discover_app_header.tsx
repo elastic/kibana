@@ -9,21 +9,18 @@
 
 import React, { useMemo } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { ChromeAppHeader } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/core-chrome-browser';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getReadOnlyBadge } from '../../application/discover_router';
 
-const chromeBadgeToHeaderBadge = (badge: {
-  badgeText: string;
-  color?: string;
-  toolTipProps?: { content?: string | React.ReactNode };
-  'data-test-subj'?: string;
-}): AppHeaderBadge => ({
+const chromeBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({
   label: badge.badgeText,
   color: badge.color as AppHeaderBadge['color'],
   tooltip: badge.toolTipProps?.content as string | undefined,
   'data-test-subj': badge['data-test-subj'] as string | undefined,
+  renderCustomBadge: badge.renderCustomBadge,
 });
 
 export interface DiscoverAppHeaderProps {
@@ -56,5 +53,5 @@ export const DiscoverAppHeader: React.FC<DiscoverAppHeaderProps> = ({
     return result.length > 0 ? result : undefined;
   }, [capabilities, extraBadges]);
 
-  return <ChromeAppHeader title={title} back={back} menu={appMenu} badges={badges} />;
+  return <ChromeAppHeaderRegistration title={title} back={back} menu={appMenu} badges={badges} />;
 };

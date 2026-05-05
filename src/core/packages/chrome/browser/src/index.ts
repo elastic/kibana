@@ -29,6 +29,16 @@ export type {
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
 export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle } from './types';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderTab,
+  ChromeNext,
+  ChromeNextAiButton,
+  ChromeNextGlobalSearchConfig,
+} from './chrome_next';
 
 export type {
   ChromeProjectNavigationNode,
@@ -58,14 +68,3 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
-
-export type {
-  ChromeNext,
-  ChromeNextAiButton,
-  ChromeNextGlobalSearchConfig,
-  AppHeaderConfig,
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderBadgeItem,
-  AppHeaderTab,
-} from './chrome_next';

@@ -20,8 +20,6 @@ export interface AppHeaderShellProps {
   badges?: ReactNode;
   titleActions?: ReactNode;
   trailing?: ReactNode;
-  metadata?: ReactNode;
-  callout?: ReactNode;
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
@@ -124,17 +122,6 @@ const useHeaderStyles = (sticky: boolean, padding: AppHeaderPadding | undefined)
       min-width: 0;
     `;
 
-    const metadataRow = css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.s};
-      padding-bottom: ${euiTheme.size.s};
-    `;
-
-    const calloutRow = css`
-      padding-bottom: ${euiTheme.size.s};
-    `;
-
     const tabsRow = css`
       display: flex;
       align-items: stretch;
@@ -157,15 +144,13 @@ const useHeaderStyles = (sticky: boolean, padding: AppHeaderPadding | undefined)
       titleGroup,
       titleClusterSpacer,
       titleActionsReveal,
-      metadataRow,
-      calloutRow,
       tabsRow,
     };
   }, [euiTheme, sticky, padding]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ title, badges, titleActions, trailing, metadata, callout, tabs, sticky = true, padding }) => {
+  ({ title, badges, titleActions, trailing, tabs, sticky = true, padding }) => {
     const styles = useHeaderStyles(sticky, padding);
 
     return (
@@ -185,16 +170,6 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           </div>
           {trailing}
         </div>
-        {metadata && (
-          <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">
-            {metadata}
-          </div>
-        )}
-        {callout && (
-          <div css={styles.calloutRow} data-test-subj="appHeaderCallout">
-            {callout}
-          </div>
-        )}
         {tabs && (
           <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
             {tabs}

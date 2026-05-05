@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode, MouseEventHandler } from 'react';
+import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNextAiButton } from './ai_button';
 import type { ChromeNextGlobalSearchConfig } from './global_search';
@@ -30,6 +30,12 @@ export interface AppHeaderBadge {
   onClick?: () => void;
   onClickAriaLabel?: string;
   'data-test-subj'?: string;
+  /** @deprecated Used for compatibility with existing breadcrumb badge custom renderers. */
+  renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
+  /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
+  items?: AppHeaderBadgeItem[];
+  /** Width of the popover menu panel in pixels. */
+  popoverWidth?: number;
 }
 
 /** @public */
@@ -42,21 +48,6 @@ export interface AppHeaderBadgeItem {
   'data-test-subj'?: string;
   disabled?: boolean;
   toolTipContent?: string;
-}
-
-/** @public */
-export interface AppHeaderBadge {
-  label: string;
-  /** EUI badge color. `filled` is intentionally excluded. */
-  color?: 'hollow' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
-  tooltip?: string;
-  onClick?: () => void;
-  onClickAriaLabel?: string;
-  'data-test-subj'?: string;
-  /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
-  items?: AppHeaderBadgeItem[];
-  /** Width of the popover menu panel in pixels. */
-  popoverWidth?: number;
 }
 
 /** @public */

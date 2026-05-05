@@ -21,7 +21,6 @@ export type AppHeaderBadge = CoreAppHeaderBadge;
 export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
 export type AppHeaderTab = CoreAppHeaderTab;
-export type ChromeAppHeaderProps = CoreAppHeaderConfig;
 
 export type AppHeaderPadding =
   | 'none'

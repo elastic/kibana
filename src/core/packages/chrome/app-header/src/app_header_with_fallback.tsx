@@ -49,13 +49,11 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
     if (fallback === null) return null;
     const { pageTitle: classicPageTitle, tabs: classicTabs, ...classicRest } = fallback ?? {};
     return (
-      <>
-        <EuiPageHeader
-          {...classicRest}
-          pageTitle={classicPageTitle ?? title}
-          tabs={classicTabs ?? mapTabsForClassic(tabs)}
-        />
-      </>
+      <EuiPageHeader
+        {...classicRest}
+        pageTitle={classicPageTitle ?? title}
+        tabs={classicTabs ?? mapTabsForClassic(tabs)}
+      />
     );
   }
 

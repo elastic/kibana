@@ -16,7 +16,6 @@ import type { AppHeaderBadge } from '../../types';
 const breadcrumbsBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({
   label: badge.badgeText,
   tooltip: badge.toolTipProps?.content as string | undefined,
-  // @ts-expect-error supported for backward compatibility. TODO: Remove it
   renderCustomBadge: badge.renderCustomBadge,
 });
 

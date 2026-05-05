@@ -27,13 +27,12 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { ChromeAppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge } from '@kbn/core-chrome-browser';
+import { ChromeAppHeaderRegistration, type AppHeaderBadge } from '@kbn/app-header';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -41,7 +40,6 @@ import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
   dashboardManagedBadge,
-  dashboardReadonlyBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
   topNavStrings,
@@ -73,6 +71,22 @@ export interface InternalDashboardTopNavProps {
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
+
+const topNavBadgeToAppHeaderBadge = ({
+  badgeText,
+  color,
+  toolTipProps,
+  renderCustomBadge,
+  onClickAriaLabel,
+  'data-test-subj': dataTestSubj,
+}: TopNavMenuBadgeProps): AppHeaderBadge => ({
+  label: badgeText,
+  color: color as AppHeaderBadge['color'],
+  tooltip: toolTipProps?.content as string | undefined,
+  onClickAriaLabel,
+  'data-test-subj': dataTestSubj as string | undefined,
+  renderCustomBadge,
+});
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
@@ -126,26 +140,6 @@ export function InternalDashboardTopNav({
     () => (lastSavedId ? <DashboardFavoriteButton dashboardId={lastSavedId} /> : undefined),
     [lastSavedId]
   );
-
-  const appHeaderBadges = useMemo(() => {
-    const result: AppHeaderBadge[] = [];
-    const { showWriteControls } = getDashboardCapabilities();
-    if (!showWriteControls) {
-      result.push({
-        label: dashboardReadonlyBadge.getText(),
-        color: 'warning',
-        tooltip: dashboardReadonlyBadge.getTooltip(),
-      });
-    }
-    if (showWriteControls && dashboardApi.isManaged) {
-      result.push({
-        label: getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()).badgeText,
-        color: 'primary',
-        tooltip: dashboardManagedBadge.getBadgeAriaLabel(),
-      });
-    }
-    return result.length > 0 ? result : undefined;
-  }, [dashboardApi.isManaged]);
 
   const hasUnpublishedFilters = useMemo(() => {
     return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
@@ -339,8 +333,8 @@ export function InternalDashboardTopNav({
     dashboardApi.clearOverlays();
   });
 
-  const badges = useMemo(() => {
-    const allBadges: TopNavMenuProps['badges'] = [];
+  const badges = useMemo<TopNavMenuBadgeProps[]>(() => {
+    const allBadges: TopNavMenuBadgeProps[] = [];
 
     const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
@@ -390,6 +384,11 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [isPopoverOpen, dashboardApi, maybeRedirect]);
 
+  const appHeaderBadges = useMemo(
+    () => (badges.length > 0 ? badges.map(topNavBadgeToAppHeaderBadge) : undefined),
+    [badges]
+  );
+
   useEffect(() => {
     coreServices.chrome.setBreadcrumbsBadges(badges);
     return () => {
@@ -413,7 +412,7 @@ export function InternalDashboardTopNav({
   return (
     <>
       {visibilityProps.showTopNavMenu && viewMode !== 'print' && (
-        <ChromeAppHeader
+        <ChromeAppHeaderRegistration
           title={dashboardTitle}
           back="/app/dashboards#/list"
           menu={appMenuConfig}

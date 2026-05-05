@@ -9,7 +9,8 @@
 
 import { useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { ChromeBreadcrumbsBadge, AppHeaderBadge } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { discoverTopNavMenuContext } from './discover_topnav_menu';
 
 const chromeBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({
@@ -17,6 +18,7 @@ const chromeBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge
   color: badge.color as AppHeaderBadge['color'],
   tooltip: badge.toolTipProps?.content as string | undefined,
   'data-test-subj': badge['data-test-subj'] as string | undefined,
+  renderCustomBadge: badge.renderCustomBadge,
 });
 
 export const useTopNavBadgeItems = (): AppHeaderBadge[] | undefined => {
@@ -26,13 +28,6 @@ export const useTopNavBadgeItems = (): AppHeaderBadge[] | undefined => {
   return useMemo(() => {
     if (!topNavBadges) return undefined;
 
-    const badges: AppHeaderBadge[] = [];
-    for (const badge of topNavBadges) {
-      if (!badge.renderCustomBadge) {
-        badges.push(chromeBadgeToHeaderBadge(badge));
-      }
-    }
-
-    return badges.length > 0 ? badges : undefined;
+    return topNavBadges.length > 0 ? topNavBadges.map(chromeBadgeToHeaderBadge) : undefined;
   }, [topNavBadges]);
 };
