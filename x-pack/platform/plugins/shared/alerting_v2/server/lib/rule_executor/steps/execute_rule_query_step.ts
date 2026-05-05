@@ -67,21 +67,34 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         abortSignal: input.executionContext.signal,
       });
 
+      const queryStartMs = Date.now();
+      let rowCount = 0;
+      let batchCount = 0;
       let yielded = false;
 
-      for await (const batch of esqlRowBatchStream) {
-        yielded = true;
-        yield {
-          type: 'continue',
-          state: { ...state, queryPayload, esqlRowBatch: batch },
-        };
-      }
+      try {
+        for await (const batch of esqlRowBatchStream) {
+          yielded = true;
+          batchCount += 1;
+          rowCount += batch.length;
+          yield {
+            type: 'continue',
+            state: { ...state, queryPayload, esqlRowBatch: batch },
+          };
+        }
 
-      if (!yielded) {
-        yield {
-          type: 'continue',
-          state: { ...state, queryPayload, esqlRowBatch: [] },
-        };
+        if (!yielded) {
+          yield {
+            type: 'continue',
+            state: { ...state, queryPayload, esqlRowBatch: [] },
+          };
+        }
+      } finally {
+        input.metrics.recordQuerySearch({
+          wallTimeMs: Date.now() - queryStartMs,
+          rowCount,
+          batchCount,
+        });
       }
     });
   }

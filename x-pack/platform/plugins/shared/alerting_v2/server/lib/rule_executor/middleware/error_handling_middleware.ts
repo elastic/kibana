@@ -12,12 +12,15 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { identifyErrorWithStepName } from '../step_error';
 
 /**
  * Middleware that provides centralized error handling for all steps.
  *
- * This middleware catches errors thrown by steps and logs them with
- * consistent formatting before re-throwing.
+ * Catches errors thrown by steps, logs them with consistent formatting,
+ * identifies them with the failing step name (so the task runner can map
+ * the failure to a `kibana.alerting_v2.rule_executor` reason in the execute
+ * summary), and re-throws.
  */
 @injectable()
 export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
@@ -45,7 +48,7 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
           code: ctx.step.name,
         });
 
-        throw error;
+        throw identifyErrorWithStepName(error, ctx.step.name);
       }
     })();
   }

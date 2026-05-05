@@ -36,6 +36,16 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         docs: state.alertEventsBatch,
       });
 
+      let breached = 0;
+      let recovered = 0;
+      let noData = 0;
+      for (const event of state.alertEventsBatch) {
+        if (event.status === 'breached') breached += 1;
+        else if (event.status === 'recovered') recovered += 1;
+        else if (event.status === 'no_data') noData += 1;
+      }
+      state.input.metrics.recordEventsWritten({ breached, recovered, no_data: noData });
+
       this.logger.debug({
         message: `[${this.name}] Successfully stored alert events batch`,
       });

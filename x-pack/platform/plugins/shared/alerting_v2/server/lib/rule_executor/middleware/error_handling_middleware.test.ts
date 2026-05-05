@@ -10,6 +10,7 @@ import { ErrorHandlingMiddleware } from './error_handling_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
+import { getStepNameFromError } from '../step_error';
 
 describe('ErrorHandlingMiddleware', () => {
   let middleware: ErrorHandlingMiddleware;
@@ -48,5 +49,25 @@ describe('ErrorHandlingMiddleware', () => {
       collectStreamResults(middleware.execute(context, next, createPipelineStream()))
     ).rejects.toThrow('Step failed');
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('identifies the rethrown error with the failing step name', async () => {
+    const error = new Error('Step failed');
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    let captured: unknown;
+    try {
+      await collectStreamResults(middleware.execute(context, next, createPipelineStream()));
+    } catch (caught) {
+      captured = caught;
+    }
+
+    expect(captured).toBe(error);
+    expect(getStepNameFromError(captured)).toBe('execute_rule_query');
   });
 });

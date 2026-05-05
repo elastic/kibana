@@ -24,6 +24,7 @@ import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
 import { createExecutionContext } from './execution_context';
 import type { RuleSavedObjectAttributes } from '../saved_objects';
+import { RuleExecutionMetricsCollector } from './rule_executor/metrics_collector';
 
 /**
  * Creates a mock Elasticsearch client.
@@ -113,6 +114,8 @@ export function createRuleExecutionInput(
     spaceId: 'default',
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionContext: createExecutionContext(abortSignal),
+    executionUuid: 'test-execution-uuid',
+    metrics: new RuleExecutionMetricsCollector(),
     ...overrides,
   };
 }
@@ -125,6 +128,8 @@ export function createRuleExecutionPipelineInput(
     spaceId: 'default',
     scheduledAt: '2025-01-01T00:00:00.000Z',
     abortSignal: new AbortController().signal,
+    executionUuid: 'test-execution-uuid',
+    metrics: new RuleExecutionMetricsCollector(),
     ...overrides,
   };
 }

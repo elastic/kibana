@@ -502,6 +502,139 @@ exports.EcsCustomPropertyMappings = {
               },
             },
           },
+          rule_executor: {
+            properties: {
+              rule: {
+                properties: {
+                  id: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  name: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  kind: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  version: {
+                    type: 'long',
+                  },
+                  tags: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                },
+              },
+              execution: {
+                properties: {
+                  uuid: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  status: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  cancelled: {
+                    properties: {
+                      step: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                      reason: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                  phase_errors: {
+                    type: 'nested',
+                    properties: {
+                      phase: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                      code: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                      message: {
+                        type: 'text',
+                      },
+                    },
+                  },
+                  metrics: {
+                    properties: {
+                      total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      query: {
+                        properties: {
+                          number_of_searches: {
+                            type: 'long',
+                          },
+                          es_search_duration_ms: {
+                            type: 'long',
+                          },
+                          total_search_duration_ms: {
+                            type: 'long',
+                          },
+                          number_of_rows_returned: {
+                            type: 'long',
+                          },
+                          number_of_batches: {
+                            type: 'long',
+                          },
+                        },
+                      },
+                      events_written: {
+                        properties: {
+                          breached: {
+                            type: 'long',
+                          },
+                          recovered: {
+                            type: 'long',
+                          },
+                          no_data: {
+                            type: 'long',
+                          },
+                          total: {
+                            type: 'long',
+                          },
+                        },
+                      },
+                      episodes: {
+                        properties: {
+                          transitioned_to_active: {
+                            type: 'long',
+                          },
+                          transitioned_to_recovering: {
+                            type: 'long',
+                          },
+                          transitioned_to_inactive: {
+                            type: 'long',
+                          },
+                        },
+                      },
+                      recovery: {
+                        properties: {
+                          mode: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          events_emitted: {
+                            type: 'long',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -546,4 +679,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'kibana.alerting_v2.dispatcher.action_group_ids',
   'kibana.alerting_v2.dispatcher.workflow_ids',
   'kibana.alerting_v2.dispatcher.workflow_execution_ids',
+  'kibana.alerting_v2.rule_executor.rule.tags',
 ];

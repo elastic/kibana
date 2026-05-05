@@ -9,6 +9,7 @@ import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
+import type { RuleExecutionMetricsCollectorContract } from './metrics_collector';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -20,6 +21,8 @@ export interface RuleExecutionInput {
   readonly spaceId: string;
   readonly scheduledAt: string;
   readonly executionContext: ExecutionContext;
+  readonly executionUuid: string;
+  readonly metrics: RuleExecutionMetricsCollectorContract;
 }
 
 export interface RulePipelineState {

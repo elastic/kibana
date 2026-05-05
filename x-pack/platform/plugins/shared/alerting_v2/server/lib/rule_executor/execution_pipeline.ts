@@ -23,6 +23,7 @@ import {
 import { EsServiceInternalToken } from '../services/es_service/tokens';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { createExecutionContext } from '../execution_context';
+import type { RuleExecutionMetricsCollectorContract } from './metrics_collector';
 
 /**
  * Raw input from the task runner.
@@ -33,6 +34,8 @@ export interface RuleExecutionPipelineInput {
   readonly spaceId: string;
   readonly scheduledAt: string;
   readonly abortSignal: AbortSignal;
+  readonly executionUuid: string;
+  readonly metrics: RuleExecutionMetricsCollectorContract;
 }
 
 export interface RuleExecutionPipelineResult {
@@ -62,6 +65,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       spaceId: rawInput.spaceId,
       scheduledAt: rawInput.scheduledAt,
       executionContext,
+      executionUuid: rawInput.executionUuid,
+      metrics: rawInput.metrics,
     };
 
     let pipelineState: RulePipelineState = { input };

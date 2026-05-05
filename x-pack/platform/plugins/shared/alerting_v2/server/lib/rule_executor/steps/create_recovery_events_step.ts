@@ -50,20 +50,22 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
+      const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
+      const recoveryMode = recoveryType === recoveryPolicyType.query ? 'query' : 'no_breach';
+
       const activeGroupHashes = await step.fetchActiveAlertGroupHashes(
         rule.id,
         input.executionContext
       );
 
       if (activeGroupHashes.length === 0) {
+        input.metrics.recordRecovery({ mode: recoveryMode, events_emitted: 0 });
         step.logger.debug({
           message: `[${step.name}] No active alerts to recover for rule ${input.ruleId}`,
         });
         yield { type: 'continue', state };
         return;
       }
-
-      const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
 
       const recoveryEvents =
         recoveryType === recoveryPolicyType.query
@@ -76,6 +78,11 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
               breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
               scheduledTimestamp: input.scheduledAt,
             });
+
+      input.metrics.recordRecovery({
+        mode: recoveryMode,
+        events_emitted: recoveryEvents.length,
+      });
 
       step.logger.debug({
         message: `[${step.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
@@ -118,12 +125,27 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         })}`,
     });
 
-    const esqlResponse = await this.scopedQueryService.executeQuery({
-      query: effectiveQuery,
-      filter: queryPayload.filter,
-      params: queryPayload.params,
-      abortSignal: input.executionContext.signal,
-    });
+    const queryStartMs = Date.now();
+    const recordQuery = (rowCount: number, batchCount: number) =>
+      input.metrics.recordQuerySearch({
+        wallTimeMs: Date.now() - queryStartMs,
+        rowCount,
+        batchCount,
+      });
+
+    let esqlResponse;
+    try {
+      esqlResponse = await this.scopedQueryService.executeQuery({
+        query: effectiveQuery,
+        filter: queryPayload.filter,
+        params: queryPayload.params,
+        abortSignal: input.executionContext.signal,
+      });
+    } catch (err) {
+      recordQuery(0, 0);
+      throw err;
+    }
+    recordQuery(esqlResponse.values.length, 1);
 
     return buildQueryRecoveryAlertEvents({
       ruleId: rule.id,

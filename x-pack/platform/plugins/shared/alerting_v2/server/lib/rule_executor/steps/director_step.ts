@@ -53,6 +53,21 @@ export class DirectorStep implements RuleExecutionStep {
         alertEvents: alertEventsBatch,
       });
 
+      let transitionedToActive = 0;
+      let transitionedToRecovering = 0;
+      let transitionedToInactive = 0;
+      for (const event of processedBatch) {
+        const status = event.episode?.status;
+        if (status === 'active') transitionedToActive += 1;
+        else if (status === 'recovering') transitionedToRecovering += 1;
+        else if (status === 'inactive') transitionedToInactive += 1;
+      }
+      input.metrics.recordEpisodesTransitioned({
+        active: transitionedToActive,
+        recovering: transitionedToRecovering,
+        inactive: transitionedToInactive,
+      });
+
       yield {
         type: 'continue',
         state: { ...state, alertEventsBatch: processedBatch },
