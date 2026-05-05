@@ -11,7 +11,13 @@ import { ruleResponseSchemaV1 } from '../../../../response';
 
 export const findRuleParamsExamples = () => path.join(__dirname, 'examples_find_rules.yaml');
 
-const UNSUPPORTED_FIELDS = ['monitoring', 'mapped_params', 'snoozeSchedule', 'activeSnoozes'];
+const UNSUPPORTED_FIELDS = [
+  'monitoring',
+  'mapped_params',
+  'snoozeSchedule',
+  'activeSnoozes',
+  'snoozedInstances',
+];
 
 export const findRulesRequestQuerySchema = schema.object({
   per_page: schema.number({
