@@ -22,7 +22,7 @@ spaceTest.describe(
   () => {
     let timelineId: string;
 
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.beforeAll(async ({ apiServices }) => {
       // Clean up any leftover rules from a previous failed run
       await apiServices.detectionRule.deleteAll();
       await apiServices.timeline.deleteAll();
