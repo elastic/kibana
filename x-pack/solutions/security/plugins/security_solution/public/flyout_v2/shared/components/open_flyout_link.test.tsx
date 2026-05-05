@@ -17,8 +17,7 @@ jest.mock('./flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('../hooks/use_default_flyout_properties', () => ({
-  defaultToolsFlyoutProperties: { outsideClickCloses: true },
-  useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: false }),
+  useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: true }),
 }));
 
 const mockOpenSystemFlyout = jest.fn();

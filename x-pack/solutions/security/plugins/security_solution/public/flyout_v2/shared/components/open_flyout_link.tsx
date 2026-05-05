@@ -64,7 +64,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const documentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -74,7 +74,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     if (flyoutContent) {
       const baseFlyoutProperties = isStandalone
         ? defaultToolsFlyoutProperties
-        : documentFlyoutProperties;
+        : defaultDocumentFlyoutProperties;
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
@@ -90,13 +90,13 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
       );
     }
   }, [
+    defaultDocumentFlyoutProperties,
     overlays,
     services,
     store,
     history,
     flyoutContent,
     isStandalone,
-    documentFlyoutProperties,
     historyKey,
   ]);
 
