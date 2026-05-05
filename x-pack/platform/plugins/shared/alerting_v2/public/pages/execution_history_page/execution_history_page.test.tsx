@@ -31,6 +31,12 @@ jest.mock('../../hooks/use_fetch_execution_history', () => ({
   useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
 }));
 
+const mockUseCountNewExecutionHistoryEvents = jest.fn();
+jest.mock('../../hooks/use_count_new_execution_history_events', () => ({
+  useCountNewExecutionHistoryEvents: (...args: unknown[]) =>
+    mockUseCountNewExecutionHistoryEvents(...args),
+}));
+
 jest.mock(
   '../../components/action_policy/details_flyout/action_policy_details_flyout_container',
   () => ({
@@ -94,6 +100,7 @@ const renderPage = () =>
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 0 } });
   });
 
   it('renders the page title and tabs', () => {
@@ -201,5 +208,40 @@ describe('ExecutionHistoryPage', () => {
     renderPage();
 
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({ page: 1, perPage: 50 });
+  });
+
+  it('shows the new-events banner when count > 0', () => {
+    mockFetchResult();
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 3 } });
+    renderPage();
+
+    expect(screen.getByTestId('executionHistoryNewEventsBanner')).toBeInTheDocument();
+    expect(screen.getByText(/3 new events since you opened this page/i)).toBeInTheDocument();
+  });
+
+  it('hides the new-events banner when count is 0', () => {
+    mockFetchResult();
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 0 } });
+    renderPage();
+
+    expect(screen.queryByTestId('executionHistoryNewEventsBanner')).not.toBeInTheDocument();
+  });
+
+  it('hides the banner when in error state even if count > 0', () => {
+    mockFetchResult({ isError: true });
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 5 } });
+    renderPage();
+
+    expect(screen.queryByTestId('executionHistoryNewEventsBanner')).not.toBeInTheDocument();
+  });
+
+  it('clicking "Load new events" resets to page 1 and refetches', async () => {
+    mockFetchResult();
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 2 } });
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('executionHistoryLoadNewEventsButton'));
+
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 });

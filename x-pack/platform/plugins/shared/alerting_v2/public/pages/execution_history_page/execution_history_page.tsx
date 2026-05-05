@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useCountNewExecutionHistoryEvents } from '../../hooks/use_count_new_execution_history_events';
 import { useFetchExecutionHistory } from '../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
 
@@ -144,6 +145,7 @@ export const ExecutionHistoryPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
+  const [lastSeenAt, setLastSeenAt] = useState(() => new Date().toISOString());
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
@@ -152,6 +154,18 @@ export const ExecutionHistoryPage = () => {
   const items = data?.items ?? [];
   const totalEvents = data?.totalEvents ?? 0;
   const columns = buildColumns(setPolicyToViewId);
+
+  const { data: newCountData } = useCountNewExecutionHistoryEvents({
+    since: lastSeenAt,
+    enabled: !isError && selectedTabId === POLICIES_TAB_ID,
+  });
+  const newEventsCount = newCountData?.count ?? 0;
+
+  const onLoadNewEvents = () => {
+    setLastSeenAt(new Date().toISOString());
+    setPage(0);
+    refetch();
+  };
 
   const onTableChange = ({
     page: tablePage,
@@ -225,6 +239,33 @@ export const ExecutionHistoryPage = () => {
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
+      {selectedTabId === POLICIES_TAB_ID && newEventsCount > 0 && !isError && (
+        <>
+          <EuiCallOut
+            data-test-subj="executionHistoryNewEventsBanner"
+            color="primary"
+            iconType="bell"
+            title={i18n.translate('xpack.alertingV2.executionHistory.newEventsBannerTitle', {
+              defaultMessage:
+                '{count, plural, one {# new event} other {# new events}} since you opened this page',
+              values: { count: newEventsCount },
+            })}
+          >
+            <EuiButton
+              size="s"
+              color="primary"
+              onClick={onLoadNewEvents}
+              data-test-subj="executionHistoryLoadNewEventsButton"
+            >
+              <FormattedMessage
+                id="xpack.alertingV2.executionHistory.newEventsBannerButton"
+                defaultMessage="Load new events"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {selectedTabId === POLICIES_TAB_ID ? (
         isError ? (
           <EuiCallOut

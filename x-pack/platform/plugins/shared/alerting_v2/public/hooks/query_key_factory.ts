@@ -55,4 +55,5 @@ export const executionHistoryKeys = {
   all: ['executionHistory'] as const,
   list: (filters: { page: number; perPage: number }) =>
     [...executionHistoryKeys.all, 'list', filters] as const,
+  countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
 };

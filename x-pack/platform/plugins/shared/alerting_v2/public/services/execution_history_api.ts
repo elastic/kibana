@@ -8,7 +8,10 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import {
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+} from '../constants';
 
 export interface PolicyExecutionHistoryItem {
   '@timestamp': string;
@@ -32,6 +35,10 @@ export interface ListExecutionHistoryParams {
   perPage?: number;
 }
 
+export interface CountNewExecutionHistoryEventsResponse {
+  count: number;
+}
+
 @injectable()
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
@@ -44,6 +51,15 @@ export class ExecutionHistoryApi {
           page: params.page,
           perPage: params.perPage,
         },
+      }
+    );
+  }
+
+  public async countNewSince(since: string) {
+    return this.http.get<CountNewExecutionHistoryEventsResponse>(
+      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+      {
+        query: { since },
       }
     );
   }
