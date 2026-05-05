@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
 import { groups } from './groups.json';
 import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
-import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels, getTrackedBranch } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -43,8 +42,7 @@ const MAX_SCOUT_COUNT_PER_CONFIG = 50;
 
 // Scout discovery target for the flaky-setup step. We read the branch name
 // from `package.json` (set when forking a release branch).
-const trackedBranch = JSON.parse(Fs.readFileSync('package.json', 'utf8')).branch;
-const scoutDiscoveryTarget = trackedBranch === 'main' ? 'local' : 'local-stateful-only';
+const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
