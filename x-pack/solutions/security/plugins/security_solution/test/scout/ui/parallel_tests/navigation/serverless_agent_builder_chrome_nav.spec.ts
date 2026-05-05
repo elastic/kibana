@@ -14,7 +14,7 @@ spaceTest.describe(
   'Serverless Security - Agent Builder item in project chrome vs chat experience',
   { tag: [...tags.serverless.security.complete] },
   () => {
-    // Privileged user can open securitySolutionUI; scoped AI-only roles omit SIEM app (Application Not Found).
+    // Platform engineer can open securitySolutionUI; scoped AI-only roles omit SIEM app (Application Not Found).
     spaceTest.beforeEach(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(AI_CHAT_EXPERIENCE_TYPE);
     });
@@ -26,7 +26,7 @@ spaceTest.describe(
     spaceTest(
       'shows Agent Builder in chrome nav when preferred chat experience has no saved value',
       async ({ browserAuth, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
+        await browserAuth.loginAsPlatformEngineer();
         await pageObjects.serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
 
         await spaceTest.step(
@@ -47,7 +47,7 @@ spaceTest.describe(
         await scoutSpace.uiSettings.set({
           [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Classic,
         });
-        await browserAuth.loginAsPrivilegedUser();
+        await browserAuth.loginAsPlatformEngineer();
         await pageObjects.serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
 
         await spaceTest.step(
