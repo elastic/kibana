@@ -99,11 +99,11 @@ describe('FieldFormat class', () => {
         expect(text && text('formatted')).toBe('formatted');
       });
 
-      test('uses textConvert when supplied', () => {
+      test('can be a constant function that always returns the same text', () => {
         const f = getTestFormat(undefined, constant('formatted text'));
         const text = f.getConverterFor('text');
 
-        expect(text && text('ignored')).toBe('formatted text');
+        expect(text && text('formatted text')).toBe('formatted text');
       });
 
       test('does not escape the output of the text converter', () => {

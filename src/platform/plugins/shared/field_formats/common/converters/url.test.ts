@@ -377,6 +377,7 @@ describe('UrlFormat', () => {
       };
       const url = new UrlFormat({ parsedUrl });
 
+      expect(url.convert('www.elastic.co', TEXT_CONTEXT_TYPE)).toBe('www.elastic.co');
       expect(url.reactConvert('www.elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/www.elastic.co"
@@ -387,6 +388,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('elastic.co', TEXT_CONTEXT_TYPE)).toBe('elastic.co');
       expect(url.reactConvert('elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/elastic.co"
@@ -397,6 +399,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('elastic', TEXT_CONTEXT_TYPE)).toBe('elastic');
       expect(url.reactConvert('elastic')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/elastic"
@@ -407,6 +410,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('ftp://elastic.co', TEXT_CONTEXT_TYPE)).toBe('ftp://elastic.co');
       expect(url.reactConvert('ftp://elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/ftp://elastic.co"
@@ -425,6 +429,7 @@ describe('UrlFormat', () => {
       };
       const url = new UrlFormat({ parsedUrl });
 
+      expect(url.convert('www.elastic.co', TEXT_CONTEXT_TYPE)).toBe('www.elastic.co');
       expect(url.reactConvert('www.elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/www.elastic.co"
@@ -435,6 +440,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('elastic.co', TEXT_CONTEXT_TYPE)).toBe('elastic.co');
       expect(url.reactConvert('elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/elastic.co"
@@ -445,6 +451,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('elastic', TEXT_CONTEXT_TYPE)).toBe('elastic');
       expect(url.reactConvert('elastic')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/elastic"
@@ -455,6 +462,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('ftp://elastic.co', TEXT_CONTEXT_TYPE)).toBe('ftp://elastic.co');
       expect(url.reactConvert('ftp://elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/ftp://elastic.co"
@@ -472,6 +480,8 @@ describe('UrlFormat', () => {
         basePath: '/abc',
       };
       const url = new UrlFormat({ parsedUrl });
+
+      expect(url.convert('../app/kibana', TEXT_CONTEXT_TYPE)).toBe('../app/kibana');
 
       expect(url.reactConvert('../app/kibana')).toMatchInlineSnapshot(`
         <a
@@ -510,6 +520,7 @@ describe('UrlFormat', () => {
       };
       const url = new UrlFormat({ parsedUrl });
 
+      expect(url.convert('#/foo', TEXT_CONTEXT_TYPE)).toBe('#/foo');
       expect(url.reactConvert('#/foo')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/nbc/app/discover#/#/foo"
@@ -520,6 +531,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('/nbc/app/discover#/', TEXT_CONTEXT_TYPE)).toBe('/nbc/app/discover#/');
       expect(url.reactConvert('/nbc/app/discover#/')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/nbc/app/discover#/"
@@ -530,6 +542,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('../foo/bar', TEXT_CONTEXT_TYPE)).toBe('../foo/bar');
       expect(url.reactConvert('../foo/bar')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/nbc/app/../foo/bar"
@@ -548,6 +561,7 @@ describe('UrlFormat', () => {
       };
       const url = new UrlFormat({ parsedUrl });
 
+      expect(url.convert('10.22.55.66', TEXT_CONTEXT_TYPE)).toBe('10.22.55.66');
       expect(url.reactConvert('10.22.55.66')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/10.22.55.66"
@@ -558,6 +572,9 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('http://www.domain.name/app/kibana#/dashboard/', TEXT_CONTEXT_TYPE)).toBe(
+        'http://www.domain.name/app/kibana#/dashboard/'
+      );
       expect(url.reactConvert('http://www.domain.name/app/kibana#/dashboard/'))
         .toMatchInlineSnapshot(`
         <a
@@ -569,6 +586,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('/app/kibana', TEXT_CONTEXT_TYPE)).toBe('/app/kibana');
       expect(url.reactConvert('/app/kibana')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/kibana"
@@ -579,6 +597,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('kibana#/dashboard/', TEXT_CONTEXT_TYPE)).toBe('kibana#/dashboard/');
       expect(url.reactConvert('kibana#/dashboard/')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/kibana#/dashboard/"
@@ -589,6 +608,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
+      expect(url.convert('#/dashboard/', TEXT_CONTEXT_TYPE)).toBe('#/dashboard/');
       expect(url.reactConvert('#/dashboard/')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/kibana#/dashboard/"
