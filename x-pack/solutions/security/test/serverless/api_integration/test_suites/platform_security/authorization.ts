@@ -27,7 +27,7 @@ if (sourceFilePath === 'authorization.ts') {
   ```
    * 2. From the kibana dir run `node scripts/functional_tests_server.js --config x-pack/solutions/security/test/serverless/api_integration/configs/config.ts`
    * to start the test server
-   * 
+   *
    * 3. in a separate terminal cd into this directory and run `node ../../../../../../../scripts/functional_test_runner.js   --config ../../configs/config.ts   --grep "security/authorization available features composite features"   --updateSnapshots`
    * 4. the snapshot should be updated now.
    */
@@ -14294,6 +14294,18 @@ if (sourceFilePath === 'authorization.ts') {
                 "login:",
                 "api:securitySolution-writeScanOperations",
                 "ui:siemV5/writeScanOperations",
+              ],
+              "scripts_management_all": Array [
+                "login:",
+                "api:securitySolution-writeScriptsManagement",
+                "api:securitySolution-readScriptsManagement",
+                "ui:siemV5/writeScriptsManagement",
+                "ui:siemV5/readScriptsManagement",
+              ],
+              "scripts_management_read": Array [
+                "login:",
+                "api:securitySolution-readScriptsManagement",
+                "ui:siemV5/readScriptsManagement",
               ],
               "soc_management_all": Array [
                 "login:",
