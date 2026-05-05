@@ -40,7 +40,7 @@ export function findConditionById(
   return undefined;
 }
 
-function buildFetchMoreSearchParams(
+export function buildFetchMoreSearchParams(
   streamName: string,
   condition: Condition,
   runtimeMappings: MappingRuntimeFields
@@ -71,7 +71,7 @@ function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[]
   return result.rawResponse.hits.hits.map((hit) => hit._source);
 }
 
-function deduplicateDocuments(
+export function deduplicateDocuments(
   existingDocs: SampleDocument[],
   newDocs: SampleDocument[]
 ): SampleDocument[] {
