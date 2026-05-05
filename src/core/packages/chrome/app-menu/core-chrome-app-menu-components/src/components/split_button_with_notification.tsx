@@ -9,10 +9,10 @@
 
 import React, { type MouseEventHandler } from 'react';
 import { EuiSplitButton, EuiIcon, EuiIconTip, useEuiTheme, type IconType } from '@elastic/eui';
-import { css, type Interpolation, type Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 
 export interface SplitButtonWithNotificationProps {
-  children?: React.ReactNode;
+  label: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   iconType?: IconType;
   isDisabled?: boolean;
@@ -23,7 +23,6 @@ export interface SplitButtonWithNotificationProps {
   target?: string;
   id?: string;
   'data-test-subj'?: string;
-  css?: Interpolation<Theme>;
   fullWidth?: boolean;
   'aria-haspopup'?: 'menu';
 
@@ -39,9 +38,8 @@ export const SplitButtonWithNotification = ({
   isDisabled = false,
   isLoading = false,
   'data-test-subj': dataTestSubj,
-  css: cssProp,
   fullWidth,
-  children,
+  label,
   onClick,
   iconType,
   isMainButtonLoading = false,
@@ -65,14 +63,13 @@ export const SplitButtonWithNotification = ({
         size="s"
         isDisabled={isDisabled}
         isLoading={isLoading}
-        css={[
+        css={
           fullWidth &&
-            css`
-              display: flex;
-              width: 100%;
-            `,
-          cssProp,
-        ]}
+          css`
+            display: flex;
+            width: 100%;
+          `
+        }
       >
         <EuiSplitButton.ActionPrimary
           data-test-subj={dataTestSubj}
@@ -129,7 +126,7 @@ export const SplitButtonWithNotification = ({
               )}
             </span>
           )}
-          {children}
+          {label}
         </EuiSplitButton.ActionPrimary>
         <EuiSplitButton.ActionSecondary
           data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
@@ -137,6 +134,7 @@ export const SplitButtonWithNotification = ({
           aria-label={secondaryButtonAriaLabel}
           onClick={onSecondaryButtonClick}
           isDisabled={isSecondaryButtonDisabled}
+          isSelected={isSelected}
         />
       </EuiSplitButton>
     </div>

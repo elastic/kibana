@@ -108,19 +108,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     fullWidth,
   };
 
-  // Target the split part of the button for popover behavior.
-  const splitButtonCss = css`
-    & + button {
-      background-color: ${isPopoverOpen
-        ? getIsSelectedColor({
-            color: 'text',
-            euiTheme,
-            isFilled: false,
-          })
-        : undefined};
-    }
-  `;
-
   const buttonCss = css`
     background-color: ${isPopoverOpen
       ? getIsSelectedColor({
@@ -136,12 +123,10 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       <SplitButtonWithNotification
         {...otherSplitButtonProps}
         {...commonProps}
+        label={itemText}
         onSecondaryButtonClick={handleSecondaryButtonClick}
         isSelected={isPopoverOpen}
-        css={splitButtonCss}
-      >
-        {itemText}
-      </SplitButtonWithNotification>
+      />
     </EuiHideFor>
   ) : (
     <EuiHideFor sizes={hidden ?? 'none'}>

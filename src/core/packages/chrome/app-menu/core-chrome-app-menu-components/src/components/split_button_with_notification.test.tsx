@@ -20,13 +20,12 @@ const setup = (props: Partial<React.ComponentProps<typeof SplitButtonWithNotific
   render(
     <SplitButtonWithNotification
       data-test-subj="split-button"
+      label="Save"
       onClick={onMainButtonClick}
       onSecondaryButtonClick={onSecondaryButtonClick}
       secondaryButtonAriaLabel="More options"
       {...props}
-    >
-      Save
-    </SplitButtonWithNotification>
+    />
   );
 
   return { onMainButtonClick, onSecondaryButtonClick, user };
@@ -73,15 +72,14 @@ describe('<SplitButtonWithNotification />', () => {
 
     render(
       <SplitButtonWithNotification
+        label="Save"
         onClick={onMainButtonClick}
         onSecondaryButtonClick={jest.fn()}
         secondaryButtonAriaLabel="More options"
         showNotificationIndicator={true}
         iconType="save"
         isDisabled={true}
-      >
-        Save
-      </SplitButtonWithNotification>
+      />
     );
 
     const indicator = screen.getByTestId('split-button-notification-indicator');
