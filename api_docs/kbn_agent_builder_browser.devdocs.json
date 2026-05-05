@@ -289,6 +289,455 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentBuilderPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentBuilderPluginSetup",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentBuilderPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentBuilderPluginStart",
+        "description": [
+          "\nPublic start contract for the browser-side agentBuilder plugin."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.agents",
+            "type": "Object",
+            "tags": [],
+            "label": "agents",
+            "description": [
+              "\nAgent service contract, can be used to list agents."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AgentsServiceStartContract",
+                "text": "AgentsServiceStartContract"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.attachments",
+            "type": "Object",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nAttachment service contract, can be used to register and retrieve attachment UI definitions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AttachmentServiceStartContract",
+                "text": "AttachmentServiceStartContract"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.tools",
+            "type": "Object",
+            "tags": [],
+            "label": "tools",
+            "description": [
+              "\nTool service contract, can be used to list or execute tools."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ToolServiceStartContract",
+                "text": "ToolServiceStartContract"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.events",
+            "type": "Object",
+            "tags": [],
+            "label": "events",
+            "description": [
+              "\nEvents service contract, can be used to listen to chat events."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.EventsServiceStartContract",
+                "text": "EventsServiceStartContract"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.openChat",
+            "type": "Function",
+            "tags": [],
+            "label": "openChat",
+            "description": [
+              "\nOpens the conversation sidebar.\n"
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.OpenConversationSidebarOptions",
+                "text": "OpenConversationSidebarOptions"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.OpenConversationSidebarReturn",
+                "text": "OpenConversationSidebarReturn"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.openChat.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Configuration options for the sidebar"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.OpenConversationSidebarOptions",
+                    "text": "OpenConversationSidebarOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 158,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "OpenConversationSidebarOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "An object containing the sidebar reference"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.toggleChat",
+            "type": "Function",
+            "tags": [],
+            "label": "toggleChat",
+            "description": [
+              "\nToggles the conversation sidebar.\n\nIf the sidebar is open, it will be closed. Otherwise, it will be opened."
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.OpenConversationSidebarOptions",
+                "text": "OpenConversationSidebarOptions"
+              },
+              " | undefined) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.toggleChat.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.OpenConversationSidebarOptions",
+                    "text": "OpenConversationSidebarOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 164,
+                "columnNumber": 16,
+                "deprecated": false,
+                "docsReferencedTypeName": "OpenConversationSidebarOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.setChatConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "setChatConfig",
+            "description": [],
+            "signature": [
+              "(config: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.EmbeddableConversationProps",
+                "text": "EmbeddableConversationProps"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.setChatConfig.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.EmbeddableConversationProps",
+                    "text": "EmbeddableConversationProps"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 165,
+                "columnNumber": 19,
+                "deprecated": false,
+                "docsReferencedTypeName": "EmbeddableConversationProps",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.clearChatConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "clearChatConfig",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.addAttachment",
+            "type": "Function",
+            "tags": [],
+            "label": "addAttachment",
+            "description": [
+              "\nAdds an attachment to the active conversation sidebar.\nIf no sidebar is open, the attachment is ignored.\n"
+            ],
+            "signature": [
+              "(attachment: ",
+              "AttachmentInput",
+              "<string, unknown>) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.addAttachment.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attachment",
+                "description": [
+                  "- The attachment to add"
+                ],
+                "signature": [
+                  "AttachmentInput",
+                  "<string, unknown>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 173,
+                "columnNumber": 19,
+                "deprecated": false,
+                "docsReferencedTypeName": "AttachmentInput",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderPluginStart.updateAttachmentOrigin",
+            "type": "Function",
+            "tags": [],
+            "label": "updateAttachmentOrigin",
+            "description": [
+              "\nUpdates the origin of an attachment in a conversation.\nUse this after saving a by-value attachment to link it to its persistent store.\n"
+            ],
+            "signature": [
+              "(conversationId: string, attachmentId: string, origin: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.UpdateOriginResponse",
+                "text": "UpdateOriginResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.updateAttachmentOrigin.$1",
+                "type": "string",
+                "tags": [],
+                "label": "conversationId",
+                "description": [
+                  "- The conversation containing the attachment"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 194,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.updateAttachmentOrigin.$2",
+                "type": "string",
+                "tags": [],
+                "label": "attachmentId",
+                "description": [
+                  "- The ID of the attachment to update"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 195,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AgentBuilderPluginStart.updateAttachmentOrigin.$3",
+                "type": "string",
+                "tags": [],
+                "label": "origin",
+                "description": [
+                  "- Origin string for the attachment (e.g. saved object id); same value passed to `resolve` on the server"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+                "lineNumber": 196,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "Promise resolving to the update result"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.AgentsServiceStartContract",
         "type": "Interface",
         "tags": [],
@@ -855,6 +1304,194 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ConversationSidebarRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationSidebarRef",
+        "description": [
+          "\nHandle to control a conversation sidebar programmatically."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ConversationSidebarRef.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.EmbeddableConversationProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableConversationProps",
+        "description": [
+          "\nProps for the embeddable conversation component.\nConfigures conversation behavior when embedded in the sidebar or other host."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.newConversation",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "newConversation",
+            "description": [
+              "\nForce starting a new conversation, ignoring any stored conversation IDs.\nWhen true, a fresh conversation is always created."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.sessionTag",
+            "type": "string",
+            "tags": [
+              "default"
+            ],
+            "label": "sessionTag",
+            "description": [
+              "\nSession tag for conversation context. Used to maintain separate conversation\nhistories for different parts of the application.\n\nExamples:\n- 'dashboard' - Conversations started from dashboard page\n- 'search' - Conversations started from search interface\n- 'observability' - Conversations in observability context\n\nCombined with agentId to restore the correct conversation when the sidebar reopens."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.agentId",
+            "type": "string",
+            "tags": [],
+            "label": "agentId",
+            "description": [
+              "\nSpecific agent ID to use for this conversation.\nIf not provided, uses the last selected agent from localStorage.\n\nExamples:\n- 'platform.core.dashboard' - Dashboard agent\n- 'platform.core.general' - General agent"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.initialMessage",
+            "type": "string",
+            "tags": [],
+            "label": "initialMessage",
+            "description": [
+              "\nOptional initial message content to use when starting a new conversation.\nOnly applies when creating a new conversation (not when restoring existing ones).\nUse with `autoSendInitialMessage` to control whether this message is automatically sent.\n\nExample: 'Show me error logs from the last hour'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.autoSendInitialMessage",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "autoSendInitialMessage",
+            "description": [
+              "\nWhether to automatically send the initial message when starting a new conversation.\nOnly applies when creating a new conversation (not when restoring existing ones).\nRequires `initialMessage` to be provided.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.attachments",
+            "type": "Array",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nOptional attachments with lazy content loading.\nContent will be fetched when starting a new conversation round.\nIt will be appended only if it has changed since previous conversation round."
+            ],
+            "signature": [
+              "AttachmentInput",
+              "<string, unknown>[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EmbeddableConversationProps.browserApiTools",
+            "type": "Array",
+            "tags": [],
+            "label": "browserApiTools",
+            "description": [
+              "\nBrowser API tools that the agent can use to interact with the page.\nTools are executed browser-side when the LLM requests them.\n\nExample:\n```typescript\nbrowserApiTools: [{\n  id: 'dashboard.config.update_title',\n  description: 'Update the dashboard title',\n  schema: z.object({\n    title: z.string().describe('The new title')\n  }),\n  handler: async ({ title }) => {\n    dashboardApi.updateTitle(title);\n  }\n}]\n```"
+            ],
+            "signature": [
+              "BrowserApiToolDefinition",
+              "<any>[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.EventsServiceStartContract",
         "type": "Interface",
         "tags": [],
@@ -1102,6 +1739,99 @@
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
             "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.OpenConversationSidebarOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "OpenConversationSidebarOptions",
+        "description": [
+          "\nOptions passed when opening or toggling the conversation sidebar."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.OpenConversationSidebarOptions",
+            "text": "OpenConversationSidebarOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.EmbeddableConversationProps",
+            "text": "EmbeddableConversationProps"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.OpenConversationSidebarOptions.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.OpenConversationSidebarReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "OpenConversationSidebarReturn",
+        "description": [
+          "\nReturn value from opening the conversation sidebar."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.OpenConversationSidebarReturn.chatRef",
+            "type": "Object",
+            "tags": [],
+            "label": "chatRef",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ConversationSidebarRef",
+                "text": "ConversationSidebarRef"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
