@@ -257,6 +257,41 @@ describe('TraceWaterfall', () => {
     });
   });
 
+  describe('Scroll to origin button', () => {
+    it('renders when scrollStrategy is parent and contextSpanIds is set', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: ['span-1'],
+      });
+
+      expect(screen.getByTestId('waterfallScrollToOriginButton')).toBeInTheDocument();
+    });
+
+    it('does not render when scrollStrategy is window', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'window',
+        contextSpanIds: ['span-1'],
+      });
+
+      expect(screen.queryByTestId('waterfallScrollToOriginButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render when contextSpanIds is not set', () => {
+      renderTraceWaterfall({ scrollStrategy: 'parent' });
+
+      expect(screen.queryByTestId('waterfallScrollToOriginButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render when contextSpanIds is empty', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: [],
+      });
+
+      expect(screen.queryByTestId('waterfallScrollToOriginButton')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Critical Path Control', () => {
     it('does not render critical path control when showCriticalPathControl is false', () => {
       renderTraceWaterfall({ showCriticalPathControl: false });
