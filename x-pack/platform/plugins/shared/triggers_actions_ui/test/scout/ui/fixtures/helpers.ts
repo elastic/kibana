@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// `.es-query` is built-in in Scout's stateful/classic config — `test.noop`
-// and `test.always-firing` are FTR-fixture-only and not registered there.
-// The rule's only purpose across all rules-page specs is to populate the
-// rules list; no behavioral assertions are made on it.
 export const makeEsQueryRule = (namePrefix: string) => ({
   name: `${namePrefix}-rule-${Date.now()}`,
   ruleTypeId: '.es-query',

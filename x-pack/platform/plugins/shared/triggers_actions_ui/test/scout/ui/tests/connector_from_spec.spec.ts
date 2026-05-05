@@ -28,11 +28,6 @@ test.describe('Create connector from connector spec', { tag: tags.stateful.class
   });
 
   test('creates a spec-defined AlienVault OTX connector', async ({ apiServices, page }) => {
-    // The Connectors page renders two "Create connector" buttons: the
-    // top-right toolbar button (always present once any connector exists or
-    // not) and a centered empty-state button shown when there are zero
-    // connectors. The toolbar button is consistently present, so click it
-    // directly instead of doing a Locator.or() that would match both.
     await page.testSubj.click('createConnectorButton');
 
     await page.testSubj.click(`${CONNECTOR_TYPE_ID}-card`);

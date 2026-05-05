@@ -87,8 +87,6 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
 
     const rows = page.testSubj.locator('connectors-row');
     await expect(rows).toHaveCount(1);
-    // The table cells wrap text in an inner `.euiTableCellContent` div
-    // alongside icons/tooltips, so toContainText is the right granularity.
     await expect(rows.getByTestId('connectorsTableCell-name')).toContainText(jiraConnectorName);
     await expect(rows.getByTestId('connectorsTableCell-actionType')).toContainText('Jira');
   });
@@ -110,11 +108,6 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
   });
 
   test('disables the execute button when other fields is not valid json', async ({ page }) => {
-    // The original FTR spec asserted a server-side JSON parse error because
-    // its Monaco setValue helper did not propagate the value to React state,
-    // so client-side validation was bypassed. With the value correctly set,
-    // the client-side validateJSON catches the malformed JSON and the form
-    // disables the execute button — that's the modern, intended behavior.
     await openTestConnectorFlyout(page, jiraConnectorId);
 
     await page.testSubj.locator(SUMMARY_INPUT).fill('Test summary');

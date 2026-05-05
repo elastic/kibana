@@ -117,8 +117,6 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     });
     createdConnectorIds.push(created.id);
 
-    // Re-load the list now that a new connector exists. The table only
-    // renders when there's at least one connector — wait for it explicitly.
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 
@@ -138,8 +136,6 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await expect(configHeaderRow.getByTestId(HEADER_KEY_INPUT)).toHaveValue('configHeader');
     await expect(secretHeaderRow.getByTestId(HEADER_KEY_INPUT)).toHaveValue('secretHeader');
 
-    // The config header value is shown verbatim; the secret header value is
-    // intentionally blanked so the encrypted secret is never displayed.
     await expect(configHeaderRow.getByTestId(HEADER_VALUE_INPUT)).toHaveValue('config-value');
     await expect(secretHeaderRow.getByTestId('webhookHeadersSecretValueInput')).toHaveValue('');
   });

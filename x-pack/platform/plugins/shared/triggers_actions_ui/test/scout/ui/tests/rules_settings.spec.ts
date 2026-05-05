@@ -37,10 +37,6 @@ const openRulesSettingsFlyout = async (page: ScoutPage) => {
 test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
   let createdRuleId: string | undefined;
 
-  // Runs before every test so each one starts from the same known
-  // settings + a populated rules list. The original FTR spec set this in a
-  // single `before` hook; tests would be order-dependent because test 3
-  // mutates flapping settings — moving to beforeEach makes them isolated.
   test.beforeEach(async ({ apiServices, browserAuth, kbnClient, page }) => {
     await kbnClient.request({
       method: 'POST',
@@ -94,8 +90,7 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     );
 
     // Query-delay UI is gated behind a feature flag that is not on in
-    // the Scout stateful/classic config (and was disabled in the original
-    // FTR spec for the same reason).
+    // the Scout stateful/classic config.
     await expect(flyout.getByTestId('queryDelayRangeInput')).toBeHidden();
   });
 
