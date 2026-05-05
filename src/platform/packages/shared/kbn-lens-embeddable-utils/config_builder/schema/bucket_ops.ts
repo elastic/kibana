@@ -296,7 +296,7 @@ export const bucketTermsOperationSchema = schema.object(
              */
             max: schema.number({
               meta: {
-                description: 'Number of rare terms to include.',
+                description: 'Maximum number of rare terms to include.',
               },
             }),
           },
