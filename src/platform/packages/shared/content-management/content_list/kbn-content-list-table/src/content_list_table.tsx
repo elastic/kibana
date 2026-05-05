@@ -184,6 +184,74 @@ const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
 `;
 
 /**
+ * Viewport width (px) at which `Column.Name` is allowed to grow past its
+ * default `64em` cap. `2560px` matches a common 4K external display width
+ * — at that size the default footprint leaves enough trailing whitespace
+ * that giving some of it back to the title column is a clear win.
+ *
+ * Not tied to a named EUI breakpoint because EUI tops out at `xl` (~1200px),
+ * so the value would have to be a hard-coded magic number either way.
+ */
+const WIDE_VIEWPORT_NAME_BREAKPOINT_PX = 2560;
+
+/**
+ * Preferred {@link DEFAULT_NAME_WIDTH} bump applied at viewports
+ * ≥ {@link WIDE_VIEWPORT_NAME_BREAKPOINT_PX}.
+ *
+ * `90em` (~1440px) keeps the column inside a comfortable reading-line
+ * range while letting longer titles render without truncation. The
+ * trailing pseudo-cell from {@link cssTrailingSpacer} still absorbs
+ * everything beyond this width, so even on truly massive viewports the
+ * title column stops growing here.
+ */
+const WIDE_VIEWPORT_NAME_WIDTH = '90em';
+
+/**
+ * Widen `Column.Name` on viewports ≥ {@link WIDE_VIEWPORT_NAME_BREAKPOINT_PX}.
+ *
+ * EUI applies `width` / `max-width` as inline styles on every `<th>` and
+ * `<td>` (via `resolveWidthPropsAsStyle` in `@elastic/eui`), so the only
+ * way to override them from CSS is with `!important`. That trade is worth
+ * it here because the alternative — driving the bump from JS via
+ * `matchMedia` + `useState` + `useEffect` and either swapping the column's
+ * `width` or appending a layout-only column — adds either re-render churn
+ * on resize or a phantom DOM cell that screen readers see as a real column
+ * (no amount of imperative `aria-hidden`/`role="presentation"` hides it
+ * cleanly from the table grid).
+ *
+ * The trailing pseudo-cell from {@link cssTrailingSpacer} still absorbs
+ * leftover horizontal slack at every viewport size, so this rule only
+ * shifts the `Column.Name` / spacer ratio on wide pages — populated
+ * sibling columns (UpdatedAt, CreatedBy, Actions, etc.) keep their
+ * defaults.
+ *
+ * Selectors:
+ * - **Body** — `td[data-test-subj='content-list-table-column-name']`. The
+ *   column object's `data-test-subj` is forwarded by `EuiBasicTable`'s
+ *   `renderItemCell` via the spread `rest` props.
+ * - **Header** — `th[data-test-subj^='tableHeaderCell_title_']`. EUI's
+ *   `renderTableHead` always emits
+ *   `data-test-subj="tableHeaderCell_${field}_${index}"`, and
+ *   `Column.Name`'s `field` is `'title'`. The `^=` prefix match keeps the
+ *   selector stable regardless of the column index.
+ *
+ * Applies regardless of consumer-supplied `width` / `maxWidth` overrides
+ * — the wide-viewport bump is a cross-cutting layout decision rather than
+ * a per-instance default. Consumers who need the column to stay locked at
+ * their value can scope a more-specific CSS rule against the rendered
+ * table.
+ */
+const cssWideViewportNameWidth = css`
+  @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
+    th[data-test-subj^='tableHeaderCell_title_'],
+    td[data-test-subj='content-list-table-column-name'] {
+      width: ${WIDE_VIEWPORT_NAME_WIDTH} !important;
+      max-width: ${WIDE_VIEWPORT_NAME_WIDTH} !important;
+    }
+  }
+`;
+
+/**
  * ContentListTable - Table renderer for content listings.
  *
  * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
@@ -252,6 +320,10 @@ const ContentListTableComponent = ({
       // Excess horizontal space is absorbed by `cssTrailingSpacer` so it lands
       // after the last populated column rather than stretching `Column.Name`.
       cssTrailingSpacer(euiTheme),
+      // On viewports ≥ 2560px (~4K), bump the Name column past its default
+      // 64em cap so users with wide displays see more of the title. The
+      // pseudo-cell still absorbs the rest of the slack.
+      cssWideViewportNameWidth,
       ...(supports.starred ? [cssFavoriteHoverWithinEuiTableRow(euiTheme)] : []),
     ],
     [euiTheme, supports.starred]

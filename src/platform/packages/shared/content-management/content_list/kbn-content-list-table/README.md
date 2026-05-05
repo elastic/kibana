@@ -75,6 +75,10 @@ On viewports too narrow to fit all preferred widths the pseudo-cell collapses (n
 
 There is no DOM, accessibility, or clipboard impact: the rendered table has exactly the columns you declared, screen readers read the correct column count, and copying rows into a spreadsheet doesn't add a trailing tab. See `cssTrailingSpacer` in `content_list_table.tsx` for the rationale and the alternatives that were considered.
 
+#### Wide-viewport `Column.Name` upgrade
+
+On viewports ≥ `2560px` (common 4K external displays), `ContentListTable` widens `Column.Name` from `64em` to `90em` via a media-query CSS override (`cssWideViewportNameWidth` in `content_list_table.tsx`). The trailing pseudo-cell still absorbs whatever horizontal slack remains, so populated sibling columns (`UpdatedAt`, `CreatedBy`, `Actions`, etc.) stay at their preferred footprints; only the Name column / spacer ratio shifts. Because EUI applies `width` / `max-width` as inline styles, the rule uses `!important` and so applies regardless of consumer-supplied `width` overrides — the wide-viewport bump is a cross-cutting layout decision rather than a per-instance default.
+
 #### Overriding defaults
 
 There are two ways to opt out of a baked-in default:

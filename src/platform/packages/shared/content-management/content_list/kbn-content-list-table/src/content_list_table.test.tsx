@@ -450,6 +450,53 @@ describe('ContentListTable', () => {
       });
     });
 
+    /**
+     * The wide-viewport `Column.Name` upgrade is implemented as a media-query
+     * CSS override (`cssWideViewportNameWidth` in `content_list_table.tsx`)
+     * rather than a JS column-width swap or a layout-only DOM column. jsdom
+     * doesn't lay out tables or evaluate `@media` rules, so we can't observe
+     * the visual outcome here — but we *can* assert that:
+     *
+     * 1. The CSS rule reaches the document (so it actually fires in the
+     *    browser).
+     * 2. No JS-driven spacer column has crept in alongside it.
+     */
+    it('emits the wide-viewport Name override as a CSS rule (no JS spacer column)', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListTable title="Dashboards" />
+        </Wrapper>
+      );
+
+      expect(await screen.findByText('Dashboard One')).toBeInTheDocument();
+
+      // Emotion injects the rule into a `<style>` element in `document.head`.
+      // We assert on the joined `cssText` so the rule is detectable regardless
+      // of which `<style>` block emotion picks for it.
+      const styleSheets = Array.from(document.styleSheets);
+      const allRulesText = styleSheets
+        .flatMap((sheet) => {
+          try {
+            return Array.from(sheet.cssRules);
+          } catch {
+            // Cross-origin sheet — ignore.
+            return [];
+          }
+        })
+        .map((rule) => rule.cssText)
+        .join('\n');
+
+      expect(allRulesText).toMatch(/min-width:\s*2560px/);
+      expect(allRulesText).toMatch(/tableHeaderCell_title_/);
+      expect(allRulesText).toMatch(/content-list-table-column-name/);
+
+      // Defence-in-depth against a regression that re-introduces the
+      // spacer-column approach: assert the layout-only `data-test-subj`
+      // never appears in the DOM at any viewport.
+      expect(screen.queryByTestId('content-list-table-column-spacer')).not.toBeInTheDocument();
+    });
+
     it('keeps cell counts in lockstep when consumers add their own columns', async () => {
       const { Column } = ContentListTable;
       const Wrapper = createWrapper();
