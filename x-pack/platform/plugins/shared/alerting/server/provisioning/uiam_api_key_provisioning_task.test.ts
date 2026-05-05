@@ -1267,11 +1267,12 @@ describe('UiamApiKeyProvisioningTask', () => {
       );
       const bulkCreateCalls = savedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
         id: string;
-        attributes: { status: string };
+        attributes: { status: string; errorCode?: string };
       }>;
       const statuses = bulkCreateCalls.map((c) => ({ id: c.id, status: c.attributes.status }));
       expect(statuses).toContainEqual({ id: 'r1', status: UiamApiKeyProvisioningStatus.COMPLETED });
       expect(statuses).toContainEqual({ id: 'r2', status: UiamApiKeyProvisioningStatus.FAILED });
+      expect(bulkCreateCalls.find((c) => c.id === 'r2')?.attributes.errorCode).toBe('400');
       expect(logger.info).toHaveBeenCalledWith(
         'Wrote provisioning status: 2 total (0 skipped, 1 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
