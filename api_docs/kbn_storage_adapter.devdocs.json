@@ -80,6 +80,7 @@
                 "lineNumber": 13,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkResponse",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -144,6 +145,7 @@
                 "lineNumber": 170,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -167,6 +169,7 @@
                 "lineNumber": 171,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -184,6 +187,7 @@
                 "lineNumber": 172,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TStorageSettings",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -202,6 +206,7 @@
                 "lineNumber": 173,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageIndexAdapterOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -283,6 +288,7 @@
             "lineNumber": 14,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "IndexStorageSettings",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -409,6 +415,7 @@
                 "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TSearchRequest",
                 "trackAdoption": false
               },
               {
@@ -432,6 +439,7 @@
                 "lineNumber": 118,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageTransportOptions",
                 "trackAdoption": false
               }
             ]
@@ -502,6 +510,7 @@
                 "lineNumber": 129,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageClientBulkRequest",
                 "trackAdoption": false
               },
               {
@@ -525,6 +534,7 @@
                 "lineNumber": 130,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageTransportOptions",
                 "trackAdoption": false
               }
             ]
@@ -590,6 +600,7 @@
                 "lineNumber": 134,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageClientIndexRequest",
                 "trackAdoption": false
               },
               {
@@ -613,6 +624,7 @@
                 "lineNumber": 135,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageTransportOptions",
                 "trackAdoption": false
               }
             ]
@@ -682,6 +694,7 @@
                 "lineNumber": 139,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageClientDeleteRequest",
                 "trackAdoption": false
               },
               {
@@ -705,6 +718,7 @@
                 "lineNumber": 140,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageTransportOptions",
                 "trackAdoption": false
               }
             ]
@@ -858,6 +872,7 @@
                 "lineNumber": 146,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageClientGetRequest",
                 "trackAdoption": false
               },
               {
@@ -881,6 +896,7 @@
                 "lineNumber": 147,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "StorageTransportOptions",
                 "trackAdoption": false
               }
             ]
@@ -1241,6 +1257,7 @@
             "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageClientBulkRequest",
             "trackAdoption": false
           },
           {
@@ -1264,6 +1281,7 @@
             "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageTransportOptions",
             "trackAdoption": false
           }
         ],
@@ -1429,6 +1447,7 @@
             "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageClientDeleteRequest",
             "trackAdoption": false
           },
           {
@@ -1452,6 +1471,7 @@
             "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageTransportOptions",
             "trackAdoption": false
           }
         ],
@@ -1626,6 +1646,7 @@
             "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageClientGetRequest",
             "trackAdoption": false
           },
           {
@@ -1649,6 +1670,7 @@
             "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageTransportOptions",
             "trackAdoption": false
           }
         ],
@@ -1818,6 +1840,7 @@
             "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageClientIndexRequest",
             "trackAdoption": false
           },
           {
@@ -1841,6 +1864,7 @@
             "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageTransportOptions",
             "trackAdoption": false
           }
         ],
@@ -1947,6 +1971,7 @@
             "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSearchRequest",
             "trackAdoption": false
           },
           {
@@ -1970,6 +1995,7 @@
             "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StorageTransportOptions",
             "trackAdoption": false
           }
         ],
@@ -2142,6 +2168,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2183,6 +2210,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2224,6 +2252,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2265,6 +2294,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2306,6 +2336,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2347,6 +2378,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2388,6 +2420,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2427,6 +2460,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2468,6 +2502,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2509,6 +2544,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2550,6 +2586,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2591,6 +2628,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2632,6 +2670,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]
@@ -2673,6 +2712,7 @@
                 "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOverrides",
                 "trackAdoption": false
               }
             ]

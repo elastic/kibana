@@ -162,6 +162,7 @@
                 "lineNumber": 57,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexAdapterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -200,6 +201,7 @@
                 "lineNumber": 64,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetComponentTemplateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -250,6 +252,7 @@
                 "lineNumber": 71,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetIndexTemplateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -288,6 +291,7 @@
                 "lineNumber": 85,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetInstallFnParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -338,6 +342,7 @@
                 "lineNumber": 104,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -388,6 +393,7 @@
                 "lineNumber": 139,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -527,6 +533,7 @@
                 "lineNumber": 23,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexPatternAdapterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -579,6 +586,7 @@
                 "lineNumber": 32,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -637,6 +645,7 @@
                 "lineNumber": 37,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -792,6 +801,7 @@
             "lineNumber": 106,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateComponentTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -831,6 +841,7 @@
             "lineNumber": 28,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateIndexTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }

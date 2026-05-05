@@ -30,6 +30,13 @@ export const QUERY_TYPE_STATS = 'stats' as const;
 
 export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
 
+/**
+ * Minimum severity score for auto-creating backing rules.
+ * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80.
+ * High + Critical queries are eligible for automatic rule creation.
+ */
+export const HIGH_SEVERITY_THRESHOLD = 60;
+
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
 export interface StreamQuery extends StreamQueryBase {

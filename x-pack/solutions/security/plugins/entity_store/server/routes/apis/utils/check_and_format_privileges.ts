@@ -71,7 +71,7 @@ export const formatPrivileges = (
 };
 
 interface CheckAndFormatPrivilegesOpts {
-  indexPattern: string;
+  indexPatterns: string[];
   request: KibanaRequest;
   security: SecurityPluginStart;
   privilegesToCheck: CheckPrivilegesPayload;
@@ -81,7 +81,7 @@ export async function checkAndFormatPrivileges({
   request,
   security,
   privilegesToCheck,
-  indexPattern,
+  indexPatterns,
 }: CheckAndFormatPrivilegesOpts): Promise<Privileges> {
   const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
   const { privileges, hasAllRequested } = await checkPrivileges(privilegesToCheck);
@@ -89,21 +89,22 @@ export async function checkAndFormatPrivileges({
   return {
     privileges: formatPrivileges(privileges),
     has_all_required: hasAllRequested,
-    ...hasReadWritePermissions(privileges.elasticsearch, indexPattern),
+    ...hasReadWritePermissions(privileges.elasticsearch, indexPatterns),
   };
 }
 
 export const hasReadWritePermissions = (
   { index, cluster }: CheckPrivilegesResponse['privileges']['elasticsearch'],
-  indexKey = ''
+  indexKeys: string[] = []
 ) => {
   const has =
     (type: string) =>
     ({ privilege, authorized }: { privilege: string; authorized: boolean }) =>
       privilege === type && authorized;
+  const hasOnAllIndices = (type: string) =>
+    indexKeys.length > 0 && indexKeys.every((key) => index[key]?.some(has(type)));
   return {
-    has_read_permissions: index[indexKey]?.some(has('read')) || cluster.some(has('read')),
-
-    has_write_permissions: index[indexKey]?.some(has('write')) || cluster.some(has('write')),
+    has_read_permissions: hasOnAllIndices('read') || cluster.some(has('read')),
+    has_write_permissions: hasOnAllIndices('write') || cluster.some(has('write')),
   };
 };

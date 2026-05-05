@@ -38,8 +38,10 @@ jest.mock('@kbn/discover-utils', () => ({
     DOC_HIDE_TIME_COLUMN_SETTING: 'doc_table:hideTimeColumn',
   },
   buildDataTableRecord: jest.fn(),
+  getChartHidden: jest.fn().mockReturnValue(undefined),
   getDefaultSort: jest.fn().mockReturnValue([]),
   getSortArray: jest.fn().mockReturnValue([]),
+  getTableHidden: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('@kbn/data-plugin/common', () => ({

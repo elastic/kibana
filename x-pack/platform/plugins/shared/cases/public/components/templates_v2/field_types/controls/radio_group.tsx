@@ -20,6 +20,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import * as i18n from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> & ConditionRenderProps;
 
@@ -29,6 +30,7 @@ interface RadioGroupFieldProps {
   name: string;
   options: Array<{ id: string; label: string }>;
   firstOption: string;
+  isRequired: boolean;
 }
 
 const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
@@ -37,6 +39,7 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
   name,
   options,
   firstOption,
+  isRequired,
 }) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -56,7 +59,13 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
     typeof field.value === 'string' && field.value !== '' ? field.value : firstOption;
 
   return (
-    <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+    <EuiFormRow
+      label={label}
+      labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      fullWidth
+    >
       <EuiRadioGroup
         name={name}
         options={options}
@@ -109,6 +118,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
           field={field}
           label={label ?? ''}
           name={name}
+          isRequired={isRequired ?? false}
           options={options}
           firstOption={metadata.options[0]}
         />

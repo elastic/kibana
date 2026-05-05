@@ -63,6 +63,7 @@
             "lineNumber": 19,
             "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -116,6 +117,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -135,6 +137,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -243,6 +246,7 @@
             "lineNumber": 46,
             "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -294,6 +298,7 @@
             "lineNumber": 19,
             "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -400,6 +405,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -419,6 +425,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -465,6 +472,7 @@
             "lineNumber": 18,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLAstQueryExpression",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -483,6 +491,7 @@
             "lineNumber": 18,
             "columnNumber": 69,
             "deprecated": false,
+            "docsReferencedTypeName": "Params",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -541,6 +550,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -558,6 +568,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -742,6 +753,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -761,6 +773,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -813,6 +826,7 @@
             "lineNumber": 39,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -965,6 +979,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -984,6 +999,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1049,6 +1065,7 @@
             "lineNumber": 68,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Query",
             "trackAdoption": false
           }
         ],

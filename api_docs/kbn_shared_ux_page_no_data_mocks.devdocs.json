@@ -168,6 +168,7 @@
                 "lineNumber": 27,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "NoDataCardStorybookParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -225,6 +226,7 @@
                 "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "NoDataCardStorybookParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -284,6 +286,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -344,6 +347,7 @@
             "lineNumber": 27,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }

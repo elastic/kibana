@@ -29,7 +29,7 @@ describe('DispatchConfigSummary', () => {
   it('renders the title', () => {
     renderSummary({});
 
-    expect(screen.getByText('Dispatch configuration')).toBeDefined();
+    expect(screen.getByText('Notification summary')).toBeDefined();
   });
 
   describe('per_episode mode', () => {
@@ -37,7 +37,7 @@ describe('DispatchConfigSummary', () => {
       renderSummary({ groupingMode: 'per_episode', throttleStrategy: 'on_status_change' });
 
       expect(
-        screen.getByText('Each episode is dispatched once per status transition.')
+        screen.getByText('Sends one notification when an episode opens and one when it recovers.')
       ).toBeDefined();
     });
 
@@ -50,7 +50,7 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'Each episode is dispatched on status change and repeated every 5 minute(s).'
+          'Sends a notification on status change and repeats every 5 minutes while the episode remains active.'
         )
       ).toBeDefined();
     });
@@ -62,14 +62,16 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(screen.getByText('Each episode is dispatched on status change.')).toBeDefined();
+      expect(screen.getByText('Sends a notification on status change.')).toBeDefined();
     });
 
     it('shows every evaluation summary', () => {
       renderSummary({ groupingMode: 'per_episode', throttleStrategy: 'every_time' });
 
       expect(
-        screen.getByText('Each episode is dispatched on every evaluation with no throttle.')
+        screen.getByText(
+          'Sends a notification for every rule evaluation. No limit on notification frequency.'
+        )
       ).toBeDefined();
     });
   });
@@ -82,7 +84,9 @@ describe('DispatchConfigSummary', () => {
         throttleStrategy: 'time_interval',
       });
 
-      expect(screen.getByText('Add group-by fields to configure grouped dispatch.')).toBeDefined();
+      expect(
+        screen.getByText('Select a field in Group by to configure group notifications.')
+      ).toBeDefined();
     });
 
     it('shows throttle summary with fields', () => {
@@ -95,7 +99,7 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'Episodes grouped by host.name, service.name are dispatched at most once every 10 minute(s).'
+          'Sends at most one notification every 10 minutes for each group sharing values in host.name, service.name.'
         )
       ).toBeDefined();
     });
@@ -108,7 +112,9 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(screen.getByText('Episodes grouped by host.name are dispatched.')).toBeDefined();
+      expect(
+        screen.getByText('Sends a notification for each group sharing values in host.name.')
+      ).toBeDefined();
     });
 
     it('shows every evaluation summary with fields', () => {
@@ -120,7 +126,7 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'Episodes grouped by host.name are dispatched on every evaluation with no throttle.'
+          'Sends a notification for each group on every rule evaluation. No limit on notification frequency.'
         )
       ).toBeDefined();
     });
@@ -135,7 +141,9 @@ describe('DispatchConfigSummary', () => {
       });
 
       expect(
-        screen.getByText('All matched episodes are dispatched at most once every 1 hour(s).')
+        screen.getByText(
+          'Combines all matching episodes into one notification at most every 1 hour.'
+        )
       ).toBeDefined();
     });
 
@@ -146,7 +154,9 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(screen.getByText('All matched episodes are dispatched.')).toBeDefined();
+      expect(
+        screen.getByText('Combines all matching episodes into one notification.')
+      ).toBeDefined();
     });
 
     it('shows every evaluation summary', () => {
@@ -154,7 +164,7 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'All matched episodes are dispatched on every evaluation with no throttle.'
+          'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.'
         )
       ).toBeDefined();
     });
@@ -169,7 +179,7 @@ describe('DispatchConfigSummary', () => {
 
     expect(
       screen.getByText(
-        'Each episode is dispatched on status change and repeated every 30 second(s).'
+        'Sends a notification on status change and repeats every 30 seconds while the episode remains active.'
       )
     ).toBeDefined();
   });
