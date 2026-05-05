@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';

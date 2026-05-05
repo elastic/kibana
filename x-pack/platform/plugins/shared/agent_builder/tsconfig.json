@@ -70,6 +70,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/workflows",
     "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
