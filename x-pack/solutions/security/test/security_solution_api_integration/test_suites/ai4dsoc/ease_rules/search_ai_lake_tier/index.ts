@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { ListClient } from '@kbn/lists-plugin/server';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export interface CreateListIndicesInitializationFlowContext {
-  internalListClient: ListClient;
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('AI4DSOC - EASE Rules', function () {
+    loadTestFile(require.resolve('./bootstrap_ease_rules'));
+  });
 }

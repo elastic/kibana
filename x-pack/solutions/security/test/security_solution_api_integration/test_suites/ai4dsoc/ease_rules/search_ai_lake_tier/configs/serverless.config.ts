@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { useAgentBuilderAgentById } from './use_agent_by_id';
+import { createTestConfig } from '../../../../../config/serverless/config.base.ai4dsoc';
 
-export const useIsAgentReadOnly = (agentId?: string) => {
-  const { agent } = useAgentBuilderAgentById(agentId);
-  return !!agent?.readonly;
-};
+export default createTestConfig({
+  testFiles: [require.resolve('..')],
+  junit: {
+    reportName: 'AI4DSOC - EASE Rules - Serverless Search AI Lake Tier',
+  },
+});
