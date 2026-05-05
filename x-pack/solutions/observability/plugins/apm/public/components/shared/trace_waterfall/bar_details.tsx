@@ -17,11 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AgentIcon } from '@kbn/custom-icons';
-import {
-  EBT_CLICK_ACTION_VIEW_ERROR,
-  EBT_CLICK_ACTION_VIEW_SERVICE,
-  getEbtProps,
-} from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -115,7 +111,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               data-test-subj="apmBarDetailsServiceNameBadge"
               {...(getServiceBadgeHref && ebt?.serviceBadge
                 ? getEbtProps({
-                    action: EBT_CLICK_ACTION_VIEW_SERVICE,
+                    action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
                     element: ebt.serviceBadge.element,
                   })
                 : {})}
@@ -168,7 +164,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 href={getRelatedErrorsHref?.(item.id) as any}
                 {...(ebt
                   ? getEbtProps({
-                      action: EBT_CLICK_ACTION_VIEW_ERROR,
+                      action: EBT_CLICK_ACTIONS.VIEW_ERROR,
                       element: ebt.errorBadge.element,
                     })
                   : {})}

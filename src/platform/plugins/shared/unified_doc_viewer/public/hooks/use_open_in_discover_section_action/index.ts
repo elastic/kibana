@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { EBT_CLICK_ACTION_OPEN_IN_DISCOVER, type EbtClickAttrs } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, type EbtClickAttrs } from '@kbn/ebt-click';
 import type { Action } from '../../components/content_framework/section/section_actions';
 import {
   OPEN_IN_DISCOVER_LABEL,
@@ -52,7 +52,7 @@ export function useOpenInDiscoverSectionAction(
       icon: 'discoverApp',
       ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
       ebt: {
-        action: EBT_CLICK_ACTION_OPEN_IN_DISCOVER,
+        action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
         element: ebt?.element,
         detail: ebt?.detail,
       },

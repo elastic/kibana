@@ -25,17 +25,21 @@
  * Discover (e.g. a button that says "Open in Discover").
  */
 
-/** Navigates to the Discover app. */
-export const EBT_CLICK_ACTION_OPEN_IN_DISCOVER = 'openInDiscover';
-
-/** User intends to view a span or transaction's details. */
-export const EBT_CLICK_ACTION_VIEW_SPAN = 'viewSpan';
-
-/** User intends to view a service's overview. */
-export const EBT_CLICK_ACTION_VIEW_SERVICE = 'viewService';
-
-/** User intends to view an error's details. */
-export const EBT_CLICK_ACTION_VIEW_ERROR = 'viewError';
-
-/** Navigates to the APM app. Use when the user explicitly chooses to open something in APM. */
-export const EBT_CLICK_ACTION_OPEN_IN_APM = 'openInApm';
+/**
+ * Shared EBT click action constants.
+ *
+ * Use these when the user intent is generic enough to be shared across plugins.
+ * For plugin-specific actions, define them locally in the plugin's own ebt_constants file.
+ */
+export const EBT_CLICK_ACTIONS = {
+  /** Navigates to the Discover app. */
+  OPEN_IN_DISCOVER: 'openInDiscover',
+  /** User intends to view a span or transaction's details. */
+  VIEW_SPAN: 'viewSpan',
+  /** User intends to view a service's overview. */
+  VIEW_SERVICE: 'viewService',
+  /** User intends to view an error's details. */
+  VIEW_ERROR: 'viewError',
+  /** Navigates to the APM app. Use when the user explicitly chooses to open something in APM. */
+  OPEN_IN_APM: 'openInApm',
+} as const;

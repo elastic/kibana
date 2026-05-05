@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EBT_CLICK_ACTION_VIEW_SPAN, getEbtProps } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { CriticalPathSegment } from './critical_path';
 import { Bar, type BarSegment } from './bar';
 import { BarDetails } from './bar_details';
@@ -123,7 +123,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
             <div
               data-test-subj="traceItemRowContent"
               {...(onClick && ebt?.row
-                ? getEbtProps({ action: EBT_CLICK_ACTION_VIEW_SPAN, element: ebt.row.element })
+                ? getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SPAN, element: ebt.row.element })
                 : {})}
               css={css`
                 margin-left: ${calculateMarginLeft()}px;

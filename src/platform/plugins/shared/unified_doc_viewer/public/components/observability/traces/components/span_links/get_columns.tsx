@@ -14,7 +14,7 @@ import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import { EBT_CLICK_ACTION_VIEW_SPAN, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
@@ -35,8 +35,8 @@ const spanLinksEbtBase = {
   element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
   detail: EBT_DETAIL_SPAN_DOC,
 };
-const spanNameEbt = { action: EBT_CLICK_ACTION_VIEW_SPAN, ...spanLinksEbtBase };
-const serviceNameEbt = { action: EBT_CLICK_ACTION_VIEW_SERVICE, ...spanLinksEbtBase };
+const spanNameEbt = { action: EBT_CLICK_ACTIONS.VIEW_SPAN, ...spanLinksEbtBase };
+const serviceNameEbt = { action: EBT_CLICK_ACTIONS.VIEW_SERVICE, ...spanLinksEbtBase };
 const traceIdEbt = { action: EBT_CLICK_ACTION_VIEW_TRACE, ...spanLinksEbtBase };
 
 const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
