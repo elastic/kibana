@@ -15,6 +15,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -55,6 +56,32 @@ export const module = new ContainerModule(({ bind }) => {
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
       });
+
+      const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(
+        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+        false
+      );
+
+      const agentBuilderToken = PluginStart('agentBuilder');
+      if (experimentalEnabled && diContainer.isBound(agentBuilderToken)) {
+        const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
+        const rulesApi = diContainer.get(RulesApi);
+        import(
+          /* webpackChunkName: "alerting_v2_rule_attachment" */
+          './agent_builder/attachments/rule_attachment_definition'
+        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE: ruleAttachmentType }) => {
+          agentBuilder.attachments.addAttachmentType(
+            ruleAttachmentType,
+            createRuleAttachmentDefinition({
+              rulesApi,
+              application: coreStart.application,
+              basePath: coreStart.http.basePath,
+              notifications: coreStart.notifications,
+              container: diContainer,
+            })
+          );
+        });
+      }
     });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;

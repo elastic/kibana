@@ -109,8 +109,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
 
-    // Find the lightweight paused step (polling uses includeInput: false)
-    const pausedStepId = useMemo(() => {
+    // Step execution row id for the active waitForInput pause (polling uses includeInput: false)
+    const waitingStepExecutionId = useMemo(() => {
       if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
         return undefined;
       }
@@ -124,7 +124,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     // consistent with every other step types
     const { data: pausedStepFullData } = useStepExecution(
       executionId,
-      pausedStepId,
+      waitingStepExecutionId,
       ExecutionStatus.WAITING_FOR_INPUT
     );
 
@@ -287,6 +287,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
               shouldAutoResume={shouldAutoResume}
+              waitingStepExecutionId={waitingStepExecutionId}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />
