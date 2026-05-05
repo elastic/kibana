@@ -207,7 +207,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('host');
 
     const expected =
-      'NOT(`host.id` IS NULL) AND `host.id` != "" OR NOT(`host.name` IS NULL) AND `host.name` != "" OR NOT(`host.hostname` IS NULL) AND `host.hostname` != ""';
+      'NOT(`host.id` IS NULL) AND COALESCE(`host.id` != "", TRUE) OR NOT(`host.name` IS NULL) AND COALESCE(`host.name` != "", TRUE) OR NOT(`host.hostname` IS NULL) AND COALESCE(`host.hostname` != "", TRUE)';
     expect(result).toBe(expected);
   });
 
@@ -281,7 +281,7 @@ describe('getEuidEsqlEvaluation', () => {
   it('returns conditional CASE for user: when local uses user.name@host.id@entity.namespace, else 4-option ranking', () => {
     const result = getEuidEsqlEvaluation('user');
 
-    const expected = `CONCAT("user:", CASE((\`entity.namespace\` == "local"), CASE((user.name IS NOT NULL AND user.name != "" AND host.id IS NOT NULL AND host.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
+    const expected = `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CASE((user.name IS NOT NULL AND user.name != "" AND host.id IS NOT NULL AND host.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
 true, CASE((user.email IS NOT NULL AND user.email != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.email, "@", entity.namespace),
 (user.id IS NOT NULL AND user.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.id, "@", entity.namespace),
 (user.name IS NOT NULL AND user.name != "" AND user.domain IS NOT NULL AND user.domain != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", user.domain, "@", entity.namespace),

@@ -105,6 +105,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/management-settings-ids",
     "@kbn/workflows-extensions",
+    "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
