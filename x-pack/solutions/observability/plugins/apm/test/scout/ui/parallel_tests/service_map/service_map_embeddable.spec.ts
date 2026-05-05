@@ -50,11 +50,9 @@ test.describe(
       });
 
       await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_1 hour');
-        await expect(page.getByTestId('superDatePickerShowDatesButton')).toContainText(
-          'Last 1 hour'
-        );
-        await page.getByTestId('superDatePickerShowDatesButton').blur();
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_1_hour');
+        await expect(page.getByTestId('dateRangePickerControlButton')).toContainText('Last 1 hour');
+        await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
       await test.step('open add panel flyout', async () => {
