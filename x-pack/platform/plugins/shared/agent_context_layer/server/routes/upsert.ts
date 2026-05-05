@@ -43,7 +43,9 @@ export const registerUpsertRoute = ({
           title: schema.string({ minLength: 1 }),
           origin_id: schema.string({ minLength: 1 }),
           content: schema.string(),
-          permissions: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
+          permissions: schema.maybe(
+            schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 100 })
+          ),
         }),
       },
       options: { access: 'internal' },
