@@ -48,10 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.wizard.selectTransformFunction('latest');
 
       await transform.testExecution.logTestStep('configures the minimum latest transform fields');
-      await transform.wizard.addUniqueKeyEntry(
-        'geoip.country_iso_code',
-        'geoip.country_iso_code'
-      );
+      await transform.wizard.addUniqueKeyEntry('geoip.country_iso_code', 'geoip.country_iso_code');
       await transform.wizard.setSortFieldValue('order_date', 'order_date');
 
       await transform.testExecution.logTestStep('advances to the details step');
