@@ -13,7 +13,6 @@ import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';

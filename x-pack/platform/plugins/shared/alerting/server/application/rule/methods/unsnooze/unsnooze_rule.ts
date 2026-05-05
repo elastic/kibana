@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -44,7 +44,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   } catch (error) {
     throw Boom.badRequest(`Error validating unsnooze params - ${error.message}`);
   }
-  const { attributes, references, version } = await withSpan(
+  const { attributes, version } = await withSpan(
     { name: 'getRuleSavedObject', type: 'rules' },
     () =>
       getRuleSavedObject(context, {
@@ -85,7 +85,6 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
   const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
   const username = await context.getUserName();
-  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,

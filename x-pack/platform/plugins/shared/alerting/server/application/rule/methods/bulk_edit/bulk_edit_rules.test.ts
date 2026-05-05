@@ -3427,4 +3427,168 @@ describe('bulkEdit()', () => {
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
   });
+
+  describe('change tracking', () => {
+    const updatedRuleSO = (id: string, error?: SavedObject<RawRule>['error']) =>
+      ({
+        id,
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...existingRule.attributes,
+          tags: ['foo', 'test-1'],
+          revision: 1,
+        },
+        references: [],
+        ...(error ? { error } : {}),
+      } as SavedObject<RawRule>);
+
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs every successfully edited rule with action "rule_update" by default', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1' })],
+        {
+          action: 'rule_update',
+          spaceId: 'default',
+          data: { metadata: { bulkCount: 1 } },
+        }
+      );
+    });
+
+    test('captures the full post-edit attributes and references of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      const updated = updatedRuleSO('1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [updated] });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          {
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: updated.attributes,
+              references: updated.references,
+            },
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('skips rules whose saved object update failed (partial bulk failures)', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          { ...existingDecryptedRule, id: '1' },
+          { ...existingDecryptedRule, id: '2' },
+          { ...existingDecryptedRule, id: '3' },
+        ],
+      });
+      // Non-409 errors are not retried, so the partial failure case is single-pass.
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          updatedRuleSO('1'),
+          updatedRuleSO('2', {
+            error: 'InternalServerError',
+            message: 'something exploded',
+            statusCode: 500,
+          }),
+          updatedRuleSO('3'),
+        ],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1' }), expect.objectContaining({ objectId: '3' })],
+        // bulkCount preserves the input size (matches caller telemetry expectations).
+        expect.objectContaining({ data: { metadata: { bulkCount: 3 } } })
+      );
+    });
+
+    test('does not log when rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does nothing when no change tracking service is configured', async () => {
+      // Default rulesClient has no changeTrackingService configured.
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      // Negative assertion is exercised at the helper level.
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
+    });
+  });
 });

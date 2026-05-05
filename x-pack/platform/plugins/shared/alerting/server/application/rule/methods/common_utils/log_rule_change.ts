@@ -48,7 +48,7 @@ export async function logRuleChange({
 
     await changeTrackingService.log(change, {
       action,
-      spaceId: spaceId,
+      spaceId,
     });
   } catch (e) {
     logger.warn(`Unable to log rule change for action "${action}": ${e}`);

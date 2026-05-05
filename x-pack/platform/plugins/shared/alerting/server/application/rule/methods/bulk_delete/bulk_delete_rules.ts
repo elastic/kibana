@@ -11,7 +11,6 @@ import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import {
   combineFiltersWithInternalRuleTypeFilter,
   constructIgnoreInternalRuleTypesFilter,

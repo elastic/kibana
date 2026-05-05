@@ -60,7 +60,7 @@ export async function logBulkRuleChanges({
 
     await changeTrackingService.logBulk(changes, {
       action,
-      spaceId: spaceId,
+      spaceId,
       data: { metadata: { bulkCount: ruleSOs.length } },
     });
   } catch (e) {

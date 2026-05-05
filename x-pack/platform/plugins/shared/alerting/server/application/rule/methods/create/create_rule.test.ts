@@ -4931,4 +4931,134 @@ This is the type of text _investigation guides_ will contain.`;
       );
     });
   });
+
+  describe('change tracking', () => {
+    const createdRuleSO = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: { bar: true },
+        createdAt: '2019-02-12T21:01:22.479Z',
+        actions: [],
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: RecoveredActionGroup,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs the change after the rule is created', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await trackingClient.create({ data: getMockData() });
+
+      expect(changeTrackingService.log).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.log).toHaveBeenCalledWith(
+        expect.objectContaining({ objectId: '1', module: 'stack' }),
+        { action: 'rule_create', spaceId: 'default' }
+      );
+    });
+
+    test('captures the full post-creation attributes and references of the rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await trackingClient.create({ data: getMockData() });
+
+      expect(changeTrackingService.log).toHaveBeenCalledWith(
+        {
+          objectId: '1',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: 'stack',
+          snapshot: {
+            attributes: createdRuleSO.attributes,
+            references: createdRuleSO.references,
+          },
+        },
+        expect.any(Object)
+      );
+    });
+
+    test('does not log when the rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await trackingClient.create({ data: getMockData() });
+
+      expect(changeTrackingService.log).not.toHaveBeenCalled();
+    });
+
+    test('does not log when no change tracking service is configured', async () => {
+      // Default rulesClient has no changeTrackingService configured.
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await rulesClient.create({ data: getMockData() });
+
+      // No service to assert against; verify the call simply did not throw.
+      // The negative assertion is exercised at the helper level
+      // (see common_utils/log_rule_change.test.ts).
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    test('rule creation succeeds even if change tracking throws', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      changeTrackingService.log.mockRejectedValueOnce(new Error('boom'));
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await expect(trackingClient.create({ data: getMockData() })).resolves.toBeDefined();
+      expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Unable to log rule change for action "rule_create"')
+      );
+    });
+  });
 });
