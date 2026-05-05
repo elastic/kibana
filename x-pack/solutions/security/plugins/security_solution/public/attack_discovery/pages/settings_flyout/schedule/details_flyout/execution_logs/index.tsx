@@ -6,15 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import type {
@@ -22,6 +20,7 @@ import type {
   AttackDiscoverySchedule,
 } from '@kbn/elastic-assistant-common';
 
+import { getColumns } from './columns';
 import { WorkflowExecutionDetailsFlyout } from '../../../../loading_callout/workflow_execution_details_flyout';
 import { useGetAttackDiscoveryGenerations } from '../../../../use_get_attack_discovery_generations';
 import * as i18n from './translations';
@@ -114,47 +113,7 @@ export const ScheduleExecutionLogs: React.FC<Props> = React.memo(({ schedule }) 
   const workflowRunId = selectedItem?.workflow_run_id ?? null;
   const workflowExecutions = selectedItem?.workflow_executions ?? null;
 
-  const hasWorkflowData = useCallback(
-    (generation: AttackDiscoveryGeneration): boolean =>
-      generation.workflow_id != null || generation.workflow_executions != null,
-    []
-  );
-
-  const columns = useMemo(
-    (): EuiBasicTableColumn<AttackDiscoveryGeneration>[] => [
-      {
-        render: (item: AttackDiscoveryGeneration) =>
-          hasWorkflowData(item) ? (
-            <EuiToolTip
-              content={i18n.EXECUTION_LOGS_VIEW_DETAILS}
-              disableScreenReaderOutput
-              position="top"
-            >
-              <EuiButtonIcon
-                aria-label={i18n.EXECUTION_LOGS_VIEW_DETAILS}
-                data-test-subj={`inspect-${item.execution_uuid}`}
-                iconType="inspect"
-                onClick={() => handleViewDetails(item)}
-              />
-            </EuiToolTip>
-          ) : (
-            <></>
-          ),
-        width: '40px',
-      },
-      {
-        field: 'start',
-        name: i18n.EXECUTION_LOGS_COLUMN_START,
-        render: (start: string) => start,
-      },
-      {
-        field: 'status',
-        name: i18n.EXECUTION_LOGS_COLUMN_STATUS,
-        render: (status: string) => status,
-      },
-    ],
-    [handleViewDetails, hasWorkflowData]
-  );
+  const columns = useMemo(() => getColumns(handleViewDetails), [handleViewDetails]);
 
   return (
     <>

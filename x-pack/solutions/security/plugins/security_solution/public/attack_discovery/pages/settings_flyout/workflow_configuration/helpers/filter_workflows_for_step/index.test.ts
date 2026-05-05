@@ -29,13 +29,6 @@ const defaultValidation: WorkflowItem = {
   tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
 };
 
-const esqlExample: WorkflowItem = {
-  description: 'ES|QL example alert retrieval',
-  id: 'esql-example-id',
-  name: 'Attack discovery - ES|QL example alert retrieval',
-  tags: ['Attack discovery', 'Security', 'Example', 'attackDiscovery:esql_example_alert_retrieval'],
-};
-
 const customWorkflow: WorkflowItem = {
   description: 'A user-created custom workflow',
   id: 'custom-workflow-id',
@@ -53,7 +46,6 @@ const allWorkflows: WorkflowItem[] = [
   customWorkflow,
   defaultAlertRetrieval,
   defaultValidation,
-  esqlExample,
   generation,
   workflowWithNoTags,
 ];
@@ -75,12 +67,6 @@ describe('filterWorkflowsForAlertRetrieval', () => {
     const result = filterWorkflowsForAlertRetrieval(allWorkflows);
 
     expect(result.find((w) => w.id === defaultValidation.id)).toBeUndefined();
-  });
-
-  it('includes the ES|QL example alert retrieval workflow', () => {
-    const result = filterWorkflowsForAlertRetrieval(allWorkflows);
-
-    expect(result.find((w) => w.id === esqlExample.id)).toBeDefined();
   });
 
   it('includes custom (user-created) workflows', () => {
@@ -111,12 +97,6 @@ describe('filterWorkflowsForValidation', () => {
     const result = filterWorkflowsForValidation(allWorkflows);
 
     expect(result.find((w) => w.id === generation.id)).toBeUndefined();
-  });
-
-  it('excludes the ES|QL example alert retrieval workflow', () => {
-    const result = filterWorkflowsForValidation(allWorkflows);
-
-    expect(result.find((w) => w.id === esqlExample.id)).toBeUndefined();
   });
 
   it('includes the default validation workflow', () => {

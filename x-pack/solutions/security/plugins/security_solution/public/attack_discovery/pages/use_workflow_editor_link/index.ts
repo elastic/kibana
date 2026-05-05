@@ -80,10 +80,16 @@ export const useWorkflowEditorLink = ({
       return null;
     }
 
+    // For slug-based IDs not in the alias map, resolvedWorkflowId will be null after the
+    // effect runs (resolveWorkflowIdFromAlias returns null immediately for unknown slugs).
+    // In that case, the workflowId itself is already the actual workflow slug — use it directly.
+    // undefined means alias resolution is still in-flight; show no link until it resolves.
     const effectiveWorkflowId = workflowId.startsWith('workflow-')
       ? workflowId
-      : resolvedWorkflowId;
-    if (!effectiveWorkflowId) {
+      : resolvedWorkflowId === undefined
+      ? undefined
+      : resolvedWorkflowId ?? workflowId;
+    if (effectiveWorkflowId == null) {
       return null;
     }
 
