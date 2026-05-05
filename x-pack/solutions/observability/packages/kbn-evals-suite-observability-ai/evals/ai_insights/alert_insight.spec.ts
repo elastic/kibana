@@ -8,23 +8,22 @@
 import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import type { LoadResult } from '@kbn/es-snapshot-loader';
-import pRetry from 'p-retry';
 import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
-  refreshReplayedSourceIndices,
 } from '../../src/data_generators/replay';
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
 import { evaluate } from './evaluate_ai_insights';
+
+const ALERT_CREATION_WAIT_MS = 3000;
+const INDEX_REFRESH_WAIT_MS = 2500;
 
 const scenarios = getAlertScenarios();
 
 for (const scenario of scenarios) {
   createScenarioTest(scenario);
 }
-
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 function createScenarioTest(scenario: AlertScenario) {
   const scenarioLabel = `Alert AI Insights - ${scenario.id} (${scenario.snapshotName})`;
@@ -52,77 +51,37 @@ function createScenarioTest(scenario: AlertScenario) {
         scenario.gcs
       );
 
-      if (!replayResult.success) {
-        throw new Error(
-          `Snapshot replay failed for scenario ${scenario.id}: ${
-            replayResult.errors.length > 0 ? replayResult.errors.join('; ') : 'no error details'
-          }`
-        );
-      }
-      await refreshReplayedSourceIndices(esClient, replayResult);
-
+      log.info('Triggering rule run');
       await kbnClient.request<void>({
         method: 'POST',
         path: `/internal/alerting/rule/${ruleId}/_run_soon`,
       });
 
-      const prePollDelayMs = 5000;
-      log.debug(
-        `Waiting ${prePollDelayMs}ms before polling for alert (task run + alert index write)`
-      );
-      await delay(prePollDelayMs);
+      log.info('Waiting for alert to be created');
+      await new Promise((resolve) => setTimeout(resolve, ALERT_CREATION_WAIT_MS));
 
-      log.info('Polling for alert to be created');
+      await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
 
-      let pollAttempt = 0;
-      alertId = await pRetry(
-        async () => {
-          pollAttempt += 1;
-          // Retry by triggering an immediate execution, then refresh source indices.
-          if (pollAttempt > 1) {
-            await kbnClient.request<void>({
-              method: 'POST',
-              path: `/internal/alerting/rule/${ruleId}/_run_soon`,
-            });
-            await delay(1500);
-          }
-          await refreshReplayedSourceIndices(esClient, replayResult);
-          await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
-
-          const alertsResponse = await esClient.search({
-            index: scenario.alertRule.alertsIndex,
-            query: {
-              bool: {
-                filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
-              },
-            },
-            sort: [{ '@timestamp': { order: 'desc' } }],
-            size: 1,
-          });
-
-          const alertDoc = alertsResponse.hits.hits[0];
-          if (!alertDoc) {
-            throw new Error('Alert not yet available');
-          }
-          return alertDoc._id as string;
-        },
-        {
-          retries: 20,
-          factor: 2,
-          minTimeout: 3000,
-          maxTimeout: 20_000,
-          onFailedAttempt: (error) => {
-            if (error.retriesLeft === 0) {
-              log.error(
-                `No alert found for rule ${ruleId} in scenario ${scenario.id} after ${error.attemptNumber} attempts`
-              );
-            } else {
-              log.debug(`Alert not yet available (attempt ${error.attemptNumber}); retrying...`);
-            }
+      log.debug('Waiting to make sure all indices are refreshed');
+      await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
+      const alertsResponse = await esClient.search({
+        index: scenario.alertRule.alertsIndex,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.rule.uuid': ruleId } },
+              { term: { 'kibana.alert.status': 'active' } },
+            ],
           },
-        }
-      );
+        },
+        size: 1,
+      });
 
+      const alertDoc = alertsResponse.hits.hits[0];
+      if (!alertDoc) {
+        throw new Error(`No alert found for rule ${ruleId} in scenario ${scenario.id}`);
+      }
+      alertId = alertDoc._id as string;
       log.info(`Found alert with ID: ${alertId}`);
     });
 

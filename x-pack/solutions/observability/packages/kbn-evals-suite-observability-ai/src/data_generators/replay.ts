@@ -73,23 +73,6 @@ export async function replayObservabilityDataStreams(
   return result;
 }
 
-/** Makes replayed trace/metric/log documents visible to search before APM rules execute. */
-export async function refreshReplayedSourceIndices(
-  esClient: Client,
-  replayResult: LoadResult
-): Promise<void> {
-  const indices = [...new Set(replayResult.reindexedIndices ?? [])];
-  if (indices.length > 0) {
-    await esClient.indices.refresh({ index: indices });
-    return;
-  }
-  await esClient.indices.refresh({
-    index: 'logs-*,metrics-*,traces-*',
-    allow_no_indices: true,
-    ignore_unavailable: true,
-  });
-}
-
 /** deleteByQuery on each distinct destination from snapshot replay (`reindexedIndices` only). */
 export async function cleanObservabilityDataStreams(
   esClient: Client,
