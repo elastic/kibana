@@ -89,7 +89,7 @@ const GraphInner = ({
         color: euiTheme.colors.borderBasePlain,
       },
       labelStyle: { fontSize: 10, fill: euiTheme.colors.subduedText },
-      labelBgStyle: { fill: euiTheme.colors.backgroundBasePlain },
+      labelBgStyle: { fill: euiTheme.colors.backgroundBaseSubdued },
     }),
     [euiTheme]
   );
@@ -115,7 +115,7 @@ const GraphInner = ({
         nodesDraggable={false}
         nodesConnectable={false}
         proOptions={{ hideAttribution: true }}
-        style={{ background: euiTheme.colors.backgroundBasePlain }}
+        style={{ background: euiTheme.colors.backgroundBaseSubdued }}
       >
         <Background color={euiTheme.colors.borderBasePlain} gap={20} size={1} />
         <Controls showInteractive={false} />

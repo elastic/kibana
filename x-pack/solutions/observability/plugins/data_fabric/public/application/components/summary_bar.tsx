@@ -31,42 +31,41 @@ const barStyles = css`
 `;
 
 const dividerStyles = css`
-  color: var(--euiColorMediumShade, #98a2b3);
-  padding: 0 8px;
+  width: 1px;
+  height: 12px;
+  background: var(--euiColorBorderBaseSubdued, #d3dae6);
+  margin: 0 8px;
+  flex-shrink: 0;
 `;
 
-const Divider = () => <span css={dividerStyles}>·</span>;
+const Divider = () => <span css={dividerStyles} />;
 
 export const SummaryBar = ({ stats }: SummaryBarProps) => {
   return (
     <EuiFlexGroup gutterSize="none" css={barStyles} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{stats.sources}</strong> sources
-        </EuiText>
-      </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{stats.sources}</strong> sources
+            </EuiText>
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <Divider />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{stats.flows}</strong> flows
+            </EuiText>
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{stats.flows}</strong> flows
-        </EuiText>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <Divider />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{stats.destinations}</strong> destinations{' '}
-          <span style={{ color: 'var(--euiColorMediumShade, #98a2b3)' }}>
-            ({stats.externalDestinations} external)
-          </span>
-        </EuiText>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{stats.destinations}</strong> destinations{' '}
+              <span style={{ color: 'var(--euiColorMediumShade, #98a2b3)' }}>
+                ({stats.externalDestinations} external)
+              </span>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -84,29 +83,25 @@ export const SummaryBar = ({ stats }: SummaryBarProps) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiHealth color="success" textSize="xs">
-          Good ({stats.good})
-        </EuiHealth>
-      </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="success" textSize="xs">
+              Good ({stats.good})
+            </EuiHealth>
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <Divider />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="warning" textSize="xs">
+              Degraded ({stats.degraded})
+            </EuiHealth>
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiHealth color="warning" textSize="xs">
-          Degraded ({stats.degraded})
-        </EuiHealth>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <Divider />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiHealth color="danger" textSize="xs">
-          Poor ({stats.poor})
-        </EuiHealth>
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="danger" textSize="xs">
+              Poor ({stats.poor})
+            </EuiHealth>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
