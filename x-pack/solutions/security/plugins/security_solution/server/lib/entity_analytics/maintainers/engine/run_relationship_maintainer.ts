@@ -20,7 +20,7 @@ import type {
 import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
-import { writeEntityIds } from './update_entities';
+import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 
@@ -136,13 +136,30 @@ async function fetchTargetsForActors(
   }
 }
 
+/**
+ * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes the
+ * integration's records to the entity store before returning, so the engine
+ * never holds more than one integration's records in memory.
+ *
+ * Memory bound: previously the engine accumulated `allRecords` across all
+ * integrations × all pages before a single write, with theoretical max
+ * ≈ COMPOSITE_PAGE_SIZE × MAX_ITERATIONS × #integrations ≈ 14M records.
+ * Streaming per-integration drops that to one integration's records.
+ *
+ * Abort semantics: returns the count of records actually written for this
+ * integration. If the abort fires mid-pagination, the partial records
+ * collected so far are still written before returning (best-effort
+ * persistence — the records are derived from the run, not authoritative,
+ * and partial writes are no worse than a re-run).
+ */
 async function runIntegration(
   config: RelationshipIntegrationConfig,
   esClient: ElasticsearchClient,
   logger: Logger,
   namespace: string,
+  crudClient: EntityUpdateClient,
   abortController: AbortController | undefined
-): Promise<{ buckets: number; records: ProcessedEngineRecord[] }> {
+): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult }> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
   let totalBuckets = 0;
@@ -200,15 +217,26 @@ async function runIntegration(
     afterKey = newAfterKey;
   } while (afterKey);
 
-  return { buckets: totalBuckets, records };
+  // Stream per-integration: write this integration's records before
+  // returning so memory does not accumulate across the outer loop.
+  const write = await writeEntityIds(crudClient, logger, records);
+  return { buckets: totalBuckets, recordsCount: records.length, write };
 }
 
 /**
  * Generic run loop for relationship maintainers.
  * Iterates over the provided integration configs and runs the composite agg +
- * ES|QL pipeline for each, collecting ProcessedEngineRecord objects.
- * After all integrations complete, writes optimistic EUIDs directly to
- * entity.relationships[relType].ids.
+ * ES|QL pipeline for each, writing optimistic EUIDs directly to
+ * `entity.relationships[relType].ids` after each integration completes.
+ *
+ * Memory: bounded by one integration's record count
+ * (≤ COMPOSITE_PAGE_SIZE × MAX_ITERATIONS) — see `runIntegration` for the
+ * streaming write rationale.
+ *
+ * Abort: an abort fired between integrations skips the remaining
+ * integrations entirely. An abort fired *during* an integration still
+ * persists that integration's partial records (best-effort), then exits
+ * the outer loop on the next iteration.
  */
 export const runGenericMaintainer = async ({
   esClient,
@@ -250,7 +278,6 @@ export const runGenericMaintainer = async ({
   let totalWritten = 0;
   let totalNotFound = 0;
   let totalWriteErrors = 0;
-  const allRecords: ProcessedEngineRecord[] = [];
 
   for (const config of integrations) {
     if (abortController?.signal.aborted) {
@@ -258,25 +285,19 @@ export const runGenericMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
-    const { buckets, records } = await runIntegration(
+    const { buckets, recordsCount, write } = await runIntegration(
       config,
       esClient,
       logger,
       namespace,
+      crudClient,
       abortController
     );
     totalBuckets += buckets;
-    totalRecords += records.length;
-    allRecords.push(...records);
-  }
-
-  if (!abortController?.signal.aborted) {
-    const writeResult = await writeEntityIds(crudClient, logger, allRecords);
-    totalWritten = writeResult.updated;
-    totalNotFound = writeResult.notFound;
-    totalWriteErrors = writeResult.errors;
-  } else {
-    logger.info('Generic maintainer aborted, skipping entity id write');
+    totalRecords += recordsCount;
+    totalWritten += write.updated;
+    totalNotFound += write.notFound;
+    totalWriteErrors += write.errors;
   }
 
   return {

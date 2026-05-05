@@ -616,36 +616,37 @@ describe('runGenericMaintainer', () => {
       expect(bulkUpdate).not.toHaveBeenCalled();
     });
 
-    it('skips the final write step when aborted after the last integration', async () => {
+    it('does not call bulkUpdateEntity when aborted during an integration that produced zero records', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkUpdate } = makeCrudClient();
       const ac = new AbortController();
-      // Integration completes one page, then we abort before the write.
+      // Integration completes one page, then aborts during esql with zero records collected.
       search.mockResolvedValueOnce(
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
       );
       esql.mockImplementationOnce(async () => {
-        ac.abort(); // abort during esql so the loop returns and the post-loop write check sees aborted
+        ac.abort();
         throw new Error('aborted');
       });
-      const logger = loggerMock.create();
       const result = await runGenericMaintainer({
         esClient,
-        logger,
+        logger: loggerMock.create(),
         namespace: 'default',
         crudClient,
         integrations: [baseConfig],
         abortController: ac,
       });
+      // With streamed per-integration write (C.3): the integration produced
+      // zero records so `writeEntityIds` early-returns without ever calling
+      // `bulkUpdateEntity`. There is no separate "skip the final write" path
+      // because there is no longer a final write — writes are streamed.
       expect(result.totalWritten).toBe(0);
       expect(bulkUpdate).not.toHaveBeenCalled();
-      const infos = logger.info.mock.calls.map((c) => c[0] as string);
-      expect(infos.some((m) => m.includes('skipping entity id write'))).toBe(true);
     });
   });
 
-  describe('aggregation across integrations and pages', () => {
-    it('sums totalBuckets and totalRecords across all integrations and writes once at the end', async () => {
+  describe('aggregation across integrations and pages (streamed per-integration write — C.3)', () => {
+    it('sums totalBuckets and totalRecords across all integrations and writes per-integration (one bulkUpdate per integration, not one global)', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkUpdate } = makeCrudClient();
       // baseConfig: 2 buckets, 1 esql record.
@@ -683,8 +684,76 @@ describe('runGenericMaintainer', () => {
       });
       expect(result.totalBuckets).toBe(3);
       expect(result.totalRecords).toBe(2);
-      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      // Streamed writes: one bulkUpdate per integration that produced records.
+      // Memory is bounded by one integration's records, not the cross-integration sum.
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
       expect(result.totalWritten).toBe(2);
+    });
+
+    it('does not call bulkUpdateEntity for an integration that produced zero records (skip-empty optimization)', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkUpdate } = makeCrudClient();
+      // baseConfig: 1 bucket, 1 esql record.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+      // oktaConfig: 0 buckets — no records produced.
+      search.mockResolvedValueOnce(successResponse([]));
+      const result = await runGenericMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig, oktaConfig],
+      });
+      expect(result.totalRecords).toBe(1);
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    it('persists already-completed integrations even if a later integration aborts (best-effort streaming)', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkUpdate } = makeCrudClient();
+      const ac = new AbortController();
+      // baseConfig: completes normally.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+      // After baseConfig writes, abort. oktaConfig should be skipped entirely.
+      bulkUpdate.mockImplementationOnce(async () => {
+        ac.abort();
+        return [];
+      });
+      const result = await runGenericMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig, oktaConfig],
+        abortController: ac,
+      });
+      // baseConfig wrote 1 entity before the abort fired.
+      expect(result.totalWritten).toBe(1);
+      // oktaConfig was skipped entirely.
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(esql).toHaveBeenCalledTimes(1);
+      // Exactly one bulkUpdate (baseConfig); oktaConfig never reached the write.
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
     });
 
     it('uses the configured indexPattern per integration', async () => {

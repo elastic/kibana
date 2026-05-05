@@ -195,4 +195,99 @@ describe('buildActorPageFilter (page filter)', () => {
     const result = buildActorPageFilter(accessesConfig, []);
     expect(JSON.stringify(result)).toContain('must_not');
   });
+
+  // Locks the tuple-vs-OR documentation contract on `buildActorPageFilter`.
+  // The function deliberately emits `field1 IN [...] OR field2 IN [...]`
+  // rather than `(field1=a AND field2=b) OR (field1=c AND field2=d) ...`.
+  // This is a strict superset of the bucket tuples but is safe given the
+  // EUID-collapse invariant (one EUID per doc, single source field).
+  describe('tuple-vs-OR page-filter contract (D.2)', () => {
+    it('emits an OR-of-terms-per-field, NOT a tuple-of-AND-per-bucket', () => {
+      // Two buckets that, taken as tuples, are
+      //   (user.name=alice, user.email=null)
+      //   (user.name=null,  user.email=bob@x)
+      // The page filter should emit
+      //   user.name IN [alice] OR user.email IN [bob@x]
+      // (also matching a doc with name=alice AND email=bob@x — false-positive
+      // tolerated; see the file-level docblock).
+      const buckets: CompositeBucket[] = [
+        { key: { 'user.name': 'alice', 'user.email': null }, doc_count: 1 },
+        { key: { 'user.name': null, 'user.email': 'bob@x' }, doc_count: 1 },
+      ];
+      const result = buildActorPageFilter(accessesConfig, buckets) as {
+        bool: { should: Array<{ terms: Record<string, string[]> }>; minimum_should_match: number };
+      };
+      expect(result.bool.minimum_should_match).toBe(1);
+
+      // OR-of-terms-per-field: at most one `terms` clause per field, never a
+      // bool/must per bucket.
+      const fields = result.bool.should.map((clause) => Object.keys(clause.terms ?? {})).flat();
+      expect(new Set(fields)).toEqual(new Set(['user.name', 'user.email']));
+      expect(result.bool.should).toHaveLength(2);
+
+      const byField = Object.fromEntries(
+        result.bool.should.map((c) => Object.entries(c.terms)).flat()
+      );
+      expect(byField['user.name']).toEqual(['alice']);
+      expect(byField['user.email']).toEqual(['bob@x']);
+    });
+
+    it('deduplicates values per field across buckets (no exploded-tuple growth)', () => {
+      // Five buckets that share the same `user.name` value: the page filter
+      // collapses to a single `user.name IN [alice]` clause, NOT five copies.
+      const buckets: CompositeBucket[] = [
+        { key: { 'user.name': 'alice', 'user.email': 'alice@a' }, doc_count: 1 },
+        { key: { 'user.name': 'alice', 'user.email': 'alice@b' }, doc_count: 1 },
+        { key: { 'user.name': 'alice', 'user.email': 'alice@c' }, doc_count: 1 },
+        { key: { 'user.name': 'alice', 'user.email': 'alice@d' }, doc_count: 1 },
+        { key: { 'user.name': 'alice', 'user.email': 'alice@e' }, doc_count: 1 },
+      ];
+      const result = buildActorPageFilter(accessesConfig, buckets) as {
+        bool: { should: Array<{ terms: Record<string, string[]> }> };
+      };
+      const byField = Object.fromEntries(
+        result.bool.should.map((c) => Object.entries(c.terms)).flat()
+      );
+      expect(byField['user.name']).toEqual(['alice']);
+      expect(byField['user.email'].sort()).toEqual([
+        'alice@a',
+        'alice@b',
+        'alice@c',
+        'alice@d',
+        'alice@e',
+      ]);
+    });
+
+    it('uses customActor.fields verbatim (proves the page filter is data-driven, not hardcoded to ECS user.*)', () => {
+      // Locks the EUID-collapse invariant: the page filter only uses fields
+      // declared on `customActor.fields`. A future config that uses a custom
+      // actor field set gets a page filter over THOSE fields. If a future
+      // refactor accidentally hardcodes ECS user.*, this test catches it
+      // (the produced filter would not contain the custom field).
+      const config: RelationshipIntegrationConfig = {
+        ...accessesConfig,
+        customActor: { fields: ['azure.auditlogs.properties.initiated_by.user.userPrincipalName'] },
+      };
+      const buckets: CompositeBucket[] = [
+        {
+          key: {
+            'azure.auditlogs.properties.initiated_by.user.userPrincipalName': 'alice@tenant',
+          },
+          doc_count: 1,
+        },
+      ];
+      const result = buildActorPageFilter(config, buckets) as {
+        bool: { should: Array<{ terms: Record<string, string[]> }> };
+      };
+      const byField = Object.fromEntries(
+        result.bool.should.map((c) => Object.entries(c.terms)).flat()
+      );
+      expect(byField['azure.auditlogs.properties.initiated_by.user.userPrincipalName']).toEqual([
+        'alice@tenant',
+      ]);
+      // ECS user.* fields are NOT present — there is no hardcoded fallback.
+      expect(byField['user.name']).toBeUndefined();
+      expect(byField['user.email']).toBeUndefined();
+    });
+  });
 });
