@@ -7283,6 +7283,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/human-readable-id@link:src/platform/packages/shared/kbn-human-readable-id":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:src/platform/packages/shared/kbn-i18n-react":
   version "0.0.0"
   uid ""
