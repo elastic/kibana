@@ -7,9 +7,9 @@
 
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools';
 import { ToolType } from '@kbn/agent-builder-common';
-import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import type { WorkflowToolFormData } from '../components/tools/form/types/tool_form_types';
+import { toCreatePayload, toUpdatePayload } from './tool_payload';
 
 export const transformWorkflowToolToFormData = (
   tool: WorkflowToolDefinition
@@ -44,11 +44,11 @@ export const transformFormDataToWorkflowTool = (
 export const transformWorkflowFormDataForCreate = (
   data: WorkflowToolFormData
 ): CreateToolPayload => {
-  return omit(transformFormDataToWorkflowTool(data), ['readonly', 'experimental']);
+  return toCreatePayload(transformFormDataToWorkflowTool(data));
 };
 
 export const transformWorkflowFormDataForUpdate = (
   data: WorkflowToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToWorkflowTool(data), ['id', 'type', 'readonly', 'experimental']);
+  return toUpdatePayload(transformFormDataToWorkflowTool(data));
 };

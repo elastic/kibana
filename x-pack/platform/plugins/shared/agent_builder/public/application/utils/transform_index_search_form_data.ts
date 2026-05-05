@@ -7,9 +7,9 @@
 
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools';
 import { ToolType } from '@kbn/agent-builder-common';
-import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import type { IndexSearchToolFormData } from '../components/tools/form/types/tool_form_types';
+import { toCreatePayload, toUpdatePayload } from './tool_payload';
 
 export const transformIndexSearchToolToFormData = (
   tool: IndexSearchToolDefinition
@@ -46,11 +46,11 @@ export const transformFormDataToIndexSearchTool = (
 export const transformIndexSearchFormDataForCreate = (
   data: IndexSearchToolFormData
 ): CreateToolPayload => {
-  return omit(transformFormDataToIndexSearchTool(data), ['readonly', 'experimental']);
+  return toCreatePayload(transformFormDataToIndexSearchTool(data));
 };
 
 export const transformIndexSearchFormDataForUpdate = (
   data: IndexSearchToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToIndexSearchTool(data), ['id', 'type', 'readonly', 'experimental']);
+  return toUpdatePayload(transformFormDataToIndexSearchTool(data));
 };
