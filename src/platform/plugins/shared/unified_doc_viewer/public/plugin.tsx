@@ -20,6 +20,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -112,6 +113,7 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       notifications: { toasts },
     } = core;
+    const callApmApiV2 = createCallApmApiV2(core);
     const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
@@ -129,6 +131,7 @@ export class UnifiedDocViewerPublicPlugin
       share,
       core,
       discoverShared,
+      callApmApiV2,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

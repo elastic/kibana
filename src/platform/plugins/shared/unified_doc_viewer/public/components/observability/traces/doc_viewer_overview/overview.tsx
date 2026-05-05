@@ -27,6 +27,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
+import { Foo } from '@kbn/apm-ui-shared';
 import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import type { ScrollableSectionWrapperApi } from '../../../doc_viewer_logs_overview/scrollable_section_wrapper';
 import {
@@ -42,6 +43,7 @@ import { TraceWaterfall, type TraceWaterfallRestorableState } from '../component
 import { isTransaction } from '../helpers';
 import { TraceRootSpanProvider } from './hooks/use_fetch_trace_root_span';
 import { DocViewerExtensionActionsProvider } from '../../../../hooks/use_doc_viewer_extension_actions';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export type OverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
@@ -77,6 +79,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
     },
     ref
   ) => {
+    const { callApmApiV2 } = getUnifiedDocViewerServices();
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
     const flattenedHit = useMemo(() => getFlattenedTraceDocumentOverview(hit), [hit]);
     const [errorsTableSectionRef, setErrorsTableSectionRef] =
@@ -128,6 +131,8 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
                   : undefined
               }
             >
+              <EuiSpacer size="m" />
+              <Foo callApmApi={callApmApiV2} />
               <EuiSpacer size="m" />
               <About
                 hit={hit}
