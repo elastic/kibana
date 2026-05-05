@@ -38,7 +38,7 @@ export const useLensAttributes = ({
   title,
   esql,
   signalIndexName,
-  overridePatterns,
+  excludedPatterns,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -141,7 +141,7 @@ export const useLensAttributes = ({
     const indexFilters = buildIndexFilters({
       hasAdHocDataViews,
       selectedPatterns,
-      overridePatterns,
+      excludedPatterns,
       signalIndexName,
     });
     const query = esql ? { esql } : globalQuery;
@@ -181,7 +181,7 @@ export const useLensAttributes = ({
     stackByField,
     hasAdHocDataViews,
     selectedPatterns,
-    overridePatterns,
+    excludedPatterns,
     signalIndexName,
     esql,
     globalQuery,

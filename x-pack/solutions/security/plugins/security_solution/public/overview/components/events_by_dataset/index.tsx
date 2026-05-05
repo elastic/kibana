@@ -59,12 +59,12 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   sourcererScopeId?: PageScope;
   applyGlobalQueriesAndFilters?: boolean;
   /**
-   * When provided, the Lens chart's `_index` filter is built from these
-   * patterns instead of the scope's full `selectedPatterns`. Pass
-   * alert-index–filtered patterns here so the histogram counts only event
-   * documents and excludes `.alerts-security.alerts-*` documents.
+   * Additional drop-list of index patterns layered on top of the histogram's
+   * allowlist as a negated `_index` filter (e.g. alert-backing indices).
+   * Forwarded to the Lens embeddable as `excludedPatterns` and CPS-expanded
+   * downstream so it covers both local and remote-prefixed `_index` values.
    */
-  eventIndexPatterns?: string[];
+  excludedPatterns?: string[];
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -96,7 +96,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
-  eventIndexPatterns,
+  excludedPatterns,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -204,7 +204,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       chartHeight={CHART_HEIGHT}
       hideQueryToggle={hideQueryToggle}
       applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
-      overridePatterns={eventIndexPatterns}
+      excludedPatterns={excludedPatterns}
     />
   );
 };

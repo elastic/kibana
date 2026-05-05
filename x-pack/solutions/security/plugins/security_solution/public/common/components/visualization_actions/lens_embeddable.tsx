@@ -70,7 +70,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   disableOnClickFilter = false,
   casesAttachmentMetadata,
   signalIndexName,
-  overridePatterns,
+  excludedPatterns,
   esql,
 }) => {
   const styles = useMemo(
@@ -105,7 +105,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
     esql,
     signalIndexName,
-    overridePatterns,
+    excludedPatterns,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYVisualizationState)
     ?.preferredSeriesType;

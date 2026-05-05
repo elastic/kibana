@@ -38,66 +38,59 @@ describe('EventsByDataset', () => {
     MatrixHistogramMocked.mockClear();
   });
 
-  test('passes eventIndexPatterns to MatrixHistogram as overridePatterns', () => {
-    const eventIndexPatterns = ['logs-*', 'auditbeat-*'];
+  test('passes excludedPatterns through to MatrixHistogram', () => {
+    const excludedPatterns = ['.alerts-security.alerts-default'];
 
     render(
       <TestProviders>
-        <EventsByDataset {...baseProps} eventIndexPatterns={eventIndexPatterns} />
+        <EventsByDataset {...baseProps} excludedPatterns={excludedPatterns} />
       </TestProviders>
     );
 
     expect(MatrixHistogramMocked).toHaveBeenCalledWith(
-      expect.objectContaining({ overridePatterns: eventIndexPatterns }),
+      expect.objectContaining({ excludedPatterns }),
       expect.anything()
     );
   });
 
-  test('does not include alert indices in overridePatterns when eventIndexPatterns is provided', () => {
-    // Simulate what overview.tsx does: pass only non-alert patterns
-    const eventIndexPatterns = ['logs-*', 'auditbeat-*'];
-    const allPatterns = [...eventIndexPatterns, '.alerts-security.alerts-default'];
-
-    // We do NOT pass allPatterns — that's the point. overview.tsx filters before passing.
-    render(
-      <TestProviders>
-        <EventsByDataset {...baseProps} eventIndexPatterns={eventIndexPatterns} />
-      </TestProviders>
-    );
-
-    const receivedPatterns = MatrixHistogramMocked.mock.calls[0][0].overridePatterns ?? [];
-
-    expect(receivedPatterns).not.toContain('.alerts-security.alerts-default');
-    expect(receivedPatterns).toEqual(eventIndexPatterns);
-    // Verify the filtered patterns don't accidentally include the full set
-    expect(receivedPatterns).not.toEqual(allPatterns);
-  });
-
-  test('remote cluster–prefixed event patterns are preserved in overridePatterns', () => {
-    // CPS: remote event index patterns have a cluster-alias prefix; they must
-    // not be stripped when building the events-only pattern list.
-    const eventIndexPatterns = ['cluster-a:logs-*', 'cluster-a:auditbeat-*', 'logs-*'];
+  test('remote cluster–prefixed event patterns are NOT included in excludedPatterns', () => {
+    // CPS: caller (overview.tsx) computes the drop-list via getAlertsIndexPatterns,
+    // so only alert-backing indices end up in excludedPatterns. Remote cluster–
+    // prefixed event patterns must not be present, otherwise the chart's negated
+    // _index filter would drop those documents.
+    const excludedPatterns = ['.alerts-security.alerts-default'];
 
     render(
       <TestProviders>
-        <EventsByDataset {...baseProps} eventIndexPatterns={eventIndexPatterns} />
+        <EventsByDataset {...baseProps} excludedPatterns={excludedPatterns} />
       </TestProviders>
     );
 
-    const receivedPatterns = MatrixHistogramMocked.mock.calls[0][0].overridePatterns ?? [];
+    const received = MatrixHistogramMocked.mock.calls[0][0].excludedPatterns ?? [];
 
-    expect(receivedPatterns).toContain('cluster-a:logs-*');
-    expect(receivedPatterns).toContain('cluster-a:auditbeat-*');
-    expect(receivedPatterns).toContain('logs-*');
+    expect(received.some((p) => p.startsWith('cluster-a:'))).toBe(false);
+    expect(received).toEqual(excludedPatterns);
   });
 
-  test('omits overridePatterns from MatrixHistogram when eventIndexPatterns is not provided', () => {
+  test('passes an empty excludedPatterns through to MatrixHistogram', () => {
+    // Empty excludedPatterns is a no-op downstream (equivalent to undefined in
+    // buildIndexFilters), but the prop should still flow through unchanged.
+    render(
+      <TestProviders>
+        <EventsByDataset {...baseProps} excludedPatterns={[]} />
+      </TestProviders>
+    );
+
+    expect(MatrixHistogramMocked.mock.calls[0][0].excludedPatterns).toEqual([]);
+  });
+
+  test('omits excludedPatterns from MatrixHistogram when prop is not provided', () => {
     render(
       <TestProviders>
         <EventsByDataset {...baseProps} />
       </TestProviders>
     );
 
-    expect(MatrixHistogramMocked.mock.calls[0][0].overridePatterns).toBeUndefined();
+    expect(MatrixHistogramMocked.mock.calls[0][0].excludedPatterns).toBeUndefined();
   });
 });

@@ -43,7 +43,10 @@ import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
-import { filterAlertsFromIndexPatterns } from '../../common/components/visualization_actions/utils';
+import {
+  filterAlertsFromIndexPatterns,
+  getAlertsIndexPatterns,
+} from '../../common/components/visualization_actions/utils';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -73,12 +76,20 @@ const OverviewComponent = () => {
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  // Patterns from the data view with alert-backing indices stripped out.
-  // The Events histogram and Host/Network event count panels must count only
-  // non-alert documents; remote event indices are preserved unchanged so that
+  // Keep-list: patterns from the data view with alert-backing indices stripped
+  // out. Used by `EventCounts` to scope the Host/Network REST queries to event
+  // documents only. Remote event indices are preserved unchanged so that
   // Cross-Project Search continues to work through the data view.
   const eventIndexPatterns = useMemo(
     () => filterAlertsFromIndexPatterns(selectedPatterns),
+    [selectedPatterns]
+  );
+
+  // Drop-list: only the alert-backing patterns from the data view. Passed to
+  // the Events histogram as `excludedPatterns` so the chart emits a negated
+  // `_index` filter (CPS-safe — does not allowlist the full scope).
+  const alertIndexPatterns = useMemo(
+    () => getAlertsIndexPatterns(selectedPatterns),
     [selectedPatterns]
   );
 
@@ -153,7 +164,7 @@ const OverviewComponent = () => {
                       from={from}
                       dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
-                      eventIndexPatterns={eventIndexPatterns}
+                      excludedPatterns={alertIndexPatterns}
                       query={query}
                       queryType="overview"
                       to={to}

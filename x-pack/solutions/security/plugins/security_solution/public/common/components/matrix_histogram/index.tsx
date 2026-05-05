@@ -37,12 +37,12 @@ export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
     /**
-     * When provided, forwarded to the underlying Lens embeddable as
-     * `overridePatterns` so the chart's `_index` filter is built from these
-     * patterns instead of the scope's full `selectedPatterns`. Used by the
-     * Events histogram to exclude alert-backing indices.
+     * Additional drop-list of index patterns layered on top of the chart's
+     * allowlist as a negated `_index` filter (CPS-expanded). Forwarded to the
+     * Lens embeddable as `excludedPatterns`. Used by the Events histogram to
+     * exclude alert-backing indices.
      */
-    overridePatterns?: string[];
+    excludedPatterns?: string[];
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -77,7 +77,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   titleSize,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters = true,
-  overridePatterns,
+  excludedPatterns,
 }) => {
   const visualizationId = `${id}-embeddable`;
 
@@ -211,7 +211,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               id={visualizationId}
               inspectTitle={title as string}
               lensAttributes={lensAttributes}
-              overridePatterns={overridePatterns}
+              excludedPatterns={excludedPatterns}
               stackByField={stackByField}
               timerange={timerange}
             />

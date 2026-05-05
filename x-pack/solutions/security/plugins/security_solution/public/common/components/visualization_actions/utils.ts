@@ -216,6 +216,14 @@ export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts';
 export const filterAlertsFromIndexPatterns = (patterns: string[]): string[] =>
   patterns.filter((p) => !p.startsWith(ALERTS_INDEX_PATTERN));
 
+/**
+ * Return only the Security Solution alerts-backing index patterns from
+ * `patterns`. Inverse of `filterAlertsFromIndexPatterns`. Useful as the
+ * drop-list input to `buildIndexFilters`'s `excludedPatterns`.
+ */
+export const getAlertsIndexPatterns = (patterns: string[]): string[] =>
+  patterns.filter((p) => p.startsWith(ALERTS_INDEX_PATTERN));
+
 export const getIndexFilters = (selectedPatterns: string[]) =>
   selectedPatterns.length >= 1
     ? [
@@ -241,46 +249,66 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
     : [];
 
 /**
+ * Double each unprefixed pattern with a `*:`-prefixed variant so a single
+ * `_index` allowlist matches both local docs and any remote cluster's docs.
+ * In CCS / CPS, the coordinating cluster prefixes `_index` values with
+ * `<cluster>:`, so `_index: "logs-*"` only matches local docs while
+ * `_index: "*:logs-*"` only matches remote-prefixed docs. Combined under a
+ * `should + minimum_should_match: 1` clause the union covers both.
+ *
+ * Patterns that already contain a `:` (an explicit cluster prefix like
+ * `cluster-a:logs-*`) are left untouched: prepending `*:` would yield
+ * `*:cluster-a:logs-*`, which never matches a real `_index` value.
+ */
+export const expandIndexPatternsForCps = (patterns: string[]): string[] =>
+  patterns.flatMap((p) => (p.includes(':') ? [p] : [p, `*:${p}`]));
+
+/**
  * Compute the `_index` filters to inject into a Lens chart.
  *
- * When `overridePatterns` is provided (and `signalIndexName` is absent), the
- * caller has supplied a subset of `selectedPatterns` with some entries removed
- * (e.g. alert-backing indices stripped by `filterAlertsFromIndexPatterns`).
- * Rather than emitting an allowlist filter from `overridePatterns` — which
- * would block CPS remote-cluster documents whose index names carry a
- * cluster-alias prefix — we instead emit *negated* filters for the removed
- * patterns only. This lets all remote-event documents through while still
- * excluding local alert-backing index documents.
+ * - **Allowlist (always emitted):** a single `_index` filter built from the
+ *   CPS-expanded `selectedPatterns` (see `expandIndexPatternsForCps`). This
+ *   bounds the chart to exactly the user-selected scope, both for local and
+ *   for any remote cluster the patterns reach via CCS/CPS.
+ * - **Drop-list (optional, layered on top):** when `excludedPatterns` is
+ *   non-empty, an additional *negated* `_index` filter is emitted for the
+ *   CPS-expanded `excludedPatterns`. This serves as a defensive exclusion
+ *   (e.g. alert-backing indices) on top of the allowlist. An empty array is
+ *   equivalent to `undefined` and adds no drop-list filter.
+ * - **`signalIndexName` sentinel:** when set, the allowlist passes through
+ *   raw `selectedPatterns` (already replaced upstream with `[signalIndexName]`
+ *   by `useLensAttributes`) with NO CPS expansion, and any `excludedPatterns`
+ *   are ignored. This preserves the Alerts trend chart's intentional
+ *   local-only scope.
  */
 export const buildIndexFilters = ({
   hasAdHocDataViews,
   selectedPatterns,
-  overridePatterns,
+  excludedPatterns,
   signalIndexName,
 }: {
   hasAdHocDataViews: boolean;
   selectedPatterns: string[];
-  overridePatterns?: string[];
+  excludedPatterns?: string[];
   signalIndexName?: string | null;
 }): Filter[] => {
   // Ad-hoc data views embed their index scope inside the Lens attributes directly.
   if (hasAdHocDataViews) return [];
 
-  // CPS-safe exclusion path: the caller stripped a subset of patterns (e.g. alert
-  // indices) before passing overridePatterns. Instead of an allowlist — which would
-  // silently drop remote-cluster documents whose index names carry a cluster-alias
-  // prefix — emit negated filters for only the removed patterns.
-  if (overridePatterns != null && !signalIndexName) {
-    const removedPatterns = selectedPatterns.filter((p) => !overridePatterns.includes(p));
-    if (removedPatterns.length === 0) return [];
-    return getIndexFilters(removedPatterns).map((filter) => ({
+  const allowlistPatterns = signalIndexName
+    ? selectedPatterns
+    : expandIndexPatternsForCps(selectedPatterns);
+  const allowlist = getIndexFilters(allowlistPatterns);
+
+  if (!signalIndexName && excludedPatterns && excludedPatterns.length > 0) {
+    const dropList = getIndexFilters(expandIndexPatternsForCps(excludedPatterns)).map((filter) => ({
       ...filter,
       meta: { ...filter.meta, negate: true },
     }));
+    return [...allowlist, ...dropList];
   }
 
-  // Default: allowlist the full selected patterns.
-  return getIndexFilters(selectedPatterns);
+  return allowlist;
 };
 
 export const getESQLGlobalFilters = (globalFilterQuery: ESBoolQuery | undefined) => [

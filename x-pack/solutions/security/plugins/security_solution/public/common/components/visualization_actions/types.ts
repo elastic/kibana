@@ -48,12 +48,14 @@ export interface UseLensAttributesProps {
    */
   signalIndexName?: string | null;
   /**
-   * When provided, replaces the scope's `selectedPatterns` as the source for
-   * the `_index` filter injected by `useLensAttributes`. Use this to scope the
-   * chart to a subset of the data view's index patterns (e.g. events-only,
-   * without alert-backing indices) without mutating the shared sourcerer scope.
+   * Additional drop-list of index patterns layered on top of the scope's
+   * allowlist as a *negated* `_index` filter (CPS-expanded). The chart's
+   * primary scope is always the CPS-expanded `selectedPatterns` allowlist;
+   * `excludedPatterns` adds a defensive exclusion (e.g. alert-backing
+   * indices). An empty array is equivalent to `undefined`. Ignored when
+   * `signalIndexName` is set. See `buildIndexFilters` for full semantics.
    */
-  overridePatterns?: string[];
+  excludedPatterns?: string[];
 }
 
 export enum VisualizationContextMenuActions {
@@ -138,10 +140,11 @@ export interface LensEmbeddableComponentProps {
    */
   signalIndexName?: string | null;
   /**
-   * When provided, replaces the scope's `selectedPatterns` as the source for
-   * the `_index` filter. See `UseLensAttributesProps.overridePatterns`.
+   * Additional drop-list of index patterns layered on top of the chart's
+   * allowlist as a negated `_index` filter (CPS-expanded). See
+   * `UseLensAttributesProps.excludedPatterns`.
    */
-  overridePatterns?: string[];
+  excludedPatterns?: string[];
   width?: string | number;
   withActions?: VisualizationContextMenuActions[];
   /**
