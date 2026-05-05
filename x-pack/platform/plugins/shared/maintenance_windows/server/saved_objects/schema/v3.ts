@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertsFilterQuerySchema } from './v1';
+import { alertsFilterQuerySchema, alertingV2ScopeSchema } from './v1';
 import { rawMaintenanceWindowSchema as rawMaintenanceWindowSchemaV2 } from './v2';
 
 export const rawMaintenanceWindowSchema = rawMaintenanceWindowSchemaV2.extends({
   scope: schema.maybe(
     schema.object({
       alerting: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
-      episodes: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
+      alertingV2: schema.maybe(schema.nullable(alertingV2ScopeSchema)),
     })
   ),
 });

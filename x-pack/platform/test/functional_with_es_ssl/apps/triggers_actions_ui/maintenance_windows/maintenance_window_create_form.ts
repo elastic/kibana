@@ -145,13 +145,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.type('MW with episode filter');
 
       // Turn on episode-data filter toggle
-      await testSubjects.click('episodeScopedQuerySwitch');
+      await testSubjects.click('alertingV2ScopedQuerySwitch');
 
       await retry.try(async () => {
-        await testSubjects.existOrFail('maintenanceWindowEpisodeDataFilterInput');
+        await testSubjects.existOrFail('maintenanceWindowAlertingV2FilterInput');
       });
 
-      const episodeInput = await testSubjects.find('maintenanceWindowEpisodeDataFilterInput');
+      const episodeInput = await testSubjects.find('maintenanceWindowAlertingV2FilterInput');
       await episodeInput.click();
       await episodeInput.type('rule.id: "abc"');
       await episodeInput.pressKeys(ENTER_KEY);

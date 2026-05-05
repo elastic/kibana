@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../../shared';
 import { rRuleRequestSchemaV1 } from '../../../../../r_rule';
-import { alertsFilterQuerySchemaV1 } from '../../../../../alerts_filter_query';
+import {
+  alertsFilterQuerySchemaV1,
+  alertingV2ScopeSchemaV1,
+} from '../../../../../alerts_filter_query';
 
 export const updateParamsSchema = schema.object({
   id: schema.string(),
@@ -21,5 +24,5 @@ export const updateBodySchema = schema.object({
   r_rule: schema.maybe(rRuleRequestSchemaV1),
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
-  scope_episode_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope_alerting_v2: schema.maybe(schema.nullable(alertingV2ScopeSchemaV1)),
 });

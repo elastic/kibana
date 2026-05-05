@@ -57,19 +57,12 @@ async function updateWithOCC(
   }
 
   let scopedQueryWithGeneratedValue = scope?.alerting;
-  let scopeEpisodesWithGeneratedValue = scope?.episodes;
+  const scopeAlertingV2 = scope?.alertingV2;
   const indexPattern = getAlertsDataViewBase();
   try {
     if (scope?.alerting) {
       scopedQueryWithGeneratedValue = buildScopeWithDsl(
         scope.alerting,
-        indexPattern,
-        esQueryConfig
-      );
-    }
-    if (scope?.episodes) {
-      scopeEpisodesWithGeneratedValue = buildScopeWithDsl(
-        scope.episodes,
         indexPattern,
         esQueryConfig
       );
@@ -114,15 +107,13 @@ async function updateWithOCC(
     }
 
     const mergedScope =
-      scopedQueryWithGeneratedValue !== undefined || scopeEpisodesWithGeneratedValue !== undefined
+      scopedQueryWithGeneratedValue !== undefined || scopeAlertingV2 !== undefined
         ? {
             ...(maintenanceWindow.scope ?? {}),
             ...(scopedQueryWithGeneratedValue !== undefined
               ? { alerting: scopedQueryWithGeneratedValue }
               : {}),
-            ...(scopeEpisodesWithGeneratedValue !== undefined
-              ? { episodes: scopeEpisodesWithGeneratedValue }
-              : {}),
+            ...(scopeAlertingV2 !== undefined ? { alertingV2: scopeAlertingV2 } : {}),
           }
         : undefined;
 

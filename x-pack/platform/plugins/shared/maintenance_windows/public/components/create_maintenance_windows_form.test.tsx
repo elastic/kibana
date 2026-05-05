@@ -249,7 +249,7 @@ describe('CreateMaintenanceWindowForm', () => {
     await user.click(titleInput);
     await user.paste('My window');
 
-    await user.click(await screen.findByTestId('episodeScopedQuerySwitch'));
+    await user.click(await screen.findByTestId('alertingV2ScopedQuerySwitch'));
 
     await user.click(screen.getByTestId('create-submit'));
 

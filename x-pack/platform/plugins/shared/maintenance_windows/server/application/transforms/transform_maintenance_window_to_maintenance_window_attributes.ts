@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertsFilterQueryAttributes } from '../../data/types/alerts_filter_query_attributes';
+import type {
+  AlertsFilterQueryAttributes,
+  AlertingV2ScopeAttributes,
+} from '../../data/types/alerts_filter_query_attributes';
 import type { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
 import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 import type { MaintenanceWindowWithoutComputedProperties } from '../types';
@@ -14,6 +17,7 @@ type AlertsFilterQueryInput = NonNullable<
   MaintenanceWindowWithoutComputedProperties['scopedQuery']
 >;
 type ScopeInput = NonNullable<MaintenanceWindowWithoutComputedProperties['scope']>;
+type AlertingV2ScopeInput = NonNullable<ScopeInput['alertingV2']>;
 type ScopeAttributes = NonNullable<MaintenanceWindowAttributes['scope']>;
 
 const normalizeAlertsFilterQuery = (
@@ -22,6 +26,10 @@ const normalizeAlertsFilterQuery = (
   filters: query.filters ?? [],
   kql: query.kql ?? '',
   dsl: query.dsl ?? '',
+});
+
+const normalizeAlertingV2Scope = (scope: AlertingV2ScopeInput): AlertingV2ScopeAttributes => ({
+  kql: scope.kql ?? '',
 });
 
 // Tri-state spread used to model partial updates against the saved object:
@@ -40,7 +48,7 @@ const partialField = <K extends string, V, R>(
 
 const transformScope = (scope: ScopeInput): ScopeAttributes => ({
   ...partialField('alerting', scope.alerting, normalizeAlertsFilterQuery),
-  ...partialField('episodes', scope.episodes, normalizeAlertsFilterQuery),
+  ...partialField('alertingV2', scope.alertingV2, normalizeAlertingV2Scope),
 });
 
 export const transformMaintenanceWindowToMaintenanceWindowAttributes = (

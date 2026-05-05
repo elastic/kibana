@@ -20,3 +20,7 @@ export interface AlertsFilterQueryAttributes {
   filters: AlertsFilterAttributes[];
   dsl: string;
 }
+
+export interface AlertingV2ScopeAttributes {
+  kql: string;
+}

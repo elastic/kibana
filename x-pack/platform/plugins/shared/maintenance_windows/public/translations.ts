@@ -147,22 +147,22 @@ export const FILTER_ALERTS_SUBTITLE = i18n.translate(
   }
 );
 
-export const EPISODES_SCOPE_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.scope.episodes.title',
+export const ALERTING_V2_SCOPE_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.alertingV2.title',
   {
     defaultMessage: 'Episodes',
   }
 );
 
-export const EPISODES_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.scope.episodes.description',
+export const ALERTING_V2_SCOPE_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.scope.alertingV2.description',
   {
     defaultMessage: 'Suppress alert episode notifications during maintenance',
   }
 );
 
-export const FILTER_EPISODES_SUBTITLE = i18n.translate(
-  'xpack.maintenanceWindows.scope.episodes.filterEpisodesSubtitle',
+export const FILTER_ALERTING_V2_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.scope.alertingV2.filterEpisodesSubtitle',
   {
     defaultMessage: 'Filter episodes',
   }
@@ -203,8 +203,8 @@ export const CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const CREATE_FORM_EPISODE_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.episodeQuery.emptyErrorMessage',
+export const CREATE_FORM_ALERTING_V2_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2Query.emptyErrorMessage',
   {
     defaultMessage: 'Episode filter is required.',
   }

@@ -46,6 +46,10 @@ export interface ScopedQueryAttributes {
   dsl?: string;
 }
 
+export interface AlertingV2ScopeAttributes {
+  kql: string;
+}
+
 /**
  * @deprecated Use the data/maintenance_window types instead
  */

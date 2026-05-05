@@ -32,7 +32,7 @@ export const convertFromMaintenanceWindowToForm = (
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
     scopedQuery: maintenanceWindow.scopedQuery,
-    scopeEpisodeQuery: maintenanceWindow.scopeEpisodeQuery,
+    scopeAlertingV2: maintenanceWindow.scopeAlertingV2,
   };
   if (!recurring) return form;
 

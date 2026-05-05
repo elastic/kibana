@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { alertsFilterQuerySchema } from './v1';
+export { alertsFilterQuerySchema, alertingV2ScopeSchema } from './v1';

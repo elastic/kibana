@@ -32,8 +32,8 @@ export const transformInternalMaintenanceWindowToExternal = (
     ...(maintenanceWindow.scopedQuery !== undefined
       ? { scoped_query: maintenanceWindow.scopedQuery }
       : {}),
-    ...(maintenanceWindow.scope?.episodes !== undefined
-      ? { scope_episode_query: maintenanceWindow.scope.episodes }
+    ...(maintenanceWindow.scope?.alertingV2 !== undefined
+      ? { scope_alerting_v2: maintenanceWindow.scope.alertingV2 }
       : {}),
   };
 };

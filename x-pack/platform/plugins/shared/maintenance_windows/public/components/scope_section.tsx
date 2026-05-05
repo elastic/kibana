@@ -26,6 +26,7 @@ export interface ScopeSectionProps {
   onSwitchChange: (checked: boolean) => void;
   switchDataTestSubj?: string;
   expandedSubtitle: string;
+  titleBadge?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export const ScopeSection = ({
   onSwitchChange,
   switchDataTestSubj,
   expandedSubtitle,
+  titleBadge,
   children,
 }: ScopeSectionProps) => (
   <EuiPanel hasBorder={true}>
@@ -48,9 +50,14 @@ export const ScopeSection = ({
     >
       <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <h4>{title}</h4>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h4>{title}</h4>
+              </EuiText>
+            </EuiFlexItem>
+            {titleBadge ? <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem> : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">

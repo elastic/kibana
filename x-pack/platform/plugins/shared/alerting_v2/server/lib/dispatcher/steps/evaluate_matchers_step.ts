@@ -8,22 +8,22 @@
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
 import { inject, injectable } from 'inversify';
-import { createMatcherContext } from './utils/matcher_context';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import type {
+  ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  ActionPolicy,
-  ActionPolicyId,
   Rule,
   RuleId,
 } from '../types';
+import { createMatcherContext } from './utils/matcher_context';
 
 @injectable()
 export class EvaluateMatchersStep implements DispatcherStep {

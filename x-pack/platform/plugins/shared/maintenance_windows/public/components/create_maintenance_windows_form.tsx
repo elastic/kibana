@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
@@ -101,13 +102,13 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
   );
   const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
 
-  const [isEpisodeQueryEnabled, setIsEpisodeQueryEnabled] = useState(
-    !!initialValue?.scopeEpisodeQuery
+  const [isAlertingV2QueryEnabled, setIsAlertingV2QueryEnabled] = useState(
+    !!initialValue?.scopeAlertingV2
   );
-  const [episodeQuery, setEpisodeQuery] = useState<string>(
-    initialValue?.scopeEpisodeQuery?.kql || ''
+  const [alertingV2Query, setAlertingV2Query] = useState<string>(
+    initialValue?.scopeAlertingV2?.kql || ''
   );
-  const [episodeQueryErrors, setEpisodeQueryErrors] = useState<string[]>([]);
+  const [alertingV2QueryErrors, setAlertingV2QueryErrors] = useState<string[]>([]);
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
@@ -148,22 +149,21 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     };
   }, [isScopedQueryEnabled, query, filters]);
 
-  const scopeEpisodeQueryPayload = useMemo(() => {
-    if (!isEpisodeQueryEnabled) {
+  const scopeAlertingV2Payload = useMemo(() => {
+    if (!isAlertingV2QueryEnabled) {
       return null;
     }
-    if (!episodeQuery) {
+    if (!alertingV2Query) {
       return null;
     }
 
     return {
-      kql: episodeQuery,
-      filters: [],
+      kql: alertingV2Query,
     };
-  }, [isEpisodeQueryEnabled, episodeQuery]);
+  }, [isAlertingV2QueryEnabled, alertingV2Query]);
 
   const submitMaintenanceWindow: FormSubmitHandler<FormProps> = async (formData, isValid) => {
-    if (!isValid || scopedQueryErrors.length !== 0 || episodeQueryErrors.length !== 0) {
+    if (!isValid || scopedQueryErrors.length !== 0 || alertingV2QueryErrors.length !== 0) {
       return;
     }
 
@@ -172,8 +172,8 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
       return;
     }
 
-    if (isEpisodeQueryEnabled && !scopeEpisodeQueryPayload) {
-      setEpisodeQueryErrors([i18n.CREATE_FORM_EPISODE_QUERY_EMPTY_ERROR_MESSAGE]);
+    if (isAlertingV2QueryEnabled && !scopeAlertingV2Payload) {
+      setAlertingV2QueryErrors([i18n.CREATE_FORM_ALERTING_V2_QUERY_EMPTY_ERROR_MESSAGE]);
       return;
     }
 
@@ -188,11 +188,11 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
         recurringSchedule: formData.recurringSchedule,
       }),
       scopedQuery: scopedQueryPayload,
-      scopeEpisodeQuery: scopeEpisodeQueryPayload,
+      scopeAlertingV2: scopeAlertingV2Payload,
       ...(scopedQueryPayload ? { categoryIds: null } : {}),
     };
 
-    if (!scopedQueryPayload && !scopeEpisodeQueryPayload) {
+    if (!scopedQueryPayload && !scopeAlertingV2Payload) {
       if (userConfirmedSaveWithoutFiltersRef.current) {
         userConfirmedSaveWithoutFiltersRef.current = false;
       } else {
@@ -238,9 +238,9 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     setScopedQueryErrors((prev) => (prev.length ? [] : prev));
   };
 
-  const onEpisodeQueryToggle = (isEnabled: boolean) => {
-    setIsEpisodeQueryEnabled(isEnabled);
-    setEpisodeQueryErrors((prev) => (prev.length ? [] : prev));
+  const onAlertingV2QueryToggle = (isEnabled: boolean) => {
+    setIsAlertingV2QueryEnabled(isEnabled);
+    setAlertingV2QueryErrors((prev) => (prev.length ? [] : prev));
   };
 
   const onQueryChange = useCallback((newQuery: string) => {
@@ -248,9 +248,9 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
     setQuery(newQuery);
   }, []);
 
-  const onEpisodeQueryChange = (newQuery: string) => {
-    setEpisodeQueryErrors((prev) => (prev.length ? [] : prev));
-    setEpisodeQuery(newQuery);
+  const onAlertingV2QueryChange = (newQuery: string) => {
+    setAlertingV2QueryErrors((prev) => (prev.length ? [] : prev));
+    setAlertingV2Query(newQuery);
   };
 
   const modalTitleId = useGeneratedHtmlId();
@@ -396,26 +396,34 @@ export const CreateMaintenanceWindowForm = (props: CreateMaintenanceWindowFormPr
             </UseField>
           </ScopeSection>
           <ScopeSection
-            title={i18n.EPISODES_SCOPE_TITLE}
-            description={i18n.EPISODES_SCOPE_DESCRIPTION}
-            switchLabel={i18n.EPISODES_SCOPE_TITLE}
-            switchChecked={isEpisodeQueryEnabled}
-            onSwitchChange={onEpisodeQueryToggle}
-            switchDataTestSubj="episodeScopedQuerySwitch"
-            expandedSubtitle={i18n.FILTER_EPISODES_SUBTITLE}
+            title={i18n.ALERTING_V2_SCOPE_TITLE}
+            description={i18n.ALERTING_V2_SCOPE_DESCRIPTION}
+            switchLabel={i18n.ALERTING_V2_SCOPE_TITLE}
+            switchChecked={isAlertingV2QueryEnabled}
+            onSwitchChange={onAlertingV2QueryToggle}
+            switchDataTestSubj="alertingV2ScopedQuerySwitch"
+            expandedSubtitle={i18n.FILTER_ALERTING_V2_SUBTITLE}
+            titleBadge={
+              <EuiBetaBadge
+                label={i18n.TECHNICAL_PREVIEW_LABEL}
+                iconType="flask"
+                tooltipContent={i18n.CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP}
+                size="s"
+              />
+            }
           >
-            <UseField path="scopeEpisodeQuery">
+            <UseField path="scopeAlertingV2">
               {() => (
                 <EuiFormRow
                   fullWidth
-                  isInvalid={episodeQueryErrors.length !== 0}
-                  error={episodeQueryErrors[0]}
+                  isInvalid={alertingV2QueryErrors.length !== 0}
+                  error={alertingV2QueryErrors[0]}
                 >
                   <EpisodeMatcherInput
-                    value={episodeQuery}
-                    onChange={onEpisodeQueryChange}
+                    value={alertingV2Query}
+                    onChange={onAlertingV2QueryChange}
                     fullWidth
-                    data-test-subj="maintenanceWindowEpisodeDataFilterInput"
+                    data-test-subj="maintenanceWindowAlertingV2FilterInput"
                     placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
                   />
                 </EuiFormRow>

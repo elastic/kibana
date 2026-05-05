@@ -6,7 +6,10 @@
  */
 
 import type { RRuleAttributes } from './r_rule_attributes';
-import type { AlertsFilterQueryAttributes } from './alerts_filter_query_attributes';
+import type {
+  AlertsFilterQueryAttributes,
+  AlertingV2ScopeAttributes,
+} from './alerts_filter_query_attributes';
 import type { Schedule } from '../../application/types';
 
 export const maintenanceWindowCategoryIdTypes = {
@@ -39,6 +42,6 @@ export interface MaintenanceWindowAttributes {
   schedule: { custom: Schedule };
   scope?: {
     alerting?: AlertsFilterQueryAttributes | null;
-    episodes?: AlertsFilterQueryAttributes | null;
+    alertingV2?: AlertingV2ScopeAttributes | null;
   };
 }

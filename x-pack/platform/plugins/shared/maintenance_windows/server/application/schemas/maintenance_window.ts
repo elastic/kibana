@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus, maintenanceWindowCategoryIdTypes } from '../constants';
 import { rRuleSchema } from './r_rule';
-import { alertsFilterQuerySchema } from './alerts_filter_query_schemas';
+import { alertsFilterQuerySchema, alertingV2ScopeSchema } from './alerts_filter_query_schemas';
 import { scheduleSchema } from './schedule';
 
 export const maintenanceWindowEventSchema = schema.object({
@@ -55,7 +55,7 @@ export const maintenanceWindowSchema = schema.object({
   scope: schema.maybe(
     schema.object({
       alerting: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
-      episodes: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
+      alertingV2: schema.maybe(schema.nullable(alertingV2ScopeSchema)),
     })
   ),
 });

@@ -17,10 +17,10 @@ export const transformCreateBody = (
     duration: createBody.duration,
   });
   const scope =
-    createBody.scoped_query || createBody.scope_episode_query
+    createBody.scoped_query || createBody.scope_alerting_v2
       ? {
           ...(createBody.scoped_query ? { alerting: createBody.scoped_query } : {}),
-          ...(createBody.scope_episode_query ? { episodes: createBody.scope_episode_query } : {}),
+          ...(createBody.scope_alerting_v2 ? { alertingV2: createBody.scope_alerting_v2 } : {}),
         }
       : undefined;
 

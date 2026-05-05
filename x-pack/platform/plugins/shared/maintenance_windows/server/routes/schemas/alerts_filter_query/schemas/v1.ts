@@ -8,6 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { FilterStateStore } from '@kbn/es-query';
 
+export const alertingV2ScopeSchema = schema.object({
+  kql: schema.string({ meta: { description: 'A filter written in Kibana Query Language (KQL).' } }),
+});
+
 export const alertsFilterQuerySchema = schema.object({
   kql: schema.string({ meta: { description: 'A filter written in Kibana Query Language (KQL).' } }),
   filters: schema.arrayOf(

@@ -20,7 +20,7 @@ export interface UpdateParams {
   rRule: MaintenanceWindowUI['rRule'];
   categoryIds?: MaintenanceWindowUI['categoryIds'];
   scopedQuery?: MaintenanceWindowUI['scopedQuery'];
-  scopeEpisodeQuery?: MaintenanceWindowUI['scopeEpisodeQuery'];
+  scopeAlertingV2?: MaintenanceWindowUI['scopeAlertingV2'];
 }
 
 const transformUpdateBodySchema = (
@@ -37,8 +37,8 @@ const transformUpdateBodySchema = (
         }
       : {}),
     ...(updateParams.scopedQuery !== undefined ? { scoped_query: updateParams.scopedQuery } : {}),
-    ...(updateParams.scopeEpisodeQuery !== undefined
-      ? { scope_episode_query: updateParams.scopeEpisodeQuery }
+    ...(updateParams.scopeAlertingV2 !== undefined
+      ? { scope_alerting_v2: updateParams.scopeAlertingV2 }
       : {}),
   };
 };

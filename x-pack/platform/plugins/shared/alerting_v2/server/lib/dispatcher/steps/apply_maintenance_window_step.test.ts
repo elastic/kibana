@@ -111,7 +111,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('suppresses episodes where the episode-data KQL filter matches', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
-        scope: { episodes: { kql: 'data.severity: "critical"', filters: [], dsl: '' } },
+        scope: { alertingV2: { kql: 'data.severity: "critical"' } },
       }),
     ]);
 
@@ -135,7 +135,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('keeps episodes where the episode-data KQL filter does not match', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
-        scope: { episodes: { kql: 'data.severity: "critical"', filters: [], dsl: '' } },
+        scope: { alertingV2: { kql: 'data.severity: "critical"' } },
       }),
     ]);
 
@@ -157,7 +157,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
         id: 'mw-non-matching',
-        scope: { episodes: { kql: 'data.severity: "low"', filters: [], dsl: '' } },
+        scope: { alertingV2: { kql: 'data.severity: "low"' } },
       }),
       buildMw({ id: 'mw-matching' }),
     ]);

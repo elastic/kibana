@@ -23,11 +23,8 @@ import { createMatcherContext } from './utils/matcher_context';
 /**
  * Suppresses episodes whose `last_event_timestamp` falls within an active
  * maintenance window in the same space, and whose `episode.data` matches the
- * maintenance window's optional episode-data KQL filter (`scope.episodes.kql`,
- * experimental).
- *
- * The DSL form of `scope.episodes` is built and stored on save but is not
- * evaluated at runtime; only the KQL string is consulted in-memory.
+ * maintenance window's optional episode-data KQL filter
+ * (`scope.alertingV2.kql`, experimental).
  */
 @injectable()
 export class ApplyMaintenanceWindowStep implements DispatcherStep {
@@ -98,7 +95,7 @@ function findMatchingMaintenanceWindow(
   for (const mw of candidates) {
     if (!isEventTimestampWithinWindow(mw, eventTime)) continue;
 
-    const kql = mw.scope?.episodes?.kql;
+    const kql = mw.scope?.alertingV2?.kql;
     if (!kql) {
       return mw;
     }

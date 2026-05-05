@@ -6,6 +6,7 @@
  */
 
 import type { MaintenanceWindow } from '../server/application/types';
+import type { AlertingV2ScopeAttributes } from './types';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -15,6 +16,7 @@ export type {
   MaintenanceWindowCreateBody,
   MaintenanceWindowClientContext,
   ScopedQueryAttributes,
+  AlertingV2ScopeAttributes,
   MaintenanceWindowDeepLinkIds,
 } from './types';
 
@@ -36,7 +38,7 @@ export {
 } from './constants';
 
 export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'> & {
-  scopeEpisodeQuery?: MaintenanceWindow['scopedQuery'];
+  scopeAlertingV2?: AlertingV2ScopeAttributes | null;
 };
 
 export {

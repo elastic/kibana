@@ -26,3 +26,7 @@ export const alertsFilterQuerySchema = schema.object({
   ),
   dsl: schema.maybe(schema.string()),
 });
+
+export const alertingV2ScopeSchema = schema.object({
+  kql: schema.string(),
+});
