@@ -23,9 +23,9 @@ import type { SavedObjectsType } from '@kbn/core/server';
 // (>8.8 rule), so the property declarations must be preserved even though no
 // runtime code reads them. The data_backfill values in version2 inline the
 // constants formerly imported from the deleted v1 `constants.ts`.
-export const legacyEntityEngineDescriptorTypeName = 'entity-engine-status';
+export const v1EntityEngineDescriptorTypeName = 'entity-engine-status';
 
-const legacyEntityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
+const v1EntityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
     indexPattern: { type: 'keyword' },
@@ -82,11 +82,11 @@ const version2: SavedObjectsModelVersion = {
   ],
 };
 
-export const legacyEntityEngineDescriptorType: SavedObjectsType = {
-  name: legacyEntityEngineDescriptorTypeName,
+export const v1EntityEngineDescriptorType: SavedObjectsType = {
+  name: v1EntityEngineDescriptorTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  mappings: legacyEntityEngineDescriptorTypeMappings,
+  mappings: v1EntityEngineDescriptorTypeMappings,
   modelVersions: { 1: version1, 2: version2 },
 };
