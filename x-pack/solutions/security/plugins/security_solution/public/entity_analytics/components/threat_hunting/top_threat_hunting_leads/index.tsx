@@ -58,6 +58,7 @@ interface TopThreatHuntingLeadsProps {
   hasValidConnector: boolean;
   onConnectorIdSelected: (id: string) => void;
   isAgentChatExperienceEnabled: boolean;
+  hasWritePermissionError?: boolean;
 }
 
 export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
@@ -77,6 +78,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   hasValidConnector,
   onConnectorIdSelected,
   isAgentChatExperienceEnabled,
+  hasWritePermissionError,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -101,6 +103,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const genAiSettingsUrl = getUrlForApp('management', { path: '/ai/genAiSettings' });
 
   const showHeaderGenerate = !isOpen && leads.length === 0 && !hasGenerated;
+  const generateTooltipContent = hasWritePermissionError
+    ? i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP
+    : !hasValidConnector
+    ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
+    : undefined;
+  const isGenerateDisabled = !hasValidConnector || !!hasWritePermissionError;
   const renderCount = Math.min(leads.length, visibleCardCount);
   const hasFewLeads = leads.length < visibleCardCount;
 
@@ -148,15 +156,24 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             )}
             {leads.length > 0 && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="refresh"
-                  isLoading={isGenerating}
-                  onClick={onGenerate}
-                  data-test-subj="refreshLeadsButton"
+                <EuiToolTip
+                  content={
+                    hasWritePermissionError
+                      ? i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP
+                      : undefined
+                  }
                 >
-                  {i18n.REGENERATE}
-                </EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="refresh"
+                    isLoading={isGenerating}
+                    isDisabled={!!hasWritePermissionError}
+                    onClick={onGenerate}
+                    data-test-subj="refreshLeadsButton"
+                  >
+                    {i18n.REGENERATE}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiFlexItem>
             )}
             {leads.length > 0 && (
@@ -198,16 +215,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     {i18n.OPEN_GENAI_SETTINGS}
                   </EuiButton>
                 ) : (
-                  <EuiToolTip
-                    content={
-                      !hasValidConnector ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
-                    }
-                  >
+                  <EuiToolTip content={generateTooltipContent}>
                     <AiButton
                       size="s"
                       iconType="sparkles"
                       isLoading={isGenerating}
-                      isDisabled={!hasValidConnector}
+                      isDisabled={isGenerateDisabled}
                       onClick={onGenerate}
                       data-test-subj="headerGenerateLeadsButton"
                     >
@@ -322,18 +335,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                         {i18n.OPEN_GENAI_SETTINGS}
                       </EuiButton>
                     ) : (
-                      <EuiToolTip
-                        content={
-                          !hasValidConnector
-                            ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
-                            : undefined
-                        }
-                      >
+                      <EuiToolTip content={generateTooltipContent}>
                         <AiButton
                           size="s"
                           iconType="sparkles"
                           isLoading={isGenerating}
-                          isDisabled={!hasValidConnector}
+                          isDisabled={isGenerateDisabled}
                           onClick={onGenerate}
                           data-test-subj="generateLeadsButton"
                         >
@@ -370,18 +377,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                         {i18n.OPEN_GENAI_SETTINGS}
                       </EuiButton>
                     ) : (
-                      <EuiToolTip
-                        content={
-                          !hasValidConnector
-                            ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
-                            : undefined
-                        }
-                      >
+                      <EuiToolTip content={generateTooltipContent}>
                         <AiButton
                           size="s"
                           iconType="sparkles"
                           isLoading={isGenerating}
-                          isDisabled={!hasValidConnector}
+                          isDisabled={isGenerateDisabled}
                           onClick={onGenerate}
                           data-test-subj="generateLeadsButton"
                         >

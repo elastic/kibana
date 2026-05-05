@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+
+# [rspack-transition] avoid shipping bundle sizes while RSPack is not the default
+if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
+  echo "Skipping shipping bundle sizes to CI Stats (rspack build)"
+  export DISABLE_CI_STATS_SHIPPING=true
+fi
+
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   cmd=(
     "node" "scripts/ship_ci_stats"
@@ -23,4 +30,15 @@ version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
 cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.zst" kibana-default.tar.zst
 buildkite-agent artifact upload "./*.tar.zst;./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+cd -
+
+# [rspack-transition] Upload build type marker for cache validation.
+# Delete this block when the legacy optimizer is removed.
+if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
+  echo "rspack" > "$KIBANA_DIR/target/kibana-build-type.txt"
+else
+  echo "legacy" > "$KIBANA_DIR/target/kibana-build-type.txt"
+fi
+cd "$KIBANA_DIR/target"
+buildkite-agent artifact upload "kibana-build-type.txt"
 cd -
