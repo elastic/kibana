@@ -8,6 +8,7 @@
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   ALERT_ACTIONS_DATA_STREAM,
@@ -50,6 +51,7 @@ import {
   ApplyThrottlingStep,
   DispatchStep,
   StoreActionsStep,
+  StoreExecutionHistoryStep,
 } from '../steps';
 import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
@@ -472,6 +474,7 @@ describe('DispatcherService integration tests', () => {
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: ActionPolicySavedObjectServiceContract;
   let mockWfm: WorkflowsServerPluginSetup['management'];
+  let eventLogger: ReturnType<typeof eventLoggerMock.create>;
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -515,6 +518,7 @@ describe('DispatcherService integration tests', () => {
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
     mockWfm = createMockWorkflowsManagement();
+    eventLogger = eventLoggerMock.create();
 
     jest.spyOn(npSoService, 'findAllDecrypted').mockImplementation(async () => {
       const { saved_objects: allPolicies } = await npSoService.find({
@@ -532,11 +536,12 @@ describe('DispatcherService integration tests', () => {
       new ApplySuppressionStep(),
       new FetchRulesStep(rulesSoService),
       new FetchPoliciesStep(npSoService),
-      new EvaluateMatchersStep(),
+      new EvaluateMatchersStep(mockLoggerService),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
+      new StoreExecutionHistoryStep(eventLogger),
     ]);
     dispatcherService = new DispatcherService(pipeline);
 
@@ -560,6 +565,7 @@ describe('DispatcherService integration tests', () => {
       });
 
       expect(actionsResponse.hits.hits).toHaveLength(0);
+      expect(eventLogger.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -608,6 +614,17 @@ describe('DispatcherService integration tests', () => {
       });
 
       expect(notifiedActionsResponse.hits.hits).toHaveLength(3);
+
+      const loggedActions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+      expect(loggedActions).toEqual(['dispatched']);
+      const [[summaryEvent]] = eventLogger.logEvent.mock.calls;
+      const refTypes = summaryEvent?.kibana?.saved_objects?.map((ref) => ref?.type);
+      expect(refTypes).toEqual([ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE]);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.episode_count).toBe(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.episode_ids).toHaveLength(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.rule_count).toBe(1);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.action_group_count).toBe(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.workflow_execution_ids).toEqual([]);
     });
   });
 
