@@ -13,6 +13,7 @@ import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } 
 import { createPrebuiltRuleObjectsClient as createPrebuiltRuleObjectsClientMock } from '../../../../prebuilt_rules/logic/rule_objects/__mocks__/prebuilt_rule_objects_client';
 import { requestContextMock } from '../../../../routes/__mocks__';
 import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { createRuleSourceImporter } from './rule_source_importer';
 
 describe('ruleSourceImporter', () => {
@@ -31,6 +32,7 @@ describe('ruleSourceImporter', () => {
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
     ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
     ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([]);
+    ruleAssetsClientMock.fetchDeprecatedRules.mockResolvedValue([]);
     ruleObjectsClientMock = createPrebuiltRuleObjectsClientMock();
     ruleObjectsClientMock.fetchInstalledRulesByIds.mockResolvedValue([]);
     ruleToImport = { rule_id: 'rule-1', version: 1 } as RuleToImport;
@@ -98,6 +100,24 @@ describe('ruleSourceImporter', () => {
       expect(subject.isPrebuiltRule(ruleWithoutVersion)).toBe(true);
     });
 
+    it("returns true if the rule's rule_id only matches a deprecated rule asset", async () => {
+      ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
+        {
+          rule_id: ruleToImport.rule_id,
+          version: ruleToImport.version ?? 1,
+          deprecated: true,
+          name: 'Deprecated rule',
+        },
+      ]);
+      await subject.setup([ruleToImport]);
+
+      expect(subject.isPrebuiltRule(ruleToImport)).toBe(true);
+      expect(ruleAssetsClientMock.fetchDeprecatedRules).toHaveBeenCalledWith([
+        ruleToImport.rule_id,
+      ]);
+    });
+
     it('throws an error if the rule is not known to the calculator', async () => {
       await subject.setup([ruleToImport]);
 
@@ -141,6 +161,35 @@ describe('ruleSourceImporter', () => {
       expect(() => subject.calculateRuleSource(rule)).toThrowErrorMatchingInlineSnapshot(
         `"Rule validated-rule was not registered during setup."`
       );
+    });
+
+    it('returns external rule_source for re-imports of deprecated prebuilt rules', async () => {
+      const deprecatedRuleToImport = {
+        ...getRulesSchemaMock(),
+        rule_id: 'validated-rule',
+        version: 1,
+      };
+
+      ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
+        {
+          rule_id: deprecatedRuleToImport.rule_id,
+          version: deprecatedRuleToImport.version,
+          deprecated: true,
+          name: 'Deprecated rule',
+        },
+      ]);
+      await subject.setup([deprecatedRuleToImport]);
+
+      const result = subject.calculateRuleSource(deprecatedRuleToImport);
+
+      expect(result.immutable).toBe(true);
+      expect(result.ruleSource).toMatchObject({
+        type: 'external',
+        is_customized: false,
+        has_base_version: false,
+      });
     });
   });
 });
