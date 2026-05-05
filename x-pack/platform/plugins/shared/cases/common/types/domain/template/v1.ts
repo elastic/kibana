@@ -68,9 +68,18 @@ export const TemplateSchema = z.object({
   fieldCount: z.number().optional(),
 
   /**
-   * Array of field names to display in a tooltip
+   * Array of field metadata used for tooltips and label-to-storage-key resolution at search time
    */
-  fieldNames: z.array(z.string()).optional(),
+  fieldNames: z
+    .array(
+      z.object({
+        name: z.string(),
+        label: z.string(),
+        type: z.string(),
+        control: z.string(),
+      })
+    )
+    .optional(),
 
   /**
    * Last time this template was used
@@ -122,6 +131,11 @@ export const ParsedTemplateSchema = TemplateSchema.omit({
    * Parsed definition for the template. Needs to be validated programmatically.
    */
   definition: ParsedTemplateDefinitionSchema,
+  /**
+   * Original YAML definition string with preserved formatting and comments.
+   * This should be used when editing templates to preserve user formatting.
+   */
+  definitionString: z.string(),
   isLatest: z.boolean(),
   latestVersion: z.number(),
 });

@@ -6,15 +6,15 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
+import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  NotificationPolicy,
-  NotificationPolicyId,
+  ActionPolicy,
+  ActionPolicyId,
 } from '../types';
 
 @injectable()
@@ -22,16 +22,16 @@ export class FetchPoliciesStep implements DispatcherStep {
   public readonly name = 'fetch_policies';
 
   constructor(
-    @inject(NotificationPolicySavedObjectServiceInternalToken)
-    private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
+    @inject(ActionPolicySavedObjectServiceInternalToken)
+    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
   ) {}
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const result = await this.notificationPolicySavedObjectService.findAllDecrypted({
+    const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
     });
 
-    const policies = new Map<NotificationPolicyId, NotificationPolicy>();
+    const policies = new Map<ActionPolicyId, ActionPolicy>();
 
     for (const doc of result) {
       if ('error' in doc) {

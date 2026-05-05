@@ -90,6 +90,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Allowlist",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -232,6 +233,7 @@
             "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TerraformImpactResult",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -448,6 +450,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OasdiffOptions",
             "trackAdoption": false,
             "isRequired": false
           }

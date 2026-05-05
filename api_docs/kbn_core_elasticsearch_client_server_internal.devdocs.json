@@ -56,6 +56,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClientConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -215,6 +216,7 @@
                     "lineNumber": 51,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "OnRequestContext",
                     "trackAdoption": false
                   },
                   {
@@ -231,6 +233,7 @@
                     "lineNumber": 52,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "TransportRequestParams",
                     "trackAdoption": false
                   },
                   {
@@ -247,6 +250,7 @@
                     "lineNumber": 53,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "TransportRequestOptions",
                     "trackAdoption": false
                   },
                   {
@@ -269,6 +273,7 @@
                     "lineNumber": 55,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Logger",
                     "trackAdoption": false
                   }
                 ]
@@ -417,6 +422,7 @@
                     "lineNumber": 51,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "OnRequestContext",
                     "trackAdoption": false
                   },
                   {
@@ -433,6 +439,7 @@
                     "lineNumber": 52,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "TransportRequestParams",
                     "trackAdoption": false
                   },
                   {
@@ -449,6 +456,7 @@
                     "lineNumber": 53,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "TransportRequestOptions",
                     "trackAdoption": false
                   },
                   {
@@ -471,6 +479,7 @@
                     "lineNumber": 55,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Logger",
                     "trackAdoption": false
                   }
                 ]
@@ -582,6 +591,7 @@
             "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DiagnosticResult",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -631,7 +641,15 @@
             "tags": [],
             "label": "getAgentsStats",
             "description": [
-              "\nReturns the {@link ElasticsearchClientsMetrics}, to understand the load on the Elasticsearch HTTP agents."
+              "\nReturns the ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
+                "section": "def-server.ElasticsearchClientsMetrics",
+                "text": "ElasticsearchClientsMetrics"
+              },
+              ", to understand the load on the Elasticsearch HTTP agents."
             ],
             "signature": [
               "() => ",
@@ -825,6 +843,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OnRequestContext",
             "trackAdoption": false
           },
           {
@@ -841,6 +860,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransportRequestParams",
             "trackAdoption": false
           },
           {
@@ -857,6 +877,7 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransportRequestOptions",
             "trackAdoption": false
           },
           {
@@ -879,6 +900,7 @@
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false
           }
         ],

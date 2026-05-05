@@ -18,6 +18,11 @@ import * as dslMocks from './dsl.mocks';
 import * as esqlMocks from './esql.mocks';
 import * as esqlApiMocks from './lens_api_config.mock';
 
+function toAPI(attributes: Parameters<LensConfigBuilder['toAPIFormat']>[0]): HeatmapConfig {
+  const builder = new LensConfigBuilder();
+  return builder.toAPIFormat(attributes) as HeatmapConfig;
+}
+
 describe('Heatmap', () => {
   describe('DSL', () => {
     it('should convert a simple heatmap', () => {
@@ -56,6 +61,28 @@ describe('Heatmap', () => {
 
     it('should convert a heatmap with sort predicates', () => {
       validateConverter(esqlMocks.withSortPredicates, heatmapConfigSchema);
+    });
+  });
+
+  describe('axis.y omission when no yAccessor', () => {
+    it('should omit axis.y for a DSL heatmap without yAccessor', () => {
+      const apiOutput = toAPI(dslMocks.simple);
+      expect(apiOutput.axis).not.toHaveProperty('y');
+    });
+
+    it('should omit axis.y for an ESQL heatmap without yAccessor', () => {
+      const apiOutput = toAPI(esqlMocks.simple);
+      expect(apiOutput.axis).not.toHaveProperty('y');
+    });
+
+    it('should include axis.y for a DSL heatmap with yAccessor', () => {
+      const apiOutput = toAPI(dslMocks.withXAndYAxes);
+      expect(apiOutput.axis).toHaveProperty('y');
+    });
+
+    it('should include axis.y for an ESQL heatmap with yAccessor', () => {
+      const apiOutput = toAPI(esqlMocks.withXAndYAxes);
+      expect(apiOutput.axis).toHaveProperty('y');
     });
   });
 
@@ -102,7 +129,7 @@ describe('Heatmap', () => {
 
         expect(outputConfig.axis?.x?.scale).toBe('temporal');
 
-        validateAPIConverter(esqlApiMocks.withTemporalXAxisScale, heatmapConfigSchema);
+        validateAPIConverter(esqlApiMocks.withTemporalXAxisScale, heatmapConfigSchema, ['axis.y']);
       });
 
       it('should convert ordinal scale correctly', () => {
@@ -112,7 +139,7 @@ describe('Heatmap', () => {
 
         expect(outputConfig.axis?.x?.scale).toBe('ordinal');
 
-        validateAPIConverter(esqlApiMocks.withOrdinalXAxisScale, heatmapConfigSchema);
+        validateAPIConverter(esqlApiMocks.withOrdinalXAxisScale, heatmapConfigSchema, ['axis.y']);
       });
 
       it('should convert linear scale correctly', () => {
@@ -122,7 +149,7 @@ describe('Heatmap', () => {
 
         expect(outputConfig.axis?.x?.scale).toBe('linear');
 
-        validateAPIConverter(esqlApiMocks.withLinearXAxisScale, heatmapConfigSchema);
+        validateAPIConverter(esqlApiMocks.withLinearXAxisScale, heatmapConfigSchema, ['axis.y']);
       });
     });
   });

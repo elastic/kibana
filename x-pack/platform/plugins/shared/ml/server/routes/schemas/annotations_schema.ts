@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Annotations } from '../../../common/types/annotations';
+import type { Annotations } from '@kbn/ml-common-types/annotations';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import type { JobId } from '../../shared';
 
 export const indexAnnotationSchema = schema.object({
   timestamp: schema.number(),

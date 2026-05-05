@@ -13,8 +13,8 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationGroup,
-  NotificationPolicy,
+  ActionGroup,
+  ActionPolicy,
   Rule,
 } from '../types';
 
@@ -24,6 +24,7 @@ export function createDispatcherPipelineInput(
   return {
     startedAt: new Date('2026-01-22T08:00:00.000Z'),
     previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+    executionUuid: '00000000-0000-4000-8000-000000000000',
     ...overrides,
   };
 }
@@ -64,6 +65,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
   return {
     id: 'rule-1',
     spaceId: 'default',
+    kind: 'alert',
     name: 'Test rule',
     description: '',
     tags: [],
@@ -74,9 +76,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
   };
 }
 
-export function createNotificationPolicy(
-  overrides: Partial<NotificationPolicy> = {}
-): NotificationPolicy {
+export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): ActionPolicy {
   return {
     id: 'policy-1',
     spaceId: 'default',
@@ -92,14 +92,12 @@ export function createNotificationPolicy(
 export function createMatchedPair(overrides: Partial<MatchedPair> = {}): MatchedPair {
   return {
     episode: createAlertEpisode(),
-    policy: createNotificationPolicy(),
+    policy: createActionPolicy(),
     ...overrides,
   };
 }
 
-export function createNotificationGroup(
-  overrides: Partial<NotificationGroup> = {}
-): NotificationGroup {
+export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionGroup {
   return {
     id: 'group-1',
     spaceId: 'default',
