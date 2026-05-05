@@ -172,3 +172,24 @@ export const registerEntityAnalyticsDashboardAttachment = ({
     register({ attachments, application, agentBuilder, chrome, searchSession });
   });
 };
+
+/**
+ * Registers the four SIEM Readiness attachment renderers:
+ *   - `security.siem_readiness_coverage` — live RuleCoveragePanel (fetches own data)
+ *   - `security.siem_readiness_quality` — link button to Data Quality Dashboard
+ *   - `security.siem_readiness_continuity` — link button to a specific ingest pipeline
+ *   - `security.siem_readiness_retention` — link button to the relevant index management page
+ *
+ * Lazily imports [./siem_readiness_attachment](./siem_readiness_attachment.tsx)
+ * so the SIEM readiness UI components stay off the main bundle until needed.
+ */
+export const registerSiemReadinessAttachments = (
+  attachments: AttachmentServiceStartContract
+): void => {
+  void import(
+    /* webpackChunkName: "security_siem_readiness_attachments" */
+    './siem_readiness_attachment'
+  ).then(({ registerSiemReadinessAttachments: register }) => {
+    register(attachments);
+  });
+};

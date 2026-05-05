@@ -97,7 +97,9 @@ Use this tool when asked about detection coverage, missing integrations, data ga
         }));
 
         // ── Compile ────────────────────────────────────────────────────────────
-        const data = compileCoverageData(categoriesData, rules, installedPackageNames, { category });
+        const data = compileCoverageData(categoriesData, rules, installedPackageNames, {
+          category,
+        });
 
         logger.debug(
           `SIEM Readiness coverage tool: ${data.summary.activeCategories.length} active categories, ${rulesResult.data.length} enabled rules`

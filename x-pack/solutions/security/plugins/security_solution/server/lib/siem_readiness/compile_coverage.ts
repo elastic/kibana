@@ -83,9 +83,7 @@ export const compileCoverageData = (
       .filter(([, mainCat]) => mainCat === cat)
       .map(([ecsCategory]) => ecsCategory)
       .filter((ecsCategory) =>
-        rawIndexBuckets.some((b) =>
-          b.by_category?.buckets.some((cb) => cb.key === ecsCategory)
-        )
+        rawIndexBuckets.some((b) => b.by_category?.buckets.some((cb) => cb.key === ecsCategory))
       );
 
     return {

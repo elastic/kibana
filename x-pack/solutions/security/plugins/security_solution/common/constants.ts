@@ -720,6 +720,10 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
+  siemReadinessCoverage = 'security.siem_readiness_coverage',
+  siemReadinessQuality = 'security.siem_readiness_quality',
+  siemReadinessContinuity = 'security.siem_readiness_continuity',
+  siemReadinessRetention = 'security.siem_readiness_retention',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

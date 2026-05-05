@@ -44,6 +44,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.alerts`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.siem_readiness_coverage`,
+  `${internalNamespaces.security}.siem_readiness_continuity`,
+  `${internalNamespaces.security}.siem_readiness_quality`,
+  `${internalNamespaces.security}.siem_readiness_retention`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -124,6 +128,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'siem-readiness',
 
   // O11Y
   'observability.rca',

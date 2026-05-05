@@ -10,6 +10,10 @@ import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
+import { createSiemReadinessCoverageAttachmentType } from './siem_readiness_coverage';
+import { createSiemReadinessQualityAttachmentType } from './siem_readiness_quality';
+import { createSiemReadinessContinuityAttachmentType } from './siem_readiness_continuity';
+import { createSiemReadinessRetentionAttachmentType } from './siem_readiness_retention';
 
 /**
  * Registers all security agent builder attachments with the agentBuilder plugin
@@ -19,4 +23,8 @@ export const registerAttachments = async (agentBuilder: AgentBuilderPluginSetup)
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
   agentBuilder.attachments.registerType(createRuleAttachmentType());
+  agentBuilder.attachments.registerType(createSiemReadinessCoverageAttachmentType());
+  agentBuilder.attachments.registerType(createSiemReadinessQualityAttachmentType());
+  agentBuilder.attachments.registerType(createSiemReadinessContinuityAttachmentType());
+  agentBuilder.attachments.registerType(createSiemReadinessRetentionAttachmentType());
 };

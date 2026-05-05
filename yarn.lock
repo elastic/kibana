@@ -9246,6 +9246,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/siem-readiness-common@link:x-pack/solutions/security/packages/siem-readiness-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/siem-readiness@link:x-pack/solutions/security/packages/siem-readiness":
   version "0.0.0"
   uid ""
