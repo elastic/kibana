@@ -63,7 +63,7 @@ export const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
  * Phase 0 lookup build uses this directly. Phase 1 base scoring is driven by
  * the lookup index (cursor-paginated via ES|QL output on `entity_id`) and
  * doesn't read the entity store directly anymore — see
- * `score_base_entities.ts` for the LOOKUP JOIN scoring path.
+ * `score_base_entities.ts` for the `WHERE entity_id IN (...)` scoring path.
  */
 export const MAX_ENTITY_SEARCH_PAGE_SIZE = 10_000;
 

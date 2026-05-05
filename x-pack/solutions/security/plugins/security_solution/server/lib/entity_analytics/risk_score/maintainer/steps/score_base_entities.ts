@@ -42,7 +42,10 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   idBasedRiskScoringEnabled: boolean;
 }
 
-export type Phase1BaseScoringSummary = StepResult;
+export interface Phase1BaseScoringSummary extends StepResult {
+  pagesProcessed: number;
+  scoresWritten: number;
+}
 
 /**
  * Streams base risk scores for one entity type, one page per yield.

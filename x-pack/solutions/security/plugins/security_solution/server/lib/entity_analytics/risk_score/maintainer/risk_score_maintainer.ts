@@ -65,6 +65,13 @@ type RunMetricsTracker = ReturnType<typeof createRunMetricsTracker>;
 type TelemetryReporter = ReturnType<typeof createRiskScoreMaintainerTelemetryReporter>;
 const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
 
+type LookupIndexReadinessStatus = 'ready' | 'mapping_upgrade_failed';
+
+interface LookupIndexReadiness {
+  lookupIndex: string;
+  status: LookupIndexReadinessStatus;
+}
+
 interface InitializedRunContext {
   namespace: string;
   coreStart: CoreStart;
@@ -119,15 +126,12 @@ export const createRiskScoreMaintainer = ({
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
       await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
       await riskScoreDataClient.init();
-      try {
-        await ensureLookupIndex({ esClient, namespace });
-      } catch (error) {
-        logger.error(
-          `There was an error upgrading the lookup index mapping. Continuing with maintainer setup. ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
+      await ensureLookupIndexReady({
+        esClient,
+        namespace,
+        logger,
+        lifecycle: 'setup',
+      });
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
@@ -256,17 +260,12 @@ const initializeRunContext = async ({
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
   await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
   await riskScoreDataClient.init();
-  let lookupIndex: string;
-  try {
-    lookupIndex = await ensureLookupIndex({ esClient, namespace });
-  } catch (error) {
-    logger.error(
-      `There was an error upgrading the lookup index mapping. Continuing with maintainer run. ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-    lookupIndex = getLookupIndexName(namespace);
-  }
+  const { lookupIndex } = await ensureLookupIndexReady({
+    esClient,
+    namespace,
+    logger,
+    lifecycle: 'run',
+  });
 
   return {
     namespace,
@@ -278,6 +277,36 @@ const initializeRunContext = async ({
     riskScoreDataClient,
     lookupIndex,
   };
+};
+
+const ensureLookupIndexReady = async ({
+  esClient,
+  namespace,
+  logger,
+  lifecycle,
+}: {
+  esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
+  namespace: string;
+  logger: Logger;
+  lifecycle: 'setup' | 'run';
+}): Promise<LookupIndexReadiness> => {
+  try {
+    return {
+      lookupIndex: await ensureLookupIndex({ esClient, namespace }),
+      status: 'ready',
+    };
+  } catch (error) {
+    logger.error(
+      `There was an error upgrading the lookup index mapping. Continuing with maintainer ${lifecycle}. ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+
+    return {
+      lookupIndex: getLookupIndexName(namespace),
+      status: 'mapping_upgrade_failed',
+    };
+  }
 };
 
 const checkRunPrerequisites = async ({

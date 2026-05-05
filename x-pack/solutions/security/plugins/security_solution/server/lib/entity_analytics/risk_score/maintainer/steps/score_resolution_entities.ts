@@ -15,6 +15,7 @@ import {
   getResolutionScoreESQLByIds,
 } from '../../calculate_esql_risk_scores';
 import { MAX_RESOLUTION_TARGETS_PER_PAGE } from '../../constants';
+import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
@@ -44,7 +45,6 @@ interface ResolutionPageResult {
   afterKey: Record<string, string> | undefined;
 }
 
-const RESOLUTION_RELATIONSHIP_TYPE = 'entity.relationships.resolution.resolved_to';
 const RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE = 1000;
 
 export const calculateResolutionEntityScores = async function* ({
@@ -325,7 +325,7 @@ const applyResolutionModifiers = ({
         .filter((entityId) => !relatedEntityIds.has(entityId))
         .map((entityId) => ({
           entity_id: entityId,
-          relationship_type: 'entity.relationships.resolution.resolved_to',
+          relationship_type: RESOLUTION_RELATIONSHIP_TYPE,
         }));
 
       return [

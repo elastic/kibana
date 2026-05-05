@@ -9,6 +9,10 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import {
   RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
+  type RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent,
+  type RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent,
+  type RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent,
+  type RiskScoreMaintainerResetToZeroStageSummaryEvent,
 } from '../../../telemetry/event_based/events';
 
 const ERROR_MESSAGE_MAX_LENGTH = 500;
@@ -35,6 +39,25 @@ interface GlobalSkipInput {
   idBasedRiskScoringEnabled: boolean;
 }
 
+type RunStageSummaryEvent =
+  | Omit<
+      RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent,
+      'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
+    >
+  | Omit<
+      RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent,
+      'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
+    >
+  | Omit<
+      RiskScoreMaintainerResetToZeroStageSummaryEvent,
+      'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
+    >;
+
+type Phase0StageSummaryEvent = Omit<
+  RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent,
+  'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
+>;
+
 export const createRiskScoreMaintainerTelemetryReporter = ({
   telemetry,
 }: {
@@ -50,65 +73,12 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
     const runStartedAtMs = Date.now();
     const getRunDurationMs = () => Date.now() - runStartedAtMs;
 
-    const reportStageSummary = ({
-      stage,
-      status,
-      durationMs,
-      skipReason,
-      errorKind,
-      pagesProcessed,
-      scoresWritten,
-      deferToPhase2Count,
-      notInStoreCount,
-      lookupDocsUpserted,
-      lookupDocsDeleted,
-      entitiesIterated,
-      lookupRowsWritten,
-      bulkBatches,
-      lookupRowsFailed,
-      resetBatchLimitHit,
-    }: {
-      stage:
-        | 'phase0_lookup_build'
-        | 'phase1_base_scoring'
-        | 'phase2_resolution_scoring'
-        | 'reset_to_zero';
-      status: MaintainerStatus;
-      durationMs: number;
-      skipReason?: StageSkipReason;
-      errorKind?: MaintainerErrorKind;
-      pagesProcessed?: number;
-      scoresWritten?: number;
-      deferToPhase2Count?: number;
-      notInStoreCount?: number;
-      lookupDocsUpserted?: number;
-      lookupDocsDeleted?: number;
-      entitiesIterated?: number;
-      lookupRowsWritten?: number;
-      bulkBatches?: number;
-      lookupRowsFailed?: number;
-      resetBatchLimitHit?: boolean;
-    }) => {
+    const reportRunStageSummary = (input: RunStageSummaryEvent) => {
       reportEvent(RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType, {
         namespace: runContext.namespace,
         entityType: runContext.entityType,
-        stage,
-        status,
-        durationMs,
-        skipReason,
-        errorKind,
-        pagesProcessed,
-        scoresWritten,
-        deferToPhase2Count,
-        notInStoreCount,
-        lookupDocsUpserted,
-        lookupDocsDeleted,
-        entitiesIterated,
-        lookupRowsWritten,
-        bulkBatches,
-        lookupRowsFailed,
-        resetBatchLimitHit,
         idBasedRiskScoringEnabled: runContext.idBasedRiskScoringEnabled,
+        ...input,
       });
     };
 
@@ -116,7 +86,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
       const stageStartedAtMs = Date.now();
       return {
         success: (input: { pagesProcessed: number; scoresWritten: number }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase1_base_scoring',
             status: 'success',
             durationMs: Date.now() - stageStartedAtMs,
@@ -124,7 +94,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             scoresWritten: input.scoresWritten,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase1_base_scoring',
             status: 'error',
             durationMs: Date.now() - stageStartedAtMs,
@@ -137,7 +107,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
       const stageStartedAtMs = Date.now();
       return {
         success: (input: { pagesProcessed: number; scoresWritten: number }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase2_resolution_scoring',
             status: 'success',
             durationMs: Date.now() - stageStartedAtMs,
@@ -145,14 +115,14 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             scoresWritten: input.scoresWritten,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase2_resolution_scoring',
             status: 'error',
             durationMs: Date.now() - stageStartedAtMs,
             errorKind: input.errorKind,
           }),
         skipped: (skipReason: Exclude<StageSkipReason, 'reset_to_zero_disabled'>) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'phase2_resolution_scoring',
             status: 'skipped',
             durationMs: Date.now() - stageStartedAtMs,
@@ -165,7 +135,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
       const stageStartedAtMs = Date.now();
       return {
         success: (input: { scoresWritten: number; resetBatchLimitHit: boolean }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'reset_to_zero',
             status: 'success',
             durationMs: Date.now() - stageStartedAtMs,
@@ -173,14 +143,14 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             resetBatchLimitHit: input.resetBatchLimitHit,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'reset_to_zero',
             status: 'error',
             durationMs: Date.now() - stageStartedAtMs,
             errorKind: input.errorKind,
           }),
         skipped: () =>
-          reportStageSummary({
+          reportRunStageSummary({
             stage: 'reset_to_zero',
             status: 'skipped',
             durationMs: 0,
@@ -248,28 +218,12 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
       idBasedRiskScoringEnabled: boolean;
     }) => {
       const stageStartedAtMs = Date.now();
-      const reportPhase0 = (input: {
-        status: MaintainerStatus;
-        errorKind?: MaintainerErrorKind;
-        entitiesIterated?: number;
-        lookupRowsWritten?: number;
-        pagesProcessed?: number;
-        bulkBatches?: number;
-        lookupRowsFailed?: number;
-      }) => {
+      const reportPhase0 = (input: Phase0StageSummaryEvent) => {
         reportEvent(RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT.eventType, {
           namespace,
           entityType: 'all',
-          stage: 'phase0_lookup_build',
-          status: input.status,
-          durationMs: Date.now() - stageStartedAtMs,
-          errorKind: input.errorKind,
-          entitiesIterated: input.entitiesIterated,
-          lookupRowsWritten: input.lookupRowsWritten,
-          pagesProcessed: input.pagesProcessed,
-          bulkBatches: input.bulkBatches,
-          lookupRowsFailed: input.lookupRowsFailed,
           idBasedRiskScoringEnabled,
+          ...input,
         });
       };
 
@@ -282,7 +236,9 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
           lookupRowsFailed?: number;
         }) =>
           reportPhase0({
+            stage: 'phase0_lookup_build',
             status: 'success',
+            durationMs: Date.now() - stageStartedAtMs,
             entitiesIterated: input.entitiesIterated,
             lookupRowsWritten: input.lookupRowsWritten,
             pagesProcessed: input.pagesProcessed,
@@ -291,7 +247,9 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
           reportPhase0({
+            stage: 'phase0_lookup_build',
             status: 'error',
+            durationMs: Date.now() - stageStartedAtMs,
             errorKind: input.errorKind,
           }),
       };

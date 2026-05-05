@@ -335,6 +335,53 @@ export type RiskScoreMaintainerStage =
   | 'phase2_resolution_scoring'
   | 'reset_to_zero';
 
+interface RiskScoreMaintainerStageSummaryEventBase {
+  namespace: string;
+  entityType: string;
+  status: RiskScoreMaintainerStatus;
+  skipReason?: RiskScoreMaintainerSkipReason;
+  errorKind?: RiskScoreMaintainerErrorKind;
+  durationMs: number;
+  idBasedRiskScoringEnabled: boolean;
+}
+
+export interface RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent
+  extends RiskScoreMaintainerStageSummaryEventBase {
+  stage: 'phase0_lookup_build';
+  pagesProcessed?: number;
+  entitiesIterated?: number;
+  lookupRowsWritten?: number;
+  bulkBatches?: number;
+  lookupRowsFailed?: number;
+}
+
+export interface RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent
+  extends RiskScoreMaintainerStageSummaryEventBase {
+  stage: 'phase1_base_scoring';
+  pagesProcessed?: number;
+  scoresWritten?: number;
+}
+
+export interface RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent
+  extends RiskScoreMaintainerStageSummaryEventBase {
+  stage: 'phase2_resolution_scoring';
+  pagesProcessed?: number;
+  scoresWritten?: number;
+}
+
+export interface RiskScoreMaintainerResetToZeroStageSummaryEvent
+  extends RiskScoreMaintainerStageSummaryEventBase {
+  stage: 'reset_to_zero';
+  scoresWritten?: number;
+  resetBatchLimitHit?: boolean;
+}
+
+export type RiskScoreMaintainerStageSummaryEvent =
+  | RiskScoreMaintainerPhase0LookupBuildStageSummaryEvent
+  | RiskScoreMaintainerPhase1BaseScoringStageSummaryEvent
+  | RiskScoreMaintainerPhase2ResolutionScoringStageSummaryEvent
+  | RiskScoreMaintainerResetToZeroStageSummaryEvent;
+
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
   entityType: string;
@@ -392,27 +439,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   },
 };
 
-export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
-  namespace: string;
-  entityType: string;
-  stage: RiskScoreMaintainerStage;
-  status: RiskScoreMaintainerStatus;
-  skipReason?: RiskScoreMaintainerSkipReason;
-  errorKind?: RiskScoreMaintainerErrorKind;
-  durationMs: number;
-  pagesProcessed?: number;
-  scoresWritten?: number;
-  deferToPhase2Count?: number;
-  notInStoreCount?: number;
-  lookupDocsUpserted?: number;
-  lookupDocsDeleted?: number;
-  entitiesIterated?: number;
-  lookupRowsWritten?: number;
-  bulkBatches?: number;
-  lookupRowsFailed?: number;
-  resetBatchLimitHit?: boolean;
-  idBasedRiskScoringEnabled: boolean;
-}> = {
+export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<RiskScoreMaintainerStageSummaryEvent> =
+  {
   eventType: 'risk_score_maintainer_stage_summary',
   schema: {
     namespace: { type: 'keyword', _meta: { description: 'Kibana space where scoring ran' } },
@@ -435,22 +463,6 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
     scoresWritten: {
       type: 'long',
       _meta: { optional: true, description: 'Risk score docs written in this stage' },
-    },
-    deferToPhase2Count: {
-      type: 'long',
-      _meta: { optional: true, description: 'Entities classified as defer_to_phase_2' },
-    },
-    notInStoreCount: {
-      type: 'long',
-      _meta: { optional: true, description: 'Entities classified as not_in_store' },
-    },
-    lookupDocsUpserted: {
-      type: 'long',
-      _meta: { optional: true, description: 'Lookup docs upserted in this stage' },
-    },
-    lookupDocsDeleted: {
-      type: 'long',
-      _meta: { optional: true, description: 'Lookup docs deleted in this stage' },
     },
     entitiesIterated: {
       type: 'long',
