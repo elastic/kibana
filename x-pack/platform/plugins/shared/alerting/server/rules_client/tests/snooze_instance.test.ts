@@ -395,9 +395,7 @@ describe('snoozeAlertInstance()', () => {
 
     test('throws error and does not update rule when getAlertSnoozeSnapshot fails', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      alertsService.getAlertSnoozeSnapshot.mockRejectedValueOnce(
-        new Error('ES connection failed')
-      );
+      alertsService.getAlertSnoozeSnapshot.mockRejectedValueOnce(new Error('ES connection failed'));
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
@@ -418,7 +416,7 @@ describe('snoozeAlertInstance()', () => {
         rulesClient.snoozeAlertInstance({
           params: { alertId: '1', alertInstanceId: '2' },
           query: { validateAlertsExistence: false },
-            body: {
+          body: {
             expiresAt: '2099-12-31T23:59:59.000Z',
             conditions: [{ type: 'field_change', field: 'host.name' }],
             conditionOperator: 'any',
