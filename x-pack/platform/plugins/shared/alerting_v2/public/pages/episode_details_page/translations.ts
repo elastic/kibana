@@ -139,7 +139,7 @@ export const EPISODE_ID_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.
 });
 
 export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
-  defaultMessage: 'Grouping',
+  defaultMessage: 'Grouping fields',
 });
 
 export const TRIGGERED_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
