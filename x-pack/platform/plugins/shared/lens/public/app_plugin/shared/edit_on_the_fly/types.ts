@@ -20,7 +20,6 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 export interface FlyoutWrapperProps {
   children: JSX.Element;
   toolbar?: JSX.Element;
-  layerTabs?: JSX.Element;
   isInlineFlyoutVisible: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;

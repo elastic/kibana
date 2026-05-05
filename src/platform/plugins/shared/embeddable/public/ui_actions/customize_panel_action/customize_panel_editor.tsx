@@ -128,6 +128,7 @@ export const CustomizePanelEditor = ({
       <div data-test-subj="customEmbeddableTitleComponent">
         <EuiFormRow>
           <EuiSwitch
+            compressed
             checked={!hideTitle}
             data-test-subj="customEmbeddablePanelHideTitleSwitch"
             id="hideTitle"
@@ -170,6 +171,7 @@ export const CustomizePanelEditor = ({
           }
         >
           <EuiFieldText
+            compressed
             inputRef={initialFocusRef}
             id="panelTitleInput"
             className="panelTitleInputText"
@@ -217,6 +219,7 @@ export const CustomizePanelEditor = ({
           }
         >
           <EuiTextArea
+            compressed
             id="panelDescriptionInput"
             className="panelDescriptionInputText"
             data-test-subj="customEmbeddablePanelDescriptionInput"
@@ -248,6 +251,7 @@ export const CustomizePanelEditor = ({
       <>
         <EuiFormRow>
           <EuiSwitch
+            compressed
             checked={hasOwnTimeRange}
             data-test-subj="customizePanelShowCustomTimeRange"
             id="showCustomTimeRange"
@@ -270,6 +274,7 @@ export const CustomizePanelEditor = ({
             }
           >
             <EuiSuperDatePicker
+              compressed
               start={timeRange?.from ?? undefined}
               end={timeRange?.to ?? undefined}
               onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
@@ -288,6 +293,7 @@ export const CustomizePanelEditor = ({
     return (
       <EuiFormRow>
         <EuiSwitch
+          compressed
           checked={!isPanelBorderless}
           data-test-subj="customizePanelBorderlessToggle"
           id="borderlessToggle"

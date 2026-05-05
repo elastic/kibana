@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -53,6 +54,11 @@ import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import { useEsqlConversionCheck } from './use_esql_conversion_check';
+import {
+  GeneralSettingsAccordion,
+  type GeneralPanelSettingsApi,
+  type GeneralSettingsAccordionHandle,
+} from './general_settings_accordion';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -81,6 +87,17 @@ export function LensEditConfigurationFlyout({
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
 
+  const panelApi: GeneralPanelSettingsApi | undefined = useMemo(() => {
+    if (!panelId || !apiIsPresentationContainer(parentApi)) return undefined;
+    const children = parentApi.children$.getValue();
+    const childApi = children[panelId];
+    if (!childApi || typeof childApi !== 'object') return undefined;
+    return childApi as GeneralPanelSettingsApi;
+  }, [panelId, parentApi]);
+
+  const generalSettingsSaveRef = useRef<GeneralSettingsAccordionHandle | null>(null);
+  const [generalSettingsChanged, setGeneralSettingsChanged] = useState(false);
+
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   // Derive datasourceId from attributes - this updates when converting between formBased and textBased
@@ -88,9 +105,24 @@ export function LensEditConfigurationFlyout({
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [isGeneralSettingsAccordionOpen, setIsGeneralSettingsAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [esqlQueryState, setESQLQueryState] = useState<TextBasedQueryState | null>(null);
+
+  const hasAdjustedAccordionStackRef = useRef(false);
+
+  useEffect(() => {
+    hasAdjustedAccordionStackRef.current = false;
+  }, [panelId]);
+
+  useEffect(() => {
+    if (!panelApi || hasAdjustedAccordionStackRef.current) {
+      return;
+    }
+    hasAdjustedAccordionStackRef.current = true;
+    setIsLayerAccordionOpen(false);
+  }, [panelApi]);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -227,42 +259,42 @@ export function LensEditConfigurationFlyout({
   }, []);
 
   const onApply = useCallback(async () => {
-    if (visualization.activeId == null || !currentAttributes) {
-      return;
-    }
+    generalSettingsSaveRef.current?.save();
 
-    let attributesToSave: TypedLensSerializedState['attributes'];
-    try {
-      // Run the apply callback first so auto-save operations (e.g. linked annotations)
-      // complete before the visualization is persisted via saveByRef.
-      const updatedAttributes = await onApplyCallback?.(currentAttributes);
-      attributesToSave = updatedAttributes ?? currentAttributes;
-    } catch (err) {
-      coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-        title: i18n.translate('xpack.lens.config.applyError', {
-          defaultMessage: 'Failed to apply changes',
-        }),
-      });
-      return;
-    }
+    if (visualization.activeId != null && currentAttributes) {
+      let attributesToSave: TypedLensSerializedState['attributes'];
+      try {
+        const updatedAttributes = await onApplyCallback?.(currentAttributes);
+        attributesToSave = updatedAttributes ?? currentAttributes;
+      } catch (err) {
+        coreStart.notifications.toasts.addError(
+          err instanceof Error ? err : new Error(String(err)),
+          {
+            title: i18n.translate('xpack.lens.config.applyError', {
+              defaultMessage: 'Failed to apply changes',
+            }),
+          }
+        );
+        return;
+      }
 
-    if (savedObjectId) {
-      const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
-      saveByRef?.(serializedAttrs);
-      updateByRefInput?.(savedObjectId, attributesToSave);
-    }
+      if (savedObjectId) {
+        const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
+        saveByRef?.(serializedAttrs);
+        updateByRefInput?.(savedObjectId, attributesToSave);
+      }
 
-    // check if visualization type changed, if it did, don't pass the previous visualization state
-    const prevVisState =
-      previousAttributes.current.visualizationType === visualization.activeId
-        ? previousAttributes.current.state.visualization
-        : undefined;
-    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
-      visualization.state,
-      prevVisState
-    );
-    if (telemetryEvents && telemetryEvents.length) {
-      trackSaveUiCounterEvents(telemetryEvents);
+      const prevVisState =
+        previousAttributes.current.visualizationType === visualization.activeId
+          ? previousAttributes.current.state.visualization
+          : undefined;
+      const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
+        visualization.state,
+        prevVisState
+      );
+      if (telemetryEvents && telemetryEvents.length) {
+        trackSaveUiCounterEvents(telemetryEvents);
+      }
     }
 
     deleteUserChartTypeFromSessionStorage();
@@ -294,7 +326,7 @@ export function LensEditConfigurationFlyout({
 
   const editorContainer = useRef(null);
 
-  const isSaveable = useMemo(() => {
+  const isVisualizationSaveable = useMemo(() => {
     if (!attributesChanged) {
       return false;
     }
@@ -343,6 +375,8 @@ export function LensEditConfigurationFlyout({
     textBasedMode,
     esqlQueryState,
   ]);
+
+  const isSaveable = isVisualizationSaveable || generalSettingsChanged;
 
   // Tooltip message when Apply button is disabled due to an unrun ES|QL query
   const applyButtonDisabledTooltip = useMemo(() => {
@@ -452,6 +486,28 @@ export function LensEditConfigurationFlyout({
     />
   );
 
+  const generalSettings = panelApi ? (
+    <GeneralSettingsAccordion
+      ref={generalSettingsSaveRef}
+      panelApi={panelApi}
+      coreStart={coreStart}
+      isAccordionOpen={isGeneralSettingsAccordionOpen}
+      onAccordionToggle={(status) => {
+        if (status && isLayerAccordionOpen) {
+          setIsLayerAccordionOpen(false);
+        }
+        if (status && isSuggestionsAccordionOpen) {
+          setIsSuggestionsAccordionOpen(!status);
+        }
+        if (status && isESQLResultsAccordionOpen) {
+          setIsESQLResultsAccordionOpen(!status);
+        }
+        setIsGeneralSettingsAccordionOpen(!isGeneralSettingsAccordionOpen);
+      }}
+      onHasChangesChange={setGeneralSettingsChanged}
+    />
+  ) : undefined;
+
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (hideTextBasedEditor && hidesSuggestions) {
     return (
@@ -470,25 +526,28 @@ export function LensEditConfigurationFlyout({
           applyButtonLabel={applyButtonLabel}
           applyButtonDisabledTooltip={applyButtonDisabledTooltip}
           toolbar={toolbar}
-          layerTabs={layerTabs}
         >
-          <LayerConfiguration
-            // TODO: remove this once we support switching to any chart in Discover
-            onlyAllowSwitchToSubtypes
-            getUserMessages={getUserMessages}
-            attributes={attributes}
-            coreStart={coreStart}
-            startDependencies={startDependencies}
-            hasPadding
-            framePublicAPI={framePublicAPI}
-            setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-            updateSuggestion={updateSuggestion}
-            setCurrentAttributes={setCurrentAttributes}
-            closeFlyout={closeFlyout}
-            parentApi={parentApi}
-            panelId={panelId}
-            onTextBasedQueryStateChange={onTextBasedQueryStateChange}
-          />
+          <>
+            {generalSettings}
+            {layerTabs}
+            <LayerConfiguration
+              // TODO: remove this once we support switching to any chart in Discover
+              onlyAllowSwitchToSubtypes
+              getUserMessages={getUserMessages}
+              attributes={attributes}
+              coreStart={coreStart}
+              startDependencies={startDependencies}
+              hasPadding
+              framePublicAPI={framePublicAPI}
+              setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+              updateSuggestion={updateSuggestion}
+              setCurrentAttributes={setCurrentAttributes}
+              closeFlyout={closeFlyout}
+              parentApi={parentApi}
+              panelId={panelId}
+              onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+            />
+          </>
         </FlyoutWrapper>
       </>
     );
@@ -509,9 +568,18 @@ export function LensEditConfigurationFlyout({
         applyButtonLabel={applyButtonLabel}
         applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
-        layerTabs={layerTabs}
       >
         <>
+          {/* General settings accordion — outside the drag-drop flex group to avoid its overrides */}
+          <div
+            css={css`
+              pointer-events: auto;
+              padding: 0 ${euiTheme.euiTheme.size.base};
+              border-block-end: ${euiTheme.euiTheme.border.thin};
+            `}
+          >
+            {generalSettings}
+          </div>
           {/* Flex container for the flyout content layout.
               Enables proper scroll behavior where accordion headers stay fixed
               and only the accordion content areas scroll independently. */}
@@ -582,6 +650,8 @@ export function LensEditConfigurationFlyout({
               css={css`
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'};
+                  padding-left: 0 !important;
+                  margin-left: 0 !important;
                 }
                 padding: 0 ${euiTheme.euiTheme.size.base};
               `}
@@ -608,6 +678,9 @@ export function LensEditConfigurationFlyout({
                 initialIsOpen={isLayerAccordionOpen}
                 forceState={isLayerAccordionOpen ? 'open' : 'closed'}
                 onToggle={(status) => {
+                  if (status && isGeneralSettingsAccordionOpen) {
+                    setIsGeneralSettingsAccordionOpen(!status);
+                  }
                   if (status && isSuggestionsAccordionOpen) {
                     setIsSuggestionsAccordionOpen(!status);
                   }
@@ -618,23 +691,44 @@ export function LensEditConfigurationFlyout({
                 }}
               >
                 <>
-                  <LayerConfiguration
-                    attributes={attributes}
-                    dataLoading$={dataLoading$}
-                    lensAdapters={lensAdapters}
-                    getUserMessages={getUserMessages}
-                    coreStart={coreStart}
-                    startDependencies={startDependencies}
-                    framePublicAPI={framePublicAPI}
-                    setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-                    updateSuggestion={updateSuggestion}
-                    setCurrentAttributes={setCurrentAttributes}
-                    closeFlyout={closeFlyout}
-                    parentApi={parentApi}
-                    panelId={panelId}
-                    editorContainer={editorContainer.current || undefined}
-                    onTextBasedQueryStateChange={onTextBasedQueryStateChange}
-                  />
+                  <div
+                    css={css`
+                      margin-inline: -${euiTheme.euiTheme.size.base};
+
+                      &:has([role='tablist']) {
+                        border: ${euiTheme.euiTheme.border.thin};
+                        border-radius: ${euiTheme.euiTheme.border.radius.medium};
+                        margin-inline: 0;
+                        margin-block-start: ${euiTheme.euiTheme.size.s};
+                        margin-block-end: ${euiTheme.euiTheme.size.m};
+
+                        > div:last-child {
+                          padding: ${euiTheme.euiTheme.size.s};
+                        }
+                      }
+                    `}
+                  >
+                    {layerTabs}
+                    <div>
+                      <LayerConfiguration
+                        attributes={attributes}
+                        dataLoading$={dataLoading$}
+                        lensAdapters={lensAdapters}
+                        getUserMessages={getUserMessages}
+                        coreStart={coreStart}
+                        startDependencies={startDependencies}
+                        framePublicAPI={framePublicAPI}
+                        setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                        updateSuggestion={updateSuggestion}
+                        setCurrentAttributes={setCurrentAttributes}
+                        closeFlyout={closeFlyout}
+                        parentApi={parentApi}
+                        panelId={panelId}
+                        editorContainer={editorContainer.current || undefined}
+                        onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+                      />
+                    </div>
+                  </div>
                 </>
               </EuiAccordion>
             </EuiFlexItem>
@@ -663,6 +757,9 @@ export function LensEditConfigurationFlyout({
                 toggleAccordionCb={(status) => {
                   if (!status && isLayerAccordionOpen) {
                     setIsLayerAccordionOpen(status);
+                  }
+                  if (status && isGeneralSettingsAccordionOpen) {
+                    setIsGeneralSettingsAccordionOpen(!status);
                   }
                   if (status && isESQLResultsAccordionOpen) {
                     setIsESQLResultsAccordionOpen(!status);
