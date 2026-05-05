@@ -34,7 +34,7 @@ export function ScrollToOriginButton({
 }) {
   return (
     <EuiToolTip content={isDisabled ? disabledTooltip : activeTooltip}>
-      <span tabIndex={0} style={{ display: 'inline-block' }}>
+      <span tabIndex={0} css={{ display: 'inline-block' }}>
         <EuiButtonEmpty
           size="xs"
           iconType="sortLeft"
