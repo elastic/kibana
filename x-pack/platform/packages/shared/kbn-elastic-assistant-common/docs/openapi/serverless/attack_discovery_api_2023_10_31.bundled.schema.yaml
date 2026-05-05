@@ -2075,6 +2075,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              BulkDeleteAttackDiscoverySchedulesRequestBodyExample:
+                summary: Delete two Attack Discovery schedules.
+                value:
+                  ids:
+                    - 12345678-1234-1234-1234-123456789012
+                    - 98765432-1234-1234-1234-123456789012
             schema:
               $ref: >-
                 #/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody
@@ -2083,6 +2090,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                BulkDeleteAttackDiscoverySchedulesResponse200Example:
+                  summary: Bulk delete response for two successfully deleted schedules.
+                  value:
+                    errors: []
+                    ids:
+                      - 12345678-1234-1234-1234-123456789012
+                      - 98765432-1234-1234-1234-123456789012
+                    total: 2
               schema:
                 $ref: >-
                   #/components/schemas/BulkActionAttackDiscoverySchedulesResponse
@@ -2090,6 +2106,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                BulkDeleteAttackDiscoverySchedulesResponse400Example:
+                  summary: >-
+                    Bad Request error returned when the bulk delete payload is
+                    invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -2103,6 +2128,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              BulkDisableAttackDiscoverySchedulesRequestBodyExample:
+                summary: Disable two Attack Discovery schedules.
+                value:
+                  ids:
+                    - 12345678-1234-1234-1234-123456789012
+                    - 98765432-1234-1234-1234-123456789012
             schema:
               $ref: >-
                 #/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody
@@ -2111,6 +2143,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                BulkDisableAttackDiscoverySchedulesResponse200Example:
+                  summary: >-
+                    Bulk disable response for two successfully disabled
+                    schedules.
+                  value:
+                    errors: []
+                    ids:
+                      - 12345678-1234-1234-1234-123456789012
+                      - 98765432-1234-1234-1234-123456789012
+                    total: 2
               schema:
                 $ref: >-
                   #/components/schemas/BulkActionAttackDiscoverySchedulesResponse
@@ -2118,6 +2161,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                BulkDisableAttackDiscoverySchedulesResponse400Example:
+                  summary: >-
+                    Bad Request error returned when the bulk disable payload is
+                    invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -2131,6 +2183,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              BulkEnableAttackDiscoverySchedulesRequestBodyExample:
+                summary: Enable two Attack Discovery schedules.
+                value:
+                  ids:
+                    - 12345678-1234-1234-1234-123456789012
+                    - 98765432-1234-1234-1234-123456789012
             schema:
               $ref: >-
                 #/components/schemas/BulkActionAttackDiscoverySchedulesRequestBody
@@ -2139,6 +2198,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                BulkEnableAttackDiscoverySchedulesResponse200Example:
+                  summary: Bulk enable response for two successfully enabled schedules.
+                  value:
+                    errors: []
+                    ids:
+                      - 12345678-1234-1234-1234-123456789012
+                      - 98765432-1234-1234-1234-123456789012
+                    total: 2
               schema:
                 $ref: >-
                   #/components/schemas/BulkActionAttackDiscoverySchedulesResponse
@@ -2146,6 +2214,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                BulkEnableAttackDiscoverySchedulesResponse400Example:
+                  summary: >-
+                    Bad Request error returned when the bulk enable payload is
+                    invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
