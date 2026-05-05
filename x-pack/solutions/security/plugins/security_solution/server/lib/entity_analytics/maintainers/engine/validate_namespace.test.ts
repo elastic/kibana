@@ -56,7 +56,11 @@ describe('assertValidNamespace', () => {
       ['curly brace', 'foo{bar}'],
       ['hash', 'foo#bar'],
       ['null byte', 'foo\u0000bar'],
-    ])('rejects %s in %p', (_label, ns) => {
+    ])('rejects %s', (_label, ns) => {
+      // Test name uses only the label (not %p) so that values containing
+      // unprintable bytes (e.g. \u0000) do not end up in the JUnit XML
+      // attribute, which the XML serializer rejects with
+      // "Invalid character in string ... at index undefined".
       expect(() => assertValidNamespace(ns)).toThrow(InvalidNamespaceError);
     });
   });
@@ -69,7 +73,7 @@ describe('assertValidNamespace', () => {
       ['leading dot', '.kibana'],
       ['unicode', 'café'],
       ['emoji', '😀'],
-    ])('rejects %s in %p', (_label, ns) => {
+    ])('rejects %s', (_label, ns) => {
       expect(() => assertValidNamespace(ns)).toThrow(InvalidNamespaceError);
     });
   });
