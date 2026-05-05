@@ -201,16 +201,15 @@ download_tmp_artifact() {
 
   if [[ "$use_gcs" == "true" ]]; then
     "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
-    gcloud storage cp \
+    if gcloud storage cp \
       "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
-      "${dest_dir}/${artifact_name}"
-    return 0
+      "${dest_dir}/${artifact_name}"; then
+      return 0
+    fi
+    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
   fi
 
-  if [[ -n "${BUILDKITE_AGENT_GCP_REGION:-}" ]]; then
-    buildkite-agent annotate --style warning --context "gcs-artifact-fallback-${artifact_name}" \
-      "Agent region \`${BUILDKITE_AGENT_GCP_REGION}\` not in GCS list. Falling back to buildkite-agent download for \`${artifact_name}\`."
-  fi
+  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
   download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
 }
 upload_tmp_artifact() {
