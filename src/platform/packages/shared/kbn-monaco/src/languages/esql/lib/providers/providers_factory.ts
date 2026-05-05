@@ -28,7 +28,7 @@ export class DisposedModelAccessError extends Error {
  * If the providers tries to access the model after it has been disposed,
  * it will return the "emptyResult" instead of throwing an error.
  *
- * - Use safeModel for accesing any propery or function of the model.
+ * - Use safeModel for accessing any property or function of the model.
  * - Use the original model if you need to compare instances.
  */
 export async function createMonacoProvider<T>({
@@ -53,7 +53,7 @@ export async function createMonacoProvider<T>({
 export function createDisposedSafeModel(model: monaco.editor.ITextModel): monaco.editor.ITextModel {
   const handler: ProxyHandler<monaco.editor.ITextModel> = {
     get(target, prop, receiver) {
-      // If accesing isDisposed, run the original function.
+      // If accessing isDisposed, run the original function.
       if (prop === 'isDisposed') {
         return target.isDisposed.bind(target);
       }
