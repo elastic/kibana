@@ -84,7 +84,24 @@ export function StreamDetailContextProvider({
             return response;
           }
 
-          throw new Error('Stream detail only supports Ingest and Query streams.');
+          // Both strict (DeepStrict) type guards failed — this indicates schema drift between
+          // the server response and the client-side zod schema.
+          if (process.env.NODE_ENV !== 'production') {
+            throw new Error('Stream detail only supports Ingest and Query streams.');
+          }
+
+          // In production: log the validation failure and pass the response through as-is to
+          // avoid a completely blank page. Things may partially break downstream, but that is
+          // vastly preferable to the page being completely unusable.
+          const validationResult = Streams.all.GetResponse.right.safeParse(response);
+          // eslint-disable-next-line no-console
+          console.error(
+            `[Streams] Stream detail schema validation failed for stream "${name}".`,
+            validationResult.success
+              ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
+              : validationResult.error
+          );
+          return response as Streams.all.GetResponse;
         });
     },
     [streamsRepositoryClient, name, canManageInUi],
@@ -158,7 +175,24 @@ export function useStreamDetailAsIngestStream() {
     !Streams.WiredStream.GetResponse.is(ctx.definition) &&
     !Streams.ClassicStream.GetResponse.is(ctx.definition)
   ) {
-    throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+    if (process.env.NODE_ENV !== 'production') {
+      throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+    }
+
+    // In production: use the non-strict schema to distinguish schema drift (extra/unknown
+    // fields rejected by DeepStrict) from a genuinely wrong stream type. If the non-strict
+    // check passes, the definition is an ingest stream — just with unexpected extra fields.
+    const nonStrictCheck = Streams.ingest.all.GetResponse.right.safeParse(ctx.definition);
+    if (!nonStrictCheck.success) {
+      throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+    }
+
+    // eslint-disable-next-line no-console
+    console.error(
+      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation. ` +
+        `The response passed non-strict validation but failed strict (DeepStrict) validation — ` +
+        `the API response contains extra or unknown fields.`
+    );
   }
   return ctx as {
     definition: Streams.ingest.all.GetResponse;
