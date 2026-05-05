@@ -8,6 +8,8 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type { ComponentHealthStatus } from '../utils';
+
 export const NODE_WIDTH = 200;
 export const NODE_HEIGHT = 60;
 export const RANK_SEPARATION = 80;
@@ -15,11 +17,12 @@ export const NODE_SEPARATION = 30;
 export const GRAPH_MARGIN = 20;
 export const GROUP_PADDING = 40;
 
-export type OTelComponentType = 'receiver' | 'processor' | 'connector' | 'exporter';
+export type OTelComponentType = 'receiver' | 'processor' | 'connector' | 'exporter' | 'pipeline';
 
 export interface OTelGraphNodeData {
   label: string;
   componentType: OTelComponentType;
+  healthStatus?: ComponentHealthStatus;
   [key: string]: unknown;
 }
 
@@ -31,6 +34,7 @@ export const COMPONENT_TYPE_VIS_COLORS: Record<
   processor: 'euiColorVis8',
   connector: 'euiColorVis4',
   exporter: 'euiColorVis2',
+  pipeline: 'euiColorVis6',
 };
 
 export const COMPONENT_TYPE_LABELS: Record<OTelComponentType, string> = {
@@ -45,5 +49,8 @@ export const COMPONENT_TYPE_LABELS: Record<OTelComponentType, string> = {
   }),
   exporter: i18n.translate('xpack.fleet.otelUi.componentType.exporter', {
     defaultMessage: 'Exporter',
+  }),
+  pipeline: i18n.translate('xpack.fleet.otelUi.componentType.pipeline', {
+    defaultMessage: 'Pipeline',
   }),
 };

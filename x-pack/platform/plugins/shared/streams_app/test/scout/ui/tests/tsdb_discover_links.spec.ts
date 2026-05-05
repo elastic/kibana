@@ -108,7 +108,7 @@ async function cleanupTsdbResources(esClient: EsClient, templateName: string, st
 
 test.describe(
   'TSDB-aware Discover links',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.all] },
   () => {
     test.beforeAll(async ({ esClient, logsSynthtraceEsClient }) => {
       // Create TSDB stream
