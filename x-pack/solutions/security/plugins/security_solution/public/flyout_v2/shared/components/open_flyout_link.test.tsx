@@ -40,9 +40,7 @@ jest.mock('../../../common/lib/kibana', () => {
 
 const buildFlyoutContentMock = buildFlyoutContent as jest.Mock;
 
-const renderOpenFlyoutLink = (
-  props: Partial<React.ComponentProps<typeof OpenFlyoutLink>> = {}
-) =>
+const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFlyoutLink>> = {}) =>
   render(
     <TestProviders>
       <OpenFlyoutLink field="source.ip" value="10.0.0.1" {...props}>
