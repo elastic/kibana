@@ -134,6 +134,20 @@ export const connectorTypeResponseSchema = schema.object({
       description: 'The source of the connector type definition.',
     },
   }),
+  description: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Description of the connector type.',
+      },
+    })
+  ),
+  is_experimental: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'When true, the connector type is a technical preview in the UI.',
+      },
+    })
+  ),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);
@@ -188,4 +202,43 @@ export const connectorExecuteResponseSchema = schema.object({
       },
     })
   ),
+  error_name: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'When the status is error, identifies the error class name so consumers can branch on specific error types (e.g. ConnectorAuthorizationError).',
+      },
+    })
+  ),
+  error_meta: schema.maybe(
+    schema.recordOf(schema.string(), schema.any(), {
+      meta: {
+        description:
+          'When the status is error, carries structured metadata describing the failure (e.g. the auth method and reason for a ConnectorAuthorizationError).',
+      },
+    })
+  ),
 });
+
+export const connectorAuthStatusResponseSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    user_auth_status: schema.oneOf(
+      [
+        schema.literal('connected'),
+        schema.literal('not_connected'),
+        schema.literal('not_applicable'),
+      ],
+      {
+        meta: {
+          description: 'The authentication status of the current user for this connector.',
+        },
+      }
+    ),
+  }),
+  {
+    meta: {
+      description: 'A map of connector IDs to their user authentication status.',
+    },
+  }
+);

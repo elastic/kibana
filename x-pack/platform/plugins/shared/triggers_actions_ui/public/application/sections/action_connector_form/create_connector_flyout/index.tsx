@@ -6,14 +6,26 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -54,6 +66,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 }) => {
   const {
     application: { capabilities },
+    http,
+    uiSettings,
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
@@ -85,44 +99,57 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
   }, [initialConnector, allActionTypes, actionType]);
 
-  const emptyConnector = {
-    actionTypeId: actionType?.id ?? '',
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-    isMissingSecrets: false,
-    isConnectorTypeDeprecated: false,
-  };
-
-  const defaultConnector = initialConnector
-    ? {
-        ...emptyConnector,
-        ...initialConnector,
-      }
-    : emptyConnector;
+  const defaultConnector = useMemo(() => {
+    const empty = {
+      actionTypeId: actionType?.id ?? '',
+      isDeprecated: false,
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+      isConnectorTypeDeprecated: false,
+    };
+    return initialConnector ? { ...empty, ...initialConnector } : empty;
+  }, [actionType?.id, initialConnector]);
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
+
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
+  } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
+
+  // Delay the spinner so quick spec loads don't flash a loading state.
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
+  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
+    isLoadingActionTypeModel,
+  ]);
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  const disabled = hasErrors || !canSave;
-
-  const actionTypeModel: ActionTypeModel | null =
-    actionType != null ? actionTypeRegistry.get(actionType.id) : null;
-
+  const disabled = hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError;
+  // Only stack connectors (not spec-based) support the test tab
   const isTestable =
     !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
       ? (actionTypeModel?.subtype ?? [])
-          .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
-          .map((subtypeAction) => ({
-            ...actionTypeRegistry.get(subtypeAction.id),
-            name: subtypeAction.name,
-          }))
+          .filter((item) => allActionTypes && allActionTypes[item.id]?.enabledInConfig)
+          .flatMap((subtypeAction) => {
+            if (!actionTypeRegistry.has(subtypeAction.id)) {
+              return [];
+            }
+            return [
+              {
+                ...actionTypeRegistry.get(subtypeAction.id),
+                name: subtypeAction.name,
+              },
+            ];
+          })
       : [];
 
   const groupActionButtons =
@@ -136,10 +163,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
-  const setResetForm = (reset: ResetForm) => {
+  const setResetForm = useCallback((reset: ResetForm) => {
     resetConnectorForm.current = reset;
     setShowFormErrors(false);
-  };
+  }, []);
 
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
@@ -286,19 +313,84 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
         {hasConnectorTypeSelected ? (
           <>
-            {groupActionTypeModel && (
+            {groupActionButtons.length > 0 && (
               <>
                 <EuiButtonGroup
                   isFullWidth
                   buttonSize="m"
                   color="primary"
-                  legend=""
+                  legend={i18n.translate(
+                    'xpack.triggersActionsUI.sections.createConnectorFlyout.subtypeGroupLegend',
+                    { defaultMessage: 'Connector subtype' }
+                  )}
                   options={groupActionButtons}
                   idSelected={actionType.id}
                   onChange={onChangeGroupAction}
                   data-test-subj="slackTypeChangeButton"
                 />
                 <EuiSpacer size="xs" />
+              </>
+            )}
+
+            {showLoadingSpinner && (
+              <EuiFlexGroup
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                style={{ minHeight: 200 }}
+                aria-live="polite"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="xl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.loadingConnectorConfiguration',
+                    {
+                      defaultMessage: 'Loading connector configuration...',
+                    }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+
+            {actionTypeModelError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="connector-spec-load-error"
+                  title={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                    {
+                      defaultMessage: 'Failed to load connector configuration',
+                    }
+                  )}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
+                      {
+                        defaultMessage:
+                          'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+                      }
+                    )}
+                  </p>
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    color="danger"
+                    data-test-subj="connector-spec-load-retry"
+                    onClick={() => refetchConnectorSpec()}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorRetry',
+                      { defaultMessage: 'Retry' }
+                    )}
+                  </EuiButton>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
               </>
             )}
 
@@ -329,14 +421,19 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="m" />
               </>
             )}
-            <ConnectorForm
-              actionTypeModel={actionTypeModel}
-              connector={defaultConnector}
-              isEdit={false}
-              onChange={setFormState}
-              setResetForm={setResetForm}
-            />
-            {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+
+            {!isLoadingActionTypeModel && !actionTypeModelError && (
+              <>
+                <ConnectorForm
+                  actionTypeModel={actionTypeModel}
+                  connector={defaultConnector}
+                  isEdit={false}
+                  onChange={setFormState}
+                  setResetForm={setResetForm}
+                />
+                {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+              </>
+            )}
           </>
         ) : (
           <ActionTypeMenu

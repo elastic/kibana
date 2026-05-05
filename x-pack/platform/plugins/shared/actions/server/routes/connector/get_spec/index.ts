@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { useSubAction } from './use_sub_action';
-export { useActionTypeModel, type UseActionTypeModelResult } from '@kbn/alerts-ui-shared';
+export { getConnectorSpecRoute } from './get_spec';

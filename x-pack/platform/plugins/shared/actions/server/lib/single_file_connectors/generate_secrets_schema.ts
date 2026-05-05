@@ -6,8 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-
-import { generateSecretsSchemaFromSpec, getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
+import { generateSecretsSchemaFromSpec, getSchemaForAuthType } from '@kbn/connector-specs';
 import type { ActionTypeSecrets, ValidatorType, ValidatorServices } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';

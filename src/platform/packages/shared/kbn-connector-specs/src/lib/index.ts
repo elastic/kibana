@@ -11,3 +11,12 @@ export { getSchemaForAuthType, AUTH_TYPE_DISCRIMINATOR } from './get_schema_for_
 export { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
 export { configureAxiosInstanceWithSsl } from './configure_axios_instance_with_ssl';
 export { getMeta } from '../connector_spec_ui';
+export {
+  serializeConnectorSpec,
+  type SerializeConnectorSpecOptions,
+} from './serialize_connector_spec';
+export { fromConnectorSpecSchema, type ConnectorZodSchema } from './deserialize_connector_spec';
+export {
+  narrowSecretsSchemaForAuthMode,
+  AUTH_MODE_BY_AUTH_TYPE_ID,
+} from './narrow_secrets_schema_for_auth_mode';
