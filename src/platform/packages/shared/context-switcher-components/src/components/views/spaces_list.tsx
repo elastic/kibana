@@ -130,6 +130,8 @@ export const SpacesListView = ({
                       size="s"
                       onClick={headerAction.onClick}
                       data-test-subj={headerAction['data-test-subj']}
+                      isDisabled={headerAction.disabled}
+                      target={headerAction.external ? '_blank' : undefined}
                     >
                       {headerAction.label}
                     </EuiButtonEmpty>

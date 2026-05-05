@@ -15,6 +15,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { useQueryClient } from '@kbn/react-query';
 
+import { useFooterLinks } from './hooks';
 import { useActiveSpace } from './hooks/use_active_space';
 import { useEnvironmentContext } from './hooks/use_environment_context';
 import { useManagementActions } from './hooks/use_management_actions';
@@ -57,6 +58,13 @@ export const ContextSwitcherComponent = ({
     isServerless,
   });
 
+  const footerLinks = useFooterLinks({
+    application: core.application,
+    cloud,
+    isServerless,
+    activeSpaceSolution: activeSpace?.solution,
+  });
+
   const managementActions = useManagementActions({
     application: core.application,
     canManageSpaces: core.application.capabilities.spaces?.manage === true,
@@ -92,6 +100,7 @@ export const ContextSwitcherComponent = ({
       spaces={spacesConfig}
       environmentContext={environmentContext}
       onOpen={handleOpen}
+      footerLinks={footerLinks}
     />
   );
 };
