@@ -14,12 +14,13 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { GrokExpressionsProvider, GrokSampleWithContext, useGrokExpressions } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
@@ -27,7 +28,6 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useGrokExpressions, GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../../hooks/use_stream_data_view_field_types';
@@ -37,15 +37,15 @@ import { RowSelectionContext } from '../shared/preview_table';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
+  NoPreviewDocumentsEmptyPrompt,
+  NoProcessingDataAvailableEmptyPrompt,
+} from './empty_prompts';
+import {
   createOriginalGrokFieldValuesMap,
   getGrokFieldDisplayValue,
   grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
 } from './processor_outcome_preview_helpers';
-import {
-  NoPreviewDocumentsEmptyPrompt,
-  NoProcessingDataAvailableEmptyPrompt,
-} from './empty_prompts';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
 import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
@@ -284,8 +284,7 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
-// TODO: Change back to 0.2 before opening PR — raised to 0.4 for manual testing
-const FETCH_MORE_THRESHOLD = 0.4;
+const FETCH_MORE_THRESHOLD = 0.1;
 
 const FetchMoreMatchingSamples = () => {
   const { fetchMoreMatchingSamples } = useStreamEnrichmentEvents();
@@ -335,13 +334,12 @@ const FetchMoreMatchingSamples = () => {
       </EuiFlexItem>
       {fetchMoreError && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={fetchMoreError}>
-            <EuiIcon
-              type="warning"
-              color="danger"
-              data-test-subj="streamsAppFetchMoreMatchingSamplesError"
-            />
-          </EuiToolTip>
+          <EuiIconTip
+            content={fetchMoreError}
+            type="warning"
+            color="danger"
+            data-test-subj="streamsAppFetchMoreMatchingSamplesError"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

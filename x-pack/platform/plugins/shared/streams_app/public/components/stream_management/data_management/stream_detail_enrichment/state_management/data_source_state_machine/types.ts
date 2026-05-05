@@ -8,6 +8,7 @@
 import type { ActorRef, Snapshot } from 'xstate';
 import type { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
 import type { SampleDocument } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -57,4 +58,4 @@ export type DataSourceEvent =
   | { type: 'dataSource.refresh' }
   | { type: 'dataSource.enable' }
   | { type: 'dataSource.disable' }
-  | { type: 'dataSource.fetchMore'; condition: Condition };
+  | { type: 'dataSource.fetchMore'; condition: Condition; runtimeMappings: MappingRuntimeFields };

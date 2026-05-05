@@ -229,11 +229,18 @@ export const dataSourceMachine = setup({
           invoke: {
             id: 'fetchMoreDocumentsActor',
             src: 'fetchMoreDocuments',
-            input: ({ context, event }) => ({
-              streamName: context.streamName,
-              condition: (event as { type: 'dataSource.fetchMore'; condition: unknown }).condition,
-              existingDocuments: context.data,
-            }),
+            input: ({ context, event }) => {
+              const fetchMoreEvent = event as Extract<
+                typeof event,
+                { type: 'dataSource.fetchMore' }
+              >;
+              return {
+                streamName: context.streamName,
+                condition: fetchMoreEvent.condition,
+                runtimeMappings: fetchMoreEvent.runtimeMappings,
+                existingDocuments: context.data,
+              };
+            },
             onSnapshot: {
               guard: {
                 type: 'isValidData',

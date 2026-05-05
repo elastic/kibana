@@ -19,9 +19,11 @@ import {
   addDeterministicCustomIdentifiers,
   addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
+  getConditionFields,
   validateStreamlang,
   validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
@@ -308,7 +310,8 @@ export const streamEnrichmentMachine = setup({
       const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
       if (!activeDataSourceRef) return;
 
-      activeDataSourceRef.send({ type: 'dataSource.fetchMore', condition });
+      const runtimeMappings = getRuntimeMappingsForCondition(context.definition, condition);
+      activeDataSourceRef.send({ type: 'dataSource.fetchMore', condition, runtimeMappings });
     },
 
     filterByCondition: ({ context }, params: { conditionId: string }) => {
@@ -737,6 +740,33 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
+
+function getRuntimeMappingsForCondition(
+  definition: Streams.ingest.all.GetResponse,
+  condition: Parameters<typeof getConditionFields>[0]
+): MappingRuntimeFields {
+  if (!Streams.WiredStream.Definition.is(definition.stream)) {
+    return {};
+  }
+
+  const wiredDefinition = definition as Streams.WiredStream.GetResponse;
+  const mappedFields = Object.keys({
+    ...wiredDefinition.inherited_fields,
+    ...wiredDefinition.stream.ingest.wired.fields,
+  });
+
+  return Object.fromEntries(
+    getConditionFields(condition)
+      .filter((field) => !mappedFields.includes(field.name))
+      .map((field) => [
+        field.name,
+        {
+          type:
+            field.type === 'boolean' ? 'boolean' : field.type === 'number' ? 'double' : 'keyword',
+        },
+      ])
+  );
+}
 
 const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
   const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);

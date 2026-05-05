@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, isConditionBlock } from '@kbn/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
@@ -20,6 +21,7 @@ const FETCH_MORE_LIMIT = 100;
 export interface FetchMoreInput {
   streamName: string;
   condition: Condition;
+  runtimeMappings: MappingRuntimeFields;
   existingDocuments: SampleDocument[];
 }
 
@@ -38,7 +40,11 @@ export function findConditionById(
   return undefined;
 }
 
-function buildFetchMoreSearchParams(streamName: string, condition: Condition) {
+function buildFetchMoreSearchParams(
+  streamName: string,
+  condition: Condition,
+  runtimeMappings: MappingRuntimeFields
+) {
   const conditionClause = conditionToQueryDsl(condition);
 
   return {
@@ -48,6 +54,7 @@ function buildFetchMoreSearchParams(streamName: string, condition: Condition) {
         must: [conditionClause],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: FETCH_MORE_LIMIT,
     sort: [{ '@timestamp': { order: 'desc' as const } }],
     terminate_after: FETCH_MORE_LIMIT,
@@ -75,9 +82,9 @@ function deduplicateDocuments(
 
 export function createFetchMoreDocumentsActor({ data }: FetchMoreDeps) {
   return fromObservable<SampleDocument[], FetchMoreInput>(({ input }) => {
-    const { streamName, condition, existingDocuments } = input;
+    const { streamName, condition, runtimeMappings, existingDocuments } = input;
     const abortController = new AbortController();
-    const params = buildFetchMoreSearchParams(streamName, condition);
+    const params = buildFetchMoreSearchParams(streamName, condition, runtimeMappings);
 
     return new Observable((observer) => {
       const subscription = data.search
