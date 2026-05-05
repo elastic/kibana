@@ -34,6 +34,7 @@ import type {
 } from '../../../../../types';
 import { entries } from '../../../../../types';
 import {
+  useAuthz,
   useConfig,
   useGetCategoriesQuery,
   useStartServices,
