@@ -10,13 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
 import {
   LENS_EMBEDDABLE_TYPE,
   type LensRendererProps,
   type LensSerializedState,
 } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { createEmptyLensState, transformToApiConfig } from '../helper';
 import type { LensParentApi } from './types';
@@ -157,7 +157,7 @@ export function LensRenderer({
   }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
-    <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
+    <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>

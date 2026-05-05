@@ -23,7 +23,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
   // if license is invalid show an error message
   if (hasInvalidLicense) {
     return (
-      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+      <ProfilingAppPageTemplate hideSearchBar>
         <LicensePrompt />
       </ProfilingAppPageTemplate>
     );

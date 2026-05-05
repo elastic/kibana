@@ -31,6 +31,10 @@ jest.mock('../../../hooks/use_last_agent_id', () => ({
   getLastAgentId: () => 'test-agent',
 }));
 
+jest.mock('../../../context/active_space_context', () => ({
+  useActiveSpaceId: () => 'default',
+}));
+
 jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: () => ({ conversations: [], isLoading: false, refresh: jest.fn() }),
 }));

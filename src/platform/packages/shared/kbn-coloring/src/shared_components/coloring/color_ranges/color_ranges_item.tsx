@@ -200,7 +200,12 @@ export function ColorRangeItem({
             aria-label={selectNewColorText}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
+          <EuiIcon
+            type={RelatedIcon}
+            size="m"
+            color={euiTheme.colors.disabled}
+            aria-hidden={true}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
