@@ -36,24 +36,31 @@ export type SecuritySolutionRowCellRendererGetter = Awaited<
  * in Discover's contextual View
  * Also see: src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security/constants.ts
  */
-const ALLOWED_DISCOVER_RENDERED_FIELDS = [
+const ALLOWED_DISCOVER_RENDERED_FIELDS = new Set([
   SIGNAL_STATUS_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
-];
+  ...HOST_CELL_RENDERER_FIELDS,
+]);
 
 export const getCellRendererForGivenRecord = (
   services: StartServices,
   store: SecurityAppStore
 ): SecuritySolutionRowCellRendererGetter => {
   return (fieldName: string) => {
-    if (ALLOWED_DISCOVER_RENDERED_FIELDS.includes(fieldName)) {
+    if (ALLOWED_DISCOVER_RENDERED_FIELDS.has(fieldName)) {
       if (
         fieldName === SIGNAL_RULE_NAME_FIELD_NAME ||
         fieldName === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
       ) {
         return function RuleNameFieldRenderer(props: DataGridCellValueElementProps) {
           return <RuleNameCellRenderer {...props} services={services} store={store} />;
+        };
+      }
+
+      if (HOST_CELL_RENDERER_FIELDS.has(fieldName)) {
+        return function HostFieldRenderer(props: DataGridCellValueElementProps) {
+          return <HostCellRenderer {...props} services={services} store={store} />;
         };
       }
 
@@ -108,12 +115,6 @@ export const getCellRendererForGivenRecord = (
     if (ecsField?.type === IP_FIELD_TYPE) {
       return function IpFieldRenderer(props: DataGridCellValueElementProps) {
         return <IpCellRenderer {...props} services={services} store={store} />;
-      };
-    }
-
-    if (HOST_CELL_RENDERER_FIELDS.has(fieldName)) {
-      return function HostFieldRenderer(props: DataGridCellValueElementProps) {
-        return <HostCellRenderer {...props} services={services} store={store} />;
       };
     }
 

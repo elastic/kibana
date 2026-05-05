@@ -152,7 +152,7 @@ describe('getColumns', () => {
       expect(screen.getByTestId(`${dataTestSubj}RulePreview`)).toBeInTheDocument();
     });
 
-    it('renders rule name as a ChildLink when useLegacyExpandableFlyout is false', () => {
+    it('renders rule name as an OpenFlyoutLink when useLegacyExpandableFlyout is false', () => {
       const [, , ruleColumn] = getColumns({
         scopeId,
         dataTestSubj,
