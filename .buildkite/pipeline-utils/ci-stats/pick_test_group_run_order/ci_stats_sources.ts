@@ -105,24 +105,3 @@ export function buildCiStatsGroups(args: {
     })),
   ];
 }
-
-/**
- * Read the tracked branch from the repo's package.json. ci-stats uses this to
- * find historical durations from the matching long-lived branch.
- */
-export function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
-}

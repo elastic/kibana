@@ -11,9 +11,10 @@ import * as Fs from 'fs';
 
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
+import { getTrackedBranch } from '../../utils';
 import { CiStatsClient } from '../client';
 
-import { buildCiStatsGroups, buildCiStatsSources, getTrackedBranch } from './ci_stats_sources';
+import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
 import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
 import { loadRunOrderConfig } from './env_config';
 import { getEnabledFtrConfigs } from './ftr_manifests';
