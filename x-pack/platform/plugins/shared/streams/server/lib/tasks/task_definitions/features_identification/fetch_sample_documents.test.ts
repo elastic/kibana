@@ -179,6 +179,7 @@ describe('fetchSampleDocuments', () => {
       end: 200,
       size: 6,
       offset: 0,
+      logger,
     });
     expect(getSampleDocumentsEsqlMock.mock.calls[1][0]).toEqual({
       esClient,

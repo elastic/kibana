@@ -11,17 +11,32 @@ import type {
   AggregationsDateHistogramAggregation,
   AggregationsMaxAggregation,
   AggregationsMinAggregation,
+  SearchHit,
   AggregationsTopHitsAggregation,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { esql, type ComposerQueryTagHole } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { omit, orderBy, uniqBy } from 'lodash';
+import { get, omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
+import type { Logger } from '@kbn/logging';
 import { pValueToLabel } from '../../utils/p_value_to_label';
+
+const MAX_DOCS_TO_SAMPLE = 100_000;
+
+// SigEvents asks the LLM for a small common/rare pattern summary. Pulling a
+// bounded long tail from one ES|QL categorization query avoids reimplementing
+// the DSL helper's second rare-pattern aggregation, while still giving
+// selectLogPatternsForLlm enough sorted rows to take the head and tail.
+const SIG_EVENTS_PASS1_LIMIT = 1000;
+
+type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
 interface FieldPatternResultBase {
   field: string;
@@ -50,6 +65,13 @@ export type FieldPatternResult<TChanges extends boolean | undefined = undefined>
   FieldPatternResultBase & (TChanges extends true ? FieldPatternResultChanges : {});
 
 export type FieldPatternResultWithChanges = FieldPatternResult<true>;
+
+export interface LogPatternEsqlEntry {
+  field: string;
+  pattern: string;
+  count: number;
+  sample: string;
+}
 
 interface CategorizeTextOptions {
   query: QueryDslQueryContainer;
@@ -264,6 +286,16 @@ interface LogPatternOptions {
   kql?: string;
 }
 
+interface SigEventsLogPatternEsqlOptions {
+  esClient: TracedElasticsearchClient;
+  start: number;
+  end: number;
+  index: string | string[];
+  fields: string[];
+  kql?: string;
+  logger: Logger;
+}
+
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
   options: LogPatternOptions & { includeChanges?: TChanges }
 ): Promise<Array<FieldPatternResult<TChanges>>>;
@@ -387,4 +419,298 @@ export async function getLogPatterns({
     orderBy(allPatterns.flat(), (pattern) => pattern.count, 'desc'),
     (pattern) => pattern.sample
   );
+}
+
+export async function getSigEventsLogPatternsEsql({
+  esClient,
+  start,
+  end,
+  index,
+  kql,
+  fields,
+  logger,
+}: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
+  // Keep the same text-field gating as the DSL helper for now. This is still a
+  // fieldCaps probe, but the field-caps migration is tracked separately in
+  // https://github.com/elastic/streams-program/issues/1220.
+  const fieldCapsResponse = await esClient.fieldCaps('get_field_caps_for_sigevents_log_patterns', {
+    fields,
+    index_filter: {
+      bool: {
+        filter: [...dateRangeQuery(start, end)],
+      },
+    },
+    index,
+    types: ['text', 'match_only_text'],
+  });
+  const fieldsInFieldCaps = Object.keys(fieldCapsResponse.fields);
+  const eligibleFields = fields.filter((field) => fieldsInFieldCaps.includes(field));
+
+  if (!eligibleFields.length) {
+    return [];
+  }
+
+  const totalDocs = await runEsqlCountQuery({ esClient, index, start, end, kql });
+  if (totalDocs === 0) {
+    return [];
+  }
+
+  const samplingProbability =
+    MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+  const perField = await Promise.all(
+    eligibleFields.map(async (field) => {
+      // Pass 1 mirrors the diverse-sampling strategy: categorize and keep one
+      // representative composite key per pattern. ES|QL grouped aggregations do
+      // not provide a coherent full `_source` document in the same row.
+      const pass1Rows = await runSigEventsPass1({
+        esClient,
+        index,
+        start,
+        end,
+        kql,
+        field,
+        samplingProbability,
+        limit: SIG_EVENTS_PASS1_LIMIT,
+      });
+
+      if (pass1Rows.length === 0) {
+        return [];
+      }
+
+      // Fetch full sources by composite key in a second query. This avoids `_id`
+      // collisions across backing indices and keeps every sample value from the
+      // same underlying log line.
+      const pass2Response = (await esClient.esql('fetch_sigevents_log_pattern_samples', {
+        query: buildPass2Query(
+          Array.isArray(index) ? index : [index],
+          pass1Rows.map(({ docKey }) => docKey)
+        ),
+        filter: { bool: { filter: dateRangeQuery(start, end) } },
+        drop_null_columns: true,
+      })) as unknown as ESQLSearchResponse;
+      const keyToHit = new Map(
+        parsePass2Hits(pass2Response).map((hit) => [`${hit._index}:${hit._id}`, hit])
+      );
+      const patterns: LogPatternEsqlEntry[] = [];
+
+      for (const row of pass1Rows) {
+        const hit = keyToHit.get(row.docKey);
+        if (!hit) {
+          logger.warn(
+            `Log patterns (ES|QL): doc ${row.docKey} not found in pass-2 fetch (deleted between passes); skipping pattern.`
+          );
+          continue;
+        }
+
+        patterns.push({
+          field,
+          pattern: row.pattern,
+          // DSL random_sampler returns population-scaled doc_counts. ES|QL
+          // SAMPLE returns sampled counts, so scale back for prompt parity.
+          count: Math.round(row.count / samplingProbability),
+          // Dotted ECS paths such as `body.text` are nested in `_source`; direct
+          // bracket access would turn valid samples into empty strings.
+          sample: String(get(hit._source, field) ?? ''),
+        });
+      }
+
+      return patterns;
+    })
+  );
+
+  return uniqBy(
+    // Preserve the DSL helper's downstream contract: sorted descending by count
+    // and deduped by sample so `message` and `body.text` do not show the same
+    // representative log line twice.
+    perField.flat().sort((a, b) => b.count - a.count),
+    (pattern) => pattern.sample
+  );
+}
+
+async function runEsqlCountQuery({
+  esClient,
+  index,
+  start,
+  end,
+  kql,
+}: {
+  esClient: TracedElasticsearchClient;
+  index: string | string[];
+  start: number;
+  end: number;
+  kql?: string;
+}): Promise<number> {
+  const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
+    query: buildCountQuery({ index, kql }),
+    filter: { bool: { filter: dateRangeQuery(start, end) } },
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+  const total = response.values[0]?.[0];
+
+  return typeof total === 'number' ? total : 0;
+}
+
+async function runSigEventsPass1({
+  esClient,
+  index,
+  start,
+  end,
+  kql,
+  field,
+  samplingProbability,
+  limit,
+}: {
+  esClient: TracedElasticsearchClient;
+  index: string | string[];
+  start: number;
+  end: number;
+  kql?: string;
+  field: string;
+  samplingProbability: number;
+  limit: number;
+}): Promise<Array<{ docKey: string; count: number; pattern: string }>> {
+  const response = (await esClient.esql('categorize_sigevents_log_patterns', {
+    query: buildPass1Query({
+      indices: Array.isArray(index) ? index : [index],
+      kql,
+      field,
+      samplingProbability,
+      limit,
+    }),
+    filter: { bool: { filter: dateRangeQuery(start, end) } },
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+
+  return parsePass1Rows(response);
+}
+
+function buildWhereExpression(kql?: string): WhereCondition | undefined {
+  return kql ? esql.exp`KQL(${esql.str(kql)})` : undefined;
+}
+
+function buildCountQuery({ index, kql }: { index: string | string[]; kql?: string }): string {
+  const whereExpression = buildWhereExpression(kql);
+  let query = esql.from(Array.isArray(index) ? index : [index]);
+
+  if (whereExpression) {
+    query = query.where`${whereExpression}`;
+  }
+
+  return query.pipe`STATS total = COUNT(*)`.print('basic');
+}
+
+function columnPath(field: string): string | string[] {
+  return field.includes('.') ? field.split('.') : field;
+}
+
+/**
+ * SigEvents-only ES|QL categorization. Unlike getLogPatterns(), this helper does
+ * not synthesize regex/highlight/metadata/timeseries/change-point output because
+ * the live SigEvents consumer only sends `{ field, pattern, count, sample }` to
+ * the LLM. The full DSL helper remains in place for Observability RCA, where
+ * change-point output is still consumed.
+ */
+function buildPass1Query({
+  indices,
+  kql,
+  field,
+  samplingProbability,
+  limit,
+}: {
+  indices: string[];
+  kql?: string;
+  field: string;
+  samplingProbability: number;
+  limit: number;
+}): string {
+  const whereExpression = buildWhereExpression(kql);
+  // `_index:_id` is the join key, not `_id` alone: stream names can expand to
+  // multiple backing indices, and Elasticsearch only guarantees `_id`
+  // uniqueness inside a single index.
+  let query = esql.from(indices, ['_index', '_id']).pipe`EVAL doc_key = CONCAT(${esql.col(
+    '_index'
+  )}, ":", ${esql.col('_id')})`;
+
+  if (whereExpression) {
+    query = query.where`${whereExpression}`;
+  }
+  if (samplingProbability < 1) {
+    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
+  }
+
+  return query.pipe`STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(${esql.col(
+    columnPath(field)
+  )})`
+    .sort([['count'], 'DESC', ''])
+    .limit(limit)
+    .print('basic');
+}
+
+/**
+ * Fetches coherent `_source` documents for the pass-1 representative keys. This
+ * intentionally duplicates the diverse-sampling pass-2 shape instead of using
+ * getSampleDocumentsEsql, whose parser discards `_index`.
+ */
+function buildPass2Query(indices: string[], docKeys: string[]): string {
+  const query = esql.from(indices, ['_index', '_id', '_source'])
+    .pipe`EVAL doc_key = CONCAT(${esql.col('_index')}, ":", ${esql.col('_id')})`;
+
+  return query.pipe`WHERE doc_key IN (${docKeys.map((docKey) => esql.str(docKey))})`
+    .pipe`KEEP _index, _id, _source`
+    .limit(docKeys.length)
+    .print('basic');
+}
+
+function parsePass1Rows(
+  response: ESQLSearchResponse
+): Array<{ docKey: string; count: number; pattern: string }> {
+  const keyIndex = response.columns.findIndex((column) => column.name === 'representative_key');
+  const countIndex = response.columns.findIndex((column) => column.name === 'count');
+  const patternIndex = response.columns.findIndex((column) => column.name === 'pattern');
+
+  if (keyIndex === -1 || countIndex === -1 || patternIndex === -1) {
+    return [];
+  }
+
+  return response.values.flatMap((row) => {
+    const rawKey = row[keyIndex];
+    // Accept both scalar and single-item-array TOP responses; pass 1 still asks
+    // ES|QL for exactly one representative key.
+    const docKey = Array.isArray(rawKey) ? rawKey[0] : rawKey;
+    const count = row[countIndex];
+    const pattern = row[patternIndex];
+
+    if (typeof docKey !== 'string' || typeof count !== 'number' || typeof pattern !== 'string') {
+      return [];
+    }
+
+    return [{ docKey, count, pattern }];
+  });
+}
+
+function parsePass2Hits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {
+  const indexIndex = response.columns.findIndex((column) => column.name === '_index');
+  const idIndex = response.columns.findIndex((column) => column.name === '_id');
+  const sourceIndex = response.columns.findIndex((column) => column.name === '_source');
+
+  if (indexIndex === -1 || idIndex === -1 || sourceIndex === -1) {
+    return [];
+  }
+
+  return response.values.flatMap((row) => {
+    const index = row[indexIndex];
+    const id = row[idIndex];
+
+    if (typeof index !== 'string' || typeof id !== 'string') {
+      return [];
+    }
+
+    return [
+      {
+        _index: index,
+        _id: id,
+        _source: (row[sourceIndex] as Record<string, unknown> | null) ?? {},
+      },
+    ];
+  });
 }

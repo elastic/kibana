@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { samplingFilterDslToKql } from './sampling_filter_dsl_to_kql';
+
+describe('samplingFilterDslToKql', () => {
+  it('translates supported leaf clauses', () => {
+    expect(samplingFilterDslToKql({ match_all: {} })).toBe('*');
+    expect(samplingFilterDslToKql({ term: { 'service.name': 'checkout' } })).toBe(
+      'service.name: "checkout"'
+    );
+    expect(samplingFilterDslToKql({ term: { 'http.response.status_code': { value: 500 } } })).toBe(
+      'http.response.status_code: 500'
+    );
+    expect(samplingFilterDslToKql({ match_phrase: { message: 'payment failed' } })).toBe(
+      'message: "payment failed"'
+    );
+    expect(samplingFilterDslToKql({ match: { message: { query: 'timeout' } } })).toBe(
+      'message: "timeout"'
+    );
+  });
+
+  it('escapes quoted string values', () => {
+    expect(samplingFilterDslToKql({ term: { message: 'failed "hard"' } })).toBe(
+      'message: "failed \\"hard\\""'
+    );
+  });
+
+  it('translates bool clauses with array fields', () => {
+    expect(
+      samplingFilterDslToKql({
+        bool: {
+          filter: [{ term: { 'service.name': 'checkout' } }, { match: { message: 'error' } }],
+          must_not: [{ term: { 'log.level': 'debug' } }],
+          should: [{ term: { 'host.name': 'a' } }, { term: { 'host.name': 'b' } }],
+        },
+      })
+    ).toBe(
+      'service.name: "checkout" AND message: "error" AND NOT (log.level: "debug") AND (host.name: "a" OR host.name: "b")'
+    );
+  });
+
+  it('translates bool clauses with single-object fields', () => {
+    expect(
+      samplingFilterDslToKql({
+        bool: {
+          filter: { term: { 'service.name': 'checkout' } },
+          must: { match_phrase: { message: 'payment failed' } },
+        },
+      })
+    ).toBe('service.name: "checkout" AND message: "payment failed"');
+  });
+
+  it('throws for unsupported clauses', () => {
+    expect(() => samplingFilterDslToKql({ range: { '@timestamp': { gte: 0 } } })).toThrow(
+      'samplingFilterDslToKql: unsupported DSL filter shape: {"range":{"@timestamp":{"gte":0}}}'
+    );
+  });
+});

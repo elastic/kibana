@@ -21,6 +21,8 @@ export type {
 } from './src/tools/describe_dataset/document_analysis';
 export {
   getLogPatterns,
+  getSigEventsLogPatternsEsql,
+  type LogPatternEsqlEntry,
   type FieldPatternResultWithChanges,
 } from './src/tools/log_patterns/get_log_patterns';
 export {
