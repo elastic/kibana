@@ -64,10 +64,10 @@ export class CreateRulePage {
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
+    await this.importQueryFromTimelineLink.waitFor({ state: 'visible' });
   }
 
   async importQueryFromTimeline(timelineId: string) {
-    await this.importQueryFromTimelineLink.waitFor({ state: 'visible' });
     await this.importQueryFromTimelineLink.click();
     await this.page.testSubj.locator(`timeline-title-${timelineId}`).click();
   }
