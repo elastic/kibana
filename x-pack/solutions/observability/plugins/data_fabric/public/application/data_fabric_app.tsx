@@ -76,7 +76,7 @@ const sidebarWrapStyles = css`
   height: 100%;
   overflow-y: auto;
   border-right: 1px solid var(--euiBorderColor, #d3dae6);
-  padding: 12px;
+  padding: 16px;
 `;
 
 const canvasWrapStyles = css`

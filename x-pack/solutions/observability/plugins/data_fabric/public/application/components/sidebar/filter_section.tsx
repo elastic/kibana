@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiSpacer,
-  EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,7 +26,7 @@ interface FilterSectionProps {
 }
 
 const rowStyles = css`
-  padding: 2px 0;
+  padding: 4px 0 4px 4px;
   align-items: center;
 `;
 
@@ -49,21 +48,29 @@ export const FilterSection = ({ title, options, selected, onChange }: FilterSect
 
   const clearAll = () => onChange([]);
 
-  const accordionExtra =
-    selected.length > 0 ? (
-      <EuiButtonEmpty size="xs" flush="right" onClick={clearAll}>
-        All
-      </EuiButtonEmpty>
-    ) : (
-      <EuiText size="xs" color="subdued">
-        All
-      </EuiText>
-    );
+  const accordionTitle = (
+    <EuiText size="xs" color="subdued">
+      <strong>{title}</strong>
+    </EuiText>
+  );
+
+  const accordionExtra = (
+    <EuiText
+      size="xs"
+      color={selected.length > 0 ? 'primary' : 'subdued'}
+      css={css`
+        cursor: ${selected.length > 0 ? 'pointer' : 'default'};
+      `}
+      onClick={selected.length > 0 ? clearAll : undefined}
+    >
+      All
+    </EuiText>
+  );
 
   return (
     <EuiAccordion
       id={`filter-section-${title}`}
-      buttonContent={title}
+      buttonContent={accordionTitle}
       extraAction={accordionExtra}
       initialIsOpen={open}
       onToggle={setOpen}
@@ -71,7 +78,7 @@ export const FilterSection = ({ title, options, selected, onChange }: FilterSect
     >
       <EuiSpacer size="xs" />
       {options.map((opt) => (
-        <EuiFlexGroup key={opt.id} gutterSize="xs" css={rowStyles} responsive={false}>
+        <EuiFlexGroup key={opt.id} gutterSize="s" css={rowStyles} responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id={`filter-${title}-${opt.id}`}
@@ -81,10 +88,7 @@ export const FilterSection = ({ title, options, selected, onChange }: FilterSect
               compressed
             />
           </EuiFlexItem>
-          <EuiFlexItem
-            css={labelStyles}
-            onClick={() => toggle(opt.id)}
-          >
+          <EuiFlexItem css={labelStyles} onClick={() => toggle(opt.id)}>
             <EuiText size="xs">{opt.label}</EuiText>
           </EuiFlexItem>
           {opt.count !== undefined && (
