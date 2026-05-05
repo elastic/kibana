@@ -24,7 +24,6 @@ import {
   getNormalizedSloStatusForMapFilters,
   getServiceNodeAlertCountForStatus,
   getNodeConnectionCount,
-  getComponentDepthByNode,
 } from './apply_service_map_visibility';
 
 const ALERT_STATUSES: AlertStatus[] = [
@@ -93,7 +92,6 @@ function getAnomalyStatusCounts(
 export interface ConnectionCounts {
   orphaned: number;
   connected: number;
-  depth1: number;
 }
 
 export interface ServiceMapFilterOptionCounts {
@@ -109,16 +107,12 @@ function getConnectionCounts(
   allNodes: ServiceMapNode[],
   edges: ServiceMapEdge[]
 ): ConnectionCounts {
-  const counts: ConnectionCounts = { orphaned: 0, connected: 0, depth1: 0 };
-  const depthMap = getComponentDepthByNode(new Set(allNodes.map((n) => n.id)), edges);
+  const counts: ConnectionCounts = { orphaned: 0, connected: 0 };
   for (const node of allNodes) {
     if (getNodeConnectionCount(node.id, edges) === 0) {
       counts.orphaned++;
     } else {
       counts.connected++;
-    }
-    if (depthMap.get(node.id) === 1) {
-      counts.depth1++;
     }
   }
   return counts;

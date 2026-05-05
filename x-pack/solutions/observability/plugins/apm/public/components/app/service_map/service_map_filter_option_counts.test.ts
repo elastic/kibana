@@ -52,14 +52,13 @@ describe('computeServiceMapFilterOptionCounts', () => {
     expect(slo.degrading).toBe(0);
   });
 
-  it('counts orphaned, connected, and depth1 services from edges', () => {
+  it('counts orphaned and connected services from edges', () => {
     const nodes: ServiceMapNode[] = [mkService('a'), mkService('b'), mkService('c')];
     const edges: ServiceMapEdge[] = [mkEdge('e1', 'a', 'b')];
 
     const { connection } = computeServiceMapFilterOptionCounts(nodes, edges);
     expect(connection.connected).toBe(2);
     expect(connection.orphaned).toBe(1);
-    expect(connection.depth1).toBe(2);
   });
 
   it('counts all as orphaned when there are no edges', () => {
@@ -68,28 +67,6 @@ describe('computeServiceMapFilterOptionCounts', () => {
     const { connection } = computeServiceMapFilterOptionCounts(nodes, []);
     expect(connection.connected).toBe(0);
     expect(connection.orphaned).toBe(2);
-    expect(connection.depth1).toBe(0);
-  });
-
-  it('depth1 excludes services in longer chains', () => {
-    // a-b is depth 1 (2 services); c-d-e is depth 2 (3 services)
-    const nodes: ServiceMapNode[] = [
-      mkService('a'),
-      mkService('b'),
-      mkService('c'),
-      mkService('d'),
-      mkService('e'),
-    ];
-    const edges: ServiceMapEdge[] = [
-      mkEdge('e1', 'a', 'b'),
-      mkEdge('e2', 'c', 'd'),
-      mkEdge('e3', 'd', 'e'),
-    ];
-
-    const { connection } = computeServiceMapFilterOptionCounts(nodes, edges);
-    expect(connection.depth1).toBe(2);
-    expect(connection.connected).toBe(5);
-    expect(connection.orphaned).toBe(0);
   });
 
   it('counts dependency (diamond) nodes in connection counts', () => {
@@ -107,6 +84,5 @@ describe('computeServiceMapFilterOptionCounts', () => {
     const { connection } = computeServiceMapFilterOptionCounts(nodes, edges);
     expect(connection.connected).toBe(2);
     expect(connection.orphaned).toBe(0);
-    expect(connection.depth1).toBe(2);
   });
 });

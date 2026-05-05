@@ -53,12 +53,6 @@ const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = 
       defaultMessage: 'With connections',
     }),
   },
-  {
-    value: 'depth1',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionDepth1', {
-      defaultMessage: 'Single connection',
-    }),
-  },
 ];
 
 const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
@@ -192,9 +186,6 @@ export function ServiceMapOptionsPanel({
             break;
           case 'hideOrphaned':
             count = connectionCounts.connected;
-            break;
-          case 'depth1':
-            count = connectionCounts.depth1;
             break;
         }
         return {
