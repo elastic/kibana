@@ -800,6 +800,8 @@
       "@kbn/core-security-server-mocks/*": ["src/core/packages/security/server-mocks/*"],
       "@kbn/core-server-benchmarks": ["src/platform/packages/shared/kbn-core-server-benchmarks"],
       "@kbn/core-server-benchmarks/*": ["src/platform/packages/shared/kbn-core-server-benchmarks/*"],
+      "@kbn/core-spaces-common": ["src/core/packages/spaces/common"],
+      "@kbn/core-spaces-common/*": ["src/core/packages/spaces/common/*"],
       "@kbn/core-status-common": ["src/core/packages/status/common"],
       "@kbn/core-status-common/*": ["src/core/packages/status/common/*"],
       "@kbn/core-status-server": ["src/core/packages/status/server"],

@@ -493,6 +493,7 @@
     "@kbn/core-security-server": "link:src/core/packages/security/server",
     "@kbn/core-security-server-internal": "link:src/core/packages/security/server-internal",
     "@kbn/core-security-server-mocks": "link:src/core/packages/security/server-mocks",
+    "@kbn/core-spaces-common": "link:src/core/packages/spaces/common",
     "@kbn/core-status-common": "link:src/core/packages/status/common",
     "@kbn/core-status-server": "link:src/core/packages/status/server",
     "@kbn/core-status-server-internal": "link:src/core/packages/status/server-internal",
