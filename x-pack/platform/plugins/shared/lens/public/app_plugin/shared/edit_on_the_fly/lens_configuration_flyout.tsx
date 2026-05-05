@@ -111,6 +111,7 @@ export function LensEditConfigurationFlyout({
   const [isLegendAccordionOpen, setIsLegendAccordionOpen] = useState(false);
   const [isStyleAccordionOpen, setIsStyleAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [isQueryEditorAccordionOpen, setIsQueryEditorAccordionOpen] = useState(true);
   const [esqlQueryState, setESQLQueryState] = useState<TextBasedQueryState | null>(null);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
@@ -497,6 +498,9 @@ export function LensEditConfigurationFlyout({
         if (status && isStyleAccordionOpen) {
           setIsStyleAccordionOpen(false);
         }
+        if (status && isQueryEditorAccordionOpen) {
+          setIsQueryEditorAccordionOpen(false);
+        }
         setIsGeneralSettingsAccordionOpen(!isGeneralSettingsAccordionOpen);
       }}
       onHasChangesChange={setGeneralSettingsChanged}
@@ -526,6 +530,9 @@ export function LensEditConfigurationFlyout({
         if (status && isStyleAccordionOpen) {
           setIsStyleAccordionOpen(false);
         }
+        if (status && isQueryEditorAccordionOpen) {
+          setIsQueryEditorAccordionOpen(false);
+        }
         setIsLegendAccordionOpen(!isLegendAccordionOpen);
       }}
     />
@@ -553,6 +560,9 @@ export function LensEditConfigurationFlyout({
         }
         if (status && isLegendAccordionOpen) {
           setIsLegendAccordionOpen(false);
+        }
+        if (status && isQueryEditorAccordionOpen) {
+          setIsQueryEditorAccordionOpen(false);
         }
         setIsStyleAccordionOpen(!isStyleAccordionOpen);
       }}
@@ -627,7 +637,7 @@ export function LensEditConfigurationFlyout({
               css={css`
                 pointer-events: auto;
                 padding: 0 ${euiTheme.euiTheme.size.base};
-                ${!textBasedMode ? `border-block-end: ${euiTheme.euiTheme.border.thin};` : ''}
+                border-block-end: ${euiTheme.euiTheme.border.thin};
               `}
             >
               {generalSettings}
@@ -684,19 +694,99 @@ export function LensEditConfigurationFlyout({
             direction="column"
             gutterSize="none"
           >
-            {/* Container for ES|QL editor - fixed height, doesn't grow */}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
+            {/* Query editor accordion — only in ES|QL mode */}
+            {textBasedMode && (
+              <EuiFlexItem
+                grow={false}
                 css={css`
-                  > * {
-                    flex-grow: 0;
+                  border-block-end: ${euiTheme.euiTheme.border.thin};
+                  .euiAccordion__childWrapper {
+                    padding-left: 0 !important;
+                    margin-left: 0 !important;
                   }
                 `}
-                gutterSize="none"
-                direction="column"
-                ref={editorContainer}
-              />
-            </EuiFlexItem>
+              >
+                <EuiAccordion
+                  id="lens-query-editor"
+                  css={css`
+                    inline-size: 100%;
+                    .euiAccordion__triggerWrapper {
+                      border-block-end: none !important;
+                      padding-inline: ${euiTheme.euiTheme.size.base};
+                    }
+                    .euiAccordion__childWrapper {
+                      inline-size: 100%;
+                      max-inline-size: 100%;
+                    }
+                  `}
+                  buttonContent={
+                    <EuiTitle
+                      size="xxs"
+                      css={css`
+                        padding: 2px;
+                      `}
+                    >
+                      <h5>
+                        {i18n.translate('xpack.lens.config.queryEditorAccordionTitle', {
+                          defaultMessage: 'Query editor',
+                        })}
+                      </h5>
+                    </EuiTitle>
+                  }
+                  buttonProps={{ paddingSize: 'm' }}
+                  initialIsOpen={isQueryEditorAccordionOpen}
+                  forceState={isQueryEditorAccordionOpen ? 'open' : 'closed'}
+                  onToggle={(status) => {
+                    if (status && isGeneralSettingsAccordionOpen) {
+                      setIsGeneralSettingsAccordionOpen(false);
+                    }
+                    if (status && isLayerAccordionOpen) {
+                      setIsLayerAccordionOpen(false);
+                    }
+                    if (status && isSuggestionsAccordionOpen) {
+                      setIsSuggestionsAccordionOpen(false);
+                    }
+                    if (status && isESQLResultsAccordionOpen) {
+                      setIsESQLResultsAccordionOpen(false);
+                    }
+                    if (status && isLegendAccordionOpen) {
+                      setIsLegendAccordionOpen(false);
+                    }
+                    if (status && isStyleAccordionOpen) {
+                      setIsStyleAccordionOpen(false);
+                    }
+                    setIsQueryEditorAccordionOpen(!isQueryEditorAccordionOpen);
+                  }}
+                  data-test-subj="lensQueryEditorAccordion"
+                >
+                  <EuiFlexGroup
+                    css={css`
+                      > * {
+                        flex-grow: 0;
+                      }
+                    `}
+                    gutterSize="none"
+                    direction="column"
+                    ref={editorContainer}
+                  />
+                </EuiAccordion>
+              </EuiFlexItem>
+            )}
+            {/* Fallback mount point when not in ES|QL mode — ref must always exist in DOM */}
+            {!textBasedMode && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup
+                  css={css`
+                    > * {
+                      flex-grow: 0;
+                    }
+                  `}
+                  gutterSize="none"
+                  direction="column"
+                  ref={editorContainer}
+                />
+              </EuiFlexItem>
+            )}
             {/* Visualization parameters accordion - grows when open to fill available space */}
             <EuiFlexItem
               grow={isLayerAccordionOpen ? 1 : false}
@@ -745,6 +835,9 @@ export function LensEditConfigurationFlyout({
                   }
                   if (status && isStyleAccordionOpen) {
                     setIsStyleAccordionOpen(false);
+                  }
+                  if (status && isQueryEditorAccordionOpen) {
+                    setIsQueryEditorAccordionOpen(false);
                   }
                   setIsLayerAccordionOpen(!isLayerAccordionOpen);
                 }}
@@ -861,6 +954,9 @@ export function LensEditConfigurationFlyout({
                   }
                   if (status && isStyleAccordionOpen) {
                     setIsStyleAccordionOpen(false);
+                  }
+                  if (status && isQueryEditorAccordionOpen) {
+                    setIsQueryEditorAccordionOpen(false);
                   }
                   setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
                 }}
