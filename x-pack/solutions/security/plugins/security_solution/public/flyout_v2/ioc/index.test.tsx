@@ -12,6 +12,7 @@ import { IOCDetails } from '.';
 import { generateMockIndicator } from '../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../common/mock';
 import { IOC_DETAILS_TITLE_TEST_ID, IOC_DETAILS_FOOTER_TEST_ID } from './test_ids';
+import { noopCellActionRenderer } from '../shared/components/cell_actions';
 
 const mockIndicator = generateMockIndicator();
 
@@ -25,7 +26,7 @@ describe('<IOCDetails />', () => {
   it('should render header, content, and footer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <IOCDetails hit={mockHit} />
+        <IOCDetails hit={mockHit} renderCellActions={noopCellActionRenderer} />
       </TestProviders>
     );
 
