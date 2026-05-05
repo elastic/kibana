@@ -414,6 +414,7 @@ export function InternalDashboardTopNav({
       {visibilityProps.showTopNavMenu && viewMode !== 'print' && (
         <ChromeAppHeaderRegistration
           title={dashboardTitle}
+          // TODO: instead of hardcoding this should also be dynamic like customLeadingBreadCrumbs
           back="/app/dashboards#/list"
           menu={appMenuConfig}
           badges={appHeaderBadges}
