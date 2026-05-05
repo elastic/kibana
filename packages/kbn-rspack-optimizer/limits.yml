@@ -7,7 +7,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 7442
+  alertingVTwo: 8551
   apm: 16978
   apmSourcesAccess: 779
   automaticImport: 13257
@@ -87,7 +87,7 @@ pageLoadAssetSize:
   home: 9251
   imageEmbeddable: 1732
   inbox: 935
-  indexLifecycleManagement: 29229
+  indexLifecycleManagement: 32333
   indexManagement: 316
   inference: 5751
   infra: 45673
