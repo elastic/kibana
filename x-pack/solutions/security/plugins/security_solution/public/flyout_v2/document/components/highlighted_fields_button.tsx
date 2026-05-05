@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
-import { useRuleDetails } from '../../../flyout/rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../rule/hooks/use_rule_details';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
 import {
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,

@@ -18,6 +18,7 @@ import {
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -36,34 +37,32 @@ export const dashboardLinkSchema = schema.object({
     meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(dashboardNavigationOptionsSchema),
+  options: dashboardNavigationOptionsSchema,
 });
 
 export const externalLinkOptionsSchema = schema.object(
   {
-    open_in_new_tab: schema.maybe(
-      schema.boolean({
-        meta: {
-          description: 'Whether to open this link in a new tab when clicked',
-        },
-      })
-    ),
-    encode_url: schema.maybe(
-      schema.boolean({
-        meta: {
-          description: 'Whether to escape the URL with percent encoding',
-        },
-      })
-    ),
+    open_in_new_tab: schema.boolean({
+      meta: {
+        description: 'Whether to open this link in a new tab when clicked',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab,
+    }),
+    encode_url: schema.boolean({
+      meta: {
+        description: 'Whether to escape the URL with percent encoding',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url,
+    }),
   },
-  { unknowns: 'forbid' }
+  { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
 );
 
 export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(externalLinkOptionsSchema),
+  options: externalLinkOptionsSchema,
 });
 
 export const linksArraySchema = schema.arrayOf(
