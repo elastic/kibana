@@ -28,8 +28,6 @@ import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
-import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';

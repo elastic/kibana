@@ -95,16 +95,20 @@ describe('generateSchema', () => {
         version: '1',
         enabled: true,
         steps: [],
-        triggers: [{ type: 'manual' }],
-        inputs: {
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive'],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active', 'inactive'],
+                },
+              },
+              required: ['status'],
             },
           },
-          required: ['status'],
-        },
+        ],
       },
     });
 
