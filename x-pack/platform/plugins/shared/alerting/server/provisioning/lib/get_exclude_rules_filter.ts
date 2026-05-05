@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { nodeBuilder, type KueryNode } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes, type KueryNode } from '@kbn/es-query';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE } from '../constants';
 import {
