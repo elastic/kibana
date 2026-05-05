@@ -19,6 +19,7 @@ import type { StreamsClient } from '../../../lib/streams/client';
 import { getStreamConvention } from '../../utils/convention_utils';
 import { extractJson } from './nl_to_es_dsl';
 import { flattenAndTruncateDocs } from './query_documents';
+import { buildDropWarnings, computePipelineDiff, type StepChange } from './pipeline_diff';
 
 const MAX_RETRIES = 3;
 const SIMULATION_SUCCESS_THRESHOLD = 50;
@@ -51,7 +52,23 @@ export interface FieldChange {
 export type SimulationMode = 'complete' | 'partial';
 
 export interface NlToStreamlangResult {
+  /**
+   * The complete proposed pipeline that would replace the stream's current
+   * processing. Apply by passing this array unchanged to `update_stream`'s
+   * `changes.processing`.
+   */
   steps: StreamlangStep[];
+  /**
+   * The pipeline as it was when the tool ran. Surfaced so the agent can show a
+   * before/after diff to the user — never overwrite without acknowledging what
+   * existed.
+   */
+  existing_steps: StreamlangStep[];
+  /**
+   * Per-step structural diff between `existing_steps` and `steps`. The agent
+   * uses this to flag silently dropped steps and ask the user before applying.
+   */
+  step_changes: StepChange[];
   summary: string;
   field_changes: FieldChange[];
   simulation: {
@@ -158,36 +175,42 @@ export const nlToStreamlang = async (
       }
 
       if (dsl.steps.length === 0) {
-        return {
-          steps: [],
-          summary: '',
-          field_changes: [],
-          simulation: {
-            success_rate: null,
-            sample_count: documents.length,
-            mode: documentStatus === 'processed' ? 'partial' : 'complete',
+        return annotateWithDiff(
+          {
+            steps: [],
+            summary: '',
+            field_changes: [],
+            simulation: {
+              success_rate: null,
+              sample_count: documents.length,
+              mode: documentStatus === 'processed' ? 'partial' : 'complete',
+            },
+            ...(llmHints.length > 0 && { hints: llmHints }),
+            samples_info: samplesInfo,
           },
-          ...(llmHints.length > 0 && { hints: llmHints }),
-          samples_info: samplesInfo,
-        };
+          existingSteps
+        );
       }
 
       const cleanSteps = stripIgnoreFailure(dsl.steps);
 
       if (documents.length === 0) {
-        return {
-          steps: injectIgnoreFailure(cleanSteps),
-          summary: buildSummary(cleanSteps),
-          field_changes: [],
-          simulation: {
-            success_rate: null,
-            sample_count: 0,
-            mode: 'complete',
+        return annotateWithDiff(
+          {
+            steps: injectIgnoreFailure(cleanSteps),
+            summary: buildSummary(cleanSteps),
+            field_changes: [],
+            simulation: {
+              success_rate: null,
+              sample_count: 0,
+              mode: 'complete',
+            },
+            warnings: ['No sample documents available for simulation.'],
+            ...(llmHints.length > 0 && { hints: llmHints }),
+            samples_info: samplesInfo,
           },
-          warnings: ['No sample documents available for simulation.'],
-          ...(llmHints.length > 0 && { hints: llmHints }),
-          samples_info: samplesInfo,
-        };
+          existingSteps
+        );
       }
 
       const { stepsToSimulate, simMode, isNonAdditive } = determineSimulationStrategy(
@@ -256,20 +279,23 @@ export const nlToStreamlang = async (
         );
       }
 
-      return {
-        steps: injectIgnoreFailure(cleanSteps),
-        summary: buildSummary(cleanSteps),
-        field_changes: fieldChanges,
-        simulation: {
-          success_rate: successRate,
-          ...(simErrors.length > 0 && { errors: simErrors }),
-          sample_count: documents.length,
-          mode: simMode,
+      return annotateWithDiff(
+        {
+          steps: injectIgnoreFailure(cleanSteps),
+          summary: buildSummary(cleanSteps),
+          field_changes: fieldChanges,
+          simulation: {
+            success_rate: successRate,
+            ...(simErrors.length > 0 && { errors: simErrors }),
+            sample_count: documents.length,
+            mode: simMode,
+          },
+          ...(warnings.length > 0 && { warnings }),
+          ...(llmHints.length > 0 && { hints: llmHints }),
+          samples_info: samplesInfo,
         },
-        ...(warnings.length > 0 && { warnings }),
-        ...(llmHints.length > 0 && { hints: llmHints }),
-        samples_info: samplesInfo,
-      };
+        existingSteps
+      );
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
     }
@@ -289,23 +315,26 @@ export const nlToStreamlang = async (
       );
     }
     const bestSteps = injectIgnoreFailure(stripIgnoreFailure(dsl.steps));
-    return {
-      steps: bestSteps,
-      summary: buildSummary(bestSteps),
-      field_changes: fieldChanges,
-      simulation: {
-        success_rate: successRate,
-        ...(simErrors.length > 0 && { errors: simErrors }),
-        sample_count: documents.length,
-        mode: simMode,
+    return annotateWithDiff(
+      {
+        steps: bestSteps,
+        summary: buildSummary(bestSteps),
+        field_changes: fieldChanges,
+        simulation: {
+          success_rate: successRate,
+          ...(simErrors.length > 0 && { errors: simErrors }),
+          sample_count: documents.length,
+          mode: simMode,
+        },
+        warnings: [
+          `Best result after ${MAX_RETRIES + 1} attempts: ${successRate}% success rate.`,
+          ...simErrors.slice(0, 3),
+        ],
+        ...(hints.length > 0 && { hints }),
+        samples_info: samplesInfo,
       },
-      warnings: [
-        `Best result after ${MAX_RETRIES + 1} attempts: ${successRate}% success rate.`,
-        ...simErrors.slice(0, 3),
-      ],
-      ...(hints.length > 0 && { hints }),
-      samples_info: samplesInfo,
-    };
+      existingSteps
+    );
   }
 
   throw new Error(
@@ -331,7 +360,7 @@ const fetchSampleDocuments = async (
   return flattenAndTruncateDocs(response.hits.hits);
 };
 
-const resolveSamples = async (
+export const resolveSamples = async (
   samples: SamplesConfig | undefined,
   streamName: string,
   esClient: ElasticsearchClient
@@ -501,7 +530,7 @@ const buildRetryMessage = (
 // Document-grounded field extraction
 // ---------------------------------------------------------------------------
 
-interface FieldInfo {
+export interface FieldInfo {
   name: string;
   type: string;
   sample_values?: Array<string | number | boolean>;
@@ -514,7 +543,9 @@ const inferEsType = (jsTypes: Set<string>): string => {
   return 'keyword';
 };
 
-const extractFieldsFromDocuments = (documents: Array<Record<string, unknown>>): FieldInfo[] => {
+export const extractFieldsFromDocuments = (
+  documents: Array<Record<string, unknown>>
+): FieldInfo[] => {
   const fieldMap = new Map<
     string,
     { types: Set<string>; samples: Set<string | number | boolean>; totalCount: number }
@@ -620,7 +651,7 @@ const determineSimulationStrategy = (
 // Simulation result analysis
 // ---------------------------------------------------------------------------
 
-const computeFieldChanges = (
+export const computeFieldChanges = (
   simResult: ProcessingSimulationResponse,
   baseFields: FieldInfo[]
 ): FieldChange[] => {
@@ -666,7 +697,7 @@ const extractSampleValues = (
   return values;
 };
 
-const computeSuccessRate = (simResult: ProcessingSimulationResponse): number => {
+export const computeSuccessRate = (simResult: ProcessingSimulationResponse): number => {
   const metrics = simResult.documents_metrics;
   if (!metrics) return 100;
   const failedRate = metrics.failed_rate ?? 0;
@@ -674,7 +705,7 @@ const computeSuccessRate = (simResult: ProcessingSimulationResponse): number => 
   return Math.round((1 - failedRate - partiallyParsedRate) * 100);
 };
 
-const extractSimulationErrors = (simResult: ProcessingSimulationResponse): string[] => {
+export const extractSimulationErrors = (simResult: ProcessingSimulationResponse): string[] => {
   const errors = new Set<string>();
   for (const docReport of simResult.documents) {
     if (docReport.status === 'failed' || docReport.status === 'partially_parsed') {
@@ -790,7 +821,32 @@ const stripIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
   });
 };
 
-const injectIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
+/**
+ * Attach a structural diff against the existing pipeline to the result and
+ * fold any "step would be removed" warnings into the result's `warnings`
+ * array. Keeps the four early-return sites in {@link nlToStreamlang}
+ * consistent: every result the agent receives carries `existing_steps`,
+ * `step_changes`, and any drop warnings — so silent overwrites become
+ * impossible.
+ */
+const annotateWithDiff = (
+  result: Omit<NlToStreamlangResult, 'existing_steps' | 'step_changes'>,
+  existingSteps: StreamlangStep[]
+): NlToStreamlangResult => {
+  const cleanExisting = stripIgnoreFailure(existingSteps);
+  const cleanProposed = stripIgnoreFailure(result.steps);
+  const diff = computePipelineDiff(cleanExisting, cleanProposed);
+  const dropWarnings = buildDropWarnings(diff);
+  const mergedWarnings = [...(result.warnings ?? []), ...dropWarnings];
+  return {
+    ...result,
+    existing_steps: cleanExisting,
+    step_changes: diff.changes,
+    ...(mergedWarnings.length > 0 && { warnings: mergedWarnings }),
+  };
+};
+
+export const injectIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
   return steps.map((step) => {
     if (isConditionBlock(step)) {
       return {
@@ -831,7 +887,7 @@ const assignTempIds = (steps: StreamlangStep[]): StreamlangStep[] => {
   return assign(steps);
 };
 
-const buildSummary = (steps: StreamlangStep[]): string => {
+export const buildSummary = (steps: StreamlangStep[]): string => {
   const parts: string[] = [];
   for (const step of steps) {
     if ('action' in step) {

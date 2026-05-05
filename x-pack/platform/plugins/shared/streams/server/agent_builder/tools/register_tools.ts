@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
+import type { IPatternExtractionService } from '../../lib/pattern_extraction/pattern_extraction_service';
 import type { StreamsServer } from '../../types';
 import {
   createFeatureKnowledgeIndicatorTool,
@@ -57,12 +58,14 @@ export function registerAgentBuilderTools({
   server,
   logger,
   telemetry,
+  patternExtractionService,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  patternExtractionService?: IPatternExtractionService;
 }): void {
   if (!agentBuilder) {
     return;
@@ -79,7 +82,12 @@ export function registerAgentBuilderTools({
       logger: logger.get('diagnose_stream'),
     }),
     createQueryDocumentsTool({ getScopedClients }),
-    createDesignPipelineTool({ getScopedClients }),
+    createDesignPipelineTool({
+      getScopedClients,
+      patternExtractionService,
+      logger: logger.get('design_pipeline'),
+      telemetry,
+    }),
     createListIlmPoliciesTool({ getScopedClients, isServerless: server.isServerless }),
 
     // Write tools

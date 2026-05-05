@@ -269,6 +269,7 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
+        patternExtractionService: this.patternExtractionService,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();

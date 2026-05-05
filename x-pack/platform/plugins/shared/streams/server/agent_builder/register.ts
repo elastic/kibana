@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
+import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
@@ -21,6 +22,7 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
+  patternExtractionService,
   isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
@@ -28,9 +30,17 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  patternExtractionService?: IPatternExtractionService;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    patternExtractionService,
+  });
   registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry });
 
   const getMemoryService = () =>
